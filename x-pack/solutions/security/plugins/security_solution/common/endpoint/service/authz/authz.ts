@@ -174,6 +174,7 @@ export const calculateEndpointAuthz = (
     // ---------------------------------------------------------
     canReadAdminData,
     canWriteAdminData,
+    canCancelResponseActions: false, // Always false - requires dynamic validation via utility functions
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -182,11 +183,11 @@ export const calculateEndpointAuthz = (
   // to allow access to Response Console.
   authz.canAccessResponseConsole =
     isEnterpriseLicense &&
-    Object.values(omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, 'release')).some(
-      (responseActionAuthzKey) => {
-        return authz[responseActionAuthzKey];
-      }
-    );
+    Object.values(
+      omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, ['release', 'cancel'])
+    ).some((responseActionAuthzKey) => {
+      return authz[responseActionAuthzKey as keyof EndpointAuthz];
+    });
 
   return authz;
 };
@@ -237,6 +238,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteWorkflowInsights: false,
     canReadAdminData: false,
     canWriteAdminData: false,
+    canCancelResponseActions: false,
   };
 };
 

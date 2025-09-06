@@ -23,6 +23,7 @@ import {
   ScanActionRequestSchema,
   NoParametersRequestSchema,
   RunScriptActionRequestSchema,
+  CancelActionRequestSchema,
 } from '../../api/endpoint';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
@@ -1108,6 +1109,86 @@ describe('actions schemas', () => {
             parameters: { scriptId: 'some-id', scriptInput: '  ' },
           });
         }).toThrow();
+      });
+    });
+
+    describe('Cancel Action Request Schema', () => {
+      it('should validate valid cancel request with all base fields', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '12345678-1234-5678-9012-123456789012',
+            endpoint_ids: ['endpoint-123'],
+            comment: 'Cancelling action due to change in requirements',
+            agent_type: 'microsoft_defender_endpoint',
+          });
+        }).not.toThrow();
+      });
+
+      it('should validate minimal cancel request with only required fields', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '12345678-1234-5678-9012-123456789012',
+            endpoint_ids: ['endpoint-123'],
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject empty action_id', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '',
+            endpoint_ids: ['endpoint-123'],
+          });
+        }).toThrow();
+      });
+
+      it('should reject whitespace-only action_id', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '   ',
+            endpoint_ids: ['endpoint-123'],
+          });
+        }).toThrow();
+      });
+
+      it('should reject missing action_id', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            endpoint_ids: ['endpoint-123'],
+            comment: 'Cancel reason',
+          });
+        }).toThrow();
+      });
+
+      it('should accept request with optional comment', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '12345678-1234-5678-9012-123456789012',
+            endpoint_ids: ['endpoint-123'],
+            comment: 'Cancelling due to policy change',
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept request without comment', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '12345678-1234-5678-9012-123456789012',
+            endpoint_ids: ['endpoint-123'],
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept request with alert_ids and case_ids', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            action_id: '12345678-1234-5678-9012-123456789012',
+            endpoint_ids: ['endpoint-123'],
+            alert_ids: ['alert-456'],
+            case_ids: ['case-789'],
+            comment: 'Cancel with related alerts and cases',
+          });
+        }).not.toThrow();
       });
     });
   });

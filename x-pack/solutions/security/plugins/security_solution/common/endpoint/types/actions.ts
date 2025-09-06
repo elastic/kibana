@@ -253,6 +253,10 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
+export interface ResponseActionCancelParameters {
+  id: string;
+}
+
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
@@ -262,7 +266,8 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -498,6 +503,8 @@ export interface ActionDetails<
   ruleName?: string;
   /** The agent type to where the response action was sent */
   agentType: ResponseActionAgentType;
+  /** Additional metadata that might be stored with the action (ex. 3rd party EDR action IDs) */
+  meta?: {};
 }
 
 export interface ActionDetailsApiResponse<

@@ -12,7 +12,12 @@ import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { CustomScriptSelectorState } from './custom_script_selector';
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
-import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
+import {
+  useGenericErrorToast,
+  useBaseSelectorHandlers,
+  useFocusManagement,
+  useRenderDelay,
+} from '../shared/hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type {
@@ -25,20 +30,36 @@ import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/typ
 
 jest.mock('../../../hooks/custom_scripts/use_get_custom_scripts');
 jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
-jest.mock('./use_custom_scripts_error_toast');
+jest.mock('../shared/hooks', () => ({
+  useGenericErrorToast: jest.fn(),
+  useBaseSelectorHandlers: jest.fn(() => ({
+    handleOpenPopover: jest.fn(),
+    handleClosePopover: jest.fn(),
+    setIsPopoverOpen: jest.fn(),
+  })),
+  useBaseSelectorState: jest.fn((store, value) => store ?? { isPopoverOpen: !value }),
+  useRenderDelay: jest.fn(() => false),
+  useFocusManagement: jest.fn(),
+}));
 jest.mock('../../../../common/lib/kibana');
 
-// Mock setTimeout to execute immediately in tests
 jest.useFakeTimers();
 
 describe('CustomScriptSelector', () => {
   const mockUseGetCustomScripts = useGetCustomScripts as jest.MockedFunction<
     typeof useGetCustomScripts
   >;
-  const mockUseCustomScriptsErrorToast = useCustomScriptsErrorToast as jest.MockedFunction<
-    typeof useCustomScriptsErrorToast
+  const mockUseGenericErrorToast = useGenericErrorToast as jest.MockedFunction<
+    typeof useGenericErrorToast
+  >;
+  const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as jest.MockedFunction<
+    typeof useBaseSelectorHandlers
+  >;
+  const mockUseFocusManagement = useFocusManagement as jest.MockedFunction<
+    typeof useFocusManagement
   >;
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+  const mockUseRenderDelay = useRenderDelay as jest.MockedFunction<typeof useRenderDelay>;
   const mockOnChange = jest.fn();
   const mockRequestFocus = jest.fn();
   const mockScripts: ResponseActionScript[] = [
@@ -84,10 +105,42 @@ describe('CustomScriptSelector', () => {
       error: null,
     } as unknown as ReturnType<typeof useGetCustomScripts>);
 
-    // Mock the error toast hook
-    mockUseCustomScriptsErrorToast.mockImplementation(() => {});
+    // Default behavior: don't show render delay
+    mockUseRenderDelay.mockReturnValue(false);
 
-    // Mock useKibana
+    // Mock the error toast hook
+    mockUseGenericErrorToast.mockImplementation(() => {});
+
+    // Mock the base selector handlers hook with working implementations
+    const mockHandleOpenPopover = jest.fn(() => {
+      mockOnChange({
+        value: defaultProps.value,
+        valueText: defaultProps.valueText,
+        store: { isPopoverOpen: true },
+      });
+    });
+
+    const mockHandleClosePopover = jest.fn(() => {
+      mockOnChange({
+        value: defaultProps.value,
+        valueText: defaultProps.valueText,
+        store: { isPopoverOpen: false },
+      });
+    });
+    mockUseBaseSelectorHandlers.mockReturnValue({
+      handleOpenPopover: mockHandleOpenPopover,
+      handleClosePopover: mockHandleClosePopover,
+      setIsPopoverOpen: jest.fn(),
+    });
+
+    mockUseFocusManagement.mockImplementation((isPopoverOpen, requestFocus) => {
+      if (!isPopoverOpen && requestFocus) {
+        setTimeout(() => {
+          requestFocus();
+        }, 0);
+      }
+    });
+
     mockUseKibana.mockReturnValue({
       services: {
         notifications: {
@@ -120,6 +173,9 @@ describe('CustomScriptSelector', () => {
   };
 
   test('renders loading spinner when fetching data', () => {
+    // Ensure render delay doesn't block the spinner
+    mockUseRenderDelay.mockReturnValueOnce(true);
+
     mockUseGetCustomScripts.mockReturnValueOnce({
       data: undefined,
       isLoading: true,
@@ -149,7 +205,6 @@ describe('CustomScriptSelector', () => {
   test('opens popover when clicked', async () => {
     await renderAndWaitForComponent(<CustomScriptSelector {...defaultProps} />);
 
-    // Click to open the popover
     fireEvent.click(screen.getByText('Click to select script'));
 
     // Check that onChange was called with isPopoverOpen set to true

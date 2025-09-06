@@ -457,4 +457,12 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       agentType: this.agentType,
     };
   }
+
+  protected async resolveExternalActionId(actionId: string): Promise<string> {
+    return actionId;
+  }
+
+  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
+    return actionDetails.id;
+  }
 }

@@ -92,6 +92,7 @@ describe('MS Defender response actions client', () => {
     release: true,
     processPendingActions: true,
     getCustomScripts: true,
+    cancel: true,
   };
 
   it.each(
@@ -1374,6 +1375,190 @@ describe('MS Defender response actions client', () => {
             });
           }
         );
+      });
+    });
+
+    describe('for Cancel actions with Cancelled status', () => {
+      let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
+
+      beforeEach(() => {
+        const generator = new EndpointActionGenerator('seed');
+
+        // Set up a cancel action request
+        const actionRequestsSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+            { id: string },
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            EndpointActions: {
+              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              data: { command: 'cancel', parameters: { id: 'target-action-id' } },
+            },
+            agent: { id: 'agent-uuid-1' },
+            meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: jest
+            .fn(() => generator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
+          pitUsage: true,
+        });
+
+        // Set up the MS API response
+        msMachineActionsApiResponse = microsoftDefenderMock.createGetActionsApiResponse(
+          microsoftDefenderMock.createMachineAction({
+            id: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+            status: 'Cancelled',
+          })
+        );
+
+        responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+          connectorActionsMock,
+          MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+          msMachineActionsApiResponse
+        );
+      });
+
+      describe('cancel action with already canceled target', () => {
+        it('should reject cancel request when target action was already canceled', async () => {
+          const generator = new EndpointActionGenerator('seed');
+          const canceledActionResponse = generator.generateResponseEsHit({
+            EndpointActions: {
+              action_id: 'target-action-id-123',
+              data: { command: 'isolate' },
+            },
+            error: {
+              message:
+                'Response action was canceled by [admin] (Microsoft Defender for Endpoint machine action ID: some-id)',
+            },
+          });
+
+          applyEsClientSearchMock({
+            esClientMock: clientConstructorOptionsMock.esClient,
+            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+            response: generator.toEsSearchResponse([canceledActionResponse]),
+          });
+
+          await expect(
+            msClientMock.cancel({
+              endpoint_ids: ['1-2-3'],
+              comment: 'test comment',
+              action_id: 'target-action-id-123',
+              parameters: { id: 'target-action-id-123' },
+            })
+          ).rejects.toThrow(
+            'Unable to cancel action [target-action-id-123]. Action has already been cancelled.'
+          );
+
+          expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith({
+            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+            query: {
+              bool: {
+                filter: [{ term: { 'EndpointActions.action_id': 'target-action-id-123' } }],
+                should: [{ match_phrase: { 'error.message': 'Response action was canceled by' } }],
+                minimum_should_match: 1,
+              },
+            },
+            size: 1,
+            _source: ['EndpointActions.action_id', 'error.message', '@timestamp'],
+          });
+        });
+
+        it('should allow cancel request when target action has no cancel records', async () => {
+          // Mock empty search results - no cancel records found
+          const generator = new EndpointActionGenerator('seed');
+          const emptySearchResponse = generator.toEsSearchResponse([]);
+
+          applyEsClientSearchMock({
+            esClientMock: clientConstructorOptionsMock.esClient,
+            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+            response: emptySearchResponse,
+          });
+
+          await expect(
+            msClientMock.cancel({
+              endpoint_ids: ['1-2-3'],
+              comment: 'test comment',
+              action_id: 'target-action-id-123',
+              parameters: { id: 'target-action-id-123' },
+            })
+          ).rejects.not.toThrow(
+            'Unable to cancel action [target-action-id-123]. Action has already been cancelled.'
+          );
+        });
+      });
+
+      it('should generate success response for cancel action with Cancelled status', async () => {
+        const expectedResult: LogsEndpointActionResponse = {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: { command: 'cancel' },
+            input_type: 'microsoft_defender_endpoint',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: undefined, // Cancel action should succeed, no error
+          meta: undefined,
+        };
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
+      });
+
+      it('should generate failure response for non-cancel action with Cancelled status', async () => {
+        // Update the action to be an isolate action (not a cancel action)
+        const generator = new EndpointActionGenerator('seed');
+        const actionRequestsSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+            undefined,
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            EndpointActions: {
+              action_id: '90d62689-f72d-4b5e3-500cad0dc366',
+              data: { command: 'isolate' },
+            },
+            agent: { id: 'agent-uuid-1' },
+            meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: jest
+            .fn(() => generator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
+          pitUsage: true,
+        });
+
+        const expectedResult: LogsEndpointActionResponse = {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: { command: 'isolate' },
+            input_type: 'microsoft_defender_endpoint',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: {
+            message: expect.any(String), // Isolate action that was cancelled should fail
+          },
+          meta: undefined,
+        };
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
       });
     });
   });

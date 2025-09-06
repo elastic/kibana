@@ -146,8 +146,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          _source: ['agent', 'device.id', 'event.created'],
-          sort: [{ 'event.created': 'desc' }],
+          _source: ['agent', 'device.id', '@timestamp'],
+          sort: [{ '@timestamp': 'desc' }],
         },
       },
       _source: false,
@@ -608,5 +608,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     // if (abortSignal.aborted) {
     //   return;
     // }
+  }
+
+  protected async resolveExternalActionId(actionId: string): Promise<string> {
+    return actionId;
+  }
+
+  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
+    return actionDetails.id;
   }
 }

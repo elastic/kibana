@@ -76,6 +76,8 @@ export interface NormalizedActionRequest {
   error?: EcsError;
   /** Host info that might have been stored along with the Action Request (ex. 3rd party EDR actions) */
   hosts: ActionDetails['hosts'];
+  /** Additional metadata that might be stored with the action (ex. 3rd party EDR action IDs) */
+  meta?: {};
 }
 
 /**
@@ -107,6 +109,7 @@ export const mapToNormalizedActionRequest = (
       ruleName: actionRequest.rule?.name,
       error: actionRequest.error,
       hosts: actionRequest.EndpointActions.data.hosts ?? {},
+      meta: actionRequest.meta,
     };
   }
 
@@ -615,6 +618,7 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
     alertIds: actionRequest.alertIds,
     ruleId: actionRequest.ruleId,
     ruleName: actionRequest.ruleName,
+    meta: actionRequest.meta,
   };
 
   return actionDetails as T;

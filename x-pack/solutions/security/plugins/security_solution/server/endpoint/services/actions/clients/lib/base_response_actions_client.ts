@@ -99,6 +99,7 @@ import type {
   SuspendProcessRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
@@ -1044,6 +1045,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   > {
     throw new ResponseActionsNotSupportedError('runscript');
   }
+
+  public async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+    // TODO TC: check if we need outputcontent type
+  ): Promise<ActionDetails> {
+    throw new ResponseActionsNotSupportedError('cancel');
+  }
+
+  protected abstract resolveExternalActionId(actionId: string): Promise<string>;
+
+  protected abstract extractExternalActionId(actionDetails: ActionDetails): string | undefined;
 
   public async getCustomScripts(
     options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>

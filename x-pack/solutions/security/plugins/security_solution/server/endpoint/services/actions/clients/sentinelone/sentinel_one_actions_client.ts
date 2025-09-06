@@ -2199,4 +2199,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     return completedResponses;
   }
+
+  protected async resolveExternalActionId(actionId: string): Promise<string> {
+    return actionId;
+  }
+
+  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
+    return (actionDetails.meta as any)?.parentTaskId;
+  }
 }

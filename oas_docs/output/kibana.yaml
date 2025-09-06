@@ -13975,6 +13975,36 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/endpoint/action/cancel:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/cancel</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Cancel a running or pending response action.
+      operationId: CancelAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_CancelRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Successfully cancelled the response action
+      summary: Cancel a response action
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/endpoint/action/execute:
     post:
       description: |-
@@ -82397,6 +82427,49 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
+    Security_Endpoint_Management_API_CancelRouteRequestBody:
+      type: object
+      properties:
+        action_id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          minLength: 1
+          type: string
+        agent_type:
+          default: endpoint
+          description: The agent type to target for the action
+          enum:
+            - endpoint
+            - sentinel_one
+            - crowdstrike
+            - microsoft_defender_endpoint
+          type: string
+        alert_ids:
+          description: If defined, any case associated with the given IDs will be updated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        case_ids:
+          description: Case IDs to be updated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        comment:
+          description: Optional comment explaining the reason for canceling the action
+          type: string
+        endpoint_ids:
+          description: A list of endpoint IDs whose hosts will be isolated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+      required:
+        - action_id
     Security_Endpoint_Management_API_CloudFileScriptParameters:
       type: object
       properties:

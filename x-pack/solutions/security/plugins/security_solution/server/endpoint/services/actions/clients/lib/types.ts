@@ -38,6 +38,7 @@ import type {
   RunScriptActionRequestBody,
   ScanActionRequestBody,
   SuspendProcessRequestBody,
+  CancelActionRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
@@ -180,6 +181,15 @@ export interface ResponseActionsClient {
   ) => Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   >;
+  /**
+   * Run a script
+   * @param actionRequest
+   * @param options
+   */
+  cancel: (
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails>;
 }
 
 /**

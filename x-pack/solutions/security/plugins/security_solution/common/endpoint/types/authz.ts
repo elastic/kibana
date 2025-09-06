@@ -112,6 +112,12 @@ export interface EndpointAuthz {
    */
   canReadAdminData: boolean;
   canWriteAdminData: boolean;
+  /**
+   * If user has permissions to cancel response actions. Always false - requires dynamic validation
+   * through utility functions like canCancelResponseAction() to check agent type support and
+   * command-specific permissions.
+   */
+  canCancelResponseActions: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

@@ -10,19 +10,21 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
-import {
-  type MicrosoftDefenderEndpointAgentDetailsParams,
-  type MicrosoftDefenderEndpointIsolateHostParams,
-  type MicrosoftDefenderEndpointMachine,
-  type MicrosoftDefenderEndpointMachineAction,
-  type MicrosoftDefenderEndpointGetActionsParams,
-  type MicrosoftDefenderEndpointGetActionsResponse,
-  type MicrosoftDefenderEndpointRunScriptParams,
-  type MicrosoftDefenderGetLibraryFilesResponse,
+import type {
+  MicrosoftDefenderEndpointAgentDetailsParams,
+  MicrosoftDefenderEndpointIsolateHostParams,
+  MicrosoftDefenderEndpointCancelParams,
+  MicrosoftDefenderEndpointMachine,
+  MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderEndpointGetActionsParams,
+  MicrosoftDefenderEndpointGetActionsResponse,
+  MicrosoftDefenderEndpointRunScriptParams,
+  MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../../../../common/endpoint/constants';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -30,6 +32,7 @@ import type {
   RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
   MSDefenderRunScriptActionRequestParams,
+  CancelActionRequestBody,
 } from '../../../../../../../../common/api/endpoint';
 import type {
   ActionDetails,
@@ -41,6 +44,7 @@ import type {
   MicrosoftDefenderEndpointActionRequestCommonMeta,
   MicrosoftDefenderEndpointActionRequestFileMeta,
   MicrosoftDefenderEndpointLogEsDoc,
+  ResponseActionCancelParameters,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
   UploadedFileInfo,
@@ -557,6 +561,75 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     >;
   }
 
+  async cancel(
+    actionRequest: CancelActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      ResponseActionCancelParameters,
+      {},
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'cancel',
+      parameters: {
+        id: actionRequest.action_id,
+      },
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          // Check for existing cancel action
+          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(
+            actionRequest.action_id
+          );
+
+          if (actionAlreadyCanceled) {
+            throw new ResponseActionsClientError(
+              `Unable to cancel action [${actionRequest.action_id}]. Action has already been cancelled.`,
+              409
+            );
+          }
+
+          // Resolve the external action ID from the internal response action ID
+          const externalActionId = await this.resolveExternalActionId(actionRequest.action_id);
+
+          const msActionResponse = await this.sendAction<
+            MicrosoftDefenderEndpointMachineAction,
+            MicrosoftDefenderEndpointCancelParams
+          >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION, {
+            actionId: externalActionId,
+            comment: this.buildExternalComment(reqIndexOptions),
+          });
+
+          if (msActionResponse?.data?.id) {
+            reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
+          } else {
+            throw new ResponseActionsClientError(
+              `Cancel request was sent to Microsoft Defender, but Machine Action Id was not provided!`
+            );
+          }
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
+
+    return actionDetails;
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,
@@ -592,6 +665,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
           case 'unisolate':
+          case 'cancel':
             addResponsesToQueueIfAny(
               await this.checkPendingActions(
                 typePendingActions as Array<
@@ -603,6 +677,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 >
               )
             );
+            break;
           case 'runscript':
             addResponsesToQueueIfAny(
               await this.checkPendingActions(
@@ -686,7 +761,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
         if (!isPending) {
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
-
           for (const actionRequest of pendingActionRequests) {
             let additionalData = {};
             // In order to not copy paste most of the logic, I decided to add this additional check here to support `runscript` action and it's result that comes back as a link to download the file
@@ -699,6 +773,18 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 },
               };
             }
+
+            // Special handling for cancelled actions:
+            // Cancel actions that successfully cancel something should show as success
+            // Actions that were cancelled by another action should show as failed
+            let finalIsError = isError;
+            if (
+              machineAction.status === 'Cancelled' &&
+              actionRequest.EndpointActions.data.command === 'cancel'
+            ) {
+              finalIsError = false; // Cancel action succeeded
+            }
+
             completedResponses.push(
               this.buildActionResponseEsDoc({
                 actionId: actionRequest.EndpointActions.action_id,
@@ -706,7 +792,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                   ? actionRequest.agent.id[0]
                   : actionRequest.agent.id,
                 data: { command: actionRequest.EndpointActions.data.command },
-                error: isError
+                error: finalIsError
                   ? {
                       message: commandErrors || message,
                     }
@@ -752,7 +838,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         isPending = false;
         isError = true;
         message = `Response action was canceled by [${
-          machineAction.cancellationRequestor
+          // TODO does requestor make more sense?
+          machineAction.requestor
         }] (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})${
           machineAction.cancellationComment ? `: ${machineAction.cancellationComment}` : ''
         }`;
@@ -946,5 +1033,90 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return agentResponse;
+  }
+
+  /**
+   * Resolves the external action ID from an internal response action ID for Microsoft Defender Endpoint.
+   * This fetches the action details and extracts the Microsoft-specific machineActionId.
+   */
+  protected async resolveExternalActionId(actionId: string): Promise<string> {
+    try {
+      this.log.debug(
+        `resolveExternalActionId: attempting to resolve external action ID for action [${actionId}]`
+      );
+
+      // Fetch the action details to get external action information
+      const actionDetails = await this.fetchActionDetails(actionId);
+
+      if (!actionDetails) {
+        throw new ResponseActionsClientError(`Action with ID [${actionId}] not found`, 404);
+      }
+
+      this.log.debug(
+        `resolveExternalActionId: fetched action details for [${actionId}]: command=${actionDetails.command}, agentType=${actionDetails.agentType}`
+      );
+
+      // Extract the Microsoft Defender machine action ID
+      const externalActionId = this.extractExternalActionId(actionDetails);
+
+      if (!externalActionId) {
+        throw new ResponseActionsClientError(
+          `Unable to resolve Microsoft Defender machine action ID for action [${actionId}]`,
+          400
+        );
+      }
+
+      return externalActionId;
+    } catch (error) {
+      this.log.error(`Failed to resolve external action ID for action [${actionId}]`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extract Microsoft Defender Endpoint's machineActionId from action details.
+   * For Microsoft Defender Endpoint, the external action ID is stored in the meta field as machineActionId.
+   */
+  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
+    // For Microsoft Defender Endpoint, the external action ID is stored in the meta field
+    const meta = (
+      actionDetails as ActionDetails & { meta?: MicrosoftDefenderEndpointActionRequestCommonMeta }
+    ).meta;
+
+    this.log.debug(
+      `extractExternalActionId: actionDetails.id=${actionDetails.id}, meta=${JSON.stringify(meta)}`
+    );
+
+    return meta?.machineActionId;
+  }
+
+  /**
+   * Check if a successful cancel action already exists for the target actionId.
+   * This method queries the endpoint response index to look for action been canceled
+   * that target the specified action ID.
+   */
+  private async checkForAlreadyCanceledAction(targetActionId: string): Promise<boolean> {
+    try {
+      const searchQuery = {
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [{ term: { 'EndpointActions.action_id': targetActionId } }],
+            should: [{ match_phrase: { 'error.message': 'Response action was canceled by' } }],
+            minimum_should_match: 1,
+          },
+        },
+        size: 1,
+        _source: ['EndpointActions.action_id', 'error.message', '@timestamp'],
+      };
+
+      const searchResult = await this.options.esClient.search(searchQuery);
+
+      return searchResult.hits.hits.length > 0;
+    } catch (error) {
+      this.log.warn(`Error checking for existing cancel actions: ${error.message}`);
+      // On ES query error, allow cancel to proceed (fail open)
+      return false;
+    }
   }
 }
