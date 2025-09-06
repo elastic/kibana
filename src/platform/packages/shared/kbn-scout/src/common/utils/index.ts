@@ -60,3 +60,5 @@ export const measurePerformanceAsync = async <T>(
 
   return result;
 };
+
+export { validateAndProcessTestFiles, type TestFilesValidationResult } from './test_files';
