@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SavedSearchCrudTypes, SavedSearchType } from '../../../common/content_management';
-import type { GetSavedSearchDependencies } from '../../../common/service/get_saved_searches';
+import { isHttpFetchError } from '@kbn/core-http-browser';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { type SavedSearchCrudTypes, SavedSearchType } from '../../common/content_management';
+import type { GetSavedSearchDependencies } from '../../common/service/get_saved_searches';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
+import { SAVED_SEARCH_TYPE } from './constants';
 
 export const createGetSavedSearchDeps = ({
   spaces,
@@ -25,5 +28,14 @@ export const createGetSavedSearchDeps = ({
       contentTypeId: SavedSearchType,
       id,
     });
+  },
+  handleGetSavedSrchError: (error, savedSearchId) => {
+    if (isHttpFetchError(error) && error.response?.status === 404) {
+      throw new SavedObjectNotFound({
+        type: SAVED_SEARCH_TYPE,
+        typeDisplayName: 'Discover session',
+        id: savedSearchId,
+      });
+    }
   },
 });

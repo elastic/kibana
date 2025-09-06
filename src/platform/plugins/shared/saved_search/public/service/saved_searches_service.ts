@@ -11,12 +11,23 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { SaveSavedSearchOptions } from '.';
-import { getNewSavedSearch, getSavedSearch, saveSavedSearch } from '.';
-import { SavedSearchType } from '../../../common';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
-import type { SavedSearch, SerializableSavedSearch } from '../../../common/types';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedSearchType } from '../../common';
+import type { SavedSearchCrudTypes } from '../../common/content_management';
+import type { SavedSearch, SerializableSavedSearch } from '../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
+import { getDiscoverSession } from '../../common/service/get_discover_session';
+import { getSavedSearch } from '../../common/service/get_saved_searches';
+import type { SaveSavedSearchOptions } from './save_saved_searches';
+import { saveSavedSearch } from './save_saved_searches';
+import type {
+  SaveDiscoverSessionOptions,
+  SaveDiscoverSessionParams,
+} from './save_discover_session';
+import { saveDiscoverSession } from './save_discover_session';
+import type { SavedSearchUnwrapResult } from './to_saved_search';
+import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { byValueToSavedSearch } from './to_saved_search';
 
 export interface SavedSearchesServiceDeps {
   search: DataPublicPluginStart['search'];
@@ -34,6 +45,11 @@ export class SavedSearchesService {
   ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
     return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps), serialized);
   };
+
+  getDiscoverSession = (discoverSessionId: string) => {
+    return getDiscoverSession(discoverSessionId, createGetSavedSearchDeps(this.deps));
+  };
+
   getAll = async () => {
     const { contentManagement } = this.deps;
     const result = await contentManagement.search<
@@ -45,7 +61,6 @@ export class SavedSearchesService {
     });
     return result.hits;
   };
-  getNew = () => getNewSavedSearch({ searchSource: this.deps.search.searchSource });
 
   find = async (search: string) => {
     const { contentManagement } = this.deps;
@@ -73,5 +88,36 @@ export class SavedSearchesService {
       contentManagement,
       savedObjectsTaggingOss?.getTaggingApi()
     );
+  };
+
+  saveDiscoverSession = (
+    discoverSession: SaveDiscoverSessionParams,
+    options: SaveDiscoverSessionOptions = {}
+  ) => {
+    const { contentManagement, savedObjectsTaggingOss } = this.deps;
+    return saveDiscoverSession(
+      discoverSession,
+      options,
+      contentManagement,
+      savedObjectsTaggingOss?.getTaggingApi()
+    );
+  };
+
+  checkForDuplicateTitle = (
+    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+  ): Promise<void> => {
+    return checkForDuplicateTitle({
+      title: props.newTitle,
+      isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+      onTitleDuplicate: props.onTitleDuplicate,
+      contentManagement: this.deps.contentManagement,
+    });
+  };
+
+  byValueToSavedSearch = <Serialized extends boolean = false>(
+    result: SavedSearchUnwrapResult,
+    serialized?: Serialized
+  ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
+    return byValueToSavedSearch(result, this.deps, serialized);
   };
 }
