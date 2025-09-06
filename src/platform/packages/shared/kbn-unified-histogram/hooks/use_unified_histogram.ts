@@ -69,6 +69,7 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * The current filters
    */
   filters?: Filter[];
+
   /**
    * The current breakdown field
    */

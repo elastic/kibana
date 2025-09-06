@@ -16,6 +16,7 @@ import type {
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
+import useLatest from 'react-use/lib/useLatest';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -119,7 +120,11 @@ const UnifiedHistogramGuard = ({
               scopedProfilesManager={currentScopedProfilesManager}
               scopedEBTManager={currentScopedEbtManager}
             >
-              <ChartsWrapper stateContainer={currentStateContainer} panelsToggle={panelsToggle} />
+              <ChartsWrapper
+                stateContainer={currentStateContainer}
+                tabId={tabId}
+                panelsToggle={panelsToggle}
+              />
             </ScopedServicesProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
@@ -132,7 +137,11 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
   stateContainer: DiscoverStateContainer;
 };
 
-const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+const ChartsWrapper = ({
+  stateContainer,
+  tabId,
+  panelsToggle,
+}: UnifiedHistogramChartProps & { tabId: string }) => {
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
   const chartSectionConfig = useMemo(
     () =>
@@ -141,6 +150,27 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
       }))(),
     [getChartConfigAccessor]
   );
+
+  const localStorageKeyPrefix = chartSectionConfig.replaceDefaultChart
+    ? chartSectionConfig.localStorageKeyPrefix
+    : undefined;
+
+  const updateTopPanelHeight = useLatest(() => {
+    const layoutProps$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      tabId
+    ).unifiedHistogramLayoutProps$;
+
+    layoutProps$.next({
+      ...layoutProps$.getValue(),
+      topPanelHeight: undefined,
+    });
+  });
+
+  useMemo(() => {
+    updateTopPanelHeight.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateTopPanelHeight, localStorageKeyPrefix]);
 
   return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
@@ -213,8 +243,14 @@ const CustomChartSectionWrapper = ({
       isChartAvailable: true,
       chart: stateProps.chart,
       topPanelHeight: stateProps.topPanelHeight,
+      defaultTopPanelHeight: chartSectionConfig.defaultTopPanelHeight,
     }),
-    [stateProps.onTopPanelHeightChange, stateProps.chart, stateProps.topPanelHeight]
+    [
+      chartSectionConfig.defaultTopPanelHeight,
+      stateProps.chart,
+      stateProps.onTopPanelHeightChange,
+      stateProps.topPanelHeight,
+    ]
   );
 
   const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
