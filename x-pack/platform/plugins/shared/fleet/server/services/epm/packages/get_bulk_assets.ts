@@ -86,12 +86,17 @@ export async function getBulkAssets(
         }
       }
 
+      let title: string | undefined;
+      if (types[obj.type]?.management?.getTitle) {
+        title = types[obj.type]!.management!.getTitle!(obj) ?? obj.attributes?.title;
+      }
+
       return {
         id: obj.id,
         type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
         updatedAt: obj.updated_at,
         attributes: {
-          title: obj.attributes?.title,
+          title,
           description: obj.attributes?.description,
         },
         appLink,
