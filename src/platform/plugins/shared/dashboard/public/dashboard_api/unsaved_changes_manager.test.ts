@@ -93,7 +93,7 @@ describe('unsavedChangesManager', () => {
   describe('onUnsavedChanges', () => {
     describe('onSettingsChanges', () => {
       test('should have unsaved changes when tags change', (done) => {
-        const settingsManager = initializeSettingsManager();
+        const settingsManager = initializeSettingsManager(new BehaviorSubject<ViewMode>('view'));
         const unsavedChangesManager = initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: false,

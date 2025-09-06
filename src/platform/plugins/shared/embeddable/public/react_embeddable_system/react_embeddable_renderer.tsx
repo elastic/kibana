@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+import {
+  apiIsPresentationContainer,
+  type HasSerializedChildState,
+} from '@kbn/presentation-containers';
+import {
+  PresentationPanel,
+  type PresentationPanelProps,
+} from '@kbn/presentation-panel-plugin/public';
+import { initializeVisibility } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
@@ -70,8 +75,10 @@ export const EmbeddableRenderer = <
             apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
           ) => {
             const hasLockedHoverActions$ = new BehaviorSubject(false);
+
             return {
               ...apiRegistration,
+              ...initializeVisibility(parentApi),
               uuid,
               phase$: phaseTracker.current.getPhase$(),
               parentApi,

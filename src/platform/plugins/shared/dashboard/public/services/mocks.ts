@@ -7,35 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { noDataPagePublicMock } from '@kbn/no-data-page-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { serverlessMock } from '@kbn/serverless/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
-
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import type { DashboardCapabilities } from '../../common';
+import type { DashboardAttributes } from '../../server/content_management';
+import type { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
+import type { LoadDashboardReturn } from './dashboard_content_management_service/types';
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
-import type { DashboardAttributes } from '../../server/content_management';
-import type { DashboardCapabilities } from '../../common';
-import type { LoadDashboardReturn } from './dashboard_content_management_service/types';
-import type { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
 
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,
@@ -60,7 +58,6 @@ export const setStubKibanaServices = () => {
     navigation: navigationPluginMock.createStartContract(),
     noDataPage: noDataPagePublicMock.createStart(),
     observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
-    presentationUtil: presentationUtilPluginMock.createStartContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
     screenshotMode: screenshotModePluginMock.createStartContract(),

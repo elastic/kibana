@@ -33,19 +33,12 @@ const strings = {
 
 export interface Props {
   onClose: () => void;
-  onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
+  onSelect: (id: string, embeddableType: string) => void;
   availableEmbeddables: string[];
-  isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
-  onClose,
-  isByValueEnabled,
-}) => {
+export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
-
   const libraryTypes = useAddFromLibraryTypes();
 
   const canvasOnlyLibraryTypes = useMemo(() => {
@@ -55,9 +48,9 @@ export const AddEmbeddableFlyout: FC<Props> = ({
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
-      onSelect(id, savedObjectType, isByValueEnabled);
+      onSelect(id, savedObjectType);
     },
-    [isByValueEnabled, onSelect]
+    [onSelect]
   );
 
   return (

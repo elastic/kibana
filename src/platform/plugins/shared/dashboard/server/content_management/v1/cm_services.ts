@@ -199,6 +199,13 @@ export const sectionSchema = schema.object({
 });
 
 export const optionsSchema = schema.object({
+  fetchOnlyVisible: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.fetchOnlyVisible,
+    meta: {
+      description:
+        'Fetch data for only visible panels in the dashboard. This can improve performance.',
+    },
+  }),
   hidePanelTitles: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
     meta: { description: 'Hide the panel titles in the dashboard.' },
