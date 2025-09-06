@@ -13,5 +13,22 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     createdBy: {
       type: 'keyword',
     },
+    enabled: {
+      type: 'boolean',
+    },
+    jobType: {
+      type: 'keyword',
+    },
+    notification: {
+      properties: {
+        email: {
+          properties: {
+            to: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
   },
 };

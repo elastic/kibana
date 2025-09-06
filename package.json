@@ -828,6 +828,7 @@
     "@kbn/reporting-export-types-pdf-common": "link:src/platform/packages/private/kbn-reporting/export_types/pdf_common",
     "@kbn/reporting-export-types-png": "link:src/platform/packages/private/kbn-reporting/export_types/png",
     "@kbn/reporting-export-types-png-common": "link:src/platform/packages/private/kbn-reporting/export_types/png_common",
+    "@kbn/reporting-fixture": "link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture",
     "@kbn/reporting-plugin": "link:x-pack/platform/plugins/private/reporting",
     "@kbn/reporting-public": "link:src/platform/packages/private/kbn-reporting/public",
     "@kbn/reporting-server": "link:src/platform/packages/private/kbn-reporting/server",
