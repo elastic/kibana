@@ -25,6 +25,7 @@ export const createEmptyConversation = (): Conversation => {
       id: 'unknown',
       username: 'unknown',
     },
+    connector_id: undefined,
   };
 };
 
@@ -35,6 +36,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     create: jest.fn(),
     update: jest.fn(),
     list: jest.fn(),
+    delete: jest.fn(),
   };
 };
 

@@ -71,7 +71,12 @@ describe('ChatService', () => {
 
     getConversationMock$.mockReturnValue(of(conversation));
     generateTitleMock$.mockReturnValue(of('generated title'));
-    getChatModelMock$.mockReturnValue(of(createChatModel()));
+    getChatModelMock$.mockReturnValue(
+      of({
+        chatModel: createChatModel(),
+        connectorId: 'test-connector-id',
+      })
+    );
 
     // Ensure a connector is available by default
     resolveSelectedConnectorIdMock.mockResolvedValue('test-connector-id');
@@ -224,6 +229,7 @@ describe('ChatService', () => {
         conversationId: undefined,
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
+        connectorId: undefined,
       });
       expect(updateConversationMock$).not.toHaveBeenCalled();
     });

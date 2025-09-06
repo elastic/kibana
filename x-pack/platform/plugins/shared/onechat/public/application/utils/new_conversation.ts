@@ -19,5 +19,6 @@ export const createNewConversation = (): Conversation => {
     created_at: now,
     updated_at: now,
     rounds: [],
+    connector_id: undefined,
   };
 };

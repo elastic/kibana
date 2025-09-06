@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import type { OnechatInternalService } from '@kbn/onechat-plugin/public/services/types';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -59,11 +60,24 @@ export interface ShowAssistantOverlayProps {
   selectedConversation?: SelectedConversation;
 }
 
+export interface ShowOneChatOverlayProps {
+  showOverlay: boolean;
+  promptContextId?: string;
+  // id if the conversation exists in the data stream, title if it's a new conversation
+  selectedConversation?: SelectedConversation;
+}
+
 type ShowAssistantOverlay = ({
   showOverlay,
   promptContextId,
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
+
+type ShowOneChatOverlay = ({
+  showOverlay,
+  promptContextId,
+  selectedConversation,
+}: ShowOneChatOverlayProps) => void;
 
 type GetUrlForApp = ApplicationStart['getUrlForApp'];
 
@@ -83,6 +97,7 @@ export interface AssistantProviderProps {
   docLinks: DocLinksStart;
   getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
+  commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
   http: HttpSetup;
   inferenceEnabled?: boolean;
   nameSpace?: string;
@@ -93,6 +108,7 @@ export interface AssistantProviderProps {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  onechatServices?: OnechatInternalService;
 }
 
 export interface UserAvatar {
@@ -118,6 +134,7 @@ export interface UseAssistantContext {
   basePath: string;
   currentUser?: User;
   getComments: GetAssistantMessages;
+  commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
   getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;
@@ -136,6 +153,8 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  setShowOneChatOverlay: (showOneChatOverlay: ShowOneChatOverlay) => void;
+  showOneChatOverlay: ShowOneChatOverlay;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -151,6 +170,7 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  onechatServices?: OnechatInternalService;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -176,6 +196,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     basePath,
     basePromptContexts = [],
     getComments,
+    commentActionsMounter,
     getUrlForApp,
     http,
     inferenceEnabled = false,
@@ -187,6 +208,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     currentAppId,
     userProfileService,
     chrome,
+    onechatServices,
   } = props;
 
   const defaultTraceOptions: TraceOptions = {
@@ -275,6 +297,11 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
+   * Global One Chat Overlay actions
+   */
+  const [showOneChatOverlay, setShowOneChatOverlay] = useState<ShowOneChatOverlay>(() => {});
+
+  /**
    * Current User Avatar
    */
   const { data: currentUser } = useQuery({
@@ -316,6 +343,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       currentUser,
       docLinks,
       getComments,
+      commentActionsMounter,
       getUrlForApp,
       http,
       inferenceEnabled,
@@ -343,8 +371,10 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      setShowOneChatOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
+      showOneChatOverlay,
       title,
       toasts,
       traceOptions: sessionStorageTraceOptions,
@@ -353,6 +383,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      onechatServices,
     }),
     [
       actionTypeRegistry,
@@ -366,6 +397,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       currentUser,
       docLinks,
       getComments,
+      commentActionsMounter,
       getUrlForApp,
       http,
       inferenceEnabled,
@@ -379,20 +411,21 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       localStorageStreaming,
       setLocalStorageStreaming,
       setLocalStorageKnowledgeBase,
-      showAnonymizedValues,
-      setShowAnonymizedValues,
       contentReferencesVisible,
       setContentReferencesVisible,
+      showAnonymizedValues,
+      setShowAnonymizedValues,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
+      showOneChatOverlay,
       title,
       toasts,
       sessionStorageTraceOptions,
       unRegisterPromptContext,
       currentAppId,
-      codeBlockRef,
       userProfileService,
       chrome,
+      onechatServices,
     ]
   );
 

@@ -8,10 +8,13 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
+import { createHashHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AssistantOverlay } from '@kbn/elastic-assistant';
+import { AssistantOverlay, OneChatOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
+import { OneChatNavLink } from '@kbn/elastic-assistant/impl/assistant_context/one_chat_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type {
@@ -28,7 +31,6 @@ import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
-
 export class ElasticAssistantPublicPlugin
   implements
     Plugin<
@@ -65,6 +67,7 @@ export class ElasticAssistantPublicPlugin
         spaces: dependencies.spaces,
         elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
         aiAssistantManagementSelection: dependencies.aiAssistantManagementSelection,
+        onechat: dependencies.onechat,
       };
       return services;
     };
@@ -85,6 +88,7 @@ export class ElasticAssistantPublicPlugin
     coreStart: CoreStart,
     services: StartServices
   ) {
+    const history = createHashHistory();
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider
@@ -100,6 +104,11 @@ export class ElasticAssistantPublicPlugin
                   <AssistantProvider>
                     <Suspense fallback={null}>
                       <AssistantNavLink />
+                      <Router history={history}>
+                        <span> </span>
+                        <OneChatNavLink />
+                        <OneChatOverlay />
+                      </Router>
                       <AssistantOverlay />
                     </Suspense>
                   </AssistantProvider>

@@ -68,5 +68,8 @@
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
     "@kbn/scout",
+    "@kbn/spaces-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/actions-plugin",
   ]
 }

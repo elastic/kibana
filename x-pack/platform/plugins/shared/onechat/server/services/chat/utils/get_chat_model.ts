@@ -13,6 +13,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 
+export interface ChatModelWithConnectorId {
+  chatModel: InferenceChatModel;
+  connectorId: string;
+}
+
 export const getChatModel$ = ({
   connectorId,
   request,
@@ -23,15 +28,19 @@ export const getChatModel$ = ({
   request: KibanaRequest;
   inference: InferenceServerStart;
   span?: Span;
-}): Observable<InferenceChatModel> => {
+}): Observable<ChatModelWithConnectorId> => {
   return defer(async () => {
     span?.setAttribute('elastic.connector.id', connectorId);
-    return inference.getChatModel({
+    const chatModel = await inference.getChatModel({
       request,
       connectorId,
       chatModelOptions: {
         telemetryMetadata: MODEL_TELEMETRY_METADATA,
       },
     });
+    return {
+      chatModel,
+      connectorId,
+    };
   });
 };

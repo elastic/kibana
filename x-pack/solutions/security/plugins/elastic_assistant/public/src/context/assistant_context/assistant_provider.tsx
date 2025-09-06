@@ -39,6 +39,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    onechat: { internalServices: onechatServices },
   } = useKibana().services;
 
   const inferenceEnabled = useInferenceEnabled();
@@ -94,6 +95,10 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     basePath,
     basePromptContexts: Object.values(promptContext),
     getComments: memoizedGetComments,
+    commentActionsMounter: (args: { message: { content: string } }) =>
+      memoizedCommentActionsMounter({
+        message: { content: args.message.content, role: 'user', timestamp: Date.now().toString() },
+      }),
     http,
     inferenceEnabled,
     navigateToApp,
@@ -104,6 +109,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     userProfileService: userProfile,
     chrome,
     getUrlForApp,
+    onechatServices,
   });
 
   useEffect(() => {

@@ -7,7 +7,7 @@
 
 import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
@@ -25,6 +25,8 @@ const conversationContainerStyles = css`
 `;
 
 export const Conversation: React.FC<{}> = () => {
+  const [starterPrompt, setStarterPrompt] = useState('');
+
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
 
@@ -61,13 +63,14 @@ export const Conversation: React.FC<{}> = () => {
             ) : (
               <EuiResizablePanel initialSize={80}>
                 <div css={fullHeightStyles}>
-                  <NewConversationPrompt />
+                  <NewConversationPrompt setStarterPrompt={setStarterPrompt} />
                 </div>
               </EuiResizablePanel>
             )}
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
               <ConversationInputForm
+                starterPrompt={starterPrompt}
                 onSubmit={() => {
                   setStickToBottom(true);
                 }}

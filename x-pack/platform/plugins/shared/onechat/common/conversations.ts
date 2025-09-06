@@ -15,10 +15,11 @@ export type ConversationCreateRequest = Omit<
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds'>>;
+  Partial<Pick<Conversation, 'title' | 'rounds' | 'connector_id'>>;
 
 export interface ConversationListOptions {
   agentId?: string;
+  spaceId?: string;
 }
 
 export interface ConversationGetOptions {

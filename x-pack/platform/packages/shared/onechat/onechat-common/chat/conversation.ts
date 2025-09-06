@@ -135,6 +135,8 @@ export interface Conversation {
   created_at: string;
   updated_at: string;
   rounds: ConversationRound[];
+  space_id?: string;
+  connector_id?: string;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

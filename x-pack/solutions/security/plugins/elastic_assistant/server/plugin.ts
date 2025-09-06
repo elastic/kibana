@@ -11,7 +11,10 @@ import type {
   Plugin,
   Logger,
   FeatureFlagsStart,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID } from '@kbn/elastic-assistant-common';
@@ -21,6 +24,7 @@ import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/se
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import type {
   AssistantTool,
@@ -44,7 +48,6 @@ import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules
 import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
-
 interface FeatureFlagDefinition {
   featureFlagName: string;
   fallbackValue: boolean;
@@ -70,6 +73,7 @@ export class ElasticAssistantPlugin
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
+  private mlPlugin: MlPluginSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -86,6 +90,8 @@ export class ElasticAssistantPlugin
 
     registerEventLogProvider(plugins.eventLog);
     const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
+
+    this.mlPlugin = plugins.ml;
 
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
@@ -189,6 +195,40 @@ export class ElasticAssistantPlugin
       },
       registerCallback: (callbackId: CallbackIds, callback: Function) => {
         return appContextService.registerCallback(callbackId, callback);
+      },
+      getKnowledgeBaseDataClient: async (request: KibanaRequest) => {
+        const currentUser = await core.security.authc.getCurrentUser(request);
+        const spaceId =
+          plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
+
+        const { securitySolutionAssistant } = await core.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'securitySolutionAssistant.*',
+        });
+
+        if (!this.mlPlugin) {
+          throw new Error('ML plugin not available');
+        }
+
+        return this.mlPlugin && this.assistantService
+          ? this.assistantService?.createAIAssistantKnowledgeBaseDataClient({
+              spaceId,
+              logger: this.logger,
+              licensing: Promise.resolve<LicensingApiRequestHandlerContext>({
+                license: await plugins.licensing.getLicense(),
+                featureUsage: plugins.licensing.featureUsage,
+              }),
+              currentUser,
+              elserInferenceId: this.config.elserInferenceId,
+              manageGlobalKnowledgeBaseAIAssistant:
+                securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
+              getTrainedModelsProvider: () =>
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                this.mlPlugin!.trainedModelsProvider(
+                  {} as KibanaRequest,
+                  core.savedObjects.createInternalRepository()
+                ),
+            })
+          : null;
       },
     };
   }

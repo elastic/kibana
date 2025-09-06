@@ -19,7 +19,8 @@
       "triggersActionsUi",
       "actions",
       "stackConnectors",
-      "inference",
+      "onechat",
+      "inference"
     ],
     "requiredBundles": [
       "kibanaUtils"

@@ -12,17 +12,34 @@ import type { Conversation } from '@kbn/onechat-common';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useConversationId } from './use_conversation_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { queryKeys } from '../query_keys';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
+import { useOnechatServices } from './use_onechat_service';
+import type { ConversationSettings } from '../../services/types';
+import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
+import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
+  // Space-aware context hooks - these will be used when conversation settings are properly set up
+  const spaceId = useOnechatSpaceId();
+  const { setLastConversation } = useOnechatLastConversation({ spaceId });
+  const { conversationSettingsService, conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+
+  // Subscribe to conversation settings to get the isFlyoutMode
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
   };
@@ -47,14 +64,38 @@ export const useConversationActions = () => {
       shouldAllowConversationRedirectRef.current = false;
     };
   }, []);
-  const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
+  const setSelectedConversation = ({ conversationId: id }: { conversationId?: string }) => {
+    // Update the last conversation in localStorage
+    setLastConversation({
+      id: id ?? '',
+    });
+    conversationSettingsService.setConversationSettings({
+      ...conversationSettings,
+      selectedConversationId: id ?? undefined,
+    });
+  };
+
+  const navigateToConversation = ({
+    nextConversationId,
+  }: {
+    nextConversationId: string | undefined;
+  }) => {
     // Navigate to the new conversation if user is still on the "new" conversation page
     if (!conversationId && shouldAllowConversationRedirectRef.current) {
-      navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+      if (isFlyoutMode) {
+        setSelectedConversation({ conversationId: nextConversationId });
+      } else {
+        navigateToOnechatUrl(
+          nextConversationId
+            ? appPaths.chat.conversation({ conversationId: nextConversationId })
+            : appPaths.chat.new
+        );
+      }
     }
   };
 
   return {
+    setSelectedConversation,
     invalidateConversation: () => {
       removeNewConversationQuery();
       queryClient.invalidateQueries({ queryKey });
@@ -92,6 +133,19 @@ export const useConversationActions = () => {
           }
 
           draft.agent_id = agentId;
+        })
+      );
+    },
+    setConnector: (connectorId: string) => {
+      setConversation(
+        produce((draft) => {
+          if (!draft) {
+            const newConversation = createNewConversation();
+            newConversation.connector_id = connectorId;
+            return newConversation;
+          }
+
+          draft.connector_id = connectorId;
         })
       );
     },
@@ -140,6 +194,12 @@ export const useConversationActions = () => {
       // Invalidate all conversations to refresh conversation history
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
+    },
+    deleteConversation: async (id: string) => {
+      await conversationsService.delete({ conversationId: id });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+      removeNewConversationQuery();
+      navigateToConversation({ nextConversationId: '' });
     },
   };
 };
