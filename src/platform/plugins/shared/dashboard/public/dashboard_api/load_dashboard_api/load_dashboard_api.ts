@@ -32,6 +32,8 @@ export async function loadDashboardApi({
     id: savedObjectId,
   });
 
+  console.log('savedObjectResult', savedObjectResult);
+
   // --------------------------------------------------------------------------------------
   // Run validation.
   // --------------------------------------------------------------------------------------

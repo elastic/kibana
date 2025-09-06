@@ -31,7 +31,8 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type { EmbeddableTransforms } from '../common';
+import type { EmbeddableTransforms, EnhancementsTransforms } from '../common';
+import { getEnhancementsTransforms } from '../common/get_enhancements_transforms';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -41,6 +42,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  enhancementsTransforms: EnhancementsTransforms;
   getTransforms: (type: string) => EmbeddableTransforms | undefined;
 };
 
@@ -76,6 +78,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     return {
+      enhancementsTransforms: getEnhancementsTransforms(this.getEnhancement),
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },
