@@ -36,7 +36,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -527,7 +527,13 @@ const ESQLEditorInternal = function ESQLEditor({
       canSuggestVariables: () => {
         return variablesService?.areSuggestionsEnabled ?? false;
       },
-      getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getJoinIndices: async () => {
+        const remoteClusters = getRemoteClustersFromESQLQuery(code);
+        const result = await kibana.services?.esql?.getJoinIndicesAutocomplete?.(
+          remoteClusters?.join(',')
+        );
+        return result ?? { indices: [] };
+      },
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
         if (activeSolutionId) {
@@ -560,6 +566,7 @@ const ESQLEditorInternal = function ESQLEditor({
     };
     return callbacks;
   }, [
+    code,
     fieldsMetadata,
     kibana.services?.esql,
     dataSourcesCache,
