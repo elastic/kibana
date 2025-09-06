@@ -36,6 +36,7 @@ import type {
   ElasticsearchClient,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -304,10 +305,13 @@ export const getExceptions = async ({
   lists: ListArray;
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
-    if (lists.length > 0) {
+    const filteredLists = lists.filter(({ list_id: listId }) => listId !== ENDPOINT_LIST_ID);
+    if (filteredLists.length > 0) {
       try {
-        const listIds = lists.map(({ list_id: listId }) => listId);
-        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+        const listIds = filteredLists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = filteredLists.map(
+          ({ namespace_type: namespaceType }) => namespaceType
+        );
 
         // Stream the results from the Point In Time (PIT) finder into this array
         let items: ExceptionListItemSchema[] = [];
