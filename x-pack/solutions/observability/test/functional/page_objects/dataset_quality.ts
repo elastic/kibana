@@ -184,6 +184,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     editFailureStoreModal: 'editFailureStoreModal',
     enableFailureStoreToggle: 'enableFailureStoreToggle',
     failureStoreModalSaveButton: 'failureStoreModalSaveButton',
+    editFailureStoreIcon: 'datasetQualityDetailsEditFailureStore',
   };
 
   return {
