@@ -101,6 +101,7 @@
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.2.0",
     "@xstate5/react/**/xstate": "^5.19.2",
+    "apache-arrow": "20.x - 21.x",
     "globby/fast-glob": "^3.3.2"
   },
   "dependencies": {
