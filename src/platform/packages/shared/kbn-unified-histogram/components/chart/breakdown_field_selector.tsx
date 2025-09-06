@@ -21,9 +21,12 @@ import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
+import {
+  EMPTY_OPTION,
+  ToolbarSelector,
+  type SelectableEntry,
+} from '@kbn/shared-ux-toolbar-selector';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
-import type { SelectableEntry } from './toolbar_selector';
-import { ToolbarSelector, EMPTY_OPTION } from './toolbar_selector';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
