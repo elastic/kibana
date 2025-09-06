@@ -13,11 +13,11 @@ import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_clie
 import {
   SiemMigrationStatus,
   MigrationTranslationResult,
-  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { StoredRuleMigrationRule } from '../types';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
 import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
 import { dsl } from './dsl_queries';
 
@@ -584,7 +584,7 @@ describe('RuleMigrationsDataRulesClient', () => {
               missing_index: {
                 filter: {
                   query_string: {
-                    query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
+                    query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"`,
                   },
                 },
               },
@@ -814,7 +814,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
@@ -858,7 +858,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',

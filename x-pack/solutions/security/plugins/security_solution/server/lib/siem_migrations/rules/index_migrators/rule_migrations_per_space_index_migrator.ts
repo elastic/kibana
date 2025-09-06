@@ -13,7 +13,7 @@ import type {
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleMigrationAdapters, StoredRuleMigration } from '../types';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import { MAX_ES_SEARCH_SIZE } from '../../common/data/constants';
 
 export class RuleMigrationSpaceIndexMigrator {
   constructor(
