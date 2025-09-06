@@ -76,6 +76,11 @@ import type {
   PolicySecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  CloudProvider,
+  CloudConnectorSO,
+  CloudConnectorVars,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
 } from '../../common/types';
 import {
   FleetError,
@@ -91,6 +96,8 @@ import {
   StreamNotFoundError,
   FleetNotFoundError,
   PackageRollbackError,
+  CloudConnectorInvalidVarsError,
+  CloudConnectorCreateError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -113,6 +120,11 @@ import {
 
 import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
 
+import {
+  AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
+  AWS_ROLE_ARN_VAR_NAME,
+} from '../../common/constants/cloud_connector';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -124,7 +136,7 @@ import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from '.
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
-import { appContextService } from '.';
+import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -232,6 +244,56 @@ export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: str
     );
   }
 }
+
+/**
+ * Validates package policy variables and extracts cloud connector configuration.
+ *
+ * Currently supports AWS cloud connector only. This function checks for both:
+ * - `aws.role_arn` and `aws.credentials.external_id` (CSPM and Asset Discovery)
+ * - `role_arn` and `external_id` (direct cloud connector variables)
+ *
+ * This is a temporary implementation pending the generic solution proposed by the
+ * Package Spec team. Once approved, this function should be updated to use the
+ * standardized approach.
+ *
+ * @see https://github.com/elastic/security-team/issues/13277#issuecomment-3245273903 for updates
+ * @todo Remove hardcoded checks for `aws.role_arn` and `aws.credentials.external_id`
+ *       and implement the generic Package Spec solution once approved.
+ */
+
+const extractPackagePolicyVars = (
+  cloudProvider: CloudProvider,
+  packagePolicy: NewPackagePolicy,
+  logger: Logger
+): CloudConnectorVars | undefined => {
+  logger.get('extract package policy vars');
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0].vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const roleArn: string = vars.role_arn?.value || vars[AWS_ROLE_ARN_VAR_NAME]?.value;
+
+    if (roleArn) {
+      const externalId: CloudConnectorSecretVar = (
+        vars.external_id?.value?.isSecretRef
+          ? vars.external_id
+          : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME]
+      ) as CloudConnectorSecretVar;
+
+      const awsCloudConnectorVars: AwsCloudConnectorVars = {
+        role_arn: { type: 'text', value: roleArn },
+        external_id: externalId,
+      };
+
+      return awsCloudConnectorVars;
+    }
+  }
+};
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
@@ -419,7 +481,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         secretReferences = secretsRes.secretReferences;
 
         inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
+        const cloudConnector = await this.createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicies[0]
+        );
+        if (cloudConnector) {
+          enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+        }
       }
+
       const assetsMap = await getAgentTemplateAssetsMap({
         logger,
         packageInfo: pkgInfo,
@@ -2135,6 +2206,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
+          supports_cloud_connector: newPolicy.supports_cloud_connector,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -2784,6 +2856,47 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(updatedPolicies)) {
       const agentPolicyIds = policies.flatMap((policy) => policy.attributes.policy_ids || []);
       await agentPolicyService.bumpAgentPoliciesByIds(agentPolicyIds, {}, namespace);
+    }
+  }
+
+  public async createCloudConnectorForPackagePolicy(
+    soClient: SavedObjectsClientContract,
+    enrichedPackagePolicy: NewPackagePolicy,
+    agentPolicy: AgentPolicy
+  ): Promise<CloudConnectorSO | undefined> {
+    const logger = this.getLogger('createCloudConnectorForPackagePolicy');
+
+    // Check if cloud connector setup supported and not already created
+    const isNewCloudConnectorSetup =
+      !!enrichedPackagePolicy?.supports_cloud_connector &&
+      agentPolicy.agentless?.cloud_connectors?.enabled &&
+      !enrichedPackagePolicy?.cloud_connector_id;
+
+    if (!isNewCloudConnectorSetup) {
+      logger.debug(
+        `New cloud connector setup is not supported, supports_cloud_connector: ${enrichedPackagePolicy?.supports_cloud_connector}, agentless.cloud_connectors.enabled: ${agentPolicy.agentless?.cloud_connectors?.enabled}, cloud_connector_id: ${enrichedPackagePolicy?.cloud_connector_id}`
+      );
+      return;
+    }
+    const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+    try {
+      const cloudConnectorVars = extractPackagePolicyVars(
+        cloudProvider,
+        enrichedPackagePolicy,
+        logger
+      );
+      if (cloudConnectorVars) {
+        const cloudConnector = await cloudConnectorService.create(soClient, {
+          name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+          vars: cloudConnectorVars,
+          cloudProvider,
+        });
+        logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
+        return cloudConnector;
+      }
+    } catch (error) {
+      logger.error(`Error creating cloud connector: ${error}`);
+      throw new CloudConnectorCreateError(`${error}`);
     }
   }
 }
