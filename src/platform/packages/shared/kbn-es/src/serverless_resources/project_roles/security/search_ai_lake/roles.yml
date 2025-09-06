@@ -47,6 +47,7 @@ _search_ai_lake_analyst:
       privileges:
         - 'feature_ml.read'
         - 'feature_siemV4.all'
+        - 'feature_securitySolutionRulesV1.all'
         - 'feature_securitySolutionCasesV2.all'
         - 'feature_securitySolutionAssistant.all'
         - 'feature_securitySolutionAttackDiscovery.all'
@@ -117,6 +118,7 @@ _search_ai_lake_soc_manager:
         - 'feature_siemV4.all'
         - 'feature_siemV4.global_artifact_management_all'
         - 'feature_siemV4.workflow_insights_all'
+        - 'feature_securitySolutionRulesV1.all'
         - 'feature_securitySolutionCasesV2.all'
         - 'feature_securitySolutionAssistant.all'
         - 'feature_securitySolutionAttackDiscovery.all'
