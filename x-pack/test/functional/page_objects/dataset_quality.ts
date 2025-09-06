@@ -85,8 +85,8 @@ const texts = {
   size: 'Size',
   services: 'Services',
   hosts: 'Hosts',
-  degradedDocs: 'Degraded documents',
-  failedDocs: 'Failed documents',
+  degradedDocs: 'Degraded docs',
+  failedDocs: 'Failed docs',
   datasetNameColumn: 'Data set name',
   datasetNamespaceColumn: 'Namespace',
   datasetTypeColumn: 'Type',
@@ -98,8 +98,8 @@ const texts = {
   datasetActionsColumn: 'Actions',
   datasetIssueColumn: 'Issue',
   datasetFieldColumn: 'Field',
-  datasetDocsCountColumn: 'Documents',
-  datasetLastOccurrenceColumn: 'Last occurred',
+  datasetDocsCountColumn: 'Docs count',
+  datasetLastOccurrenceColumn: 'Last Occurrence',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -118,6 +118,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
+    qualityIssueDegradedChart: '.euiButtonGroupButton[data-test-subj="degraded"]',
+    qualityIssueFailedChart: '.euiButtonGroupButton[data-test-subj="failed"]',
   };
 
   const testSubjectSelectors = {
@@ -143,7 +145,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
     datasetQualityTypesSelectable: 'datasetQualityFilterType',
-    datasetQualityTypesSelectableButton: 'datasetQualityFilterTypeSelectableButton',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDetailsIssueTypeSelector: 'datasetQualityDetailsIssueTypeSelectorOptions',
@@ -154,15 +155,12 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityDetailsSummaryKpiValue: 'datasetQualityDetailsSummaryKpiValue',
-    datasetQualityDetailsDegradedSummaryCard:
-      'datasetQualityDetailsSummaryKpiCard-Degraded documents',
-    datasetQualityDetailsFailedSummaryCard: 'datasetQualityDetailsSummaryKpiCard-Failed documents',
     datasetQualityDetailsIntegrationRowIntegration: 'datasetQualityDetailsFieldsList-integration',
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
-    datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
+    datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
@@ -176,15 +174,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
-    datasetQualityDetailsSummaryCardFailedDocuments:
-      'datasetQualityDetailsSummaryKpiCard-Failed documents',
-    datasetQualityDetailsSummaryCardNoFailureStore:
-      'datasetQualityDetailsSummaryKpiCard-No failure store',
-    datasetQualityDetailsEnableFailureStoreButton: 'datasetQualityDetailsEnableFailureStoreButton',
-    editFailureStoreModal: 'editFailureStoreModal',
-    enableFailureStoreToggle: 'enableFailureStoreToggle',
-    failureStoreModalSaveButton: 'failureStoreModalSaveButton',
-    editFailureStoreIcon: 'datasetQualityDetailsEditFailureStore',
+    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
+    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -206,7 +197,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         ),
       });
 
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
+      return PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         '/data/data_quality',
         queryStringParams,
@@ -216,7 +207,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           ensureCurrentUrl: false,
         }
       );
-      return await this.waitUntilTableLoaded();
     },
 
     async navigateToDetails(pageState: datasetQualityDetailsUrlSchemaV1.UrlSchema) {
@@ -264,7 +254,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilTableLoaded() {
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 30 * 1000);
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
@@ -423,11 +413,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async filterForIssueTypes(issueTypes: string[]) {
-      // Wait for the component to be available before attempting to filter
-      await testSubjects.existOrFail(
-        testSubjectSelectors.datasetQualityDetailsIssueTypeSelectorButton
-      );
-
       return euiSelectable.selectOnlyOptionsWithText(
         testSubjectSelectors.datasetQualityDetailsIssueTypeSelectorButton,
         testSubjectSelectors.datasetQualityDetailsIssueTypeSelector,
@@ -436,9 +421,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async filterForFields(fields: string[]) {
-      // Wait for the component to be available before attempting to filter
-      await testSubjects.existOrFail(testSubjectSelectors.datasetQualityDetailsFieldSelectorButton);
-
       return euiSelectable.selectOnlyOptionsWithText(
         testSubjectSelectors.datasetQualityDetailsFieldSelectorButton,
         testSubjectSelectors.datasetQualityDetailsFieldSelector,
@@ -479,8 +461,12 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
     },
 
+    openDatasetQualityDetailsActionsButton() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
+    },
+
     getOpenInDiscoverButton() {
-      return testSubjects.find(testSubjectSelectors.datasetQualityDetailsLinkToDiscover);
+      return testSubjects.find(testSubjectSelectors.openInDiscover);
     },
 
     openIntegrationActionsMenu() {
@@ -544,18 +530,19 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async selectQualityIssueChart(type: 'degraded' | 'failed') {
       const chartSelector =
         type === 'degraded'
-          ? testSubjectSelectors.datasetQualityDetailsDegradedSummaryCard
-          : testSubjectSelectors.datasetQualityDetailsFailedSummaryCard;
-      return testSubjects.click(chartSelector);
+          ? selectors.qualityIssueDegradedChart
+          : selectors.qualityIssueFailedChart;
+      return find.clickByCssSelector(chartSelector);
     },
 
     async openDegradedFieldFlyout(fieldName: string) {
       await this.waitUntilTableLoaded();
-
       const cols = await this.parseDegradedFieldTable();
-      const fieldNameCol = cols.Field;
+      const fieldNameCol = cols.Issue;
       const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
-      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `${fieldName} field ignored`
+      );
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 

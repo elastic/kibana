@@ -784,6 +784,8 @@
       "@kbn/data-grid-in-table-search/*": ["src/platform/packages/shared/kbn-data-grid-in-table-search/*"],
       "@kbn/data-plugin": ["src/platform/plugins/shared/data"],
       "@kbn/data-plugin/*": ["src/platform/plugins/shared/data/*"],
+      "@kbn/data-quality": ["x-pack/platform/packages/private/kbn-data-quality"],
+      "@kbn/data-quality/*": ["x-pack/platform/packages/private/kbn-data-quality/*"],
       "@kbn/data-quality-plugin": ["x-pack/platform/plugins/shared/data_quality"],
       "@kbn/data-quality-plugin/*": ["x-pack/platform/plugins/shared/data_quality/*"],
       "@kbn/data-search-plugin": ["src/platform/test/plugin_functional/plugins/data_search"],
