@@ -7,18 +7,18 @@
 
 import { useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { getExcludeAlertsFilters } from './utils';
-import { useAlertCountQuery } from '../../hooks/use_alert_count_query';
-import { getValueMetrics, type ValueMetrics } from './metrics';
-import { useKibana } from '../../../common/lib/kibana';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { getExcludeAlertsFilters } from '../components/ai_value/utils';
+import { useAlertCountQuery } from './use_alert_count_query';
+import { getValueMetrics, type ValueMetrics } from '../components/ai_value/metrics';
+import { useKibana } from '../../common/lib/kibana';
+import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
 import {
   ACKNOWLEDGED,
   CLOSED,
   OPEN,
-} from '../../../attack_discovery/pages/results/history/search_and_filter/translations';
-import { getPreviousTimeRange } from '../../../common/utils/get_time_range';
-import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+} from '../../attack_discovery/pages/results/history/search_and_filter/translations';
+import { getPreviousTimeRange } from '../../common/utils/get_time_range';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 interface Props {
   analystHourlyRate: number;
   from: string;

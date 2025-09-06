@@ -17,6 +17,7 @@ import {
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
+import { useMetricAnimation } from '../../hooks/use_metric_animation';
 
 interface Props {
   from: string;
@@ -41,6 +42,12 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
+
+  // Apply animation to the metric value
+  useMetricAnimation({
+    animationDurationMs: 1500,
+    selector: '.echMetricText__value',
+  });
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const getLensAttributes = useCallback<GetLensAttributes>(

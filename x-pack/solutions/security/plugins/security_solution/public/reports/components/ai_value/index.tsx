@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ValueReportSettings } from './value_report_settings';
 import {
   DEFAULT_VALUE_REPORT_MINUTES,
@@ -15,7 +16,7 @@ import {
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
-import { useValueMetrics } from './use_value_metrics';
+import { useValueMetrics } from '../../hooks/use_value_metrics';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface Props {
@@ -34,8 +35,10 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
     }),
     [uiSettings]
   );
-
-  const { isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
+  const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
     from,
     to,
     minutesPerAlert,
@@ -53,8 +56,15 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
 
   // TODO loading state UI
   return isLoading ? null : (
-    <>
+    <div
+      css={css`
+        background: ${colors.backgroundBaseSubdued};
+        width: 100%;
+        min-height: 100%;
+      `}
+    >
       <ExecutiveSummary
+        attackAlertIds={attackAlertIds}
         analystHourlyRate={analystHourlyRate}
         hasAttackDiscoveries={hasAttackDiscoveries}
         minutesPerAlert={minutesPerAlert}
@@ -63,24 +73,33 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
         valueMetrics={valueMetrics}
         valueMetricsCompare={valueMetricsCompare}
       />
-      <EuiSpacer size="l" />
-
+      <EuiHorizontalRule />
       {hasAttackDiscoveries && (
-        <EuiFlexGrid columns={2} gutterSize="l">
-          <AlertProcessing valueMetrics={valueMetrics} valueMetricsCompare={valueMetricsCompare} />
+        <>
+          <AlertProcessing
+            attackAlertIds={attackAlertIds}
+            valueMetrics={valueMetrics}
+            from={from}
+            to={to}
+          />
+          <EuiHorizontalRule />
+        </>
+      )}
+      {hasAttackDiscoveries && (
+        <>
           <CostSavingsTrend
             analystHourlyRate={analystHourlyRate}
             minutesPerAlert={minutesPerAlert}
             from={from}
             to={to}
           />
-        </EuiFlexGrid>
+          <EuiHorizontalRule />
+        </>
       )}
-      <EuiSpacer size="m" />
       <ValueReportSettings
         analystHourlyRate={analystHourlyRate}
         minutesPerAlert={minutesPerAlert}
       />
-    </>
+    </div>
   );
 };
