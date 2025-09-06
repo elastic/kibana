@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await getService('esSupertest')
         .post('/_security/role_mapping/cloud-saml-kibana')
         .send({
-          roles: ['superuser'],
+          roles: ['superuser', '_ec_billing_admin'],
           enabled: true,
           rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
         })
@@ -31,6 +31,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await PageObjects.common.navigateToUrl('home');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      // Clean up role mapping
+      await getService('esSupertest')
+        .delete('/_security/role_mapping/cloud-saml-kibana')
+        .expect(200);
+      await browser.refresh();
     });
 
     describe('Guided onboarding', () => {

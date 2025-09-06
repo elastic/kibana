@@ -52,7 +52,11 @@ export class ServerlessPlugin
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
     }
-    project.setCloudUrls(cloud);
+
+    project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+    cloud.getPrivilegedUrls().then((privilegedUrls) => {
+      project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
+    });
 
     chrome.navControls.registerRight({
       order: 1,
