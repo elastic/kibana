@@ -27,6 +27,7 @@ import { ThreatIntelligence } from './threat_intelligence';
 import { Dashboards } from './dashboards';
 import { EntityAnalytics } from './entity_analytics';
 import { SiemMigrations } from './siem_migrations';
+import { SiemReadiness } from './siem_readiness';
 import { Configurations } from './configurations';
 
 /**
@@ -50,6 +51,7 @@ const subPluginClasses = {
   EntityAnalytics,
   Configurations,
   SiemMigrations,
+  SiemReadiness,
   Reports,
 };
 export { subPluginClasses };
