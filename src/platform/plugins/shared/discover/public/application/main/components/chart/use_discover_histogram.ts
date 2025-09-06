@@ -133,6 +133,10 @@ export const useDiscoverHistogram = (
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
           unifiedHistogramApi?.setChartHidden(changes.chartHidden);
         }
+
+        if ('topPanelHeight' in changes && changes.topPanelHeight) {
+          unifiedHistogramApi?.setTopPanelHeight(changes.topPanelHeight);
+        }
       }
     );
 

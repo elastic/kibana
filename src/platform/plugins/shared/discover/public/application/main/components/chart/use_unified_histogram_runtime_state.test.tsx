@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -15,6 +15,7 @@ import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { selectTabRuntimeState } from '../../state_management/redux';
 
 jest.mock('./use_discover_histogram', () => ({
   useDiscoverHistogram: jest.fn(),
@@ -57,7 +58,7 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
       wrapper: Wrapper,
     });
 
-    return { hook };
+    return { hook, stateContainer };
   };
 
   beforeEach(() => {
@@ -65,15 +66,13 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
   });
 
   it('should return the current tab id', () => {
-    const stateContainer = getStateContainer();
-    const { hook } = renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    const { hook, stateContainer } = renderUseUnifiedHistogramRuntimeState();
 
     expect(hook.result.current.currentTabId).toBe(stateContainer.getCurrentTab().id);
   });
 
   it('should call useDiscoverHistogramMock with correct arguments', () => {
-    const stateContainer = getStateContainer();
-    renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    const { stateContainer } = renderUseUnifiedHistogramRuntimeState();
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
       stateContainer,
@@ -81,5 +80,44 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
         initialLayoutProps: undefined,
       })
     );
+  });
+
+  it('should reset topPanelHeight in layout props$', () => {
+    const { stateContainer } = renderUseUnifiedHistogramRuntimeState();
+
+    const layoutProps$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramLayoutProps$;
+
+    renderUseUnifiedHistogramRuntimeState({ stateContainer });
+
+    const updatedLayoutPropsValue = layoutProps$.getValue();
+    expect(updatedLayoutPropsValue?.topPanelHeight).toBeUndefined();
+  });
+
+  it('should update options with new layoutProps', async () => {
+    const { stateContainer } = renderUseUnifiedHistogramRuntimeState();
+
+    const layoutProps$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramLayoutProps$;
+
+    act(() => {
+      layoutProps$.next({
+        topPanelHeight: 123,
+      });
+    });
+
+    const updatedLayoutPropsValue = layoutProps$.getValue();
+    expect(updatedLayoutPropsValue?.topPanelHeight).toEqual(123);
+
+    await waitFor(() => {
+      expect(useDiscoverHistogramMock).toHaveBeenLastCalledWith(
+        stateContainer,
+        expect.objectContaining({ initialLayoutProps: { topPanelHeight: 123 } })
+      );
+    });
   });
 });

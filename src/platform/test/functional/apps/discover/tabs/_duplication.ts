@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.duplicateTab(0);
       await discover.waitUntilTabIsLoaded();
       await retry.try(async () => {
-        await expectHistogramHeight(updatedHistogramHeight);
+        await expectHistogramHeight(updatedHistogramHeight2);
         await expectSidebarFieldCount(updatedSidebarFieldCount);
       });
 
