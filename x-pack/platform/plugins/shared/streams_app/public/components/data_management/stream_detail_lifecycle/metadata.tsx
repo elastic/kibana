@@ -14,27 +14,21 @@ import {
 } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
   EuiLink,
-  EuiPopover,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
-import type { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import type { DataStreamStats } from './hooks/use_data_stream_stats';
@@ -43,77 +37,21 @@ import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insu
 
 export function RetentionMetadata({
   definition,
-  lifecycleActions,
   openEditModal,
   stats,
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
-  openEditModal: (action: LifecycleEditAction) => void;
+  openEditModal: () => void;
   stats?: DataStreamStats;
   statsError?: Error;
 }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
-  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
 
   const dateFormatter = useDateFormatter();
 
   const lifecycle = definition.effective_lifecycle;
-
-  const contextualMenu =
-    lifecycleActions.length === 0 ? null : (
-      <EuiPopover
-        button={
-          <EuiToolTip
-            content={
-              !definition.privileges.lifecycle
-                ? i18n.translate(
-                    'xpack.streams.entityDetailViewWithoutParams.editDataRetention.insufficientPrivileges',
-                    {
-                      defaultMessage: "You don't have sufficient privileges to change retention.",
-                    }
-                  )
-                : undefined
-            }
-          >
-            <EuiButtonEmpty
-              data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-              size="s"
-              onClick={toggleMenu}
-              disabled={!definition.privileges.lifecycle}
-              iconType="pencil"
-              css={css`
-                margin-bottom: -${euiTheme.size.s};
-              `}
-            >
-              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
-                defaultMessage: 'Edit data retention',
-              })}
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        }
-        isOpen={isMenuOpen}
-        closePopover={closeMenu}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          items={lifecycleActions.map(({ name, action }) => (
-            <EuiContextMenuItem
-              key={action}
-              onClick={() => {
-                closeMenu();
-                openEditModal(action);
-              }}
-            >
-              {name}
-            </EuiContextMenuItem>
-          ))}
-        />
-      </EuiPopover>
-    );
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
@@ -174,7 +112,20 @@ export function RetentionMetadata({
                     })}
               </EuiBadge>
             </EuiFlexItem>
-            {contextualMenu}
+            <EuiButtonEmpty
+              data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+              size="s"
+              onClick={openEditModal}
+              disabled={!definition.privileges.lifecycle}
+              iconType="pencil"
+              css={css`
+                margin-bottom: -${euiTheme.size.s};
+              `}
+            >
+              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
+                defaultMessage: 'Edit data retention',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexGroup>
         }
         dataTestSubj="streamsAppRetentionMetadataRetentionPeriod"
