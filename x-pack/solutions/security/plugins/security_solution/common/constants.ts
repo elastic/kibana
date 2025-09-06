@@ -7,6 +7,7 @@
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { z } from '@kbn/zod';
 import * as i18n from './translations';
 
 export { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -546,3 +547,14 @@ export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live
   'Promotion: External Alerts',
 ];
+
+export const AlertClosingReasonSchema = z.enum([
+  'false_positive',
+  'duplicate',
+  'true_positive',
+  'benign_positive',
+  'automated_closure',
+  'other',
+]);
+export type AlertClosingReason = z.infer<typeof AlertClosingReasonSchema>;
+export const AlertClosingReasonValues = AlertClosingReasonSchema.enum;
