@@ -11,6 +11,7 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
+import type { MonitoringEntitySourceType } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
@@ -129,10 +130,16 @@ export class MonitoringEntitySourceDescriptorClient {
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
 
-  public async findByIndex(): Promise<MonitoringEntitySource[]> {
-    const result = await this.find();
+  /**
+   * entity_analytics_integration or index type
+   */
+  public async findBySourceType(
+    // will find only one and NOT all. Need ALL integration sources, not one.
+    type: MonitoringEntitySourceType
+  ): Promise<MonitoringEntitySource[]> {
+    const result = await this.find(); // is this always guaranteed to be a list?
     return result.saved_objects
-      .filter((so) => so.attributes.type === 'index')
+      .filter((so) => so.attributes.type === type)
       .map((so) => ({ ...so.attributes, id: so.id }));
   }
 
