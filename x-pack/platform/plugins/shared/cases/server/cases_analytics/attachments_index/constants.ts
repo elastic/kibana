@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { Owner } from '../../../common/constants/types';
 
 export const CAI_ATTACHMENTS_INDEX_NAME = '.internal.cases-attachments';
 
@@ -15,51 +16,28 @@ export const CAI_ATTACHMENTS_INDEX_ALIAS = '.cases-attachments';
 
 export const CAI_ATTACHMENTS_INDEX_VERSION = 1;
 
-export const CAI_ATTACHMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
+export const CAI_ATTACHMENTS_SYNC_TYPE = 'cai_attachments_sync';
+
+export const getAttachmentsSourceQuery = (spaceId: string, owner: Owner) => ({
   bool: {
-    must: [
+    filter: [
       {
         term: {
           type: 'cases-comments',
         },
       },
       {
-        bool: {
-          should: [
-            {
-              term: {
-                'cases-comments.type': 'externalReference',
-              },
-            },
-            {
-              term: {
-                'cases-comments.type': 'alert',
-              },
-            },
-          ],
-          minimum_should_match: 1,
+        term: {
+          namespaces: spaceId,
+        },
+      },
+      {
+        term: {
+          'cases-comments.owner': owner,
         },
       },
     ],
-  },
-};
-
-export const CAI_ATTACHMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
-
-export const CAI_ATTACHMENTS_BACKFILL_TASK_ID = 'cai_attachments_backfill_task';
-
-export const CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_attachments_synchronization_task';
-
-export const getAttachmentsSynchronizationSourceQuery = (
-  lastSyncAt: Date
-): QueryDslQueryContainer => ({
-  bool: {
     must: [
-      {
-        term: {
-          type: 'cases-comments',
-        },
-      },
       {
         bool: {
           should: [
@@ -75,28 +53,56 @@ export const getAttachmentsSynchronizationSourceQuery = (
             },
           ],
           minimum_should_match: 1,
-        },
-      },
-      {
-        bool: {
-          should: [
-            {
-              range: {
-                'cases-comments.created_at': {
-                  gte: lastSyncAt.toISOString(),
-                },
-              },
-            },
-            {
-              range: {
-                'cases-comments.updated_at': {
-                  gte: lastSyncAt.toISOString(),
-                },
-              },
-            },
-          ],
         },
       },
     ],
   },
 });
+
+export const CAI_ATTACHMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
+
+const CAI_ATTACHMENTS_BACKFILL_TASK_ID = 'cai_attachments_backfill_task';
+export const getCAIAttachmentsBackfillTaskId = (spaceId: string, owner: Owner): string => {
+  return `${CAI_ATTACHMENTS_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
+};
+
+const CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_attachments_synchronization_task';
+export const getCAIAttachmentsSynchronizationTaskId = (spaceId: string, owner: Owner): string => {
+  return `${CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID}-${spaceId}-${owner}`;
+};
+
+export const getAttachmentsSynchronizationSourceQuery = (
+  lastSyncAt: Date,
+  spaceId: string,
+  owner: Owner
+): QueryDslQueryContainer => {
+  const baseQuery = getAttachmentsSourceQuery(spaceId, owner);
+  return {
+    bool: {
+      filter: baseQuery.bool.filter,
+      must: [
+        ...baseQuery.bool.must,
+        {
+          bool: {
+            should: [
+              {
+                range: {
+                  'cases-comments.created_at': {
+                    gte: lastSyncAt.toISOString(),
+                  },
+                },
+              },
+              {
+                range: {
+                  'cases-comments.updated_at': {
+                    gte: lastSyncAt.toISOString(),
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+};

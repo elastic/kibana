@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { Owner } from '../../../common/constants/types';
 
 export const CAI_COMMENTS_INDEX_NAME = '.internal.cases-comments';
 
@@ -15,7 +16,9 @@ export const CAI_COMMENTS_INDEX_ALIAS = '.cases-comments';
 
 export const CAI_COMMENTS_INDEX_VERSION = 1;
 
-export const CAI_COMMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
+export const CAI_COMMENTS_SYNC_TYPE = 'cai_comments_sync';
+
+export const getCommentsSourceQuery = (spaceId: string, owner: Owner): QueryDslQueryContainer => ({
   bool: {
     filter: [
       {
@@ -28,31 +31,40 @@ export const CAI_COMMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
           'cases-comments.type': 'user',
         },
       },
+      {
+        term: {
+          namespaces: spaceId,
+        },
+      },
+      {
+        term: {
+          'cases-comments.owner': owner,
+        },
+      },
     ],
   },
-};
+});
 
 export const CAI_COMMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
-export const CAI_COMMENTS_BACKFILL_TASK_ID = 'cai_comments_backfill_task';
+const CAI_COMMENTS_BACKFILL_TASK_ID = 'cai_comments_backfill_task';
+export const getCAIBackfillTaskId = (spaceId: string, owner: Owner): string => {
+  return `${CAI_COMMENTS_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
+};
 
-export const CAI_COMMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_comments_synchronization_task';
+const CAI_COMMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_comments_synchronization_task';
+export const getCAICommentsSynchronizationTaskId = (spaceId: string, owner: Owner): string => {
+  return `${CAI_COMMENTS_SYNCHRONIZATION_TASK_ID}-${spaceId}-${owner}`;
+};
 
 export const getCommentsSynchronizationSourceQuery = (
-  lastSyncAt: Date
+  lastSyncAt: Date,
+  spaceId: string,
+  owner: Owner
 ): QueryDslQueryContainer => ({
   bool: {
+    filter: getCommentsSourceQuery(spaceId, owner).bool?.filter,
     must: [
-      {
-        term: {
-          'cases-comments.type': 'user',
-        },
-      },
-      {
-        term: {
-          type: 'cases-comments',
-        },
-      },
       {
         bool: {
           should: [
