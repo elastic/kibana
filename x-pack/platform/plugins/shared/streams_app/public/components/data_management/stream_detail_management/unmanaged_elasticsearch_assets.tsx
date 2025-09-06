@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { StreamDescription } from './stream_description';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ComponentTemplatePanel } from './component_template_panel';
@@ -125,6 +126,9 @@ export function UnmanagedElasticsearchAssets({
               onFlyoutOpen={(name) => setCurrentFlyout({ type: 'data_stream', name })}
             />
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <StreamDescription definition={definition} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ComponentTemplatePanel
