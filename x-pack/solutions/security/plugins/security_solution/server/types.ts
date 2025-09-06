@@ -75,7 +75,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
-  getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
+  getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager | undefined;
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
   siemMigrations: SiemMigrationClients;
   getInferenceClient: () => InferenceClient;
