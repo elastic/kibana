@@ -9,12 +9,17 @@
 
 import React from 'react';
 import { LoadingIndices } from '.';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 describe('LoadingIndices', () => {
   it('should render normally', () => {
-    const component = shallow(<LoadingIndices />);
+    const { container } = render(
+      <IntlProvider locale="en">
+        <LoadingIndices />
+      </IntlProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
