@@ -7,6 +7,7 @@
 
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import React from 'react';
+import { parseTag } from '../../../utils/tags';
 
 interface OnechatToolTagsProps {
   tags: string[];
@@ -15,11 +16,14 @@ interface OnechatToolTagsProps {
 export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
   return (
     <EuiBadgeGroup>
-      {tags.map((tag) => (
-        <EuiBadge key={tag} color="hollow">
-          {tag}
-        </EuiBadge>
-      ))}
+      {tags.map((tag) => {
+        const { inherent, value } = parseTag(tag);
+        return (
+          <EuiBadge key={tag} color={inherent ? 'default' : 'hollow'}>
+            {value}
+          </EuiBadge>
+        );
+      })}
     </EuiBadgeGroup>
   );
 };

@@ -9,35 +9,46 @@ import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
 import { useToasts } from '../use_toasts';
+import { createCustomTag, createInherentTag } from '../../utils/tags';
 
-export interface UseToolsServiceProps {
-  includeSystemTools?: boolean;
-}
+const getTypeTag = (type: ToolType) => {
+  switch (type) {
+    case ToolType.builtin:
+      return createInherentTag(labels.tools.builtinLabel);
+    default:
+      return null;
+  }
+};
 
-export const useToolsService = ({ includeSystemTools }: UseToolsServiceProps = {}) => {
+const transformTags = (tools: ToolDefinitionWithSchema[]) => {
+  return tools.map((tool) => {
+    const tags = tool.tags.map((tag) => createCustomTag(tag));
+    const typeTag = getTypeTag(tool.type);
+    if (typeTag) {
+      tags.unshift(typeTag);
+    }
+    return {
+      ...tool,
+      tags,
+    };
+  });
+};
+
+export const useToolsService = () => {
   const { toolsService } = useOnechatServices();
 
   const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
+    select: transformTags,
   });
 
-  const tools = useMemo(() => {
-    if (!data) {
-      return [];
-    }
-    if (includeSystemTools) {
-      return data;
-    }
-    return data.filter((tool) => tool.type !== ToolType.builtin);
-  }, [data, includeSystemTools]);
-
-  return { tools, isLoading, error, isError };
+  return { tools: data ?? [], isLoading, error, isError };
 };
 
 export const useToolService = (toolId?: string) => {
@@ -92,16 +103,12 @@ export const useTool = ({ toolId, onLoadingError }: UseToolProps) => {
 };
 
 export interface UseToolsWithErrorHandlingProps {
-  includeSystemTools?: boolean;
   onLoadingError?: (error: Error) => void;
 }
 
-export const useTools = ({
-  includeSystemTools,
-  onLoadingError,
-}: UseToolsWithErrorHandlingProps = {}) => {
+export const useTools = ({ onLoadingError }: UseToolsWithErrorHandlingProps = {}) => {
   const { addErrorToast } = useToasts();
-  const { tools, isLoading, error, isError } = useToolsService({ includeSystemTools });
+  const { tools, isLoading, error, isError } = useToolsService();
 
   useEffect(() => {
     if (isError) {
