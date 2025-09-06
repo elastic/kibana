@@ -80,10 +80,10 @@ describe('I18nService', () => {
 
       expect(registerRoutesMock).toHaveBeenCalledTimes(1);
       expect(registerRoutesMock).toHaveBeenCalledWith({
-        locale: 'en',
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
-        translationHash: expect.any(String),
+        pluginPaths: [],
+        defaultLocale: 'en',
       });
     });
   });
@@ -123,10 +123,10 @@ describe('I18nService', () => {
 
       expect(registerRoutesMock).toHaveBeenCalledTimes(1);
       expect(registerRoutesMock).toHaveBeenCalledWith({
-        locale: 'en',
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
-        translationHash: expect.any(String),
+        pluginPaths: [],
+        defaultLocale: 'en',
       });
     });
 

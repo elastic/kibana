@@ -15,9 +15,9 @@ describe('registerTranslationsRoute', () => {
     const router = mockRouter.create();
     registerTranslationsRoute({
       router,
-      locale: 'en',
+      pluginPaths: [],
       isDist: true,
-      translationHash: 'XXXX',
+      defaultLocale: 'en',
     });
     expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
@@ -36,7 +36,7 @@ describe('registerTranslationsRoute', () => {
     expect(router.get).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        path: '/translations/XXXX/{locale}.json',
+        path: '/translations/{hash}/{locale}.json',
         options: {
           access: 'public',
           authRequired: false,

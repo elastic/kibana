@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
+import { createHash } from 'crypto';
+import { getKibanaTranslationFiles } from '../get_kibana_translation_files';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
@@ -22,74 +24,109 @@ interface TranslationCache {
 
 export const registerTranslationsRoute = ({
   router,
-  locale,
-  translationHash,
+  pluginPaths,
   isDist,
+  defaultLocale,
 }: {
   router: IRouter;
-  locale: string;
-  translationHash: string;
+  pluginPaths: string[];
   isDist: boolean;
+  defaultLocale: string;
 }) => {
-  let translationCache: TranslationCache;
+  const translationCacheByLocale: Record<string, TranslationCache> = {};
 
-  ['/translations/{locale}.json', `/translations/${translationHash}/{locale}.json`].forEach(
-    (routePath) => {
-      router.get(
-        {
-          path: routePath,
-          security: {
-            authz: {
-              enabled: false,
-              reason: 'This route is only used for serving i18n translations.',
-            },
-          },
-          validate: {
-            params: schema.object({
-              locale: schema.string(),
-            }),
-          },
-          options: {
-            access: 'public',
-            httpResource: true,
-            authRequired: false,
-            excludeFromRateLimiter: true,
+  const canonicalize = (tag: string) => {
+    const parts = tag.split('-');
+
+    if (parts.length === 1) {
+      return parts[0].toLowerCase();
+    }
+
+    return `${parts[0].toLowerCase()}-${parts[1].toUpperCase()}`;
+  };
+
+  const resolveAvailableLocale = async (requested: string): Promise<string> => {
+    const candidates = [canonicalize(requested), requested, defaultLocale];
+    for (const candidate of candidates) {
+      const files = await getKibanaTranslationFiles(candidate, pluginPaths);
+
+      if (files.length) {
+        return candidate;
+      }
+    }
+    return defaultLocale;
+  };
+
+  // Support both hashed and non-hashed URL shapes. The "hash" segment is ignored here and
+  // retained only for backward-compatibility with previously generated URLs.
+  const paths = ['/translations/{locale}.json', '/translations/{hash}/{locale}.json'];
+
+  paths.forEach((routePath) => {
+    router.get(
+      {
+        path: routePath,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is only used for serving i18n translations.',
           },
         },
-        (ctx, req, res) => {
-          if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
-            return res.notFound({
-              body: `Unknown locale: ${req.params.locale}`,
-            });
-          }
-          if (!translationCache) {
-            const translations = JSON.stringify(i18n.getTranslation());
-            translationCache = {
-              translations,
-              hash: translationHash,
-            };
+        validate: {
+          params: schema.object({
+            // optional hash segment for compatibility; not used in handler
+            hash: schema.maybe(schema.string()),
+            locale: schema.string(),
+          }),
+        },
+        options: {
+          access: 'public',
+          httpResource: true,
+          authRequired: false,
+          excludeFromRateLimiter: true,
+        },
+      },
+      async (_ctx, req, res) => {
+        const requestedLocale = req.params.locale || defaultLocale;
+        const effectiveLocale = await resolveAvailableLocale(requestedLocale);
+        const cacheKey = effectiveLocale.toLowerCase();
+
+        if (!translationCacheByLocale[cacheKey]) {
+          const translationFiles = await getKibanaTranslationFiles(effectiveLocale, pluginPaths);
+          if (translationFiles.length) {
+            i18nLoader.registerTranslationFiles(translationFiles);
           }
 
-          let headers: Record<string, string>;
-          if (isDist) {
-            headers = {
-              'content-type': 'application/json',
-              'cache-control': `public, max-age=${365 * DAY}, immutable`,
-            };
-          } else {
-            headers = {
-              'content-type': 'application/json',
-              'cache-control': 'must-revalidate',
-              etag: translationCache.hash,
-            };
-          }
+          const translationInput = await i18nLoader.getTranslationsByLocale(effectiveLocale);
+          const translations = JSON.stringify(translationInput);
+          const hash = createHash('sha256').update(translations).digest('hex').slice(0, 12);
 
-          return res.ok({
-            headers,
-            body: translationCache.translations,
-          });
+          translationCacheByLocale[cacheKey] = {
+            translations,
+            hash,
+          };
         }
-      );
-    }
-  );
+
+        const { translations, hash } = translationCacheByLocale[cacheKey];
+
+        let headers: Record<string, string>;
+        if (isDist) {
+          headers = {
+            'content-type': 'application/json',
+            'cache-control': `public, max-age=${365 * DAY}, immutable`,
+          };
+        } else {
+          headers = {
+            'content-type': 'application/json',
+            'cache-control': 'must-revalidate',
+            etag: hash,
+          };
+        }
+
+        return res.ok({
+          headers,
+          body: translations,
+        });
+      }
+    );
+  });
 };
