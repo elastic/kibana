@@ -47,7 +47,6 @@ export const buildIndexPatternsByEngine = async (
   return patterns;
 };
 
-
 const getSecuritySolutionIndices = async (
   appClient: AppClient,
   dataViewsService: DataViewsService

@@ -103,7 +103,6 @@ import {
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
   buildEntityDefinitionId,
-  buildIndexPatterns,
   buildIndexPatternsByEngine,
   getEntitiesIndexName,
   isPromiseFulfilled,
@@ -872,12 +871,6 @@ export class EntityStoreDataClient {
       };
     }
 
-    const defaultIndexPatterns = await buildIndexPatterns(
-      this.options.namespace,
-      this.options.appClient,
-      this.options.dataViewsService
-    );
-
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
         const originalStatus = engine.status;
@@ -893,6 +886,12 @@ export class EntityStoreDataClient {
           );
         }
 
+        const defaultIndexPatterns = await buildIndexPatternsByEngine(
+          this.options.namespace,
+          engine.type,
+          this.options.appClient,
+          this.options.dataViewsService
+        );
         const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, engine.indexPattern);
 
         // Skip update if index patterns are the same
