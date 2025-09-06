@@ -45,7 +45,7 @@ export function ClassicStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const { enrich, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { isLoading, enrich, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -152,8 +152,14 @@ export function ClassicStreamDetailManagement({
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;
   }
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  }
 
   if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
+    if (isLoading) {
+      return null;
+    }
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
   }
 

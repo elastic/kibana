@@ -42,7 +42,7 @@ export function WiredStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const { enrich, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { isLoading, enrich, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -87,10 +87,12 @@ export function WiredStreamDetailManagement({
     },
     ...otherTabs,
   };
-
-  if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  }
+  if (isLoading) {
+    return null;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
 }
