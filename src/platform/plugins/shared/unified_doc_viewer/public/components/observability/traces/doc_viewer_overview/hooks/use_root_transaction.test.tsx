@@ -8,17 +8,12 @@
  */
 
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
+import { DURATION, TRANSACTION_DURATION } from '@kbn/apm-types';
+import { waitFor } from '@testing-library/dom';
+import { renderHook } from '@testing-library/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { RootTransactionProvider, useRootTransactionContext } from './use_root_transaction';
-import {
-  SERVICE_NAME_FIELD,
-  SPAN_ID_FIELD,
-  TRANSACTION_DURATION_FIELD,
-  TRANSACTION_ID_FIELD,
-  TRANSACTION_NAME_FIELD,
-} from '@kbn/discover-utils';
+import { TraceRootSpanProvider, useTraceRootSpanContext } from './use_trace_root_span';
 
 jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -62,37 +57,29 @@ beforeEach(() => {
   lastValueFromMock.mockReset();
 });
 
-describe('useRootTransaction hook', () => {
+describe('useTraceRootSpan hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <RootTransactionProvider traceId="test-trace">{children}</RootTransactionProvider>
+    <TraceRootSpanProvider traceId="test-trace">{children}</TraceRootSpanProvider>
   );
 
-  it('should start with loading true and transaction as null', async () => {
+  it('should start with loading true and span as null', async () => {
     lastValueFromMock.mockResolvedValue({});
 
-    const { result } = renderHook(() => useRootTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should update transaction when data is fetched successfully', async () => {
-    const transactionName = 'Test Transaction';
+  it('should update span when data is fetched successfully APM', async () => {
     const transactionDuration = 1;
-    const spanId = 'spanId';
-    const transactionId = 'transactionId';
-    const serviceName = 'serviceName';
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
           hits: [
             {
               fields: {
-                [TRANSACTION_NAME_FIELD]: transactionName,
-                [TRANSACTION_DURATION_FIELD]: transactionDuration,
-                [SPAN_ID_FIELD]: spanId,
-                [TRANSACTION_ID_FIELD]: transactionId,
-                [SERVICE_NAME_FIELD]: serviceName,
+                [TRANSACTION_DURATION]: transactionDuration,
               },
             },
           ],
@@ -100,15 +87,37 @@ describe('useRootTransaction hook', () => {
       },
     });
 
-    const { result } = renderHook(() => useRootTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction?.duration).toBe(transactionDuration);
-    expect(result.current.transaction?.[SPAN_ID_FIELD]).toBe(spanId);
-    expect(result.current.transaction?.[TRANSACTION_ID_FIELD]).toBe(transactionId);
-    expect(result.current.transaction?.[SERVICE_NAME_FIELD]).toBe(serviceName);
+    expect(result.current.span?.duration).toBe(transactionDuration);
+    expect(lastValueFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('should update span when data is fetched successfully OTel', async () => {
+    const spanDuration = 1;
+    lastValueFromMock.mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                [DURATION]: spanDuration,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span?.duration).toBe(spanDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
@@ -116,16 +125,16 @@ describe('useRootTransaction hook', () => {
     const errorMessage = 'Search error';
     lastValueFromMock.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useRootTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction).toBeNull();
+    expect(result.current.span).toBeNull();
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'An error occurred while fetching the transaction',
+        title: 'An error occurred while fetching the root span of the trace',
         text: errorMessage,
       })
     );

@@ -10,10 +10,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
-import { EuiSpacer, useResizeObserver } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
@@ -52,7 +53,7 @@ export interface ContentFrameworkTableProps
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
-  title: string;
+  id: string;
 }
 
 export function ContentFrameworkTable({
@@ -61,18 +62,19 @@ export function ContentFrameworkTable({
   fieldConfigurations,
   dataView,
   columns,
-  title,
+  id,
   textBasedHits,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
+  const { euiTheme } = useEuiTheme();
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
   } = getUnifiedDocViewerServices();
   const { fieldsMetadata = {} } = useFieldsMetadata({
-    attributes: ['short', 'flat_name', 'name'],
+    attributes: ['short'],
     fieldNames,
   });
 
@@ -152,13 +154,15 @@ export function ContentFrameworkTable({
         return (
           <>
             <EuiSpacer size="s" />
-            {fieldConfig.name}
+            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold }}>
+              {fieldConfig.name}
+            </EuiText>
           </>
         );
       }
       return fieldConfig.valueCellContent;
     },
-    [rows, fields]
+    [rows, fields, euiTheme.font.weight]
   );
 
   const cellPopoverRenderer = useCallback(
@@ -186,10 +190,18 @@ export function ContentFrameworkTable({
   }
 
   return (
-    <div ref={setContainerRef}>
+    <div
+      ref={setContainerRef}
+      css={css`
+        .euiDataGridRow:last-of-type .euiDataGridRowCell {
+          border-bottom: none;
+        }
+        margin-top: calc(${euiTheme.base * -1.5}px);
+      `}
+    >
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"
-        id={title}
+        id={id}
         containerWidth={containerWidth}
         rows={rows}
         isEsqlMode={isEsqlMode}

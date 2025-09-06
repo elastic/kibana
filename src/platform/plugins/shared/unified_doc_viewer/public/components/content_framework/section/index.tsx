@@ -102,16 +102,16 @@ export function ContentFrameworkSection({
         </EuiFlexGroup>
       }
       extraAction={
-        actions?.length && (
+        actions?.length ? (
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>{' '}
           </EuiFlexGroup>
-        )
+        ) : null
       }
     >
       <>
         <EuiSpacer size="s" />
-        <EuiPanel hasBorder={true} hasShadow={false}>
+        <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
           {children}
         </EuiPanel>
       </>
