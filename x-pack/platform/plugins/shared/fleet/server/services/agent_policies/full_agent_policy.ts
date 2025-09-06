@@ -17,16 +17,17 @@ import {
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
 
-import type {
-  FullAgentPolicy,
-  PackagePolicy,
-  Output,
-  ShipperOutput,
-  FullAgentPolicyOutput,
-  FleetProxy,
-  FleetServerHost,
-  AgentPolicy,
-  TemplateAgentPolicyInput,
+import {
+  type FullAgentPolicy,
+  type PackagePolicy,
+  type Output,
+  type ShipperOutput,
+  type FullAgentPolicyOutput,
+  type FleetProxy,
+  type FleetServerHost,
+  type AgentPolicy,
+  type TemplateAgentPolicyInput,
+  OutputType,
 } from '../../types';
 import type {
   DownloadSource,
@@ -35,6 +36,8 @@ import type {
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
   OTelCollectorConfig,
+  OTelCollectorPipeline,
+  OTelCollectorPipelineID,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
@@ -64,6 +67,7 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { isSiemSignalsRuleType } from '@kbn/alerting-plugin/server/saved_objects/migrations/utils';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -162,7 +166,7 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs);
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
   }
 
   const inputs = agentInputs
@@ -893,23 +897,159 @@ export function getBinarySourceSettings(
 }
 
 // Generate OTel Collector policy
-export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]) {
-  const otelConfig = inputs.flatMap((input) => {
-    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).flatMap((inputStream) => {
+export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[], dataOutput: Output) {
+  const otelConfigs : OTelCollectorConfig[] = inputs.
+    filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE).
+    flatMap((input) => {
+      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((inputStream) => {
+        const suffix = input.id + "." + inputStream.id
         return {
-          ...(inputStream?.receivers ? { receivers: inputStream.receivers } : {}),
-          ...(inputStream?.service ? { service: inputStream.service } : {}),
-          ...(inputStream?.extensions ? { service: inputStream.extensions } : {}),
-          ...(inputStream?.processors ? { service: inputStream.processors } : {}),
-          ...(inputStream?.connectors ? { service: inputStream.connectors } : {}),
-          ...(inputStream?.exporters ? { service: inputStream.exporters } : {}),
+          ...addSuffixToOtelcolComponentsConfig('extensions', inputStream?.extensions, suffix),
+          ...addSuffixToOtelcolComponentsConfig('receivers',  inputStream?.receivers,  suffix),
+          ...addSuffixToOtelcolComponentsConfig('processors', inputStream?.processors, suffix),
+          ...addSuffixToOtelcolComponentsConfig('connectors', inputStream?.connectors, suffix),
+          ...addSuffixToOtelcolComponentsConfig('exporters',  inputStream?.exporters,  suffix),
+          ...(inputStream?.service ? { service: {
+            ...inputStream.service,
+            ...addSuffixToOtelcolComponentsConfig('pipelines',
+                addSuffixToOtelcolPipelinesComponents(inputStream.service.pipelines, suffix),
+                input.id),
+          }} : {}),
         };
       });
 
       return otelInputs;
     }
-  });
+  );
 
-  return otelConfig.length > 0 ? otelConfig[0] : {};
+  if (otelConfigs.length == 0) {
+    return {};
+  }
+
+  const config = mergeOtelcolConfigs(otelConfigs);
+  return attachExporter(config, dataOutput);
 }
+
+function addSuffixToOtelcolComponentsConfig(type: string, components: {[key:string]:any}, suffix: string) {
+  if (!components) {
+    return {}
+  }
+
+  let generated : {[key:string]:any} = {};
+  Object.entries(components).forEach(([id, config]) => {
+    generated[id + "/" + suffix] = { ...config};
+  })
+
+  return { [type]: generated }
+}
+
+function addSuffixToOtelcolPipelinesComponents(pipelines: any, suffix: string) {
+  let result : {[key:string]:any} = {};
+  Object.entries(pipelines as {[key:string]:{[key:string]:string[]}}).forEach(([pipelineID,pipeline]) => {
+    let newPipeline : {[key:string]:string[]} = {};
+    Object.entries(pipeline).forEach(([type,componentIDs]) => {
+      newPipeline[type] = componentIDs.map((id) => id + "/" + suffix);
+    });
+    result[pipelineID] = newPipeline;
+  });
+  return result;
+}
+
+function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {
+  return otelConfigs.reduce((merged, next) => {
+    if (!next) {
+      return merged
+    };
+    const extensions = {
+      ...merged.extensions,
+      ...next.extensions,
+    }
+    const receivers = {
+      ...merged.receivers,
+      ...next.receivers,
+    }
+    const processors = {
+      ...merged.processors,
+      ...next.processors,
+    }
+    const connectors = {
+      ...merged.connectors,
+      ...next.connectors,
+    }
+    const exporters = {
+      ...merged.exporters,
+      ...next.exporters,
+    }
+    return {
+      ...(Object.keys(extensions).length > 0? { extensions: extensions } : {}),
+      ...(Object.keys(receivers).length > 0? { receivers: receivers }: {}),
+      ...(Object.keys(processors).length > 0? { processors: processors }: {}),
+      ...(Object.keys(connectors).length > 0? { connectors: connectors }: {}),
+      ...(Object.keys(exporters).length > 0? { exporters: exporters }: {}),
+      service: {
+        ...merged.service,
+        ...(next.service?.extensions? { extensions: (merged.service?.extensions? merged.service.extensions : []).concat(next.service.extensions) } : {}),
+        pipelines: {
+          ...merged.service?.pipelines,
+          ...next.service?.pipelines,
+        }
+      }
+    };
+  });
+}
+
+function attachExporter(config: OTelCollectorConfig, dataOutput: Output) {
+  const exporter = generateExporter(dataOutput);
+  config.connectors = {
+    ...config.connectors,
+    forward: {},
+  }
+  config.exporters = {
+    ...config.exporters,
+    ...exporter,
+  }
+
+  if (config.service?.pipelines) {
+    let signalTypes = new Set<string>();
+    Object.entries(config.service.pipelines).forEach(([id, pipeline]) => {
+      config.service!.pipelines![id] = {
+        ...pipeline,
+        exporters: [
+          ...pipeline.exporters || [],
+          'forward',
+        ],
+      }
+      signalTypes.add(signalType(id));
+    });
+
+    signalTypes.forEach((id) => {
+      config.service!.pipelines![id] = {
+        receivers: ['forward'],
+        exporters: Object.keys(exporter),
+      }
+    });
+  }
+
+  return config
+}
+
+function generateExporter(dataOutput: Output) {
+  switch (dataOutput.type) {
+  case "elasticsearch":
+  case "remote_elasticsearch":
+    return {
+      "elasticsearch": {
+        "endpoints": dataOutput.hosts,
+        // TODO: Add secrets.
+      },
+    };
+    break;
+  default:
+    throw new Error(`output type ${dataOutput.type} not supported when policy contains OTel inputs`)
+  }
+}
+
+function signalType(id : string) : string {
+  return id.substring(0, id.indexOf('/'));
+}
+
