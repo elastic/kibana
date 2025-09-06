@@ -44,9 +44,7 @@ test.describe(
       await dialog.getByTestId('streamsAppDslModalDaysField').fill('7');
 
       await dialog.getByRole('button', { name: 'Save' }).click();
-      await expect(
-        page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
-      ).toBeVisible();
+      await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
       await pageObjects.streams.closeToasts();
     });
 
@@ -61,9 +59,7 @@ test.describe(
       await dialog.getByTestId('streamsAppDslModalDaysField').fill('7');
 
       await dialog.getByRole('button', { name: 'Save' }).click();
-      await expect(
-        page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
-      ).toBeVisible();
+      await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
       await pageObjects.streams.closeToasts();
 
       // Reset the retention policy
@@ -73,9 +69,7 @@ test.describe(
         .getByRole('dialog')
         .getByRole('button', { name: 'Set to default', exact: true })
         .click();
-      await expect(
-        page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('∞')
-      ).toBeVisible();
+      await expect(page.getByTestId('retention-metric').getByText('∞')).toBeVisible();
       await pageObjects.streams.closeToasts();
     });
   }
