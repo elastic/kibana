@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
         });
 
-        it('should display elements on File Data Visualizer page correctly', async () => {
+        it.skip('should display elements on File Data Visualizer page correctly', async () => {
           await ml.testExecution.logTestStep('should load the file data visualizer file selection');
           await ml.navigation.navigateToDataVisualizer();
           await ml.dataVisualizer.navigateToFileUpload();

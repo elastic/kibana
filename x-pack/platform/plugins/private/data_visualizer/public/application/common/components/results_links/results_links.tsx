@@ -12,14 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ResultLinks } from '../../../../../common/app';
 import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import type { CombinedField } from '../combined_fields/types';
 
 type LinkType = 'file' | 'index';
 
@@ -45,15 +43,13 @@ export interface ResultLink {
 }
 
 interface Props {
-  results: FindFileStructureResponse;
   index: string;
-  dataViewId: string;
+  dataViewId: string | undefined;
   timeFieldName?: string;
   createDataView: boolean;
-  showFilebeatFlyout(): void;
+  showFilebeatFlyout?: () => void;
   getAdditionalLinks?: GetAdditionalLinks;
   resultLinks?: ResultLinks;
-  combinedFields: CombinedField[];
 }
 
 interface GlobalState {
@@ -64,7 +60,6 @@ interface GlobalState {
 const RECHECK_DELAY_MS = 3000;
 
 export const ResultsLinks: FC<Props> = ({
-  results,
   index,
   dataViewId,
   timeFieldName,
@@ -72,7 +67,6 @@ export const ResultsLinks: FC<Props> = ({
   showFilebeatFlyout,
   getAdditionalLinks,
   resultLinks,
-  combinedFields,
 }) => {
   const {
     services: {
@@ -81,7 +75,6 @@ export const ResultsLinks: FC<Props> = ({
       application: { getUrlForApp, capabilities },
     },
   } = useDataVisualizerKibana();
-  const fieldStats = results.field_stats;
   const [duration, setDuration] = useState({
     from: 'now-30m',
     to: 'now',
@@ -117,7 +110,7 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
-    if (Array.isArray(getAdditionalLinks)) {
+    if (Array.isArray(getAdditionalLinks) && dataViewId !== undefined) {
       Promise.all(
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const cardResults = await asyncCardGetter({
@@ -183,22 +176,6 @@ export const ResultsLinks: FC<Props> = ({
     };
     setGlobalState(_globalState);
   }, [duration]);
-
-  useEffect(() => {
-    // Update the global time range from known timeFieldName if stats is available
-    if (
-      fieldStats &&
-      typeof fieldStats === 'object' &&
-      timeFieldName !== undefined &&
-      Object.hasOwn(fieldStats, timeFieldName) &&
-      fieldStats[timeFieldName].earliest !== undefined &&
-      fieldStats[timeFieldName].latest !== undefined
-    ) {
-      setGlobalState({
-        time: { from: fieldStats[timeFieldName].earliest!, to: fieldStats[timeFieldName].latest! },
-      });
-    }
-  }, [timeFieldName, fieldStats]);
 
   async function updateTimeValues(recheck = true) {
     if (timeFieldName !== undefined) {
@@ -270,7 +247,7 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-      {resultLinks?.fileBeat?.enabled === false ? null : (
+      {resultLinks?.fileBeat?.enabled !== false && showFilebeatFlyout !== undefined ? (
         <EuiFlexItem>
           <EuiCard
             hasBorder
@@ -286,7 +263,7 @@ export const ResultsLinks: FC<Props> = ({
             onClick={showFilebeatFlyout}
           />
         </EuiFlexItem>
-      )}
+      ) : null}
 
       {playgroundLink ? (
         <EuiFlexItem>

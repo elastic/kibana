@@ -23,6 +23,7 @@ export enum CLASH_ERROR_TYPE {
   NONE,
   ERROR,
   WARNING,
+  INFO,
 }
 
 export interface MappingClash {
@@ -275,6 +276,13 @@ export function getMappingClashInfo(
         existingIndexChecks?.existingFields.length > 0 &&
         fileClash.missingFields.length > (existingIndexChecks.existingFields.length - 1) / 2
       ) {
+        // correct these comments!!!!!!!!!!!!!!!!!
+        fileClash.clash = CLASH_ERROR_TYPE.WARNING;
+      } else if (
+        (fileClash.missingFields && fileClash.missingFields.length > 0) ||
+        (fileClash.newFields && fileClash.newFields.length > 0)
+      ) {
+        // correct these comments!!!!!!!!!!!!!!!!!
         fileClash.clash = CLASH_ERROR_TYPE.WARNING;
       }
     }
