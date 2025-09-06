@@ -59,7 +59,7 @@ describe('RasterTileLayer', () => {
 
     const layer: ILayer = new RasterTileLayer({
       source,
-      layerDescriptor: { id: 'layerid', sourceDescriptor },
+      layerDescriptor: RasterTileLayer.createDescriptor({ id: 'layerid', sourceDescriptor }),
     });
     expect(await source.getDisplayName()).toEqual(await layer.getDisplayName());
   });
@@ -68,7 +68,11 @@ describe('RasterTileLayer', () => {
     const source = new MockTileSource(sourceDescriptor);
     const layer: ILayer = new RasterTileLayer({
       source,
-      layerDescriptor: { id: 'layerid', sourceDescriptor, label: 'custom' },
+      layerDescriptor: RasterTileLayer.createDescriptor({
+        id: 'layerid',
+        sourceDescriptor,
+        label: 'custom',
+      }),
     });
     expect('custom').toEqual(await layer.getDisplayName());
   });
