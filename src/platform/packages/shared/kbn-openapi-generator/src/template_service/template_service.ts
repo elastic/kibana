@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { resolve } from 'path';
 import type { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
