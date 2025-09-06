@@ -85,12 +85,13 @@ export const AccessModeContainer = ({
         accessControl,
         createdBy,
         uid: user?.uid,
+        contentTypeId: entityName,
       });
       setCanManageAccessControl(canManage);
     };
 
     getCanManage();
-  }, [accessControl, createdBy, accessControlClient, getCurrentUser]);
+  }, [accessControl, createdBy, accessControlClient, entityName, getCurrentUser]);
 
   const selectId = useGeneratedHtmlId({ prefix: 'accessControlSelect' });
 

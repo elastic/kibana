@@ -16,6 +16,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+import { CONTENT_ID } from '../../../common/content_management';
 import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
 import type { DashboardSearchOut } from '../../../server/content_management';
@@ -227,7 +228,7 @@ export const useDashboardListingTable = ({
 
       const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
         coreServices.userProfile.getCurrent(),
-        accessControlClient.checkGlobalPrivilege(),
+        accessControlClient.checkGlobalPrivilege(CONTENT_ID),
       ]);
 
       const uid = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;

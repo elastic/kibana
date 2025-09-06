@@ -34,7 +34,7 @@ import {
   type AccessControlClient,
 } from '@kbn/content-management-access-control-public';
 
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
+import { CONTENT_ID } from '../../../../common/content_management';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import {
@@ -346,7 +346,7 @@ export function ShowShareModal({
           getCurrentUser={coreServices.userProfile.getCurrent}
           onChangeAccessMode={handleChangeAccessMode}
           accessControlClient={accessControlClient}
-          entityName={DASHBOARD_CONTENT_ID}
+          entityName={CONTENT_ID}
         />
       ),
     },

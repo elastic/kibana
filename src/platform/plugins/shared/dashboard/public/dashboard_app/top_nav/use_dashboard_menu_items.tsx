@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { CONTENT_ID } from '../../../common/content_management';
 import { getAccessControlClient } from '../access_control/get_access_control_client';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -62,6 +63,7 @@ export const useDashboardMenuItems = ({
         accessControl,
         createdBy: dashboardApi.createdBy,
         uid: user?.uid,
+        contentTypeId: CONTENT_ID,
       });
       setCanManageAccessControl(canManage);
     };

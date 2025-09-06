@@ -10,6 +10,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type {
+  CanManageContentControlParameters,
   ChangeAccesModeParameters,
   ChangeAccessModeResponse,
   CheckGlobalPrivilegeResponse,
@@ -22,6 +23,7 @@ export interface AccessControlClientPublic {
     objects,
     accessMode,
   }: ChangeAccesModeParameters): Promise<ChangeAccessModeResponse>;
+  canManageAccessControl(params: CanManageContentControlParameters): Promise<boolean>;
   checkUserAccessControl(params: CheckUserAccessControlParameters): boolean;
   isInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean;
 }
@@ -30,16 +32,12 @@ export class AccessControlClient implements AccessControlClientPublic {
   constructor(
     private readonly deps: {
       http: HttpStart;
-      contentTypeId: string;
     }
   ) {}
 
-  async checkGlobalPrivilege(): Promise<CheckGlobalPrivilegeResponse> {
+  async checkGlobalPrivilege(contentTypeId: string): Promise<CheckGlobalPrivilegeResponse> {
     const response = await this.deps.http.get<CheckGlobalPrivilegeResponse>(
-      `/internal/access_control/check_global_access_control_privilege`,
-      {
-        query: { contentTypeId: this.deps.contentTypeId },
-      }
+      `/internal/access_control/global_access/${contentTypeId}`
     );
 
     return {
@@ -61,6 +59,21 @@ export class AccessControlClient implements AccessControlClientPublic {
     return {
       result,
     };
+  }
+
+  async canManageAccessControl({
+    accessControl,
+    createdBy,
+    uid,
+    contentTypeId,
+  }: CanManageContentControlParameters): Promise<boolean> {
+    const { isGloballyAuthorized } = await this.checkGlobalPrivilege(contentTypeId);
+    const canManage = this.checkUserAccessControl({
+      accessControl,
+      createdBy,
+      uid,
+    });
+    return isGloballyAuthorized || canManage;
   }
 
   checkUserAccessControl({
@@ -89,19 +102,5 @@ export class AccessControlClient implements AccessControlClientPublic {
       accessControl.accessMode === undefined ||
       accessControl.accessMode === 'default'
     );
-  }
-
-  async canManageAccessControl({
-    accessControl,
-    createdBy,
-    uid,
-  }: CheckUserAccessControlParameters) {
-    const { isGloballyAuthorized } = await this.checkGlobalPrivilege();
-    const canManage = this.checkUserAccessControl({
-      accessControl,
-      createdBy,
-      uid,
-    });
-    return isGloballyAuthorized || canManage;
   }
 }

@@ -28,3 +28,7 @@ export interface CheckUserAccessControlParameters {
   createdBy?: string;
   uid?: string;
 }
+
+export interface CanManageContentControlParameters extends CheckUserAccessControlParameters {
+  contentTypeId: string;
+}

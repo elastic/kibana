@@ -19,10 +19,10 @@ export const registerAccessControl = async ({
 
   router.get(
     {
-      path: '/internal/access_control/check_global_access_control_privilege',
+      path: '/internal/access_control/global_access/{contentTypeId}',
       validate: {
         request: {
-          query: schema.object({
+          params: schema.object({
             contentTypeId: schema.string(),
           }),
         },
@@ -44,7 +44,7 @@ export const registerAccessControl = async ({
     },
     async (_ctx, request, response) => {
       const { security } = await getStartServices();
-      const { contentTypeId } = request.query;
+      const contentTypeId = request.params.contentTypeId;
 
       const authorization = security?.authz;
 

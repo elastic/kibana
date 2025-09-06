@@ -53,7 +53,6 @@ exports[`renders DashboardSaveModal 1`] = `
           accessControlClient={
             AccessControlClient {
               "deps": Object {
-                "contentTypeId": "dashboard",
                 "http": Object {
                   "addLoadingCountSource": [MockFunction],
                   "anonymousPaths": Object {

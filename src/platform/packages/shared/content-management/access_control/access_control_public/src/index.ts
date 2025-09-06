@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AccessControlClient } from './access_control_client';
+export { AccessControlClient, type AccessControlClientPublic } from './access_control_client';
 export { AccessModeContainer } from './components';
 export type {
   CheckGlobalPrivilegeResponse,
   ChangeAccesModeParameters,
   ChangeAccessModeResponse,
   CheckUserAccessControlParameters,
+  CanManageContentControlParameters,
 } from './types';

@@ -8,7 +8,6 @@
  */
 
 import { AccessControlClient } from '@kbn/content-management-access-control-public';
-import { CONTENT_ID } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 
 let accessControlClient: AccessControlClient | null = null;
@@ -19,7 +18,6 @@ export const getAccessControlClient = () => {
   }
   const client = new AccessControlClient({
     http: coreServices.http,
-    contentTypeId: CONTENT_ID,
   });
   accessControlClient = client;
   return client;
