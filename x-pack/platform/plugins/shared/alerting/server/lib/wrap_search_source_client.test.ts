@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -61,7 +61,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await searchSourceClient.createEmpty();
-    await wrappedSearchSource.fetch();
+    await lastValueFrom(wrappedSearchSource.fetch$());
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       abortSignal: abortController.signal,
@@ -80,7 +80,7 @@ describe('wrapSearchSourceClient', () => {
       requestTimeout: 5000,
     });
     const wrappedSearchSource = await searchSourceClient.createEmpty();
-    await wrappedSearchSource.fetch();
+    await lastValueFrom(wrappedSearchSource.fetch$());
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       abortSignal: abortController.signal,
@@ -105,7 +105,9 @@ describe('wrapSearchSourceClient', () => {
       requestTimeout: 5000,
     });
     const wrappedSearchSource = await searchSourceClient.create();
-    await wrappedSearchSource.fetch({ isStored: true, transport: { requestTimeout: 10000 } });
+    await lastValueFrom(
+      wrappedSearchSource.fetch$({ isStored: true, transport: { requestTimeout: 10000 } })
+    );
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       isStored: true,
@@ -128,9 +130,9 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await searchSourceClient.create();
-    await wrappedSearchSource.fetch();
-    await wrappedSearchSource.fetch();
-    await wrappedSearchSource.fetch();
+    await lastValueFrom(wrappedSearchSource.fetch$());
+    await lastValueFrom(wrappedSearchSource.fetch$());
+    await lastValueFrom(wrappedSearchSource.fetch$());
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       abortSignal: abortController.signal,
@@ -159,7 +161,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await searchSourceClient.create();
-    const fetch = wrappedSearchSource.fetch();
+    const fetch = lastValueFrom(wrappedSearchSource.fetch$());
 
     await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot('"something went wrong!"');
   });
@@ -179,7 +181,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await searchSourceClient.create();
-    const fetch = wrappedSearchSource.fetch();
+    const fetch = lastValueFrom(wrappedSearchSource.fetch$());
 
     await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Search has been aborted due to cancelled execution"'

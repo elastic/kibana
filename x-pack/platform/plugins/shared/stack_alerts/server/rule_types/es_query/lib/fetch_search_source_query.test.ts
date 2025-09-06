@@ -35,6 +35,7 @@ import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
+import { of } from 'rxjs';
 import { updateFilterReferences } from '@kbn/es-query';
 
 const createDataView = () => {
@@ -478,8 +479,8 @@ describe('fetchSearchSourceQuery', () => {
       (searchSourceInstanceMock.createChild as jest.Mock).mockImplementationOnce(
         jest.fn().mockReturnValue(searchSourceInstanceMock)
       );
-      (searchSourceInstanceMock.fetch as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(response)
+      (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(of({ rawResponse: response }))
       );
 
       // const searchSourceInstance = createSearchSourceMock({}, response);
@@ -590,8 +591,8 @@ describe('fetchSearchSourceQuery', () => {
       (searchSourceInstanceMock.createChild as jest.Mock).mockImplementationOnce(
         jest.fn().mockReturnValue(searchSourceInstanceMock)
       );
-      (searchSourceInstanceMock.fetch as jest.Mock).mockImplementationOnce(
-        jest.fn().mockReturnValue(response)
+      (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(of({ rawResponse: response }))
       );
 
       // const searchSourceInstance = createSearchSourceMock({}, response);

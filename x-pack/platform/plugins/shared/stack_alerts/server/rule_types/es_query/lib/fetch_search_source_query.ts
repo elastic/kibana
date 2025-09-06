@@ -28,6 +28,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { lastValueFrom } from 'rxjs';
 import type { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 import { checkForShardFailures } from '../util';
@@ -91,11 +92,11 @@ export async function fetchSearchSourceQuery({
     () => `search source query rule (${ruleId}) query: ${JSON.stringify(searchRequestBody)}`
   );
 
-  const searchResult = await searchSource.fetch();
+  const searchResult = await lastValueFrom(searchSource.fetch$());
 
   // result against CCS indices will return success response with errors nested within
   // the _shards or _clusters field; look for these errors and bubble them up
-  const anyShardFailures = checkForShardFailures(searchResult);
+  const anyShardFailures = checkForShardFailures(searchResult.rawResponse);
   if (anyShardFailures && ruleResultService) {
     ruleResultService.addLastRunWarning(anyShardFailures);
     ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
@@ -113,12 +114,12 @@ export async function fetchSearchSourceQuery({
   );
   return {
     link,
-    numMatches: Number(searchResult.hits.total),
-    searchResult,
+    numMatches: Number(searchResult.rawResponse.hits.total),
+    searchResult: searchResult.rawResponse,
     parsedResults: parseAggregationResults({
       isCountAgg,
       isGroupAgg,
-      esResult: searchResult,
+      esResult: searchResult.rawResponse,
       sourceFieldsParams: params.sourceFields,
       termField: params.termField,
     }),
