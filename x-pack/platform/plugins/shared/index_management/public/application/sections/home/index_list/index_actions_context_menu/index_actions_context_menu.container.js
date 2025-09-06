@@ -6,6 +6,7 @@
  */
 
 import { connect } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import {
   clearCacheIndices,
@@ -20,6 +21,8 @@ import {
 } from '../../../../store/actions';
 
 import { getIndexStatusByIndexName, getIndicesByName } from '../../../../store/selectors';
+import { convertToLookupIndex as convertToLookupIndexRequest } from '../../../../services';
+import { notificationService } from '../../../../services/notification';
 
 const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
@@ -63,6 +66,22 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     performExtensionAction: (requestMethod, successMessage) => {
       dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
+    },
+    convertToLookupIndex: async (lookupIndexName) => {
+      try {
+        await convertToLookupIndexRequest(indexNames[0], lookupIndexName);
+        notificationService.showSuccessToast(
+          i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastTitle', {
+            defaultMessage: 'Lookup index created',
+          }),
+          i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastMessage', {
+            defaultMessage: 'The {lookupIndexName} has been created.',
+            values: { lookupIndexName },
+          })
+        );
+      } catch (error) {
+        notificationService.showDangerToast(error.message);
+      }
     },
   };
 };
