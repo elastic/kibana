@@ -76,9 +76,6 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
-  // When true, the Assistant Sharing feature is enabled
-  // keep type loose to avoid updating mocks as temp property
-  isAssistantSharingEnabled?: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {
