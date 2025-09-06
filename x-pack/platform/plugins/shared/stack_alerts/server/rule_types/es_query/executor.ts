@@ -124,7 +124,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           scopedClusterClient,
           logger,
           ruleResultService,
-          getAsyncSearchClient,
         },
         dateStart,
         dateEnd,
