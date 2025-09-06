@@ -246,6 +246,14 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  addToCase: {
+    label: i18n.translate('dashboard.topNav.addToCaseButtonAriaLabel', {
+      defaultMessage: 'Add to case',
+    }),
+    description: i18n.translate('dashboard.topNav.addToCaseConfigDescription', {
+      defaultMessage: 'Add dashboard to case',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>
