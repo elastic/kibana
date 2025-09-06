@@ -101,3 +101,11 @@ export interface Privilege {
   is_authenticated: boolean;
   has_encryption_key: boolean;
 }
+
+export interface AlertSuppressionInfoResponse {
+  alerts: {
+    [alertId: string]: {
+      has_active_suppression_window: boolean;
+    };
+  };
+}

@@ -204,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
    */
 
-  continueSuppressionWindowAdvancedSettingEnabled: false,
+  continueSuppressionWindowAdvancedSettingEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters

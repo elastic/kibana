@@ -100,11 +100,11 @@ export const useBulkAlertActionItems = ({
         refresh
       ) => {
         try {
-          if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+          let ids: string[] | undefined = items.map((item) => item._id);
+          if (status === 'closed' && !(await promptAlertCloseConfirmation({ alertIds: ids }))) {
             return;
           }
 
-          let ids: string[] | undefined = items.map((item) => item._id);
           let query: Record<string, unknown> | undefined;
 
           if (isSelectAllChecked) {
