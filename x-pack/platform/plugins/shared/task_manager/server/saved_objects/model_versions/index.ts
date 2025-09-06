@@ -7,3 +7,5 @@
 
 export { taskModelVersions } from './task_model_versions';
 export { backgroundTaskNodeModelVersions } from './background_task_node_model_versions';
+export { taskResultModelVersions } from './task_result';
+export { taskPollRequestModelVersions } from './task_poll_request';
