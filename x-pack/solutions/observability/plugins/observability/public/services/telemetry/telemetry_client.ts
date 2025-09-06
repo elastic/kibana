@@ -24,9 +24,23 @@ export class TelemetryClient implements ITelemetryClient {
     });
   }
 
-  reportRelatedAlertAddedToCase(newCaseCreated: boolean): void {
-    this.analytics.reportEvent(TelemetryEventTypes.RELATED_ALERT_ADDED_TO_CASE, {
+  reportAlertAddedToCase(newCaseCreated: boolean, from: string, ruleTypeId: string): void {
+    this.analytics.reportEvent(TelemetryEventTypes.ALERT_ADDED_TO_CASE, {
       new_case_created: newCaseCreated,
+      from,
+      rule_type_id: ruleTypeId,
+    });
+  }
+
+  reportLinkedDashboardViewed(ruleTypeId: string): void {
+    this.analytics.reportEvent(TelemetryEventTypes.LINKED_DASHBOARD_VIEW, {
+      rule_type_id: ruleTypeId,
+    });
+  }
+
+  reportSuggestedDashboardAdded(ruleTypeId: string): void {
+    this.analytics.reportEvent(TelemetryEventTypes.SUGGESTED_DASHBOARD_ADDED, {
+      rule_type_id: ruleTypeId,
     });
   }
 }
