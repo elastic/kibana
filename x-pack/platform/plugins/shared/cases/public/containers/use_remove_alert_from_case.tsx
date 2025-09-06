@@ -16,7 +16,7 @@ import { useGetCase } from './use_get_case';
 import type { AttachmentUI, AlertAttachmentUI } from './types';
 
 interface MutationArgs {
-  alertId: string;
+  alertIds: string[];
   successToasterTitle: string;
 }
 
@@ -27,45 +27,15 @@ export const useRemoveAlertFromCase = (caseId: string) => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const { data: caseData } = useGetCase(caseId);
-  const attachments = caseData?.case?.comments ?? [];
+  const attachments = (caseData?.case?.comments as AlertAttachmentUI[]) ?? [];
 
   return useMutation(
-    ({ alertId }: MutationArgs) => {
-      const alertAttachment = attachments.find((attachment) => {
-        if ('alertId' in attachment && isAlertAttachment(attachment)) {
-          return attachment.alertId.includes(alertId);
-        }
-        return false;
-      });
-      if (!alertAttachment || isAlertAttachment(alertAttachment) === false) {
-        throw new Error('Alert attachment not found');
-      }
-
+    ({ alertIds }: MutationArgs) => {
       return removeAlertFromComment({
         caseId,
-        alertId,
-        alertAttachment: {
-          ...alertAttachment,
-          created_at: alertAttachment.createdAt,
-          created_by: {
-            ...alertAttachment.createdBy,
-            full_name: alertAttachment.createdBy.fullName,
-          },
-          updated_at: alertAttachment.updatedAt,
-          updated_by: alertAttachment.updatedBy
-            ? {
-                ...alertAttachment.updatedBy,
-                full_name: alertAttachment.updatedBy.fullName,
-              }
-            : null,
-          pushed_at: alertAttachment.pushedAt ?? null,
-          pushed_by: alertAttachment.pushedBy
-            ? {
-                ...alertAttachment.pushedBy,
-                full_name: alertAttachment.pushedBy.fullName,
-              }
-            : null,
-        },
+        alertIds,
+        caseAttachments: attachments,
+        signal: new AbortController().signal,
       });
     },
     {

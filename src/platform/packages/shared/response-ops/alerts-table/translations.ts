@@ -246,6 +246,13 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.removeFromCase',
+  {
+    defaultMessage: 'Remove from case',
+  }
+);
+
 export const ADD_TO_NEW_CASE = i18n.translate(
   'xpack.triggersActionsUI.alerts.table.actions.addToNewCase',
   {

@@ -28,6 +28,7 @@ export function CasesAlertsTable(props: CaseViewAlertsTableProps) {
   return (
     <ObservabilityAlertsTable
       {...props}
+      caseData={props.caseData}
       renderActionsCell={(actionProps) => (
         <AlertActionsComponent caseData={props.caseData} {...actionProps} />
       )}

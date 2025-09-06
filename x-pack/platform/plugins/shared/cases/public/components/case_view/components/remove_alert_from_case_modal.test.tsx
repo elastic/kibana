@@ -36,7 +36,7 @@ describe('RemoveAlertFromCaseModal', () => {
         onSuccess={onSuccess}
       />
     );
-    expect(screen.getByText(/Remove alert from case/i)).toBeInTheDocument();
+    expect(screen.getByText(/Remove 2 alerts from case/i)).toBeInTheDocument();
   });
 
   it('calls onClose when cancel button is clicked', () => {
@@ -64,7 +64,7 @@ describe('RemoveAlertFromCaseModal', () => {
       />
     );
     fireEvent.click(screen.getByText('Remove'));
-    expect(mutateAsync).toHaveBeenCalledTimes(2);
+    expect(mutateAsync).toHaveBeenCalledTimes(1);
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalled();
     });

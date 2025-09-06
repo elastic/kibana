@@ -14,7 +14,12 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
+import {
+  useBulkActions,
+  useBulkRemoveFromCaseActions,
+  useBulkAddToCaseActions,
+  useBulkUntrackActions,
+} from './use_bulk_actions';
 import { createCasesServiceMock } from '../mocks/cases.mock';
 import { BulkActionsVerbs, type PublicAlertsDataGridProps } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
@@ -76,6 +81,13 @@ describe('bulk action hooks', () => {
       open: mockOpenExistingCase,
     }
   );
+
+  const mockRemoveFromCase = mockCasesService.hooks.useRemoveAlertFromCaseModal.mockReturnValue({
+    open: jest.fn(),
+    close: jest.fn(),
+    onSuccess: jest.fn(),
+    onClose: jest.fn(),
+  });
 
   describe('useBulkAddToCaseActions', () => {
     beforeEach(() => {
@@ -404,6 +416,156 @@ describe('bulk action hooks', () => {
       const { result } = renderHook(
         () =>
           useBulkAddToCaseActions({
+            casesConfig,
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+  });
+
+  describe('useBulkRemoveFromCaseActions', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should refetch when calling onSuccess of useBulkRemoveFromCaseActions', async () => {
+      renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
+            casesConfig,
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      mockRemoveFromCase.mock.calls[0][0]!.onSuccess();
+      expect(refresh).toHaveBeenCalled();
+    });
+
+    it('should useRemoveAlertFromCase with correct toaster params', async () => {
+      renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
+            casesConfig,
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(mockRemoveFromCase).toHaveBeenCalledWith({
+        onSuccess: expect.anything(),
+      });
+    });
+
+    it('should not show the bulk actions when the user does not have write access', async () => {
+      mockCasesService.helpers.canUseCases = jest
+        .fn()
+        .mockReturnValue({ create: false, read: true });
+
+      const { result } = renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
+            casesConfig,
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+
+    it('should not show the bulk actions when the user does not have read access', async () => {
+      mockCasesService.helpers.canUseCases = jest
+        .fn()
+        .mockReturnValue({ create: true, read: false });
+
+      const { result } = renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
+            casesConfig,
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+
+    it('should call canUseCases with an empty owner when casesConfig is missing', async () => {
+      renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(mockCasesService.helpers.canUseCases).toHaveBeenCalledWith([]);
+    });
+
+    it('should not show the bulk actions when the cases context is missing', async () => {
+      mockCasesService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+
+      const { result } = renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+
+    it('should not show the bulk actions when the case service is not available', async () => {
+      const { result } = renderHook(
+        () =>
+          useBulkRemoveFromCaseActions({
             casesConfig,
             refresh,
             clearSelection,

@@ -17,49 +17,48 @@ export interface RemoveAlertModalProps {
   onSuccess: () => void;
 }
 
-const RemoveAlertFromCaseModal: React.FC<RemoveAlertModalProps> = ({
-  caseId,
-  alertId,
-  onClose,
-  onSuccess,
-}) => {
-  const { mutateAsync: removeAlertFromComment } = useRemoveAlertFromCase(caseId);
+const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
+  ({ caseId, alertId, onClose, onSuccess }) => {
+    const { mutateAsync: removeAlertFromComment } = useRemoveAlertFromCase(caseId);
 
-  const handleRemoveAlert = useCallback(async () => {
-    Promise.allSettled(
-      alertId.map((id) => {
-        const removalSuccessToast = i18n.translate(
-          'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
-          { defaultMessage: 'Alert {alertId} removed from case', values: { alertId: id } }
-        );
-        return removeAlertFromComment({
-          alertId: id,
-          successToasterTitle: removalSuccessToast,
-        });
-      })
-    ).then(() => {
-      onSuccess();
-    });
+    const removalSuccessToast = i18n.translate(
+      'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
+      {
+        defaultMessage: '{alertCount, plural, one {Alert} other {# alerts}} removed from case',
+        values: {
+          alertCount: alertId.length,
+        },
+      }
+    );
+    const handleRemoveAlert = useCallback(() => {
+      removeAlertFromComment({
+        alertIds: alertId,
+        successToasterTitle: removalSuccessToast,
+      }).then(() => onSuccess());
 
-    onClose();
-  }, [alertId, onClose, onSuccess, removeAlertFromComment]);
+      onClose();
+    }, [alertId, onClose, onSuccess, removeAlertFromComment, removalSuccessToast]);
 
-  return (
-    <DeleteAttachmentConfirmationModal
-      onCancel={onClose}
-      onConfirm={handleRemoveAlert}
-      confirmButtonText={i18n.translate(
-        'xpack.cases.caseView.alerts.actions.removeFromCaseConfirm',
-        {
-          defaultMessage: 'Remove',
-        }
-      )}
-      title={i18n.translate('xpack.cases.caseView.alerts.actions.removeFromCaseTitle', {
-        defaultMessage: 'Remove alert from case',
-      })}
-    />
-  );
-};
+    return (
+      <DeleteAttachmentConfirmationModal
+        onCancel={onClose}
+        onConfirm={handleRemoveAlert}
+        confirmButtonText={i18n.translate(
+          'xpack.cases.caseView.alerts.actions.removeFromCaseConfirm',
+          {
+            defaultMessage: 'Remove',
+          }
+        )}
+        title={i18n.translate('xpack.cases.caseView.alerts.actions.removeFromCaseTitle', {
+          defaultMessage: 'Remove {alertCount, plural, one {alert} other {# alerts}} from case',
+          values: {
+            alertCount: alertId.length,
+          },
+        })}
+      />
+    );
+  }
+);
 
 RemoveAlertFromCaseModal.displayName = 'RemoveAlertFromCaseModal';
 // eslint-disable-next-line import/no-default-export
