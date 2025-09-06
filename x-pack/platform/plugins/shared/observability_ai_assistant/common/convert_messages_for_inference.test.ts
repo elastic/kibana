@@ -9,13 +9,17 @@ import type { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
 import { collapseInternalToolCalls } from './convert_messages_for_inference';
 import type { Message } from './types';
 import { MessageRole } from './types';
+import type { Logger } from '@kbn/logging';
+
+// const availableToolNames = ['get_dataset_info', 'query', 'execute_query', 'visualize_query'];
+const availableToolNames = ['get_dataset_info', 'query'];
 
 const mockLogger = {
   error: jest.fn(),
   debug: jest.fn(),
   warn: jest.fn(),
   trace: jest.fn(),
-};
+} as any as Logger;
 
 const userMessage: (msg: string) => Message = (msg: string) => ({
   '@timestamp': '2025-07-02T10:00:00Z',
@@ -170,7 +174,7 @@ describe('collapseInternalToolCalls', () => {
         message: { role: MessageRole.Assistant, content: 'hi there' },
       },
     ];
-    const collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
+    const collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
     expect(collapsedMessages).toEqual(messages);
   });
 
@@ -182,7 +186,7 @@ describe('collapseInternalToolCalls', () => {
       },
       ...queryTool,
     ];
-    const collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
+    const collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
     expect(collapsedMessages).toEqual(messages);
   });
 
@@ -198,7 +202,7 @@ describe('collapseInternalToolCalls', () => {
         assistantMessage('Here is the result'),
         userMessage('What about the unique IPs?'),
       ];
-      collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
+      collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
     });
 
     it('should have the right messages after collapsing', () => {
@@ -297,7 +301,7 @@ describe('collapseInternalToolCalls', () => {
         userMessage('What about the unique IPs?'),
       ];
 
-      collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
+      collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
     });
 
     it('should collapse "visualize_query" into the "query" response', () => {
@@ -343,7 +347,7 @@ describe('collapseInternalToolCalls', () => {
           },
         },
       ];
-      collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
+      collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
     });
 
     it('should stop collapsing and preserve the unrelated tool call', () => {
@@ -358,6 +362,49 @@ describe('collapseInternalToolCalls', () => {
     it('should retain the unrelated tool call as the last message', () => {
       expect(collapsedMessages[2].message.function_call?.name).toEqual('some_other_function');
     });
+  });
+
+  it('should convert correctly', () => {
+    const messagesNew = [
+      userMessage('Please generate some esql'),
+      ...queryTool,
+      assistantMessage(`Here you go!`),
+      userMessage('Display results for the generated ESQL query'),
+      ...executeQueryTool,
+    ];
+
+    const formatMessages = (msg: Message) => ({
+      role: msg.message.role,
+      tool: msg.message.function_call?.name
+        ? `${msg.message.function_call.name} (request)`
+        : msg.message.name
+        ? `${msg.message.name} (response)`
+        : undefined,
+    });
+
+    expect(messagesNew.map(formatMessages)).toEqual([
+      { role: 'user', tool: undefined },
+      { role: 'assistant', tool: 'query (request)' },
+      { role: 'user', tool: 'query (response)' },
+      { role: 'assistant', tool: undefined },
+      { role: 'user', tool: undefined },
+      { role: 'assistant', tool: 'execute_query (request)' },
+      { role: 'user', tool: 'execute_query (response)' },
+    ]);
+
+    // after collapsing
+    const collapsedMessages = collapseInternalToolCalls(
+      messagesNew,
+      availableToolNames,
+      mockLogger
+    );
+    expect(collapsedMessages.map(formatMessages)).toEqual([
+      { role: 'user', tool: undefined },
+      { role: 'assistant', tool: 'query (request)' },
+      { role: 'user', tool: 'query (response)' },
+      { role: 'assistant', tool: undefined },
+      { role: 'user', tool: undefined },
+    ]);
   });
 });
 

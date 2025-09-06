@@ -13,7 +13,7 @@ import { takeWhile } from 'lodash';
 import type { Message } from '.';
 import { MessageRole } from '.';
 
-function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
+export function safeJsonParse(jsonString: string | undefined) {
   try {
     return JSON.parse(jsonString?.trim() ?? '{}');
   } catch (error) {
@@ -25,49 +25,85 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
   }
 }
 
-export function collapseInternalToolCalls(messages: Message[], logger: Pick<Logger, 'error'>) {
-  const collapsed: Message[] = [];
+export function collapseInternalToolCalls(
+  messages: Message[],
+  availableToolNames: string[],
+  logger: Logger
+) {
+  const collapsedMessages: Message[] = [];
 
   for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
+    const currentMessage = messages[i];
 
-    if (message.message.role === MessageRole.User && message.message.name === 'query') {
-      const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) => {
-        const name = msg.message.name || msg.message.function_call?.name;
-        return name && ['query', 'visualize_query', 'execute_query'].includes(name);
-      });
+    const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) => {
+      const toolCall =
+        msg.message.role === MessageRole.Assistant &&
+        msg.message.function_call?.name &&
+        !availableToolNames.includes(msg.message.function_call?.name);
 
-      if (messagesToCollapse.length) {
-        const content = JSON.parse(message.message.content!);
-        collapsed.push({
-          ...message,
-          message: {
-            ...message.message,
-            content: JSON.stringify({
-              ...content,
-              steps: convertMessagesForInference(messagesToCollapse, logger),
-            }),
-          },
-        });
+      const toolResult =
+        msg.message.role === MessageRole.User &&
+        msg.message.name &&
+        !availableToolNames.includes(msg.message.name);
 
-        i += messagesToCollapse.length;
-        continue;
+      return toolCall || toolResult;
+    });
+
+    if (messagesToCollapse.length) {
+      if (currentMessage?.message.role === MessageRole.User) {
+        const isToolResult = !!currentMessage.message.name;
+        if (isToolResult) {
+          const content = JSON.parse(currentMessage.message.content!);
+          collapsedMessages.push({
+            ...currentMessage,
+            message: {
+              ...currentMessage.message,
+              content: JSON.stringify({
+                ...content,
+                steps: convertMessagesForInference(messagesToCollapse, availableToolNames, logger),
+              }),
+            },
+          });
+        } else {
+          const content = currentMessage.message.content!;
+          collapsedMessages.push({
+            ...currentMessage,
+            message: {
+              ...currentMessage.message,
+              content: `${content} <steps>${JSON.stringify(
+                convertMessagesForInference(messagesToCollapse, availableToolNames, logger)
+              )}</steps>`,
+            },
+          });
+        }
       }
-    }
 
-    collapsed.push(message);
+      // skip the collapsed messages
+      i += messagesToCollapse.length;
+    } else {
+      collapsedMessages.push(currentMessage);
+    }
   }
 
-  return collapsed;
+  return collapsedMessages;
 }
 
 export function convertMessagesForInference(
   messages: Message[],
-  logger: Pick<Logger, 'error'>
+  availableToolNames: string[],
+  logger: Logger
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
-  const collapsedMessages: Message[] = collapseInternalToolCalls(messages, logger);
+  logger.debug(
+    `Converting ${messages.length} messages for inference: ${JSON.stringify(messages, null, 2)}`
+  );
+
+  const collapsedMessages: Message[] = collapseInternalToolCalls(
+    messages,
+    availableToolNames,
+    logger
+  );
 
   collapsedMessages.forEach((message, idx) => {
     if (message.message.role === MessageRole.Assistant) {
@@ -80,7 +116,7 @@ export function convertMessagesForInference(
                 {
                   function: {
                     name: message.message.function_call.name,
-                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
+                    arguments: safeJsonParse(message.message.function_call.arguments),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },

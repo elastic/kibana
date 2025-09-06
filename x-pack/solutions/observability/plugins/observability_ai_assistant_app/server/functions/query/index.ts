@@ -103,18 +103,22 @@ export function registerQueryFunction({
 
       const actions = functions.getActions();
 
-      const inferenceMessages = convertMessagesForInference(
-        // remove system message and query function request
-        messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
-        resources.logger
-      );
-
       const availableToolDefinitions = Object.fromEntries(
         [...actions, ...esqlFunctions].map((fn) => [
           fn.name,
           { description: fn.description, schema: fn.parameters } as ToolDefinition,
         ])
       );
+
+      const toolNames = Object.keys(availableToolDefinitions);
+
+      const inferenceMessages = convertMessagesForInference(
+        // remove system message and query function request
+        messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
+        toolNames,
+        resources.logger
+      );
+
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
