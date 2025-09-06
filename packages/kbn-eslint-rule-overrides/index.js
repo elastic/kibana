@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { minimatch } from 'minimatch';
+const { createRuleOverrides } = require('./src/create_rule_overrides');
 
-export function matchesAnyGlob(path, globs) {
-  return globs.some((pattern) =>
-    minimatch(path, pattern, {
-      dot: true,
-    })
-  );
-}
+module.exports = {
+  createRuleOverrides,
+};
