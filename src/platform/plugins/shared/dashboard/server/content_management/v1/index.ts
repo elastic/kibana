@@ -8,18 +8,21 @@
  */
 
 export type {
+  FindDashboardsByIdResponseAttributes,
   GridData,
   DashboardPanel,
   DashboardSection,
   DashboardAttributes,
   DashboardItem,
   DashboardGetIn,
+  DashboardAPIGetOut,
   DashboardGetOut,
   DashboardCreateIn,
   DashboardCreateOut,
   DashboardCreateOptions,
   DashboardSearchIn,
   DashboardSearchOut,
+  DashboardSearchAPIResult,
   DashboardSearchOptions,
   DashboardUpdateIn,
   DashboardUpdateOut,
@@ -31,9 +34,7 @@ export type {
 export {
   serviceDefinition,
   dashboardAttributesSchema,
-  dashboardGetResultSchema,
-  dashboardCreateResultSchema,
-  dashboardItemSchema,
+  dashboardAPIGetResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,
 } from './cm_services';
