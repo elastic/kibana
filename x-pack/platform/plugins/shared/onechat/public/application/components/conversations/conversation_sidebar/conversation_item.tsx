@@ -41,9 +41,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
   const handleClick = useCallback(() => {
     setSelectedConversation({
       conversationId: conversation.id,
-      connectorId: conversation.connectorId,
     });
-  }, [setSelectedConversation, conversation.id, conversation.connectorId]);
+  }, [setSelectedConversation, conversation.id]);
 
   const handleDelete = useCallback(async () => {
     setShowDeleteModal(false);

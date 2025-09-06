@@ -126,7 +126,7 @@ class ConversationClientImpl implements ConversationClient {
       document: attributes,
     });
 
-    return this.get(id, conversation.spaceId);
+    return this.get(id, conversation.space_id);
   }
 
   async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {

@@ -18,20 +18,33 @@ import {
 import { css } from '@emotion/react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ConnectorSelector, type AIConnector } from '../connector_selector';
+import useObservable from 'react-use/lib/useObservable';
+import { ConnectorSelector } from '../connector_selector';
 import * as i18n from './translations';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useConnectorId } from '../../../hooks/use_conversation';
+import { useConversationActions } from '../../../hooks/use_conversation_actions';
+import type { ConversationSettings } from '../../../../services/types';
 
 interface Params {
   isDisabled?: boolean;
-  selectedConnectorId?: string;
-  onConnectorSelectionChange?: (connector: AIConnector) => void;
 }
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
-  ({ isDisabled = false, onConnectorSelectionChange, selectedConnectorId }: Params) => {
+  ({ isDisabled = false }: Params) => {
+    const { conversationSettingsService } = useOnechatServices();
+    const connectorId = useConnectorId();
     const {
       services: { application },
     } = useKibana();
+
+    const { setConnector } = useConversationActions();
+
+    // Subscribe to conversation settings to get the settingsMenuComponent
+    const conversationSettings = useObservable<ConversationSettings>(
+      conversationSettingsService.getConversationSettings$(),
+      {}
+    );
 
     const [isPopoverOpen, setPopover] = useState(false);
 
@@ -62,6 +75,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         >
           {i18n.ONECHAT_SETTINGS}
         </EuiContextMenuItem>,
+        ...(conversationSettings?.customMenuItems || []),
         <EuiContextMenuItem
           aria-label={'connector-selector'}
           key={'connector-selector'}
@@ -71,8 +85,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <ConnectorSelector
-                selectedConnectorId={selectedConnectorId}
-                onConnectorSelectionChange={onConnectorSelectionChange}
+                selectedConnectorId={connectorId}
+                onConnectorSelectionChange={(connector) => {
+                  setConnector(connector.id);
+                  conversationSettings.onConnectorSelectionChange?.(connector);
+                }}
                 isDisabled={isDisabled}
                 fullWidth={true}
               />
@@ -80,7 +97,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           </EuiFlexGroup>
         </EuiContextMenuItem>,
       ],
-      [handleNavigateToSettings, selectedConnectorId, isDisabled, onConnectorSelectionChange]
+      [handleNavigateToSettings, connectorId, isDisabled, conversationSettings, setConnector]
     );
 
     return (

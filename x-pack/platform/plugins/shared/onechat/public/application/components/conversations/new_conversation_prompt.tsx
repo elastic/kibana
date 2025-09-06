@@ -59,8 +59,9 @@ export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({
   const handleSelectPrompt = useCallback(
     (prompt: string, title: string) => {
       setStarterPrompt(prompt);
+      conversationSettings?.onSelectPrompt?.(prompt, title);
     },
-    [setStarterPrompt]
+    [setStarterPrompt, conversationSettings]
   );
 
   return (

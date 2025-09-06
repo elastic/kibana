@@ -42,8 +42,8 @@ export const createConversation$ = ({
         title,
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
-        spaceId,
-        connectorId,
+        space_id: spaceId,
+        connector_id: connectorId,
       });
     }),
     switchMap((createdConversation) => {
@@ -78,7 +78,7 @@ export const updateConversation$ = ({
         id: conversation.id,
         title,
         rounds: [...conversation.rounds, roundCompletedEvent.data.round],
-        connectorId,
+        connector_id: connectorId,
       });
     }),
     switchMap((updatedConversation) => {
@@ -157,6 +157,6 @@ const placeholderConversation = ({
       id: 'unknown',
       username: 'unknown',
     },
-    connectorId: undefined,
+    connector_id: undefined,
   };
 };

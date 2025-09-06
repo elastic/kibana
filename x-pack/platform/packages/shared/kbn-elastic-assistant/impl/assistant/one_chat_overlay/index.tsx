@@ -23,9 +23,6 @@ import {
 import type { ShowOneChatOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { EMPTY_SCREEN_DESCRIPTION } from '../translations';
-import { AssistantSettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
-import { useAssistantLastConversation } from '../use_space_aware_context/use_last_conversation';
-import { useAssistantSpaceId } from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -44,8 +41,11 @@ export const OneChatOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   // id if the conversation exists in the data stream, title if it's a new conversation
-
   const [connectorId, setConnectorId] = useState<string | undefined>(undefined);
+
+  // TODO: Use promptContextId when implementing prompt context functionality
+  // eslint-disable-next-line no-console
+  console.log('Prompt context ID:', promptContextId);
   const {
     assistantTelemetry,
     setShowOneChatOverlay,
@@ -57,17 +57,11 @@ export const OneChatOverlay = React.memo(() => {
     alertsIndexPattern,
     knowledgeBase,
   } = useAssistantContext();
-  const spaceId = useAssistantSpaceId();
-  const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
 
   // Bind `showOneChatOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
     () =>
-      ({
-        showOverlay: so,
-        promptContextId: pid,
-        selectedConversation,
-      }: ShowOneChatOverlayProps) => {
+      ({ showOverlay: so, promptContextId: pid }: ShowOneChatOverlayProps) => {
         if (so) assistantTelemetry?.reportAssistantInvoked({ invokedBy: 'click' });
 
         setIsModalVisible(so);
@@ -184,48 +178,33 @@ export const OneChatOverlay = React.memo(() => {
     [trackPrompt]
   );
 
-  const assistantSettings = useMemo(() => {
-    return (
-      <AssistantSettingsContextMenu
-        isDisabled={false}
-        isOneChatMode={true}
-        selectedConnectorId={connectorId}
-        onConnectorSelectionChange={handleConnectorSelectionChange}
-      />
-    );
-  }, [connectorId, handleConnectorSelectionChange]);
-
   // Move setConversationSettings to useEffect to avoid setState during render
   useEffect(() => {
     if (onechatServices && isModalVisible) {
       onechatServices.conversationSettingsService.setConversationSettings({
         isFlyoutMode: true,
-        getLastConversation,
         newConversationSubtitle: EMPTY_SCREEN_DESCRIPTION,
         newConversationPrompts: fetchedPromptGroups,
-        selectedConnectorId: connectorId,
-        // settingsMenuComponent: assistantSettings,
-        setLastConversation,
+        onSelectPrompt,
+        onConnectorSelectionChange: handleConnectorSelectionChange,
         defaultAgentId: 'siem-security-analyst',
         commentActionsMounter,
-        setConnectorId,
         toolParameters: {
           alertsIndexPattern,
           size: knowledgeBase.latestAlerts,
         },
+        customMenuItems: [],
       });
     }
   }, [
     onechatServices,
     isModalVisible,
-    getLastConversation,
     fetchedPromptGroups,
-    connectorId,
-    assistantSettings,
-    setLastConversation,
     commentActionsMounter,
     alertsIndexPattern,
     knowledgeBase.latestAlerts,
+    handleConnectorSelectionChange,
+    onSelectPrompt,
   ]);
 
   if (!isModalVisible || !OnechatConversationsView || !onechatServices) return null;
@@ -245,6 +224,7 @@ export const OneChatOverlay = React.memo(() => {
         data-test-subj="onechat-flyout"
         paddingSize="none"
         hideCloseButton
+        aria-label="One Chat Assistant"
       >
         <OnechatServicesContext.Provider value={onechatServices}>
           <OnechatConversationsView />

@@ -57,6 +57,12 @@ export const useConversationTitle = () => {
   return conversation?.title ?? '';
 };
 
+export const useConnectorId = () => {
+  const { conversation } = useConversation();
+  // Return the connector_id from conversation if available, otherwise return an empty string
+  return conversation?.connector_id;
+};
+
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
   const { pendingMessage, error } = useSendMessage();

@@ -21,10 +21,15 @@ import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
 import { useOnechatServices } from './use_onechat_service';
 import type { ConversationSettings } from '../../services/types';
+import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
+import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
+  // Space-aware context hooks - these will be used when conversation settings are properly set up
+  const spaceId = useOnechatSpaceId();
+  const { setLastConversation } = useOnechatLastConversation({ spaceId });
   const { conversationSettingsService, conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
 
@@ -59,41 +64,26 @@ export const useConversationActions = () => {
       shouldAllowConversationRedirectRef.current = false;
     };
   }, []);
-  const setSelectedConversation = ({
-    conversationId: id,
-    connectorId,
-  }: {
-    conversationId?: string;
-    connectorId?: string;
-  }) => {
+  const setSelectedConversation = ({ conversationId: id }: { conversationId?: string }) => {
+    // Update the last conversation in localStorage
+    setLastConversation({
+      id: id ?? '',
+    });
     conversationSettingsService.setConversationSettings({
       ...conversationSettings,
-      selectedConnectorId: connectorId, // Add missing required property
-      selectedConversationId: id,
+      selectedConversationId: id ?? undefined,
     });
-
-    // Only call setLastConversation if id is defined
-    if (conversationSettings?.setLastConversation) {
-      conversationSettings.setLastConversation({
-        id: id ?? '',
-      });
-    }
-    if (conversationSettings?.setConnectorId) {
-      conversationSettings?.setConnectorId(connectorId);
-    }
   };
 
   const navigateToConversation = ({
     nextConversationId,
-    connectorId,
   }: {
     nextConversationId: string | undefined;
-    connectorId: string | undefined;
   }) => {
     // Navigate to the new conversation if user is still on the "new" conversation page
     if (!conversationId && shouldAllowConversationRedirectRef.current) {
       if (isFlyoutMode) {
-        setSelectedConversation({ conversationId: nextConversationId, connectorId });
+        setSelectedConversation({ conversationId: nextConversationId });
       } else {
         navigateToOnechatUrl(
           nextConversationId
@@ -146,6 +136,19 @@ export const useConversationActions = () => {
         })
       );
     },
+    setConnector: (connectorId: string) => {
+      setConversation(
+        produce((draft) => {
+          if (!draft) {
+            const newConversation = createNewConversation();
+            newConversation.connector_id = connectorId;
+            return newConversation;
+          }
+
+          draft.connector_id = connectorId;
+        })
+      );
+    },
     addToolCall: ({ step }: { step: ToolCallStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
@@ -172,11 +175,9 @@ export const useConversationActions = () => {
     onConversationCreated: ({
       conversationId: id,
       title,
-      connectorId,
     }: {
       conversationId: string;
       title: string;
-      connectorId: string;
     }) => {
       const current = queryClient.getQueryData<Conversation>(queryKey);
       if (!current) {
@@ -192,13 +193,13 @@ export const useConversationActions = () => {
       removeNewConversationQuery();
       // Invalidate all conversations to refresh conversation history
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      navigateToConversation({ nextConversationId: id, connectorId });
+      navigateToConversation({ nextConversationId: id });
     },
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       removeNewConversationQuery();
-      navigateToConversation({ nextConversationId: '', connectorId: undefined });
+      navigateToConversation({ nextConversationId: '' });
     },
   };
 };

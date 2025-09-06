@@ -18,7 +18,7 @@ import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { useAgentId } from '../hooks/use_conversation';
+import { useAgentId, useConnectorId } from '../hooks/use_conversation';
 import { useConversationActions } from '../hooks/use_conversation_actions';
 import { useConversationId } from '../hooks/use_conversation_id';
 import { useOnechatServices } from '../hooks/use_onechat_service';
@@ -86,15 +86,10 @@ const useSendMessageMutation = ({
             // Now we have the full response and can stop the loading indicators
             setIsResponseLoading(false);
           } else if (isConversationCreatedEvent(event)) {
-            const {
-              conversation_id: id,
-              title,
-              connector_id: conversationConnectorId,
-            } = event.data;
+            const { conversation_id: id, title } = event.data;
             conversationActions.onConversationCreated({
               conversationId: id,
               title,
-              connectorId: conversationConnectorId,
             });
           }
         },
@@ -198,7 +193,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     {}
   );
 
-  const connectorId = conversationSettings?.selectedConnectorId;
+  const connectorId = useConnectorId();
   const toolParameters = conversationSettings?.toolParameters;
 
   const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
