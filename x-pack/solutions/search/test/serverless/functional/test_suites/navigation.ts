@@ -62,7 +62,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         {
           deepLinkId: 'discover',
           breadcrumbs: ['Discover'],
-          pageTestSubject: 'queryInput',
+          pageTestSubject: 'discoverLayoutResizableContainer',
         },
         {
           deepLinkId: 'dashboards',

@@ -31,6 +31,7 @@ import { copySavedSearch } from './discover_saved_search_container';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import type { DiscoverCustomizationContext } from '../../../customizations';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 import { createRuntimeStateManager } from './redux';
 import type { HistoryLocationState } from '../../../build_services';
@@ -48,7 +49,15 @@ let mockServices = createDiscoverServicesMock();
 
 async function getState(
   url: string = '/',
-  { savedSearch, isEmptyUrl }: { savedSearch?: SavedSearch; isEmptyUrl?: boolean } = {}
+  {
+    savedSearch,
+    isEmptyUrl,
+    customizationContext,
+  }: {
+    savedSearch?: SavedSearch;
+    isEmptyUrl?: boolean;
+    customizationContext?: DiscoverCustomizationContext;
+  } = {}
 ) {
   const nextHistory = createBrowserHistory<HistoryLocationState>();
   nextHistory.push(url);
@@ -68,6 +77,7 @@ async function getState(
     runtimeStateManager,
     history: nextHistory,
     services: mockServices,
+    customizationContext,
   });
   jest.spyOn(nextState.dataState, 'fetch');
   await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
@@ -278,6 +288,32 @@ describe('Discover state', () => {
         })
       );
       expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
+      state.actions.stopSyncing();
+    });
+
+    test('Empty URL with enableEsqlByDefault true should create ES|QL query', async () => {
+      const { state, customizationService } = await getState('/', {
+        customizationContext: {
+          ...mockCustomizationContext,
+          enableEsqlByDefault: true,
+        },
+      });
+      await state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeSession)({
+          initializeSessionParams: {
+            stateContainer: state,
+            customizationService,
+            discoverSessionId: undefined,
+            dataViewSpec: undefined,
+            defaultUrlState: undefined,
+            shouldClearAllTabs: false,
+          },
+        })
+      );
+      expect(state.appState.getState().query).toEqual({
+        esql: 'FROM the-data-view-title | LIMIT 10',
+      });
+      expect(state.appState.getState().dataSource).toEqual(createEsqlDataSource());
       state.actions.stopSyncing();
     });
   });

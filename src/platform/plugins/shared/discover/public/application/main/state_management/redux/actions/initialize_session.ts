@@ -238,6 +238,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       savedSearch: persistedDiscoverSession,
       overrideDataView: dataView,
       services,
+      enableEsqlByDefault: customizationContext?.enableEsqlByDefault ?? false,
     });
     const discoverSession = updateSavedSearch({
       savedSearch: persistedDiscoverSession

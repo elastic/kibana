@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       for (const columnName of TEST_COLUMN_NAMES) {
@@ -141,6 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('navigates to doc view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectClassicMode();
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

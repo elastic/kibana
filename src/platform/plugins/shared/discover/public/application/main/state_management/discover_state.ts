@@ -278,6 +278,7 @@ export function getDiscoverStateContainer({
     savedSearchContainer,
     services,
     injectCurrentTab,
+    customizationContext,
   });
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
@@ -568,6 +569,7 @@ export function getDiscoverStateContainer({
       initialUrlState: undefined,
       savedSearch: nextSavedSearch,
       services,
+      enableEsqlByDefault: customizationContext?.enableEsqlByDefault ?? false,
     });
 
     // a saved search can't have global (pinned) filters so we can reset global filters state

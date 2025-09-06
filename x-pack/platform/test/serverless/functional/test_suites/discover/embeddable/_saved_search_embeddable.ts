@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToActualUrl('discover', undefined, {
         ensureCurrentUrl: false,
       });
+      await discover.selectClassicMode();
       await dataViews.createFromSearchBar({
         name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
         adHoc: true,

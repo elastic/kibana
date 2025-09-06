@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
+  enableEsqlByDefault: schema.boolean({ defaultValue: false }),
   experimental: schema.maybe(
     schema.object({
       ruleFormV2Enabled: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -28,5 +29,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   exposeToBrowser: {
     experimental: true,
+    enableEsqlByDefault: true,
   },
 };

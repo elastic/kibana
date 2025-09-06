@@ -31,6 +31,7 @@ import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
+import type { DiscoverCustomizationContext } from '../../../customizations';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import type { DiscoverDataSource } from '../../../../common/data_sources';
 import {
@@ -188,6 +189,7 @@ export const getDiscoverAppStateContainer = ({
   savedSearchContainer,
   services,
   injectCurrentTab,
+  customizationContext,
 }: {
   tabId: string;
   stateStorage: IKbnUrlStateStorage;
@@ -195,11 +197,13 @@ export const getDiscoverAppStateContainer = ({
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
   injectCurrentTab: TabActionInjector;
+  customizationContext?: DiscoverCustomizationContext;
 }): DiscoverAppStateContainer => {
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
     savedSearch: savedSearchContainer.getState(),
     services,
+    enableEsqlByDefault: customizationContext?.enableEsqlByDefault ?? false,
   });
   let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
@@ -231,6 +235,7 @@ export const getDiscoverAppStateContainer = ({
       initialUrlState: undefined,
       savedSearch: newSavedSearch,
       services,
+      enableEsqlByDefault: customizationContext?.enableEsqlByDefault ?? false,
     });
   };
 
@@ -373,16 +378,19 @@ export function getInitialState({
   savedSearch,
   overrideDataView,
   services,
+  enableEsqlByDefault = false,
 }: {
   initialUrlState: DiscoverAppState | undefined;
   savedSearch: SavedSearch | undefined;
   overrideDataView?: DataView | undefined;
   services: DiscoverServices;
+  enableEsqlByDefault?: boolean;
 }) {
   const defaultAppState = getStateDefaults({
     savedSearch,
     overrideDataView,
     services,
+    enableEsqlByDefault,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 

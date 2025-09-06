@@ -68,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
+          await discover.selectClassicMode();
           await dataViews.switchTo('my-example-logs');
           await discover.waitUntilSearchingHasFinished();
           await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
