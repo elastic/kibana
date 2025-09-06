@@ -10,6 +10,7 @@ import {
   ENTITY_BASE_PREFIX,
   ENTITY_HISTORY,
   ENTITY_LATEST,
+  ENTITY_RESET,
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
@@ -23,24 +24,16 @@ function generateHistoryId(definition: EntityDefinition) {
   return `${ENTITY_HISTORY_PREFIX_V1}-${definition.id}` as const;
 }
 
-// History Backfill
-export function generateHistoryBackfillTransformId(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_PREFIX_V1}-backfill-${definition.id}` as const;
-}
-
+// History
 export const generateHistoryTransformId = generateHistoryId;
 export const generateHistoryIngestPipelineId = generateHistoryId;
 
-export function generateHistoryIndexName(definition: EntityDefinition) {
-  return entitiesIndexPattern({
-    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
-    dataset: ENTITY_HISTORY,
-    definitionId: definition.id,
-  });
-}
-
 export function generateHistoryIndexTemplateId(definition: EntityDefinition) {
   return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_${definition.id}_index_template` as const;
+}
+
+export function generateHistoryILMPolicyId(definition: EntityDefinition) {
+  return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_${definition.id}_ilm_policy` as const;
 }
 
 // Latest
@@ -61,3 +54,12 @@ export function generateLatestIndexName(definition: EntityDefinition) {
 
 export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
+
+// Reset
+export function generateResetIndexTemplateId(definition: EntityDefinition) {
+  return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_${definition.id}_index_template` as const;
+}
+
+export function generateResetILMPolicyId(definition: EntityDefinition) {
+  return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_${definition.id}_ilm_policy` as const;
+}

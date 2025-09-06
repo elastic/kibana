@@ -31,6 +31,7 @@ import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/managemen
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
+  ENTITY_STORE_HISTORY_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from '../../../../common/entity_analytics/entity_store/constants';
@@ -77,6 +78,9 @@ import {
   removeEntityStoreDataViewRefreshTask,
   startEntityStoreDataViewRefreshTask,
   getEntityStoreDataViewRefreshTaskState,
+  startEntityStoreSnapshotTask,
+  removeEntityStoreSnapshotTask,
+  getEntityStoreSnapshotTaskState,
 } from './tasks';
 import {
   createEntityIndex,
@@ -92,11 +96,15 @@ import {
   getFieldRetentionEnrichPolicyStatus,
   getEntityIndexStatus,
   getEntityIndexComponentTemplateStatus,
+  deleteAllEntitySnapshotIndices,
+  createEntityResetIndex,
+  deleteEntityResetIndex,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
   buildEntityDefinitionId,
   buildIndexPatterns,
+  buildIndexPatternsByEngine,
   getEntitiesIndexName,
   isPromiseFulfilled,
   isPromiseRejected,
@@ -220,6 +228,9 @@ export class EntityStoreDataClient {
             : []),
           ...(taskManager
             ? [getEntityStoreDataViewRefreshTaskState({ namespace, taskManager })]
+            : []),
+          ...(taskManager
+            ? [getEntityStoreSnapshotTaskState({ namespace, entityType: type, taskManager })]
             : []),
           getPlatformPipelineStatus({
             engineId: definition.id,
@@ -401,7 +412,12 @@ export class EntityStoreDataClient {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
-      const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const defaultIndexPatterns = await buildIndexPatternsByEngine(
+        namespace,
+        entityType,
+        appClient,
+        dataViewsService
+      );
       const options = merge(defaultOptions, requestParams);
 
       const description = createEngineDescription({
@@ -443,6 +459,10 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created entity index`);
 
+      // Create reset index required by Snapshot task
+      await createEntityResetIndex({ entityType, esClient: this.esClient, namespace });
+      this.log(`debug`, entityType, `Created entity reset index`);
+
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist
       await createFieldRetentionEnrichPolicy({
@@ -479,6 +499,7 @@ export class EntityStoreDataClient {
         taskManager,
         interval: options.enrichPolicyExecutionInterval,
       });
+      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
 
       // this task will continuously refresh the Entity Store indices based on the Data View
       await startEntityStoreDataViewRefreshTask({
@@ -486,10 +507,13 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
+      this.log(`debug`, entityType, `Started entity store data view refresh task`);
 
-      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
+      // this task will create daily snapshots for the historical view
+      await startEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      this.log(`debug`, entityType, `Started entity store snapshot task`);
+
       this.log(`info`, entityType, `Entity store initialized`);
-
       const setupEndTime = moment().utc().toISOString();
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
@@ -661,8 +685,12 @@ export class EntityStoreDataClient {
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
-    const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
-
+    const defaultIndexPatterns = await buildIndexPatternsByEngine(
+      namespace,
+      entityType,
+      appClient,
+      dataViewsService
+    );
     const description = createEngineDescription({
       entityType,
       namespace,
@@ -715,6 +743,9 @@ export class EntityStoreDataClient {
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
 
+      await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      this.log('debug', entityType, `Deleted entity store snapshot task`);
+
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
@@ -723,7 +754,16 @@ export class EntityStoreDataClient {
           logger,
         });
         this.log('debug', entityType, `Deleted entity index`);
+        await deleteAllEntitySnapshotIndices({
+          entityType,
+          esClient: this.esClient,
+          namespace,
+        });
+        this.log('debug', entityType, `Deleted snapshot indices`);
       }
+
+      await deleteEntityResetIndex({ entityType, esClient: this.esClient, namespace });
+      this.log('debug', entityType, `Deleted reset index`);
 
       if (descriptor && deleteEngine) {
         await this.engineClient.delete(entityType);
@@ -933,6 +973,12 @@ export class EntityStoreDataClient {
     // The entity store has to create the following indices
     indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_HISTORY_INDEX_PATTERN] = [
+      'create_index',
+      'manage',
+      'read',
+      'write',
+    ];
 
     return checkAndFormatPrivileges({
       request: this.options.request,
