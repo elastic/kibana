@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+import { ExportEdge, ImportEdge } from './types';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export function createImportEdge(edge: ImportEdge): ImportEdge {
+  return edge;
+}
+
+export function createExportEdge(edge: ExportEdge): ExportEdge {
+  return edge;
+}
