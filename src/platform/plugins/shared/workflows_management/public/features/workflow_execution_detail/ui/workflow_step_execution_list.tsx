@@ -26,6 +26,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import {
   isDangerousStatus,
   type WorkflowExecutionDto,
@@ -38,15 +39,45 @@ import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icon';
 
+function isForeachIteration(stepId: string) {
+  return stepId.split(':').length > 1 && !isNaN(parseInt(stepId.split(':')[1], 10));
+}
+
+function isIfBranch(stepId: string) {
+  return (
+    stepId.split(':').length > 1 &&
+    (stepId.split(':')[1] === 'true' || stepId.split(':')[1] === 'false')
+  );
+}
+
 function getStepType(stepId: string, stepType: string) {
-  if (stepId.split(':').length > 1) {
-    const index = stepId.split(':')[1];
-    if (!isNaN(parseInt(index, 10))) {
-      return 'foreach-iteration';
-    }
-    return index;
+  if (isForeachIteration(stepId)) {
+    return 'foreach-iteration';
+  }
+  if (isIfBranch(stepId)) {
+    return 'if-branch';
   }
   return stepType;
+}
+
+// handle special nodes like foreachstep:0, foreachstep:1, if:true, if:false
+function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | null) {
+  const stepType = getStepType(item.stepId, item.stepType);
+  if (
+    (stepType === 'foreach-iteration' ||
+      stepType === 'foreach' ||
+      stepType === 'if-branch' ||
+      stepType === 'if') &&
+    !item.children.length
+  ) {
+    return ExecutionStatus.SKIPPED;
+  }
+
+  if (status) {
+    return status;
+  }
+
+  return null;
 }
 
 function convertTreeToEuiTreeViewItems(
@@ -59,23 +90,20 @@ function convertTreeToEuiTreeViewItems(
   const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
+    const status = getStepStatus(item, stepExecution?.status ?? null);
     return {
       ...item,
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
       icon: (
-        <StepIcon
-          stepType={getStepType(item.stepId, item.stepType)}
-          executionStatus={item.status}
-        />
+        <StepIcon stepType={getStepType(item.stepId, item.stepType)} executionStatus={status} />
       ),
       css:
-        item.status && isDangerousStatus(item.status)
+        status && isDangerousStatus(status)
           ? css`
               &,
               &:active,
               &:focus {
-                background-color: ${getExecutionStatusColors(euiTheme, item.status)
-                  .backgroundColor};
+                background-color: ${getExecutionStatusColors(euiTheme, status).backgroundColor};
               }
 
               &:hover {
@@ -86,7 +114,7 @@ function convertTreeToEuiTreeViewItems(
       label: (
         <StepExecutionTreeItemLabel
           stepId={item.stepId}
-          status={item.status}
+          status={status}
           executionIndex={item.executionIndex}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
           stepType={item.stepType}

@@ -41,6 +41,7 @@ export const getStepIconType = (stepType: string) => {
     case 'exit-if':
     case 'enter-condition-branch':
     case 'exit-condition-branch':
+    case 'if':
       iconType = 'branch';
       break;
     case 'enter-foreach':
@@ -50,8 +51,8 @@ export const getStepIconType = (stepType: string) => {
     case 'foreach-iteration':
       iconType = 'tokenNumber';
       break;
-    case 'true':
-    case 'false':
+
+    case 'if-branch':
       iconType = 'tokenBoolean';
       break;
     default:

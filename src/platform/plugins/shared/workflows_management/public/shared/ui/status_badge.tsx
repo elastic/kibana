@@ -86,7 +86,7 @@ export const getExecutionStatusColors = (
     return {
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      tokenColor: euiTheme.colors.textDisabled,
+      tokenColor: 'gray',
     };
   }
   return getExecutionStatusColorsMap(euiTheme)[status];

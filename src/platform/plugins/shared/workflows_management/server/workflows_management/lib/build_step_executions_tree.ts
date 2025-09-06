@@ -12,6 +12,17 @@ import type { ExecutionStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from '@kbn/workflows';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
+function isForeachIteration(stepId: string | null) {
+  return stepId && stepId.split(':').length > 1 && !isNaN(parseInt(stepId.split(':')[1], 10));
+}
+function isIfBranch(stepId: string | null) {
+  return (
+    stepId &&
+    stepId.split(':').length > 1 &&
+    (stepId.split(':')[1] === 'true' || stepId.split(':')[1] === 'false')
+  );
+}
+
 export function buildStepExecutionsTree(
   workflowDefinition: WorkflowYaml,
   workflowExecutionStatus: ExecutionStatus,
@@ -25,7 +36,8 @@ export function buildStepExecutionsTree(
   // add all steps to the map
   for (const stepExecution of sortedStepExecutions) {
     const lastPart = stepExecution.path[stepExecution.path.length - 1];
-    if (lastPart === 'true' || lastPart === 'false' || !isNaN(parseInt(lastPart, 10))) {
+    // handle special path parts like if:true, if:false, foreach:item
+    if (isIfBranch(lastPart) || isForeachIteration(lastPart)) {
       stepMap.set(stepExecution.path.join('.'), {
         stepId: stepExecution.path.slice(-2).join(':'),
         stepType: lastPart,
