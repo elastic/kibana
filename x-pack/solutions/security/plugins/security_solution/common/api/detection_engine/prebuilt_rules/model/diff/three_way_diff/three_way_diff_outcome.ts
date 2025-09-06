@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import {
+  areArrayFieldsEqual,
+  areFieldsEqual,
+} from '../../../../../../detection_engine/prebuilt_rules/comparators';
 import { MissingVersion } from './three_way_diff';
 import type { RuleDataSource } from '../diffable_rule/diffable_field_types';
 import { DataSourceType } from '../diffable_rule/diffable_field_types';
@@ -42,9 +45,9 @@ export const determineDiffOutcome = <TValue>(
   currentVersion: TValue,
   targetVersion: TValue
 ): ThreeWayDiffOutcome => {
-  const baseEqlCurrent = isEqual(baseVersion, currentVersion);
-  const baseEqlTarget = isEqual(baseVersion, targetVersion);
-  const currentEqlTarget = isEqual(currentVersion, targetVersion);
+  const baseEqlCurrent = areFieldsEqual(baseVersion, currentVersion);
+  const baseEqlTarget = areFieldsEqual(baseVersion, targetVersion);
+  const currentEqlTarget = areFieldsEqual(currentVersion, targetVersion);
 
   return getThreeWayDiffOutcome({
     baseEqlCurrent,
@@ -62,12 +65,14 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   currentVersion: TValue[],
   targetVersion: TValue[]
 ): ThreeWayDiffOutcome => {
-  const baseSet = baseVersion === MissingVersion ? MissingVersion : new Set<TValue>(baseVersion);
-  const currentSet = new Set<TValue>(currentVersion);
-  const targetSet = new Set<TValue>(targetVersion);
-  const baseEqlCurrent = isEqual(baseSet, currentSet);
-  const baseEqlTarget = isEqual(baseSet, targetSet);
-  const currentEqlTarget = isEqual(currentSet, targetSet);
+  const isBaseVersionMissing = baseVersion === MissingVersion;
+  const baseEqlCurrent = isBaseVersionMissing
+    ? false
+    : areArrayFieldsEqual(baseVersion, currentVersion);
+  const baseEqlTarget = isBaseVersionMissing
+    ? false
+    : areArrayFieldsEqual(baseVersion, targetVersion);
+  const currentEqlTarget = areArrayFieldsEqual(currentVersion, targetVersion);
 
   return getThreeWayDiffOutcome({
     baseEqlCurrent,

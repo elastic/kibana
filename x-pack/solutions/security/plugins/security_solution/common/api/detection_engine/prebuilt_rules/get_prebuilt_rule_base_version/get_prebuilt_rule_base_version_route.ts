@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
-import type { PartialRuleDiff } from '../model';
+import type { PartialThreeWayRuleDiff } from '../model';
 
 export type GetPrebuiltRuleBaseVersionRequest = z.infer<typeof GetPrebuiltRuleBaseVersionRequest>;
 export const GetPrebuiltRuleBaseVersionRequest = z.object({
@@ -22,5 +22,5 @@ export interface GetPrebuiltRuleBaseVersionResponseBody {
   current_version: RuleResponse;
 
   /** The resulting diff between the base and current versions of the rule */
-  diff: PartialRuleDiff;
+  diff: PartialThreeWayRuleDiff;
 }

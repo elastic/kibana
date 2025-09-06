@@ -8,7 +8,10 @@
 import React, { memo, useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
+import type {
+  PartialThreeWayRuleDiff,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine';
 import { PerFieldRuleDiffTab } from '../per_field_rule_diff_tab';
 import { RuleDetailsFlyout, TabContentPadding } from '../rule_details_flyout';
 import * as ruleDetailsI18n from '../translations';
@@ -30,7 +33,7 @@ interface PrebuiltRuleConcurrencyControl {
 interface RuleCustomizationsFlyoutProps {
   currentRule: RuleResponse;
   baseRule: RuleResponse;
-  diff: PartialRuleDiff;
+  diff: PartialThreeWayRuleDiff;
   closeFlyout: () => void;
   isReverting: boolean;
 }
