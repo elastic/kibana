@@ -31,7 +31,7 @@ export const OnechatAgents = () => {
       href={createOnechatUrl(appPaths.agents.new)}
     >
       {i18n.translate('xpack.onechat.agents.newAgentButton', {
-        defaultMessage: 'New agent',
+        defaultMessage: 'New Agent',
       })}
     </EuiButton>,
   ];
