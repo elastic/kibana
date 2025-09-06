@@ -20,6 +20,7 @@ export function getConnectorType(): GeminiConnector {
   return {
     id: GEMINI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
+    isDeprecated: true,
     selectMessage: i18n.translate('xpack.stackConnectors.components.gemini.selectMessageText', {
       defaultMessage: 'Send a request to Google Gemini.',
     }),

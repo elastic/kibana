@@ -127,6 +127,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  isDeprecated?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   hideInUi?: boolean;
