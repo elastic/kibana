@@ -22,16 +22,16 @@ export namespace BaseStream {
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
 
   export interface GetResponse<TDefinition extends Definition = Definition> {
+    stream: TDefinition;
     dashboards: string[];
     rules: string[];
-    stream: TDefinition;
     queries: StreamQuery[];
   }
 
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
+    stream: OmitName<TDefinition>;
     dashboards: string[];
     rules: string[];
-    stream: OmitName<TDefinition>;
     queries: StreamQuery[];
   }
 

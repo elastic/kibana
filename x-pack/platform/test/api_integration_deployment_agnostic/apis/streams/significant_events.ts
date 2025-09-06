@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -66,9 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       beforeEach(async () => {
         await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
         }).then((response) => expect(response).to.have.property('acknowledged', true));
         await alertingApi.deleteRules({ roleAuthc });
       });
@@ -76,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('updates the queries', async () => {
         const response = await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
           rules: [],
         });
@@ -111,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           },
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.query1',
@@ -151,7 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           },
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.child.query1',
@@ -165,7 +163,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         response = await putStream(apiClient, 'logs.queries-test.child.first', {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.child.first.query1',
@@ -202,9 +200,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             classic: {},
           },
         },
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
       };
 
       const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {
