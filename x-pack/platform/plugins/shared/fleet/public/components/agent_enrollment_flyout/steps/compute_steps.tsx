@@ -18,7 +18,7 @@ import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_po
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
 import { useGetOneEnrollmentAPIKey, useStartServices, useAgentVersion } from '../../../hooks';
-import { useFetchFullPolicy } from '../hooks';
+import { useFetchFullPolicy, useCloudbeatIntegration } from '../hooks';
 
 import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
@@ -55,11 +55,14 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   cloudSecurityIntegration,
   downloadSource,
   downloadSourceProxy,
+  hasCloudbeatIntegration,
 }) => {
   const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } = useFetchFullPolicy(
     selectedPolicy,
     isK8s
   );
+
+  const { hasCloudbeatIntegration: detectedCloudbeatIntegration } = useCloudbeatIntegration(selectedPolicy);
 
   const agentVersion = useAgentVersion();
 
@@ -107,6 +110,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         cloudSecurityIntegration,
         rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+        hasCloudbeatIntegration: hasCloudbeatIntegration || detectedCloudbeatIntegration,
       })
     );
 
@@ -132,6 +136,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     cloudSecurityIntegration,
     mode,
     setMode,
+    hasCloudbeatIntegration,
+    detectedCloudbeatIntegration,
   ]);
 
   if (!agentVersion) {
@@ -160,6 +166,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
+  hasCloudbeatIntegration,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -178,6 +185,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
   const showInstallServers = hasInstallServersInputs(agentPolicy?.package_policies ?? []);
+
+  const { hasCloudbeatIntegration: detectedCloudbeatIntegration } = useCloudbeatIntegration(selectedPolicy);
 
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
@@ -259,6 +268,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           fleetServerHost,
           enrollToken,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+          hasCloudbeatIntegration: hasCloudbeatIntegration || detectedCloudbeatIntegration,
         })
       );
     }
@@ -310,6 +320,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     agentDataConfirmed,
     installedPackagePolicy,
     gcpProjectId,
+    hasCloudbeatIntegration,
+    detectedCloudbeatIntegration,
   ]);
 
   if (!agentVersion) {
