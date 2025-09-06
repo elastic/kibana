@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -7,8 +9,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-validate-oas'],
-};
+require('../src/setup_node_env');
+require('@kbn/validate-oas');
