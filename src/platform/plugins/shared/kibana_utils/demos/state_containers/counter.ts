@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStateContainer } from '../../common/state_containers';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 
 interface State {
   count: number;

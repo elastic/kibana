@@ -11,7 +11,7 @@ import type { Subscription } from 'rxjs';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
-import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import type { TimefilterSetup } from '../timefilter';
 import type { FilterManager } from '../filter_manager';
 import type { QueryState } from '../query_state';

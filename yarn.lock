@@ -8025,6 +8025,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-state-container@link:src/platform/packages/shared/shared-ux/state_container":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-storybook-config@link:src/platform/packages/private/shared-ux/storybook/config":
   version "0.0.0"
   uid ""

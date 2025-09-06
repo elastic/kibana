@@ -18,6 +18,7 @@
     "@kbn/tinymath",
     "@kbn/panel-loader",
     "@kbn/es-query",
+    "@kbn/shared-ux-state-container",
   ],
   "exclude": [
     "target/**/*",

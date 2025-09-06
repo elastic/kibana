@@ -8,7 +8,8 @@
  */
 
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createStateContainer, syncState } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
+import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
