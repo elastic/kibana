@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
@@ -111,16 +111,31 @@ const SamplePreviewTableContent = ({
 
   if (value && value.status === 'success' && value.documentsWithRuntimeFieldsApplied) {
     return (
-      <div
-        css={css`
-          height: 500px;
-        `}
-      >
-        <PreviewTable
-          documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
-          displayColumns={columns}
-        />
-      </div>
+      <>
+        {value.ignoredFields && (
+          <>
+            <EuiCallOut
+              color="warning"
+              title={i18n.translate('xpack.streams.samplePreviewTable.ignoredFieldsCallOutTitle', {
+                defaultMessage: 'There were ignored fields in the simulation:',
+              })}
+            >
+              {value.ignoredFields.join(', ')}
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        <div
+          css={css`
+            height: 500px;
+          `}
+        >
+          <PreviewTable
+            documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
+            displayColumns={columns}
+          />
+        </div>
+      </>
     );
   }
 
