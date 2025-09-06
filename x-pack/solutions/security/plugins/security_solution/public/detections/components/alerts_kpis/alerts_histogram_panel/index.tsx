@@ -108,6 +108,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     hideQueryToggle = false,
     isExpanded,
     setIsExpanded,
+    signalIndexName,
   }) => {
     const { to, from } = useGlobalTime();
 
@@ -282,6 +283,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         </HeaderSection>
         {showHistogram ? (
           <VisualizationEmbeddable
+            signalIndexName={signalIndexName}
             data-test-subj="embeddable-matrix-histogram"
             extraActions={extraActions}
             extraOptions={{
