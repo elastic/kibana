@@ -15,11 +15,10 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
-  ESQLUserDefinedColumn,
-  ESQLFieldWithMetadata,
   ICommandCallbacks,
   ISuggestionItem,
   Location,
+  ESQLColumnData,
 } from '../commands_registry/types';
 import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
@@ -50,8 +49,7 @@ export const suggest = (
     arg1: ESQLCommand,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -80,8 +78,7 @@ export const expectSuggestions = async (
     arg1: ESQLCommand,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -105,12 +102,10 @@ export function getFieldNamesByType(
   _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
   excludeUserDefined: boolean = false
 ) {
-  const fieldsMap = mockContext.fields;
-  const userDefinedColumnsMap = mockContext.userDefinedColumns;
-  const fields = Array.from(fieldsMap.values());
-  const userDefinedColumns = Array.from(userDefinedColumnsMap.values()).flat();
+  const columnMap = mockContext.columns;
+  const columns = Array.from(columnMap.values());
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  const finalArray = excludeUserDefined ? fields : [...fields, ...userDefinedColumns];
+  const finalArray = excludeUserDefined ? columns.filter((col) => !col.userDefined) : columns;
   return finalArray
     .filter(
       ({ type }) =>

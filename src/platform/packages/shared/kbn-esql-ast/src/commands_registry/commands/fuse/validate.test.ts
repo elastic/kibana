@@ -22,13 +22,13 @@ describe('FUSE Validation', () => {
 
   describe('FUSE', () => {
     test('no errors for valid command', () => {
-      const newFields = new Map(mockContext.fields);
+      const newColumns = new Map(mockContext.columns);
       METADATA_FIELDS.forEach((fieldName) => {
-        newFields.set(fieldName, { name: fieldName, type: 'keyword' });
+        newColumns.set(fieldName, { name: fieldName, type: 'keyword', userDefined: false });
       });
       const context = {
         ...mockContext,
-        fields: newFields,
+        fields: newColumns,
       };
       fuseExpectErrors(
         `FROM index METADATA _id, _score, _index

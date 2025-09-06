@@ -178,9 +178,11 @@ describe('validation logic', () => {
           JSON.stringify(
             {
               indexes,
-              fields: fields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+              fields: fields.concat([
+                { name: policies[0].matchField, type: 'keyword', userDefined: false },
+              ]),
               enrichFields: enrichFields.concat([
-                { name: policies[0].matchField, type: 'keyword' },
+                { name: policies[0].matchField, type: 'keyword', userDefined: false },
               ]),
               policies,
               unsupported_field,

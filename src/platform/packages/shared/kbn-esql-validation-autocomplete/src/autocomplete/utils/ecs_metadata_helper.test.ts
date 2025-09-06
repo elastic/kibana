@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
+import { type ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
 
 describe('enrichFieldsWithECSInfo', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
     const columns: ESQLFieldWithMetadata[] = [
-      { name: 'ecs.version', type: 'keyword' },
-      { name: 'field1', type: 'text' },
-      { name: 'field2', type: 'double' },
+      { name: 'ecs.version', type: 'keyword', userDefined: false },
+      { name: 'field1', type: 'text', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ];
 
     const result = await enrichFieldsWithECSInfo(columns);
@@ -24,9 +25,9 @@ describe('enrichFieldsWithECSInfo', () => {
 
   it('should return columns with metadata if both name and type match with ECS fields', async () => {
     const columns: ESQLFieldWithMetadata[] = [
-      { name: 'ecs.field', type: 'text' },
-      { name: 'ecs.fakeBooleanField', type: 'boolean' },
-      { name: 'field2', type: 'double' },
+      { name: 'ecs.field', type: 'text', userDefined: false },
+      { name: 'ecs.fakeBooleanField', type: 'boolean', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ];
     const fieldsMetadata = {
       getClient: jest.fn().mockResolvedValue({
@@ -58,17 +59,18 @@ describe('enrichFieldsWithECSInfo', () => {
         name: 'ecs.field',
         type: 'text',
         isEcs: true,
+        userDefined: false,
       },
-      { name: 'ecs.fakeBooleanField', type: 'boolean' },
-      { name: 'field2', type: 'double' },
+      { name: 'ecs.fakeBooleanField', type: 'boolean', isEcs: true, userDefined: false },
+      { name: 'field2', type: 'double', isEcs: false, userDefined: false },
     ]);
   });
 
   it('should handle keyword suffix correctly', async () => {
     const columns: ESQLFieldWithMetadata[] = [
-      { name: 'ecs.version', type: 'keyword' },
-      { name: 'ecs.version.keyword', type: 'keyword' },
-      { name: 'field2', type: 'double' },
+      { name: 'ecs.version', type: 'keyword', userDefined: false },
+      { name: 'ecs.version.keyword', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ];
     const fieldsMetadata = {
       getClient: jest.fn().mockResolvedValue({
@@ -90,14 +92,15 @@ describe('enrichFieldsWithECSInfo', () => {
       fieldsMetadataCache.fields as ECSMetadata
     );
 
-    expect(result).toEqual([
-      { name: 'ecs.version', type: 'keyword', isEcs: true },
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'ecs.version', type: 'keyword', isEcs: true, userDefined: false },
       {
         name: 'ecs.version.keyword',
         type: 'keyword',
         isEcs: true,
+        userDefined: false,
       },
-      { name: 'field2', type: 'double' },
+      { name: 'field2', type: 'double', userDefined: false },
     ]);
   });
 });

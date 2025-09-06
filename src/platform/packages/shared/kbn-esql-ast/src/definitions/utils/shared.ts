@@ -126,10 +126,10 @@ export function unescapeColumnName(columnName: string) {
  */
 export function getColumnByName(
   columnName: string,
-  { fields, userDefinedColumns }: ICommandContext
+  { columns }: ICommandContext
 ): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const unescaped = unescapeColumnName(columnName);
-  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
+  return columns.get(unescaped);
 }
 
 /**
@@ -137,10 +137,10 @@ export function getColumnByName(
  */
 export function getColumnForASTNode(
   node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: ICommandContext
+  { columns }: ICommandContext
 ): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
-  return getColumnByName(formatted, { fields, userDefinedColumns });
+  return getColumnByName(formatted, { columns });
 }
 
 function hasWildcard(name: string) {

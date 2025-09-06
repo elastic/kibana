@@ -24,11 +24,7 @@ export const validate = (
 
   const { prompt, location, targetField, inferenceId } = command as ESQLAstCompletionCommand;
 
-  const promptExpressionType = getExpressionType(
-    prompt,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const promptExpressionType = getExpressionType(prompt, context?.columns);
 
   if (!supportedPromptTypes.includes(promptExpressionType)) {
     messages.push(
@@ -46,13 +42,13 @@ export const validate = (
   const targetName = targetField?.name || 'completion';
 
   // Sets the target field so the column is recognized after the command is applied
-  context?.userDefinedColumns.set(targetName, [
-    {
-      name: targetName,
-      location: targetField?.location || command.location,
-      type: 'keyword',
-    },
-  ]);
+  // @TODO can we remove now?
+  context?.columns.set(targetName, {
+    name: targetName,
+    location: targetField?.location || command.location,
+    type: 'keyword',
+    userDefined: true,
+  });
 
   messages.push(...validateCommandArguments(command, ast, context, callbacks));
 

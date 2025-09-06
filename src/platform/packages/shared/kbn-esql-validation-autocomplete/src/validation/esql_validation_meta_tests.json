@@ -10,113 +10,140 @@
   "fields": [
     {
       "name": "booleanField",
-      "type": "boolean"
+      "type": "boolean",
+      "userDefined": false
     },
     {
       "name": "dateField",
-      "type": "date"
+      "type": "date",
+      "userDefined": false
     },
     {
       "name": "doubleField",
-      "type": "double"
+      "type": "double",
+      "userDefined": false
     },
     {
       "name": "ipField",
-      "type": "ip"
+      "type": "ip",
+      "userDefined": false
     },
     {
       "name": "keywordField",
-      "type": "keyword"
+      "type": "keyword",
+      "userDefined": false
     },
     {
       "name": "integerField",
-      "type": "integer"
+      "type": "integer",
+      "userDefined": false
     },
     {
       "name": "longField",
-      "type": "long"
+      "type": "long",
+      "userDefined": false
     },
     {
       "name": "textField",
-      "type": "text"
+      "type": "text",
+      "userDefined": false
     },
     {
       "name": "unsignedLongField",
-      "type": "unsigned_long"
+      "type": "unsigned_long",
+      "userDefined": false
     },
     {
       "name": "versionField",
-      "type": "version"
+      "type": "version",
+      "userDefined": false
     },
     {
       "name": "cartesianPointField",
-      "type": "cartesian_point"
+      "type": "cartesian_point",
+      "userDefined": false
     },
     {
       "name": "cartesianShapeField",
-      "type": "cartesian_shape"
+      "type": "cartesian_shape",
+      "userDefined": false
     },
     {
       "name": "geoPointField",
-      "type": "geo_point"
+      "type": "geo_point",
+      "userDefined": false
     },
     {
       "name": "geoShapeField",
-      "type": "geo_shape"
+      "type": "geo_shape",
+      "userDefined": false
     },
     {
       "name": "counterIntegerField",
-      "type": "counter_integer"
+      "type": "counter_integer",
+      "userDefined": false
     },
     {
       "name": "counterLongField",
-      "type": "counter_long"
+      "type": "counter_long",
+      "userDefined": false
     },
     {
       "name": "counterDoubleField",
-      "type": "counter_double"
+      "type": "counter_double",
+      "userDefined": false
     },
     {
       "name": "unsupportedField",
-      "type": "unsupported"
+      "type": "unsupported",
+      "userDefined": false
     },
     {
       "name": "dateNanosField",
-      "type": "date_nanos"
+      "type": "date_nanos",
+      "userDefined": false
     },
     {
       "name": "functionNamedParametersField",
-      "type": "function_named_parameters"
+      "type": "function_named_parameters",
+      "userDefined": false
     },
     {
       "name": "any#Char$Field",
-      "type": "double"
+      "type": "double",
+      "userDefined": false
     },
     {
       "name": "kubernetes.something.something",
-      "type": "double"
+      "type": "double",
+      "userDefined": false
     },
     {
       "name": "@timestamp",
-      "type": "date"
+      "type": "date",
+      "userDefined": false
     },
     {
       "name": "otherStringField",
-      "type": "keyword"
+      "type": "keyword",
+      "userDefined": false
     }
   ],
   "enrichFields": [
     {
       "name": "otherField",
-      "type": "text"
+      "type": "text",
+      "userDefined": false
     },
     {
       "name": "yetAnotherField",
-      "type": "double"
+      "type": "double",
+      "userDefined": false
     },
     {
       "name": "otherStringField",
-      "type": "keyword"
+      "type": "keyword",
+      "userDefined": false
     }
   ],
   "policies": [
@@ -146,7 +173,8 @@
   "unsupported_field": [
     {
       "name": "unsupported_field",
-      "type": "unsupported"
+      "type": "unsupported",
+      "userDefined": false
     }
   ],
   "testCases": [

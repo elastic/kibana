@@ -6,25 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { walk } from '../../../walker';
+import { uniqBy } from 'lodash';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData } from '../../types';
+import type { IAdditionalFields } from '../../registry';
 
-export const columnsAfter = (
+export const columnsAfter = async (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string
+  query: string,
+  additionalFields: IAdditionalFields
 ) => {
-  const columnsToDrop: string[] = [];
-
-  walk(command, {
-    visitColumn: (node) => {
-      columnsToDrop.push(node.name);
-    },
-  });
-
-  return previousColumns.filter((field) => {
-    // if the field is not in the columnsToDrop, keep it
-    return !columnsToDrop.some((column) => column === field.name);
-  });
+  const joinFields = await additionalFields.fromJoin(command);
+  return uniqBy([...(joinFields ?? []), ...previousColumns], 'name');
 };

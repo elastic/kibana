@@ -41,8 +41,8 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const pos = getPosition(innerText, command);
   const policies = context?.policies ?? new Map<string, ESQLPolicy>();
-  const fieldsMap = context?.fields ?? new Map<string, string>();
-  const allColumnNames = Array.from(fieldsMap.keys());
+  const columnMap = context?.columns ?? new Map<string, string>();
+  const allColumnNames = Array.from(columnMap.keys());
   const policyName = (
     command.args.find((arg) => !Array.isArray(arg) && arg.type === 'source') as
       | ESQLSource

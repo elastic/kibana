@@ -20,24 +20,22 @@ describe('RENAME Validation', () => {
   });
 
   test('validates the most basic query', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField + 1', [
-      {
-        name: 'doubleField + 1',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg(doubleField)', [
-      {
-        name: 'avg(doubleField)',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField + 1', {
+      name: 'doubleField + 1',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg(doubleField)', {
+      name: 'avg(doubleField)',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
     const context = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     renameExpectErrors('from a_index | rename textField as', [
       'AS expected 2 arguments, but got 1.',
