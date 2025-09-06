@@ -136,7 +136,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
       }
     );
     const maxTotalSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.open.limit',
+      'elasticsearch.client.sockets.max_open',
       {
         description: 'Elasticsearch Clients: Maximum number of sockets allowed to each agent.',
         unit: '1',
@@ -144,7 +144,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
       }
     );
     const maxIdleSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.idle.limit',
+      'elasticsearch.client.sockets.max_idle',
       {
         description: 'Elasticsearch Clients: Maximum number of idle sockets allowed to each agent.',
         unit: '1',
@@ -223,8 +223,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         result.observe(numberOfAgentsObservable, this.agents.size);
       },
       [
-        totalActiveSocketsObservable,
-        totalIdleSocketsObservable,
+        totalSocketsObservable,
         totalQueuedRequestsObservable,
         maxTotalSocketsObservable,
         maxIdleSocketsObservable,
