@@ -991,6 +991,7 @@ describe('Response actions', () => {
               totals: {
                 userComments: 1,
                 alerts: 1,
+                events: 0,
               },
             },
           ];

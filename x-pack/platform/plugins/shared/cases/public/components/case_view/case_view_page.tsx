@@ -23,6 +23,7 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
+import { CaseViewEvents } from './components/case_view_events';
 import { CaseSummary } from './components/case_summary';
 import { KibanaServices } from '../../common/lib/kibana';
 
@@ -132,6 +133,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               renderAlertsTable={renderAlertsTable}
               onAlertsTableLoaded={onAlertsTableLoaded}
             />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
+            <CaseViewEvents caseData={caseData} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
           {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
