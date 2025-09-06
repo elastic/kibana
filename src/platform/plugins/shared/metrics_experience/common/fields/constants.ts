@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MetricField, MetricFieldsResponse, MetricFieldType } from './fields/types';
-export type { Dimension } from './dimensions/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+
+export const NUMERIC_TYPES = [
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.INTEGER,
+  ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.BYTE,
+  ES_FIELD_TYPES.DOUBLE,
+  ES_FIELD_TYPES.FLOAT,
+  ES_FIELD_TYPES.HALF_FLOAT,
+  ES_FIELD_TYPES.SCALED_FLOAT,
+  ES_FIELD_TYPES.UNSIGNED_LONG,
+  ES_FIELD_TYPES.HISTOGRAM,
+];

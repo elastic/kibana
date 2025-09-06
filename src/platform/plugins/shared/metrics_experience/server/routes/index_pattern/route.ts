@@ -12,28 +12,16 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { createRoute } from '../create_route';
-import { getDimensions } from './get_dimentions';
+import { getIndexPatternMetadata } from './get_index_pattern_metadata';
 
-export const getDimensionsRoute = createRoute({
-  endpoint: 'GET /internal/metrics_experience/dimensions',
+export const getIndexPatternMetadataRoute = createRoute({
+  endpoint: 'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}',
   security: { authz: { requiredPrivileges: ['read'] } },
   params: z.object({
+    path: z.object({
+      indexPattern: z.string(),
+    }),
     query: z.object({
-      dimensions: z
-        .string()
-        .transform((str) => {
-          try {
-            const parsed = JSON.parse(str);
-            return parsed;
-          } catch {
-            throw new Error('Invalid JSON');
-          }
-        })
-        .pipe(z.array(z.string()).min(1).max(10)),
-      indices: z
-        .union([z.string(), z.array(z.string())])
-        .transform((val) => (Array.isArray(val) ? val : [val]))
-        .default(['metrics-*']),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()
@@ -43,26 +31,28 @@ export const getDimensionsRoute = createRoute({
     }),
   }),
   handler: async ({ context, params, logger }) => {
-    const { dimensions, indices, from, to } = params.query;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-    const values = await getDimensions({
+    const { indexPattern } = params.path;
+    const { from, to } = params.query;
+
+    const indexPatternMetadata = await getIndexPatternMetadata({
       esClient: createTracedEsClient({
         logger,
         client: esClient,
         plugin: 'metrics_experience',
       }),
-      dimensions,
-      indices,
+      indexPattern,
       from,
       to,
-      logger,
     });
 
-    return { values };
+    return {
+      indexPatternMetadata,
+    };
   },
 });
 
-export const dimensionsRoutes = {
-  ...getDimensionsRoute,
+export const indexPatternMetadataRoutes = {
+  ...getIndexPatternMetadataRoute,
 };
