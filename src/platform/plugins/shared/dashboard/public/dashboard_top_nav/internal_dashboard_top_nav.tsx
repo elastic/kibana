@@ -29,6 +29,7 @@ import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plug
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
+import useObservable from 'react-use/lib/useObservable';
 
 import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -108,6 +109,8 @@ export function InternalDashboardTopNav({
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const searchSessionId = useObservable(dashboardApi.searchSessionId$);
+  const searchSessionIdFromUrl = useObservable(dashboardApi.searchSessionIdFromUrl$);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -357,6 +360,8 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
+      {searchSessionIdFromUrl === searchSessionId &&
+        dataService.search.session.getBackgroundSearchIndicator()}
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
