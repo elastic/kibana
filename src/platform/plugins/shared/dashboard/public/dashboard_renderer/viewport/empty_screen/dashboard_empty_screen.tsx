@@ -29,7 +29,7 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
-import { addFromLibrary } from '../../add_panel_from_library';
+import { openAddFromLibraryFlyout } from '../../../dashboard_app/top_nav/add_from_library/open_add_from_library_flyout';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -117,7 +117,7 @@ export function DashboardEmptyScreen() {
             <EuiButtonEmpty
               flush="left"
               iconType="folderOpen"
-              onClick={() => addFromLibrary(dashboardApi)}
+              onClick={() => openAddFromLibraryFlyout(dashboardApi)}
             >
               {i18n.translate('dashboard.emptyScreen.addFromLibrary', {
                 defaultMessage: 'Add from library',

@@ -12,9 +12,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 import { AddFromLibraryFlyout } from './add_from_library_flyout';
-import { usageCollection } from '../kibana_services';
+import { usageCollectionService } from '../../../services/kibana_services';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { registerAddFromLibraryType } from './registry';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { HasType } from '@kbn/presentation-publishing';
 
@@ -50,18 +49,11 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   };
 });
 
+jest.mock('@kbn/embeddable-plugin/public', () => ({}));
+
 describe('add from library flyout', () => {
   let container: PresentationContainer & HasType;
   const onAdd = jest.fn();
-
-  beforeAll(() => {
-    registerAddFromLibraryType({
-      onAdd,
-      savedObjectType: 'AWESOME_EMBEDDABLE',
-      savedObjectName: 'Awesome sauce',
-      getIconForSavedObject: () => 'happyface',
-    });
-  });
 
   beforeEach(() => {
     onAdd.mockClear();
@@ -69,6 +61,21 @@ describe('add from library flyout', () => {
       type: 'DASHBOARD_CONTAINER',
       ...getMockPresentationContainer(),
     };
+
+    const savedObjectMetaData = {
+      type: 'AWESOME_EMBEDDABLE',
+      name: 'Awesome sauce',
+      getIconForSavedObject: () => 'happyface',
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('@kbn/embeddable-plugin/public').getAddFromLibraryType = () => ({
+      onAdd,
+      savedObjectMetaData,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('@kbn/embeddable-plugin/public').useAddFromLibraryTypes = () => [savedObjectMetaData];
   });
 
   test('renders SavedObjectFinder', async () => {
@@ -102,7 +109,7 @@ describe('add from library flyout', () => {
     // flush promises
     await new Promise((r) => setTimeout(r, 1));
 
-    expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+    expect(usageCollectionService?.reportUiCounter).toHaveBeenCalledWith(
       'DASHBOARD_CONTAINER',
       'click',
       'AWESOME_EMBEDDABLE:add'

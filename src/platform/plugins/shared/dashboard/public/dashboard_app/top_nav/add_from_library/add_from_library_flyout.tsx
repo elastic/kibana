@@ -17,17 +17,17 @@ import {
   SavedObjectFinder,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
+import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
-  core,
-  savedObjectsTaggingOss,
-  contentManagement,
-  usageCollection,
-} from '../kibana_services';
-import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
+  coreServices,
+  savedObjectsTaggingService,
+  contentManagementService,
+  usageCollectionService,
+} from '../../../services/kibana_services';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -39,7 +39,7 @@ const runAddTelemetry = (
     ? savedObjectMetaData.getSavedObjectSubType(savedObject)
     : savedObjectMetaData.type;
 
-  usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
+  usageCollectionService?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
 export const AddFromLibraryFlyout = ({
@@ -60,8 +60,8 @@ export const AddFromLibraryFlyout = ({
     ) => {
       const libraryType = getAddFromLibraryType(type);
       if (!libraryType) {
-        core.notifications.toasts.addWarning(
-          i18n.translate('embeddableApi.addPanel.typeNotFound', {
+        coreServices.notifications.toasts.addWarning(
+          i18n.translate('dashboard.addFromLibrary.typeNotFound', {
             defaultMessage: 'Unable to load type: {type}',
             values: { type },
           })
@@ -79,7 +79,9 @@ export const AddFromLibraryFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={modalTitleId}>
-            {i18n.translate('embeddableApi.addPanel.Title', { defaultMessage: 'Add from library' })}
+            {i18n.translate('dashboard.addFromLibrary.title', {
+              defaultMessage: 'Add from library',
+            })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -87,19 +89,19 @@ export const AddFromLibraryFlyout = ({
         <SavedObjectFinder
           id="embeddableAddPanel"
           services={{
-            contentClient: contentManagement.client,
-            savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-            uiSettings: core.uiSettings,
+            contentClient: contentManagementService.client,
+            savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+            uiSettings: coreServices.uiSettings,
           }}
           onChoose={onChoose}
           savedObjectMetaData={libraryTypes}
           showFilter={true}
-          noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
+          noItemsMessage={i18n.translate('dashboard.addFromLibrary.noMatchingObjectsMessage', {
             defaultMessage: 'No matching objects found.',
           })}
           getTooltipText={(item) => {
             return item.managed
-              ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
+              ? i18n.translate('dashboard.addFromLibrary.managedPanelTooltip', {
                   defaultMessage:
                     'Elastic manages this panel. Adding it to a dashboard unlinks it from the library.',
                 })
