@@ -25,15 +25,16 @@ import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './uti
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { DiscoverBadgeButton } from '../stream_badges';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
-  DOCUMENTS_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
+  DOCUMENTS_COLUMN_HEADER,
 } from './translations';
 
 export function StreamsTreeTable({
@@ -135,8 +136,9 @@ export function StreamsTreeTable({
         {
           field: 'documentsCount',
           name: DOCUMENTS_COLUMN_HEADER,
-          width: '280px',
+          width: '180px',
           sortable: false,
+          align: 'right',
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
@@ -148,10 +150,11 @@ export function StreamsTreeTable({
           name: (
             <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
           ),
-          width: '160px',
           align: 'left',
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
+          width: '200px',
+          truncateText: { lines: 2 },
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
               lifecycle={item.effective_lifecycle!}
@@ -161,6 +164,16 @@ export function StreamsTreeTable({
               })}
             />
           ),
+        },
+        {
+          field: 'definition',
+          name: 'Actions',
+          width: '60px',
+          align: 'left',
+          sortable: false,
+          dataType: 'string',
+          render: (_: unknown, item: TableRow) =>
+            item.definition && <DiscoverBadgeButton definition={item.definition} />,
         },
       ]}
       itemId="name"

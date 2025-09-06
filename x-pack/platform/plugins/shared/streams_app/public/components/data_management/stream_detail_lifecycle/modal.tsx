@@ -50,6 +50,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
+import { timeUnits } from '../../../../common/time_units';
 import { useKibana } from '../../../hooks/use_kibana';
 import { rolloverCondition } from './helpers/rollover_condition';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -93,13 +94,6 @@ const isInvalidRetention = (value: string) => {
 
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
   const modalTitleId = useGeneratedHtmlId();
-
-  const timeUnits = [
-    { name: 'Days', value: 'd' },
-    { name: 'Hours', value: 'h' },
-    { name: 'Minutes', value: 'm' },
-    { name: 'Seconds', value: 's' },
-  ];
 
   const existingRetention = isDslLifecycle(definition.stream.ingest.lifecycle)
     ? parseDuration(definition.stream.ingest.lifecycle.dsl.data_retention)

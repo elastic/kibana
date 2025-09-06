@@ -91,7 +91,7 @@ export function DocumentsColumn({
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
-  const noDocCountData = histogramQueryFetch.error ? '' : <EuiI18nNumber value={docCount} />;
+  const noDocCountData = histogramQueryFetch.error ? '' : '-';
 
   const noHistogramData = histogramQueryFetch.error ? (
     <TooltipOrPopoverIcon
@@ -135,6 +135,7 @@ export function DocumentsColumn({
             aria-hidden="true"
             className={css`
               text-align: right;
+              font-family: 'Roboto mono', sans-serif;
             `}
           >
             {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}

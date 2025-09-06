@@ -21,6 +21,7 @@ export interface EnrichedStream extends ListStreamDetail {
   retentionMs: number;
   type: 'wired' | 'root' | 'classic';
   children?: EnrichedStream[];
+  definition: Streams.ingest.all.GetResponse;
 }
 
 export type TableRow = EnrichedStream & {
@@ -124,6 +125,11 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
       : node.stream.name;
   const children = 'children' in node ? node.children.map(enrichStream) : undefined;
 
+  const definition: Streams.ingest.all.GetResponse = {
+    stream: node.stream,
+    data_stream_exists: !!node.data_stream,
+  } as Streams.ingest.all.GetResponse;
+
   return {
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
@@ -136,6 +142,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
       : isRootStreamDefinition(node.stream)
       ? 'root'
       : 'wired',
+    definition,
     ...(children && { children }),
   };
 };
