@@ -8,16 +8,17 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
 import type {
-  SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
+  ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsPointInTimeFinderClient,
   SavedObjectsFindInternalOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
+import { decorateEsError } from './utils';
 
 /**
  * @internal
@@ -117,7 +118,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       }
       this.#open = false;
     } catch (e) {
-      this.#log.error(`Failed to close PIT for types [${this.#findOptions.type}]`);
+      this.#log.error(
+        `Failed to close PIT for types [${this.#findOptions.type}]: ${decorateEsError(e)}`
+      );
       throw e;
     }
   }
@@ -134,11 +137,16 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     } catch (e) {
       // Since `find` swallows 404s, it is expected that finder will do the same,
       // so we only rethrow non-404 errors here.
-      if (e.output?.statusCode !== 404) {
-        this.#log.error(`Failed to open PIT for types [${this.#findOptions.type}]`);
+      const findOptionsType = this.#findOptions.type;
+      const decoratedError = decorateEsError(e);
+      const statusCode = decoratedError.output?.statusCode;
+      if (statusCode !== 404) {
+        this.#log.error(
+          `Failed to open PIT for types [${findOptionsType}]: ${statusCode} ${decoratedError}`
+        );
         throw e;
       }
-      this.#log.debug(`Unable to open PIT for types [${this.#findOptions.type}]: 404 ${e}`);
+      this.#log.debug(`Unable to open PIT for types [${findOptionsType}]: 404 ${decoratedError}`);
     }
   }
 
@@ -166,6 +174,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         this.#internalOptions
       );
     } catch (e) {
+      this.#log.error(
+        `Failed to find next page for types [${this.#findOptions.type}]: ${decorateEsError(e)}`
+      );
       if (id) {
         // Clean up PIT on any errors.
         await this.close();
