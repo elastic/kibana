@@ -7,41 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, SavedObjectsType } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import { Response, SavedObjectsTypeRegistry } from '@kbn/core-di-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaResponseFactory,
+  SavedObjectsType,
+} from '@kbn/core/server';
 import type { SavedObjectManagementTypeInfo } from '../../common';
 
-const convertType = (sot: SavedObjectsType): SavedObjectManagementTypeInfo => {
+function convertType(sot: SavedObjectsType): SavedObjectManagementTypeInfo {
   return {
     name: sot.name,
     namespaceType: sot.namespaceType,
     hidden: sot.hidden,
     displayName: sot.management?.displayName ?? sot.name,
   };
-};
+}
 
-export const registerGetAllowedTypesRoute = (router: IRouter) => {
-  router.get(
-    {
-      path: '/api/kibana/management/saved_objects/_allowed_types',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: false,
+@injectable()
+export class GetAllowedTypesRoute {
+  static method = 'get' as const;
+  static path = '/api/kibana/management/saved_objects/_allowed_types';
+  static security = {
+    authz: {
+      enabled: false,
+      reason: 'This route is opted out from authorization',
     },
-    async (context, req, res) => {
-      const allowedTypes = (await context.core).savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .filter((type) => type.management!.visibleInManagement ?? true)
-        .map(convertType);
+  } as const;
+  static validate = false as const;
 
-      return res.ok({
-        body: {
-          types: allowedTypes,
-        },
-      });
-    }
-  );
-};
+  constructor(
+    @inject(SavedObjectsTypeRegistry) private readonly typeRegistry: ISavedObjectTypeRegistry,
+    @inject(Response) private readonly response: KibanaResponseFactory
+  ) {}
+
+  async handle() {
+    const allowedTypes = this.typeRegistry
+      .getImportableAndExportableTypes()
+      .filter(({ management }) => management!.visibleInManagement ?? true)
+      .map(convertType);
+
+    return this.response.ok({
+      body: {
+        types: allowedTypes,
+      },
+    });
+  }
+}
