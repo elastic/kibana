@@ -10,7 +10,7 @@
 import * as synth from '../synth';
 import { ComposerQuery } from './composer_query';
 import { ParameterHole } from './parameter_hole';
-import { processTemplateHoles, validateParamName } from './util';
+import { processTemplateHoles, removeNopCommands, validateParamName } from './util';
 import type {
   ComposerQueryGenerator,
   ComposerQueryTag,
@@ -39,6 +39,9 @@ const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQuer
          * ```
          */
         const ast = synth.qry(templateOrQuery);
+
+        ast.commands = removeNopCommands(ast.commands);
+
         const moreParamValues =
           typeof holes[0] === 'object' && !Array.isArray(holes[0]) ? holes[0] : {};
 
@@ -64,6 +67,9 @@ const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQuer
         templateOrQuery as TemplateStringsArray,
         ...(holes as synth.SynthTemplateHole[])
       );
+
+      ast.commands = removeNopCommands(ast.commands);
+
       const query = new ComposerQuery(ast, processedHoles.params);
 
       return query;
@@ -163,6 +169,10 @@ export const esql: ComposerQueryTag &
       }
 
       return esql`FROM ${nodes}`;
+    },
+
+    get nop() {
+      return synth.cmd`WHERE TRUE`;
     },
   }
 );

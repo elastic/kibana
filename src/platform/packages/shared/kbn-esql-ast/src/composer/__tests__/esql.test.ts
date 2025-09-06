@@ -322,3 +322,51 @@ ComposerQuery
     );
   });
 });
+
+describe('.nop command', () => {
+  test('can conditionally add a command', () => {
+    const query = esql`FROM index | ${false ? esql.nop : esql.cmd`WHERE foo > 42`} | LIMIT 10`;
+
+    expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+  });
+
+  test('does not insert "nop" command in the final query', () => {
+    const query = esql`FROM index | ${true ? esql.nop : esql.cmd`WHERE foo > 42`} | LIMIT 10`;
+
+    expect(query.print('basic')).toBe('FROM index | LIMIT 10');
+  });
+
+  test('removes all nop commands', () => {
+    const query = esql`FROM index
+      | ${esql.nop}
+      | WHERE foo > 42
+      | ${esql.nop}
+      | LIMIT 10`;
+
+    expect(query.print('basic')).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+  });
+
+  test('removes custom constructed "WHERE TRUE" commands', () => {
+    const query = esql`FROM index
+      | ${esql.cmd`WHERE TRUE`}
+      | WHERE foo > 42
+      | WHERE TRUE
+      | LIMIT 10`;
+
+    expect(query.print('basic')).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+  });
+});
+
+describe('nested queries', () => {
+  test('can construct a FORK command from using subqueries', () => {
+    const where1 = esql`WHERE bytes > 1 | SORT bytes ASC | LIMIT 1`;
+    const query = esql`FROM kibana_ecommerce_data
+      | FORK
+        ( ${where1} )
+        ( WHERE extension.keyword == "txt" | LIMIT 100 )`;
+
+    expect(query.print('basic')).toBe(
+      'FROM kibana_ecommerce_data | FORK (WHERE bytes > 1 | SORT bytes ASC | LIMIT 1) (WHERE extension.keyword == "txt" | LIMIT 100)'
+    );
+  });
+});
