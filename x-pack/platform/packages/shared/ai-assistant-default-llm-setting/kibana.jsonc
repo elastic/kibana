@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/ai-assistant-default-llm-setting",
+  "owner": ["@elastic/security-generative-ai"],
+  "group": "platform",
+  "visibility": "shared"
+}
