@@ -43,7 +43,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return inspector.isAvailable(embeddable.getInspectorAdapters());
+    return await inspector.isAvailable(embeddable.getInspectorAdapters());
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

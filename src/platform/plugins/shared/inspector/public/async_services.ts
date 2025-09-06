@@ -8,4 +8,5 @@
  */
 
 export { RequestsViewComponent } from './views/requests/components/requests_view';
+export { getRequestsViewDescription } from './views/requests';
 export { InspectorPanel } from './ui/inspector_panel';
