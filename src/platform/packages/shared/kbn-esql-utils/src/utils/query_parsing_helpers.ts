@@ -14,6 +14,7 @@ import {
   isFunctionExpression,
   isColumn,
   WrappingPrettyPrinter,
+  isStringLiteral,
 } from '@kbn/esql-ast';
 
 import type {
@@ -130,6 +131,38 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   });
 
   return columnName;
+};
+
+export const getSearchQueries = (esql: string) => {
+  const { ast } = parse(esql);
+  const functions: ESQLFunction[] = [];
+
+  walk(ast, {
+    visitFunction: (node) => functions.push(node),
+  });
+
+  const queryStringFunctions = ['kql', 'qstr'];
+  const searchFunctions = functions.filter(({ name }) => queryStringFunctions.includes(name));
+
+  if (!searchFunctions.length) {
+    return [];
+  }
+
+  // Extract query strings from all search functions
+  const searchQueries = searchFunctions
+    .map((func) => {
+      if (func.args.length > 0 && isStringLiteral(func.args[0])) {
+        return func.args[0].valueUnquoted.trim();
+      }
+      return '';
+    })
+    .filter((query) => query !== '');
+
+  if (!searchQueries.length) {
+    return [];
+  }
+
+  return searchQueries;
 };
 
 export const isQueryWrappedByPipes = (query: string): boolean => {
