@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
 import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { useAssistantContext } from '../../assistant_context';
 import type { FetchConnectorExecuteResponse } from '../api';
 import { fetchConnectorExecuteAction } from '../api';

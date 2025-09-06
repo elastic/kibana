@@ -19,7 +19,7 @@ import type {
 import { parseEsInterval } from '@kbn/data-plugin/common';
 
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
 import { roundDateToESInterval } from '@elastic/charts';
 import type { Adapters } from '@kbn/inspector-plugin/common';

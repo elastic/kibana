@@ -8,8 +8,23 @@
  */
 
 module.exports = (_, options = {}) => {
+  const deferRequiresOptions = options.defer_requires || {
+    ignoreSpecifiers: ['@testing-library/react', '@storybook/react', '@testing-library/user-event'],
+  };
   return {
     presets: [
+      {
+        plugins: [
+          [
+            require.resolve('./defer_requires'),
+            {
+              ...deferRequiresOptions,
+              enabled: true,
+            },
+          ],
+        ],
+      },
+      require('./common_preset'),
       [
         require.resolve('@babel/preset-env'),
         {
@@ -38,7 +53,6 @@ module.exports = (_, options = {}) => {
           ...(options['@babel/preset-env'] || {}),
         },
       ],
-      [require('./common_preset'), options],
     ],
   };
 };

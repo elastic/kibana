@@ -98,7 +98,7 @@ function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper value={apmContextMock} history={history}>
-        <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+        {<KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>}
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );

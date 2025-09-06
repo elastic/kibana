@@ -113,7 +113,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
   );
 }
 
-function ActionMenuSections({
+export function ActionMenuSections({
   transaction,
   profilingLocators,
 }: {
@@ -124,16 +124,11 @@ function ActionMenuSections({
   const location = useLocation();
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
-
   const logsLocator = getLogsLocatorFromUrlService(share.url)!;
-
   const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
-
   const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
-
   const assetDetailsLocator =
     share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-
   const {
     query: { rangeFrom, rangeTo, environment },
   } = useAnyOfApmParams(
@@ -142,7 +137,6 @@ function ActionMenuSections({
     '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
-
   const sections = getSections({
     transaction,
     basePath: core.http.basePath,
@@ -158,7 +152,6 @@ function ActionMenuSections({
     dataViewId: dataView?.id,
     assetDetailsLocator,
   });
-
   const externalMenuItems = useAsync(() => {
     return transaction
       ? getContextMenuItemsFromActions({
@@ -168,7 +161,6 @@ function ActionMenuSections({
         })
       : Promise.resolve([]);
   }, [transaction, uiActions]);
-
   if (externalMenuItems.value?.length) {
     sections.push([
       {

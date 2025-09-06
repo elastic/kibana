@@ -6,7 +6,7 @@
  */
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 export const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
