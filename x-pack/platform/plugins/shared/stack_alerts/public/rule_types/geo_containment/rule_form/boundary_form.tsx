@@ -60,9 +60,9 @@ export const BoundaryForm = (props: Props) => {
     let ignore = false;
     setIsLoading(true);
     setDataViewNotFound(false);
-    props.data.indexPatterns
+    props.data.dataViews
       .get(props.ruleParams.boundaryIndexId)
-      .then((nextDataView) => {
+      .then((nextDataView: DataView) => {
         if (!ignore) {
           setDataView(nextDataView);
           setGeoFields(getGeoFields(nextDataView.fields));
@@ -80,7 +80,7 @@ export const BoundaryForm = (props: Props) => {
     return () => {
       ignore = true;
     };
-  }, [props.ruleParams.boundaryIndexId, dataView?.id, props.data.indexPatterns]);
+  }, [props.ruleParams.boundaryIndexId, dataView?.id, props.data.dataViews]);
 
   function getDataViewError() {
     const validationError = props.getValidationError('boundaryIndexTitle');

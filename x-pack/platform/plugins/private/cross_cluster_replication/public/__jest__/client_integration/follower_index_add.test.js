@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RemoteClustersFormField } from '../../app/components';
@@ -125,7 +125,7 @@ describe('Create Follower index', () => {
           );
         };
 
-        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });
@@ -154,7 +154,7 @@ describe('Create Follower index', () => {
           );
         };
 
-        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });
