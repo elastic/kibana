@@ -305,7 +305,7 @@ describe('query tab with unified timeline', () => {
     it(
       'should hide row-renderers when disabled',
       async () => {
-        renderTestComponents();
+        const { container } = renderTestComponents();
         await waitFor(() => {
           expect(screen.getByTestId('discoverDocTable')).toBeVisible();
         });
@@ -316,12 +316,12 @@ describe('query tab with unified timeline', () => {
         expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
 
         fireEvent.click(screen.getByTestId('disable-all'));
-
         expect(
-          within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+          screen.getAllByTestId('renderer-checkbox')[0].querySelector('[type="checkbox"]')
         ).not.toBeChecked();
-
-        fireEvent.click(screen.getByLabelText('Closes this modal window'));
+        fireEvent.click(
+          container.closest('body')!.querySelector('[aria-label="Closes this modal window"]')!
+        );
 
         expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
 
@@ -780,7 +780,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -809,7 +809,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
