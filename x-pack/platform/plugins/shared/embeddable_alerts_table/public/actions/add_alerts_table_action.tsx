@@ -11,7 +11,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasUniqueId, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -42,6 +42,8 @@ export const getAddAlertsTableAction = (
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
+      let newlyCreatedPanel: unknown;
+
       openLazyFlyout({
         core: coreServices,
         parentApi: embeddable,
@@ -52,8 +54,8 @@ export const getAddAlertsTableAction = (
               coreServices={coreServices}
               closeFlyout={closeFlyout}
               ariaLabelledBy={ariaLabelledBy}
-              onSave={(tableConfig) => {
-                embeddable.addNewPanel(
+              onSave={async (tableConfig) => {
+                newlyCreatedPanel = await embeddable.addNewPanel(
                   {
                     panelType: EMBEDDABLE_ALERTS_TABLE_ID,
                     serializedState: { rawState: { tableConfig } },
@@ -63,6 +65,13 @@ export const getAddAlertsTableAction = (
               }}
             />
           );
+        },
+        flyoutProps: {
+          determineFocusTargetAfterClose: () => {
+            return apiHasUniqueId(newlyCreatedPanel)
+              ? document.getElementById(`panel-${newlyCreatedPanel.uuid}`)
+              : document.getElementById(`dashboardEditorMenuButton`);
+          },
         },
       });
     },

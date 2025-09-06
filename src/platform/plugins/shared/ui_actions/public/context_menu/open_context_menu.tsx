@@ -153,7 +153,6 @@ class ContextMenuSession extends EventEmitter {
 export function openContextMenu(
   panels: EuiContextMenuPanelDescriptor[],
   props: {
-    closeButtonAriaLabel?: string;
     onClose?: () => void;
     'data-test-subj'?: string;
   } = {}
@@ -165,9 +164,7 @@ export function openContextMenu(
   const container = getOrCreateContainerElement();
   const session = (activeSession = new ContextMenuSession());
   const onClose = () => {
-    if (props.onClose) {
-      props.onClose();
-    }
+    props.onClose?.();
     session.close();
   };
 

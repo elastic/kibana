@@ -155,15 +155,13 @@ export function InternalDashboardTopNav({
           viewMode === 'edit' ? (
             <>
               {dashboardTitle}
-              <EuiIcon
-                tabIndex={0}
-                role="button"
-                aria-label={topNavStrings.settings.description}
-                size="s"
-                type="pencil"
+              <button
                 onClick={() => openSettingsFlyout(dashboardApi)}
                 css={styles.updateIcon}
-              />
+                tabIndex={0}
+              >
+                <EuiIcon aria-label={topNavStrings.settings.description} size="s" type="pencil" />
+              </button>
             </>
           ) : (
             dashboardTitle
@@ -418,7 +416,9 @@ const topNavStyles = {
     css({
       '.kbnBody &': {
         marginLeft: euiTheme.size.xs,
-        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
+        verticalAlign: 'middle',
+        display: 'inline-block',
+        marginTop: `calc(-1 * ${euiTheme.size.xs})`,
         cursor: 'pointer',
       },
     }),

@@ -8,7 +8,6 @@
  */
 
 import { omit } from 'lodash';
-import { v4 as generateId } from 'uuid';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type {

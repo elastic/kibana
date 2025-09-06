@@ -396,7 +396,7 @@ export class LensPlugin {
       embeddable.registerAddFromLibraryType<LensAttributes>({
         onAdd: async (container, savedObject) => {
           const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
-          container.addNewPanel(
+          return container.addNewPanel(
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
