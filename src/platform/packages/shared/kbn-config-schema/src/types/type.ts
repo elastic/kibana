@@ -40,10 +40,12 @@ export interface TypeMeta {
   'x-discontinued'?: string;
 }
 
-export interface TypeOptions<T> {
-  defaultValue?: T | Reference<T> | (() => T);
+export type DefaultValue<T> = T | (() => T) | Reference<T>;
+
+export interface TypeOptions<T, D extends DefaultValue<T>, M extends Record<string, unknown> = {}> {
+  defaultValue?: D;
   validate?: (value: T) => string | void;
-  meta?: TypeMeta;
+  meta?: TypeMeta & M;
 }
 
 export interface SchemaStructureEntry {
@@ -96,11 +98,31 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
-export abstract class Type<V> {
-  // This is just to enable the `TypeOf` helper, and because TypeScript would
-  // fail if it wasn't initialized we use a "trick" to which basically just
-  // sets the value to `null` while still keeping the type.
+// Need to turn off the distributive behavior to check never correctly
+type Input<V, D = never> = [D] extends [never] ? V : V | undefined;
+
+export abstract class Type<V, D extends DefaultValue<V> = never> {
+  /**
+   * To track output type of the schema, duplicate alias of `_ouput`
+   *
+   * @deprecated Use `TypeOf<typeof mySchema>` - Never use this directly
+   */
   public readonly type: V = null! as V;
+  /**
+   * To track output type of the schema
+   *
+   * @deprecated Use `TypeOfOutput<typeof mySchema>` - Never use this directly
+   */
+  public readonly _output: V = null! as V;
+  /**
+   * To track input type of the schema
+   *
+   * @deprecated Use `TypeOfInput<typeof mySchema>` - Never use this directly
+   */
+  public readonly _input: Input<V, D> = null! as Input<V, D>;
+
+  // @ts-ignore - This is needed to preserve the type of D, otherwise it will become ambigious
+  private readonly _default: D = null! as D;
 
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
@@ -111,19 +133,17 @@ export abstract class Type<V> {
    */
   protected readonly internalSchema: Schema;
 
-  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+  protected constructor(schema: Schema, options: TypeOptions<V, D> = {}) {
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
       // If default value is a function, then we must provide description for it.
       if (typeof options.defaultValue === 'function') {
         schema = schema.default(options.defaultValue);
+      } else if (Reference.isReference(options.defaultValue)) {
+        schema = schema.default(options.defaultValue.getSchema());
       } else {
-        schema = schema.default(
-          Reference.isReference(options.defaultValue)
-            ? options.defaultValue.getSchema()
-            : (options.defaultValue as any)
-        );
+        schema = schema.default(options.defaultValue);
       }
     }
 
@@ -151,7 +171,7 @@ export abstract class Type<V> {
     this.internalSchema = schema;
   }
 
-  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
+  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V, D> {
     return this;
   }
 

@@ -10,24 +10,29 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Reference } from '../references';
-import type { ExtendsDeepOptions, TypeOptions } from './type';
+import type { DefaultValue, ExtendsDeepOptions, TypeOptions } from './type';
 import { Type } from './type';
 
 export type ConditionalTypeValue = string | number | boolean | object | null;
 
-export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<B | C> {
+export class ConditionalType<
+  A extends ConditionalTypeValue,
+  B,
+  C,
+  DV extends DefaultValue<B | C>
+> extends Type<B | C, DV> {
   private readonly leftOperand: Reference<A>;
   private readonly rightOperand: Reference<A> | A | Type<unknown>;
   private readonly equalType: Type<B>;
   private readonly notEqualType: Type<C>;
-  private readonly options?: TypeOptions<B | C>;
+  private readonly options?: TypeOptions<B | C, DV>;
 
   constructor(
     leftOperand: Reference<A>,
     rightOperand: Reference<A> | A | Type<unknown>,
     equalType: Type<B>,
     notEqualType: Type<C>,
-    options?: TypeOptions<B | C>
+    options?: TypeOptions<B | C, DV>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
       is:

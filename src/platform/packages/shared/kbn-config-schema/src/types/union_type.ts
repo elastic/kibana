@@ -10,18 +10,21 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import type { ExtendsDeepOptions } from './type';
+import type { DefaultValue, ExtendsDeepOptions } from './type';
 import { Type, type TypeOptions, type TypeMeta } from './type';
 
-export type UnionTypeOptions<T> = TypeOptions<T> & {
+export type UnionTypeOptions<T, D extends DefaultValue<T>> = TypeOptions<T, D> & {
   meta?: Omit<TypeMeta, 'id'>;
 };
 
-export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
+export class UnionType<RTS extends Array<Type<any>>, T, D extends DefaultValue<T>> extends Type<
+  T,
+  D
+> {
   private readonly unionTypes: RTS;
-  private readonly typeOptions?: UnionTypeOptions<T>;
+  private readonly typeOptions?: UnionTypeOptions<T, D>;
 
-  constructor(types: RTS, options?: UnionTypeOptions<T>) {
+  constructor(types: RTS, options?: UnionTypeOptions<T, D>) {
     const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
     super(schema, options);
