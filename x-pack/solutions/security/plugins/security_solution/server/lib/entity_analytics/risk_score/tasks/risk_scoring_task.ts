@@ -306,6 +306,7 @@ export const runTask = async ({
       let afterKeys: AfterKeys = {};
       while (!isWorkComplete) {
         const now = Date.now();
+
         const result = await riskScoreService.calculateAndPersistScores({
           afterKeys,
           index,
