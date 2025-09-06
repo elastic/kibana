@@ -169,6 +169,8 @@ export async function executor(
     headers,
   });
 
+  console.log('headersWithBasicAuth: ', headersWithBasicAuth);
+
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
