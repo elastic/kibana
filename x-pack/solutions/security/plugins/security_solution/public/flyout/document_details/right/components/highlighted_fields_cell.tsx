@@ -6,9 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
@@ -50,6 +51,11 @@ export interface HighlightedFieldsCellProps {
    * when clicking on "Source event" id
    */
   ancestorsIndexName?: string;
+  /**
+   * Caps the amount of values displayed in the cell.
+   * If the limit is reached a "show more" button is being rendered
+   */
+  displayValuesLimit?: number;
 }
 
 /**
@@ -62,14 +68,81 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   scopeId = '',
   showPreview = false,
   ancestorsIndexName,
+  displayValuesLimit,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
   const { euiTheme } = useEuiTheme();
+  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+  const togglePopover = useCallback(
+    () => setIsOverflowPopoverOpen((currentIsOpen) => !currentIsOpen),
+    []
+  );
+
+  const visibleValues = useMemo(() => {
+    /**
+     * Check if a limit was set and if the limit
+     * is within the values size
+     */
+    if (
+      displayValuesLimit &&
+      displayValuesLimit > 0 &&
+      displayValuesLimit < (values?.length ?? 0)
+    ) {
+      return values?.slice(0, displayValuesLimit);
+    }
+
+    return values;
+  }, [values, displayValuesLimit]);
+
+  const overflownValues = useMemo(() => {
+    /**
+     * Check if a limit was set and if the limit
+     * is within the values size
+     */
+    if (
+      displayValuesLimit &&
+      displayValuesLimit > 0 &&
+      displayValuesLimit < (values?.length ?? 0)
+    ) {
+      return values?.slice(displayValuesLimit);
+    }
+
+    return [];
+  }, [values, displayValuesLimit]);
+
+  const isShowMoreButtonVisible = useMemo(() => {
+    return !!displayValuesLimit && displayValuesLimit < (values?.length ?? 0);
+  }, [displayValuesLimit, values]);
+
+  const renderValue = useCallback(
+    (value: string, i: number) => (
+      <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
+        {showPreview && isFlyoutLink({ field, scopeId }) ? (
+          <PreviewLink
+            field={field}
+            value={value}
+            scopeId={scopeId}
+            data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
+            ancestorsIndexName={ancestorsIndexName}
+          />
+        ) : field === AGENT_STATUS_FIELD_NAME ? (
+          <AgentStatus
+            agentId={String(value ?? '')}
+            agentType={agentType}
+            data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+          />
+        ) : (
+          <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
+        )}
+      </div>
+    ),
+    [agentType, ancestorsIndexName, field, scopeId, showPreview]
+  );
 
   return (
-    <React.Fragment
+    <div
       css={css`
         div {
           margin-bottom: ${euiTheme.size.xs};
@@ -80,33 +153,26 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         }
       `}
     >
-      {values != null &&
-        values.map((value, i) => {
-          return (
-            <div
-              key={`${i}-${value}`}
-              data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
-            >
-              {showPreview && isFlyoutLink({ field, scopeId }) ? (
-                <PreviewLink
-                  field={field}
-                  value={value}
-                  scopeId={scopeId}
-                  data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
-                  ancestorsIndexName={ancestorsIndexName}
-                />
-              ) : field === AGENT_STATUS_FIELD_NAME ? (
-                <AgentStatus
-                  agentId={String(value ?? '')}
-                  agentType={agentType}
-                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-                />
-              ) : (
-                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
-              )}
-            </div>
-          );
+      {visibleValues != null &&
+        visibleValues.map((value, i) => {
+          return renderValue(value, i);
         })}
-    </React.Fragment>
+      {isOverflowPopoverOpen && overflownValues?.map(renderValue)}
+      {isShowMoreButtonVisible && (
+        <EuiButtonEmpty size="xs" flush="both" onClick={togglePopover}>
+          {isOverflowPopoverOpen ? (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.alertsHighlightedField.showMore"
+              defaultMessage="Show less"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.alertsHighlightedField.showLess"
+              defaultMessage="Show more"
+            />
+          )}
+        </EuiButtonEmpty>
+      )}
+    </div>
   );
 };
