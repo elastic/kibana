@@ -124,7 +124,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           isFlyout={isFlyout}
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
-          initialMetadata={initialMetadata}
+          initialMetadata={{ ...initialMetadata, isEdit: true }}
           initialEditStep={initialEditStep}
         />
       );

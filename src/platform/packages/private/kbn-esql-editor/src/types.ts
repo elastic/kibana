@@ -60,6 +60,8 @@ export interface ESQLEditorProps {
   errors?: Error[];
   /** Warning string as it comes from ES */
   warning?: string;
+  /** Warning string as it comes from the client */
+  clientWarning?: string;
   /** Disables the editor and displays loading icon in run button
    * It is also used for hiding the history component if it is not defined
    */
