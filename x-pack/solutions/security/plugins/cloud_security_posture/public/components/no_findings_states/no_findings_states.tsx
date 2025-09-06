@@ -26,6 +26,7 @@ import type { IndexDetails, CspStatusCode } from '@kbn/cloud-security-posture-co
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { EmptyStatesIllustrationContainer } from '../empty_states_illustration_container';
 import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
@@ -40,7 +41,8 @@ import {
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
 import cloudsSVG from '../../assets/illustrations/clouds.svg';
-import misconfigurationsVendorsSVG from '../../assets/illustrations/misconfigurations_vendors.svg';
+import misconfigurationsVendorBrightSVG from '../../assets/illustrations/misconfiguration_vendor_bright.svg';
+import misconfigurationsVendorDarkSVG from '../../assets/illustrations/misconfiguration_vendor_dark.svg';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
@@ -185,6 +187,7 @@ const EmptySecurityFindingsPrompt = () => {
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiFlexGroup>
@@ -272,8 +275,14 @@ const EmptySecurityFindingsPrompt = () => {
               <EmptyStatesIllustrationContainer>
                 <EuiImage
                   size="fullWidth"
-                  src={misconfigurationsVendorsSVG}
-                  alt="misconfigurationsVendorsSVG"
+                  src={
+                    isDarkMode ? misconfigurationsVendorDarkSVG : misconfigurationsVendorBrightSVG
+                  }
+                  alt={
+                    isDarkMode
+                      ? 'misconfigurationsVendorDarkSVG'
+                      : 'misconfigurationsVendorBrightSVG'
+                  }
                   role="presentation"
                 />
               </EmptyStatesIllustrationContainer>
@@ -293,7 +302,7 @@ const EmptySecurityFindingsPrompt = () => {
               <p>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
-                  defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
+                  defaultMessage="Ingest findings from your existing {lineBreak}  CSPM solution, while taking {lineBreak} advantage of Elastic’s security workflows and {lineBreak} dashboards."
                   values={{ lineBreak: <br /> }}
                 />
               </p>
