@@ -36,6 +36,7 @@ import {
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
+import type { OnLlmResponse } from '../lib/langchain/executors/types';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -80,7 +81,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        let onLlmResponse;
+        let onLlmResponse: OnLlmResponse | undefined;
 
         const coreContext = await context.core;
         const inferenceChatModelDisabled =
@@ -157,11 +158,12 @@ export const postActionsConnectorExecuteRoute = (
             disabled: request.query.content_references_disabled,
           });
 
-          onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
-          ): Promise<void> => {
+          onLlmResponse = async ({
+            content,
+            traceData,
+            isError,
+            interruptValue,
+          }): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -176,6 +178,7 @@ export const postActionsConnectorExecuteRoute = (
                 isError,
                 traceData,
                 contentReferences: prunedContentReferencesStore,
+                interruptValue,
               });
             }
           };
@@ -243,7 +246,11 @@ export const postActionsConnectorExecuteRoute = (
           logger.error(err);
           const error = transformError(err);
           if (onLlmResponse) {
-            await onLlmResponse(error.message, {}, true);
+            await onLlmResponse({
+              content: error.message,
+              traceData: {},
+              isError: true,
+            });
           }
 
           const kbDataClient =
