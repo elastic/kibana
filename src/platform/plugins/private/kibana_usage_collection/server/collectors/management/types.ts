@@ -49,10 +49,7 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'onechat:mcp:enabled': boolean;
-  'onechat:a2a:enabled': boolean;
-  'onechat:ui:enabled': boolean;
-  'onechat:api:enabled': boolean;
+  'agentBuilder:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
