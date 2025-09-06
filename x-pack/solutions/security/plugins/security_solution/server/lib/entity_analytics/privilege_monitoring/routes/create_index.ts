@@ -56,7 +56,10 @@ export const createPrivilegeMonitoringIndicesRoute = (
         );
 
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const dataSourcesService = createDataSourcesService(dataClient);
+        const config = secSol.getConfig();
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+        const dataSourcesService = createDataSourcesService(dataClient, maxUsersAllowed);
         try {
           await dataSourcesService.createImportIndex(indexName, indexMode);
           return response.ok();
