@@ -12,7 +12,7 @@ import type { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
   configId: string,
-  location: string
+  locationId: string
 ): { data?: Ping; loading?: boolean } => {
   const params = {
     index: SYNTHETICS_INDEX_PATTERN,
@@ -27,7 +27,7 @@ export const useMonitorDetail = (
           },
           {
             term: {
-              'observer.geo.name': location,
+              'observer.name': locationId,
             },
           },
           {
@@ -42,7 +42,7 @@ export const useMonitorDetail = (
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,
-    [configId, location],
+    [configId, locationId],
     {
       name: 'getMonitorStatusByLocation',
     }

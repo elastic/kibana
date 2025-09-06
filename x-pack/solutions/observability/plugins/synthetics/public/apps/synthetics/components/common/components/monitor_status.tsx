@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useScreenContext } from '../../../hooks/use_screen_context';
 
 export const BadgeStatus = ({
@@ -42,17 +41,16 @@ export const BadgeStatus = ({
 
 export const MonitorStatus = ({
   loading,
-  monitor,
   status,
+  monitorType,
   compressed = true,
 }: {
   loading?: boolean;
   compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
   status?: string;
+  monitorType: string;
 }) => {
-  const isBrowserType = monitor.type === 'browser';
-  const loadingContent = loading && !monitor;
+  const isBrowserType = monitorType === 'browser';
 
   return (
     <EuiDescriptionList
@@ -61,7 +59,7 @@ export const MonitorStatus = ({
       listItems={[
         {
           title: STATUS_LABEL,
-          description: loadingContent ? (
+          description: loading ? (
             <EuiSkeletonText lines={1} />
           ) : (
             <BadgeStatus status={status} isBrowserType={isBrowserType} />
