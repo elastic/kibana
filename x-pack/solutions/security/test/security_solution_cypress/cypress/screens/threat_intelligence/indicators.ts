@@ -54,7 +54,7 @@ export const FLYOUT_CLOSE_BUTTON = getDataTestSubjectSelector('euiFlyoutCloseBut
 export const FLYOUT_TITLE = getDataTestSubjectSelector('tiIndicatorFlyoutTitle');
 export const FLYOUT_TABS = getDataTestSubjectSelector('tiIndicatorFlyoutTabs');
 export const FLYOUT_TABLE = getDataTestSubjectSelector('tiFlyoutTable');
-export const FLYOUT_JSON = getDataTestSubjectSelector('tiFlyoutJsonCodeBlock');
+export const FLYOUT_JSON = getDataTestSubjectSelector('indicators-flyoutjsonView');
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
   'tiFlyoutOverviewTableRowFilterInButton'
 );
