@@ -341,9 +341,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       entityAnalytics: subPlugins.entityAnalytics.start(
         this.experimentalFeatures.riskScoringRoutesEnabled
       ),
-      siemMigrations: subPlugins.siemMigrations.start(
-        !this.experimentalFeatures.siemMigrationsDisabled
-      ),
+      siemMigrations: subPlugins.siemMigrations.start(this.experimentalFeatures),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
     };
