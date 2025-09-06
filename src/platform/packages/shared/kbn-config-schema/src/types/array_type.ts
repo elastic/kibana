@@ -48,6 +48,22 @@ export class ArrayType<T> extends Type<T[]> {
     return new ArrayType(this.arrayType.extendsDeep(options), this.arrayOptions);
   }
 
+  public getInputSchema(): ArrayType<T> | import('./maybe_type').MaybeType<T[]> {
+    // For arrays, create a new array with the input schema of the item type
+    const inputItemType = this.arrayType.getInputSchema();
+    
+    // Create new options without defaultValue to avoid circular default handling
+    const { defaultValue, ...optionsWithoutDefault } = this.arrayOptions;
+    const inputArrayType = new ArrayType(inputItemType as Type<T>, optionsWithoutDefault);
+    
+    // If this array has a default value, wrap it in MaybeType
+    if (defaultValue !== undefined) {
+      return new (require('./maybe_type').MaybeType)(inputArrayType);
+    }
+    
+    return inputArrayType;
+  }
+
   protected handleError(type: string, { limit, reason, value }: Record<string, any>) {
     switch (type) {
       case 'any.required':

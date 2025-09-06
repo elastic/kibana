@@ -56,6 +56,29 @@ export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<
     );
   }
 
+  public getInputSchema(): ConditionalType<A, B, C> | import('./maybe_type').MaybeType<B | C> {
+    // For conditional types, create a new conditional with input schemas of both branches
+    const inputEqualType = this.equalType.getInputSchema();
+    const inputNotEqualType = this.notEqualType.getInputSchema();
+    
+    // Create new options without defaultValue to avoid circular default handling
+    const { defaultValue, ...optionsWithoutDefault } = this.options || {};
+    const inputConditionalType = new ConditionalType(
+      this.leftOperand,
+      this.rightOperand,
+      inputEqualType.getInputSchema() as Type<B>,
+      inputNotEqualType.getInputSchema() as Type<C>,
+      optionsWithoutDefault
+    );
+    
+    // If this conditional has a default value, wrap it in MaybeType
+    if (defaultValue !== undefined) {
+      return new (require('./maybe_type').MaybeType)(inputConditionalType);
+    }
+    
+    return inputConditionalType;
+  }
+
   protected handleError(type: string, { value }: Record<string, any>) {
     if (type === 'any.required') {
       return `expected at least one defined value but got [${typeDetect(value)}]`;
