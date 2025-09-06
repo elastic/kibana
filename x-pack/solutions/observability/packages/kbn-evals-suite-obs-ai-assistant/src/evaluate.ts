@@ -27,9 +27,12 @@ export const evaluate = base.extend<
     },
   ],
   chatClient: [
-    async ({ fetch, log, connector }, use, testInfo) => {
-      const chatClient = new ObservabilityAIAssistantEvaluationChatClient(fetch, log, connector.id);
+    async ({ fetch, log, connector, knowledgeBaseClient }, use) => {
+      // Ensure the KB fixture is initialized before creating the chat client.
+      // This guarantees KB is installed even if no spec references knowledgeBaseClient directly.
+      await knowledgeBaseClient.ensureInstalled();
 
+      const chatClient = new ObservabilityAIAssistantEvaluationChatClient(fetch, log, connector.id);
       await use(chatClient);
     },
     {

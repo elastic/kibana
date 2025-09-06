@@ -30,13 +30,10 @@ export class KnowledgeBaseClient {
         const response = await this.fetch<{}>('/internal/observability_ai_assistant/kb/setup', {
           method: 'POST',
           query: {
+            inference_id: '.elser-2-elasticsearch',
             wait_until_complete: true,
           },
-          body: JSON.stringify({
-            query: {
-              inference_id: '.elser-2-elasticsearch',
-            },
-          }),
+          body: JSON.stringify({}),
         });
 
         this.log.info('Knowledge base is ready');
