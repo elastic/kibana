@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import React from 'react';
 import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
   distinctUntilChanged,
@@ -31,6 +31,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
+import { BackgroundSearchCallout } from './background_search_callout';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type {
@@ -702,6 +703,20 @@ export class SessionService {
       isDisabled: () => ({ disabled: false }),
       ...this.searchSessionIndicatorUiConfig,
     };
+  }
+
+  public getBackgroundSearchIndicator() {
+    // const bgSearch = useObservable(this.state$);
+    const bgSearchEnabled = this.featureFlags?.getBooleanValue(
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+      false
+    );
+
+    if (!bgSearchEnabled) {
+      return null;
+    }
+    // Note that there are more bgSearch states we need to check for
+    return <BackgroundSearchCallout bgsState={this.state$} />;
   }
 
   private async refreshSearchSessionSavedObject() {

@@ -649,6 +649,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
+        {this.services.data.search.session.getBackgroundSearchIndicator()}
         <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
