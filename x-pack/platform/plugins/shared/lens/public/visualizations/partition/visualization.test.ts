@@ -19,7 +19,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import type { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { PartitionChartsMeta } from './partition_charts_meta';
+import { PartitionChartsMeta } from '../../../common/visualizations/partition/partition_charts_meta';
 import type { CollapseFunction } from '../../../common/expressions';
 import type { PaletteOutput } from '@kbn/coloring';
 import { LegendValue } from '@elastic/charts';

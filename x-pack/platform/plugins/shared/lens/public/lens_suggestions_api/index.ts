@@ -6,7 +6,7 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChartType } from '@kbn/visualization-utils';
+import type { ChartType, LensVisualizationType } from '@kbn/visualization-utils';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
 import type { DataViewsState } from '../state_management';
@@ -20,6 +20,7 @@ interface SuggestionsApiProps {
   datasourceMap?: DatasourceMap;
   excludedVisualizations?: string[];
   preferredChartType?: ChartType;
+  preferredVisualizationId?: LensVisualizationType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
 
@@ -30,6 +31,7 @@ export const suggestionsApi = ({
   visualizationMap,
   excludedVisualizations,
   preferredChartType,
+  preferredVisualizationId,
   preferredVisAttributes,
 }: SuggestionsApiProps) => {
   const initialContext = context;
@@ -115,10 +117,13 @@ export const suggestionsApi = ({
   }
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  const suggestionsList = [activeVisualization, ...newSuggestions];
+  let suggestionsList = [activeVisualization, ...newSuggestions];
+  if (preferredVisualizationId) {
+    suggestionsList = suggestionsList.filter((s) => s.visualizationId === preferredVisualizationId);
+  }
   if (suggestionsList.length > 1 && preferredChartType) {
-    const compatibleSuggestion = suggestionsList.find(
-      (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
+    const compatibleSuggestion = suggestionsList.find((s) =>
+      s.title.toLowerCase().includes(preferredChartType)
     );
 
     if (compatibleSuggestion) {

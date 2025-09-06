@@ -9,6 +9,10 @@ export enum VisualizeESQLUserIntention {
   generateQueryOnly = 'generateQueryOnly',
   executeAndReturnResults = 'executeAndReturnResults',
   visualizeAuto = 'visualizeAuto',
+  visualize = 'visualize',
+}
+
+export enum LegacyVisualizeESQLUserIntention {
   visualizeXy = 'visualizeXy',
   visualizeBar = 'visualizeBar',
   visualizeLine = 'visualizeLine',

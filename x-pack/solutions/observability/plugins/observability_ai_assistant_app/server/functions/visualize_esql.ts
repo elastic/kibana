@@ -6,10 +6,97 @@
  */
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import {
+  VISUALIZE_QUERY_FUNCTION_NAME,
+  VISUALIZE_ESQL_USER_INTENTIONS,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import { LensVisualizationType } from '@kbn/visualization-utils';
+import { visualizationTypes as partitionVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/partition/partition_charts_meta';
+import { visualizationTypes as datatableVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/datatable_visualization';
+import { visualizationTypes as gaugeVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/gauge_visualization';
+import { visualizationTypes as heatmapVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/heatmap_visualization';
+import { visualizationTypes as legacymetricVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/legacy_metric_visualization';
+import { visualizationTypes as metricVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/metric_visualization';
+import { visualizationTypes as tagcloudVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/tagcloud_visualization';
+import { visualizationTypes as xyVisualizationTypes } from '@kbn/lens-plugin/common/visualizations/xy_visualization';
+import type { VisualizationType } from '@kbn/lens-plugin/common/types';
 import type { VisualizeQueryResponsev2 } from '../../common/functions/visualize_esql';
-import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '.';
 import { runAndValidateEsqlQuery } from './query/validate_esql_query';
+
+type VisualizationMap = Record<LensVisualizationType, VisualizationType[]>;
+
+const visualizationMap: VisualizationMap = {
+  [LensVisualizationType.XY]: xyVisualizationTypes,
+  [LensVisualizationType.Pie]: partitionVisualizationTypes,
+  [LensVisualizationType.Metric]: metricVisualizationTypes,
+  [LensVisualizationType.Heatmap]: heatmapVisualizationTypes,
+  [LensVisualizationType.Gauge]: gaugeVisualizationTypes,
+  [LensVisualizationType.Datatable]: datatableVisualizationTypes,
+  [LensVisualizationType.LegacyMetric]: legacymetricVisualizationTypes,
+  [LensVisualizationType.Tagcloud]: tagcloudVisualizationTypes,
+};
+
+const getVisualizationSchema = (visualizations: VisualizationMap) => {
+  const visualizationsSchema = Object.entries(visualizations).flatMap(
+    ([visualizationId, visualizationTypes]) =>
+      visualizationTypes.map((v) => ({
+        visualizationId,
+        shape: v.id,
+        label: v.label,
+        description: v.description,
+        ...(v.subtypes &&
+          v.subtypes.length > 0 && {
+            availableSubtypes: v.subtypes,
+            subtypeNote: `Use shape "${v.id}" for any of these variations: 
+            ${v.subtypes.join(', ')}`,
+          }),
+      }))
+  );
+
+  return JSON.stringify(visualizationsSchema, null, 2);
+};
+
+const VISUALIZATION_SCHEMA = getVisualizationSchema(visualizationMap);
+
+export const visualizeESQLFunction = {
+  name: VISUALIZE_QUERY_FUNCTION_NAME,
+  isInternal: true,
+  description: `Use this function to visualize charts for ES|QL queries. 
+  use the visualizationId and shape to specify the desired visualization.
+  **Default Visualization:** If no visualization is specified, use XY bar chart (visualizationId: "${LensVisualizationType.XY}", shape: "bar").
+  Available visualizations (JSON Schema):
+  ${VISUALIZATION_SCHEMA}
+  `,
+  descriptionForUser: 'Use this function to visualize charts for ES|QL queries.',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+      },
+      visualization: {
+        type: 'object',
+        properties: {
+          visualizationId: {
+            type: 'string',
+            enum: Object.keys(visualizationMap),
+          },
+          shape: {
+            type: 'string',
+            enum: Object.values(visualizationMap).flatMap((type) => type.map((t) => t.id)),
+          },
+        },
+      },
+      intention: {
+        type: 'string',
+        enum: VISUALIZE_ESQL_USER_INTENTIONS,
+      },
+    },
+    required: ['query', 'intention'],
+  } as const,
+  contexts: ['core'],
+};
 
 const getMessageForLLM = (
   intention: VisualizeESQLUserIntention,

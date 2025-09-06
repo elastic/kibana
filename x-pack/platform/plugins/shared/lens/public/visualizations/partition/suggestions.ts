@@ -21,7 +21,7 @@ import {
 } from '../../../common/constants';
 import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
-import { PartitionChartsMeta } from './partition_charts_meta';
+import { PartitionChartsMeta } from '../../../common/visualizations/partition/partition_charts_meta';
 import { layerTypes } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 

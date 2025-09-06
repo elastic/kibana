@@ -8,8 +8,6 @@
 import type { OptionalKeys } from 'utility-types';
 import type { MetricVisualizationState } from './types';
 
-export const LENS_METRIC_ID = 'lnsMetric';
-
 export const GROUP_ID = {
   METRIC: 'metric',
   SECONDARY_METRIC: 'secondaryMetric',

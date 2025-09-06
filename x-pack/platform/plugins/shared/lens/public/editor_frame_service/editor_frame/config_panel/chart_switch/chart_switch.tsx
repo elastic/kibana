@@ -11,12 +11,12 @@ import { ExperimentalBadge } from '../../../../shared_components';
 import type {
   Visualization,
   FramePublicAPI,
-  VisualizationType,
   VisualizationMap,
   DatasourceMap,
   Suggestion,
   DatasourcePublicAPI,
 } from '../../../../types';
+import type { VisualizationType } from '../../../../../common/types';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
 import type { VisualizationState, DatasourceStates } from '../../../../state_management';

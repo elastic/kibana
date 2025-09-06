@@ -35,9 +35,11 @@ import type {
 import {
   ChatActionClickType,
   VisualizeESQLUserIntention,
+  LegacyVisualizeESQLUserIntention,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { type LensVisualizationType, ChartType } from '@kbn/visualization-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -72,6 +74,8 @@ interface VisualizeESQLProps {
   userOverrides?: unknown;
   /** User's preferation chart type as it comes from the model */
   preferredChartType?: ChartType;
+  /** User's preferation visualization id as it comes from the model */
+  preferredVisualizationId?: LensVisualizationType;
   /** Error messages returned by the query validator */
   errorMessages?: string[];
   ObservabilityAIAssistantMultipaneFlyoutContext: ObservabilityAIAssistantPublicStart['ObservabilityAIAssistantMultipaneFlyoutContext'];
@@ -104,6 +108,7 @@ export function VisualizeESQL({
   onActionClick,
   userOverrides,
   preferredChartType,
+  preferredVisualizationId,
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
 }: VisualizeESQLProps) {
@@ -159,7 +164,8 @@ export function VisualizeESQL({
         context,
         dataViewAsync.value,
         [],
-        preferredChartType
+        preferredChartType,
+        preferredVisualizationId
       );
 
       if (chartSuggestions?.length) {
@@ -181,7 +187,15 @@ export function VisualizeESQL({
         setLensInput(lensEmbeddableInput);
       }
     }
-  }, [columns, dataViewAsync.value, lensHelpersAsync.value, lensInput, query, preferredChartType]);
+  }, [
+    columns,
+    dataViewAsync.value,
+    lensHelpersAsync.value,
+    lensInput,
+    query,
+    preferredChartType,
+    preferredVisualizationId,
+  ]);
 
   // trigger options to open the inline editing flyout correctly
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
@@ -386,6 +400,45 @@ export function VisualizeESQL({
   );
 }
 
+/**
+ * Converts a LegacyVisualizeESQLUserIntention to a ChartType.
+ */
+const convertIntentionToChartType = (
+  intention: LegacyVisualizeESQLUserIntention
+): ChartType | undefined => {
+  switch (intention) {
+    case LegacyVisualizeESQLUserIntention.visualizeBar:
+      return ChartType.Bar;
+
+    case LegacyVisualizeESQLUserIntention.visualizeDonut:
+      return ChartType.Pie;
+
+    case LegacyVisualizeESQLUserIntention.visualizeHeatmap:
+      return ChartType.Heatmap;
+
+    case LegacyVisualizeESQLUserIntention.visualizeLine:
+      return ChartType.Line;
+
+    case LegacyVisualizeESQLUserIntention.visualizeArea:
+      return ChartType.Area;
+
+    case LegacyVisualizeESQLUserIntention.visualizeTable:
+      return ChartType.Table;
+
+    case LegacyVisualizeESQLUserIntention.visualizeTagcloud:
+      return ChartType.Tagcloud;
+
+    case LegacyVisualizeESQLUserIntention.visualizeTreemap:
+      return ChartType.Treemap;
+
+    case LegacyVisualizeESQLUserIntention.visualizeWaffle:
+      return ChartType.Waffle;
+
+    case LegacyVisualizeESQLUserIntention.visualizeXy:
+      return ChartType.XY;
+  }
+};
+
 export function registerVisualizeQueryRenderFunction({
   registerRenderFunction,
   pluginsStart,
@@ -396,7 +449,7 @@ export function registerVisualizeQueryRenderFunction({
   registerRenderFunction(
     VISUALIZE_QUERY_FUNCTION_NAME,
     ({
-      arguments: { query, userOverrides, intention },
+      arguments: { query, userOverrides, intention, visualization = {} },
       response,
       onActionClick,
     }: Parameters<RenderFunction<VisualizeESQLFunctionArguments, {}>>[0]) => {
@@ -418,7 +471,9 @@ export function registerVisualizeQueryRenderFunction({
         userOverrides = typedResponse.data.userOverrides;
       }
 
+      const { visualizationId, shape } = visualization;
       let preferredChartType: ChartType | undefined;
+      let preferredVisualizationId: LensVisualizationType | undefined;
 
       switch (intention) {
         case VisualizeESQLUserIntention.executeAndReturnResults:
@@ -426,45 +481,13 @@ export function registerVisualizeQueryRenderFunction({
         case VisualizeESQLUserIntention.visualizeAuto:
           break;
 
-        case VisualizeESQLUserIntention.visualizeBar:
-          preferredChartType = ChartType.Bar;
+        case VisualizeESQLUserIntention.visualize:
+          preferredChartType = shape as ChartType;
+          preferredVisualizationId = visualizationId as LensVisualizationType;
           break;
 
-        case VisualizeESQLUserIntention.visualizeDonut:
-          preferredChartType = ChartType.Donut;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeHeatmap:
-          preferredChartType = ChartType.Heatmap;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeLine:
-          preferredChartType = ChartType.Line;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeArea:
-          preferredChartType = ChartType.Area;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeTable:
-          preferredChartType = ChartType.Table;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeTagcloud:
-          preferredChartType = ChartType.Tagcloud;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeTreemap:
-          preferredChartType = ChartType.Treemap;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeWaffle:
-          preferredChartType = ChartType.Waffle;
-          break;
-
-        case VisualizeESQLUserIntention.visualizeXy:
-          preferredChartType = ChartType.XY;
-          break;
+        default:
+          preferredChartType = convertIntentionToChartType(intention);
       }
 
       const trimmedQuery = correctedQuery.trim();
@@ -483,6 +506,7 @@ export function registerVisualizeQueryRenderFunction({
           onActionClick={onActionClick}
           userOverrides={userOverrides}
           preferredChartType={preferredChartType}
+          preferredVisualizationId={preferredVisualizationId}
           errorMessages={errorMessages}
         />
       );

@@ -25,7 +25,7 @@ import type {
   YConfig,
   XYAnnotationLayerConfig,
 } from './types';
-import { visualizationSubtypes } from './types';
+import { visualizationSubtypes } from '../../../common/visualizations/xy_visualization';
 import {
   getDataLayers,
   isAnnotationsLayer,

@@ -27,7 +27,7 @@ import type {
   Suggestion,
   UserMessage,
 } from '../../types';
-import { GROUP_ID, LENS_METRIC_ID } from './constants';
+import { GROUP_ID } from './constants';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
@@ -47,6 +47,11 @@ import {
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
 import { convertToRunTimeState } from './runtime_state';
+import {
+  visualizationTypes,
+  metricLabel,
+  LENS_METRIC_ID,
+} from '../../../common/visualizations/metric_visualization';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -72,10 +77,6 @@ const isSupportedMetric = (op: OperationMetadata) =>
 
 const isSupportedDynamicMetric = (op: OperationMetadata) =>
   !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
-
-export const metricLabel = i18n.translate('xpack.lens.metric.label', {
-  defaultMessage: 'Metric',
-});
 
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
@@ -363,17 +364,7 @@ export const getMetricVisualization = ({
   getVisualizationTypeId() {
     return this.id;
   },
-  visualizationTypes: [
-    {
-      id: LENS_METRIC_ID,
-      icon: IconChartMetric,
-      label: metricLabel,
-      sortPriority: 4,
-      description: i18n.translate('xpack.lens.metric.visualizationDescription', {
-        defaultMessage: 'Present individual key metrics or KPIs.',
-      }),
-    },
-  ],
+  visualizationTypes,
 
   clearLayer(state) {
     const newState = { ...state };

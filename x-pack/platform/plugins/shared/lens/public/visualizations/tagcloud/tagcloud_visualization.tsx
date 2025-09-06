@@ -27,9 +27,13 @@ import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
-import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { DEFAULT_STATE } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { convertToRuntimeState } from './runtime_state';
+import {
+  visualizationTypes,
+  TAGCLOUD_LABEL,
+} from '../../../common/visualizations/tagcloud_visualization';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -48,17 +52,7 @@ export const getTagcloudVisualization = ({
   getVisualizationTypeId() {
     return this.id;
   },
-  visualizationTypes: [
-    {
-      id: 'lnsTagcloud',
-      icon: IconChartTagcloud,
-      label: TAGCLOUD_LABEL,
-      sortPriority: 12,
-      description: i18n.translate('xpack.lens.tagcloud.visualizationDescription', {
-        defaultMessage: 'Visualize text data frequency or importance.',
-      }),
-    },
-  ],
+  visualizationTypes,
 
   clearLayer(state) {
     const newState = {

@@ -20,9 +20,9 @@ import {
 } from '@kbn/chart-icons';
 import type { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { LegendValue } from '@elastic/charts';
-import { EmptySizeRatios } from '../../../common/types';
-import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
-import type { PieChartType, SharedPieLayerState } from '../../../common/types';
+import { EmptySizeRatios } from '../../types';
+import { CategoryDisplay, NumberDisplay } from '../../constants';
+import type { PieChartType, SharedPieLayerState } from '../../types';
 
 interface PartitionChartMeta {
   id: string;
