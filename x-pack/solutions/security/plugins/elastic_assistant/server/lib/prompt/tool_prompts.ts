@@ -143,4 +143,95 @@ If no relevant information is found, inform the user you could not locate the re
       default: 'Call this for Elastic Defend insights.',
     },
   },
+  {
+    promptId: 'AssetInventory',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get detailed information about assets from the asset inventory. This includes hosts, users, services, and other entities.
+      
+Use this tool when the user wants to:
+- Get information about a specific asset, host, user, or service
+- Understand asset details like criticality, location, network info, or configuration
+- Look up asset ownership, cloud provider information, or last seen data
+- Investigate an entity by name, ID, or ARN
+
+Provide the asset identifier (hostname, entity ID, ARN, username, or service name) to get comprehensive asset details.`,
+    },
+  },
+  {
+    promptId: 'GenerateAssetESQLTool',
+    promptGroupId,
+    prompt: {
+      default: `You MUST use the "GenerateAssetESQLTool" function when the user wants to:
+- generate ES|QL queries for investigating a specific asset, host, user, or service
+- create queries to find activity, events, or logs related to a particular entity
+- investigate security incidents for a specific asset identifier
+- generate asset-focused queries for common investigation patterns
+
+This tool creates ES|QL queries pre-filtered by asset identifiers (host.id, host.name, entity.id, user.name, service.name).
+
+Use query types like: recent_activity, login_attempts, network_connections, process_execution, file_access, or provide custom requirements.
+
+ALWAYS use this tool instead of the general GenerateESQLTool when the user wants to investigate a specific asset or entity.`,
+    },
+  },
+  {
+    promptId: 'AssetComplianceTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get compliance and misconfiguration information for a specific asset. This includes CIS benchmark results, security posture findings, and remediation guidance.
+
+Use this tool when the user wants to:
+- Check compliance status of an asset, host, user, or service
+- Get security misconfiguration findings for an entity
+- Review CIS benchmark results
+- See failed security configurations that need attention
+- Get remediation guidance for compliance issues
+- Understand security posture and compliance score
+
+The tool provides detailed compliance findings including passed/failed checks, compliance scores, benchmark coverage, and actionable remediation steps.
+
+Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive compliance and security posture information.`,
+    },
+  },
+  {
+    promptId: 'AssetVulnerabilityTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get detailed vulnerability assessment information for a specific asset. This includes CVE details, severity levels, affected packages, and available fixes.
+
+Use this tool when the user wants to:
+- Check vulnerability status of an asset, host, user, or service
+- Get CVE information and CVSS scores for an entity
+- Review security vulnerabilities and patches
+- See critical and high severity vulnerabilities that need attention
+- Get package vulnerabilities and fix versions
+- Assess security risk based on vulnerability severity
+- Understand exposure to known security issues
+
+The tool provides detailed vulnerability findings including severity counts, CVE details, affected packages, fix availability, and CVSS scoring.
+
+Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive vulnerability and security risk information.`,
+    },
+  },
+  {
+    promptId: 'AssetSecurityIncidentTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get detailed security incident and alert information about a specific asset. This includes active security alerts, attack patterns, MITRE ATT&CK techniques, and incident status.
+
+Use this tool when users ask about:
+- Security incidents for an asset
+- Active alerts and their status  
+- Attack patterns targeting an asset
+- Recent security events and threats
+- MITRE ATT&CK techniques observed on an asset
+- Security alert correlation with asset vulnerabilities/compliance
+- Incident response context for an asset
+
+The tool searches across the security alerts index to provide comprehensive security incident insights including severity breakdowns, workflow status, and threat intelligence context.
+
+Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive security incident and threat information.`,
+    },
+  },
 ];
