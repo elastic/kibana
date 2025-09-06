@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/todo-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "A plugin which registers a very simple To Do application.",
+  "plugin": {
+    "id": "todo",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"]
+  }
+}
