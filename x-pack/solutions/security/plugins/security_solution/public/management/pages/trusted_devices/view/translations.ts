@@ -101,6 +101,18 @@ export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: s
       defaultMessage: 'Product ID',
     }
   ),
+  [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.deviceType',
+    {
+      defaultMessage: 'Device Type',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.MANUFACTURER_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.manufacturerId',
+    {
+      defaultMessage: 'Manufacturer ID',
+    }
+  ),
 };
 
 export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryField]: string } = {
@@ -119,19 +131,31 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryFie
   [TrustedDeviceConditionEntryField.DEVICE_ID]: i18n.translate(
     'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceId',
     {
-      defaultMessage: 'The unique identifier of the device',
+      defaultMessage: 'The serial number of the device',
     }
   ),
   [TrustedDeviceConditionEntryField.MANUFACTURER]: i18n.translate(
     'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturer',
     {
-      defaultMessage: 'The manufacturer of the device',
+      defaultMessage: 'The vendor name of the device manufacturer',
     }
   ),
   [TrustedDeviceConditionEntryField.PRODUCT_ID]: i18n.translate(
     'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productId',
     {
-      defaultMessage: 'The product identifier of the device model',
+      defaultMessage: 'The product identifier of the device',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceType',
+    {
+      defaultMessage: 'The type of the device',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.MANUFACTURER_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturerId',
+    {
+      defaultMessage: 'The vendor identifier of the device manufacturer',
     }
   ),
 };
