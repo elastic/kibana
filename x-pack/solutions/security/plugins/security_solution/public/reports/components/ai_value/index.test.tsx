@@ -91,8 +91,6 @@ describe('AIValueMetrics', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
     mockUseValueMetrics.mockReturnValue({

@@ -81,8 +81,6 @@ describe('CostSavingsKeyInsight', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
     mockLicenseService.isEnterprise.mockReturnValue(true);
@@ -293,8 +291,6 @@ describe('CostSavingsKeyInsight', () => {
     );
 
     render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    // Should still show loading state after error
     await waitFor(() => {
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
@@ -349,7 +345,6 @@ describe('CostSavingsKeyInsight', () => {
       expect(mockChatComplete).toHaveBeenCalledTimes(1);
     });
 
-    // Change lensResponse
     const newLensResponse = {
       ...mockLensResponse,
       meta: {

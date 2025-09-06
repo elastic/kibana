@@ -14,7 +14,6 @@ import { AlertProcessingDonut } from './alert_processing_donut_lens';
 import { formatPercent } from './metrics';
 import type { ValueMetrics } from './metrics';
 
-// Mock child components
 jest.mock('./alert_processing_key_insight', () => ({
   AlertProcessingKeyInsight: jest.fn(() => (
     <div data-test-subj="mock-alert-processing-key-insight" />
@@ -29,7 +28,6 @@ jest.mock('./alert_processing_donut_lens', () => ({
   AlertProcessingDonut: jest.fn(() => <div data-test-subj="mock-alert-processing-donut" />),
 }));
 
-// Mock the metrics module
 jest.mock('./metrics', () => ({
   formatPercent: jest.fn(),
 }));
@@ -66,14 +64,12 @@ describe('AlertProcessing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Setup default mock implementations
     mockFormatPercent.mockImplementation((value) => `${value.toFixed(2)}%`);
   });
 
   it('renders all child components with correct props', () => {
     render(<AlertProcessing {...defaultProps} />);
 
-    // Verify AlertProcessingDonut is rendered with correct props
     expect(mockAlertProcessingDonut).toHaveBeenCalledWith(
       {
         attackAlertIds: defaultProps.attackAlertIds,
@@ -83,7 +79,6 @@ describe('AlertProcessing', () => {
       {}
     );
 
-    // Verify AlertsProcessingTable is rendered with correct props
     expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
       {
         filteredAlerts: defaultValueMetrics.filteredAlerts,
@@ -94,7 +89,6 @@ describe('AlertProcessing', () => {
       {}
     );
 
-    // Verify AlertProcessingKeyInsight is rendered with correct props
     expect(mockAlertProcessingKeyInsight).toHaveBeenCalledWith(
       {
         valueMetrics: defaultValueMetrics,
@@ -113,7 +107,6 @@ describe('AlertProcessing', () => {
   it('calculates escalated alerts correctly', () => {
     render(<AlertProcessing {...defaultProps} />);
 
-    // escalatedAlerts = totalAlerts - filteredAlerts = 1000 - 800 = 200
     expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
       expect.objectContaining({
         escalatedAlerts: 200,
@@ -141,7 +134,7 @@ describe('AlertProcessing', () => {
     expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
       expect.objectContaining({
         filteredAlerts: 1000,
-        escalatedAlerts: 0, // 1000 - 1000
+        escalatedAlerts: 0,
         filteredAlertsPerc: '100.00%',
         escalatedAlertsPerc: '0.00%',
       }),
@@ -168,7 +161,7 @@ describe('AlertProcessing', () => {
     expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
       expect.objectContaining({
         filteredAlerts: 0,
-        escalatedAlerts: 1000, // 1000 - 0
+        escalatedAlerts: 1000,
         filteredAlertsPerc: '0.00%',
         escalatedAlertsPerc: '100.00%',
       }),
@@ -179,7 +172,6 @@ describe('AlertProcessing', () => {
   it('passes all required props to child components', () => {
     render(<AlertProcessing {...defaultProps} />);
 
-    // Verify all components receive their expected props
     expect(mockAlertProcessingDonut).toHaveBeenCalledTimes(1);
     expect(mockAlertsProcessingTable).toHaveBeenCalledTimes(1);
     expect(mockAlertProcessingKeyInsight).toHaveBeenCalledTimes(1);

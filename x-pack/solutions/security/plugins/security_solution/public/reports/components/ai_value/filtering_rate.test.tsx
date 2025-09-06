@@ -41,8 +41,6 @@ const defaultProps = {
 describe('FilteringRate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockFormatPercent.mockReturnValue('60.0%');
     mockGetTimeRangeAsDays.mockReturnValue('30');
   });

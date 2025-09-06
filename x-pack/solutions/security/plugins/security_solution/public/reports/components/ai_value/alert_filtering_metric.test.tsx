@@ -14,7 +14,6 @@ import { getAlertFilteringMetricLensAttributes } from '../../../common/component
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 
-// Mock dependencies
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));
@@ -49,7 +48,6 @@ describe('AlertFilteringMetric', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Setup default mock implementations
     mockGetExcludeAlertsFilters.mockReturnValue([
       {
         meta: {
@@ -268,31 +266,19 @@ describe('AlertFilteringMetric', () => {
 
   it('memoizes extraVisualizationOptions based on attackAlertIds', () => {
     const { rerender } = render(<AlertFilteringMetric {...defaultProps} />);
-
-    // Clear mock calls
     jest.clearAllMocks();
-
-    // Rerender with same props
     rerender(<AlertFilteringMetric {...defaultProps} />);
-
-    // getExcludeAlertsFilters should not be called again due to memoization
     expect(mockGetExcludeAlertsFilters).not.toHaveBeenCalled();
   });
 
   it('recalculates extraVisualizationOptions when attackAlertIds change', () => {
     const { rerender } = render(<AlertFilteringMetric {...defaultProps} />);
-
-    // Clear mock calls
     jest.clearAllMocks();
-
-    // Rerender with different attackAlertIds
     const newProps = {
       ...defaultProps,
       attackAlertIds: ['new-alert-1', 'new-alert-2'],
     };
     rerender(<AlertFilteringMetric {...newProps} />);
-
-    // getExcludeAlertsFilters should be called again
     expect(mockGetExcludeAlertsFilters).toHaveBeenCalledWith(['new-alert-1', 'new-alert-2']);
   });
 });

@@ -14,7 +14,6 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 
-// Mock dependencies
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));
@@ -45,8 +44,6 @@ const defaultProps = {
 describe('AlertProcessingDonut', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockUseSpaceId.mockReturnValue('test-space-id');
 
     mockGetAlertProcessingDonutAttributes.mockReturnValue({

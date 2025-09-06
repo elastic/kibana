@@ -43,8 +43,6 @@ const defaultProps = {
 describe('ThreatsDetectedMetric', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockUseSpaceId.mockReturnValue('test-space-id');
     mockGetThreatsDetectedMetricLensAttributes.mockReturnValue({
       description: '',
@@ -265,24 +263,14 @@ describe('ThreatsDetectedMetric', () => {
 
   it('memoizes the component correctly', () => {
     const { rerender } = render(<ThreatsDetectedMetric {...defaultProps} />);
-
-    // Get initial call count
     const initialCallCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
-
-    // Re-render with same props
     rerender(<ThreatsDetectedMetric {...defaultProps} />);
-
-    // Should not call VisualizationEmbeddable again due to memoization
     expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length).toBe(
       initialCallCount
     );
-
-    // Re-render with different props
     rerender(
       <ThreatsDetectedMetric from="2023-02-01T00:00:00.000Z" to="2023-02-28T23:59:59.999Z" />
     );
-
-    // Should call VisualizationEmbeddable again
     expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length).toBe(
       initialCallCount + 1
     );

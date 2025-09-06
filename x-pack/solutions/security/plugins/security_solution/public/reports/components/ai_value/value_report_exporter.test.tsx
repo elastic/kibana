@@ -43,21 +43,18 @@ describe('ValueReportExporter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockUseToasts.mockReturnValue({
       addError: mockAddError,
-    } as ReturnType<typeof useToasts>);
+    } as unknown as ReturnType<typeof useToasts>);
 
-    // Mock successful domtoimage.toBlob
-    const { toBlob } = require('dom-to-image-more');
+    const { toBlob } = jest.requireMock('dom-to-image-more');
     toBlob.mockResolvedValue({
       arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
     });
   });
 
   it('renders children with export function', () => {
-    const mockChildren = jest.fn(() => <div>Test Content</div>);
+    const mockChildren = jest.fn(() => <div>{'Test Content'}</div>);
 
     render(<ValueReportExporter>{mockChildren}</ValueReportExporter>);
 
@@ -69,7 +66,7 @@ describe('ValueReportExporter', () => {
 
     const children = (exportPDF: () => void) => {
       exportFunction = exportPDF;
-      return <div>Test Content</div>;
+      return <div>{'Test Content'}</div>;
     };
 
     render(<ValueReportExporter>{children}</ValueReportExporter>);
@@ -79,21 +76,20 @@ describe('ValueReportExporter', () => {
   });
 
   it('handles export error gracefully', async () => {
-    const { toBlob } = require('dom-to-image-more');
+    const { toBlob } = jest.requireMock('dom-to-image-more');
     toBlob.mockRejectedValue(new Error('Export failed'));
 
     let exportFunction: (() => void) | null = null;
 
     const children = (exportPDF: () => void) => {
       exportFunction = exportPDF;
-      return <div>Test Content</div>;
+      return <div>{'Test Content'}</div>;
     };
 
     render(<ValueReportExporter>{children}</ValueReportExporter>);
 
     expect(exportFunction).toBeDefined();
 
-    // The export function should be callable without throwing
     expect(() => {
       if (exportFunction) {
         exportFunction();
@@ -102,22 +98,16 @@ describe('ValueReportExporter', () => {
   });
 
   it('memoizes the component correctly', () => {
-    const mockChildren = jest.fn(() => <div>Test Content</div>);
+    const mockChildren = jest.fn(() => <div>{'Test Content'}</div>);
 
     const { rerender } = render(<ValueReportExporter>{mockChildren}</ValueReportExporter>);
-
-    // Get initial call count
     const initialCallCount = mockChildren.mock.calls.length;
-
-    // Re-render with same props
     rerender(<ValueReportExporter>{mockChildren}</ValueReportExporter>);
-
-    // Component should be memoized and not re-render unnecessarily
     expect(mockChildren.mock.calls.length).toBe(initialCallCount);
   });
 
   it('handles different children functions', () => {
-    const differentChildren = jest.fn(() => <div>Different Content</div>);
+    const differentChildren = jest.fn(() => <div>{'Different Content'}</div>);
 
     render(<ValueReportExporter>{differentChildren}</ValueReportExporter>);
 

@@ -40,8 +40,6 @@ const defaultProps = {
 describe('TimeSaved', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockGetTimeRangeAsDays.mockReturnValue(`30`);
     mockFormatThousands.mockReturnValue('100');
   });
@@ -180,22 +178,13 @@ describe('TimeSaved', () => {
 
   it('memoizes timerange calculation based on from and to props', () => {
     const { rerender } = render(<TimeSaved {...defaultProps} />);
-
-    // Clear mock calls
     jest.clearAllMocks();
-
-    // Re-render with same from/to values
     rerender(<TimeSaved {...defaultProps} />);
-
-    // getTimeRangeAsDays should not be called again due to memoization
     expect(mockGetTimeRangeAsDays).not.toHaveBeenCalled();
-
-    // Re-render with different from/to values
     rerender(
       <TimeSaved {...defaultProps} from="2023-02-01T00:00:00.000Z" to="2023-02-28T23:59:59.999Z" />
     );
 
-    // getTimeRangeAsDays should be called again
     expect(mockGetTimeRangeAsDays).toHaveBeenCalledWith({
       from: '2023-02-01T00:00:00.000Z',
       to: '2023-02-28T23:59:59.999Z',

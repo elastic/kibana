@@ -37,8 +37,6 @@ const defaultProps = {
 describe('ThreatsDetected', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementation
     mockGetTimeRangeAsDays.mockReturnValue(`30`);
   });
 

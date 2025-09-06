@@ -61,10 +61,8 @@ describe('useValueMetrics', () => {
     });
     (useAlertCountQuery as jest.Mock).mockImplementation(({ filters }) => {
       if (filters && filters[0]?.query?.bool?.must_not?.length) {
-        // filtered
         return { alertCount: mockFilteredAlertsCount };
       }
-      // unfiltered
       return { alertCount: mockAlertCount, isLoading: mockIsLoading };
     });
   });

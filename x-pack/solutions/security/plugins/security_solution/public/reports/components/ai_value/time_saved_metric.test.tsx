@@ -12,8 +12,6 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-
-// Mock dependencies
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));
@@ -37,8 +35,6 @@ const defaultProps = {
 describe('TimeSavedMetric', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementation
     mockGetTimeSavedMetricLensAttributes.mockReturnValue({
       description: '',
       state: {
@@ -164,26 +160,16 @@ describe('TimeSavedMetric', () => {
 
   it('memoizes timerange based on from and to props', () => {
     const { rerender } = render(<TimeSavedMetric {...defaultProps} />);
-
-    // Get the initial call count
     const initialCallCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
 
-    // Rerender with same props
     rerender(<TimeSavedMetric {...defaultProps} />);
-
-    // Due to React.memo, the component should not re-render with same props
-    // So VisualizationEmbeddable should not be called again
     const finalCallCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
     expect(finalCallCount).toBe(initialCallCount);
   });
 
   it('recalculates timerange when from or to props change', () => {
     const { rerender } = render(<TimeSavedMetric {...defaultProps} />);
-
-    // Clear mock calls
     jest.clearAllMocks();
-
-    // Rerender with different timerange
     const newProps = {
       ...defaultProps,
       from: '2023-02-01T00:00:00.000Z',
@@ -207,16 +193,9 @@ describe('TimeSavedMetric', () => {
 
     const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     const firstGetLensAttributes = firstCallArgs.getLensAttributes;
-
-    // Rerender with same props
     rerender(<TimeSavedMetric {...defaultProps} />);
-
-    // Due to React.memo, the component should not re-render with same props
-    // So we should still have the same number of calls
     const callCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
     expect(callCount).toBe(1);
-
-    // The function reference should be the same due to useCallback memoization
     const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     const secondGetLensAttributes = secondCallArgs.getLensAttributes;
     expect(firstGetLensAttributes).toBe(secondGetLensAttributes);
@@ -227,11 +206,7 @@ describe('TimeSavedMetric', () => {
 
     const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     const firstGetLensAttributes = firstCallArgs.getLensAttributes;
-
-    // Clear mock calls
     jest.clearAllMocks();
-
-    // Rerender with different minutesPerAlert
     const newProps = {
       ...defaultProps,
       minutesPerAlert: 15,
@@ -240,8 +215,6 @@ describe('TimeSavedMetric', () => {
 
     const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     const secondGetLensAttributes = secondCallArgs.getLensAttributes;
-
-    // Should be different function references due to dependency change
     expect(firstGetLensAttributes).not.toBe(secondGetLensAttributes);
   });
 

@@ -7,6 +7,7 @@
 
 import { getPercentInfo, getExcludeAlertsFilters } from './utils';
 import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 // Mock dependencies
 jest.mock('../../../overview/components/detection_response/soc_trends/helpers', () => ({
@@ -94,7 +95,7 @@ describe('utils', () => {
       const mockColors = {
         backgroundBaseSuccess: '#success-color',
         backgroundBaseDanger: '#danger-color',
-      } as any;
+      } as EuiThemeComputed['colors'];
 
       const testCases = [
         {

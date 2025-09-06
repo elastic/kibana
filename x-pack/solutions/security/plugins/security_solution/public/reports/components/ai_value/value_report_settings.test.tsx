@@ -9,8 +9,6 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ValueReportSettings } from './value_report_settings';
 import { useNavigation } from '@kbn/security-solution-navigation';
-
-// Mock dependencies
 jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigation: jest.fn(),
 }));
@@ -27,8 +25,6 @@ describe('ValueReportSettings', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementation
     mockUseNavigation.mockReturnValue({
       navigateTo: mockNavigateTo,
       getAppUrl: jest.fn(),
@@ -44,8 +40,6 @@ describe('ValueReportSettings', () => {
 
   it('displays correct cost calculation information', () => {
     const { container } = render(<ValueReportSettings {...defaultProps} />);
-
-    // Check that the component renders with the correct className
     const settingsElement = container.querySelector('.valueReportSettings');
     expect(settingsElement).toBeInTheDocument();
   });
@@ -93,8 +87,6 @@ describe('ValueReportSettings', () => {
 
     testCases.forEach(({ props, description }) => {
       const { container } = render(<ValueReportSettings {...props} />);
-
-      // Verify the component renders with different props
       const settingsElement = container.querySelector('.valueReportSettings');
       expect(settingsElement).toBeInTheDocument();
     });
@@ -102,22 +94,11 @@ describe('ValueReportSettings', () => {
 
   it('memoizes the component correctly', () => {
     const { rerender } = render(<ValueReportSettings {...defaultProps} />);
-
-    // Get initial render
     const initialRender = render(<ValueReportSettings {...defaultProps} />);
-
-    // Re-render with same props
     rerender(<ValueReportSettings {...defaultProps} />);
-
-    // Component should be memoized and not re-render unnecessarily
-    // This is tested by ensuring the component structure remains the same
     const settingsElement = initialRender.container.querySelector('.valueReportSettings');
     expect(settingsElement).toBeInTheDocument();
-
-    // Re-render with different props
     rerender(<ValueReportSettings minutesPerAlert={5} analystHourlyRate={75} />);
-
-    // Component should re-render with new props
     const settingsElementAfterRerender =
       initialRender.container.querySelector('.valueReportSettings');
     expect(settingsElementAfterRerender).toBeInTheDocument();
@@ -134,16 +115,10 @@ describe('ValueReportSettings', () => {
     const { container } = render(<ValueReportSettings {...defaultProps} />);
 
     const linkElement = container.querySelector('button.euiLink');
-
-    // Verify the link is clickable
     expect(linkElement).toBeInTheDocument();
-
-    // Click the link
     if (linkElement) {
       fireEvent.click(linkElement);
     }
-
-    // Verify navigation was called
     expect(mockNavigateTo).toHaveBeenCalledTimes(1);
     expect(mockNavigateTo).toHaveBeenCalledWith({
       appId: 'management',

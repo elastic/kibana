@@ -33,8 +33,6 @@ const defaultValueMetrics: ValueMetrics = {
 describe('AlertProcessingKeyInsight', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Setup default mock implementations
     mockFormatThousands.mockImplementation((value) => value.toLocaleString());
     mockFormatPercent.mockImplementation((value) => `${value.toFixed(2)}%`);
   });
@@ -84,7 +82,6 @@ describe('AlertProcessingKeyInsight', () => {
   it('calls formatThousands with correct escalated alerts count', () => {
     render(<AlertProcessingKeyInsight valueMetrics={defaultValueMetrics} />);
 
-    // escalatedAlerts = totalAlerts - filteredAlerts = 1000 - 800 = 200
     expect(mockFormatThousands).toHaveBeenCalledWith(200);
   });
 
@@ -101,7 +98,7 @@ describe('AlertProcessingKeyInsight', () => {
     expect(mockFormatPercent).toHaveBeenCalledWith(0);
     expect(mockFormatThousands).toHaveBeenCalledWith(0);
     expect(mockFormatPercent).toHaveBeenCalledWith(100);
-    expect(mockFormatThousands).toHaveBeenCalledWith(1000); // totalAlerts - 0
+    expect(mockFormatThousands).toHaveBeenCalledWith(1000);
   });
 
   it('handles zero totalAlerts', () => {
@@ -118,7 +115,7 @@ describe('AlertProcessingKeyInsight', () => {
     expect(mockFormatPercent).toHaveBeenCalledWith(0);
     expect(mockFormatThousands).toHaveBeenCalledWith(0);
     expect(mockFormatPercent).toHaveBeenCalledWith(0);
-    expect(mockFormatThousands).toHaveBeenCalledWith(0); // 0 - 0
+    expect(mockFormatThousands).toHaveBeenCalledWith(0);
   });
 
   it('handles all alerts filtered (100% filtered)', () => {
@@ -134,7 +131,7 @@ describe('AlertProcessingKeyInsight', () => {
     expect(mockFormatPercent).toHaveBeenCalledWith(100);
     expect(mockFormatThousands).toHaveBeenCalledWith(1000);
     expect(mockFormatPercent).toHaveBeenCalledWith(0);
-    expect(mockFormatThousands).toHaveBeenCalledWith(0); // 1000 - 1000
+    expect(mockFormatThousands).toHaveBeenCalledWith(0);
   });
 
   it('handles all alerts escalated (0% filtered)', () => {
@@ -150,7 +147,7 @@ describe('AlertProcessingKeyInsight', () => {
     expect(mockFormatPercent).toHaveBeenCalledWith(0);
     expect(mockFormatThousands).toHaveBeenCalledWith(0);
     expect(mockFormatPercent).toHaveBeenCalledWith(100);
-    expect(mockFormatThousands).toHaveBeenCalledWith(1000); // 1000 - 0
+    expect(mockFormatThousands).toHaveBeenCalledWith(1000);
   });
 
   it('handles large numbers correctly', () => {
@@ -167,7 +164,7 @@ describe('AlertProcessingKeyInsight', () => {
     expect(mockFormatPercent).toHaveBeenCalledWith(75.0);
     expect(mockFormatThousands).toHaveBeenCalledWith(750000);
     expect(mockFormatPercent).toHaveBeenCalledWith(25.0);
-    expect(mockFormatThousands).toHaveBeenCalledWith(250000); // 1000000 - 750000
+    expect(mockFormatThousands).toHaveBeenCalledWith(250000);
   });
 
   it('handles decimal percentages correctly', () => {
@@ -218,7 +215,7 @@ describe('AlertProcessingKeyInsight', () => {
     render(<AlertProcessingKeyInsight valueMetrics={metricsEqual} />);
 
     expect(mockFormatThousands).toHaveBeenCalledWith(1000);
-    expect(mockFormatThousands).toHaveBeenCalledWith(0); // 1000 - 1000
+    expect(mockFormatThousands).toHaveBeenCalledWith(0);
   });
 
   it('handles negative values gracefully', () => {
@@ -234,6 +231,6 @@ describe('AlertProcessingKeyInsight', () => {
     expect(mockFormatPercent).toHaveBeenCalledWith(-10);
     expect(mockFormatThousands).toHaveBeenCalledWith(-100);
     expect(mockFormatPercent).toHaveBeenCalledWith(110);
-    expect(mockFormatThousands).toHaveBeenCalledWith(1100); // 1000 - (-100)
+    expect(mockFormatThousands).toHaveBeenCalledWith(1100);
   });
 });
