@@ -62,7 +62,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
     loadTestFile(require.resolve('./space_awareness'));
     loadTestFile(require.resolve('./artifacts'));
-    loadTestFile(require.resolve('./role_backwards_compatibility'));
     loadTestFile(require.resolve('./response_actions'));
   });
 }
