@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export const getVendorTag = (originalRule: OriginalRule): string => {
+export const getVendorTag = (originalRule: OriginalRule | OriginalDashboard): string => {
   const { vendor } = originalRule;
   const capitalizedVendor = `${vendor.charAt(0).toUpperCase()}${vendor.slice(1)}`;
   return `Migrated from ${capitalizedVendor}`;
