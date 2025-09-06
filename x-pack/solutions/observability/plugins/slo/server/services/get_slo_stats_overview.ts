@@ -12,14 +12,21 @@ import type { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+import { FindSLO } from './find_slo';
+import type { SLORepository } from './slo_repository';
+import { DefaultSummarySearchClient } from './summary_search_client/summary_search_client';
+
+const SLO_PAGESIZE_LIMIT = 1000;
 
 export class GetSLOStatsOverview {
   constructor(
     private soClient: SavedObjectsClientContract,
+    private repository: SLORepository,
     private scopedClusterClient: IScopedClusterClient,
     private spaceId: string,
     private logger: Logger,
@@ -31,9 +38,80 @@ export class GetSLOStatsOverview {
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
-    const kqlQuery = params.kqlQuery ?? '';
-    const filters = params.filters ?? '';
+    const kqlQuery = params?.kqlQuery ?? '';
+    const filters = params?.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
+
+    const summarySearchClient = new DefaultSummarySearchClient(
+      this.scopedClusterClient,
+      this.soClient,
+      this.logger,
+      this.spaceId
+    );
+
+    let ruleFilters: string = '';
+    let burnRateFilters: QueryDslQueryContainer[] = [];
+
+    let querySLOsForIds = false;
+
+    try {
+      querySLOsForIds = !!(
+        (params?.filters &&
+          Object.values(JSON.parse(params.filters)).some(
+            (value) => Array.isArray(value) && value.length > 0
+          )) ||
+        (params?.kqlQuery && params?.kqlQuery?.length > 0)
+      );
+    } catch (error) {
+      querySLOsForIds = !!(params?.kqlQuery && params?.kqlQuery?.length > 0);
+      this.logger.error(`Error parsing filters: ${error}`);
+    }
+
+    if (querySLOsForIds) {
+      const findSLO = new FindSLO(this.repository, summarySearchClient);
+      const sloIds = new Set<string>();
+
+      const findSLOQueryParams = {
+        filters: params?.filters,
+        kqlQuery: params?.kqlQuery,
+        perPage: String(SLO_PAGESIZE_LIMIT),
+      };
+
+      const findSLOResponse = await findSLO.execute(findSLOQueryParams);
+      const total = findSLOResponse.total;
+      const numCalls = Math.ceil(total / SLO_PAGESIZE_LIMIT);
+      findSLOResponse.results.forEach((slo) => sloIds.add(slo.id));
+
+      for (let i = 1; i < numCalls; i++) {
+        const additionalCallResponse = await findSLO.execute({
+          ...findSLOQueryParams,
+          page: String(i + 1),
+        });
+        additionalCallResponse.results.forEach((slo) => sloIds.add(slo.id));
+      }
+
+      const sloIdsArray = Array.from(sloIds);
+
+      const resultString = sloIdsArray.length
+        ? sloIdsArray.reduce((accumulator, currentValue, index) => {
+            const conditionString = `alert.attributes.params.sloId:${currentValue}`;
+            if (index === 0) {
+              return conditionString;
+            } else {
+              return accumulator + ' OR ' + conditionString;
+            }
+          }, '')
+        : 'alert.attributes.params.sloId:NO_MATCHES';
+
+      ruleFilters = resultString;
+      burnRateFilters = [
+        {
+          terms: {
+            'kibana.alert.rule.parameters.sloId': sloIdsArray,
+          },
+        },
+      ];
+    }
 
     const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
@@ -105,6 +183,11 @@ export class GetSLOStatsOverview {
         options: {
           ruleTypeIds: SLO_RULE_TYPE_IDS,
           consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
+          ...(ruleFilters
+            ? {
+                filter: ruleFilters,
+              }
+            : {}),
         },
       }),
 
@@ -113,6 +196,11 @@ export class GetSLOStatsOverview {
         consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         gte: moment().subtract(24, 'hours').toISOString(),
         lte: moment().toISOString(),
+        ...(burnRateFilters?.length
+          ? {
+              filter: burnRateFilters,
+            }
+          : {}),
       }),
     ]);
 
