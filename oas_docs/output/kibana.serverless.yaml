@@ -15806,6 +15806,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -16716,6 +16718,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -17422,6 +17426,8 @@ paths:
                                             - data_stream
                                             - features
                                         type: array
+                                      fips_compatible:
+                                        type: boolean
                                       name:
                                         description: Package name
                                         type: string
@@ -18107,6 +18113,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -19017,6 +19025,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -19787,6 +19797,8 @@ paths:
                                           - data_stream
                                           - features
                                       type: array
+                                    fips_compatible:
+                                      type: boolean
                                     name:
                                       description: Package name
                                       type: string
@@ -33838,6 +33850,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -34191,6 +34205,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -34359,6 +34375,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -34702,6 +34720,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -35175,6 +35195,8 @@ paths:
                                   - data_stream
                                   - features
                               type: array
+                            fips_compatible:
+                              type: boolean
                             name:
                               description: Package name
                               type: string
@@ -35681,6 +35703,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -36036,6 +36060,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -36203,6 +36229,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -36545,6 +36573,8 @@ paths:
                                 - data_stream
                                 - features
                             type: array
+                          fips_compatible:
+                            type: boolean
                           name:
                             description: Package name
                             type: string
@@ -36771,6 +36801,8 @@ paths:
                               - data_stream
                               - features
                           type: array
+                        fips_compatible:
+                          type: boolean
                         name:
                           description: Package name
                           type: string
@@ -37332,6 +37364,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
@@ -37656,6 +37690,8 @@ paths:
                                         - data_stream
                                         - features
                                     type: array
+                                  fips_compatible:
+                                    type: boolean
                                   name:
                                     description: Package name
                                     type: string
