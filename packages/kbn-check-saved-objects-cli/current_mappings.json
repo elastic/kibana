@@ -2604,6 +2604,7 @@
     }
   },
   "lens": {
+    "dynamic": false,
     "properties": {
       "description": {
         "type": "text"
