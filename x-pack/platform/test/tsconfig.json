@@ -156,5 +156,10 @@
     "@kbn/remote-clusters-plugin",
     "@kbn/product-intercept-plugin",
     "@kbn/intercepts-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/console-plugin",
+    "@kbn/serverless-common-settings",
+    "@kbn/management-settings-ids",
+    "@kbn/core-saved-objects-import-export-server-internal",
   ]
 }

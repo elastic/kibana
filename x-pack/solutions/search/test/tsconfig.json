@@ -35,5 +35,7 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/stdio-dev-helpers",
     "@kbn/dev-proc-runner",
+    "@kbn/dev-utils",
+    "@kbn/cases-plugin",
   ]
 }
