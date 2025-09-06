@@ -619,7 +619,7 @@ describe('kibana index telemetry', () => {
       const loggerCalls = loggingSystemMock.collect(logger);
       expect(loggerCalls.debug).toHaveLength(2);
       expect(loggerCalls.debug[0][0]).toEqual(
-        `query for getTotalCountInUse - {\"index\":\"test\",\"size\":0,\"query\":{\"bool\":{\"filter\":[{\"term\":{\"type\":\"alert\"}},{\"term\":{\"alert.enabled\":true}}]}},\"aggs\":{\"namespaces_count\":{\"cardinality\":{\"field\":\"namespaces\"}},\"by_rule_type_id\":{\"terms\":{\"field\":\"alert.alertTypeId\",\"size\":33}},\"by_search_type\":{\"terms\":{\"field\":\"alert.params.searchType\"}}}}`
+        `query for getTotalCountInUse - {\"index\":\"test\",\"track_total_hits\":true,\"size\":0,\"query\":{\"bool\":{\"filter\":[{\"term\":{\"type\":\"alert\"}},{\"term\":{\"alert.enabled\":true}}]}},\"aggs\":{\"namespaces_count\":{\"cardinality\":{\"field\":\"namespaces\"}},\"by_rule_type_id\":{\"terms\":{\"field\":\"alert.alertTypeId\",\"size\":33}},\"by_search_type\":{\"terms\":{\"field\":\"alert.params.searchType\"}}}}`
       );
       expect(loggerCalls.debug[1][0]).toMatchInlineSnapshot(`
         "Error executing alerting telemetry task: getTotalCountInUse - ResponseError: search_phase_execution_exception
