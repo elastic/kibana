@@ -7,12 +7,20 @@
 
 import type {
   ClusterComponentTemplate,
+  DocStats,
+  EpochTime,
   IndicesDataStream,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
+  UnitMillis,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type {
+  FailureStore,
+  FailureStoreStatsResponse,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
@@ -245,4 +253,146 @@ export async function getDataStream({
     throw new DefinitionNotFoundError(`Stream definition for ${name} not found.`);
   }
   return dataStream;
+}
+
+// In case this retention is not present in cluster.
+// This is extracted from the docs that indicate that a thirty day (30d) retention is applied to failure store data:
+// https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store#manage-failure-store-lifecycle
+const DEFAULT_RETENTION_PERIOD = '30d';
+
+export async function getDefaultRetentionValue({
+  scopedClusterClient,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<string> {
+  const { persistent, defaults } =
+    await scopedClusterClient.asSecondaryAuthUser.cluster.getSettings({ include_defaults: true });
+  const persistentDSRetention = persistent?.data_streams?.lifecycle?.retention?.failures_default;
+  const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
+  return persistentDSRetention ?? defaultsDSRetention ?? DEFAULT_RETENTION_PERIOD;
+}
+
+export async function getFailureStore({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<FailureStore> {
+  const dataStream = await getDataStream({ name, scopedClusterClient });
+  const defaultRetentionPeriod = await getDefaultRetentionValue({ scopedClusterClient });
+
+  return {
+    enabled: !!dataStream.failure_store?.enabled,
+    retentionPeriod: {
+      // @ts-expect-error
+      custom: dataStream.failure_store?.lifecycle?.data_retention,
+      default: defaultRetentionPeriod,
+    },
+  };
+}
+
+export async function getFailureStoreStats({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<FailureStoreStatsResponse> {
+  const failureStoreDocs = await getFailureStoreSize({ name, scopedClusterClient });
+  const creationDate = await getFailureStoreCreationDate({ name, scopedClusterClient });
+
+  return {
+    size: failureStoreDocs?.total_size_in_bytes,
+    count: failureStoreDocs?.count,
+    creationDate,
+  };
+}
+
+export async function getFailureStoreSize({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<DocStats | undefined> {
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.stats({
+      index: `${name}${FAILURE_STORE_SELECTOR}`,
+      metric: ['docs'],
+      forbid_closed_indices: false,
+    });
+    const docsStats = response?._all?.total?.docs;
+    return {
+      count: docsStats?.count || 0,
+      total_size_in_bytes: docsStats?.total_size_in_bytes || 0,
+    };
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      // fall through and throw not found
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function getFailureStoreCreationDate({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<number | undefined> {
+  let age: number | undefined;
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.explainDataLifecycle({
+      index: `${name}${FAILURE_STORE_SELECTOR}`,
+    });
+    const indices = response.indices;
+    if (indices && typeof indices === 'object') {
+      const firstIndex = Object.values(indices)[0] as {
+        index_creation_date_millis?: EpochTime<UnitMillis>;
+      };
+      age = firstIndex?.index_creation_date_millis;
+    }
+    return age || undefined;
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      // fall through and throw not found
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function updateFailureStore({
+  name,
+  enabled,
+  customRetentionPeriod,
+  scopedClusterClient,
+  isServerless,
+}: {
+  name: string;
+  enabled: boolean;
+  customRetentionPeriod?: string;
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+}): Promise<void> {
+  try {
+    await scopedClusterClient.asCurrentUser.indices.putDataStreamOptions(
+      {
+        name,
+        failure_store: {
+          enabled,
+          lifecycle: {
+            data_retention: customRetentionPeriod,
+            ...(isServerless ? {} : { enabled }),
+          },
+        },
+      },
+      { meta: true }
+    );
+  } catch (error) {
+    throw new Error(`Failed to update failure store for stream "${name}": ${error}`);
+  }
 }

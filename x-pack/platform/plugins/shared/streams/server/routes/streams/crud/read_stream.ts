@@ -15,6 +15,7 @@ import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getFailureStore,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
@@ -83,6 +84,10 @@ export async function readStream({
     streamsClient.getPrivileges(name),
   ]);
 
+  const failureStore = dataStream
+    ? await getFailureStore({ name, scopedClusterClient })
+    : undefined;
+
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
@@ -99,6 +104,7 @@ export async function readStream({
       dashboards,
       rules,
       queries,
+      failure_store: failureStore,
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
@@ -115,6 +121,7 @@ export async function readStream({
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: inheritedFields,
+    failure_store: failureStore,
   };
 
   return body;
