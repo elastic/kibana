@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
 
 import classnames from 'classnames';
 
@@ -41,17 +41,13 @@ export const CompressedInstallationStatus: React.FC<{
           className={styles.compressedActiveStatusIcon}
         />
       ) : (
-        <EuiToolTip
-          data-test-subj="compressed-installed-tooltip"
+        <EuiIconTip
+          data-test-subj="compressed-installed-tooltip compressed-installed-icon"
           position="bottom"
           content={installStatus === 'installed' ? installedTooltip : installFailedTooltip}
-        >
-          <EuiIcon
-            data-test-subj="compressed-installed-icon"
-            type="warningFilled"
-            className={styles.compressedInstalledStatusIcon}
-          />
-        </EuiToolTip>
+          anchorClassName={styles.compressedInstalledStatusIcon}
+          type="warningFilled"
+        />
       )}
     </div>
   );

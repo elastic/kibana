@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
@@ -134,7 +134,7 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiToolTip
+              <EuiIconTip
                 content={i18n.translate(
                   'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRange.tooltip',
                   {
@@ -142,9 +142,9 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
                       'Adds a wider time range to the analysis to improve pattern accuracy.',
                   }
                 )}
-              >
-                <EuiIcon type="question" color="subdued" />
-              </EuiToolTip>
+                type="question"
+                color="subdued"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

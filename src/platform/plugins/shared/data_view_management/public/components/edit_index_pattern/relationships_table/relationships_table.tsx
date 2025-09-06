@@ -22,7 +22,7 @@ import type {
 } from '@kbn/saved-objects-management-plugin/public';
 
 import type { SearchFilterConfig } from '@elastic/eui';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../plugin';
 import {
   typeFieldName,
@@ -72,14 +72,16 @@ export const RelationshipsTable = ({
       render: (type: string, object: SavedObjectRelation) => {
         const typeLabel = getSavedObjectLabel(type, allowedTypes);
         return (
-          <EuiToolTip position="top" content={typeLabel}>
-            <EuiIcon
-              aria-label={typeLabel}
-              type={object.meta.icon || 'apps'}
-              size="s"
-              data-test-subj="relationshipsObjectType"
-            />
-          </EuiToolTip>
+          <EuiIconTip
+            content={typeLabel}
+            position="top"
+            aria-label={typeLabel}
+            type={object.meta.icon || 'apps'}
+            size="s"
+            iconProps={{
+              'data-test-subj': 'relationshipsObjectType',
+            }}
+          />
         );
       },
     },

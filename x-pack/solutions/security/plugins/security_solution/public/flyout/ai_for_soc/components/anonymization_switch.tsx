@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAIForSOCDetailsContext } from '../context';
 
@@ -84,7 +84,7 @@ export const AnonymizationSwitch = memo(({ hasAlertSummary }: AnonymizationSwitc
             </ConditionalWrap>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               position="top"
               key={'anonymize-values-tooltip'}
               content={
@@ -93,9 +93,8 @@ export const AnonymizationSwitch = memo(({ hasAlertSummary }: AnonymizationSwitc
                   defaultMessage="Toggle to reveal or obfuscate field values in your alert summary. The data sent to the LLM is still anonymized based on settings in Configurations > AI Settings > Anonymization."
                 />
               }
-            >
-              <EuiIcon tabIndex={0} type="info" />
-            </EuiToolTip>
+              type="info"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

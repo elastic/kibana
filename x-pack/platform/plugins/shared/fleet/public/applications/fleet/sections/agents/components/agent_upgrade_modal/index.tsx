@@ -14,8 +14,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiSpacer,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
@@ -659,15 +658,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   position="top"
                   content={i18n.translate('xpack.fleet.upgradeAgents.rolloutPeriodTooltip', {
                     defaultMessage:
                       'Define the rollout period for upgrades to your Elastic Agents. Any agents that are offline during this period will be upgraded when they come back online.',
                   })}
-                >
-                  <EuiIcon type="info" />
-                </EuiToolTip>
+                  type="info"
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           }

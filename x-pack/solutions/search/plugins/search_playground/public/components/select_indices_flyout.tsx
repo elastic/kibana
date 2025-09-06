@@ -15,12 +15,11 @@ import {
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIcon,
+  EuiIconTip,
   EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -98,15 +97,15 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         };
         if (emptyIndices.includes(index)) {
           option.append = (
-            <EuiToolTip
+            <EuiIconTip
               position="top"
               content={i18n.translate(
                 'xpack.searchPlayground.addDataSource.flyout.emptyIndexTooltip',
                 { defaultMessage: 'No fields found in index' }
               )}
-            >
-              <EuiIcon type="warning" color="danger" />
-            </EuiToolTip>
+              type="warning"
+              color="danger"
+            />
           );
         } else if (
           selectedTempIndices.includes(index) &&

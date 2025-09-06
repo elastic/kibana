@@ -9,11 +9,10 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiSuperSelect,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -154,9 +153,13 @@ export const SpaceCopyResultDetails = (props: Props) => {
               `}
             >
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                  <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={getSavedObjectLabel(type)}
+                  aria-label={getSavedObjectLabel(type)}
+                  type={icon}
+                  size="s"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={5}

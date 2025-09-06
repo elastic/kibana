@@ -11,7 +11,7 @@ import {
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonRectangle,
   EuiTableHeader,
@@ -284,12 +284,16 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
-          <EuiToolTip content={datasetQualityColumnTooltip}>
-            <span>
-              {`${datasetQualityColumnName} `}
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <span>
+            {`${datasetQualityColumnName} `}
+            <EuiIconTip
+              content={datasetQualityColumnTooltip}
+              type="question"
+              size="s"
+              color="subdued"
+              className="eui-alignTop"
+            />
+          </span>
         </EuiTableHeader>
       ),
       field: 'quality',
@@ -305,12 +309,16 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
-          <EuiToolTip content={degradedDocsColumnTooltip}>
-            <span>
-              {`${degradedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <span>
+            {`${degradedDocsColumnName} `}
+            <EuiIconTip
+              content={degradedDocsColumnTooltip}
+              type="question"
+              size="s"
+              color="subdued"
+              className="eui-alignTop"
+            />
+          </span>
         </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
@@ -340,12 +348,16 @@ export const getDatasetQualityTableColumns = ({
           {
             name: (
               <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-                <EuiToolTip content={failedDocsColumnTooltip}>
-                  <span>
-                    {`${failedDocsColumnName} `}
-                    <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-                  </span>
-                </EuiToolTip>
+                <span>
+                  {`${failedDocsColumnName} `}
+                  <EuiIconTip
+                    content={failedDocsColumnTooltip}
+                    type="question"
+                    size="s"
+                    color="subdued"
+                    className="eui-alignTop"
+                  />
+                </span>
               </EuiTableHeader>
             ),
             field: 'failedDocs.percentage',
@@ -439,9 +451,12 @@ export const getDatasetQualityTableColumns = ({
                 {!isActiveDataset(timestamp) ? (
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                    <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="info" size="s" />
-                    </EuiToolTip>
+                    <EuiIconTip
+                      position="top"
+                      content={inactiveDatasetActivityColumnTooltip}
+                      type="info"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 ) : (
                   fieldFormats

@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { includes } from 'lodash';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { MonitoringStartServices } from '../../../types';
 import { PageTemplate } from '../page_template';
 import type { TabMenuItem, PageTemplateProps } from '../page_template';
@@ -55,13 +55,12 @@ export const ElasticsearchTemplate: React.FC<
         defaultMessage: 'Ingest Pipelines',
       }),
       prepend: (
-        <EuiToolTip
+        <EuiIconTip
           content={i18n.translate('xpack.monitoring.esNavigation.ingestPipelinesBetaTooltip', {
             defaultMessage: 'Ingest Pipeline monitoring is a beta feature',
           })}
-        >
-          <EuiIcon type="beaker" />
-        </EuiToolTip>
+          type="beaker"
+        />
       ),
       onClick: () => ingestPipelineTabOnClick(services),
     });
