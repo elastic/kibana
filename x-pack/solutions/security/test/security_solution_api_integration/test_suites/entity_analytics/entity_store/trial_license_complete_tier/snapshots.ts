@@ -26,6 +26,7 @@ const SNAPSHOT_INDEX_NAME: string = getEntitiesSnapshotIndexName(
   rewindToYesterday(new Date()),
   'default'
 );
+const RESET_INDEX_NAME: string = '.entities.v1.reset.security_host_default';
 const TIMEOUT_MS: number = 600000; // 10 minutes
 
 export default function (providerContext: FtrProviderContext) {
@@ -71,6 +72,7 @@ export default function (providerContext: FtrProviderContext) {
         await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
 
         let timestampBeforeSnapshot: string = '';
+        let entityId: string = '';
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
@@ -86,13 +88,14 @@ export default function (providerContext: FtrProviderContext) {
             });
             const total = result.hits.total as SearchTotalHits;
             expect(total.value).to.eql(1);
-            const hit = result.hits.hits[0] as SearchHit<Ecs>;
+            const hit = result.hits.hits[0] as SearchHit<Ecs & EcsEntity>;
             expect(hit._source).ok();
             expect(hit._source?.host?.name).to.eql(hostName);
             expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '2.2.2.2']);
             expect(hit._source?.['@timestamp']).ok();
             timestampBeforeSnapshot = hit._source?.['@timestamp'] as string;
             expect(new Date(timestampBeforeSnapshot) < new Date()).ok();
+            entityId = hit._source?.entity?.id as string;
             return true;
           }
         );
@@ -114,15 +117,16 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(updateResp.result).to.eql('updated');
 
+        let timestampInSnapshot: string = '';
         await retry.waitForWithTimeout(
-          'Snapshot index to be created with documents',
+          'Snapshot index to be created with unchanged documents',
           TIMEOUT_MS,
           async () => {
             const result = await es.search({
               index: SNAPSHOT_INDEX_NAME,
               query: {
                 term: {
-                  'host.name': hostName,
+                  'entity.id': entityId,
                 },
               },
             });
@@ -130,16 +134,69 @@ export default function (providerContext: FtrProviderContext) {
             expect(total.value).to.eql(1);
             const hit = result.hits.hits[0] as SearchHit<Ecs>;
             expect(hit._source).ok();
-            /* Entity.last_seen_timestamp?
             expect(hit._source?.['@timestamp']).ok();
-            const timestampInSnapshot = hit._source?.['@timestamp'] as string;
+            timestampInSnapshot = hit._source?.['@timestamp'] as string;
             expect(timestampInSnapshot).to.eql(timestampBeforeSnapshot);
-            */
             return true;
           }
         );
-        // Await document in reset index
+
+        let timestampInResetIndex: string = '';
+        await retry.waitForWithTimeout(
+          'Reset index to be populated with a copy of the document with a refreshed timestamp',
+          TIMEOUT_MS,
+          async () => {
+            const result = await es.search({
+              index: RESET_INDEX_NAME,
+              query: {
+                term: {
+                  'entity.id': entityId,
+                },
+              },
+            });
+            const total = result.hits.total as SearchTotalHits;
+            expect(total.value).to.eql(1);
+            const hit = result.hits.hits[0] as SearchHit<Ecs & EcsEntity>;
+            expect(hit._source).ok();
+            expect(hit._source?.entity?.last_seen_timestamp).ok();
+            timestampInResetIndex = hit._source?.entity?.last_seen_timestamp as string;
+            expect(new Date(timestampInResetIndex) > new Date(timestampBeforeSnapshot)).ok();
+            expect(new Date(timestampInResetIndex) > new Date(timestampInSnapshot)).ok();
+            // Check that the reset document contains identity field (host.name)
+            expect(hit._source?.host?.name).ok();
+            return true;
+          }
+        );
+
         // Schedule transform and await a new timestamp, greater than timestampBeforeSnapshot
+        const { acknowledged } = await es.transform.scheduleNowTransform({
+          transform_id: HOST_TRANSFORM_ID,
+        });
+        expect(acknowledged).to.be(true);
+
+        await retry.waitForWithTimeout(
+          'Document in latest index to be updated with new timestamp from reset index',
+          TIMEOUT_MS,
+          async () => {
+            const result = await es.search({
+              index: INDEX_NAME,
+              query: {
+                term: {
+                  'entity.id': entityId,
+                },
+              },
+            });
+            const total = result.hits.total as SearchTotalHits;
+            expect(total.value).to.eql(1);
+            const hit = result.hits.hits[0] as SearchHit<Ecs & EcsEntity>;
+            expect(hit._source).ok();
+            expect(hit._source?.['@timestamp']).ok();
+            const refreshedTimestamp = hit._source?.['@timestamp'] as string;
+            expect(refreshedTimestamp).to.eql(timestampInResetIndex);
+            expect(new Date(refreshedTimestamp) > new Date(timestampBeforeSnapshot)).ok();
+            return true;
+          }
+        );
       });
     });
   });
@@ -232,7 +289,6 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
         success = false;
         return true;
       }
-      console.log(`KUBA DEBUG ES STATUS: ${JSON.stringify(body)}`);
       expect(body.status).to.eql('running');
       success = true;
       return true;
@@ -268,4 +324,13 @@ async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
+}
+
+interface EcsEntity {
+  entity?: EcsEntityEntity;
+}
+
+interface EcsEntityEntity {
+  id?: string;
+  last_seen_timestamp?: string;
 }
