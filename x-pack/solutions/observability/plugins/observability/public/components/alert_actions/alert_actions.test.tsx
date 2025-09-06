@@ -130,7 +130,6 @@ describe('ObservabilityActions component', () => {
       | 'cveProps'
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
-      | 'openAlertInFlyout'
       | 'refresh'
     > = {
       tableId: pageId,
@@ -142,7 +141,6 @@ describe('ObservabilityActions component', () => {
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      openAlertInFlyout: jest.fn(),
       refresh,
     };
 
