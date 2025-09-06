@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
-const TRACES_INDEX_PATTERN = 'traces-*';
-const METRICS_INDEX_PATTERN = 'metrics-*';
-const LOGS_INDEX_PATTERN = 'logs-*';
+export const TRACES_INDEX_PATTERN = 'traces-*';
+export const METRICS_INDEX_PATTERN = 'metrics-*';
+export const LOGS_INDEX_PATTERN = 'logs-*';
 
 const TRACES_ESQL_RECOMMENDED_QUERIES = [
   {
@@ -65,27 +65,7 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
-const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
-  {
-    name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.name', {
-      defaultMessage: 'Kubernetes pods sorted by memory usage',
-    }),
-    query: `FROM ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.memory.usage.limit.pct IS NOT NULL | STATS memory_limit_pct = MAX(kubernetes.pod.memory.usage.limit.pct) BY kubernetes.pod.name | SORT memory_limit_pct DESC`,
-    description: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.description', {
-      defaultMessage:
-        'Lists Kubernetes pods sorted by memory usage percentage relative to their limit',
-    }),
-  },
-  {
-    name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByCpu.name', {
-      defaultMessage: 'Kubernetes pods sorted by CPU usage',
-    }),
-    query: `FROM ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.cpu.usage.limit.pct IS NOT NULL | STATS cpu_limit_pct = MAX(kubernetes.pod.cpu.usage.limit.pct) BY kubernetes.pod.name | SORT cpu_limit_pct DESC`,
-    description: i18n.translate('xpack.observability.esqlQueries.k8sPodsByCpu.description', {
-      defaultMessage:
-        'Lists Kubernetes pods sorted by CPU usage percentage relative to their limit',
-    }),
-  },
+const LOGS_ESQL_RECOMMENDED_QUERIES = [
   {
     name: i18n.translate('xpack.observability.esqlQueries.logsWithErrorOrWarn.name', {
       defaultMessage: 'Logs with "error" or "warn" messages',
@@ -107,10 +87,44 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
+const METRICS_ESQL_RECOMMENDED_QUERIES = [
+  {
+    name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.name', {
+      defaultMessage: 'Kubernetes pods sorted by memory usage',
+    }),
+    query: `FROM ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.memory.usage.limit.pct IS NOT NULL | STATS memory_limit_pct = MAX(kubernetes.pod.memory.usage.limit.pct) BY kubernetes.pod.name | SORT memory_limit_pct DESC`,
+    description: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.description', {
+      defaultMessage:
+        'Lists Kubernetes pods sorted by memory usage percentage relative to their limit',
+    }),
+  },
+  {
+    name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByCpu.name', {
+      defaultMessage: 'Kubernetes pods sorted by CPU usage',
+    }),
+    query: `FROM ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.cpu.usage.limit.pct IS NOT NULL | STATS cpu_limit_pct = MAX(kubernetes.pod.cpu.usage.limit.pct) BY kubernetes.pod.name | SORT cpu_limit_pct DESC`,
+    description: i18n.translate('xpack.observability.esqlQueries.k8sPodsByCpu.description', {
+      defaultMessage:
+        'Lists Kubernetes pods sorted by CPU usage percentage relative to their limit',
+    }),
+  },
+];
+
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
+
   esqlExtensionsRegistry.setRecommendedQueries(
-    [...TRACES_ESQL_RECOMMENDED_QUERIES, ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES],
+    [
+      ...TRACES_ESQL_RECOMMENDED_QUERIES,
+      ...LOGS_ESQL_RECOMMENDED_QUERIES,
+      ...METRICS_ESQL_RECOMMENDED_QUERIES,
+    ],
     'oblt'
   );
+}
+
+export function unsetEsqlRecommendedQueries(esqlPlugin: ESQLSetup, indexPattern: string) {
+  const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
+
+  esqlExtensionsRegistry.unsetRecommendedQueries(indexPattern, 'oblt');
 }

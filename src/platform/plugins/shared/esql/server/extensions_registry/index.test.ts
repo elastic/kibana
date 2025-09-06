@@ -227,6 +227,43 @@ describe('ESQLExtensionsRegistry', () => {
     });
   });
 
+  // --- unsetRecommendedQueries tests ---
+
+  describe('unsetRecommendedQueries', () => {
+    const METRICS_INDEX_PATTERN = 'metrics-*';
+
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [
+          { name: 'logs-2023' },
+          { name: 'logs-2024' },
+          { name: METRICS_INDEX_PATTERN },
+          { name: 'other_index' },
+        ],
+        data_streams: [],
+        aliases: [],
+      };
+    });
+
+    it('should remove recommended queries from the registry', () => {
+      const solutionId: SolutionId = 'oblt';
+      const queries: RecommendedQuery[] = [
+        { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
+        { name: 'Metrics Query', query: `FROM ${METRICS_INDEX_PATTERN} | STATS max(bytes)` },
+      ];
+
+      registry.setRecommendedQueries(queries, solutionId);
+      registry.unsetRecommendedQueries(METRICS_INDEX_PATTERN, solutionId);
+
+      const retrievedQueries = registry.getRecommendedQueries(
+        `FROM ${METRICS_INDEX_PATTERN}`,
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedQueries).toEqual([]);
+    });
+  });
+
   // --- setRecommendedFields tests ---
   describe('setRecommendedFields', () => {
     beforeEach(() => {

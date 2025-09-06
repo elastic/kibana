@@ -15,3 +15,5 @@ export type {
 } from './types';
 
 export const plugin = () => new MetricsExperiencePlugin();
+
+export { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';

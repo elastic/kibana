@@ -12,6 +12,7 @@ import { isValidDateMath } from '@kbn/zod-helpers';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { createRoute } from '../create_route';
 import { getDimensions } from './get_dimentions';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/dimensions',
@@ -38,8 +39,11 @@ export const getDimensionsRoute = createRoute({
     }),
   }),
   handler: async ({ context, params, logger }) => {
+    const services = await context.resolve(['core']);
+    await throwNotFoundIfMetricsExperienceDisabled(services);
+
     const { dimensions, indices, from, to } = params.query;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = services.core.elasticsearch.client.asCurrentUser;
 
     const values = await getDimensions({
       esClient: createTracedEsClient({

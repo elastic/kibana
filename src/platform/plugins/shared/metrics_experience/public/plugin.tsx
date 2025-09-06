@@ -29,6 +29,7 @@ export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
     core.application.register({
       id: 'metricsExperience',
       title: 'Metrics Experience',
+      visibleIn: [],
       async mount(appMountParameters: AppMountParameters) {
         const { element } = appMountParameters;
         const [coreStart] = await core.getStartServices();

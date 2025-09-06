@@ -105,6 +105,17 @@ export class ESQLExtensionsRegistry {
     return uniqBy(recommendedItems, uniqByProperty);
   }
 
+  private unsetRecommendedItems<T>(
+    map: Map<string, T[]>,
+    indexPattern: string,
+    activeSolutionId: SolutionId
+  ): void {
+    const registryId = `${activeSolutionId}>${indexPattern}`;
+    if (map.has(registryId)) {
+      map.delete(registryId);
+    }
+  }
+
   setRecommendedQueries(
     recommendedQueries: RecommendedQuery[],
     activeSolutionId: SolutionId
@@ -137,6 +148,10 @@ export class ESQLExtensionsRegistry {
       activeSolutionId,
       'query'
     );
+  }
+
+  unsetRecommendedQueries(indexPattern: string, activeSolutionId: SolutionId): void {
+    this.unsetRecommendedItems(this.recommendedQueries, indexPattern, activeSolutionId);
   }
 
   setRecommendedFields(recommendedFields: RecommendedField[], activeSolutionId: SolutionId): void {

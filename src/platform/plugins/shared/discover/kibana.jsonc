@@ -56,7 +56,8 @@
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects"
+      "savedObjects",
+      "metricsExperience"
     ],
     "extraPublicDirs": [
       "common"
