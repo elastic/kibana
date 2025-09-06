@@ -9,9 +9,9 @@ import type { Observable } from 'rxjs';
 import type {
   IRouter,
   Logger,
-  ICustomClusterClient,
   CustomRequestHandlerContext,
   ElasticsearchClient,
+  IClusterClient,
 } from '@kbn/core/server';
 import type Boom from '@hapi/boom';
 import type { errors } from '@elastic/elasticsearch';
@@ -66,7 +66,7 @@ export interface PluginsStart {
 }
 
 export interface RouteDependencies {
-  cluster: ICustomClusterClient;
+  cluster: IClusterClient;
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
