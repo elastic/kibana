@@ -18,5 +18,10 @@ export const useSampleDataStatus = () => {
     queryFn: sampleDataIngest?.getStatus,
   });
 
-  return { isInstalled: data?.status === 'installed', indexName: data?.indexName, isLoading };
+  return {
+    isInstalled: data?.status === 'installed',
+    indexName: data?.indexName,
+    dashboardId: data?.dashboardId,
+    isLoading,
+  };
 };
