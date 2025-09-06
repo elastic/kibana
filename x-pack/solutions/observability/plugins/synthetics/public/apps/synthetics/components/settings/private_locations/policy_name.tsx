@@ -5,22 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBadge, EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   const { canReadAgentPolicies } = useFleetPermissions();
-
+  const { space: currentSpace } = useKibanaSpace();
   const { basePath } = useSyntheticsSettingsContext();
 
   const { data: policies, loading } = useSelector(selectAgentPolicies);
 
   const policy = policies?.find((policyT) => policyT.id === agentPolicyId);
+
+  const agentPolicyUrl = useMemo(() => {
+    const spaceId =
+      currentSpace && policy?.spaceIds && policy.spaceIds.includes(currentSpace.id)
+        ? currentSpace.id
+        : policy?.spaceIds[0];
+    const appPath = `/app/fleet/policies/${agentPolicyId}`;
+
+    return spaceId === DEFAULT_SPACE_ID ? appPath : `${basePath}${appPath}`;
+  }, [agentPolicyId, basePath, currentSpace, policy?.spaceIds]);
 
   if (loading) {
     return <EuiLoadingSpinner size="s" />;
@@ -31,10 +43,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       {canReadAgentPolicies ? (
         <EuiTextColor color="subdued">
           {policy ? (
-            <EuiLink
-              data-test-subj="syntheticsPolicyNameLink"
-              href={`${basePath}/app/fleet/policies/${agentPolicyId}`}
-            >
+            <EuiLink data-test-subj="syntheticsPolicyNameLink" href={agentPolicyUrl}>
               {policy?.name}
             </EuiLink>
           ) : (

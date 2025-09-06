@@ -55,6 +55,22 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('text=Private Locations');
   });
 
+  step(
+    'Verify that spaces options are available only after selecting an agent policy',
+    async () => {
+      await page.click('button:has-text("Create location")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).not.toBeVisible();
+      await page.click('[aria-label="Select agent policy"]');
+      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeVisible();
+      await page.click('button:has-text("Cancel")');
+    }
+  );
+
   step('Click button:has-text("Create location")', async () => {
     await page.click('button:has-text("Create location")');
     await page.click('[aria-label="Location name"]');

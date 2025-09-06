@@ -20,7 +20,7 @@ interface PolicyProps {
   proxyUrl?: string;
   params?: Record<string, any>;
   isBrowser?: boolean;
-  spaceId?: string;
+  spaceIds?: string[];
 }
 
 const commonVars = {
@@ -35,13 +35,13 @@ const commonVars = {
 };
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace } = props;
+  const { namespace, spaceIds } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    spaceIds: ['default'],
+    spaceIds: spaceIds || ['default'],
     package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
@@ -62,8 +62,7 @@ export const getHttpInput = ({
   location,
   proxyUrl,
   isTLSEnabled,
-  spaceId,
-  namespace,
+  spaceIds,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = true;
@@ -131,7 +130,7 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
-              meta: { space_id: spaceId ?? 'default' },
+              meta: { space_id: spaceIds ? spaceIds[1] : 'default' },
               'monitor.project.name': projectId,
               'monitor.project.id': projectId,
             },
@@ -234,7 +233,7 @@ export const getHttpInput = ({
           fields: {
             config_id: id,
             meta: {
-              space_id: spaceId ?? 'default',
+              space_id: spaceIds ? spaceIds[1] : 'default',
             },
             'monitor.fleet_managed': true,
             ...(projectId
