@@ -741,6 +741,36 @@ const countOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
         },

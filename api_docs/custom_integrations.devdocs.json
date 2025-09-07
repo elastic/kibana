@@ -2573,6 +2573,44 @@
           },
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.opentelemetry",
+            "type": "Object",
+            "tags": [],
+            "label": "opentelemetry",
+            "description": [],
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.opentelemetry.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.opentelemetry.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.observability",
             "type": "Object",
             "tags": [],
