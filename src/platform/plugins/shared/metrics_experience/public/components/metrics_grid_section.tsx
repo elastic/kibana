@@ -75,7 +75,7 @@ export const MetricsGridSection = ({ indexPattern, timeRange }: MetricsGridSecti
   const filteredFields = useMemo(() => {
     return fields.filter((field) => {
       // Filter out fields with no sample data
-      const hasData = !field.no_data;
+      const hasData = !field.noData;
 
       // Filter by search term
       const matchesSearch = field.name.toLowerCase().includes(searchTerm.toLowerCase());

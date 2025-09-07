@@ -95,7 +95,7 @@ const getHostNames = async ({
   to,
   limit,
   query,
-  schema,
+  schema = 'ecs',
 }: Pick<
   GetHostParameters,
   'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query' | 'schema'

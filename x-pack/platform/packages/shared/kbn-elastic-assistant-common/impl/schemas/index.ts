@@ -38,6 +38,9 @@ export * from './attack_discovery/schedules.gen';
 // Defend insight Schemas
 export * from './defend_insights';
 
+// Users Schemas
+export * from './users';
+
 // Chat Schemas
 export * from './chat/post_chat_complete_route.gen';
 

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_GROUPING, ALERT_REASON } from '@kbn/rule-data-utils';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type {
   AlertPendingStatusMetaData,
@@ -39,7 +39,8 @@ export const getMonitorAlertDocument = (
   locationNames: string[],
   locationIds: string[],
   useLatestChecks: boolean,
-  threshold: number
+  threshold: number,
+  grouping?: Record<string, unknown>
 ) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
@@ -62,6 +63,7 @@ export const getMonitorAlertDocument = (
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
+  ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
 });
 
 type Reason = 'pending' | 'down' | 'recovered';

@@ -69,8 +69,6 @@
   &__badge {
     border: none;
     display: block;
-    // Force text to always be dark on top of white -> pink color
-    color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
   }
 
   &__panel {

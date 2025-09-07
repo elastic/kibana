@@ -39,7 +39,16 @@ export const selectionComparators: StateComparators<
   >
 > = {
   selectedOptions: selectedOptionsComparatorFunction,
-  availableOptions: 'referenceEquality',
+  availableOptions: (a, b, lastState, currentState) => {
+    // Only compare availableOptions for static values controls; values from query fetch these at runtime
+    if (
+      lastState?.controlType === currentState?.controlType &&
+      currentState?.controlType === EsqlControlType.VALUES_FROM_QUERY
+    ) {
+      return true;
+    }
+    return deepEqual(a ?? [], b ?? []);
+  },
   variableName: 'referenceEquality',
   variableType: 'referenceEquality',
   controlType: 'referenceEquality',
@@ -49,7 +58,8 @@ export const selectionComparators: StateComparators<
 
 export function initializeESQLControlSelections(
   initialState: ESQLControlState,
-  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
+  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>,
+  setDataLoading: (loading: boolean) => void
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
@@ -84,16 +94,17 @@ export function initializeESQLControlSelections(
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      switchMap(
-        async ({ timeRange }) =>
-          await getESQLSingleColumnValues({
-            query: esqlQuery$.getValue(),
-            search: dataService.search.search,
-            timeRange,
-          })
-      )
+      switchMap(async ({ timeRange }) => {
+        setDataLoading(true);
+        return await getESQLSingleColumnValues({
+          query: esqlQuery$.getValue(),
+          search: dataService.search.search,
+          timeRange,
+        });
+      })
     )
     .subscribe((result) => {
+      setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
         availableOptions$.next(result.values.map((value) => value));
       }
@@ -158,7 +169,9 @@ export function initializeESQLControlSelections(
     getLatestState: () => {
       return {
         selectedOptions: selectedOptions$.getValue() ?? [],
-        availableOptions: availableOptions$.getValue() ?? [],
+        ...(controlType$.getValue() === EsqlControlType.STATIC_VALUES
+          ? { availableOptions: availableOptions$.getValue() ?? [] }
+          : {}),
         variableName: variableName$.getValue() ?? '',
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),

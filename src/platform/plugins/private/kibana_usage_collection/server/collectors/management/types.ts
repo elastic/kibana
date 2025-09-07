@@ -76,6 +76,7 @@ export interface UsageStats {
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enablePrivilegedUserMonitoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
+  'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -174,7 +175,9 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
-  'observability:enableStreamsUI': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
+  'genAiSettings:defaultAIConnector': string;
+  'genAiSettings:defaultAIConnectorOnly': boolean;
+  'observability:streamsEnableGroupStreams': boolean;
 }

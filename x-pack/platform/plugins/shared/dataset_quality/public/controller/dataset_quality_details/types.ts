@@ -33,6 +33,8 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
     | 'timeRange'
     | 'breakdownField'
     | 'showCurrentQualityIssues'
+    | 'selectedIssueTypes'
+    | 'selectedFields'
     | 'expandedQualityIssue'
     | 'qualityIssuesChart'
   >

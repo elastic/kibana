@@ -21,7 +21,7 @@ export class EMSVectorTileStyle implements IStyle {
     this._descriptor = EMSVectorTileStyle.createDescriptor(descriptor.color);
   }
 
-  static createDescriptor(color?: string) {
+  static createDescriptor(color?: string): EMSVectorTileStyleDescriptor {
     return {
       type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE,
       color: color ?? '',

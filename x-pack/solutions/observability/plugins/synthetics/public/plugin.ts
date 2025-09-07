@@ -238,18 +238,15 @@ export class SyntheticsPlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
-    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+    pluginsStart.dashboard.registerDashboardPanelSettings(
       SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
       () => {
-        return { width: 10, height: 8 };
+        return { placementSettings: { width: 10, height: 8 } };
       }
     );
-    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-      SYNTHETICS_MONITORS_EMBEDDABLE,
-      () => {
-        return { width: 30, height: 12 };
-      }
-    );
+    pluginsStart.dashboard.registerDashboardPanelSettings(SYNTHETICS_MONITORS_EMBEDDABLE, () => {
+      return { placementSettings: { width: 30, height: 12 } };
+    });
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

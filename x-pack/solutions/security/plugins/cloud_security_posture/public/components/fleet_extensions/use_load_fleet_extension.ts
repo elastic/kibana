@@ -158,7 +158,7 @@ const useCloudFormationTemplate = ({
 interface UseLoadFleetExtensionProps {
   newPolicy: NewPackagePolicy;
   onChange: (args: {
-    isValid: boolean;
+    isValid?: boolean;
     updatedPolicy: NewPackagePolicy;
     isExtensionLoaded?: boolean;
   }) => void;
@@ -233,14 +233,13 @@ export const useLoadFleetExtension = ({
           posture: { value: getPostureType(selectedInput.type) },
         }),
       };
-      // Update the policy with the new
       onChange({
-        isValid: isValid !== undefined ? isValid : isValidFormState,
+        isValid,
         updatedPolicy: newUpdatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [isValidFormState, input.policy_template, onChange, isLoading]
+    [input.policy_template, onChange, isLoading]
   );
 
   const setEnabledPolicyInput = useCallback(

@@ -212,6 +212,7 @@ describe('schema validation', () => {
         ingest_pipeline: [],
         data_stream_ilm_policy: [],
         ml_model: [],
+        knowledge_base: [],
       },
     };
     packageInfo = {
@@ -464,6 +465,7 @@ describe('schema validation', () => {
     const expectedResponse: GetStatsResponse = {
       response: {
         agent_policy_count: 0,
+        package_policy_count: 0,
       },
     };
     (getStatsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
