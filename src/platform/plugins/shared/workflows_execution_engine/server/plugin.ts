@@ -86,18 +86,19 @@ export class WorkflowsExecutionEnginePlugin
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
               // Task Manager automatically provides fakeRequest if task was scheduled with user context
-              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } = await createContainer(
-                workflowRunId,
-                spaceId,
-                actions,
-                taskManager,
-                esClient,
-                logger,
-                config,
-                workflowExecutionRepository,
-                fakeRequest, // Provided by Task Manager's first-class API key support
-                coreStart
-              );
+              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+                await createContainer(
+                  workflowRunId,
+                  spaceId,
+                  actions,
+                  taskManager,
+                  esClient,
+                  logger,
+                  config,
+                  workflowExecutionRepository,
+                  fakeRequest, // Provided by Task Manager's first-class API key support
+                  coreStart
+                );
               await workflowRuntime.start();
               await workflowExecutionLoop(
                 workflowRuntime,
