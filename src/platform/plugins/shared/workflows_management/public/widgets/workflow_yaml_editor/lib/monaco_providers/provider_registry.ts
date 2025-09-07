@@ -27,11 +27,13 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
     }
 
     this.handlers.push(handler);
-    
+
     // Sort by priority (highest first)
     this.handlers.sort((a, b) => b.getPriority() - a.getPriority());
 
-    console.log(`MonacoConnectorHandlerRegistry: Registered handler with priority ${handler.getPriority()}`);
+    console.log(
+      `MonacoConnectorHandlerRegistry: Registered handler with priority ${handler.getPriority()}`
+    );
   }
 
   /**
@@ -50,7 +52,7 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
    * Get all handlers that can handle a connector type (sorted by priority)
    */
   getHandlers(connectorType: string): MonacoConnectorHandler[] {
-    return this.handlers.filter(handler => handler.canHandle(connectorType));
+    return this.handlers.filter((handler) => handler.canHandle(connectorType));
   }
 
   /**
@@ -83,9 +85,9 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
    * Get debug information about registered handlers
    */
   getDebugInfo(): Array<{ priority: number; canHandle: string[] }> {
-    return this.handlers.map(handler => ({
+    return this.handlers.map((handler) => ({
       priority: handler.getPriority(),
-      canHandle: ['elasticsearch.', 'kibana.', 'http.', 'console.', 'slack.'].filter(prefix =>
+      canHandle: ['elasticsearch.', 'kibana.', 'http.', 'console.', 'slack.'].filter((prefix) =>
         handler.canHandle(prefix + 'test')
       ),
     }));

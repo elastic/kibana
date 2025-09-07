@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type YAML from 'yaml';
 
 /**
@@ -112,7 +112,7 @@ export interface ConnectorExamples {
  * These handlers provide Monaco editor extensions (hover, actions, etc.) for specific connector types
  */
 export interface MonacoConnectorHandler {
-  /** 
+  /**
    * Check if this handler can process the given connector type
    */
   canHandle(connectorType: string): boolean;
@@ -154,16 +154,16 @@ export interface ProviderConfig {
 export interface MonacoHandlerRegistry {
   /** Register a new Monaco connector handler */
   register(handler: MonacoConnectorHandler): void;
-  
+
   /** Get the best handler for a connector type */
   getHandler(connectorType: string): MonacoConnectorHandler | null;
-  
+
   /** Get all handlers that can handle a connector type */
   getHandlers(connectorType: string): MonacoConnectorHandler[];
-  
+
   /** Unregister a handler */
   unregister(handler: MonacoConnectorHandler): void;
-  
+
   /** Clear all handlers */
   clear(): void;
 }

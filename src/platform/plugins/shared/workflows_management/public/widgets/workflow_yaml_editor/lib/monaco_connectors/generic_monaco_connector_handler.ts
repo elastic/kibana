@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type {
   HoverContext,
@@ -81,30 +81,20 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
 
     // Add generic "Copy Step" action
     actions.push(
-      this.createActionInfo(
-        'copy-step',
-        'Copy Step',
-        () => this.copyStep(context),
-        {
-          icon: 'copy',
-          tooltip: 'Copy this workflow step to clipboard',
-          priority: 5,
-        }
-      )
+      this.createActionInfo('copy-step', 'Copy Step', () => this.copyStep(context), {
+        icon: 'copy',
+        tooltip: 'Copy this workflow step to clipboard',
+        priority: 5,
+      })
     );
 
     // Add "Validate Step" action
     actions.push(
-      this.createActionInfo(
-        'validate-step',
-        'Validate Step',
-        () => this.validateStep(context),
-        {
-          icon: 'check',
-          tooltip: 'Validate step configuration',
-          priority: 3,
-        }
-      )
+      this.createActionInfo('validate-step', 'Validate Step', () => this.validateStep(context), {
+        icon: 'check',
+        tooltip: 'Validate step configuration',
+        priority: 3,
+      })
     );
 
     return actions;
@@ -123,9 +113,12 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         snippet: `- name: ${connectorType.replace(/[^a-zA-Z0-9]/g, '_')}_step
   type: ${connectorType}
   with:
-${Object.entries(category.examples.params || {}).map(([key, value]) => 
-  `    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
-).join('\n')}`,
+${Object.entries(category.examples.params || {})
+  .map(
+    ([key, value]) =>
+      `    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
+  )
+  .join('\n')}`,
       };
     }
 
@@ -151,7 +144,7 @@ ${Object.entries(category.examples.params || {}).map(([key, value]) =>
           params: {
             url: 'https://api.example.com/endpoint',
             method: 'GET',
-            headers: { 'Authorization': 'Bearer token' },
+            headers: { Authorization: 'Bearer token' },
           },
         },
       };
@@ -218,7 +211,11 @@ ${Object.entries(category.examples.params || {}).map(([key, value]) =>
     }
 
     // AI/ML connectors
-    if (connectorType.includes('inference') || connectorType.includes('ai') || connectorType.includes('ml')) {
+    if (
+      connectorType.includes('inference') ||
+      connectorType.includes('ai') ||
+      connectorType.includes('ml')
+    ) {
       return {
         name: 'AI/ML',
         description: 'AI/ML connector for inference and analysis',
@@ -256,7 +253,9 @@ ${Object.entries(category.examples.params || {}).map(([key, value]) =>
     if (category.examples?.params) {
       lines.push('', '**Example Parameters:**');
       for (const [key, value] of Object.entries(category.examples.params)) {
-        lines.push(`- \`${key}\`: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`);
+        lines.push(
+          `- \`${key}\`: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
+        );
       }
     }
 

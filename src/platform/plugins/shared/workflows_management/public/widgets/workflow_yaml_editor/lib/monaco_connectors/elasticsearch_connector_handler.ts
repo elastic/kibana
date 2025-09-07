@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
@@ -28,12 +28,14 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
   private readonly esHost?: string;
   private readonly kibanaHost?: string;
 
-  constructor(options: {
-    http?: HttpSetup;
-    notifications?: NotificationsSetup;
-    esHost?: string;
-    kibanaHost?: string;
-  } = {}) {
+  constructor(
+    options: {
+      http?: HttpSetup;
+      notifications?: NotificationsSetup;
+      esHost?: string;
+      kibanaHost?: string;
+    } = {}
+  ) {
     super('ElasticsearchMonacoConnectorHandler', 100, ['elasticsearch.']);
     this.http = options.http;
     this.notifications = options.notifications;
@@ -238,7 +240,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
 
       await navigator.clipboard.writeText(consoleFormat);
-      
+
       if (this.notifications) {
         this.notifications.toasts.addSuccess({
           title: 'Copied to clipboard',
@@ -254,5 +256,4 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       }
     }
   }
-
 }

@@ -29,14 +29,11 @@ export class UnifiedActionsProvider {
   private currentActionButtons: HTMLElement[] = [];
   private currentStepNode: any = null;
 
-  constructor(
-    editor: monaco.editor.IStandaloneCodeEditor,
-    config: ProviderConfig
-  ) {
+  constructor(editor: monaco.editor.IStandaloneCodeEditor, config: ProviderConfig) {
     this.editor = editor;
     this.getYamlDocument = config.getYamlDocument;
     this.options = config.options || {};
-    
+
     // Initialize decorations collection
     this.highlightedLines = editor.createDecorationsCollection();
 
@@ -65,10 +62,10 @@ export class UnifiedActionsProvider {
       immediateClear(); // Clear immediately
       debouncedHighlight(); // Then update after debounce
     });
-    
-    // Note: Removed onDidChangeModelContent listener to prevent highlighting 
+
+    // Note: Removed onDidChangeModelContent listener to prevent highlighting
     // updates when typing. We only want highlighting to change when cursor moves.
-    
+
     // Listen for scroll changes to update action button positions
     this.editor.onDidScrollChange(() => {
       // Update action button positions when scrolling
@@ -121,12 +118,18 @@ export class UnifiedActionsProvider {
       // Find appropriate handler
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (!handler) {
-        console.log('UnifiedActionsProvider: No Monaco handler found for connector type:', context.connectorType);
+        console.log(
+          'UnifiedActionsProvider: No Monaco handler found for connector type:',
+          context.connectorType
+        );
         this.clearHighlightAndActions();
         return;
       }
 
-      console.log('UnifiedActionsProvider: Found Monaco handler for connector type:', context.connectorType);
+      console.log(
+        'UnifiedActionsProvider: Found Monaco handler for connector type:',
+        context.connectorType
+      );
 
       // Check if connector type changed - clear highlighting if it did
       if (this.currentConnectorType !== context.connectorType) {
@@ -147,16 +150,15 @@ export class UnifiedActionsProvider {
         isInWithBlock: context.stepContext?.isInWithBlock,
         yamlPath: context.yamlPath,
       });
-      
+
       const actions = await handler.generateActions(context);
-      
+
       console.log('🔍 Generated actions:', {
         actionCount: actions.length,
-        actions: actions.map(a => ({ id: a.id, label: a.label })),
+        actions: actions.map((a) => ({ id: a.id, label: a.label })),
       });
-      
-      this.updateActionButtons(actions, position);
 
+      this.updateActionButtons(actions, position);
     } catch (error) {
       console.warn('UnifiedActionsProvider: Error updating highlight and actions', error);
       this.clearHighlightAndActions();
@@ -179,7 +181,7 @@ export class UnifiedActionsProvider {
       console.log('🔍 buildActionContext debug:', {
         absolutePosition,
         yamlPath,
-        position: { line: position.lineNumber, column: position.column }
+        position: { line: position.lineNumber, column: position.column },
       });
 
       // If no path found (e.g., cursor after colon), try to find it from the current line
@@ -190,9 +192,9 @@ export class UnifiedActionsProvider {
 
       // Detect connector type and step context
       const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
-      
+
       console.log('🔍 buildActionContext stepContext result:', stepContext);
-      
+
       if (!stepContext?.stepType) {
         console.log('❌ buildActionContext: No stepContext or stepType, returning null');
         return null;
@@ -206,7 +208,7 @@ export class UnifiedActionsProvider {
 
       return {
         connectorType: stepContext.stepType,
-        yamlPath: yamlPath.map(segment => String(segment)),
+        yamlPath: yamlPath.map((segment) => String(segment)),
         currentValue,
         position,
         model,
@@ -232,11 +234,11 @@ export class UnifiedActionsProvider {
     try {
       const lineContent = model.getLineContent(position.lineNumber);
       const beforeCursor = lineContent.substring(0, position.column - 1);
-      
+
       console.log('🔍 getPathFromCurrentLine:', {
         lineContent: JSON.stringify(lineContent),
         beforeCursor: JSON.stringify(beforeCursor),
-        position: { line: position.lineNumber, column: position.column }
+        position: { line: position.lineNumber, column: position.column },
       });
 
       // Check if we're after a colon (common case: "with:|")
@@ -244,16 +246,16 @@ export class UnifiedActionsProvider {
       if (colonMatch) {
         const keyName = colonMatch[1];
         console.log('🔍 Found key after colon:', keyName);
-        
+
         // Try to find this key in the document by looking at nearby positions
         // Look at the start of the key on this line
         const keyStartPosition = lineContent.indexOf(keyName);
         if (keyStartPosition !== -1) {
           const keyAbsolutePosition = model.getOffsetAt({
             lineNumber: position.lineNumber,
-            column: keyStartPosition + 1
+            column: keyStartPosition + 1,
           });
-          
+
           // Try to get path from the key position
           const keyPath = getCurrentPath(yamlDocument, keyAbsolutePosition);
           if (keyPath.length > 0) {
@@ -266,9 +268,9 @@ export class UnifiedActionsProvider {
       // Fallback: try to find path from the beginning of the current line
       const lineStartPosition = model.getOffsetAt({
         lineNumber: position.lineNumber,
-        column: 1
+        column: 1,
       });
-      
+
       // Try positions along the line to find any valid path
       for (let offset = 0; offset < lineContent.length; offset++) {
         const testPosition = lineStartPosition + offset;
@@ -295,9 +297,9 @@ export class UnifiedActionsProvider {
     position: monaco.Position
   ): any {
     // Look for steps in the path
-    const stepsIndex = yamlPath.findIndex(segment => segment === 'steps');
+    const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');
     console.log('🔍 detectStepContext: stepsIndex:', stepsIndex, 'yamlPath:', yamlPath);
-    
+
     if (stepsIndex === -1) {
       console.log('❌ detectStepContext: No "steps" found in yamlPath');
       return null;
@@ -305,8 +307,13 @@ export class UnifiedActionsProvider {
 
     // Get step index
     const stepIndex = parseInt(String(yamlPath[stepsIndex + 1]), 10);
-    console.log('🔍 detectStepContext: stepIndex:', stepIndex, 'raw value:', yamlPath[stepsIndex + 1]);
-    
+    console.log(
+      '🔍 detectStepContext: stepIndex:',
+      stepIndex,
+      'raw value:',
+      yamlPath[stepsIndex + 1]
+    );
+
     if (isNaN(stepIndex)) {
       console.log('❌ detectStepContext: stepIndex is NaN');
       return null;
@@ -330,9 +337,11 @@ export class UnifiedActionsProvider {
       }
 
       // Check if we're in the 'with' block or its sub-blocks
-      const isInWithBlock = yamlPath.some(segment => segment === 'with');
-      const isInSubBlock = yamlPath.some(segment => 
-        ['with', 'settings', 'mappings', 'aliases', 'query', 'index', 'body'].includes(String(segment))
+      const isInWithBlock = yamlPath.some((segment) => segment === 'with');
+      const isInSubBlock = yamlPath.some((segment) =>
+        ['with', 'settings', 'mappings', 'aliases', 'query', 'index', 'body'].includes(
+          String(segment)
+        )
       );
 
       console.log('🔍 detectStepContext result:', {
@@ -367,7 +376,7 @@ export class UnifiedActionsProvider {
     }
 
     // Find 'with' in path and get parameter name
-    const withIndex = yamlPath.findIndex(segment => segment === 'with');
+    const withIndex = yamlPath.findIndex((segment) => segment === 'with');
     if (withIndex === -1 || withIndex >= yamlPath.length - 1) {
       return null;
     }
@@ -418,9 +427,8 @@ export class UnifiedActionsProvider {
       console.log('🔍 Step highlighting applied:', {
         stepName: context.stepContext.stepName,
         stepType: context.stepContext.stepType,
-        lines: stepRange ? `${stepRange.startLineNumber}-${stepRange.endLineNumber}` : 'none'
+        lines: stepRange ? `${stepRange.startLineNumber}-${stepRange.endLineNumber}` : 'none',
       });
-
     } catch (error) {
       console.warn('UnifiedActionsProvider: Error updating highlighting', error);
     }
@@ -442,13 +450,13 @@ export class UnifiedActionsProvider {
 
       const [startOffset, , endOffset] = stepNode.range;
       const startPos = model.getPositionAt(startOffset);
-      let endPos = model.getPositionAt(endOffset);
+      const endPos = model.getPositionAt(endOffset);
 
       console.log('🔍 getStepRange initial:', {
         startOffset,
         endOffset,
         startPos: { line: startPos.lineNumber, column: startPos.column },
-        endPos: { line: endPos.lineNumber, column: endPos.column }
+        endPos: { line: endPos.lineNumber, column: endPos.column },
       });
 
       // Adjust end position to exclude trailing empty lines and prevent bleeding into next step
@@ -459,16 +467,23 @@ export class UnifiedActionsProvider {
       while (adjustedEndLine > startPos.lineNumber) {
         const lineContent = model.getLineContent(adjustedEndLine);
         const trimmedContent = lineContent.trim();
-        
-        console.log('🔍 Checking line', adjustedEndLine, ':', JSON.stringify(lineContent), 'trimmed:', JSON.stringify(trimmedContent));
-        
+
+        console.log(
+          '🔍 Checking line',
+          adjustedEndLine,
+          ':',
+          JSON.stringify(lineContent),
+          'trimmed:',
+          JSON.stringify(trimmedContent)
+        );
+
         // If this line is non-empty and doesn't start with "- " (which would be the next step)
         if (trimmedContent.length > 0 && !trimmedContent.startsWith('- ')) {
           // Use the full line length for this non-empty line
           adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
           break;
         }
-        
+
         // If we found a line that starts with "- ", this is likely the next step
         if (trimmedContent.startsWith('- ')) {
           // Go back to the previous line and use its end
@@ -477,7 +492,7 @@ export class UnifiedActionsProvider {
           console.log('🔍 Found next step marker, adjusting to previous line', adjustedEndLine);
           break;
         }
-        
+
         adjustedEndLine--;
       }
 
@@ -489,7 +504,7 @@ export class UnifiedActionsProvider {
 
       console.log('🔍 getStepRange adjustment:', {
         originalEnd: { line: endPos.lineNumber, column: endPos.column },
-        adjustedEnd: { line: adjustedEndLine, column: adjustedEndColumn }
+        adjustedEnd: { line: adjustedEndLine, column: adjustedEndColumn },
       });
 
       return new monaco.Range(
@@ -517,12 +532,15 @@ export class UnifiedActionsProvider {
       return;
     }
 
-    console.log('UnifiedActionsProvider: Setting up action buttons:', actions.map(a => a.label));
+    console.log(
+      'UnifiedActionsProvider: Setting up action buttons:',
+      actions.map((a) => a.label)
+    );
 
     // Calculate position for floating buttons - always position at first line of step
     const lineHeight = this.editor.getOption(monaco.editor.EditorOption.lineHeight);
     const scrollTop = this.editor.getScrollTop();
-    
+
     // Get the step range to find the first line
     let targetLineNumber = position.lineNumber;
     try {
@@ -534,10 +552,10 @@ export class UnifiedActionsProvider {
       // Fallback to current position
       console.warn('Could not get step range, using current position');
     }
-    
+
     // Position floating buttons inside the step area (like Dev Console play button)
     const topPosition = (targetLineNumber - 1) * lineHeight - scrollTop;
-    
+
     this.updateEditorActionsCss({
       position: 'absolute',
       top: `${topPosition + 4}px`, // Account for border and padding
@@ -572,12 +590,12 @@ export class UnifiedActionsProvider {
     try {
       const lineHeight = this.editor.getOption(monaco.editor.EditorOption.lineHeight);
       const scrollTop = this.editor.getScrollTop();
-      
+
       const stepRange = this.getStepRange(this.currentStepNode);
       if (stepRange) {
         const targetLineNumber = stepRange.startLineNumber;
         const topPosition = (targetLineNumber - 1) * lineHeight - scrollTop;
-        
+
         this.updateEditorActionsCss({
           position: 'absolute',
           top: `${topPosition + 4}px`, // Account for border and padding
@@ -713,11 +731,11 @@ export class UnifiedActionsProvider {
     // Convert step type to API path
     // Example: ['indices', 'get_mapping'] -> '/indices/_mapping'
     let path = '/' + apiParts.join('/');
-    
+
     // Handle common patterns
     path = path.replace('/get_', '/_');
     path = path.replace('/create_', '/_');
-    
+
     return path;
   }
 

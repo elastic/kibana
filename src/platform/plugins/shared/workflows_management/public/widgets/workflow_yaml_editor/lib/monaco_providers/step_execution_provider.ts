@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as monaco from 'monaco-editor';
@@ -64,60 +66,70 @@ export class StepExecutionProvider {
 
       // Only apply step execution decorations in readonly mode (Executions view)
       // This prevents interference with interactive highlighting
-      if (!model || !yamlDocument || !stepExecutions || stepExecutions.length === 0 || !this.isReadOnly()) {
+      if (
+        !model ||
+        !yamlDocument ||
+        !stepExecutions ||
+        stepExecutions.length === 0 ||
+        !this.isReadOnly()
+      ) {
         return;
       }
 
-      console.log('🎯 StepExecutionProvider: Updating decorations for', stepExecutions.length, 'executions');
+      console.log(
+        '🎯 StepExecutionProvider: Updating decorations for',
+        stepExecutions.length,
+        'executions'
+      );
 
-    const decorations = stepExecutions
-      .map((stepExecution) => {
-        const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
-        if (!stepNode) {
-          return null;
-        }
-        const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
-        if (!stepRange) {
-          return null;
-        }
+      const decorations = stepExecutions
+        .map((stepExecution) => {
+          const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
+          if (!stepNode) {
+            return null;
+          }
+          const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
+          if (!stepRange) {
+            return null;
+          }
 
-        // Glyph decoration for status icon
-        const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            stepRange.startLineNumber,
-            stepRange.startColumn,
-            stepRange.startLineNumber,
-            stepRange.endColumn
-          ),
-          options: {
-            glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
-              !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-            }`,
-          },
-        };
+          // Glyph decoration for status icon
+          const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
+            range: new monaco.Range(
+              stepRange.startLineNumber,
+              stepRange.startColumn,
+              stepRange.startLineNumber,
+              stepRange.endColumn
+            ),
+            options: {
+              glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
+                !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+              }`,
+            },
+          };
 
-        // Background decoration for execution status
-        const bgClassName = `step-execution-${stepExecution.status} ${
-          !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-        }`;
-        const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            stepRange.startLineNumber,
-            stepRange.startColumn,
-            stepRange.endLineNumber - 1,
-            stepRange.endColumn
-          ),
-          options: {
-            className: bgClassName,
-            marginClassName: bgClassName,
-            isWholeLine: true,
-          },
-        };
+          // Background decoration for execution status
+          const bgClassName = `step-execution-${stepExecution.status} ${
+            !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+          }`;
+          const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
+            range: new monaco.Range(
+              stepRange.startLineNumber,
+              stepRange.startColumn,
+              stepRange.endLineNumber - 1,
+              stepRange.endColumn
+            ),
+            options: {
+              className: bgClassName,
+              marginClassName: bgClassName,
+              isWholeLine: true,
+            },
+          };
 
-        return [glyphDecoration, backgroundDecoration];
-      })
-      .flat()
-      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
+          return [glyphDecoration, backgroundDecoration];
+        })
+        .flat()
+        .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
 
       this.decorationsCollection = this.editor.createDecorationsCollection(decorations);
 

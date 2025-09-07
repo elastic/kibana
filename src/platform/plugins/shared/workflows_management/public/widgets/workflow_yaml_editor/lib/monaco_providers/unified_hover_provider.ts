@@ -116,7 +116,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
       // Get actions and find the requested one
       const actions = await handler.generateActions(context);
-      const action = actions.find(a => a.id === actionId);
+      const action = actions.find((a) => a.id === actionId);
 
       if (action) {
         await action.handler();
@@ -180,11 +180,17 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (!handler) {
-        console.log('UnifiedHoverProvider: No Monaco handler found for connector type:', context.connectorType);
+        console.log(
+          'UnifiedHoverProvider: No Monaco handler found for connector type:',
+          context.connectorType
+        );
         return null;
       }
 
-      console.log('UnifiedHoverProvider: Found Monaco handler for connector type:', context.connectorType);
+      console.log(
+        'UnifiedHoverProvider: Found Monaco handler for connector type:',
+        context.connectorType
+      );
 
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);
@@ -245,7 +251,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
       return {
         connectorType: stepContext.stepType,
-        yamlPath: yamlPath.map(segment => String(segment)),
+        yamlPath: yamlPath.map((segment) => String(segment)),
         currentValue,
         position,
         model,
@@ -270,11 +276,11 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     try {
       const lineContent = model.getLineContent(position.lineNumber);
       const beforeCursor = lineContent.substring(0, position.column - 1);
-      
+
       console.log('🔍 getPathFromCurrentLine (hover):', {
         lineContent: JSON.stringify(lineContent),
         beforeCursor: JSON.stringify(beforeCursor),
-        position: { line: position.lineNumber, column: position.column }
+        position: { line: position.lineNumber, column: position.column },
       });
 
       // Check if we're after a colon (common case: "with:|")
@@ -282,16 +288,16 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       if (colonMatch) {
         const keyName = colonMatch[1];
         console.log('🔍 Found key after colon:', keyName);
-        
+
         // Try to find this key in the document by looking at nearby positions
         // Look at the start of the key on this line
         const keyStartPosition = lineContent.indexOf(keyName);
         if (keyStartPosition !== -1) {
           const keyAbsolutePosition = model.getOffsetAt({
             lineNumber: position.lineNumber,
-            column: keyStartPosition + 1
+            column: keyStartPosition + 1,
           });
-          
+
           // Try to get path from the key position
           const keyPath = getCurrentPath(yamlDocument, keyAbsolutePosition);
           if (keyPath.length > 0) {
@@ -304,9 +310,9 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Fallback: try to find path from the beginning of the current line
       const lineStartPosition = model.getOffsetAt({
         lineNumber: position.lineNumber,
-        column: 1
+        column: 1,
       });
-      
+
       // Try positions along the line to find any valid path
       for (let offset = 0; offset < lineContent.length; offset++) {
         const testPosition = lineStartPosition + offset;
@@ -333,7 +339,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position
   ): any {
     // Look for steps in the path
-    const stepsIndex = yamlPath.findIndex(segment => segment === 'steps');
+    const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');
     if (stepsIndex === -1) {
       return null;
     }
@@ -347,12 +353,12 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     try {
       // Get step node - handle being inside 'with' block
       let stepPath = yamlPath.slice(0, stepsIndex + 2);
-      
+
       // If we're deeper in the path (e.g., in 'with' block), still get the step node
       if (yamlPath.length > stepsIndex + 2) {
         stepPath = yamlPath.slice(0, stepsIndex + 2);
       }
-      
+
       const stepNode = yamlDocument.getIn(stepPath, true);
       if (!stepNode) {
         console.log('🔍 detectStepContext: No stepNode found for stepPath:', stepPath);
@@ -377,7 +383,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       }
 
       // Check if we're in the 'with' block
-      const isInWithBlock = yamlPath.some(segment => segment === 'with');
+      const isInWithBlock = yamlPath.some((segment) => segment === 'with');
 
       return {
         stepName,
@@ -402,7 +408,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     }
 
     // Find 'with' in path and get parameter name
-    const withIndex = yamlPath.findIndex(segment => segment === 'with');
+    const withIndex = yamlPath.findIndex((segment) => segment === 'with');
     if (withIndex === -1 || withIndex >= yamlPath.length - 1) {
       return null;
     }
@@ -435,7 +441,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
           const [startOffset, , endOffset] = typeNode.value.range;
           const startPos = model.getPositionAt(startOffset);
           const endPos = model.getPositionAt(endOffset);
-          
+
           return new monaco.Range(
             startPos.lineNumber,
             startPos.column,

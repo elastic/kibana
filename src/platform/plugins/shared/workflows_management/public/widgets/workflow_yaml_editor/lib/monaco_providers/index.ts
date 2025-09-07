@@ -35,9 +35,6 @@ export {
   registerUnifiedHoverProvider,
 } from './unified_hover_provider';
 
-export {
-  UnifiedActionsProvider,
-  createUnifiedActionsProvider,
-} from './unified_actions_provider';
+export { UnifiedActionsProvider, createUnifiedActionsProvider } from './unified_actions_provider';
 
 // REMOVED: UnifiedDecorationsProvider - no longer needed in new architecture

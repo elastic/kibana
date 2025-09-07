@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type {
   MonacoConnectorHandler,
   HoverContext,
@@ -35,9 +35,7 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
    * Check if this handler can process the given connector type
    */
   canHandle(connectorType: string): boolean {
-    return this.supportedPrefixes.some(prefix => 
-      connectorType.startsWith(prefix)
-    );
+    return this.supportedPrefixes.some((prefix) => connectorType.startsWith(prefix));
   }
 
   /**
@@ -122,7 +120,7 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     isInWithBlock: boolean;
   } {
     const { stepContext } = context;
-    
+
     return {
       stepName: stepContext?.stepName,
       stepType: stepContext?.stepType,
@@ -139,7 +137,7 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
       .replace(/^elasticsearch\./, '')
       .replace(/^kibana\./, '')
       .replace(/_/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase());
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
   /**
@@ -152,14 +150,14 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     examples?: any[]
   ): string {
     const lines = [`**Parameter**: \`${paramName}\` (${paramType})`];
-    
+
     if (description) {
       lines.push('', description);
     }
 
     if (examples && examples.length > 0) {
       lines.push('', '**Examples:**');
-      examples.slice(0, 3).forEach(example => {
+      examples.slice(0, 3).forEach((example) => {
         if (typeof example === 'string') {
           lines.push(`- \`${example}\``);
         } else {
@@ -179,11 +177,7 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     description: string,
     additionalInfo?: string[]
   ): string {
-    const lines = [
-      `**Connector**: \`${connectorType}\``,
-      '',
-      description,
-    ];
+    const lines = [`**Connector**: \`${connectorType}\``, '', description];
 
     if (additionalInfo && additionalInfo.length > 0) {
       lines.push('', ...additionalInfo);

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { copyAsConsole, type CopyAsOptions } from '../lib/copy_request_utils';
 
 export interface ElasticsearchStepActionsProps {
   actionsProvider: any; // We'll make this optional since we're transitioning to unified providers
@@ -30,16 +28,16 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
 }) => {
   // Use state to force re-renders when actions change
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
+
   // Get current actions directly from the unified actions provider
   const currentActions = actionsProvider?.getCurrentActions?.() || [];
-  
+
   // Listen for action updates - force refresh every 100ms when actions might change
   useEffect(() => {
     const interval = setInterval(() => {
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     }, 100);
-    
+
     return () => clearInterval(interval);
   }, []);
 

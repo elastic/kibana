@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type {
@@ -27,18 +27,20 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   private readonly kibanaHost?: string;
   private readonly connectorExamples: Map<string, ConnectorExamples>;
 
-  constructor(options: {
-    http?: HttpSetup;
-    notifications?: NotificationsSetup;
-    kibanaHost?: string;
-    generatedConnectors?: Array<{
-      type: string;
-      description?: string;
-      examples?: ConnectorExamples;
-      methods?: string[];
-      patterns?: string[];
-    }>;
-  } = {}) {
+  constructor(
+    options: {
+      http?: HttpSetup;
+      notifications?: NotificationsSetup;
+      kibanaHost?: string;
+      generatedConnectors?: Array<{
+        type: string;
+        description?: string;
+        examples?: ConnectorExamples;
+        methods?: string[];
+        patterns?: string[];
+      }>;
+    } = {}
+  ) {
     super('KibanaMonacoConnectorHandler', 90, ['kibana.']);
     this.http = options.http;
     this.notifications = options.notifications;
@@ -106,42 +108,27 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     // Add "Copy as cURL" action if we have HTTP service
     if (this.http && this.notifications) {
       actions.push(
-        this.createActionInfo(
-          'copy-as-curl',
-          'Copy as cURL',
-          () => this.copyAsCurl(context),
-          {
-            icon: 'copy',
-            tooltip: 'Copy this step as cURL command',
-            priority: 10,
-          }
-        )
+        this.createActionInfo('copy-as-curl', 'Copy as cURL', () => this.copyAsCurl(context), {
+          icon: 'copy',
+          tooltip: 'Copy this step as cURL command',
+          priority: 10,
+        })
       );
 
       actions.push(
-        this.createActionInfo(
-          'copy-as-fetch',
-          'Copy as Fetch',
-          () => this.copyAsFetch(context),
-          {
-            icon: 'copy',
-            tooltip: 'Copy this step as JavaScript fetch()',
-            priority: 8,
-          }
-        )
+        this.createActionInfo('copy-as-fetch', 'Copy as Fetch', () => this.copyAsFetch(context), {
+          icon: 'copy',
+          tooltip: 'Copy this step as JavaScript fetch()',
+          priority: 8,
+        })
       );
 
       actions.push(
-        this.createActionInfo(
-          'open-in-browser',
-          'Open API Docs',
-          () => this.openApiDocs(context),
-          {
-            icon: 'documentation',
-            tooltip: 'Open API documentation',
-            priority: 6,
-          }
-        )
+        this.createActionInfo('open-in-browser', 'Open API Docs', () => this.openApiDocs(context), {
+          icon: 'documentation',
+          tooltip: 'Open API documentation',
+          priority: 6,
+        })
       );
     }
 
@@ -172,7 +159,9 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         this.connectorExamples.set(connector.type, connector.examples);
       }
     }
-    console.log(`KibanaMonacoConnectorHandler: Processed ${this.connectorExamples.size} connector examples`);
+    console.log(
+      `KibanaMonacoConnectorHandler: Processed ${this.connectorExamples.size} connector examples`
+    );
   }
 
   /**
@@ -186,7 +175,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   } | null {
     // Extract operation ID from connector type (kibana.operationId)
     const operationId = connectorType.replace('kibana.', '');
-    
+
     // This could be enhanced by looking up the actual API definition
     // For now, provide basic information
     return {
@@ -215,7 +204,9 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       lines.push('', '**Example Parameters:**');
       lines.push('```yaml');
       for (const [key, value] of Object.entries(examples.params)) {
-        lines.push(`${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`);
+        lines.push(
+          `${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
+        );
       }
       lines.push('```');
     }
@@ -274,7 +265,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const curlCommand = this.generateCurlCommand(kibanaUrl, apiInfo, withParams);
 
       await navigator.clipboard.writeText(curlCommand);
-      
+
       if (this.notifications) {
         this.notifications.toasts.addSuccess({
           title: 'Copied to clipboard',
@@ -306,7 +297,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const fetchCode = this.generateFetchCode(apiInfo, withParams);
 
       await navigator.clipboard.writeText(fetchCode);
-      
+
       if (this.notifications) {
         this.notifications.toasts.addSuccess({
           title: 'Copied to clipboard',
@@ -326,7 +317,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // This could open the Kibana API docs or OpenAPI explorer
       const docsUrl = `${this.kibanaHost || 'http://localhost:5601'}/app/dev_tools#/console`;
       window.open(docsUrl, '_blank');
-      
+
       if (this.notifications) {
         this.notifications.toasts.addInfo({
           title: 'API Documentation',
