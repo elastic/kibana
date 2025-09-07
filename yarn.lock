@@ -8049,6 +8049,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/siem-readiness@link:x-pack/solutions/security/packages/siem-readiness":
+  version "0.0.0"
+  uid ""
+
 "@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/slo":
   version "0.0.0"
   uid ""
