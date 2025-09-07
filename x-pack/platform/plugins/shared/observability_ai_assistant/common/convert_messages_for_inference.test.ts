@@ -11,8 +11,9 @@ import type { Message } from './types';
 import { MessageRole } from './types';
 import type { Logger } from '@kbn/logging';
 
-// const availableToolNames = ['get_dataset_info', 'query', 'execute_query', 'visualize_query'];
-const availableToolNames = ['get_dataset_info', 'query'];
+jest.mock('@kbn/inference-plugin/common/utils/generate_fake_tool_call_id', () => ({
+  generateFakeToolCallId: jest.fn().mockReturnValue('123456'),
+}));
 
 const mockLogger = {
   error: jest.fn(),
@@ -21,8 +22,14 @@ const mockLogger = {
   trace: jest.fn(),
 } as any as Logger;
 
+let counter = 0;
+function getNextTimestamp() {
+  counter++;
+  return new Date(counter * 1000).toISOString();
+}
+
 const userMessage: (msg: string) => Message = (msg: string) => ({
-  '@timestamp': '2025-07-02T10:00:00Z',
+  '@timestamp': getNextTimestamp(),
   message: {
     role: MessageRole.User,
     content: msg,
@@ -30,227 +37,198 @@ const userMessage: (msg: string) => Message = (msg: string) => ({
 });
 
 const assistantMessage: (msg: string) => Message = (msg: string) => ({
-  '@timestamp': '2025-07-02T10:01:00Z',
+  '@timestamp': getNextTimestamp(),
   message: {
     content: msg,
     role: MessageRole.Assistant,
   },
 });
 
-const getDatasetInfoTool: Message[] = [
+const getTool = (
+  toolName: 'get_dataset_info' | 'query' | 'execute_query' | 'visualize_query'
+): Message[] => [
   {
-    '@timestamp': '2025-07-02T10:01:00Z',
+    '@timestamp': getNextTimestamp(),
     message: {
-      content:
-        "I'll help you visualize logs from your system. First, let me check what log indices are available:",
+      content: '',
       function_call: {
-        name: 'get_dataset_info',
-        arguments: '{"index": "logs-*"}',
+        name: toolName,
+        arguments: JSON.stringify({}),
         trigger: MessageRole.Assistant,
       },
       role: MessageRole.Assistant,
     },
   },
   {
-    '@timestamp': '2025-07-02T10:01:00Z',
+    '@timestamp': getNextTimestamp(),
     message: {
-      content: JSON.stringify({
-        indices: ['remote_cluster:logs-cloud_security_posture.scores-default'],
-        fields: ['@timestamp:date', 'log.level:keyword'],
-        stats: {
-          analyzed: 386,
-          total: 386,
-        },
-      }),
-      name: 'get_dataset_info',
+      content: JSON.stringify({ response: `${toolName} response` }),
+      name: toolName,
       role: MessageRole.User,
     },
   },
 ];
 
-const queryTool: Message[] = [
-  {
-    '@timestamp': '2025-07-04T14:32:53.974Z',
-    message: {
-      content: 'Now that I can see the available log indices, let me visualize some logs for you:',
-      function_call: {
-        name: 'query',
-        arguments: '',
-        trigger: MessageRole.Assistant,
-      },
-      role: MessageRole.Assistant,
-    },
-  },
-  {
-    '@timestamp': '2025-07-04T14:32:57.331Z',
-    message: {
-      content: '{}',
-      data: JSON.stringify({
-        keywords: ['STATS', 'COUNT_DISTINCT'],
-        requestedDocumentation: {
-          STATS: 'Aggregates data using statistical functions.',
-          COUNT_DISTINCT: 'Counts distinct values in a field.',
-        },
-      }),
-      name: 'query',
-      role: MessageRole.User,
-    },
-  },
-];
+function hasToolMessage(toolName: string) {
+  return (msg: Message) =>
+    msg.message.name === toolName || msg.message.function_call?.name === toolName;
+}
 
-const executeQueryTool: Message[] = [
-  {
-    '@timestamp': '2025-07-02T10:01:00Z',
-    message: {
-      content: undefined,
-      role: MessageRole.Assistant,
-      function_call: {
-        name: 'execute_query',
-        arguments: '{"query":"FROM logs"}',
-        trigger: MessageRole.Assistant,
-      },
-    },
-  },
-  {
-    '@timestamp': '2025-07-02T10:01:01Z',
-    message: {
-      role: MessageRole.User,
-      name: 'execute_query',
-      content: JSON.stringify({
-        columns: [{ id: 'unique_ips', name: 'unique_ips', meta: { type: 'number' } }],
-        rows: [[324567]],
-      }),
-    },
-  },
-];
+const formatMessage = (msg: Message) => {
+  const toolName = msg.message.function_call?.name
+    ? `${msg.message.function_call.name} (request)`
+    : msg.message.name
+    ? `${msg.message.name} (response)`
+    : undefined;
 
-const visualizeQueryTool: Message[] = [
-  {
-    '@timestamp': '2025-07-04T14:33:03.937Z',
-    message: {
-      content:
-        "Now I'll create a visualization of your logs. Let me query the available logs and create a meaningful visualization:",
-      role: MessageRole.Assistant,
-      function_call: {
-        name: 'visualize_query',
-        arguments: '{"query":"FROM remote_cluster:logs-* | LIMIT 10","intention":"visualizeBar"}',
-        trigger: MessageRole.Assistant,
-      },
-    },
-  },
-  {
-    '@timestamp': '2025-07-04T14:33:33.978Z',
-    message: {
-      content: JSON.stringify({
-        errorMessages: ['Request timed out'],
-        message:
-          'Only following query is visualized: ```esql\nFROM remote_cluster:logs-* | LIMIT 10\n```',
-      }),
-      data: JSON.stringify({
-        columns: [],
-        rows: [],
-        correctedQuery:
-          'FROM remote_cluster:logs-*\n| WHERE @timestamp >= NOW() - 24 hours\n| STATS count = COUNT(*) BY data_stream.dataset, log.level\n| SORT count DESC\n| LIMIT 10',
-      }),
-      name: 'visualize_query',
-      role: MessageRole.User,
-    },
-  },
-];
+  return toolName
+    ? { role: msg.message.role, toolName }
+    : { role: msg.message.role, message: msg.message.content };
+};
 
 describe('collapseInternalToolCalls', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should not collapse messages if there are no query messages', () => {
-    const messages: Message[] = [
-      {
-        '@timestamp': '2025-07-02T10:00:00Z',
-        message: { role: MessageRole.User, content: 'hello' },
-      },
-      {
-        '@timestamp': '2025-07-02T10:01:00Z',
-        message: { role: MessageRole.Assistant, content: 'hi there' },
-      },
-    ];
-    const collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
+  const availableToolNames = ['get_dataset_info', 'query'];
+  it('should not collapse messages if there are no tool calls', () => {
+    const messages: Message[] = [userMessage('hello'), assistantMessage('hi there')];
+    const collapsedMessages = collapseInternalToolCalls({
+      messages,
+      availableToolNames,
+      logger: mockLogger,
+    });
     expect(collapsedMessages).toEqual(messages);
   });
 
-  it('should not collapse a query message if there are no messages after it', () => {
-    const messages: Message[] = [
-      {
-        '@timestamp': '2025-07-02T10:00:00Z',
-        message: { role: MessageRole.User, content: 'hello' },
-      },
-      ...queryTool,
-    ];
-    const collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
+  it('should not collapse a "query" tool call', () => {
+    const messages: Message[] = [userMessage('hello'), ...getTool('query')];
+    const collapsedMessages = collapseInternalToolCalls({
+      messages,
+      availableToolNames,
+      logger: mockLogger,
+    });
     expect(collapsedMessages).toEqual(messages);
   });
 
-  describe('when a conversation contains a "query" followed by "execute_query" tool call', () => {
+  it('should collapse "execute_query" when it follows a user message', () => {
+    const messages = [
+      userMessage('Please generate esql'),
+      ...getTool('query'),
+      assistantMessage(`Here you go!`),
+      userMessage('Display results for the generated ESQL query'),
+      ...getTool('execute_query'),
+    ];
+
+    // before collapsing
+    expect(messages.map(formatMessage)).toEqual([
+      { role: 'user', message: 'Please generate esql' },
+      { role: 'assistant', toolName: 'query (request)' },
+      { role: 'user', toolName: 'query (response)' },
+      { role: 'assistant', message: 'Here you go!' },
+      { role: 'user', message: 'Display results for the generated ESQL query' },
+      { role: 'assistant', toolName: 'execute_query (request)' },
+      { role: 'user', toolName: 'execute_query (response)' },
+    ]);
+
+    // after collapsing
+    const collapsedMessages = collapseInternalToolCalls({
+      messages,
+      availableToolNames,
+      logger: mockLogger,
+    });
+    expect(collapsedMessages.map(formatMessage)).toEqual([
+      { role: 'user', message: 'Please generate esql' },
+      { role: 'assistant', toolName: 'query (request)' },
+      { role: 'user', toolName: 'query (response)' },
+      { role: 'assistant', message: 'Here you go!' },
+      {
+        role: 'user',
+        message: `Display results for the generated ESQL query <steps>${JSON.stringify([
+          {
+            role: 'assistant',
+            content: '',
+            toolCalls: [
+              { function: { name: 'execute_query', arguments: {} }, toolCallId: '123456' },
+            ],
+          },
+          {
+            name: 'execute_query',
+            role: 'tool',
+            response: { response: 'execute_query response' },
+            toolCallId: '123456',
+          },
+        ])}</steps>`,
+      },
+    ]);
+  });
+
+  describe('when "execute_query" follows a "query" tool call', () => {
     let collapsedMessages: Message[];
     let messages: Message[];
     beforeEach(() => {
       messages = [
         userMessage('Please analyze my logs'),
-        ...getDatasetInfoTool,
-        ...queryTool,
-        ...executeQueryTool,
+        ...getTool('get_dataset_info'),
+        ...getTool('query'),
+        ...getTool('execute_query'),
         assistantMessage('Here is the result'),
         userMessage('What about the unique IPs?'),
       ];
-      collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
+      collapsedMessages = collapseInternalToolCalls({
+        messages,
+        availableToolNames,
+        logger: mockLogger,
+      });
     });
 
-    it('should have the right messages after collapsing', () => {
-      const formatMessages = (msg: Message) => ({
-        role: msg.message.role,
-        toolName: msg.message.function_call?.name,
-      });
-
+    it('should remove the "execute_query" calls', () => {
       // before collapsing
-      expect(messages.map(formatMessages)).toEqual([
-        { role: 'user' },
-        { role: 'assistant', toolName: 'get_dataset_info' },
-        { role: 'user' },
-        { role: 'assistant', toolName: 'query' },
-        { role: 'user' },
-        { role: 'assistant', toolName: 'execute_query' },
-        { role: 'user' },
-        { role: 'assistant' },
-        { role: 'user' },
+      expect(messages.map(formatMessage)).toEqual([
+        { role: 'user', message: 'Please analyze my logs' },
+        { role: 'assistant', toolName: 'get_dataset_info (request)' },
+        { role: 'user', toolName: 'get_dataset_info (response)' },
+        { role: 'assistant', toolName: 'query (request)' },
+        { role: 'user', toolName: 'query (response)' },
+        { role: 'assistant', toolName: 'execute_query (request)' },
+        { role: 'user', toolName: 'execute_query (response)' },
+        { role: 'assistant', message: 'Here is the result' },
+        { role: 'user', message: 'What about the unique IPs?' },
       ]);
 
       // after collapsing
-      expect(collapsedMessages.map(formatMessages)).toEqual([
-        { role: 'user' },
-        { role: 'assistant', toolName: 'get_dataset_info' },
-        { role: 'user' },
-        { role: 'assistant', toolName: 'query' },
-        { role: 'user' },
-        { role: 'assistant' },
-        { role: 'user' },
+      expect(collapsedMessages.map(formatMessage)).toEqual([
+        { role: 'user', message: 'Please analyze my logs' },
+        { role: 'assistant', toolName: 'get_dataset_info (request)' },
+        { role: 'user', toolName: 'get_dataset_info (response)' },
+        { role: 'assistant', toolName: 'query (request)' },
+        { role: 'user', toolName: 'query (response)' },
+        { role: 'assistant', message: 'Here is the result' },
+        { role: 'user', message: 'What about the unique IPs?' },
       ]);
     });
 
-    it('should retain the messages up until the query response', () => {
-      expect(messages.slice(0, 4)).toEqual(collapsedMessages.slice(0, 4));
+    it('should retain the messages up until the execute_query', () => {
+      const beforeToolStart =
+        messages.findIndex((msg) => msg.message.function_call?.name === 'execute_query') - 1;
+
+      expect(messages.slice(0, beforeToolStart)).toEqual(
+        collapsedMessages.slice(0, beforeToolStart)
+      );
     });
 
     it('should retain the messages after the "execute_query" response', () => {
-      expect(messages.slice(-2)).toEqual(collapsedMessages.slice(-2));
+      const toolStartIndex = messages.findIndex(
+        (msg) => msg.message.function_call?.name === 'execute_query'
+      );
+
+      expect(messages.slice(toolStartIndex + 2)).toEqual(collapsedMessages.slice(toolStartIndex));
     });
 
     it('should remove the "execute_query" messages', () => {
-      expect(collapsedMessages).not.toContain(executeQueryTool[0]);
-      expect(collapsedMessages).not.toContain(executeQueryTool[1]);
-    });
-
-    it('should retain the "query" tool request', () => {
-      expect(collapsedMessages).toContain(queryTool[0]);
+      expect(messages.some(hasToolMessage('execute_query'))).toBe(true);
+      expect(collapsedMessages.some(hasToolMessage('execute_query'))).toBe(false);
     });
 
     it('should collapse the "execute_query" calls into the "query" tool response', () => {
@@ -261,16 +239,13 @@ describe('collapseInternalToolCalls', () => {
       const content = JSON.parse(queryToolResponse.message.content!);
 
       expect(content.steps).toHaveLength(2);
-      expect(content.steps[0].role).toBe('assistant');
-      expect(content.steps[1].role).toBe('tool');
-      expect(content.steps[1].name).toBe('execute_query');
       expect(content.steps).toEqual([
         {
-          content: null,
+          content: '',
           role: 'assistant',
           toolCalls: [
             {
-              function: { arguments: { query: 'FROM logs' }, name: 'execute_query' },
+              function: { arguments: {}, name: 'execute_query' },
               toolCallId: expect.any(String),
             },
           ],
@@ -278,8 +253,7 @@ describe('collapseInternalToolCalls', () => {
         {
           name: 'execute_query',
           response: {
-            columns: [{ id: 'unique_ips', meta: { type: 'number' }, name: 'unique_ips' }],
-            rows: [[324567]],
+            response: 'execute_query response',
           },
           role: 'tool',
           toolCallId: expect.any(String),
@@ -294,14 +268,18 @@ describe('collapseInternalToolCalls', () => {
     beforeEach(() => {
       messages = [
         userMessage('Please visualize my logs'),
-        ...getDatasetInfoTool,
-        ...queryTool,
-        ...visualizeQueryTool,
+        ...getTool('get_dataset_info'),
+        ...getTool('query'),
+        ...getTool('visualize_query'),
         assistantMessage('Here is the result'),
         userMessage('What about the unique IPs?'),
       ];
 
-      collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
+      collapsedMessages = collapseInternalToolCalls({
+        messages,
+        availableToolNames,
+        logger: mockLogger,
+      });
     });
 
     it('should collapse "visualize_query" into the "query" response', () => {
@@ -328,83 +306,103 @@ describe('collapseInternalToolCalls', () => {
     });
   });
 
-  describe('when an unrelated tool call is present', () => {
+  describe('when an unavailable tool call (execute_query) is followed by an available tool call (get_dataset_info)', () => {
     let collapsedMessages: Message[];
+    const messages: Message[] = [
+      userMessage('Please find my logs'),
+      ...getTool('query'),
+      ...getTool('execute_query'),
+      ...getTool('get_dataset_info'),
+    ];
+
     beforeEach(() => {
-      const messages: Message[] = [
-        ...queryTool,
-        ...executeQueryTool,
-        {
-          '@timestamp': '2025-07-02T10:02:00Z',
-          message: {
-            role: MessageRole.Assistant,
-            function_call: {
-              name: 'some_other_function',
-              arguments: JSON.stringify({ user: 'george' }),
-              trigger: MessageRole.Assistant,
-            },
-            content: undefined,
-          },
-        },
-      ];
-      collapsedMessages = collapseInternalToolCalls(messages, availableToolNames, mockLogger);
+      collapsedMessages = collapseInternalToolCalls({
+        messages,
+        availableToolNames,
+        logger: mockLogger,
+      });
     });
 
-    it('should stop collapsing and preserve the unrelated tool call', () => {
-      expect(collapsedMessages).toHaveLength(3);
+    it('should only collapse the "execute_query" tool call', () => {
+      expect(messages).toHaveLength(7);
+      expect(collapsedMessages).toHaveLength(5);
     });
 
     it('should add "execute_query" to the "query" response', () => {
-      const queryToolResponse = collapsedMessages[1];
+      const queryToolResponse = collapsedMessages.find(
+        (msg) => msg.message.role === MessageRole.User && msg.message.name === 'query'
+      )!;
       expect(queryToolResponse.message.content).toContain('execute_query');
-    });
-
-    it('should retain the unrelated tool call as the last message', () => {
-      expect(collapsedMessages[2].message.function_call?.name).toEqual('some_other_function');
+      expect(queryToolResponse.message.content).not.toContain('get_dataset_info');
     });
   });
 
-  it('should convert correctly', () => {
-    const messagesNew = [
-      userMessage('Please generate some esql'),
-      ...queryTool,
-      assistantMessage(`Here you go!`),
-      userMessage('Display results for the generated ESQL query'),
-      ...executeQueryTool,
-    ];
+  describe('when "execute_query" is available tool and "get_dataset_info" is not', () => {
+    it('should retain "execute_query" call and remove "get_dataset_info"', () => {
+      const messages: Message[] = [
+        userMessage('Please generate esql from natural language'),
+        ...getTool('get_dataset_info'),
+        ...getTool('query'),
+        ...getTool('execute_query'),
+        assistantMessage('Here is the result'),
+        userMessage('What about the unique IPs?'),
+      ];
 
-    const formatMessages = (msg: Message) => ({
-      role: msg.message.role,
-      tool: msg.message.function_call?.name
-        ? `${msg.message.function_call.name} (request)`
-        : msg.message.name
-        ? `${msg.message.name} (response)`
-        : undefined,
+      const collapsedMessages = collapseInternalToolCalls({
+        messages,
+        availableToolNames: ['execute_query'],
+        logger: mockLogger,
+      });
+      // before collapsing
+      expect(messages.map(formatMessage)).toEqual([
+        { role: 'user', message: 'Please generate esql from natural language' },
+        { role: 'assistant', toolName: 'get_dataset_info (request)' },
+        { role: 'user', toolName: 'get_dataset_info (response)' },
+        { role: 'assistant', toolName: 'query (request)' },
+        { role: 'user', toolName: 'query (response)' },
+        { role: 'assistant', toolName: 'execute_query (request)' },
+        { role: 'user', toolName: 'execute_query (response)' },
+        { role: 'assistant', message: 'Here is the result' },
+        { role: 'user', message: 'What about the unique IPs?' },
+      ]);
+
+      // after collapsing
+      expect(collapsedMessages.map(formatMessage)).toEqual([
+        {
+          role: 'user',
+          message: `Please generate esql from natural language <steps>${JSON.stringify([
+            {
+              role: 'assistant',
+              content: '',
+              toolCalls: [
+                { function: { name: 'get_dataset_info', arguments: {} }, toolCallId: '123456' },
+              ],
+            },
+            {
+              name: 'get_dataset_info',
+              role: 'tool',
+              response: { response: 'get_dataset_info response' },
+              toolCallId: '123456',
+            },
+            {
+              role: 'assistant',
+              content: '',
+              toolCalls: [{ function: { name: 'query', arguments: {} }, toolCallId: '123456' }],
+            },
+            {
+              name: 'query',
+              role: 'tool',
+              response: { response: 'query response' },
+              toolCallId: '123456',
+            },
+          ])}</steps>`,
+        },
+        { role: 'assistant', toolName: 'execute_query (request)' },
+        { role: 'user', toolName: 'execute_query (response)' },
+        { role: 'assistant', message: 'Here is the result' },
+        { role: 'user', message: 'What about the unique IPs?' },
+      ]);
     });
-
-    expect(messagesNew.map(formatMessages)).toEqual([
-      { role: 'user', tool: undefined },
-      { role: 'assistant', tool: 'query (request)' },
-      { role: 'user', tool: 'query (response)' },
-      { role: 'assistant', tool: undefined },
-      { role: 'user', tool: undefined },
-      { role: 'assistant', tool: 'execute_query (request)' },
-      { role: 'user', tool: 'execute_query (response)' },
-    ]);
-
-    // after collapsing
-    const collapsedMessages = collapseInternalToolCalls(
-      messagesNew,
-      availableToolNames,
-      mockLogger
-    );
-    expect(collapsedMessages.map(formatMessages)).toEqual([
-      { role: 'user', tool: undefined },
-      { role: 'assistant', tool: 'query (request)' },
-      { role: 'user', tool: 'query (response)' },
-      { role: 'assistant', tool: undefined },
-      { role: 'user', tool: undefined },
-    ]);
   });
 });
 

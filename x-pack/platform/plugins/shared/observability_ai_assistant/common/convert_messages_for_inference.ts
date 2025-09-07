@@ -25,62 +25,70 @@ export function safeJsonParse(jsonString: string | undefined) {
   }
 }
 
-export function collapseInternalToolCalls(
-  messages: Message[],
-  availableToolNames: string[],
-  logger: Logger
-) {
+const isInternalToolMessage = (msg: Message, availableToolNames: string[]): boolean => {
+  const { message } = msg;
+  // tool call
+  if (message.role === MessageRole.Assistant && message.function_call?.name) {
+    return !availableToolNames.includes(message.function_call.name);
+  }
+
+  // tool result
+  if (message.role === MessageRole.User && message.name) {
+    return !availableToolNames.includes(message.name);
+  }
+  return false;
+};
+
+export function collapseInternalToolCalls({
+  messages,
+  availableToolNames,
+  logger,
+}: {
+  messages: Message[];
+  availableToolNames: string[];
+  logger: Logger;
+}) {
   const collapsedMessages: Message[] = [];
 
   for (let i = 0; i < messages.length; i++) {
     const currentMessage = messages[i];
 
-    const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) => {
-      const toolCall =
-        msg.message.role === MessageRole.Assistant &&
-        msg.message.function_call?.name &&
-        !availableToolNames.includes(msg.message.function_call?.name);
+    try {
+      const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) =>
+        isInternalToolMessage(msg, availableToolNames)
+      );
 
-      const toolResult =
-        msg.message.role === MessageRole.User &&
-        msg.message.name &&
-        !availableToolNames.includes(msg.message.name);
-
-      return toolCall || toolResult;
-    });
-
-    if (messagesToCollapse.length) {
-      if (currentMessage?.message.role === MessageRole.User) {
+      if (
+        messagesToCollapse.length > 0 &&
+        currentMessage?.message.role === MessageRole.User &&
+        currentMessage.message.content
+      ) {
+        const collapsedInferenceMessages =
+          convertMessagesForInferenceWithoutCollapsing(messagesToCollapse);
         const isToolResult = !!currentMessage.message.name;
-        if (isToolResult) {
-          const content = JSON.parse(currentMessage.message.content!);
-          collapsedMessages.push({
-            ...currentMessage,
-            message: {
-              ...currentMessage.message,
-              content: JSON.stringify({
-                ...content,
-                steps: convertMessagesForInference(messagesToCollapse, availableToolNames, logger),
-              }),
-            },
-          });
-        } else {
-          const content = currentMessage.message.content!;
-          collapsedMessages.push({
-            ...currentMessage,
-            message: {
-              ...currentMessage.message,
-              content: `${content} <steps>${JSON.stringify(
-                convertMessagesForInference(messagesToCollapse, availableToolNames, logger)
-              )}</steps>`,
-            },
-          });
-        }
-      }
 
-      // skip the collapsed messages
-      i += messagesToCollapse.length;
-    } else {
+        let updatedContent;
+        if (isToolResult) {
+          const content = JSON.parse(currentMessage.message.content) as Record<string, unknown>;
+          updatedContent = JSON.stringify({ ...content, steps: collapsedInferenceMessages });
+        } else {
+          updatedContent = `${currentMessage.message.content} <steps>${JSON.stringify(
+            collapsedInferenceMessages
+          )}</steps>`;
+        }
+
+        collapsedMessages.push({
+          ...currentMessage,
+          message: { ...currentMessage.message, content: updatedContent },
+        });
+
+        // skip the collapsed messages
+        i += messagesToCollapse.length;
+      } else {
+        collapsedMessages.push(currentMessage);
+      }
+    } catch (error) {
+      logger.warn(`Unable to collapse tool calls: ${error.message}`);
       collapsedMessages.push(currentMessage);
     }
   }
@@ -93,19 +101,23 @@ export function convertMessagesForInference(
   availableToolNames: string[],
   logger: Logger
 ): InferenceMessage[] {
-  const inferenceMessages: InferenceMessage[] = [];
-
   logger.debug(
     `Converting ${messages.length} messages for inference: ${JSON.stringify(messages, null, 2)}`
   );
 
-  const collapsedMessages: Message[] = collapseInternalToolCalls(
+  const collapsedMessages: Message[] = collapseInternalToolCalls({
     messages,
     availableToolNames,
-    logger
-  );
+    logger,
+  });
 
-  collapsedMessages.forEach((message, idx) => {
+  return convertMessagesForInferenceWithoutCollapsing(collapsedMessages);
+}
+
+function convertMessagesForInferenceWithoutCollapsing(messages: Message[]): InferenceMessage[] {
+  const inferenceMessages: InferenceMessage[] = [];
+
+  messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
