@@ -211,7 +211,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
-    this.logger.debug('Workflows Management: Started');
+    this.logger.info('Workflows Management: Started');
 
     return {};
   }

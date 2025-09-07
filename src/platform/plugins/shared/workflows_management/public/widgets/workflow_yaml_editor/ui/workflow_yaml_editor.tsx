@@ -28,15 +28,18 @@ import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import {
-  getHighlightStepDecorations,
   getMonacoRangeFromYamlNode,
   navigateToErrorPosition,
 } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { registerElasticsearchStepHoverProvider } from '../lib/elasticsearch_step_hover_provider';
-import { enhanceEditorWithElasticsearchStepContextMenu } from '../lib/elasticsearch_step_context_menu_provider';
-import { ElasticsearchStepActionsProvider } from '../lib/elasticsearch_step_actions_provider';
+import { 
+  registerUnifiedHoverProvider,
+  createUnifiedActionsProvider
+} from '../lib/monaco_providers';
+import { createStepExecutionProvider } from '../lib/monaco_providers/step_execution_provider';
+import { ElasticsearchMonacoConnectorHandler } from '../lib/monaco_connectors';
+import { registerMonacoConnectorHandler } from '../lib/monaco_providers';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
 
 const getTriggerNodes = (
@@ -234,19 +237,21 @@ export const WorkflowYAMLEditor = ({
 
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
-  const highlightStepDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const stepExecutionsDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  // REMOVED: highlightStepDecorationCollectionRef - now handled by UnifiedActionsProvider
+  // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const elasticsearchStepDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const elasticsearchStepActionsProviderRef = useRef<ElasticsearchStepActionsProvider | null>(null);
+  const unifiedProvidersRef = useRef<{
+    hover: any;
+    actions: any;
+    stepExecution: any;
+  } | null>(null);
 
   // Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({});
+  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({ display: 'none' });
 
   const {
     error: errorValidating,
@@ -300,29 +305,58 @@ export const WorkflowYAMLEditor = ({
     if (http && notifications) {
       console.log('WorkflowYAMLEditor: Setting up Elasticsearch step providers');
 
-      // Register hover provider
-      const hoverProvider = registerElasticsearchStepHoverProvider({
+      // Register Elasticsearch connector handler
+      const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
         http,
         notifications: notifications as any, // Temporary type cast
         esHost,
         kibanaHost: kibanaHost || window.location.origin,
-        getYamlDocument: () => yamlDocumentRef.current,
       });
-      disposablesRef.current.push(hoverProvider);
-      console.log('WorkflowYAMLEditor: Hover provider registered');
+      registerMonacoConnectorHandler(elasticsearchHandler);
 
-      // Actions provider will be created later when YAML document is ready
-
-      // Enhance editor with context menu (keyboard shortcuts)
-      const contextMenuDisposable = enhanceEditorWithElasticsearchStepContextMenu(editor, {
-        http,
-        notifications: notifications as any, // Temporary type cast
-        esHost,
-        kibanaHost: kibanaHost || window.location.origin,
+      // Create unified providers
+      const providerConfig = {
         getYamlDocument: () => yamlDocumentRef.current,
+        options: {
+          http,
+          notifications: notifications as any,
+          esHost,
+          kibanaHost: kibanaHost || window.location.origin,
+        },
+      };
+
+      // Register hover provider with Monaco
+      const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
+      disposablesRef.current.push(hoverDisposable);
+
+      // Create other providers
+      const actionsProvider = createUnifiedActionsProvider(editor, providerConfig);
+      // Decorations provider disabled - user prefers only step background highlighting, not green dots
+      // const decorationsProvider = createUnifiedDecorationsProvider(editor, providerConfig);
+
+      // Setup event listener for CSS updates from actions provider
+      const handleCssUpdate = (event: CustomEvent) => {
+        setEditorActionsCss(event.detail || {});
+      };
+      window.addEventListener('updateEditorActionsCss', handleCssUpdate as EventListener);
+      disposablesRef.current.push({
+        dispose: () => {
+          window.removeEventListener('updateEditorActionsCss', handleCssUpdate as EventListener);
+        },
       });
-      disposablesRef.current.push(contextMenuDisposable);
-      console.log('WorkflowYAMLEditor: Context menu enhanced');
+
+      // Store provider references  
+      unifiedProvidersRef.current = {
+        hover: null, // hover provider is managed by Monaco directly
+        actions: actionsProvider,
+        stepExecution: null, // will be created when needed
+      };
+
+      console.log('🚀 WorkflowYAMLEditor: Unified providers registered', {
+        hoverDisposable: !!hoverDisposable,
+        actionsProvider: !!actionsProvider,
+        elasticsearchHandler: !!elasticsearchHandler
+      });
     } else {
       console.log('WorkflowYAMLEditor: Missing http or notifications services');
     }
@@ -349,118 +383,69 @@ export const WorkflowYAMLEditor = ({
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
-  // Initialize actions provider after YAML document is ready
+  // Update providers when YAML document changes
   useEffect(() => {
     if (
       isEditorMounted &&
       editorRef.current &&
       yamlDocument &&
-      http &&
-      notifications &&
-      !elasticsearchStepActionsProviderRef.current
+      unifiedProvidersRef.current
     ) {
-      console.log('WorkflowYAMLEditor: Late initializing actions provider with YAML document');
-
-      elasticsearchStepActionsProviderRef.current = new ElasticsearchStepActionsProvider(
-        editorRef.current,
-        setEditorActionsCss,
-        {
-          http,
-          notifications: notifications as any,
-          esHost,
-          kibanaHost: kibanaHost || window.location.origin,
-          getYamlDocument: () => yamlDocumentRef.current,
-        }
-      );
-      console.log('WorkflowYAMLEditor: Late actions provider created');
+      console.log('WorkflowYAMLEditor: Updating providers with YAML document');
+      
+      // Step execution provider updates will be handled separately when needed
+      
+      // The unified actions provider is already created, it will automatically 
+      // respond to YAML document changes through the getYamlDocument callback
     }
-  }, [isEditorMounted, yamlDocument]); // Removed changing dependencies
+  }, [isEditorMounted, yamlDocument]);
 
+  // REMOVED: Old decoration-based highlighting - now handled by UnifiedActionsProvider
+  // useEffect(() => {
+  //   // This functionality is now handled by UnifiedActionsProvider for better consistency
+  // }, [highlightStep, isEditorMounted, yamlDocument]);
+
+  // Step execution provider - managed through provider architecture
   useEffect(() => {
-    const model = editorRef.current?.getModel() ?? null;
-    if (highlightStepDecorationCollectionRef.current) {
-      highlightStepDecorationCollectionRef.current.clear();
-    }
-    if (!model || !isEditorMounted || !yamlDocument || !highlightStep) {
-      return;
-    }
-    const stepNode = getStepNode(yamlDocument, highlightStep);
-    if (!stepNode) {
-      return;
-    }
-    const range = getMonacoRangeFromYamlNode(model, stepNode);
-    if (!range) {
-      return;
-    }
-    editorRef.current?.revealLineInCenter(range.startLineNumber);
-    if (highlightStepDecorationCollectionRef.current) {
-      highlightStepDecorationCollectionRef.current.clear();
-    }
-    highlightStepDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(getHighlightStepDecorations(model, range)) ??
-      null;
-  }, [highlightStep, isEditorMounted, yamlDocument]);
-
-  useEffect(() => {
-    const model = editorRef.current?.getModel() ?? null;
-    if (stepExecutionsDecorationCollectionRef.current) {
-      // clear existing decorations
-      stepExecutionsDecorationCollectionRef.current.clear();
-    }
-
-    if (!model || !yamlDocument || !stepExecutions || stepExecutions.length === 0) {
-      // no model or yamlDocument or sExecutions, skipping
+    if (!isEditorMounted || !editorRef.current) {
       return;
     }
 
-    const decorations = stepExecutions
-      .map((stepExecution) => {
-        const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
-        if (!stepNode) {
-          return null;
+    // Create step execution provider if needed and we're in readonly mode
+    try {
+      if (readOnly && stepExecutions && stepExecutions.length > 0 && !unifiedProvidersRef.current?.stepExecution) {
+        console.log('🎯 Creating StepExecutionProvider');
+        const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
+          getYamlDocument: () => yamlDocument,
+          getStepExecutions: () => stepExecutions || [],
+          getHighlightStep: () => highlightStep || null,
+          isReadOnly: () => readOnly,
+        });
+
+        if (unifiedProvidersRef.current) {
+          unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
         }
-        const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
-        if (!stepRange) {
-          return null;
-        }
-        const decoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            stepRange.startLineNumber,
-            stepRange.startColumn,
-            stepRange.startLineNumber,
-            stepRange.endColumn
-          ),
-          options: {
-            glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
-              !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-            }`,
-          },
-        };
-        const bgClassName = `step-execution-${stepExecution.status} ${
-          !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-        }`;
-        // TODO: handle steps with nested steps
-        const decoration2: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            stepRange.startLineNumber,
-            stepRange.startColumn,
-            stepRange.endLineNumber - 1,
-            stepRange.endColumn
-          ),
-          options: {
-            className: bgClassName,
-            marginClassName: bgClassName,
-            isWholeLine: true,
-          },
-        };
-        return [decoration, decoration2];
-      })
-      .flat()
-      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
+      }
+    } catch (error) {
+      console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
+    }
+    
+    // Update decorations when dependencies change
+    try {
+      if (unifiedProvidersRef.current?.stepExecution) {
+        unifiedProvidersRef.current.stepExecution.updateDecorations();
+      }
+    } catch (error) {
+      console.error('🎯 WorkflowYAMLEditor: Error updating StepExecutionProvider decorations:', error);
+    }
 
-    stepExecutionsDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(decorations) ?? null;
-  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
+    // Dispose step execution provider when switching out of readonly mode
+    if (!readOnly && unifiedProvidersRef.current?.stepExecution) {
+      console.log('🎯 Disposing StepExecutionProvider (no longer readonly)');
+      unifiedProvidersRef.current.stepExecution.dispose();
+      unifiedProvidersRef.current.stepExecution = null;
+    }
+  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument, readOnly]);
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
@@ -469,6 +454,9 @@ export const WorkflowYAMLEditor = ({
       alertTriggerDecorationCollectionRef.current.clear();
     }
 
+    // TEMPORARILY DISABLED: Alert trigger decorations to debug green highlighting
+    return;
+    
     // Don't show alert dots when in executions view
     if (!model || !yamlDocument || !isEditorMounted || readOnly) {
       return;
@@ -640,8 +628,9 @@ export const WorkflowYAMLEditor = ({
 
       // Dispose of decorations and actions provider
       elasticsearchStepDecorationCollectionRef.current?.clear();
-      elasticsearchStepActionsProviderRef.current?.dispose();
-      elasticsearchStepActionsProviderRef.current = null;
+      unifiedProvidersRef.current?.actions?.dispose();
+      unifiedProvidersRef.current?.stepExecution?.dispose();
+      unifiedProvidersRef.current = null;
 
       editor?.dispose();
     };
@@ -668,26 +657,28 @@ export const WorkflowYAMLEditor = ({
     <div css={styles.container}>
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
       {/* Floating Elasticsearch step actions */}
-      <EuiFlexGroup
-        className="elasticsearch-step-actions"
-        gutterSize="xs"
-        responsive={false}
-        style={editorActionsCss}
-        justifyContent="center"
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>
-          {http && notifications && (
-            <ElasticsearchStepActions
-              actionsProvider={elasticsearchStepActionsProviderRef.current}
-              http={http}
-              notifications={notifications as any}
-              esHost={esHost}
-              kibanaHost={kibanaHost}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {unifiedProvidersRef.current?.actions && (
+        <EuiFlexGroup
+          className="elasticsearch-step-actions"
+          gutterSize="xs"
+          responsive={false}
+          style={editorActionsCss}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <EuiFlexItem grow={false}>
+            {http && notifications && (
+              <ElasticsearchStepActions
+                actionsProvider={unifiedProvidersRef.current?.actions}
+                http={http}
+                notifications={notifications as any}
+                esHost={esHost}
+                kibanaHost={kibanaHost}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
@@ -879,6 +870,23 @@ const componentStyles = {
       '.elasticsearch-step-block-highlight': {
         backgroundColor: 'rgba(0, 120, 212, 0.08)',
         borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.elasticsearch-step-background': {
+        backgroundColor: 'rgba(0, 120, 212, 0.08)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.workflow-step-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.1)',
+        borderLeft: `3px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.workflow-step-line-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.05)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      // Dev Console-style step highlighting (isWholeLine handles full area)
+      '.workflow-step-selected': {
+        backgroundColor: 'rgba(0, 120, 212, 0.05)', // Light blue background
+        border: `1px solid ${euiTheme.colors.vis.euiColorVis1}`, // Blue border
       },
 
       // Custom icons for Monaco autocomplete

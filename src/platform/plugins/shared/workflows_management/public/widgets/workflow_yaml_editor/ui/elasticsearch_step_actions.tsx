@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchStepActionsProvider } from '../lib/elasticsearch_step_actions_provider';
 import { copyAsConsole, type CopyAsOptions } from '../lib/copy_request_utils';
 
 export interface ElasticsearchStepActionsProps {
-  actionsProvider: ElasticsearchStepActionsProvider | null;
+  actionsProvider: any; // We'll make this optional since we're transitioning to unified providers
   http: HttpSetup;
   notifications: NotificationsSetup;
   esHost?: string;
@@ -29,49 +28,41 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   esHost,
   kibanaHost,
 }) => {
-  const currentStep = actionsProvider?.getCurrentElasticsearchStep();
+  // Use state to force re-renders when actions change
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Get current actions directly from the unified actions provider
+  const currentActions = actionsProvider?.getCurrentActions?.() || [];
+  
+  // Listen for action updates - force refresh every 100ms when actions might change
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, []);
 
-  const copyAsOptions: CopyAsOptions = {
-    http,
-    notifications,
-    esHost,
-    kibanaHost,
-  };
-
-  const handleCopyAsConsole = useCallback(async () => {
-    if (!currentStep) return;
-    await copyAsConsole(currentStep, copyAsOptions);
-  }, [currentStep, copyAsOptions]);
-
-  if (!currentStep) {
+  // Show actions only when we have current actions
+  if (!currentActions || currentActions.length === 0) {
     return null;
   }
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'workflows.workflowDetail.yamlEditor.elasticsearchStep.copyAsConsoleTooltip',
-            {
-              defaultMessage: 'Copy as Console format',
-            }
-          )}
-        >
-          <EuiButtonIcon
-            iconType="console"
-            onClick={handleCopyAsConsole}
-            data-test-subj="copyAsConsoleButton"
-            aria-label={i18n.translate(
-              'workflows.workflowDetail.yamlEditor.elasticsearchStep.copyAsConsoleAriaLabel',
-              {
-                defaultMessage: 'Copy as Console format',
-              }
-            )}
-            size="s"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {currentActions.map((action, index) => (
+        <EuiFlexItem key={action.id || index} grow={false}>
+          <EuiToolTip content={action.tooltip || action.label}>
+            <EuiButtonIcon
+              iconType={action.icon || 'console'}
+              onClick={action.handler}
+              data-test-subj={`actionButton-${action.id}`}
+              aria-label={action.label}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

@@ -1207,6 +1207,11 @@ export function getCompletionItemProvider(
                 insertText = `${key}: `;
               }
 
+              // If it's kbn-xsrf, skip it since we don't need to suggest it
+              if (key === 'kbn-xsrf') {
+                continue;
+              }
+
               const suggestion: monaco.languages.CompletionItem = {
                 label: key,
                 kind: monaco.languages.CompletionItemKind.Variable,
