@@ -27,6 +27,7 @@ import type {
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import { v4 as generateUuid } from 'uuid';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -746,6 +747,6 @@ export class WorkflowsService {
   }
 
   private generateWorkflowId(): string {
-    return `workflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `workflow-${generateUuid()}`;
   }
 }

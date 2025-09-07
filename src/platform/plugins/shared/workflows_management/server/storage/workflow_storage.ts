@@ -41,7 +41,7 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface WorkflowProperties {
-  // TODO: we can remove this name, since we use the WorkflowYaml object to get the nam``e
+  // TODO: we can remove this name, since we use the WorkflowYaml object to get the name
   name: string;
   description?: string;
   enabled: boolean;
