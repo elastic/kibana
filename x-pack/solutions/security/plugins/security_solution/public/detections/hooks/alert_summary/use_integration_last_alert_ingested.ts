@@ -15,7 +15,7 @@ const FIELD = 'event.ingested';
 
 export interface UseIntegrationsLastAlertIngestedParams {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   integrationName: string;
 }

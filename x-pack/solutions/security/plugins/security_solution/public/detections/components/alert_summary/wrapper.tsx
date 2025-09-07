@@ -45,7 +45,7 @@ export const RUNTIME_FIELD_MAP: Record<string, RuntimeFieldSpec> = {
 
 export interface WrapperProps {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
