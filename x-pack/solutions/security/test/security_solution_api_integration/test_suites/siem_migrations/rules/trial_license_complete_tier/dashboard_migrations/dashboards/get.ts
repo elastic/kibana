@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should filtere by `untranslatable`', async () => {
+      it('should filter by `untranslatable`', async () => {
         const response = await dashboardMigrationRoutes.getDashboards({
           migrationId,
           queryParams: {
