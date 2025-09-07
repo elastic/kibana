@@ -21262,7 +21262,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -21828,7 +21829,8 @@
                                         "ilm_policy",
                                         "data_stream_ilm_policy",
                                         "transform",
-                                        "ml_model"
+                                        "ml_model",
+                                        "knowledge_base"
                                       ],
                                       "type": "string"
                                     },
@@ -22276,7 +22278,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -22494,7 +22497,8 @@
                                                 "ilm_policy",
                                                 "data_stream_ilm_policy",
                                                 "transform",
-                                                "ml_model"
+                                                "ml_model",
+                                                "knowledge_base"
                                               ],
                                               "type": "string"
                                             },
@@ -23562,7 +23566,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -23981,7 +23986,8 @@
                                       "ilm_policy",
                                       "data_stream_ilm_policy",
                                       "transform",
-                                      "ml_model"
+                                      "ml_model",
+                                      "knowledge_base"
                                     ],
                                     "type": "string"
                                   },
@@ -24513,7 +24519,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -24929,7 +24936,8 @@
                                       "ilm_policy",
                                       "data_stream_ilm_policy",
                                       "transform",
-                                      "ml_model"
+                                      "ml_model",
+                                      "knowledge_base"
                                     ],
                                     "type": "string"
                                   },
@@ -27849,6 +27857,9 @@
                                   "elasticsearch"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28081,6 +28092,9 @@
                                   "remote_elasticsearch"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28265,6 +28279,9 @@
                                   "logstash"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28733,6 +28750,9 @@
                               },
                               "version": {
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -29014,6 +29034,9 @@
                           "elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29246,6 +29269,9 @@
                           "remote_elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29430,6 +29456,9 @@
                           "logstash"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29898,6 +29927,9 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -30112,6 +30144,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30344,6 +30379,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30528,6 +30566,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30996,6 +31037,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31375,6 +31419,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31607,6 +31654,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31791,6 +31841,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32259,6 +32312,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32532,6 +32588,9 @@
                           "elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -32757,6 +32816,9 @@
                           "remote_elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -32934,6 +32996,9 @@
                           "logstash"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -33397,6 +33462,9 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -33608,6 +33676,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -33840,6 +33911,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -34024,6 +34098,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -34492,6 +34569,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -45784,10 +45864,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -49079,10 +49166,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -51931,10 +52025,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -54698,7 +54799,114 @@
                                             "properties": {
                                               "classic": {
                                                 "additionalProperties": false,
-                                                "properties": {},
+                                                "properties": {
+                                                  "field_overrides": {
+                                                    "additionalProperties": {
+                                                      "allOf": [
+                                                        {
+                                                          "additionalProperties": {
+                                                            "anyOf": [
+                                                              {
+                                                                "anyOf": [
+                                                                  {
+                                                                    "type": "string"
+                                                                  },
+                                                                  {
+                                                                    "type": "number"
+                                                                  },
+                                                                  {
+                                                                    "type": "boolean"
+                                                                  },
+                                                                  {
+                                                                    "enum": [
+                                                                      "null"
+                                                                    ],
+                                                                    "nullable": true
+                                                                  },
+                                                                  {
+                                                                    "not": {}
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "items": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    {
+                                                                      "enum": [
+                                                                        "null"
+                                                                      ],
+                                                                      "nullable": true
+                                                                    },
+                                                                    {
+                                                                      "not": {}
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "type": "array"
+                                                              },
+                                                              {}
+                                                            ]
+                                                          },
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "anyOf": [
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "format": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "type": {
+                                                                  "enum": [
+                                                                    "keyword",
+                                                                    "match_only_text",
+                                                                    "long",
+                                                                    "double",
+                                                                    "date",
+                                                                    "boolean",
+                                                                    "ip"
+                                                                  ],
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "type"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "type": {
+                                                                  "enum": [
+                                                                    "system"
+                                                                  ],
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "type"
+                                                              ],
+                                                              "type": "object"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    "type": "object"
+                                                  }
+                                                },
                                                 "type": "object"
                                               }
                                             },
@@ -54815,10 +55023,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -57669,10 +57884,17 @@
                               ]
                             },
                             "type": "array"
+                          },
+                          "rules": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
                           }
                         },
                         "required": [
                           "dashboards",
+                          "rules",
                           "queries"
                         ],
                         "type": "object"
@@ -57702,6 +57924,12 @@
                                         },
                                         "type": "array"
                                       },
+                                      "metadata": {
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
                                       "tags": {
                                         "items": {
                                           "type": "string"
@@ -57710,6 +57938,7 @@
                                       }
                                     },
                                     "required": [
+                                      "metadata",
                                       "tags",
                                       "members"
                                     ],
@@ -58174,6 +58403,12 @@
                         },
                         "type": "array"
                       },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
                       "tags": {
                         "items": {
                           "type": "string"
@@ -58182,6 +58417,7 @@
                       }
                     },
                     "required": [
+                      "metadata",
                       "tags",
                       "members"
                     ],
@@ -64132,7 +64368,114 @@
                             "properties": {
                               "classic": {
                                 "additionalProperties": false,
-                                "properties": {},
+                                "properties": {
+                                  "field_overrides": {
+                                    "additionalProperties": {
+                                      "allOf": [
+                                        {
+                                          "additionalProperties": {
+                                            "anyOf": [
+                                              {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "boolean"
+                                                  },
+                                                  {
+                                                    "enum": [
+                                                      "null"
+                                                    ],
+                                                    "nullable": true
+                                                  },
+                                                  {
+                                                    "not": {}
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "items": {
+                                                  "anyOf": [
+                                                    {
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "type": "number"
+                                                    },
+                                                    {
+                                                      "type": "boolean"
+                                                    },
+                                                    {
+                                                      "enum": [
+                                                        "null"
+                                                      ],
+                                                      "nullable": true
+                                                    },
+                                                    {
+                                                      "not": {}
+                                                    }
+                                                  ]
+                                                },
+                                                "type": "array"
+                                              },
+                                              {}
+                                            ]
+                                          },
+                                          "type": "object"
+                                        },
+                                        {
+                                          "anyOf": [
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "type": {
+                                                  "enum": [
+                                                    "keyword",
+                                                    "match_only_text",
+                                                    "long",
+                                                    "double",
+                                                    "date",
+                                                    "boolean",
+                                                    "ip"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "enum": [
+                                                    "system"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "type": "object"
+                                  }
+                                },
                                 "type": "object"
                               }
                             },
@@ -64918,6 +65261,178 @@
         },
         "responses": {},
         "summary": "Upsert a query to a stream",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/rules": {
+      "get": {
+        "description": "Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "get-streams-name-rules",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Get stream rules",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/rules/{ruleId}": {
+      "delete": {
+        "description": "Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
+        "operationId": "delete-streams-name-rules-ruleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Unlink a rule from a stream",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "put": {
+        "description": "Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
+        "operationId": "put-streams-name-rules-ruleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Link a rule to a stream",
         "tags": [
           "streams"
         ],
