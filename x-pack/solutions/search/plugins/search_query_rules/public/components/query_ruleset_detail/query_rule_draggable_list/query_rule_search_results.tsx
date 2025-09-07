@@ -33,9 +33,9 @@ import { DroppableContainer } from '../styles';
 
 export interface QueryRuleSearchResultsProps {
   rules: SearchQueryRulesQueryRule[];
+  unfilteredRules: SearchQueryRulesQueryRule[];
   queryRule: QueryRulesQueryRule;
   rulesetId: string;
-  index: number;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
   deleteRule?: (ruleId: string) => void;
   isLastItem?: boolean;
@@ -47,8 +47,8 @@ export interface QueryRuleSearchResultsProps {
 }
 
 export const QueryRuleSearchResults: React.FC<QueryRuleSearchResultsProps> = ({
-  index,
   rules,
+  unfilteredRules,
   onEditRuleFlyoutOpen,
   deleteRule,
   queryRule,
@@ -91,7 +91,7 @@ export const QueryRuleSearchResults: React.FC<QueryRuleSearchResultsProps> = ({
           <EuiFlexItem grow={true}>
             <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiNotificationBadge color="subdued">{index + 1}</EuiNotificationBadge>
+                <EuiNotificationBadge color="subdued">-</EuiNotificationBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -170,7 +170,7 @@ export const QueryRuleSearchResults: React.FC<QueryRuleSearchResultsProps> = ({
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         toolTipContent={
-                          rules.length === 1
+                          unfilteredRules.length === 1
                             ? i18n.translate(
                                 'xpack.search.queryRulesetDetail.draggableList.actions.deleteTooltip',
                                 {
@@ -179,11 +179,11 @@ export const QueryRuleSearchResults: React.FC<QueryRuleSearchResultsProps> = ({
                               )
                             : undefined
                         }
-                        disabled={rules.length === 1}
+                        disabled={unfilteredRules.length === 1}
                         key="delete"
                         icon="trash"
                         css={css`
-                          color: ${rules.length === 1
+                          color: ${unfilteredRules.length === 1
                             ? euiTheme.colors.textDisabled
                             : euiTheme.colors.danger};
                         `}
@@ -215,6 +215,7 @@ export const QueryRuleSearchResults: React.FC<QueryRuleSearchResultsProps> = ({
 
 export interface QueryRuleSearchResultsListProps {
   rules: SearchQueryRulesQueryRule[];
+  unfilteredRules: SearchQueryRulesQueryRule[];
   rulesetId: string;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
   deleteRule?: (ruleId: string) => void;
@@ -226,10 +227,10 @@ export interface QueryRuleSearchResultsListProps {
 }
 export const QueryRuleSearchResultsList: React.FC<QueryRuleSearchResultsListProps> = ({
   rules,
+  unfilteredRules,
   rulesetId,
   onEditRuleFlyoutOpen,
   deleteRule,
-
   tourInfo,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -247,8 +248,8 @@ export const QueryRuleSearchResultsList: React.FC<QueryRuleSearchResultsListProp
                 deleteRule={deleteRule}
                 rulesetId={rulesetId}
                 tourInfo={tourInfo}
-                index={index}
                 rules={rules}
+                unfilteredRules={unfilteredRules}
                 onEditRuleFlyoutOpen={onEditRuleFlyoutOpen}
                 isLastItem={index === rules.length - 1}
               />

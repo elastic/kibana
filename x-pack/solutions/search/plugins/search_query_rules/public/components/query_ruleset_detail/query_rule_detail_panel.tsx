@@ -22,6 +22,7 @@ import { QueryRuleSearchResultsList } from './query_rule_draggable_list/query_ru
 
 interface QueryRuleDetailPanelProps {
   rules: SearchQueryRulesQueryRule[];
+  unfilteredRules: SearchQueryRulesQueryRule[];
   setNewRules: (newRules: SearchQueryRulesQueryRule[]) => void;
   setIsFormDirty?: (isDirty: boolean) => void;
   updateRule: (updatedRule: SearchQueryRulesQueryRule) => void;
@@ -41,6 +42,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   rulesetId,
   tourInfo,
   rules,
+  unfilteredRules,
   setIsFormDirty,
   setNewRules,
   updateRule,
@@ -178,6 +180,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
           {rules.length > 0 && searchFilter.trim() !== '' && (
             <QueryRuleSearchResultsList
               rules={rules}
+              unfilteredRules={unfilteredRules}
               rulesetId={rulesetId}
               onEditRuleFlyoutOpen={(ruleId: string) => {
                 setFlyoutMode('edit');

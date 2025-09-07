@@ -104,6 +104,7 @@ export const useQueryRulesetDetailState = ({
 
   return {
     queryRuleset,
+    unfilteredRules: rules,
     rules: filteredRules,
     setSearchFilter,
     searchFilter,

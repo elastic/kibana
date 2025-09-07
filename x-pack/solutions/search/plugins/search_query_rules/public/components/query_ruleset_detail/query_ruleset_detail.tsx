@@ -83,6 +83,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   const {
     queryRuleset,
     rules,
+    unfilteredRules,
     setNewRules,
     addNewRule,
     deleteRule,
@@ -364,7 +365,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     color="primary"
                     data-test-subj="queryRulesetDetailHeaderSaveButton"
                     onClick={handleSave}
-                    disabled={!isFormDirty || isInitialLoading || rules.length === 0}
+                    disabled={!isFormDirty || isInitialLoading || unfilteredRules.length === 0}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.queryRulesetDetail.saveButton"
@@ -408,6 +409,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               deleteRule={deleteRule}
               updateRule={updateRule}
               rules={rules}
+              unfilteredRules={unfilteredRules}
               tourInfo={tourStepsInfo[1]}
               setIsFormDirty={setIsFormDirty}
               createMode={createMode}
