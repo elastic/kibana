@@ -15,37 +15,27 @@ import { workflowSystemIndex } from './indices';
 
 export const workflowIndexName = workflowSystemIndex('workflows');
 
+// ✅ RUDOLF'S SUGGESTED APPROACH
 const storageSettings = {
   name: workflowIndexName,
   schema: {
     properties: {
+      // ONLY map fields we actively search/filter/aggregate on
       name: types.text({
         fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
+          keyword: { type: 'keyword', ignore_above: 256 },
         },
       }),
       description: types.text({
         fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
+          keyword: { type: 'keyword', ignore_above: 256 },
         },
       }),
-      enabled: types.boolean({}),
-      tags: types.keyword({}),
-      yaml: types.text({ index: false }),
-      definition: types.object({ enabled: false }),
-      createdBy: types.keyword({}),
-      lastUpdatedBy: types.keyword({}),
-      spaceId: types.keyword({}),
-      deleted_at: types.date({}),
-      valid: types.boolean({}),
-      created_at: types.date({}),
-      updated_at: types.date({}),
+      enabled: types.boolean({}), // We filter by this
+      tags: types.keyword({}), // We search by this
+      createdBy: types.keyword({}), // We filter by this
+      spaceId: types.keyword({}), // We filter by this
+      updated_at: types.date({}), // We sort by this
     },
   },
 } satisfies IndexStorageSettings;
