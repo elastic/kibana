@@ -17,6 +17,9 @@ disabled:
   # Playwright
   - x-pack/solutions/security/test/security_solution_playwright/serverless_config.ts
 
+  # QA suites that are run out-of-band
+  - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.cloud.ts
+
   # MKI only configs files
   - x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts
 
