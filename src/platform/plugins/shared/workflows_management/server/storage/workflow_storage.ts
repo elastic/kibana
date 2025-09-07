@@ -36,6 +36,13 @@ const storageSettings = {
       createdBy: types.keyword({}), // We filter by this
       spaceId: types.keyword({}), // We filter by this
       updated_at: types.date({}), // We sort by this
+      // Non-searchable fields (stored but not indexed)
+      yaml: types.text({ index: false }),
+      definition: types.object({ enabled: false }),
+      deleted_at: types.date({}),
+      valid: types.boolean({}),
+      created_at: types.date({}),
+      lastUpdatedBy: types.keyword({}),
     },
   },
 } satisfies IndexStorageSettings;
