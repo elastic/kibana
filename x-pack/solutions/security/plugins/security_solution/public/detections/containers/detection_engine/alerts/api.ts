@@ -16,6 +16,7 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_ALERTS_INDEX_URL,
+  DETECTION_ENGINE_INTERNAL_GET_ALERT_SUPPRESSION_INFO_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -29,6 +30,7 @@ import type {
   CasesFromAlertsResponse,
   CheckSignalIndex,
   UpdateAlertStatusByIdsProps,
+  AlertSuppressionInfoResponse,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -262,4 +264,16 @@ export const getHostMetadata = async ({
   KibanaServices.get().http.fetch<HostInfo>(
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
     { method: 'GET', signal, version: '2023-10-31' }
+  );
+
+export const getAlertSuppressionInfo = async ({
+  alertIds,
+  query,
+}: {
+  alertIds?: string[];
+  query?: string;
+}): Promise<AlertSuppressionInfoResponse> =>
+  KibanaServices.get().http.fetch<AlertSuppressionInfoResponse>(
+    DETECTION_ENGINE_INTERNAL_GET_ALERT_SUPPRESSION_INFO_URL,
+    { method: 'POST', version: '1', body: JSON.stringify({ alert_ids: alertIds, query }) }
   );
