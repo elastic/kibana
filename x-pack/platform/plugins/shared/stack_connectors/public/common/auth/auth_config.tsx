@@ -109,7 +109,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
       ),
       'data-test-subj': 'authSSL',
     },
-    isOAuth2Enabled && {
+    (isOAuth2Enabled || authType === AuthType.OAuth2ClientCredentials) && {
       value: AuthType.OAuth2ClientCredentials,
       label: i18n.AUTHENTICATION_OAUTH2,
       children: authType === AuthType.OAuth2ClientCredentials && (

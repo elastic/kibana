@@ -18,6 +18,7 @@ import {
 
 import * as i18n from './translations';
 import { AuthConfig } from '../../common/auth/auth_config';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 
 const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
@@ -28,6 +29,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
+  const isOAuth2Enabled = getIsExperimentalFeatureEnabled('isWebhookAuth2ClientCredentialsOn');
 
   return (
     <>
@@ -74,7 +76,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <AuthConfig readOnly={readOnly} isPfxEnabled={isPfxEnabled} isOAuth2Enabled />
+      <AuthConfig
+        readOnly={readOnly}
+        isPfxEnabled={isPfxEnabled}
+        isOAuth2Enabled={isOAuth2Enabled}
+      />
     </>
   );
 };

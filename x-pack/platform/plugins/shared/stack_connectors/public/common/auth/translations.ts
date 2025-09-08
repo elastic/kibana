@@ -215,7 +215,7 @@ export const SCOPE_HELP_TEXT = i18n.translate(
 export const AUTHENTICATION_OAUTH2 = i18n.translate(
   'xpack.stackConnectors.components.auth.authenticationMethodOAuth2Label',
   {
-    defaultMessage: 'OAuth 2.0',
+    defaultMessage: 'OAuth 2.0 Client Credentials',
   }
 );
 

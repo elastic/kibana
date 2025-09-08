@@ -12,8 +12,14 @@ import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+jest.mock('../../common/get_experimental_features');
 
 describe('WebhookActionConnectorFields renders', () => {
+  beforeAll(() => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+  });
+
   it('renders all connector fields', async () => {
     const actionConnector = {
       actionTypeId: '.webhook',

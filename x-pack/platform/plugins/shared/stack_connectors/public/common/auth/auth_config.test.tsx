@@ -504,7 +504,7 @@ describe('AuthConfig renders', () => {
       );
 
       expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
-      expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
+      expect(await screen.findByText('OAuth 2.0 Client Credentials')).toBeInTheDocument();
     });
 
     it('renders OAuth2 fields when authType is OAuth2', async () => {
