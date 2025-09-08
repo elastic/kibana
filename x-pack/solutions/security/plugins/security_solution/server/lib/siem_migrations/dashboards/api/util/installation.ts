@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ContentClient } from '@kbn/content-management-plugin/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management';
+import type { IContentClient } from '@kbn/content-management-plugin/server/content_client/types';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
@@ -35,7 +35,7 @@ interface InstallTranslatedProps {
   /**
    * The content management setup
    */
-  dashboardClient: ContentClient<DashboardAttributes>;
+  dashboardClient: IContentClient<DashboardAttributes>;
 }
 
 export const installTranslated = async ({
@@ -76,7 +76,7 @@ export const installTranslated = async ({
 
 const installDashboards = async (
   dashboardsToInstall: DashboardMigrationDashboard[],
-  dashboardClient: ContentClient<DashboardAttributes>
+  dashboardClient: IContentClient<DashboardAttributes>
 ): Promise<{
   dashboardsToUpdate: Array<DashboardMigrationDashboard>;
   errors: Error[];
@@ -106,7 +106,7 @@ const installDashboards = async (
             ...dashboardData.attributes,
           },
           {
-            id: undefined, // Let the system generate an ID
+            id: dashboard.id,
             references: [
               {
                 type: 'tag',
@@ -125,10 +125,10 @@ const installDashboards = async (
         dashboardsToUpdate.push({
           ...dashboard,
           elastic_dashboard: {
-            id: result.item?.id || '',
+            id: dashboard.id,
             title: dashboard.original_dashboard.title,
             description: dashboard.original_dashboard.description,
-            data: result.item?.data ?? dashboard.elastic_dashboard.data,
+            data: JSON.stringify(result.item),
           },
         });
       } catch (error) {

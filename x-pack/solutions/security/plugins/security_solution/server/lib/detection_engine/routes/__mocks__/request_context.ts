@@ -51,6 +51,7 @@ import { padPackageInstallationClientMock } from '../../../entity_analytics/priv
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -96,6 +97,7 @@ export const createMockClients = () => {
     productFeaturesService: createProductFeaturesServiceMock(),
     logger: loggerMock.create(),
     contentManagement: contentManagementMock.createSetupContract(),
+    contentClient: contentManagementMock.createStartContract().client,
   };
 };
 
@@ -214,6 +216,7 @@ const createSecuritySolutionRequestContextMock = (
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
+    getContentClient: jest.fn(() => clients.contentClient as unknown as IContentClient<unknown>),
   };
 };
 
