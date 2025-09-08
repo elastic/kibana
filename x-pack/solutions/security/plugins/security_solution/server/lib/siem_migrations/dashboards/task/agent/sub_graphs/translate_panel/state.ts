@@ -15,6 +15,7 @@ import type { ValidationErrors } from './types';
 export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
   description: Annotation<string>(),
+  dashboard_description: Annotation<string>(),
   resources: Annotation<MigrationResources>(),
   elastic_panel: Annotation<object | undefined>(), // The visualization panel object
   index_pattern: Annotation<string | undefined>(),

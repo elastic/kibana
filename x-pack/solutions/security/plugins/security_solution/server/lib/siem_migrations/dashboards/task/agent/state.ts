@@ -25,6 +25,7 @@ export const migrateDashboardState = Annotation.Root({
   id: Annotation<string>(),
   original_dashboard: Annotation<OriginalDashboard>(),
   parsed_original_dashboard: Annotation<ParsedOriginalDashboard>(),
+  description: Annotation<string>(),
   panel_descriptions: Annotation<PanelDescriptions>(),
   translated_panels: Annotation<TranslatedPanels>({
     reducer: (current, value) => current.concat(value),

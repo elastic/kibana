@@ -14,6 +14,7 @@ import type { GraphNode } from '../../types';
 interface DashboardData {
   attributes: {
     title: string;
+    description: string;
     panelsJSON: string;
   };
 }
@@ -28,9 +29,15 @@ export const getAggregateDashboardNode = (): GraphNode => {
     }
 
     // Recover original order (the translated_panels is built asynchronously so the panels are in the order they complete the translation, not the original order)
-    const panels = state.translated_panels.sort((a, b) => a.index - b.index);
+    const panels = state.translated_panels
+      .filter((panel) => panel.data) // Filter out any panels that failed to translate
+      .sort((a, b) => a.index - b.index);
 
-    dashboardData.attributes.title = state.original_dashboard.title;
+    const title = state.original_dashboard.title || 'Untitled Dashboard';
+    const description = state.description || '';
+
+    dashboardData.attributes.title = title;
+    dashboardData.attributes.description = description;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
 
     let translationResult;
@@ -60,7 +67,8 @@ export const getAggregateDashboardNode = (): GraphNode => {
 
     return {
       elastic_dashboard: {
-        ...state.original_dashboard,
+        title,
+        description,
         data: JSON.stringify(dashboardData),
       },
       translation_result: translationResult,

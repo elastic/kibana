@@ -19,9 +19,13 @@ export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): Grap
     if (!state.inline_query) {
       return {};
     }
+
+    const description = `Dashboard description: "${state.dashboard_description}"
+Specific Panel description: "${state.description}"`;
+
     const { esqlQuery, comments } = await translateSplToEsql({
       title: state.parsed_panel.title,
-      description: state.description ?? '',
+      description,
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
       indexPattern: TRANSLATION_INDEX_PATTERN,

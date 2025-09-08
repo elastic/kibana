@@ -6,7 +6,6 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { GraphNode } from '../../types';
 import { CREATE_DESCRIPTIONS_PROMPT } from './prompts';
@@ -16,8 +15,8 @@ interface GetCreateDescriptionsNodeParams {
 }
 
 interface Output {
-  descriptions?: Record<string, string>; // panel_id -> description
-  summary?: string; // markdown, begins with "## Describe Panels Summary"
+  dashboard_description?: string; // the main dashboard description
+  panel_descriptions?: Record<string, string>; // panel_id -> description
 }
 
 export const getCreateDescriptionsNode = (params: GetCreateDescriptionsNodeParams): GraphNode => {
@@ -37,10 +36,9 @@ export const getCreateDescriptionsNode = (params: GetCreateDescriptionsNodeParam
       panels_json: JSON.stringify(panels, null, 2),
     });
 
-    const comments = response.summary
-      ? [generateAssistantComment(cleanMarkdown(response.summary))]
-      : undefined;
-
-    return { panel_descriptions: response.descriptions ?? {}, comments };
+    return {
+      description: response.dashboard_description,
+      panel_descriptions: response.panel_descriptions ?? {},
+    };
   };
 };

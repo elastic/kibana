@@ -33,10 +33,13 @@ export const getSelectIndexPatternNode = (params: GetSelectIndexPatternParams): 
       return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
 
+    const description = `Dashboard description: "${state.dashboard_description}"
+Specific Panel description: "${state.description}"`;
+
     const question = await SELECT_INDEX_PATTERN_PROMPT.format({
       query: state.esql_query,
       title: state.parsed_panel.title,
-      description: state.description ?? '',
+      description,
     });
 
     const selectIndexPatternGraph = await selectIndexPatternGraphPromise; // This will only be awaited the first time the node is executed

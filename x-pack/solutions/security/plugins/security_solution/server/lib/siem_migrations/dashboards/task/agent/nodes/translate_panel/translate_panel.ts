@@ -75,6 +75,7 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
         const translatePanelParams: TranslatePanelNodeParams = {
           parsed_panel: panel,
           description,
+          dashboard_description: state.description,
           resources,
           index: i,
         };

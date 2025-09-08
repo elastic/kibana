@@ -147,7 +147,7 @@ export abstract class SiemMigrationsTaskClient<
       return { updated: false };
     }
     filter.installed = false; // only retry rules that are not installed
-    await this.data.items.updateStatus(migrationId, filter, SiemMigrationStatus.PENDING, {
+    await this.data.items.updateStatus(migrationId, {}, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
     return { updated: true };

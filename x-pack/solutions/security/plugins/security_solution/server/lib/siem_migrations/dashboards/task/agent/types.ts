@@ -72,6 +72,7 @@ export type FailedPanelTranslations = Array<{
 export interface TranslatePanelNodeParams {
   parsed_panel: ParsedPanel;
   description: string;
+  dashboard_description: string;
   resources: MigrationResources;
   index: number;
 }
