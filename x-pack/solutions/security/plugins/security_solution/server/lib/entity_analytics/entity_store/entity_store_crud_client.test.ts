@@ -92,6 +92,10 @@ describe('EntityStoreCrudClient', () => {
     it('when not allowed attributes are updated, throw error', async () => {
       mockStatusRunning(dataClientMock, 'host');
       const doc: Entity = {
+        user: {
+          name: 'not-allowed',
+          id: ['123'],
+        },
         entity: {
           id: 'host-1',
           type: 'update',
@@ -105,7 +109,7 @@ describe('EntityStoreCrudClient', () => {
       expect(async () => client.upsertEntity('host', 'host-1', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
-            `updated without forcing it (?force=true): type, sub_type`
+            `updated without forcing it (?force=true): user.name, user.id, entity.type, entity.sub_type`
         )
       );
     });
@@ -170,11 +174,86 @@ describe('EntityStoreCrudClient', () => {
         script: {
           lang: 'painless',
           source:
-            "ctx._source.entity['attributes'] = ctx._source.entity['attributes'] == null ? [:] : ctx._source.entity['attributes'];" +
-            "ctx._source.entity['attributes']['StorageClass'] = 'cold';" +
-            "ctx._source.entity['attributes']['Managed'] = true;" +
-            "ctx._source.entity['behavior'] = ctx._source.entity['behavior'] == null ? [:] : ctx._source.entity['behavior'];" +
-            "ctx._source.entity['behavior']['BruteForceVictim'] = false;",
+            `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
+            `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
+            `ctx._source['entity']['attributes']['StorageClass'] = 'cold';` +
+            `ctx._source['entity']['attributes']['Managed'] = true;` +
+            `ctx._source['entity']['behavior'] = ctx._source['entity']['behavior'] == null ? [:] : ctx._source['entity']['behavior'];` +
+            `ctx._source['entity']['behavior']['BruteForceVictim'] = false;`,
+        },
+      });
+
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v1.priority_updates.security_host_default',
+        id: '123',
+        document: {
+          '@timestamp': mockedDate.toISOString(),
+          host: {
+            name: 'host-1',
+            entity: {
+              Metadata: {
+                priority: 1,
+              },
+              ...doc.entity,
+            },
+          },
+        },
+      });
+
+      expect(v4Spy).toBeCalledTimes(1);
+    });
+
+    it('when valid update entity using force', async () => {
+      mockStatusRunning(dataClientMock, 'host');
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      // overly complex mock implementation to work around type issues
+      // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
+      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+
+      const doc: Entity = {
+        host: {
+          name: 'not-allowed',
+          id: ['123'],
+        },
+        entity: {
+          id: 'host-1',
+          attributes: {
+            StorageClass: 'cold',
+            Managed: true,
+          },
+          behavior: {
+            BruteForceVictim: false,
+          },
+        },
+      };
+
+      await client.upsertEntity('host', 'host-1', doc, true);
+
+      expect(dataClientMock.status).toBeCalledWith({ include_components: true });
+      expect(esClientMock.updateByQuery).toBeCalledWith({
+        index: '.entities.v1.latest.security_host_default',
+        query: {
+          term: {
+            'entity.id': 'host-1',
+          },
+        },
+        script: {
+          lang: 'painless',
+          source:
+            `ctx._source['host'] = ctx._source['host'] == null ? [:] : ctx._source['host'];` +
+            `ctx._source['host']['name'] = 'not-allowed';` +
+            `ctx._source['host']['id'] = ['123'];` +
+            `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
+            `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
+            `ctx._source['entity']['attributes']['StorageClass'] = 'cold';` +
+            `ctx._source['entity']['attributes']['Managed'] = true;` +
+            `ctx._source['entity']['behavior'] = ctx._source['entity']['behavior'] == null ? [:] : ctx._source['entity']['behavior'];` +
+            `ctx._source['entity']['behavior']['BruteForceVictim'] = false;`,
         },
       });
 

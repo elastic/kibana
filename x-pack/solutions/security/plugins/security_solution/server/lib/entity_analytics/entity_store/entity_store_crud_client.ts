@@ -14,6 +14,8 @@ import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } fro
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
 import { getEntityPriorityUpdateIndexName } from './elasticsearch_assets/priority_update_entity_index';
+import type { FlattenProps } from './utils/flatten_props';
+import { flattenProps } from './utils/flatten_props';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -22,7 +24,12 @@ interface EntityStoreClientOpts {
   dataClient: EntityStoreDataClient;
 }
 
-const allowedEntityAttributes = ['id', 'attributes', 'lifecycle', 'behavior'];
+const nonForcedAttributesPath = [
+  ['entity', 'id'],
+  ['entity', 'attributes', '*'],
+  ['entity', 'lifecycle', '*'],
+  ['entity', 'behavior', '*'],
+];
 
 export class EntityStoreCrudClient {
   private esClient: ElasticsearchClient;
@@ -37,13 +44,18 @@ export class EntityStoreCrudClient {
     this.dataClient = dataClient;
   }
 
-  public async upsertEntity(type: EntityType, entityId: string, doc: Entity) {
+  public async upsertEntity(type: EntityType, entityId: string, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
-    this.validEntityUpdate(doc, entityId);
+    const flatProps = flattenProps(doc);
+
+    assertIdsMatch(doc, entityId);
+    if (!force) {
+      assertOnlyNonForcedAttributesInReq(flatProps);
+    }
 
     this.logger.info(`Updating entity '${entityId}' (type ${type})`);
 
-    const painlessUpdate = buildUpdateEntityPainlessScript(doc);
+    const painlessUpdate = buildUpdateEntityPainlessScript(flatProps);
     if (!painlessUpdate) {
       throw new BadCRUDRequestError(`The request doesn't contain any update`);
     }
@@ -83,29 +95,6 @@ export class EntityStoreCrudClient {
     });
   }
 
-  private validEntityUpdate(doc: Entity, entityId: string) {
-    if (entityId !== doc.entity.id) {
-      throw new BadCRUDRequestError(
-        `The id provided in the path, and the id provided in the body doesn't match`
-      );
-    }
-
-    const notAllowedAttributes = [];
-    const keys = Object.keys(doc.entity);
-    for (let i = 0; i < keys.length; i++) {
-      if (allowedEntityAttributes.indexOf(keys[i]) < 0) {
-        notAllowedAttributes.push(keys[i]);
-      }
-    }
-
-    if (notAllowedAttributes.length > 0) {
-      throw new BadCRUDRequestError(
-        `The following attributes are not allowed to be ` +
-          `updated without forcing it (?force=true): ${notAllowedAttributes.join(', ')}`
-      );
-    }
-  }
-
   private async assertEngineIsRunning(type: EntityType) {
     const { engines, status } = await this.dataClient.status({ include_components: true });
 
@@ -123,4 +112,63 @@ export class EntityStoreCrudClient {
 
     throw new EngineNotRunningError(type);
   }
+}
+
+function assertIdsMatch(doc: Entity, entityId: string) {
+  if (entityId !== doc.entity.id) {
+    throw new BadCRUDRequestError(
+      `The id provided in the path, and the id provided in the body doesn't match`
+    );
+  }
+}
+function assertOnlyNonForcedAttributesInReq(flatProps: FlattenProps[]) {
+  const notAllowedProps = [];
+  for (let i = 0; i < flatProps.length; i++) {
+    if (!isPropAllowed(flatProps[i])) {
+      notAllowedProps.push(flatProps[i]);
+    }
+  }
+
+  if (notAllowedProps.length > 0) {
+    const notAllowedPropsString = notAllowedProps.map(({ path }) => path.join('.')).join(', ');
+    throw new BadCRUDRequestError(
+      `The following attributes are not allowed to be ` +
+        `updated without forcing it (?force=true): ${notAllowedPropsString}`
+    );
+  }
+}
+
+function isPropAllowed(prop: FlattenProps) {
+  for (let i = 0; i < nonForcedAttributesPath.length; i++) {
+    const nonForcedPropPath = nonForcedAttributesPath[i];
+    let isMatch = false;
+    if (nonForcedPropPath[nonForcedPropPath.length - 1] === '*') {
+      isMatch = isExactMatch(
+        nonForcedPropPath.slice(0, -1),
+        prop.path.slice(0, prop.path.length - nonForcedPropPath.length - 1)
+      );
+    } else {
+      isMatch = isExactMatch(nonForcedPropPath, prop.path);
+    }
+
+    if (isMatch) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isExactMatch(arr1: string[], arr2: string[]) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }

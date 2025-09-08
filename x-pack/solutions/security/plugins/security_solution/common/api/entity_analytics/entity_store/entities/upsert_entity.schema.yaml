@@ -1,18 +1,18 @@
 openapi: 3.0.0
 info:
   version: '2023-10-31'
-  title: Entity Store - Update Single Entity
+  title: Entity Store - Upsert Entity
 paths:
   /api/entity_store/entities/{entityType}/{entityId}:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: UpdateSingleEntity
-      summary: Updates a single entity from Entity Store
+      operationId: UpsertEntity
+      summary: Updates or creates an entity in Entity Store
       description: >
         Given an entity type, an entity id and the contents of an entity, 
-        update the contents of an entity. By default only a specific set  
-        of fields are allowed to be modified, being that `entity.attributes.*, 
+        update (or create) the contents of an entity. By default only a specific 
+        set of fields are allowed to be modified, being that `entity.attributes.*, 
         entity.lifecyle.* and entity.behavior.*`. If you wish to update any 
         other field you must use the query parameter `force=true`. Be aware 
         that some fields always fetch the first seen value, thus your changes
@@ -51,7 +51,7 @@ paths:
         '400':
           description: Operation on a non existent field or on a not initiated Engine
         '200':
-          description: Entity Updated
+          description: Entity Updated or Created
           content:
             application/json:
               schema:
