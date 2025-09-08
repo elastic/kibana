@@ -58501,6 +58501,51 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/streams/{name}/_failure_store:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_failure_store</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Updates the failure store configuration for a stream<br/><br/>[Required authorization] Route required privileges: manage_stream.
+      operationId: put-streams-name-failure-store
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                customRetentionPeriod:
+                  type: string
+                failureStoreEnabled:
+                  type: boolean
+              required:
+                - failureStoreEnabled
+      responses: {}
+      summary: Update failure store configuration
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/streams/{name}/_fork:
     post:
       description: |-
@@ -62280,6 +62325,43 @@ paths:
                 - not: {}
       responses: {}
       summary: Link a dashboard to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/streams/{name}/failure_store/stats:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/failure_store/stats</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Gets the failure store statistics for a stream<br/><br/>[Required authorization] Route required privileges: read_stream.
+      operationId: get-streams-name-failure-store-stats
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get failure store stats
       tags:
         - streams
       x-state: Technical Preview
