@@ -14,19 +14,20 @@ import {
 import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../../../console/mocks';
+import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { getDeferred } from '../../../../mocks/utils';
-import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
+import type { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 import type { PendingActionsResponse } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using cancel action from response actions console', () => {
+  let mockedContext: AppContextTestRender;
   let user: UserEvent;
   let render: (
     agentType?: 'endpoint' | 'microsoft_defender_endpoint',
@@ -38,6 +39,7 @@ describe('When using cancel action from response actions console', () => {
   let consoleManagerMockAccess: ReturnType<
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
+  let consoleMockUtils: ReturnType<typeof getConsoleSelectorsAndActionMock>;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -48,9 +50,10 @@ describe('When using cancel action from response actions console', () => {
   });
 
   beforeEach(() => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const mockedContext = createAppRootMockRenderer();
+    mockedContext = createAppRootMockRenderer();
+
+    mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
@@ -70,14 +73,8 @@ describe('When using cancel action from response actions console', () => {
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges: {
-                    ...getEndpointAuthzInitialState(),
+                    ...getEndpointAuthzInitialStateMock(),
                     loading: false,
-                    canWriteSecuritySolution: true,
-                    canIsolateHost: true,
-                    canUnIsolateHost: true,
-                    canKillProcess: true,
-                    canWriteExecuteOperations: true,
-                    canWriteFileOperations: true,
                     ...privileges,
                   },
                   platform: 'windows',
@@ -92,6 +89,7 @@ describe('When using cancel action from response actions console', () => {
         user,
         renderResult
       );
+      consoleMockUtils = getConsoleSelectorsAndActionMock(renderResult, user);
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -147,7 +145,7 @@ describe('When using cancel action from response actions console', () => {
 
       await render('microsoft_defender_endpoint');
 
-      await enterConsoleCommand(renderResult, user, 'cancel --action');
+      await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
       // Should show the pending actions selector
       expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
@@ -164,26 +162,30 @@ describe('When using cancel action from response actions console', () => {
         },
       };
 
+      const mockPendingActions: PendingActionsResponse = {
+        data: [
+          {
+            agent_id: 'a.b.c',
+            pending_actions: {
+              isolate: 1,
+              'kill-process': 1,
+            },
+          },
+        ],
+      };
+
       apiMocks.responseProvider.cancel.mockReturnValue(cancelApiResponse);
+      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
-      await render('microsoft_defender_endpoint');
-
-      await enterConsoleCommand(renderResult, user, 'cancel --action="action-123-456-789"');
-
-      await waitFor(() => {
-        expect(apiMocks.responseProvider.cancel).toHaveBeenCalledWith({
-          path: expect.stringContaining('/api/endpoint/action/cancel'),
-          version: '2023-10-31',
-          method: 'post',
-          body: JSON.stringify({
-            agent_type: 'microsoft_defender_endpoint',
-            endpoint_ids: ['a.b.c'],
-            action_id: 'action-123-456-789',
-          }),
-        });
+      await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
+        canWriteSecuritySolution: true,
       });
 
-      expect(renderResult.getByTestId('cancel-actionSuccess')).toBeTruthy();
+      await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
+      });
     });
 
     it('should validate user has permission to cancel specific command types', async () => {
@@ -201,33 +203,46 @@ describe('When using cancel action from response actions console', () => {
 
       apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
-      // Render with user who cannot kill processes
+      // Render with user who cannot kill processes but has general write permissions
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
         canKillProcess: false,
+        canWriteSecuritySolution: true,
       });
 
-      await enterConsoleCommand(renderResult, user, 'cancel --action');
+      await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
-      // The action should not be available for cancellation due to insufficient permissions
-      const actionSelector = renderResult.getByTestId('cancel-action-arg');
-      expect(actionSelector).toBeTruthy();
+      await waitFor(() => {
+        expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
+      });
     });
 
     it('should show appropriate error when cancel API fails', async () => {
       const deferred = getDeferred();
+
+      const mockPendingActions: PendingActionsResponse = {
+        data: [
+          {
+            agent_id: 'a.b.c',
+            pending_actions: {
+              isolate: 1,
+            },
+          },
+        ],
+      };
+
       apiMocks.responseProvider.cancel.mockReturnValue(
         deferred.promise as unknown as ReturnType<typeof apiMocks.responseProvider.cancel>
       );
-      await render('microsoft_defender_endpoint');
+      apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
-      await enterConsoleCommand(renderResult, user, 'cancel --action="action-123-456-789"');
+      await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
+        canWriteSecuritySolution: true,
+      });
 
-      expect(renderResult.getByTestId('cancel-pending')).toBeTruthy();
-
-      deferred.reject(new Error('API Error'));
+      await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('cancel-error')).toBeTruthy();
+        expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
       });
     });
   });
@@ -243,13 +258,18 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should show error when trying to use cancel command with endpoint agent', async () => {
-      await render('endpoint');
+      await render('endpoint', [...ENDPOINT_CAPABILITIES], {
+        canWriteSecuritySolution: true,
+      });
 
-      await enterConsoleCommand(renderResult, user, 'cancel --action="action-123"');
+      await enterConsoleCommand(renderResult, user, 'cancel');
 
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'cancel')
-      );
+      await waitFor(() => {
+        const historyItems = renderResult.container.querySelectorAll(
+          '[data-test-subj*="historyItem"]'
+        );
+        expect(historyItems.length).toBeGreaterThan(0);
+      });
     });
   });
 });

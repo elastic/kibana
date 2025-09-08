@@ -22,6 +22,7 @@ import {
 import { canCancelResponseAction } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 /**
  * State for the pending actions selector component
@@ -70,6 +71,7 @@ export const PendingActionsSelector = memo<
 
   const userPrivileges = useUserPrivileges();
   const featureFlags = ExperimentalFeaturesService.get();
+  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg`);
 
   const privilegeChecker = useMemo(
     () => (actionCommand: string) => {
@@ -119,6 +121,7 @@ export const PendingActionsSelector = memo<
       transformToOptions={transformToOptionsWithPrivileges}
       config={PENDING_ACTIONS_CONFIG}
       useErrorToast={usePendingActionsErrorToast}
+      testIdPrefix={testId()}
     />
   );
 });
