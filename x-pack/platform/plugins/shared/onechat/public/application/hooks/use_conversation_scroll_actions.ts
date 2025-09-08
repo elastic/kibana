@@ -30,31 +30,42 @@ const scrollToMostRecentRound = (
 };
 
 export const useConversationScrollActions = ({
+  isResponseLoading,
   conversationId,
   scrollContainer,
 }: {
+  isResponseLoading: boolean;
   conversationId: string;
   scrollContainer: HTMLDivElement | null;
 }) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  // Set up scroll listener to show/hide scroll button
   useEffect(() => {
     const parent = scrollContainer?.parentElement;
     if (!parent) return;
 
-    const handleScroll = () => {
-      const { scrollTop } = parent;
-      // With column-reverse, {scrollTop} is negative when scrolled up
-      const distanceFromBottom = Math.abs(scrollTop);
-      const threshold = 200;
+    const checkScrollPosition = () => {
+      const { scrollTop, scrollHeight, clientHeight } = parent;
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+      const threshold = 50;
 
       setShowScrollButton(distanceFromBottom > threshold);
     };
 
-    parent.addEventListener('scroll', handleScroll);
-    return () => parent.removeEventListener('scroll', handleScroll);
-  }, [conversationId, scrollContainer]);
+    // Set up scroll listener
+    parent.addEventListener('scroll', checkScrollPosition);
+
+    // Set up interval for streaming check (only when response is loading)
+    let interval: NodeJS.Timeout | undefined;
+    if (isResponseLoading) {
+      interval = setInterval(checkScrollPosition, 1500);
+    }
+
+    return () => {
+      parent.removeEventListener('scroll', checkScrollPosition);
+      if (interval) clearInterval(interval);
+    };
+  }, [isResponseLoading, conversationId, scrollContainer]);
 
   return {
     showScrollButton,

@@ -14,6 +14,7 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 import { useConversationId } from '../../hooks/use_conversation_id';
+import { useSendMessage } from '../../context/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 
 const fullHeightStyles = css`
@@ -28,9 +29,11 @@ export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
+  const { isResponseLoading } = useSendMessage();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const { showScrollButton, scrollToMostRecentRound } = useConversationScrollActions({
+    isResponseLoading,
     conversationId: conversationId || '',
     scrollContainer: scrollContainerRef.current,
   });
@@ -39,8 +42,6 @@ export const Conversation: React.FC<{}> = () => {
     overflow-y: auto;
     ${fullHeightStyles}
     ${useEuiScrollBar()}
-    display: flex;
-    flex-direction: column-reverse;
   `;
 
   useSyncAgentId();
