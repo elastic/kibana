@@ -73,10 +73,7 @@ export function fromBucketLensApiToLensState(
   throw new Error(`Unsupported bucket operation`);
 }
 
-export function fromBucketLensStateToAPI(
-  column: AnyBucketLensStateColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiBucketOperations;
+
 export function fromBucketLensStateToAPI(
   column: FiltersIndexPatternColumn,
   columns: { column: AnyLensStateColumn; id: string }[]
@@ -96,7 +93,11 @@ export function fromBucketLensStateToAPI(
 export function fromBucketLensStateToAPI(
   column: AnyBucketLensStateColumn,
   columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiBucketOperations | undefined {
+): LensApiBucketOperations;
+export function fromBucketLensStateToAPI(
+  column: AnyBucketLensStateColumn,
+  columns: { column: AnyLensStateColumn; id: string }[]
+): LensApiBucketOperations {
   if (isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', column)) {
     return fromFiltersLensStateToAPI(column);
   }

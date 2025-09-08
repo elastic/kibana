@@ -210,10 +210,6 @@ export function fromMetricAPItoLensState(
 }
 
 export function getMetricApiColumnFromLensState(
-  options: AnyMetricLensStateColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiAllMetricOperations;
-export function getMetricApiColumnFromLensState(
   column: CountIndexPatternColumn,
   columns: Record<string, AnyMetricLensStateColumn>
 ): LensApiCountMetricOperation;
@@ -262,6 +258,10 @@ export function getMetricApiColumnFromLensState(
   column: DerivativeIndexPatternColumn,
   columns: Record<string, AnyMetricLensStateColumn>
 ): LensApiDifferencesOperation;
+export function getMetricApiColumnFromLensState(
+  options: AnyMetricLensStateColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiAllMetricOperations;
 export function getMetricApiColumnFromLensState(
   options: AnyMetricLensStateColumn,
   columns: Record<string, AnyMetricLensStateColumn>
