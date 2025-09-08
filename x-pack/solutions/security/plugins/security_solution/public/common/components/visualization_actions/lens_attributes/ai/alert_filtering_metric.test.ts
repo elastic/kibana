@@ -48,7 +48,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         title: 'Alert filtering rate',
         visualizationType: 'lnsMetric',
         type: 'lens',
-        version: 'WzI0LDFd',
         updated_at: '2025-07-21T15:51:38.660Z',
       })
     );
