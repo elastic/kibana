@@ -17,6 +17,7 @@ import {
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
+  CoreWorkerFixtures,
   EsClient,
   KbnClient,
   KibanaUrl,
@@ -60,20 +61,34 @@ export interface ScoutParallelWorkerFixtures {
   apiServices: ApiServicesFixture;
 }
 
-export const globalSetup = mergeTests(
+/**
+ * Pre-creates Elasticsearch Security indexes (.security, .security-tokens, .security-profile)
+ * during global setup to prevent race conditions when parallel tests perform their first SAML authentication.
+ */
+const preCreateSecurityIndexesFixture = coreWorkerFixtures.extend<
+  {},
+  { samlAuth: CoreWorkerFixtures['samlAuth']; preCreateSecurityIndexes: void }
+>({
+  preCreateSecurityIndexes: [
+    async (
+      {
+        samlAuth,
+        log,
+      }: { samlAuth: CoreWorkerFixtures['samlAuth']; log: CoreWorkerFixtures['log'] },
+      use: (arg: void) => Promise<void>
+    ) => {
+      log.debug('Running SAML authentication to pre-create Elasticsearch .security indexes');
+      await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope('admin');
+      await use();
+    },
+    { scope: 'worker', auto: true },
+  ],
+});
+
+export const globalSetupFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   synthtraceFixture,
   apiServicesFixture,
-  // Auto-authenticate with admin role during global setup to pre-create ES security indexes
-  {
-    autoSamlAuthAdmin: [
-      async ({ samlAuth }, use) => {
-        // Automatically authenticate with admin role during setup
-        await samlAuth.session.getApiCredentialsForRole('admin');
-        await use();
-      },
-      { scope: 'worker', auto: true },
-    ],
-  }
+  preCreateSecurityIndexesFixture
 );
