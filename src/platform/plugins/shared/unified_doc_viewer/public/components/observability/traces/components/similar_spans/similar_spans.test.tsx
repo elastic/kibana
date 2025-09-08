@@ -57,7 +57,7 @@ describe('SimilarSpans', () => {
     spanDuration: 1200,
     latencyChart: {
       data: {
-        spanDistributionChartData: mockSpanDistributionChartData,
+        distributionChartData: mockSpanDistributionChartData,
         percentileThresholdValue: 1000,
       },
       loading: false,
@@ -104,7 +104,7 @@ describe('SimilarSpans', () => {
         {...defaultProps}
         latencyChart={{
           data: {
-            spanDistributionChartData: [],
+            distributionChartData: [],
           },
           loading: false,
           hasError: true,
