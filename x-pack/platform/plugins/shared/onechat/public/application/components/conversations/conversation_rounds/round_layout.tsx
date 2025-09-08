@@ -11,8 +11,13 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-// Height offset for conversation UI elements to make last round expand to fill viewport
-const CONVERSATION_UI_OFFSET = 248;
+// A new round should have a min-height equal to the scroll container height
+const getScrollContainerHeight = () => {
+  const container = document.querySelector(
+    '[id="onechatConversationScrollContainer"]'
+  ) as HTMLDivElement;
+  return container?.clientHeight || 0;
+};
 
 interface RoundLayoutProps {
   input: ReactNode;
@@ -38,13 +43,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isResponseLoading,
   isCurrentRound,
 }) => {
-  const [shouldExpandToFillViewport, setShouldExpandToFillViewport] = useState(false);
+  const [viewportOffset, setViewportOffset] = useState(0);
 
   useEffect(() => {
     if (isCurrentRound && isResponseLoading) {
-      setShouldExpandToFillViewport(true);
+      setViewportOffset(getScrollContainerHeight());
     } else if (!isCurrentRound) {
-      setShouldExpandToFillViewport(false);
+      setViewportOffset(0);
     }
   }, [isCurrentRound, isResponseLoading]);
 
@@ -56,12 +61,17 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
 
-  const outputContainerStyles = css`
-    ${shouldExpandToFillViewport ? `min-height: calc(100vh - ${CONVERSATION_UI_OFFSET}px);` : ''}
+  const roundContainerStyles = css`
+    ${viewportOffset > 0 ? `min-height: ${viewportOffset}px;` : ''}
   `;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.container}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="l"
+      aria-label={labels.container}
+      css={roundContainerStyles}
+    >
       <EuiFlexItem grow={false}>
         <EuiPanel
           css={inputContainerStyles}
@@ -74,7 +84,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiPanel>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} css={outputContainerStyles}>
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
           <EuiFlexItem>{output}</EuiFlexItem>
