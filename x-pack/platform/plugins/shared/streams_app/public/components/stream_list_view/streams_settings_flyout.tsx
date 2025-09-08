@@ -76,8 +76,6 @@ export function StreamsSettingsFlyout({
     return () => sub.unsubscribe();
   }, [wiredStatus$]);
 
-  console.log(['canManageWiredKibana', canManageWiredKibana, 'canManageWiredElasticsearch', canManageWiredElasticsearch]);
-
   const handleSwitchChange = async () => {
     if (wiredChecked) {
       setShowDisableModal(true);
