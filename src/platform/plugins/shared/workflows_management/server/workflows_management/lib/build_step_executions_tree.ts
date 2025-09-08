@@ -50,7 +50,7 @@ export function buildStepExecutionsTree(
     const path = [...stepExecution.path, stepExecution.stepId].join('.');
     stepMap.set(path, {
       stepId: stepExecution.stepId,
-      stepType: workflowExecutionGraph.node(stepExecution.stepId)?.configuration?.type,
+      stepType: (workflowExecutionGraph.node(stepExecution.stepId) as any)?.configuration?.type,
       executionIndex: stepExecution.executionIndex,
       stepExecutionId: stepExecution.id,
       status: stepExecution.status,
