@@ -252,6 +252,7 @@ Alerting::
 * Adds the `xpack.actions.email.services.ses.host` {kib} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {kib} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors ({kibana-pull}221389[#221389]).
 * Adds `rrule` notation support for task scheduling ({kibana-pull}217728[#217728]).
 * Publishes new public APIs for the Maintenance Window ({kibana-pull}216756[#216756]).
+* Allows you to delete Maintenance Windows ({kibana-pull}211399[#211399]).
 * Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time ({kibana-pull}216613[#216613]).
 * Adds an embeddable panel for dashboards that allows you to show a simplified version of the Alerts table from {observability} or {elastic-sec} ({kibana-pull}216076[#216076]).
 Dashboards and Visualizations::
