@@ -506,7 +506,6 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getPolicies: async () => {
         try {
-          // TODO cache?
           const policies = (await core.http.get(
             `/internal/index_management/enrich_policies`
           )) as SerializedEnrichPolicy[];
