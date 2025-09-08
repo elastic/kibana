@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
@@ -74,12 +74,15 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
   const traceRootItem = useFetchTraceRootItemContext();
 
-  const aboutFieldConfigurations = {
-    ...getSharedFieldConfigurations(flattenedHit),
-    ...(isSpan
-      ? getSpanFieldConfigurations(flattenedHit)
-      : getTransactionFieldConfigurations(flattenedHit)),
-  };
+  const aboutFieldConfigurations = useMemo(
+    () => ({
+      ...getSharedFieldConfigurations(flattenedHit),
+      ...(isSpan
+        ? getSpanFieldConfigurations(flattenedHit)
+        : getTransactionFieldConfigurations(flattenedHit)),
+    }),
+    [flattenedHit, isSpan]
+  );
 
   const durationField = isSpan ? SPAN_DURATION : TRANSACTION_DURATION;
 
