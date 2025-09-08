@@ -1,25 +1,30 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
- * 
+ *
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
  * Generated at: 2025-09-08T07:30:06.702Z
  * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
- * 
+ *
  * To regenerate: npm run generate:kibana-connectors
  */
 
 import { z } from '@kbn/zod';
 
-import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
-import { z } from "zod";
+import { z } from '@kbn/zod';
 
 export const bedrock_config = z
   .object({
     apiUrl: z.string(),
-    defaultModel: z
-      .string()
-      .optional()
-      .default("us.anthropic.claude-3-7-sonnet-20250219-v1:0"),
+    defaultModel: z.string().optional().default('us.anthropic.claude-3-7-sonnet-20250219-v1:0'),
   })
   .passthrough();
 export const crowdstrike_config = z.object({ url: z.string() }).passthrough();
@@ -34,14 +39,7 @@ export const email_config = z
     port: z.number().int().optional(),
     secure: z.boolean().optional(),
     service: z
-      .enum([
-        "elastic_cloud",
-        "exchange_server",
-        "gmail",
-        "other",
-        "outlook365",
-        "ses",
-      ])
+      .enum(['elastic_cloud', 'exchange_server', 'gmail', 'other', 'outlook365', 'ses'])
       .optional(),
     tenantId: z.string().nullish(),
   })
@@ -49,14 +47,12 @@ export const email_config = z
 export const gemini_config = z
   .object({
     apiUrl: z.string(),
-    defaultModel: z.string().optional().default("gemini-2.5-pro"),
+    defaultModel: z.string().optional().default('gemini-2.5-pro'),
     gcpRegion: z.string(),
     gcpProjectID: z.string(),
   })
   .passthrough();
-export const resilient_config = z
-  .object({ apiUrl: z.string(), orgId: z.string() })
-  .passthrough();
+export const resilient_config = z.object({ apiUrl: z.string(), orgId: z.string() }).passthrough();
 export const index_config = z
   .object({
     executionTimeField: z.string().nullish().default(null),
@@ -64,39 +60,31 @@ export const index_config = z
     refresh: z.boolean().optional().default(false),
   })
   .passthrough();
-export const jira_config = z
-  .object({ apiUrl: z.string(), projectKey: z.string() })
-  .passthrough();
+export const jira_config = z.object({ apiUrl: z.string(), projectKey: z.string() }).passthrough();
 export const genai_azure_config = z
-  .object({ apiProvider: z.literal("Azure OpenAI"), apiUrl: z.string() })
+  .object({ apiProvider: z.literal('Azure OpenAI'), apiUrl: z.string() })
   .passthrough();
 export const genai_openai_config = z
   .object({
-    apiProvider: z.literal("OpenAI"),
+    apiProvider: z.literal('OpenAI'),
     apiUrl: z.string(),
     defaultModel: z.string().optional(),
   })
   .passthrough();
 export const genai_openai_other_config = z
   .object({
-    apiProvider: z.literal("Other"),
+    apiProvider: z.literal('Other'),
     apiUrl: z.string(),
     defaultModel: z.string(),
     certificateData: z.string().min(1).optional(),
     privateKeyData: z.string().min(1).optional(),
     caData: z.string().min(1).optional(),
-    verificationMode: z
-      .enum(["full", "certificate", "none"])
-      .optional()
-      .default("full"),
+    verificationMode: z.enum(['full', 'certificate', 'none']).optional().default('full'),
     headers: z.record(z.string()).optional(),
   })
   .passthrough();
 export const opsgenie_config = z.object({ apiUrl: z.string() }).passthrough();
-export const pagerduty_config = z
-  .object({ apiUrl: z.string().nullable() })
-  .partial()
-  .passthrough();
+export const pagerduty_config = z.object({ apiUrl: z.string().nullable() }).partial().passthrough();
 export const sentinelone_config = z.object({ url: z.string() }).passthrough();
 export const servicenow_config = z
   .object({
@@ -129,7 +117,7 @@ export const swimlane_config = z
   .object({
     apiUrl: z.string(),
     appId: z.string(),
-    connectorType: z.enum(["all", "alerts", "cases"]),
+    connectorType: z.enum(['all', 'alerts', 'cases']),
     mappings: z
       .object({
         alertIdConfig: z
@@ -198,27 +186,22 @@ export const thehive_config = z
   .object({ organisation: z.string().optional(), url: z.string() })
   .passthrough();
 export const tines_config = z.object({ url: z.string() }).passthrough();
-export const torq_config = z
-  .object({ webhookIntegrationUrl: z.string() })
-  .passthrough();
-export const auth_type = z.enum([
-  "webhook-authentication-basic",
-  "webhook-authentication-ssl",
-]);
+export const torq_config = z.object({ webhookIntegrationUrl: z.string() }).passthrough();
+export const auth_type = z.enum(['webhook-authentication-basic', 'webhook-authentication-ssl']);
 export const ca = z.string();
-export const cert_type = z.enum(["ssl-crt-key", "ssl-pfx"]);
+export const cert_type = z.enum(['ssl-crt-key', 'ssl-pfx']);
 export const has_auth = z.boolean();
-export const verification_mode = z.enum(["certificate", "full", "none"]);
+export const verification_mode = z.enum(['certificate', 'full', 'none']);
 export const webhook_config = z
   .object({
     authType: auth_type.nullable(),
-    ca: ca,
+    ca,
     certType: cert_type,
     hasAuth: has_auth.default(true),
     headers: z.object({}).partial().passthrough().nullable(),
-    method: z.enum(["post", "put"]).default("post"),
+    method: z.enum(['post', 'put']).default('post'),
     url: z.string(),
-    verificationMode: verification_mode.default("full"),
+    verificationMode: verification_mode.default('full'),
   })
   .partial()
   .passthrough();
@@ -228,16 +211,10 @@ export const cases_webhook_config = z
     ca: ca.optional(),
     certType: cert_type.optional(),
     createCommentJson: z.string().optional(),
-    createCommentMethod: z
-      .enum(["patch", "post", "put"])
-      .optional()
-      .default("put"),
+    createCommentMethod: z.enum(['patch', 'post', 'put']).optional().default('put'),
     createCommentUrl: z.string().optional(),
     createIncidentJson: z.string(),
-    createIncidentMethod: z
-      .enum(["patch", "post", "put"])
-      .optional()
-      .default("post"),
+    createIncidentMethod: z.enum(['patch', 'post', 'put']).optional().default('post'),
     createIncidentResponseKey: z.string(),
     createIncidentUrl: z.string(),
     getIncidentResponseExternalTitleKey: z.string(),
@@ -245,12 +222,9 @@ export const cases_webhook_config = z
     hasAuth: has_auth.optional().default(true),
     headers: z.string().optional(),
     updateIncidentJson: z.string(),
-    updateIncidentMethod: z
-      .enum(["patch", "post", "put"])
-      .optional()
-      .default("put"),
+    updateIncidentMethod: z.enum(['patch', 'post', 'put']).optional().default('put'),
     updateIncidentUrl: z.string(),
-    verificationMode: verification_mode.optional().default("full"),
+    verificationMode: verification_mode.optional().default('full'),
     viewIncidentUrl: z.string(),
   })
   .passthrough();
@@ -276,9 +250,7 @@ export const gemini_secrets = z.object({ credentialsJson: z.string() }).passthro
 export const resilient_secrets = z
   .object({ apiKeyId: z.string(), apiKeySecret: z.string() })
   .passthrough();
-export const jira_secrets = z
-  .object({ apiToken: z.string(), email: z.string() })
-  .passthrough();
+export const jira_secrets = z.object({ apiToken: z.string(), email: z.string() }).passthrough();
 export const defender_secrets = z.object({ clientSecret: z.string() }).passthrough();
 export const teams_secrets = z.object({ webhookUrl: z.string() }).passthrough();
 export const genai_secrets = z
@@ -304,23 +276,18 @@ export const servicenow_secrets = z
   .partial()
   .passthrough();
 export const slack_api_secrets = z.object({ token: z.string() }).passthrough();
-export const swimlane_secrets = z
-  .object({ apiToken: z.string() })
-  .partial()
-  .passthrough();
+export const swimlane_secrets = z.object({ apiToken: z.string() }).partial().passthrough();
 export const thehive_secrets = z.object({ apiKey: z.string() }).passthrough();
-export const tines_secrets = z
-  .object({ email: z.string(), token: z.string() })
-  .passthrough();
+export const tines_secrets = z.object({ email: z.string(), token: z.string() }).passthrough();
 export const torq_secrets = z.object({ token: z.string() }).passthrough();
 export const crt = z.string();
 export const key = z.string();
 export const pfx = z.string();
 export const webhook_secrets = z
   .object({
-    crt: crt,
-    key: key,
-    pfx: pfx,
+    crt,
+    key,
+    pfx,
     password: z.string(),
     user: z.string(),
   })
@@ -328,9 +295,9 @@ export const webhook_secrets = z
   .passthrough();
 export const cases_webhook_secrets = z
   .object({
-    crt: crt,
-    key: key,
-    pfx: pfx,
+    crt,
+    key,
+    pfx,
     password: z.string(),
     user: z.string(),
   })
@@ -470,7 +437,7 @@ export const put_actions_connector_id_Body = z.object({
 export const run_acknowledge_resolve_pagerduty = z
   .object({
     dedupKey: z.string().max(255),
-    eventAction: z.enum(["acknowledge", "resolve"]),
+    eventAction: z.enum(['acknowledge', 'resolve']),
   })
   .passthrough();
 export const run_documents = z
@@ -487,10 +454,7 @@ export const run_message_email = z
   .passthrough();
 export const run_message_serverlog = z
   .object({
-    level: z
-      .enum(["debug", "error", "fatal", "info", "trace", "warn"])
-      .optional()
-      .default("info"),
+    level: z.enum(['debug', 'error', 'fatal', 'info', 'trace', 'warn']).optional().default('info'),
     message: z.string(),
   })
   .passthrough();
@@ -501,17 +465,12 @@ export const run_trigger_pagerduty = z
     component: z.string().optional(),
     customDetails: z.object({}).partial().passthrough().optional(),
     dedupKey: z.string().max(255).optional(),
-    eventAction: z.literal("trigger"),
+    eventAction: z.literal('trigger'),
     group: z.string().optional(),
     links: z
-      .array(
-        z.object({ href: z.string(), text: z.string() }).partial().passthrough()
-      )
+      .array(z.object({ href: z.string(), text: z.string() }).partial().passthrough())
       .optional(),
-    severity: z
-      .enum(["critical", "error", "info", "warning"])
-      .optional()
-      .default("info"),
+    severity: z.enum(['critical', 'error', 'info', 'warning']).optional().default('info'),
     source: z.string().optional(),
     summary: z.string().max(1024).optional(),
     timestamp: z.string().datetime({ offset: true }).optional(),
@@ -519,7 +478,7 @@ export const run_trigger_pagerduty = z
   .passthrough();
 export const run_addevent = z
   .object({
-    subAction: z.literal("addEvent"),
+    subAction: z.literal('addEvent'),
     subActionParams: z
       .object({
         additional_info: z.string(),
@@ -541,7 +500,7 @@ export const run_addevent = z
   .passthrough();
 export const run_closealert = z
   .object({
-    subAction: z.literal("closeAlert"),
+    subAction: z.literal('closeAlert'),
     subActionParams: z
       .object({
         alias: z.string(),
@@ -554,15 +513,13 @@ export const run_closealert = z
   .passthrough();
 export const run_closeincident = z
   .object({
-    subAction: z.literal("closeIncident"),
-    subActionParams: z
-      .object({ incident: z.union([z.unknown(), z.unknown()]) })
-      .passthrough(),
+    subAction: z.literal('closeIncident'),
+    subActionParams: z.object({ incident: z.union([z.unknown(), z.unknown()]) }).passthrough(),
   })
   .passthrough();
 export const run_createalert = z
   .object({
-    subAction: z.literal("createAlert"),
+    subAction: z.literal('createAlert'),
     subActionParams: z
       .object({
         actions: z.array(z.string()),
@@ -572,13 +529,13 @@ export const run_createalert = z
         entity: z.string(),
         message: z.string(),
         note: z.string(),
-        priority: z.enum(["P1", "P2", "P3", "P4", "P5"]),
+        priority: z.enum(['P1', 'P2', 'P3', 'P4', 'P5']),
         responders: z.array(
           z
             .object({
               id: z.string(),
               name: z.string(),
-              type: z.enum(["escalation", "schedule", "team", "user"]),
+              type: z.enum(['escalation', 'schedule', 'team', 'user']),
               username: z.string(),
             })
             .partial()
@@ -597,7 +554,7 @@ export const run_createalert = z
             .object({
               id: z.string().optional(),
               name: z.string().optional(),
-              type: z.enum(["team", "user"]),
+              type: z.enum(['team', 'user']),
               username: z.string().optional(),
             })
             .passthrough()
@@ -609,52 +566,46 @@ export const run_createalert = z
   .passthrough();
 export const run_fieldsbyissuetype = z
   .object({
-    subAction: z.literal("fieldsByIssueType"),
+    subAction: z.literal('fieldsByIssueType'),
     subActionParams: z.object({ id: z.string() }).passthrough(),
   })
   .passthrough();
 export const run_getagentdetails = z
   .object({
-    subAction: z.literal("getAgentDetails"),
+    subAction: z.literal('getAgentDetails'),
     subActionParams: z.object({ ids: z.array(z.string()) }).passthrough(),
   })
   .passthrough();
-export const run_getagents = z
-  .object({ subAction: z.literal("getAgents") })
-  .passthrough();
+export const run_getagents = z.object({ subAction: z.literal('getAgents') }).passthrough();
 export const run_getchoices = z
   .object({
-    subAction: z.literal("getChoices"),
+    subAction: z.literal('getChoices'),
     subActionParams: z.object({ fields: z.array(z.string()) }).passthrough(),
   })
   .passthrough();
-export const run_getfields = z
-  .object({ subAction: z.literal("getFields") })
-  .passthrough();
+export const run_getfields = z.object({ subAction: z.literal('getFields') }).passthrough();
 export const run_getincident = z
   .object({
-    subAction: z.literal("getIncident"),
+    subAction: z.literal('getIncident'),
     subActionParams: z.object({ externalId: z.string() }).passthrough(),
   })
   .passthrough();
 export const run_issue = z
   .object({
-    subAction: z.literal("issue"),
+    subAction: z.literal('issue'),
     subActionParams: z.object({ id: z.string() }).passthrough().optional(),
   })
   .passthrough();
 export const run_issues = z
   .object({
-    subAction: z.literal("issues"),
+    subAction: z.literal('issues'),
     subActionParams: z.object({ title: z.string() }).passthrough(),
   })
   .passthrough();
-export const run_issuetypes = z
-  .object({ subAction: z.literal("issueTypes") })
-  .passthrough();
+export const run_issuetypes = z.object({ subAction: z.literal('issueTypes') }).passthrough();
 export const run_postmessage = z
   .object({
-    subAction: z.literal("postMessage"),
+    subAction: z.literal('postMessage'),
     subActionParams: z
       .object({
         channelIds: z.array(z.string()).max(1),
@@ -667,14 +618,11 @@ export const run_postmessage = z
   .passthrough();
 export const run_pushtoservice = z
   .object({
-    subAction: z.literal("pushToService"),
+    subAction: z.literal('pushToService'),
     subActionParams: z
       .object({
         comments: z.array(
-          z
-            .object({ comment: z.string(), commentId: z.number().int() })
-            .partial()
-            .passthrough()
+          z.object({ comment: z.string(), commentId: z.number().int() }).partial().passthrough()
         ),
         incident: z
           .object({
@@ -718,7 +666,7 @@ export const run_pushtoservice = z
   .passthrough();
 export const run_validchannelid = z
   .object({
-    subAction: z.literal("validChannelId"),
+    subAction: z.literal('validChannelId'),
     subActionParams: z.object({ channelId: z.string() }).passthrough(),
   })
   .passthrough();
@@ -750,7 +698,7 @@ export const post_actions_connector_id_execute_Body = z.object({
 });
 export const Alerting_401_response = z
   .object({
-    error: z.literal("Unauthorized"),
+    error: z.literal('Unauthorized'),
     message: z.string(),
     statusCode: z.literal(401),
   })
@@ -764,9 +712,7 @@ export const Alerting_fieldmap_properties = z
     ignore_above: z.number().int(),
     index: z.boolean(),
     path: z.string(),
-    properties: z.record(
-      z.object({ type: z.string() }).partial().passthrough()
-    ),
+    properties: z.record(z.object({ type: z.string() }).partial().passthrough()),
     required: z.boolean(),
     scaling_factor: z.number().int(),
     type: z.string(),
@@ -778,29 +724,24 @@ export const params_property_apm_anomaly = z
     serviceName: z.string().optional(),
     transactionType: z.string().optional(),
     windowSize: z.number(),
-    windowUnit: z.enum(["m", "h", "d"]),
+    windowUnit: z.enum(['m', 'h', 'd']),
     environment: z.string(),
-    anomalySeverityType: z.enum(["critical", "major", "minor", "warning"]),
+    anomalySeverityType: z.enum(['critical', 'major', 'minor', 'warning']),
   })
   .passthrough();
 export const params_property_apm_error_count = z
   .object({
     serviceName: z.string().optional(),
     windowSize: z.number(),
-    windowUnit: z.enum(["m", "h", "d"]),
+    windowUnit: z.enum(['m', 'h', 'd']),
     environment: z.string(),
     threshold: z.number(),
     groupBy: z
       .array(
-        z.enum([
-          "service.name",
-          "service.environment",
-          "transaction.name",
-          "error.grouping_key",
-        ])
+        z.enum(['service.name', 'service.environment', 'transaction.name', 'error.grouping_key'])
       )
       .optional()
-      .default(["service.name", "service.environment"]),
+      .default(['service.name', 'service.environment']),
     errorGroupingKey: z.string().optional(),
   })
   .passthrough();
@@ -810,21 +751,16 @@ export const params_property_apm_transaction_duration = z
     transactionType: z.string().optional(),
     transactionName: z.string().optional(),
     windowSize: z.number(),
-    windowUnit: z.enum(["m", "h", "d"]),
+    windowUnit: z.enum(['m', 'h', 'd']),
     environment: z.string(),
     threshold: z.number(),
     groupBy: z
       .array(
-        z.enum([
-          "service.name",
-          "service.environment",
-          "transaction.type",
-          "transaction.name",
-        ])
+        z.enum(['service.name', 'service.environment', 'transaction.type', 'transaction.name'])
       )
       .optional()
-      .default(["service.name", "service.environment", "transaction.type"]),
-    aggregationType: z.enum(["avg", "95th", "99th"]),
+      .default(['service.name', 'service.environment', 'transaction.type']),
+    aggregationType: z.enum(['avg', '95th', '99th']),
   })
   .passthrough();
 export const params_property_apm_transaction_error_rate = z
@@ -833,54 +769,42 @@ export const params_property_apm_transaction_error_rate = z
     transactionType: z.string().optional(),
     transactionName: z.string().optional(),
     windowSize: z.number(),
-    windowUnit: z.enum(["m", "h", "d"]),
+    windowUnit: z.enum(['m', 'h', 'd']),
     environment: z.string(),
     threshold: z.number(),
     groupBy: z
       .array(
-        z.enum([
-          "service.name",
-          "service.environment",
-          "transaction.type",
-          "transaction.name",
-        ])
+        z.enum(['service.name', 'service.environment', 'transaction.type', 'transaction.name'])
       )
       .optional()
-      .default(["service.name", "service.environment", "transaction.type"]),
+      .default(['service.name', 'service.environment', 'transaction.type']),
   })
   .passthrough();
 export const aggfield = z.string();
-export const aggtype = z.enum(["avg", "count", "max", "min", "sum"]);
+export const aggtype = z.enum(['avg', 'count', 'max', 'min', 'sum']);
 export const excludehitsfrompreviousrun = z.boolean();
-export const groupby = z.enum(["all", "top"]);
+export const groupby = z.enum(['all', 'top']);
 export const size = z.number();
 export const termfield = z.union([z.string(), z.array(z.string())]);
 export const termsize = z.number();
 export const threshold = z.array(z.number().int());
-export const thresholdcomparator = z.enum([
-  ">",
-  ">=",
-  "<",
-  "<=",
-  "between",
-  "notBetween",
-]);
+export const thresholdcomparator = z.enum(['>', '>=', '<', '<=', 'between', 'notBetween']);
 export const timefield = z.string();
 export const timewindowsize = z.number();
-export const timewindowunit = z.enum(["s", "m", "h", "d"]);
+export const timewindowunit = z.enum(['s', 'm', 'h', 'd']);
 export const params_es_query_dsl_rule = z
   .object({
     aggField: aggfield.optional(),
-    aggType: aggtype.optional().default("count"),
+    aggType: aggtype.optional().default('count'),
     esQuery: z.string(),
     excludeHitsFromPreviousRun: excludehitsfrompreviousrun.optional(),
-    groupBy: groupby.optional().default("all"),
+    groupBy: groupby.optional().default('all'),
     index: z.union([z.array(z.string()), z.string()]),
-    searchType: z.literal("esQuery").optional().default("esQuery"),
+    searchType: z.literal('esQuery').optional().default('esQuery'),
     size: size.int().optional(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
@@ -890,15 +814,15 @@ export const params_es_query_dsl_rule = z
 export const params_es_query_esql_rule = z
   .object({
     aggField: aggfield.optional(),
-    aggType: aggtype.optional().default("count"),
+    aggType: aggtype.optional().default('count'),
     esqlQuery: z.object({ esql: z.string() }).passthrough(),
     excludeHitsFromPreviousRun: excludehitsfrompreviousrun.optional(),
-    groupBy: groupby.optional().default("all"),
-    searchType: z.literal("esqlQuery"),
+    groupBy: groupby.optional().default('all'),
+    searchType: z.literal('esqlQuery'),
     size: z.number().int(),
     termSize: termsize.int().optional(),
     threshold: z.array(z.number().int().gte(0).lte(0)),
-    thresholdComparator: z.literal(">"),
+    thresholdComparator: z.literal('>'),
     timeField: timefield.optional(),
     timeWindowSize: timewindowsize.int(),
     timeWindowUnit: timewindowunit,
@@ -931,26 +855,23 @@ export const filter = z
 export const params_es_query_kql_rule = z
   .object({
     aggField: aggfield.optional(),
-    aggType: aggtype.optional().default("count"),
+    aggType: aggtype.optional().default('count'),
     excludeHitsFromPreviousRun: excludehitsfrompreviousrun.optional(),
-    groupBy: groupby.optional().default("all"),
+    groupBy: groupby.optional().default('all'),
     searchConfiguration: z
       .object({
         filter: z.array(filter),
         index: z.union([z.string(), z.array(z.string())]),
-        query: z
-          .object({ language: z.string(), query: z.string() })
-          .partial()
-          .passthrough(),
+        query: z.object({ language: z.string(), query: z.string() }).partial().passthrough(),
       })
       .partial()
       .passthrough()
       .optional(),
-    searchType: z.literal("searchSource"),
+    searchType: z.literal('searchSource'),
     size: size.int(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield.optional(),
     timeWindowSize: timewindowsize.int(),
@@ -960,13 +881,13 @@ export const params_es_query_kql_rule = z
 export const params_index_threshold_rule = z
   .object({
     aggField: aggfield.optional(),
-    aggType: aggtype.optional().default("count"),
+    aggType: aggtype.optional().default('count'),
     filterKuery: z.string().optional(),
-    groupBy: groupby.optional().default("all"),
+    groupBy: groupby.optional().default('all'),
     index: z.array(z.string()),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
@@ -979,72 +900,57 @@ export const params_property_infra_inventory = z
       z
         .object({
           metric: z.enum([
-            "count",
-            "cpu",
-            "diskLatency",
-            "load",
-            "memory",
-            "memoryTotal",
-            "tx",
-            "rx",
-            "logRate",
-            "diskIOReadBytes",
-            "diskIOWriteBytes",
-            "s3TotalRequests",
-            "s3NumberOfObjects",
-            "s3BucketSize",
-            "s3DownloadBytes",
-            "s3UploadBytes",
-            "rdsConnections",
-            "rdsQueriesExecuted",
-            "rdsActiveTransactions",
-            "rdsLatency",
-            "sqsMessagesVisible",
-            "sqsMessagesDelayed",
-            "sqsMessagesSent",
-            "sqsMessagesEmpty",
-            "sqsOldestMessage",
-            "custom",
+            'count',
+            'cpu',
+            'diskLatency',
+            'load',
+            'memory',
+            'memoryTotal',
+            'tx',
+            'rx',
+            'logRate',
+            'diskIOReadBytes',
+            'diskIOWriteBytes',
+            's3TotalRequests',
+            's3NumberOfObjects',
+            's3BucketSize',
+            's3DownloadBytes',
+            's3UploadBytes',
+            'rdsConnections',
+            'rdsQueriesExecuted',
+            'rdsActiveTransactions',
+            'rdsLatency',
+            'sqsMessagesVisible',
+            'sqsMessagesDelayed',
+            'sqsMessagesSent',
+            'sqsMessagesEmpty',
+            'sqsOldestMessage',
+            'custom',
           ]),
           timeSize: z.number(),
-          timeUnit: z.enum(["s", "m", "h", "d"]),
+          timeUnit: z.enum(['s', 'm', 'h', 'd']),
           sourceId: z.string(),
           threshold: z.array(z.number()),
-          comparator: z.enum(["<", "<=", ">", ">=", "between", "outside"]),
+          comparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
           customMetric: z
             .object({
-              type: z.literal("custom"),
+              type: z.literal('custom'),
               field: z.string(),
-              aggregation: z.enum(["avg", "max", "min", "rate"]),
+              aggregation: z.enum(['avg', 'max', 'min', 'rate']),
               id: z.string(),
               label: z.string(),
             })
             .partial()
             .passthrough(),
           warningThreshold: z.array(z.number()),
-          warningComparator: z.enum([
-            "<",
-            "<=",
-            ">",
-            ">=",
-            "between",
-            "outside",
-          ]),
+          warningComparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
         })
         .partial()
         .passthrough()
     ),
     filterQuery: z.string(),
     filterQueryText: z.string(),
-    nodeType: z.enum([
-      "host",
-      "pod",
-      "container",
-      "awsEC2",
-      "awsS3",
-      "awsSQS",
-      "awsRDS",
-    ]),
+    nodeType: z.enum(['host', 'pod', 'container', 'awsEC2', 'awsS3', 'awsSQS', 'awsRDS']),
     sourceId: z.string(),
     alertOnNoData: z.boolean(),
   })
@@ -1059,16 +965,16 @@ export const params_property_log_threshold = z.union([
             .object({
               field: z.string(),
               comparator: z.enum([
-                "more than",
-                "more than or equals",
-                "less than",
-                "less than or equals",
-                "equals",
-                "does not equal",
-                "matches",
-                "does not match",
-                "matches phrase",
-                "does not match phrase",
+                'more than',
+                'more than or equals',
+                'less than',
+                'less than or equals',
+                'equals',
+                'does not equal',
+                'matches',
+                'does not match',
+                'matches phrase',
+                'does not match phrase',
               ]),
               value: z.union([z.number(), z.string()]),
             })
@@ -1079,27 +985,27 @@ export const params_property_log_threshold = z.union([
       count: z
         .object({
           comparator: z.enum([
-            "more than",
-            "more than or equals",
-            "less than",
-            "less than or equals",
-            "equals",
-            "does not equal",
-            "matches",
-            "does not match",
-            "matches phrase",
-            "does not match phrase",
+            'more than',
+            'more than or equals',
+            'less than',
+            'less than or equals',
+            'equals',
+            'does not equal',
+            'matches',
+            'does not match',
+            'matches phrase',
+            'does not match phrase',
           ]),
           value: z.number(),
         })
         .partial()
         .passthrough(),
       timeSize: z.number(),
-      timeUnit: z.enum(["s", "m", "h", "d"]),
+      timeUnit: z.enum(['s', 'm', 'h', 'd']),
       logView: z
         .object({
           logViewId: z.string(),
-          type: z.literal("log-view-reference"),
+          type: z.literal('log-view-reference'),
         })
         .partial()
         .passthrough(),
@@ -1116,16 +1022,16 @@ export const params_property_log_threshold = z.union([
                 .object({
                   field: z.string(),
                   comparator: z.enum([
-                    "more than",
-                    "more than or equals",
-                    "less than",
-                    "less than or equals",
-                    "equals",
-                    "does not equal",
-                    "matches",
-                    "does not match",
-                    "matches phrase",
-                    "does not match phrase",
+                    'more than',
+                    'more than or equals',
+                    'less than',
+                    'less than or equals',
+                    'equals',
+                    'does not equal',
+                    'matches',
+                    'does not match',
+                    'matches phrase',
+                    'does not match phrase',
                   ]),
                   value: z.union([z.number(), z.string()]),
                 })
@@ -1139,27 +1045,27 @@ export const params_property_log_threshold = z.union([
       count: z
         .object({
           comparator: z.enum([
-            "more than",
-            "more than or equals",
-            "less than",
-            "less than or equals",
-            "equals",
-            "does not equal",
-            "matches",
-            "does not match",
-            "matches phrase",
-            "does not match phrase",
+            'more than',
+            'more than or equals',
+            'less than',
+            'less than or equals',
+            'equals',
+            'does not equal',
+            'matches',
+            'does not match',
+            'matches phrase',
+            'does not match phrase',
           ]),
           value: z.number(),
         })
         .partial()
         .passthrough(),
       timeSize: z.number(),
-      timeUnit: z.enum(["s", "m", "h", "d"]),
+      timeUnit: z.enum(['s', 'm', 'h', 'd']),
       logView: z
         .object({
           logViewId: z.string(),
-          type: z.literal("log-view-reference"),
+          type: z.literal('log-view-reference'),
         })
         .partial()
         .passthrough(),
@@ -1174,30 +1080,23 @@ export const params_property_infra_metric_threshold = z
         z
           .object({
             threshold: z.array(z.number()),
-            comparator: z.enum(["<", "<=", ">", ">=", "between", "outside"]),
-            timeUnit: z.enum(["s", "m", "h", "d"]),
+            comparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
+            timeUnit: z.enum(['s', 'm', 'h', 'd']),
             timeSize: z.number(),
             warningThreshold: z.array(z.number()),
-            warningComparator: z.enum([
-              "<",
-              "<=",
-              ">",
-              ">=",
-              "between",
-              "outside",
-            ]),
+            warningComparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
             metric: z.string(),
             aggType: z.enum([
-              "avg",
-              "max",
-              "min",
-              "cardinality",
-              "rate",
-              "count",
-              "sum",
-              "p95",
-              "p99",
-              "custom",
+              'avg',
+              'max',
+              'min',
+              'cardinality',
+              'rate',
+              'count',
+              'sum',
+              'p95',
+              'p99',
+              'custom',
             ]),
           })
           .partial()
@@ -1205,50 +1104,30 @@ export const params_property_infra_metric_threshold = z
         z
           .object({
             threshold: z.array(z.number()),
-            comparator: z.enum(["<", "<=", ">", ">=", "between", "outside"]),
-            timeUnit: z.enum(["s", "m", "h", "d"]),
+            comparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
+            timeUnit: z.enum(['s', 'm', 'h', 'd']),
             timeSize: z.number(),
             warningThreshold: z.array(z.number()),
-            warningComparator: z.enum([
-              "<",
-              "<=",
-              ">",
-              ">=",
-              "between",
-              "outside",
-            ]),
-            aggType: z.literal("count"),
+            warningComparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
+            aggType: z.literal('count'),
           })
           .partial()
           .passthrough(),
         z
           .object({
             threshold: z.array(z.number()),
-            comparator: z.enum(["<", "<=", ">", ">=", "between", "outside"]),
-            timeUnit: z.enum(["s", "m", "h", "d"]),
+            comparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
+            timeUnit: z.enum(['s', 'm', 'h', 'd']),
             timeSize: z.number(),
             warningThreshold: z.array(z.number()),
-            warningComparator: z.enum([
-              "<",
-              "<=",
-              ">",
-              ">=",
-              "between",
-              "outside",
-            ]),
-            aggType: z.literal("custom"),
+            warningComparator: z.enum(['<', '<=', '>', '>=', 'between', 'outside']),
+            aggType: z.literal('custom'),
             customMetric: z.array(
               z.union([
                 z
                   .object({
                     name: z.string(),
-                    aggType: z.enum([
-                      "avg",
-                      "sum",
-                      "max",
-                      "min",
-                      "cardinality",
-                    ]),
+                    aggType: z.enum(['avg', 'sum', 'max', 'min', 'cardinality']),
                     field: z.string(),
                   })
                   .partial()
@@ -1256,7 +1135,7 @@ export const params_property_infra_metric_threshold = z
                 z
                   .object({
                     name: z.string(),
-                    aggType: z.literal("count"),
+                    aggType: z.literal('count'),
                     filter: z.string(),
                   })
                   .partial()
@@ -1283,14 +1162,8 @@ export const params_property_slo_burn_rate = z
     sloId: z.string(),
     burnRateThreshold: z.number(),
     maxBurnRateThreshold: z.number(),
-    longWindow: z
-      .object({ value: z.number(), unit: z.string() })
-      .partial()
-      .passthrough(),
-    shortWindow: z
-      .object({ value: z.number(), unit: z.string() })
-      .partial()
-      .passthrough(),
+    longWindow: z.object({ value: z.number(), unit: z.string() }).partial().passthrough(),
+    shortWindow: z.object({ value: z.number(), unit: z.string() }).partial().passthrough(),
   })
   .partial()
   .passthrough();
@@ -1318,10 +1191,10 @@ export const params_property_synthetics_monitor_status = z
         z.string(),
         z
           .object({
-            "monitor.type": z.array(z.string()),
-            "observer.geo.name": z.array(z.string()),
+            'monitor.type': z.array(z.string()),
+            'observer.geo.name': z.array(z.string()),
             tags: z.array(z.string()),
-            "url.port": z.array(z.string()),
+            'url.port': z.array(z.string()),
           })
           .partial()
           .passthrough(),
@@ -1334,11 +1207,7 @@ export const params_property_synthetics_monitor_status = z
     shouldCheckAvailability: z.boolean(),
     timerangeCount: z.number().optional(),
     timerangeUnit: z.string().optional(),
-    timerange: z
-      .object({ from: z.string(), to: z.string() })
-      .partial()
-      .passthrough()
-      .optional(),
+    timerange: z.object({ from: z.string(), to: z.string() }).partial().passthrough().optional(),
     version: z.number().optional(),
     isAutoGenerated: z.boolean().optional(),
   })
@@ -1353,9 +1222,7 @@ export const post_alerting_rule_id_Body = z.object({
               dsl: z.string().optional(),
               filters: z.array(
                 z.object({
-                  $state: z
-                    .object({ store: z.enum(["appState", "globalState"]) })
-                    .optional(),
+                  $state: z.object({ store: z.enum(['appState', 'globalState']) }).optional(),
                   meta: z.object({}).partial().passthrough(),
                   query: z.object({}).partial().passthrough().optional(),
                 })
@@ -1382,11 +1249,7 @@ export const post_alerting_rule_id_Body = z.object({
           .optional(),
         frequency: z
           .object({
-            notify_when: z.enum([
-              "onActionGroupChange",
-              "onActiveAlert",
-              "onThrottleInterval",
-            ]),
+            notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
             summary: z.boolean(),
             throttle: z.string().nullable(),
           })
@@ -1417,9 +1280,7 @@ export const post_alerting_rule_id_Body = z.object({
     })
     .nullish(),
   name: z.string(),
-  notify_when: z
-    .enum(["onActionGroupChange", "onActiveAlert", "onThrottleInterval"])
-    .nullish(),
+  notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']).nullish(),
   rule_type_id: z.string(),
   schedule: z.object({ interval: z.string() }),
   tags: z.array(z.string()).optional().default([]),
@@ -1454,9 +1315,7 @@ export const put_alerting_rule_id_Body = z.object({
               dsl: z.string().optional(),
               filters: z.array(
                 z.object({
-                  $state: z
-                    .object({ store: z.enum(["appState", "globalState"]) })
-                    .optional(),
+                  $state: z.object({ store: z.enum(['appState', 'globalState']) }).optional(),
                   meta: z.object({}).partial().passthrough(),
                   query: z.object({}).partial().passthrough().optional(),
                 })
@@ -1483,11 +1342,7 @@ export const put_alerting_rule_id_Body = z.object({
           .optional(),
         frequency: z
           .object({
-            notify_when: z.enum([
-              "onActionGroupChange",
-              "onActiveAlert",
-              "onThrottleInterval",
-            ]),
+            notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
             summary: z.boolean(),
             throttle: z.string().nullable(),
           })
@@ -1516,9 +1371,7 @@ export const put_alerting_rule_id_Body = z.object({
     })
     .nullish(),
   name: z.string(),
-  notify_when: z
-    .enum(["onActionGroupChange", "onActiveAlert", "onThrottleInterval"])
-    .nullish(),
+  notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']).nullish(),
   params: z.object({}).partial().passthrough().optional().default({}),
   schedule: z.object({ interval: z.string() }),
   tags: z.array(z.string()).optional().default([]),
@@ -1551,7 +1404,7 @@ export const has_reference = z.object({ id: z.string(), type: z.string() }).null
 export const APM_UI_agent_keys_object = z
   .object({
     name: z.string(),
-    privileges: z.array(z.enum(["event:write", "config_agent:read"])),
+    privileges: z.array(z.enum(['event:write', 'config_agent:read'])),
   })
   .passthrough();
 export const APM_UI_agent_keys_response = z
@@ -1590,11 +1443,9 @@ export const APM_UI_404_response = z
   .passthrough();
 export const APM_UI_create_annotation_object = z
   .object({
-    "@timestamp": z.string(),
+    '@timestamp': z.string(),
     message: z.string().optional(),
-    service: z
-      .object({ environment: z.string().optional(), version: z.string() })
-      .passthrough(),
+    service: z.object({ environment: z.string().optional(), version: z.string() }).passthrough(),
     tags: z.array(z.string()).optional(),
   })
   .passthrough();
@@ -1604,11 +1455,8 @@ export const APM_UI_create_annotation_response = z
     _index: z.string(),
     _source: z
       .object({
-        "@timestamp": z.string(),
-        annotation: z
-          .object({ title: z.string(), type: z.string() })
-          .partial()
-          .passthrough(),
+        '@timestamp': z.string(),
+        annotation: z.object({ title: z.string(), type: z.string() }).partial().passthrough(),
         event: z.object({ created: z.string() }).partial().passthrough(),
         message: z.string(),
         service: z
@@ -1631,10 +1479,10 @@ export const APM_UI_annotation_search_response = z
     annotations: z.array(
       z
         .object({
-          "@timestamp": z.number(),
+          '@timestamp': z.number(),
           id: z.string(),
           text: z.string(),
-          type: z.literal("version"),
+          type: z.literal('version'),
         })
         .partial()
         .passthrough()
@@ -1656,7 +1504,7 @@ export const APM_UI_delete_agent_configurations_response = z
 export const APM_UI_settings_object = z.record(z.string());
 export const APM_UI_agent_configuration_object = z
   .object({
-    "@timestamp": z.number(),
+    '@timestamp': z.number(),
     agent_name: z.string().optional(),
     applied_by_agent: z.boolean().optional(),
     etag: z.string(),
@@ -1774,10 +1622,10 @@ export const APM_UI_upload_source_maps_response = z
   .passthrough()
   .and(APM_UI_base_source_map_object);
 export const Security_Entity_Analytics_API_IdField = z.enum([
-  "host.name",
-  "user.name",
-  "service.name",
-  "entity.id",
+  'host.name',
+  'user.name',
+  'service.name',
+  'entity.id',
 ]);
 export const Security_Entity_Analytics_API_AssetCriticalityRecordIdParts = z
   .object({
@@ -1786,10 +1634,10 @@ export const Security_Entity_Analytics_API_AssetCriticalityRecordIdParts = z
   })
   .passthrough();
 export const Security_Entity_Analytics_API_AssetCriticalityLevel = z.enum([
-  "low_impact",
-  "medium_impact",
-  "high_impact",
-  "extreme_impact",
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
 ]);
 export const Security_Entity_Analytics_API_CreateAssetCriticalityRecord =
   Security_Entity_Analytics_API_AssetCriticalityRecordIdParts.and(
@@ -1803,8 +1651,7 @@ export const Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts = z
   .object({
     asset: z
       .object({
-        criticality:
-          Security_Entity_Analytics_API_AssetCriticalityLevel.optional(),
+        criticality: Security_Entity_Analytics_API_AssetCriticalityLevel.optional(),
       })
       .passthrough(),
     entity: z
@@ -1860,26 +1707,21 @@ export const Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts = z
 export const Security_Entity_Analytics_API_AssetCriticalityRecord =
   Security_Entity_Analytics_API_CreateAssetCriticalityRecord.and(
     Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts
-  ).and(
-    z
-      .object({ "@timestamp": z.string().datetime({ offset: true }) })
-      .passthrough()
-  );
+  ).and(z.object({ '@timestamp': z.string().datetime({ offset: true }) }).passthrough());
 export const CreateAssetCriticalityRecord_Body =
   Security_Entity_Analytics_API_CreateAssetCriticalityRecord.and(
     z
-      .object({ refresh: z.literal("wait_for") })
+      .object({ refresh: z.literal('wait_for') })
       .partial()
       .passthrough()
   );
-export const Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload =
-  z.enum([
-    "low_impact",
-    "medium_impact",
-    "high_impact",
-    "extreme_impact",
-    "unassigned",
-  ]);
+export const Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload = z.enum([
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
+  'unassigned',
+]);
 export const BulkUpsertAssetCriticalityRecords_Body = z
   .object({
     records: z
@@ -1887,8 +1729,7 @@ export const BulkUpsertAssetCriticalityRecords_Body = z
         Security_Entity_Analytics_API_AssetCriticalityRecordIdParts.and(
           z
             .object({
-              criticality_level:
-                Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload,
+              criticality_level: Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload,
             })
             .passthrough()
         )
@@ -1922,7 +1763,7 @@ export const Cases_connector_properties_none = z
     fields: z.string().nullable(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".none"),
+    type: z.literal('.none'),
   })
   .passthrough();
 export const Cases_connector_properties_cases_webhook = z
@@ -1930,7 +1771,7 @@ export const Cases_connector_properties_cases_webhook = z
     fields: z.string().nullable(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".cases-webhook"),
+    type: z.literal('.cases-webhook'),
   })
   .passthrough();
 export const Cases_connector_properties_jira = z
@@ -1944,7 +1785,7 @@ export const Cases_connector_properties_jira = z
       .passthrough(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".jira"),
+    type: z.literal('.jira'),
   })
   .passthrough();
 export const Cases_connector_properties_resilient = z
@@ -1955,7 +1796,7 @@ export const Cases_connector_properties_resilient = z
       .nullable(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".resilient"),
+    type: z.literal('.resilient'),
   })
   .passthrough();
 export const Cases_connector_properties_servicenow = z
@@ -1971,7 +1812,7 @@ export const Cases_connector_properties_servicenow = z
       .passthrough(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".servicenow"),
+    type: z.literal('.servicenow'),
   })
   .passthrough();
 export const Cases_connector_properties_servicenow_sir = z
@@ -1989,7 +1830,7 @@ export const Cases_connector_properties_servicenow_sir = z
       .passthrough(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".servicenow-sir"),
+    type: z.literal('.servicenow-sir'),
   })
   .passthrough();
 export const Cases_connector_properties_swimlane = z
@@ -1997,13 +1838,13 @@ export const Cases_connector_properties_swimlane = z
     fields: z.object({ caseId: z.string().nullable() }).passthrough(),
     id: z.string(),
     name: z.string(),
-    type: z.literal(".swimlane"),
+    type: z.literal('.swimlane'),
   })
   .passthrough();
 export const Cases_case_description = z.string();
 export const Cases_settings = z.object({ syncAlerts: z.boolean() }).passthrough();
-export const Cases_case_severity = z.enum(["critical", "high", "low", "medium"]);
-export const Cases_case_status = z.enum(["closed", "in-progress", "open"]);
+export const Cases_case_severity = z.enum(['critical', 'high', 'low', 'medium']);
+export const Cases_case_status = z.enum(['closed', 'in-progress', 'open']);
 export const Cases_case_tags = z.array(z.string().max(256));
 export const Cases_case_title = z.string();
 export const Cases_update_case_request = z
@@ -2030,7 +1871,7 @@ export const Cases_update_case_request = z
                 z
                   .object({
                     key: z.string(),
-                    type: z.enum(["text", "toggle"]),
+                    type: z.enum(['text', 'toggle']),
                     value: z.union([z.string(), z.boolean()]),
                   })
                   .passthrough()
@@ -2040,7 +1881,7 @@ export const Cases_update_case_request = z
             description: Cases_case_description.max(30000).optional(),
             id: z.string().max(30000),
             settings: Cases_settings.optional(),
-            severity: Cases_case_severity.optional().default("low"),
+            severity: Cases_case_severity.optional().default('low'),
             status: Cases_case_status.optional(),
             tags: Cases_case_tags.max(200).optional(),
             title: Cases_case_title.max(160).optional(),
@@ -2060,7 +1901,7 @@ export const Cases_case_response_closed_by_properties = z
     username: z.string().nullable(),
   })
   .passthrough();
-export const Cases_owner = z.enum(["cases", "observability", "securitySolution"]);
+export const Cases_owner = z.enum(['cases', 'observability', 'securitySolution']);
 export const Cases_alert_comment_response_properties = z
   .object({
     alertId: z.array(z.string()).optional(),
@@ -2087,12 +1928,8 @@ export const Cases_alert_comment_response_properties = z
       })
       .passthrough()
       .nullish(),
-    rule: z
-      .object({ id: z.string(), name: z.string() })
-      .partial()
-      .passthrough()
-      .optional(),
-    type: z.literal("alert"),
+    rule: z.object({ id: z.string(), name: z.string() }).partial().passthrough().optional(),
+    type: z.literal('alert'),
     updated_at: z.string().datetime({ offset: true }).nullish(),
     updated_by: z
       .object({
@@ -2139,7 +1976,7 @@ export const Cases_user_comment_response_properties = z
     owner: Cases_owner.optional(),
     pushed_at: z.string().datetime({ offset: true }).nullish(),
     pushed_by: Cases_case_response_pushed_by_properties.nullish(),
-    type: z.literal("user"),
+    type: z.literal('user'),
     updated_at: z.string().datetime({ offset: true }).nullish(),
     updated_by: Cases_case_response_updated_by_properties.nullish(),
     version: z.string().optional(),
@@ -2174,13 +2011,13 @@ export const Cases_case_response_properties = z
     closed_by: Cases_case_response_closed_by_properties.nullable(),
     comments: z
       .array(
-        z.discriminatedUnion("type", [
+        z.discriminatedUnion('type', [
           Cases_alert_comment_response_properties,
           Cases_user_comment_response_properties,
         ])
       )
       .max(10000),
-    connector: z.discriminatedUnion("type", [
+    connector: z.discriminatedUnion('type', [
       Cases_connector_properties_none,
       Cases_connector_properties_cases_webhook,
       Cases_connector_properties_jira,
@@ -2196,7 +2033,7 @@ export const Cases_case_response_properties = z
         z
           .object({
             key: z.string(),
-            type: z.enum(["text", "toggle"]),
+            type: z.enum(['text', 'toggle']),
             value: z.union([z.string(), z.boolean()]),
           })
           .partial()
@@ -2209,7 +2046,7 @@ export const Cases_case_response_properties = z
     id: z.string(),
     owner: Cases_owner,
     settings: Cases_settings,
-    severity: Cases_case_severity.default("low"),
+    severity: Cases_case_severity.default('low'),
     status: Cases_case_status,
     tags: z.array(z.string()),
     title: z.string(),
@@ -2238,7 +2075,7 @@ export const Cases_create_case_request = z
         z
           .object({
             key: z.string(),
-            type: z.enum(["text", "toggle"]),
+            type: z.enum(['text', 'toggle']),
             value: z.union([z.string(), z.boolean()]),
           })
           .passthrough()
@@ -2248,7 +2085,7 @@ export const Cases_create_case_request = z
     description: Cases_case_description.max(30000),
     owner: Cases_owner,
     settings: Cases_settings,
-    severity: Cases_case_severity.optional().default("low"),
+    severity: Cases_case_severity.optional().default('low'),
     tags: Cases_case_tags.max(200),
     title: Cases_case_title.max(160),
   })
@@ -2257,12 +2094,10 @@ export const Cases_string = z.string();
 export const Cases_string_array = z.array(Cases_string);
 export const assignees = z.union([Cases_string, Cases_string_array]).optional();
 export const Cases_case_categories = z.array(Cases_case_category);
-export const category = z
-  .union([Cases_case_category, Cases_case_categories])
-  .optional();
+export const category = z.union([Cases_case_category, Cases_case_categories]).optional();
 export const Cases_owners = z.array(Cases_owner);
 export const owner = z.union([Cases_owner, Cases_owners]).optional();
-export const Cases_searchFieldsType = z.enum(["description", "title"]);
+export const Cases_searchFieldsType = z.enum(['description', 'title']);
 export const Cases_searchFieldsTypeArray = z.array(Cases_searchFieldsType);
 export const searchFields = z
   .union([Cases_searchFieldsType, Cases_searchFieldsTypeArray])
@@ -2277,10 +2112,7 @@ export const Cases_alert_response_properties = z
   .passthrough();
 export const Cases_alert_identifiers = z.union([z.string(), z.array(z.string())]);
 export const Cases_alert_indices = z.union([z.string(), z.array(z.string())]);
-export const Cases_rule = z
-  .object({ id: z.string(), name: z.string() })
-  .partial()
-  .passthrough();
+export const Cases_rule = z.object({ id: z.string(), name: z.string() }).partial().passthrough();
 export const Cases_update_alert_comment_request_properties = z
   .object({
     alertId: Cases_alert_identifiers,
@@ -2288,7 +2120,7 @@ export const Cases_update_alert_comment_request_properties = z
     index: Cases_alert_indices,
     owner: Cases_owner,
     rule: Cases_rule,
-    type: z.literal("alert"),
+    type: z.literal('alert'),
     version: z.string(),
   })
   .passthrough();
@@ -2297,11 +2129,11 @@ export const Cases_update_user_comment_request_properties = z
     comment: z.string().max(30000),
     id: z.string(),
     owner: Cases_owner,
-    type: z.literal("user"),
+    type: z.literal('user'),
     version: z.string(),
   })
   .passthrough();
-export const Cases_update_case_comment_request = z.discriminatedUnion("type", [
+export const Cases_update_case_comment_request = z.discriminatedUnion('type', [
   Cases_update_alert_comment_request_properties,
   Cases_update_user_comment_request_properties,
 ]);
@@ -2311,30 +2143,24 @@ export const Cases_add_alert_comment_request_properties = z
     index: Cases_alert_indices,
     owner: Cases_owner,
     rule: Cases_rule,
-    type: z.literal("alert"),
+    type: z.literal('alert'),
   })
   .passthrough();
 export const Cases_add_user_comment_request_properties = z
   .object({
     comment: z.string().max(30000),
     owner: Cases_owner,
-    type: z.literal("user"),
+    type: z.literal('user'),
   })
   .passthrough();
-export const Cases_add_case_comment_request = z.discriminatedUnion("type", [
+export const Cases_add_case_comment_request = z.discriminatedUnion('type', [
   Cases_add_alert_comment_request_properties,
   Cases_add_user_comment_request_properties,
 ]);
 export const Cases_add_case_file_request = z
   .object({ file: z.any(), filename: z.string().optional() })
   .passthrough();
-export const Cases_actions = z.enum([
-  "add",
-  "create",
-  "delete",
-  "push_to_service",
-  "update",
-]);
+export const Cases_actions = z.enum(['add', 'create', 'delete', 'push_to_service', 'update']);
 export const Cases_payload_alert_comment = z
   .object({
     comment: z
@@ -2342,11 +2168,8 @@ export const Cases_payload_alert_comment = z
         alertId: z.union([z.string(), z.array(z.string())]),
         index: z.union([z.string(), z.array(z.string())]),
         owner: Cases_owner,
-        rule: z
-          .object({ id: z.string(), name: z.string() })
-          .partial()
-          .passthrough(),
-        type: z.literal("alert"),
+        rule: z.object({ id: z.string(), name: z.string() }).partial().passthrough(),
+        type: z.literal('alert'),
       })
       .partial()
       .passthrough(),
@@ -2358,13 +2181,13 @@ export const Cases_payload_assignees = z
   .partial()
   .passthrough();
 export const Cases_connector_types = z.enum([
-  ".cases-webhook",
-  ".jira",
-  ".none",
-  ".resilient",
-  ".servicenow",
-  ".servicenow-sir",
-  ".swimlane",
+  '.cases-webhook',
+  '.jira',
+  '.none',
+  '.resilient',
+  '.servicenow',
+  '.servicenow-sir',
+  '.swimlane',
 ]);
 export const Cases_payload_connector = z
   .object({
@@ -2435,7 +2258,7 @@ export const Cases_payload_create_case = z
     description: z.string(),
     owner: Cases_owner,
     settings: Cases_settings,
-    severity: Cases_case_severity.default("low"),
+    severity: Cases_case_severity.default('low'),
     status: Cases_case_status,
     tags: z.array(z.string()),
     title: z.string(),
@@ -2456,28 +2279,22 @@ export const Cases_payload_settings = z
   .partial()
   .passthrough();
 export const Cases_payload_severity = z
-  .object({ severity: Cases_case_severity.default("low") })
+  .object({ severity: Cases_case_severity.default('low') })
   .partial()
   .passthrough();
-export const Cases_payload_status = z
-  .object({ status: Cases_case_status })
-  .partial()
-  .passthrough();
+export const Cases_payload_status = z.object({ status: Cases_case_status }).partial().passthrough();
 export const Cases_payload_tags = z
   .object({ tags: z.array(z.string()) })
   .partial()
   .passthrough();
-export const Cases_payload_title = z
-  .object({ title: z.string() })
-  .partial()
-  .passthrough();
+export const Cases_payload_title = z.object({ title: z.string() }).partial().passthrough();
 export const Cases_payload_user_comment = z
   .object({
     comment: z
       .object({
         comment: z.string(),
         owner: Cases_owner,
-        type: z.literal("user"),
+        type: z.literal('user'),
       })
       .partial()
       .passthrough(),
@@ -2515,22 +2332,22 @@ export const Cases_user_actions_find_response_properties = z
       Cases_payload_user_comment,
     ]),
     type: z.enum([
-      "assignees",
-      "create_case",
-      "comment",
-      "connector",
-      "description",
-      "pushed",
-      "tags",
-      "title",
-      "status",
-      "settings",
-      "severity",
+      'assignees',
+      'create_case',
+      'comment',
+      'connector',
+      'description',
+      'pushed',
+      'tags',
+      'title',
+      'status',
+      'settings',
+      'severity',
     ]),
     version: z.string(),
   })
   .passthrough();
-export const Cases_closure_types = z.enum(["close-by-pushing", "close-by-user"]);
+export const Cases_closure_types = z.enum(['close-by-pushing', 'close-by-user']);
 export const Cases_template_tags = z.array(z.string().max(256));
 export const Cases_templates = z.array(
   z
@@ -2552,7 +2369,7 @@ export const Cases_templates = z.array(
             z
               .object({
                 key: z.string(),
-                type: z.enum(["text", "toggle"]),
+                type: z.enum(['text', 'toggle']),
                 value: z.union([z.string(), z.boolean()]),
               })
               .partial()
@@ -2560,7 +2377,7 @@ export const Cases_templates = z.array(
           ),
           description: Cases_case_description.max(30000),
           settings: Cases_settings,
-          severity: Cases_case_severity.default("low"),
+          severity: Cases_case_severity.default('low'),
           tags: Cases_case_tags.max(200),
           title: Cases_case_title.max(160),
         })
@@ -2592,7 +2409,7 @@ export const Cases_set_case_configuration_request = z
             defaultValue: z.union([z.string(), z.boolean()]).optional(),
             key: z.string().min(1).max(36),
             label: z.string().min(1).max(50),
-            type: z.enum(["text", "toggle"]),
+            type: z.enum(['text', 'toggle']),
             required: z.boolean(),
           })
           .passthrough()
@@ -2622,7 +2439,7 @@ export const Cases_update_case_configuration_request = z
             defaultValue: z.union([z.string(), z.boolean()]).optional(),
             key: z.string().min(1).max(36),
             label: z.string().min(1).max(50),
-            type: z.enum(["text", "toggle"]),
+            type: z.enum(['text', 'toggle']),
             required: z.boolean(),
           })
           .passthrough()
@@ -2645,16 +2462,14 @@ export const Data_views_fieldattrs = z
   .partial()
   .passthrough();
 export const Data_views_fieldformats = z.object({}).partial().passthrough();
-export const Data_views_namespaces = z.array(z.string().default("default"));
+export const Data_views_namespaces = z.array(z.string().default('default'));
 export const Data_views_runtimefieldmap = z
   .object({
     script: z.object({ source: z.string() }).partial().passthrough(),
     type: z.string(),
   })
   .passthrough();
-export const Data_views_sourcefilters = z.array(
-  z.object({ value: z.string() }).passthrough()
-);
+export const Data_views_sourcefilters = z.array(z.object({ value: z.string() }).passthrough());
 export const Data_views_timefieldname = z.string();
 export const Data_views_title = z.string();
 export const Data_views_type = z.string();
@@ -2719,7 +2534,7 @@ export const Data_views_data_view_response_object = z
   .passthrough();
 export const Data_views_404_response = z
   .object({
-    error: z.literal("Not Found"),
+    error: z.literal('Not Found'),
     message: z.string(),
     statusCode: z.literal(404),
   })
@@ -2777,17 +2592,14 @@ export const Security_Detections_API_PlatformErrorResponse = z
 export const Security_Detections_API_SiemErrorResponse = z
   .object({ message: z.string(), status_code: z.number().int() })
   .passthrough();
-export const Security_Detections_API_RuleActionAlertsFilter = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Detections_API_RuleActionAlertsFilter = z.object({}).partial().passthrough();
 export const Security_Detections_API_RuleActionNotifyWhen = z.enum([
-  "onActiveAlert",
-  "onThrottleInterval",
-  "onActionGroupChange",
+  'onActiveAlert',
+  'onThrottleInterval',
+  'onActionGroupChange',
 ]);
 export const Security_Detections_API_RuleActionThrottle = z.union([
-  z.enum(["no_actions", "rule"]),
+  z.enum(['no_actions', 'rule']),
   z.string(),
 ]);
 export const Security_Detections_API_RuleActionFrequency = z
@@ -2799,10 +2611,7 @@ export const Security_Detections_API_RuleActionFrequency = z
   .passthrough();
 export const Security_Detections_API_RuleActionGroup = z.string();
 export const Security_Detections_API_RuleActionId = z.string();
-export const Security_Detections_API_RuleActionParams = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Detections_API_RuleActionParams = z.object({}).partial().passthrough();
 export const Security_Detections_API_NonEmptyString = z.string();
 export const Security_Detections_API_RuleAction = z
   .object({
@@ -2816,8 +2625,8 @@ export const Security_Detections_API_RuleAction = z
   })
   .passthrough();
 export const Security_Detections_API_SavedObjectResolveAliasPurpose = z.enum([
-  "savedObjectConversion",
-  "savedObjectImport",
+  'savedObjectConversion',
+  'savedObjectImport',
 ]);
 export const Security_Detections_API_SavedObjectResolveAliasTargetId = z.string();
 export const Security_Detections_API_RuleAuthorArray = z.array(z.string());
@@ -2825,20 +2634,20 @@ export const Security_Detections_API_BuildingBlockType = z.string();
 export const Security_Detections_API_RuleDescription = z.string();
 export const Security_Detections_API_IsRuleEnabled = z.boolean();
 export const Security_Detections_API_ExceptionListType = z.enum([
-  "detection",
-  "rule_default",
-  "endpoint",
-  "endpoint_trusted_apps",
-  "endpoint_trusted_devices",
-  "endpoint_events",
-  "endpoint_host_isolation_exceptions",
-  "endpoint_blocklists",
+  'detection',
+  'rule_default',
+  'endpoint',
+  'endpoint_trusted_apps',
+  'endpoint_trusted_devices',
+  'endpoint_events',
+  'endpoint_host_isolation_exceptions',
+  'endpoint_blocklists',
 ]);
 export const Security_Detections_API_RuleExceptionList = z
   .object({
     id: z.string().min(1),
     list_id: z.string().min(1),
-    namespace_type: z.enum(["agnostic", "single"]),
+    namespace_type: z.enum(['agnostic', 'single']),
     type: Security_Detections_API_ExceptionListType,
   })
   .passthrough();
@@ -2852,17 +2661,14 @@ export const Security_Detections_API_InvestigationFields = z
   .passthrough();
 export const Security_Detections_API_RuleLicense = z.string();
 export const Security_Detections_API_MaxSignals = z.number();
-export const Security_Detections_API_RuleMetadata = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Detections_API_RuleMetadata = z.object({}).partial().passthrough();
 export const Security_Detections_API_RuleName = z.string();
 export const Security_Detections_API_AlertsIndexNamespace = z.string();
 export const Security_Detections_API_InvestigationGuide = z.string();
 export const Security_Detections_API_SavedObjectResolveOutcome = z.enum([
-  "exactMatch",
-  "aliasMatch",
-  "conflict",
+  'exactMatch',
+  'aliasMatch',
+  'conflict',
 ]);
 export const Security_Detections_API_AlertsIndex = z.string();
 export const Security_Detections_API_RuleReferenceArray = z.array(z.string());
@@ -2912,16 +2718,16 @@ export const Security_Detections_API_OsqueryParams = z
   .passthrough();
 export const Security_Detections_API_OsqueryResponseAction = z
   .object({
-    action_type_id: z.literal(".osquery"),
+    action_type_id: z.literal('.osquery'),
     params: Security_Detections_API_OsqueryParams,
   })
   .passthrough();
 export const Security_Detections_API_DefaultParams = z
-  .object({ command: z.literal("isolate"), comment: z.string().optional() })
+  .object({ command: z.literal('isolate'), comment: z.string().optional() })
   .passthrough();
 export const Security_Detections_API_ProcessesParams = z
   .object({
-    command: z.enum(["kill-process", "suspend-process"]),
+    command: z.enum(['kill-process', 'suspend-process']),
     comment: z.string().optional(),
     config: z
       .object({
@@ -2933,7 +2739,7 @@ export const Security_Detections_API_ProcessesParams = z
   .passthrough();
 export const Security_Detections_API_EndpointResponseAction = z
   .object({
-    action_type_id: z.literal(".endpoint"),
+    action_type_id: z.literal('.endpoint'),
     params: z.union([
       Security_Detections_API_DefaultParams,
       Security_Detections_API_ProcessesParams,
@@ -2949,28 +2755,20 @@ export const Security_Detections_API_RiskScoreMapping = z.array(
   z
     .object({
       field: z.string(),
-      operator: z.literal("equals"),
-      risk_score: Security_Detections_API_RiskScore.int()
-        .gte(0)
-        .lte(100)
-        .optional(),
+      operator: z.literal('equals'),
+      risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100).optional(),
       value: z.string(),
     })
     .passthrough()
 );
 export const Security_Detections_API_RuleNameOverride = z.string();
 export const Security_Detections_API_SetupGuide = z.string();
-export const Security_Detections_API_Severity = z.enum([
-  "low",
-  "medium",
-  "high",
-  "critical",
-]);
+export const Security_Detections_API_Severity = z.enum(['low', 'medium', 'high', 'critical']);
 export const Security_Detections_API_SeverityMapping = z.array(
   z
     .object({
       field: z.string(),
-      operator: z.literal("equals"),
+      operator: z.literal('equals'),
       severity: Security_Detections_API_Severity,
       value: z.string(),
     })
@@ -2988,9 +2786,7 @@ export const Security_Detections_API_ThreatTechnique = z
     id: z.string(),
     name: z.string(),
     reference: z.string(),
-    subtechnique: z
-      .array(Security_Detections_API_ThreatSubtechnique)
-      .optional(),
+    subtechnique: z.array(Security_Detections_API_ThreatSubtechnique).optional(),
   })
   .passthrough();
 export const Security_Detections_API_Threat = z
@@ -3000,9 +2796,7 @@ export const Security_Detections_API_Threat = z
     technique: z.array(Security_Detections_API_ThreatTechnique).optional(),
   })
   .passthrough();
-export const Security_Detections_API_ThreatArray = z.array(
-  Security_Detections_API_Threat
-);
+export const Security_Detections_API_ThreatArray = z.array(Security_Detections_API_Threat);
 export const Security_Detections_API_TimelineTemplateId = z.string();
 export const Security_Detections_API_TimelineTemplateTitle = z.string();
 export const Security_Detections_API_TimestampOverride = z.string();
@@ -3021,11 +2815,11 @@ export const Security_Detections_API_RuleExecutionMetrics = z
   .partial()
   .passthrough();
 export const Security_Detections_API_RuleExecutionStatus = z.enum([
-  "going to run",
-  "running",
-  "partial failure",
-  "failed",
-  "succeeded",
+  'going to run',
+  'running',
+  'partial failure',
+  'failed',
+  'succeeded',
 ]);
 export const Security_Detections_API_RuleExecutionStatusOrder = z.number();
 export const Security_Detections_API_RuleExecutionSummary = z
@@ -3060,13 +2854,13 @@ export const Security_Detections_API_IsExternalRuleCustomized = z.boolean();
 export const Security_Detections_API_ExternalRuleSource = z
   .object({
     is_customized: Security_Detections_API_IsExternalRuleCustomized,
-    type: z.literal("external"),
+    type: z.literal('external'),
   })
   .passthrough();
 export const Security_Detections_API_InternalRuleSource = z
-  .object({ type: z.literal("internal") })
+  .object({ type: z.literal('internal') })
   .passthrough();
-export const Security_Detections_API_RuleSource = z.discriminatedUnion("type", [
+export const Security_Detections_API_RuleSource = z.discriminatedUnion('type', [
   Security_Detections_API_ExternalRuleSource,
   Security_Detections_API_InternalRuleSource,
 ]);
@@ -3085,20 +2879,16 @@ export const Security_Detections_API_ResponseFields = z
     updated_by: z.string(),
   })
   .passthrough();
-export const Security_Detections_API_EqlQueryLanguage = z.literal("eql");
+export const Security_Detections_API_EqlQueryLanguage = z.literal('eql');
 export const Security_Detections_API_RuleQuery = z.string();
 export const Security_Detections_API_EqlRequiredFields = z
   .object({
     language: Security_Detections_API_EqlQueryLanguage,
     query: Security_Detections_API_RuleQuery,
-    type: z.literal("eql"),
+    type: z.literal('eql'),
   })
   .passthrough();
-export const Security_Detections_API_AlertSuppressionDurationUnit = z.enum([
-  "s",
-  "m",
-  "h",
-]);
+export const Security_Detections_API_AlertSuppressionDurationUnit = z.enum(['s', 'm', 'h']);
 export const Security_Detections_API_AlertSuppressionDuration = z
   .object({
     unit: Security_Detections_API_AlertSuppressionDurationUnit,
@@ -3107,8 +2897,8 @@ export const Security_Detections_API_AlertSuppressionDuration = z
   .passthrough();
 export const Security_Detections_API_AlertSuppressionGroupBy = z.array(z.string());
 export const Security_Detections_API_AlertSuppressionMissingFieldsStrategy = z.enum([
-  "doNotSuppress",
-  "suppress",
+  'doNotSuppress',
+  'suppress',
 ]);
 export const Security_Detections_API_AlertSuppression = z
   .object({
@@ -3137,16 +2927,12 @@ export const Security_Detections_API_EqlOptionalFields = z
   .partial()
   .passthrough();
 export const Security_Detections_API_EqlRuleResponseFields =
-  Security_Detections_API_EqlRequiredFields.and(
-    Security_Detections_API_EqlOptionalFields
-  );
+  Security_Detections_API_EqlRequiredFields.and(Security_Detections_API_EqlOptionalFields);
 export const Security_Detections_API_EqlRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3155,8 +2941,7 @@ export const Security_Detections_API_EqlRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3168,9 +2953,7 @@ export const Security_Detections_API_EqlRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3192,7 +2975,7 @@ export const Security_Detections_API_EqlRule = z
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_EqlRuleResponseFields);
 export const Security_Detections_API_QueryRuleRequiredFields = z
-  .object({ type: z.literal("query") })
+  .object({ type: z.literal('query') })
   .passthrough();
 export const Security_Detections_API_SavedQueryId = z.string();
 export const Security_Detections_API_QueryRuleOptionalFields = z
@@ -3205,7 +2988,7 @@ export const Security_Detections_API_QueryRuleOptionalFields = z
   })
   .partial()
   .passthrough();
-export const Security_Detections_API_KqlQueryLanguage = z.enum(["kuery", "lucene"]);
+export const Security_Detections_API_KqlQueryLanguage = z.enum(['kuery', 'lucene']);
 export const Security_Detections_API_QueryRuleResponseFields =
   Security_Detections_API_QueryRuleRequiredFields.and(
     Security_Detections_API_QueryRuleOptionalFields
@@ -3220,10 +3003,8 @@ export const Security_Detections_API_QueryRuleResponseFields =
 export const Security_Detections_API_QueryRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3232,8 +3013,7 @@ export const Security_Detections_API_QueryRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3245,9 +3025,7 @@ export const Security_Detections_API_QueryRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3271,7 +3049,7 @@ export const Security_Detections_API_QueryRule = z
 export const Security_Detections_API_SavedQueryRuleRequiredFields = z
   .object({
     saved_id: Security_Detections_API_SavedQueryId,
-    type: z.literal("saved_query"),
+    type: z.literal('saved_query'),
   })
   .passthrough();
 export const Security_Detections_API_SavedQueryRuleOptionalFields = z
@@ -3287,18 +3065,12 @@ export const Security_Detections_API_SavedQueryRuleOptionalFields = z
 export const Security_Detections_API_SavedQueryRuleResponseFields =
   Security_Detections_API_SavedQueryRuleRequiredFields.and(
     Security_Detections_API_SavedQueryRuleOptionalFields
-  ).and(
-    z
-      .object({ language: Security_Detections_API_KqlQueryLanguage })
-      .passthrough()
-  );
+  ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
 export const Security_Detections_API_SavedQueryRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3307,8 +3079,7 @@ export const Security_Detections_API_SavedQueryRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3320,9 +3091,7 @@ export const Security_Detections_API_SavedQueryRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3346,10 +3115,7 @@ export const Security_Detections_API_SavedQueryRule = z
 export const Security_Detections_API_ThresholdCardinality = z.array(
   z.object({ field: z.string(), value: z.number().int().gte(0) }).passthrough()
 );
-export const Security_Detections_API_ThresholdField = z.union([
-  z.string(),
-  z.array(z.string()),
-]);
+export const Security_Detections_API_ThresholdField = z.union([z.string(), z.array(z.string())]);
 export const Security_Detections_API_ThresholdValue = z.number();
 export const Security_Detections_API_Threshold = z
   .object({
@@ -3362,7 +3128,7 @@ export const Security_Detections_API_ThresholdRuleRequiredFields = z
   .object({
     query: Security_Detections_API_RuleQuery,
     threshold: Security_Detections_API_Threshold,
-    type: z.literal("threshold"),
+    type: z.literal('threshold'),
   })
   .passthrough();
 export const Security_Detections_API_ThresholdAlertSuppression = z
@@ -3381,18 +3147,12 @@ export const Security_Detections_API_ThresholdRuleOptionalFields = z
 export const Security_Detections_API_ThresholdRuleResponseFields =
   Security_Detections_API_ThresholdRuleRequiredFields.and(
     Security_Detections_API_ThresholdRuleOptionalFields
-  ).and(
-    z
-      .object({ language: Security_Detections_API_KqlQueryLanguage })
-      .passthrough()
-  );
+  ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
 export const Security_Detections_API_ThresholdRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3401,8 +3161,7 @@ export const Security_Detections_API_ThresholdRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3414,9 +3173,7 @@ export const Security_Detections_API_ThresholdRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3442,14 +3199,12 @@ export const Security_Detections_API_ThreatMappingEntry = z
   .object({
     field: Security_Detections_API_NonEmptyString.min(1),
     negate: z.boolean().optional(),
-    type: z.literal("mapping"),
+    type: z.literal('mapping'),
     value: Security_Detections_API_NonEmptyString.min(1),
   })
   .passthrough();
 export const Security_Detections_API_ThreatMapping = z.array(
-  z
-    .object({ entries: z.array(Security_Detections_API_ThreatMappingEntry) })
-    .passthrough()
+  z.object({ entries: z.array(Security_Detections_API_ThreatMappingEntry) }).passthrough()
 );
 export const Security_Detections_API_ThreatQuery = z.string();
 export const Security_Detections_API_ThreatMatchRuleRequiredFields = z
@@ -3458,7 +3213,7 @@ export const Security_Detections_API_ThreatMatchRuleRequiredFields = z
     threat_index: Security_Detections_API_ThreatIndex,
     threat_mapping: Security_Detections_API_ThreatMapping.min(1),
     threat_query: Security_Detections_API_ThreatQuery,
-    type: z.literal("threat_match"),
+    type: z.literal('threat_match'),
   })
   .passthrough();
 export const Security_Detections_API_ConcurrentSearches = z.number();
@@ -3468,8 +3223,7 @@ export const Security_Detections_API_ThreatIndicatorPath = z.string();
 export const Security_Detections_API_ThreatMatchRuleOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_AlertSuppression,
-    concurrent_searches:
-      Security_Detections_API_ConcurrentSearches.int().gte(1),
+    concurrent_searches: Security_Detections_API_ConcurrentSearches.int().gte(1),
     data_view_id: Security_Detections_API_DataViewId,
     filters: Security_Detections_API_RuleFilterArray,
     index: Security_Detections_API_IndexPatternArray,
@@ -3484,18 +3238,12 @@ export const Security_Detections_API_ThreatMatchRuleOptionalFields = z
 export const Security_Detections_API_ThreatMatchRuleResponseFields =
   Security_Detections_API_ThreatMatchRuleRequiredFields.and(
     Security_Detections_API_ThreatMatchRuleOptionalFields
-  ).and(
-    z
-      .object({ language: Security_Detections_API_KqlQueryLanguage })
-      .passthrough()
-  );
+  ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
 export const Security_Detections_API_ThreatMatchRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3504,8 +3252,7 @@ export const Security_Detections_API_ThreatMatchRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3517,9 +3264,7 @@ export const Security_Detections_API_ThreatMatchRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3549,7 +3294,7 @@ export const Security_Detections_API_MachineLearningRuleRequiredFields = z
   .object({
     anomaly_threshold: Security_Detections_API_AnomalyThreshold.int().gte(0),
     machine_learning_job_id: Security_Detections_API_MachineLearningJobId,
-    type: z.literal("machine_learning"),
+    type: z.literal('machine_learning'),
   })
   .passthrough();
 export const Security_Detections_API_MachineLearningRuleOptionalFields = z
@@ -3563,10 +3308,8 @@ export const Security_Detections_API_MachineLearningRuleResponseFields =
 export const Security_Detections_API_MachineLearningRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3575,8 +3318,7 @@ export const Security_Detections_API_MachineLearningRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3588,9 +3330,7 @@ export const Security_Detections_API_MachineLearningRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3618,7 +3358,7 @@ export const Security_Detections_API_NewTermsRuleRequiredFields = z
     history_window_start: Security_Detections_API_HistoryWindowStart.min(1),
     new_terms_fields: Security_Detections_API_NewTermsFields.min(1).max(3),
     query: Security_Detections_API_RuleQuery,
-    type: z.literal("new_terms"),
+    type: z.literal('new_terms'),
   })
   .passthrough();
 export const Security_Detections_API_NewTermsRuleOptionalFields = z
@@ -3633,18 +3373,12 @@ export const Security_Detections_API_NewTermsRuleOptionalFields = z
 export const Security_Detections_API_NewTermsRuleResponseFields =
   Security_Detections_API_NewTermsRuleRequiredFields.and(
     Security_Detections_API_NewTermsRuleOptionalFields
-  ).and(
-    z
-      .object({ language: Security_Detections_API_KqlQueryLanguage })
-      .passthrough()
-  );
+  ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
 export const Security_Detections_API_NewTermsRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3653,8 +3387,7 @@ export const Security_Detections_API_NewTermsRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3666,9 +3399,7 @@ export const Security_Detections_API_NewTermsRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3693,12 +3424,12 @@ export const Security_Detections_API_EsqlRuleOptionalFields = z
   .object({ alert_suppression: Security_Detections_API_AlertSuppression })
   .partial()
   .passthrough();
-export const Security_Detections_API_EsqlQueryLanguage = z.literal("esql");
+export const Security_Detections_API_EsqlQueryLanguage = z.literal('esql');
 export const Security_Detections_API_EsqlRuleRequiredFields = z
   .object({
     language: Security_Detections_API_EsqlQueryLanguage,
     query: Security_Detections_API_RuleQuery,
-    type: z.literal("esql"),
+    type: z.literal('esql'),
   })
   .passthrough();
 export const Security_Detections_API_EsqlRuleResponseFields =
@@ -3708,10 +3439,8 @@ export const Security_Detections_API_EsqlRuleResponseFields =
 export const Security_Detections_API_EsqlRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray,
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
@@ -3720,8 +3449,7 @@ export const Security_Detections_API_EsqlRule = z
     false_positives: Security_Detections_API_RuleFalsePositiveArray,
     from: Security_Detections_API_RuleIntervalFrom,
     interval: Security_Detections_API_RuleInterval,
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
     max_signals: Security_Detections_API_MaxSignals.int().gte(1).default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
@@ -3733,9 +3461,7 @@ export const Security_Detections_API_EsqlRule = z
     references: Security_Detections_API_RuleReferenceArray,
     related_integrations: Security_Detections_API_RelatedIntegrationArray,
     required_fields: z.array(Security_Detections_API_RequiredFieldInput),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping,
     rule_name_override: Security_Detections_API_RuleNameOverride.optional(),
@@ -3770,7 +3496,7 @@ export const Security_Detections_API_EqlRulePatchFields = z
   .object({
     language: Security_Detections_API_EqlQueryLanguage,
     query: Security_Detections_API_RuleQuery,
-    type: z.literal("eql"),
+    type: z.literal('eql'),
   })
   .partial()
   .passthrough()
@@ -3815,8 +3541,7 @@ export const Security_Detections_API_EqlRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -3831,7 +3556,7 @@ export const Security_Detections_API_QueryRuleDefaultableFields = z
   .partial()
   .passthrough();
 export const Security_Detections_API_QueryRulePatchFields = z
-  .object({ type: z.literal("query") })
+  .object({ type: z.literal('query') })
   .partial()
   .passthrough()
   .and(Security_Detections_API_QueryRuleOptionalFields)
@@ -3876,8 +3601,7 @@ export const Security_Detections_API_QueryRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -3891,7 +3615,7 @@ export const Security_Detections_API_SavedQueryRuleDefaultableFields = z
 export const Security_Detections_API_SavedQueryRulePatchFields = z
   .object({
     saved_id: Security_Detections_API_SavedQueryId,
-    type: z.literal("saved_query"),
+    type: z.literal('saved_query'),
   })
   .partial()
   .passthrough()
@@ -3937,8 +3661,7 @@ export const Security_Detections_API_SavedQueryRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -3953,7 +3676,7 @@ export const Security_Detections_API_ThresholdRulePatchFields = z
   .object({
     query: Security_Detections_API_RuleQuery,
     threshold: Security_Detections_API_Threshold,
-    type: z.literal("threshold"),
+    type: z.literal('threshold'),
   })
   .partial()
   .passthrough()
@@ -3999,8 +3722,7 @@ export const Security_Detections_API_ThresholdRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -4017,7 +3739,7 @@ export const Security_Detections_API_ThreatMatchRulePatchFields = z
     threat_index: Security_Detections_API_ThreatIndex,
     threat_mapping: Security_Detections_API_ThreatMapping.min(1),
     threat_query: Security_Detections_API_ThreatQuery,
-    type: z.literal("threat_match"),
+    type: z.literal('threat_match'),
   })
   .partial()
   .passthrough()
@@ -4063,8 +3785,7 @@ export const Security_Detections_API_ThreatMatchRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -4075,7 +3796,7 @@ export const Security_Detections_API_MachineLearningRulePatchFields = z
   .object({
     anomaly_threshold: Security_Detections_API_AnomalyThreshold.int().gte(0),
     machine_learning_job_id: Security_Detections_API_MachineLearningJobId,
-    type: z.literal("machine_learning"),
+    type: z.literal('machine_learning'),
   })
   .partial()
   .passthrough()
@@ -4120,8 +3841,7 @@ export const Security_Detections_API_MachineLearningRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -4137,7 +3857,7 @@ export const Security_Detections_API_NewTermsRulePatchFields = z
     history_window_start: Security_Detections_API_HistoryWindowStart.min(1),
     new_terms_fields: Security_Detections_API_NewTermsFields.min(1).max(3),
     query: Security_Detections_API_RuleQuery,
-    type: z.literal("new_terms"),
+    type: z.literal('new_terms'),
   })
   .partial()
   .passthrough()
@@ -4183,8 +3903,7 @@ export const Security_Detections_API_NewTermsRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
@@ -4233,10 +3952,9 @@ export const Security_Detections_API_EsqlRulePatchProps = z
     timeline_id: Security_Detections_API_TimelineTemplateId,
     timeline_title: Security_Detections_API_TimelineTemplateTitle,
     timestamp_override: Security_Detections_API_TimestampOverride,
-    timestamp_override_fallback_disabled:
-      Security_Detections_API_TimestampOverrideFallbackDisabled,
+    timestamp_override_fallback_disabled: Security_Detections_API_TimestampOverrideFallbackDisabled,
     to: Security_Detections_API_RuleIntervalTo,
-    type: z.literal("esql"),
+    type: z.literal('esql'),
     version: Security_Detections_API_RuleVersion.int().gte(1),
   })
   .partial()
@@ -4253,33 +3971,23 @@ export const Security_Detections_API_RulePatchProps = z.union([
   Security_Detections_API_EsqlRulePatchProps,
 ]);
 export const Security_Detections_API_EqlRuleCreateFields =
-  Security_Detections_API_EqlRequiredFields.and(
-    Security_Detections_API_EqlOptionalFields
-  );
+  Security_Detections_API_EqlRequiredFields.and(Security_Detections_API_EqlOptionalFields);
 export const Security_Detections_API_EqlRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4287,14 +3995,9 @@ export const Security_Detections_API_EqlRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4322,27 +4025,19 @@ export const Security_Detections_API_QueryRuleCreateFields =
 export const Security_Detections_API_QueryRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4350,14 +4045,9 @@ export const Security_Detections_API_QueryRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4385,27 +4075,19 @@ export const Security_Detections_API_SavedQueryRuleCreateFields =
 export const Security_Detections_API_SavedQueryRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4413,14 +4095,9 @@ export const Security_Detections_API_SavedQueryRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4448,27 +4125,19 @@ export const Security_Detections_API_ThresholdRuleCreateFields =
 export const Security_Detections_API_ThresholdRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4476,14 +4145,9 @@ export const Security_Detections_API_ThresholdRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4511,27 +4175,19 @@ export const Security_Detections_API_ThreatMatchRuleCreateFields =
 export const Security_Detections_API_ThreatMatchRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4539,14 +4195,9 @@ export const Security_Detections_API_ThreatMatchRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4574,27 +4225,19 @@ export const Security_Detections_API_MachineLearningRuleCreateFields =
 export const Security_Detections_API_MachineLearningRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4602,14 +4245,9 @@ export const Security_Detections_API_MachineLearningRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4637,27 +4275,19 @@ export const Security_Detections_API_NewTermsRuleCreateFields =
 export const Security_Detections_API_NewTermsRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4665,14 +4295,9 @@ export const Security_Detections_API_NewTermsRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4700,27 +4325,19 @@ export const Security_Detections_API_EsqlRuleCreateFields =
 export const Security_Detections_API_EsqlRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4728,14 +4345,9 @@ export const Security_Detections_API_EsqlRuleCreateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4769,28 +4381,20 @@ export const Security_Detections_API_RuleCreateProps = z.union([
 export const Security_Detections_API_EqlRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4798,14 +4402,9 @@ export const Security_Detections_API_EqlRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4829,28 +4428,20 @@ export const Security_Detections_API_EqlRuleUpdateProps = z
 export const Security_Detections_API_QueryRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4858,14 +4449,9 @@ export const Security_Detections_API_QueryRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4889,28 +4475,20 @@ export const Security_Detections_API_QueryRuleUpdateProps = z
 export const Security_Detections_API_SavedQueryRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4918,14 +4496,9 @@ export const Security_Detections_API_SavedQueryRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -4949,28 +4522,20 @@ export const Security_Detections_API_SavedQueryRuleUpdateProps = z
 export const Security_Detections_API_ThresholdRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -4978,14 +4543,9 @@ export const Security_Detections_API_ThresholdRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -5009,28 +4569,20 @@ export const Security_Detections_API_ThresholdRuleUpdateProps = z
 export const Security_Detections_API_ThreatMatchRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -5038,14 +4590,9 @@ export const Security_Detections_API_ThreatMatchRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -5069,28 +4616,20 @@ export const Security_Detections_API_ThreatMatchRuleUpdateProps = z
 export const Security_Detections_API_MachineLearningRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -5098,14 +4637,9 @@ export const Security_Detections_API_MachineLearningRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -5129,28 +4663,20 @@ export const Security_Detections_API_MachineLearningRuleUpdateProps = z
 export const Security_Detections_API_NewTermsRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -5158,14 +4684,9 @@ export const Security_Detections_API_NewTermsRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -5189,28 +4710,20 @@ export const Security_Detections_API_NewTermsRuleUpdateProps = z
 export const Security_Detections_API_EsqlRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
-    alias_purpose:
-      Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
-    alias_target_id:
-      Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
+    alias_purpose: Security_Detections_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_target_id: Security_Detections_API_SavedObjectResolveAliasTargetId.optional(),
     author: Security_Detections_API_RuleAuthorArray.optional(),
     building_block_type: Security_Detections_API_BuildingBlockType.optional(),
     description: Security_Detections_API_RuleDescription.min(1),
     enabled: Security_Detections_API_IsRuleEnabled.optional(),
-    exceptions_list: z
-      .array(Security_Detections_API_RuleExceptionList)
-      .optional(),
+    exceptions_list: z.array(Security_Detections_API_RuleExceptionList).optional(),
     false_positives: Security_Detections_API_RuleFalsePositiveArray.optional(),
     from: Security_Detections_API_RuleIntervalFrom.optional(),
     id: Security_Detections_API_RuleObjectId.optional(),
     interval: Security_Detections_API_RuleInterval.optional(),
-    investigation_fields:
-      Security_Detections_API_InvestigationFields.optional(),
+    investigation_fields: Security_Detections_API_InvestigationFields.optional(),
     license: Security_Detections_API_RuleLicense.optional(),
-    max_signals: Security_Detections_API_MaxSignals.int()
-      .gte(1)
-      .optional()
-      .default(100),
+    max_signals: Security_Detections_API_MaxSignals.int().gte(1).optional().default(100),
     meta: Security_Detections_API_RuleMetadata.optional(),
     name: Security_Detections_API_RuleName.min(1),
     namespace: Security_Detections_API_AlertsIndexNamespace.optional(),
@@ -5218,14 +4731,9 @@ export const Security_Detections_API_EsqlRuleUpdateProps = z
     outcome: Security_Detections_API_SavedObjectResolveOutcome.optional(),
     output_index: Security_Detections_API_AlertsIndex.optional(),
     references: Security_Detections_API_RuleReferenceArray.optional(),
-    related_integrations:
-      Security_Detections_API_RelatedIntegrationArray.optional(),
-    required_fields: z
-      .array(Security_Detections_API_RequiredFieldInput)
-      .optional(),
-    response_actions: z
-      .array(Security_Detections_API_ResponseAction)
-      .optional(),
+    related_integrations: Security_Detections_API_RelatedIntegrationArray.optional(),
+    required_fields: z.array(Security_Detections_API_RequiredFieldInput).optional(),
+    response_actions: z.array(Security_Detections_API_ResponseAction).optional(),
     risk_score: Security_Detections_API_RiskScore.int().gte(0).lte(100),
     risk_score_mapping: Security_Detections_API_RiskScoreMapping.optional(),
     rule_id: Security_Detections_API_RuleSignatureId.optional(),
@@ -5258,7 +4766,7 @@ export const Security_Detections_API_RuleUpdateProps = z.union([
 ]);
 export const Security_Detections_API_BulkDeleteRules = z
   .object({
-    action: z.literal("delete"),
+    action: z.literal('delete'),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
     ids: z.array(z.string()).min(1).optional(),
@@ -5267,7 +4775,7 @@ export const Security_Detections_API_BulkDeleteRules = z
   .passthrough();
 export const Security_Detections_API_BulkDisableRules = z
   .object({
-    action: z.literal("disable"),
+    action: z.literal('disable'),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
     ids: z.array(z.string()).min(1).optional(),
@@ -5276,7 +4784,7 @@ export const Security_Detections_API_BulkDisableRules = z
   .passthrough();
 export const Security_Detections_API_BulkEnableRules = z
   .object({
-    action: z.literal("enable"),
+    action: z.literal('enable'),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
     ids: z.array(z.string()).min(1).optional(),
@@ -5285,7 +4793,7 @@ export const Security_Detections_API_BulkEnableRules = z
   .passthrough();
 export const Security_Detections_API_BulkExportRules = z
   .object({
-    action: z.literal("export"),
+    action: z.literal('export'),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
     ids: z.array(z.string()).min(1).optional(),
@@ -5294,7 +4802,7 @@ export const Security_Detections_API_BulkExportRules = z
   .passthrough();
 export const Security_Detections_API_BulkDuplicateRules = z
   .object({
-    action: z.literal("duplicate"),
+    action: z.literal('duplicate'),
     duplicate: z
       .object({
         include_exceptions: z.boolean(),
@@ -5310,22 +4818,18 @@ export const Security_Detections_API_BulkDuplicateRules = z
   .passthrough();
 export const Security_Detections_API_BulkManualRuleRun = z
   .object({
-    action: z.literal("run"),
+    action: z.literal('run'),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
     ids: z.array(z.string()).min(1).optional(),
     query: z.string().optional(),
-    run: z
-      .object({ end_date: z.string(), start_date: z.string() })
-      .passthrough(),
+    run: z.object({ end_date: z.string(), start_date: z.string() }).passthrough(),
   })
   .passthrough();
 export const Security_Detections_API_BulkManualRuleFillGaps = z
   .object({
-    action: z.literal("fill_gaps"),
-    fill_gaps: z
-      .object({ end_date: z.string(), start_date: z.string() })
-      .passthrough(),
+    action: z.literal('fill_gaps'),
+    fill_gaps: z.object({ end_date: z.string(), start_date: z.string() }).passthrough(),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
     ids: z.array(z.string()).min(1).optional(),
@@ -5334,34 +4838,30 @@ export const Security_Detections_API_BulkManualRuleFillGaps = z
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadTags = z
   .object({
-    type: z.enum(["add_tags", "delete_tags", "set_tags"]),
+    type: z.enum(['add_tags', 'delete_tags', 'set_tags']),
     value: Security_Detections_API_RuleTagArray,
   })
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadIndexPatterns = z
   .object({
     overwrite_data_views: z.boolean().optional(),
-    type: z.enum([
-      "add_index_patterns",
-      "delete_index_patterns",
-      "set_index_patterns",
-    ]),
+    type: z.enum(['add_index_patterns', 'delete_index_patterns', 'set_index_patterns']),
     value: Security_Detections_API_IndexPatternArray,
   })
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadInvestigationFields = z
   .object({
     type: z.enum([
-      "add_investigation_fields",
-      "delete_investigation_fields",
-      "set_investigation_fields",
+      'add_investigation_fields',
+      'delete_investigation_fields',
+      'set_investigation_fields',
     ]),
     value: Security_Detections_API_InvestigationFields,
   })
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadTimeline = z
   .object({
-    type: z.literal("set_timeline"),
+    type: z.literal('set_timeline'),
     value: z
       .object({
         timeline_id: Security_Detections_API_TimelineTemplateId,
@@ -5377,15 +4877,10 @@ export const Security_Detections_API_NormalizedRuleAction = z.object({
   id: Security_Detections_API_RuleActionId,
   params: Security_Detections_API_RuleActionParams,
 });
-export const Security_Detections_API_ThrottleForBulkActions = z.enum([
-  "rule",
-  "1h",
-  "1d",
-  "7d",
-]);
+export const Security_Detections_API_ThrottleForBulkActions = z.enum(['rule', '1h', '1d', '7d']);
 export const Security_Detections_API_BulkActionEditPayloadRuleActions = z
   .object({
-    type: z.enum(["add_rule_actions", "set_rule_actions"]),
+    type: z.enum(['add_rule_actions', 'set_rule_actions']),
     value: z
       .object({
         actions: z.array(Security_Detections_API_NormalizedRuleAction),
@@ -5396,7 +4891,7 @@ export const Security_Detections_API_BulkActionEditPayloadRuleActions = z
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadSchedule = z
   .object({
-    type: z.literal("set_schedule"),
+    type: z.literal('set_schedule'),
     value: z
       .object({
         interval: z.string().regex(/^[1-9]\d*[smh]$/),
@@ -5407,19 +4902,18 @@ export const Security_Detections_API_BulkActionEditPayloadSchedule = z
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadSetAlertSuppression = z
   .object({
-    type: z.literal("set_alert_suppression"),
+    type: z.literal('set_alert_suppression'),
     value: Security_Detections_API_AlertSuppression,
   })
   .passthrough();
-export const Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold =
-  z
-    .object({
-      type: z.literal("set_alert_suppression_for_threshold"),
-      value: Security_Detections_API_ThresholdAlertSuppression,
-    })
-    .passthrough();
+export const Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold = z
+  .object({
+    type: z.literal('set_alert_suppression_for_threshold'),
+    value: Security_Detections_API_ThresholdAlertSuppression,
+  })
+  .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression = z
-  .object({ type: z.literal("delete_alert_suppression") })
+  .object({ type: z.literal('delete_alert_suppression') })
   .passthrough();
 export const Security_Detections_API_BulkActionEditPayloadAlertSuppression = z.union([
   Security_Detections_API_BulkActionEditPayloadSetAlertSuppression,
@@ -5437,7 +4931,7 @@ export const Security_Detections_API_BulkActionEditPayload = z.union([
 ]);
 export const Security_Detections_API_BulkEditRules = z
   .object({
-    action: z.literal("edit"),
+    action: z.literal('edit'),
     edit: z.array(Security_Detections_API_BulkActionEditPayload).min(1),
     gaps_range_end: z.string().optional(),
     gaps_range_start: z.string().optional(),
@@ -5456,16 +4950,16 @@ export const PerformRulesBulkAction_Body = z.union([
   Security_Detections_API_BulkEditRules,
 ]);
 export const Security_Detections_API_BulkActionsDryRunErrCode = z.enum([
-  "IMMUTABLE",
-  "PREBUILT_CUSTOMIZATION_LICENSE",
-  "MACHINE_LEARNING_AUTH",
-  "MACHINE_LEARNING_INDEX_PATTERN",
-  "ESQL_INDEX_PATTERN",
-  "MANUAL_RULE_RUN_FEATURE",
-  "MANUAL_RULE_RUN_DISABLED_RULE",
-  "THRESHOLD_RULE_TYPE_IN_SUPPRESSION",
-  "UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD",
-  "RULE_FILL_GAPS_DISABLED_RULE",
+  'IMMUTABLE',
+  'PREBUILT_CUSTOMIZATION_LICENSE',
+  'MACHINE_LEARNING_AUTH',
+  'MACHINE_LEARNING_INDEX_PATTERN',
+  'ESQL_INDEX_PATTERN',
+  'MANUAL_RULE_RUN_FEATURE',
+  'MANUAL_RULE_RUN_DISABLED_RULE',
+  'THRESHOLD_RULE_TYPE_IN_SUPPRESSION',
+  'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD',
+  'RULE_FILL_GAPS_DISABLED_RULE',
 ]);
 export const Security_Detections_API_RuleDetailsInError = z
   .object({ id: z.string(), name: z.string().optional() })
@@ -5478,10 +4972,8 @@ export const Security_Detections_API_NormalizedRuleError = z
     status_code: z.number().int(),
   })
   .passthrough();
-export const Security_Detections_API_BulkEditSkipReason =
-  z.literal("RULE_NOT_MODIFIED");
-export const Security_Detections_API_BulkGapsFillingSkipReason =
-  z.literal("NO_GAPS_TO_FILL");
+export const Security_Detections_API_BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
+export const Security_Detections_API_BulkGapsFillingSkipReason = z.literal('NO_GAPS_TO_FILL');
 export const Security_Detections_API_BulkActionSkipResult = z
   .object({
     id: z.string(),
@@ -5526,17 +5018,11 @@ export const Security_Detections_API_BulkEditActionResponse = z
 export const Security_Detections_API_BulkExportActionResponse = z.string();
 export const ExportRules_Body = z
   .object({
-    objects: z.array(
-      z
-        .object({ rule_id: Security_Detections_API_RuleSignatureId })
-        .passthrough()
-    ),
+    objects: z.array(z.object({ rule_id: Security_Detections_API_RuleSignatureId }).passthrough()),
   })
   .passthrough();
 export const Security_Detections_API_ErrorSchema = z.object({
-  error: z
-    .object({ message: z.string(), status_code: z.number().int().gte(400) })
-    .passthrough(),
+  error: z.object({ message: z.string(), status_code: z.number().int().gte(400) }).passthrough(),
   id: z.string().optional(),
   item_id: z.string().min(1).optional(),
   list_id: z.string().min(1).optional(),
@@ -5559,14 +5045,14 @@ export const Security_Exceptions_API_CreateRuleExceptionListItemCommentArray = z
 );
 export const Security_Exceptions_API_ExceptionListItemDescription = z.string();
 export const Security_Exceptions_API_ExceptionListItemEntryOperator = z.enum([
-  "excluded",
-  "included",
+  'excluded',
+  'included',
 ]);
 export const Security_Exceptions_API_ExceptionListItemEntryMatch = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("match"),
+    type: z.literal('match'),
     value: Security_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
@@ -5574,35 +5060,35 @@ export const Security_Exceptions_API_ExceptionListItemEntryMatchAny = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("match_any"),
+    type: z.literal('match_any'),
     value: z.array(Security_Exceptions_API_NonEmptyString).min(1),
   })
   .passthrough();
 export const Security_Exceptions_API_ListId = z.string();
 export const Security_Exceptions_API_ListType = z.enum([
-  "binary",
-  "boolean",
-  "byte",
-  "date",
-  "date_nanos",
-  "date_range",
-  "double",
-  "double_range",
-  "float",
-  "float_range",
-  "geo_point",
-  "geo_shape",
-  "half_float",
-  "integer",
-  "integer_range",
-  "ip",
-  "ip_range",
-  "keyword",
-  "long",
-  "long_range",
-  "shape",
-  "short",
-  "text",
+  'binary',
+  'boolean',
+  'byte',
+  'date',
+  'date_nanos',
+  'date_range',
+  'double',
+  'double_range',
+  'float',
+  'float_range',
+  'geo_point',
+  'geo_shape',
+  'half_float',
+  'integer',
+  'integer_range',
+  'ip',
+  'ip_range',
+  'keyword',
+  'long',
+  'long_range',
+  'shape',
+  'short',
+  'text',
 ]);
 export const Security_Exceptions_API_ExceptionListItemEntryList = z
   .object({
@@ -5614,14 +5100,14 @@ export const Security_Exceptions_API_ExceptionListItemEntryList = z
       })
       .passthrough(),
     operator: Security_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("list"),
+    type: z.literal('list'),
   })
   .passthrough();
 export const Security_Exceptions_API_ExceptionListItemEntryExists = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("exists"),
+    type: z.literal('exists'),
   })
   .passthrough();
 export const Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem = z.union([
@@ -5631,18 +5117,16 @@ export const Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem = z.u
 ]);
 export const Security_Exceptions_API_ExceptionListItemEntryNested = z
   .object({
-    entries: z
-      .array(Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem)
-      .min(1),
+    entries: z.array(Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem).min(1),
     field: Security_Exceptions_API_NonEmptyString.min(1),
-    type: z.literal("nested"),
+    type: z.literal('nested'),
   })
   .passthrough();
 export const Security_Exceptions_API_ExceptionListItemEntryMatchWildcard = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("wildcard"),
+    type: z.literal('wildcard'),
     value: Security_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
@@ -5658,31 +5142,18 @@ export const Security_Exceptions_API_ExceptionListItemEntryArray = z.array(
   Security_Exceptions_API_ExceptionListItemEntry
 );
 export const Security_Exceptions_API_ExceptionListItemHumanId = z.string();
-export const Security_Exceptions_API_ExceptionListItemMeta = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Exceptions_API_ExceptionListItemMeta = z.object({}).partial().passthrough();
 export const Security_Exceptions_API_ExceptionListItemName = z.string();
-export const Security_Exceptions_API_ExceptionNamespaceType = z.enum([
-  "agnostic",
-  "single",
-]);
-export const Security_Exceptions_API_ExceptionListOsType = z.enum([
-  "linux",
-  "macos",
-  "windows",
-]);
+export const Security_Exceptions_API_ExceptionNamespaceType = z.enum(['agnostic', 'single']);
+export const Security_Exceptions_API_ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
 export const Security_Exceptions_API_ExceptionListItemOsTypeArray = z.array(
   Security_Exceptions_API_ExceptionListOsType
 );
-export const Security_Exceptions_API_ExceptionListItemTags = z.array(
-  z.string().min(1)
-);
-export const Security_Exceptions_API_ExceptionListItemType = z.literal("simple");
+export const Security_Exceptions_API_ExceptionListItemTags = z.array(z.string().min(1));
+export const Security_Exceptions_API_ExceptionListItemType = z.literal('simple');
 export const Security_Exceptions_API_CreateRuleExceptionListItemProps = z
   .object({
-    comments:
-      Security_Exceptions_API_CreateRuleExceptionListItemCommentArray.optional(),
+    comments: Security_Exceptions_API_CreateRuleExceptionListItemCommentArray.optional(),
     description: Security_Exceptions_API_ExceptionListItemDescription,
     entries: Security_Exceptions_API_ExceptionListItemEntryArray,
     expire_time: z.string().datetime({ offset: true }).optional(),
@@ -5758,30 +5229,16 @@ export const Security_Detections_API_RulePreviewParams = z
   })
   .passthrough();
 export const RulePreview_Body = z.union([
-  Security_Detections_API_EqlRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
-  Security_Detections_API_QueryRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
-  Security_Detections_API_SavedQueryRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
-  Security_Detections_API_ThresholdRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
-  Security_Detections_API_ThreatMatchRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
+  Security_Detections_API_EqlRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
+  Security_Detections_API_QueryRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
+  Security_Detections_API_SavedQueryRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
+  Security_Detections_API_ThresholdRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
+  Security_Detections_API_ThreatMatchRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
   Security_Detections_API_MachineLearningRuleCreateProps.and(
     Security_Detections_API_RulePreviewParams
   ),
-  Security_Detections_API_NewTermsRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
-  Security_Detections_API_EsqlRuleCreateProps.and(
-    Security_Detections_API_RulePreviewParams
-  ),
+  Security_Detections_API_NewTermsRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
+  Security_Detections_API_EsqlRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
 ]);
 export const Security_Detections_API_RulePreviewLoggedRequest = z
   .object({
@@ -5796,9 +5253,7 @@ export const Security_Detections_API_RulePreviewLogs = z
   .object({
     duration: z.number().int(),
     errors: z.array(Security_Detections_API_NonEmptyString),
-    requests: z
-      .array(Security_Detections_API_RulePreviewLoggedRequest)
-      .optional(),
+    requests: z.array(Security_Detections_API_RulePreviewLoggedRequest).optional(),
     startedAt: Security_Detections_API_NonEmptyString.min(1).optional(),
     warnings: z.array(Security_Detections_API_NonEmptyString),
   })
@@ -5838,10 +5293,10 @@ export const SearchAlerts_Body = z
   .partial()
   .passthrough();
 export const Security_Detections_API_AlertStatus = z.enum([
-  "open",
-  "closed",
-  "acknowledged",
-  "in-progress",
+  'open',
+  'closed',
+  'acknowledged',
+  'in-progress',
 ]);
 export const Security_Detections_API_SetAlertsStatusByIds = z
   .object({
@@ -5851,7 +5306,7 @@ export const Security_Detections_API_SetAlertsStatusByIds = z
   .passthrough();
 export const Security_Detections_API_SetAlertsStatusByQuery = z
   .object({
-    conflicts: z.enum(["abort", "proceed"]).optional().default("abort"),
+    conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     query: z.object({}).partial().passthrough(),
     status: Security_Detections_API_AlertStatus,
   })
@@ -5861,9 +5316,7 @@ export const SetAlertsStatus_Body = z.union([
   Security_Detections_API_SetAlertsStatusByQuery,
 ]);
 export const Security_Detections_API_AlertTag = z.string();
-export const Security_Detections_API_AlertTags = z.array(
-  Security_Detections_API_AlertTag
-);
+export const Security_Detections_API_AlertTags = z.array(Security_Detections_API_AlertTag);
 export const Security_Detections_API_SetAlertTags = z
   .object({
     tags_to_add: Security_Detections_API_AlertTags,
@@ -5878,7 +5331,7 @@ export const SetAlertTags_Body = z
   .passthrough();
 export const Saved_objects_400_response = z
   .object({
-    error: z.literal("Bad Request"),
+    error: z.literal('Bad Request'),
     message: z.string(),
     statusCode: z.literal(400),
   })
@@ -5892,27 +5345,27 @@ export const Security_Endpoint_Exceptions_API_ExceptionListMeta = z
   .passthrough();
 export const Security_Endpoint_Exceptions_API_ExceptionListName = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionNamespaceType = z.enum([
-  "agnostic",
-  "single",
+  'agnostic',
+  'single',
 ]);
 export const Security_Endpoint_Exceptions_API_ExceptionListOsType = z.enum([
-  "linux",
-  "macos",
-  "windows",
+  'linux',
+  'macos',
+  'windows',
 ]);
 export const Security_Endpoint_Exceptions_API_ExceptionListOsTypeArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListOsType
 );
 export const Security_Endpoint_Exceptions_API_ExceptionListTags = z.array(z.string());
 export const Security_Endpoint_Exceptions_API_ExceptionListType = z.enum([
-  "detection",
-  "rule_default",
-  "endpoint",
-  "endpoint_trusted_apps",
-  "endpoint_trusted_devices",
-  "endpoint_events",
-  "endpoint_host_isolation_exceptions",
-  "endpoint_blocklists",
+  'detection',
+  'rule_default',
+  'endpoint',
+  'endpoint_trusted_apps',
+  'endpoint_trusted_devices',
+  'endpoint_events',
+  'endpoint_host_isolation_exceptions',
+  'endpoint_blocklists',
 ]);
 export const Security_Endpoint_Exceptions_API_ExceptionListVersion = z.number();
 export const Security_Endpoint_Exceptions_API_ExceptionList = z
@@ -5927,8 +5380,7 @@ export const Security_Endpoint_Exceptions_API_ExceptionList = z
     meta: Security_Endpoint_Exceptions_API_ExceptionListMeta.optional(),
     name: Security_Endpoint_Exceptions_API_ExceptionListName,
     namespace_type: Security_Endpoint_Exceptions_API_ExceptionNamespaceType,
-    os_types:
-      Security_Endpoint_Exceptions_API_ExceptionListOsTypeArray.optional(),
+    os_types: Security_Endpoint_Exceptions_API_ExceptionListOsTypeArray.optional(),
     tags: Security_Endpoint_Exceptions_API_ExceptionListTags.optional(),
     tie_breaker_id: z.string(),
     type: Security_Endpoint_Exceptions_API_ExceptionListType,
@@ -5959,24 +5411,22 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemComment = z
     created_by: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
     id: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
     updated_at: z.string().datetime({ offset: true }).optional(),
-    updated_by:
-      Security_Endpoint_Exceptions_API_NonEmptyString.min(1).optional(),
+    updated_by: Security_Endpoint_Exceptions_API_NonEmptyString.min(1).optional(),
   })
   .passthrough();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListItemComment
 );
-export const Security_Endpoint_Exceptions_API_ExceptionListItemDescription =
-  z.string();
+export const Security_Endpoint_Exceptions_API_ExceptionListItemDescription = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator = z.enum([
-  "excluded",
-  "included",
+  'excluded',
+  'included',
 ]);
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("match"),
+    type: z.literal('match'),
     value: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
@@ -5984,35 +5434,35 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("match_any"),
+    type: z.literal('match_any'),
     value: z.array(Security_Endpoint_Exceptions_API_NonEmptyString).min(1),
   })
   .passthrough();
 export const Security_Endpoint_Exceptions_API_ListId = z.string();
 export const Security_Endpoint_Exceptions_API_ListType = z.enum([
-  "binary",
-  "boolean",
-  "byte",
-  "date",
-  "date_nanos",
-  "date_range",
-  "double",
-  "double_range",
-  "float",
-  "float_range",
-  "geo_point",
-  "geo_shape",
-  "half_float",
-  "integer",
-  "integer_range",
-  "ip",
-  "ip_range",
-  "keyword",
-  "long",
-  "long_range",
-  "shape",
-  "short",
-  "text",
+  'binary',
+  'boolean',
+  'byte',
+  'date',
+  'date_nanos',
+  'date_range',
+  'double',
+  'double_range',
+  'float',
+  'float_range',
+  'geo_point',
+  'geo_shape',
+  'half_float',
+  'integer',
+  'integer_range',
+  'ip',
+  'ip_range',
+  'keyword',
+  'long',
+  'long_range',
+  'shape',
+  'short',
+  'text',
 ]);
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryList = z
   .object({
@@ -6024,38 +5474,33 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryList = z
       })
       .passthrough(),
     operator: Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("list"),
+    type: z.literal('list'),
   })
   .passthrough();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("exists"),
+    type: z.literal('exists'),
   })
   .passthrough();
-export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryNestedEntryItem =
-  z.union([
-    Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch,
-    Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny,
-    Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists,
-  ]);
+export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryNestedEntryItem = z.union([
+  Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch,
+  Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny,
+  Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists,
+]);
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryNested = z
   .object({
-    entries: z
-      .array(
-        Security_Endpoint_Exceptions_API_ExceptionListItemEntryNestedEntryItem
-      )
-      .min(1),
+    entries: z.array(Security_Endpoint_Exceptions_API_ExceptionListItemEntryNestedEntryItem).min(1),
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
-    type: z.literal("nested"),
+    type: z.literal('nested'),
   })
   .passthrough();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchWildcard = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
     operator: Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator,
-    type: z.literal("wildcard"),
+    type: z.literal('wildcard'),
     value: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
@@ -6081,11 +5526,8 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemName = z.string()
 export const Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListOsType
 );
-export const Security_Endpoint_Exceptions_API_ExceptionListItemTags = z.array(
-  z.string().min(1)
-);
-export const Security_Endpoint_Exceptions_API_ExceptionListItemType =
-  z.literal("simple");
+export const Security_Endpoint_Exceptions_API_ExceptionListItemTags = z.array(z.string().min(1));
+export const Security_Endpoint_Exceptions_API_ExceptionListItemType = z.literal('simple');
 export const Security_Endpoint_Exceptions_API_ExceptionListItem = z
   .object({
     _version: z.string().optional(),
@@ -6094,18 +5536,16 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItem = z
     created_by: z.string(),
     description: Security_Endpoint_Exceptions_API_ExceptionListItemDescription,
     entries: Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray,
-    expire_time:
-      Security_Endpoint_Exceptions_API_ExceptionListItemExpireTime.datetime({
-        offset: true,
-      }).optional(),
+    expire_time: Security_Endpoint_Exceptions_API_ExceptionListItemExpireTime.datetime({
+      offset: true,
+    }).optional(),
     id: Security_Endpoint_Exceptions_API_ExceptionListItemId.min(1),
     item_id: Security_Endpoint_Exceptions_API_ExceptionListItemHumanId.min(1),
     list_id: Security_Endpoint_Exceptions_API_ExceptionListHumanId.min(1),
     meta: Security_Endpoint_Exceptions_API_ExceptionListItemMeta.optional(),
     name: Security_Endpoint_Exceptions_API_ExceptionListItemName.min(1),
     namespace_type: Security_Endpoint_Exceptions_API_ExceptionNamespaceType,
-    os_types:
-      Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray.optional(),
+    os_types: Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray.optional(),
     tags: Security_Endpoint_Exceptions_API_ExceptionListItemTags.optional(),
     tie_breaker_id: z.string(),
     type: Security_Endpoint_Exceptions_API_ExceptionListItemType,
@@ -6115,18 +5555,13 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItem = z
   .passthrough();
 export const CreateEndpointListItem_Body = z
   .object({
-    comments:
-      Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray.optional(),
+    comments: Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray.optional(),
     description: Security_Endpoint_Exceptions_API_ExceptionListItemDescription,
     entries: Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray,
-    item_id:
-      Security_Endpoint_Exceptions_API_ExceptionListItemHumanId.min(
-        1
-      ).optional(),
+    item_id: Security_Endpoint_Exceptions_API_ExceptionListItemHumanId.min(1).optional(),
     meta: Security_Endpoint_Exceptions_API_ExceptionListItemMeta.optional(),
     name: Security_Endpoint_Exceptions_API_ExceptionListItemName.min(1),
-    os_types:
-      Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray.optional(),
+    os_types: Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray.optional(),
     tags: Security_Endpoint_Exceptions_API_ExceptionListItemTags.optional(),
     type: Security_Endpoint_Exceptions_API_ExceptionListItemType,
   })
@@ -6134,36 +5569,31 @@ export const CreateEndpointListItem_Body = z
 export const UpdateEndpointListItem_Body = z
   .object({
     _version: z.string().optional(),
-    comments:
-      Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray.optional(),
+    comments: Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray.optional(),
     description: Security_Endpoint_Exceptions_API_ExceptionListItemDescription,
     entries: Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray,
     id: Security_Endpoint_Exceptions_API_ExceptionListItemId.min(1).optional(),
-    item_id:
-      Security_Endpoint_Exceptions_API_ExceptionListItemHumanId.min(
-        1
-      ).optional(),
+    item_id: Security_Endpoint_Exceptions_API_ExceptionListItemHumanId.min(1).optional(),
     meta: Security_Endpoint_Exceptions_API_ExceptionListItemMeta.optional(),
     name: Security_Endpoint_Exceptions_API_ExceptionListItemName.min(1),
-    os_types:
-      Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray.optional(),
+    os_types: Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray.optional(),
     tags: Security_Endpoint_Exceptions_API_ExceptionListItemTags.optional(),
     type: Security_Endpoint_Exceptions_API_ExceptionListItemType,
   })
   .passthrough();
 export const Security_Endpoint_Management_API_Command = z.enum([
-  "isolate",
-  "unisolate",
-  "kill-process",
-  "suspend-process",
-  "running-processes",
-  "get-file",
-  "execute",
-  "upload",
-  "scan",
+  'isolate',
+  'unisolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+  'get-file',
+  'execute',
+  'upload',
+  'scan',
 ]);
 export const agentIds = z.union([z.array(z.string().min(1)), z.string()]).optional();
-export const Security_Endpoint_Management_API_Type = z.enum(["automated", "manual"]);
+export const Security_Endpoint_Management_API_Type = z.enum(['automated', 'manual']);
 export const Security_Endpoint_Management_API_GetEndpointActionListResponse = z
   .object({})
   .partial()
@@ -6182,15 +5612,12 @@ export const Security_Endpoint_Management_API_PendingActionsSchema = z.union([
   z
     .object({
       execute: Security_Endpoint_Management_API_PendingActionDataType.int(),
-      "get-file": Security_Endpoint_Management_API_PendingActionDataType.int(),
+      'get-file': Security_Endpoint_Management_API_PendingActionDataType.int(),
       isolate: Security_Endpoint_Management_API_PendingActionDataType.int(),
-      "kill-process":
-        Security_Endpoint_Management_API_PendingActionDataType.int(),
-      "running-processes":
-        Security_Endpoint_Management_API_PendingActionDataType.int(),
+      'kill-process': Security_Endpoint_Management_API_PendingActionDataType.int(),
+      'running-processes': Security_Endpoint_Management_API_PendingActionDataType.int(),
       scan: Security_Endpoint_Management_API_PendingActionDataType.int(),
-      "suspend-process":
-        Security_Endpoint_Management_API_PendingActionDataType.int(),
+      'suspend-process': Security_Endpoint_Management_API_PendingActionDataType.int(),
       unisolate: Security_Endpoint_Management_API_PendingActionDataType.int(),
       upload: Security_Endpoint_Management_API_PendingActionDataType.int(),
     })
@@ -6205,8 +5632,7 @@ export const Security_Endpoint_Management_API_ActionStatusSuccessResponse = z
         data: z
           .object({
             agent_id: Security_Endpoint_Management_API_AgentId,
-            pending_actions:
-              Security_Endpoint_Management_API_PendingActionsSchema,
+            pending_actions: Security_Endpoint_Management_API_PendingActionsSchema,
           })
           .passthrough(),
       })
@@ -6222,17 +5648,14 @@ export const Security_Endpoint_Management_API_SuccessResponse = z
   .partial()
   .passthrough();
 export const Security_Endpoint_Management_API_AgentTypes = z.enum([
-  "endpoint",
-  "sentinel_one",
-  "crowdstrike",
-  "microsoft_defender_endpoint",
+  'endpoint',
+  'sentinel_one',
+  'crowdstrike',
+  'microsoft_defender_endpoint',
 ]);
 export const Security_Endpoint_Management_API_Comment = z.string();
 export const Security_Endpoint_Management_API_EndpointIds = z.array(z.string().min(1));
-export const Security_Endpoint_Management_API_Parameters = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Endpoint_Management_API_Parameters = z.object({}).partial().passthrough();
 export const Security_Endpoint_Management_API_Timeout = z.number();
 export const Security_Endpoint_Management_API_ExecuteRouteRequestBody = z
   .object({
@@ -6250,9 +5673,7 @@ export const Security_Endpoint_Management_API_ExecuteRouteRequestBody = z
         parameters: z
           .object({
             command: Security_Endpoint_Management_API_Command,
-            timeout: Security_Endpoint_Management_API_Timeout.int()
-              .gte(1)
-              .optional(),
+            timeout: Security_Endpoint_Management_API_Timeout.int().gte(1).optional(),
           })
           .passthrough(),
       })
@@ -6272,11 +5693,7 @@ export const Security_Endpoint_Management_API_GetFileRouteRequestBody = z
     parameters: Security_Endpoint_Management_API_Parameters.optional(),
   })
   .passthrough()
-  .and(
-    z
-      .object({ parameters: z.object({ path: z.string() }).passthrough() })
-      .passthrough()
-  );
+  .and(z.object({ parameters: z.object({ path: z.string() }).passthrough() }).passthrough());
 export const Security_Endpoint_Management_API_GetFileRouteResponse = z
   .object({})
   .partial()
@@ -6417,11 +5834,8 @@ export const Security_Endpoint_Management_API_ResponseActionCreateSuccessRespons
         outputs: z.record(
           z
             .object({
-              content: z.union([
-                z.object({}).partial().passthrough(),
-                z.string(),
-              ]),
-              type: z.enum(["json", "text"]),
+              content: z.union([z.object({}).partial().passthrough(), z.string()]),
+              type: z.enum(['json', 'text']),
             })
             .passthrough()
         ),
@@ -6445,11 +5859,7 @@ export const Security_Endpoint_Management_API_ScanRouteRequestBody = z
     parameters: Security_Endpoint_Management_API_Parameters.optional(),
   })
   .passthrough()
-  .and(
-    z
-      .object({ parameters: z.object({ path: z.string() }).passthrough() })
-      .passthrough()
-  );
+  .and(z.object({ parameters: z.object({ path: z.string() }).passthrough() }).passthrough());
 export const Security_Endpoint_Management_API_ScanRouteResponse = z
   .object({})
   .partial()
@@ -6539,10 +5949,10 @@ export const Security_Endpoint_Management_API_ProtectionUpdatesNoteResponse = z
   .partial()
   .passthrough();
 export const Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus = z.enum([
-  "started",
-  "error",
-  "disabled",
-  "not_installed",
+  'started',
+  'error',
+  'disabled',
+  'not_installed',
 ]);
 export const Security_Entity_Analytics_API_MonitoringEngineDescriptor = z
   .object({
@@ -6574,7 +5984,7 @@ export const Security_Entity_Analytics_API_UserName = z
   .passthrough();
 export const Security_Entity_Analytics_API_MonitoredUserDoc = z
   .object({
-    "@timestamp": z.string().datetime({ offset: true }),
+    '@timestamp': z.string().datetime({ offset: true }),
     entity_analytics_monitoring: z
       .object({
         labels: z.array(
@@ -6603,10 +6013,7 @@ export const Security_Entity_Analytics_API_MonitoredUserDoc = z
       })
       .partial()
       .passthrough(),
-    user: z
-      .object({ is_privileged: z.boolean(), name: z.string() })
-      .partial()
-      .passthrough(),
+    user: z.object({ is_privileged: z.boolean(), name: z.string() }).partial().passthrough(),
   })
   .partial()
   .passthrough();
@@ -6626,10 +6033,10 @@ export const Security_Entity_Analytics_API_PrivmonUserCsvUploadStats = z
   .passthrough();
 export const Security_Entity_Analytics_API_Interval = z.string();
 export const Security_Entity_Analytics_API_EntityType = z.enum([
-  "user",
-  "host",
-  "service",
-  "generic",
+  'user',
+  'host',
+  'service',
+  'generic',
 ]);
 export const Security_Entity_Analytics_API_IndexPattern = z.string();
 export const InitEntityStore_Body = z
@@ -6637,37 +6044,36 @@ export const InitEntityStore_Body = z
     delay: z
       .string()
       .regex(/[smdh]$/)
-      .default("1m"),
+      .default('1m'),
     docsPerSecond: z.number().int().default(-1),
-    enrichPolicyExecutionInterval:
-      Security_Entity_Analytics_API_Interval.regex(/^[1-9]\d*[smh]$/),
+    enrichPolicyExecutionInterval: Security_Entity_Analytics_API_Interval.regex(/^[1-9]\d*[smh]$/),
     entityTypes: z.array(Security_Entity_Analytics_API_EntityType),
     fieldHistoryLength: z.number().int().default(10),
     filter: z.string(),
     frequency: z
       .string()
       .regex(/[smdh]$/)
-      .default("1m"),
+      .default('1m'),
     indexPattern: Security_Entity_Analytics_API_IndexPattern,
     lookbackPeriod: z
       .string()
       .regex(/[smdh]$/)
-      .default("3h"),
+      .default('3h'),
     maxPageSearchSize: z.number().int().default(500),
     timeout: z
       .string()
       .regex(/[smdh]$/)
-      .default("180s"),
-    timestampField: z.string().default("@timestamp"),
+      .default('180s'),
+    timestampField: z.string().default('@timestamp'),
   })
   .partial()
   .passthrough();
 export const Security_Entity_Analytics_API_EngineStatus = z.enum([
-  "installing",
-  "started",
-  "stopped",
-  "updating",
-  "error",
+  'installing',
+  'started',
+  'stopped',
+  'updating',
+  'error',
 ]);
 export const Security_Entity_Analytics_API_EngineDescriptor = z
   .object({
@@ -6675,10 +6081,10 @@ export const Security_Entity_Analytics_API_EngineDescriptor = z
       .string()
       .regex(/[smdh]$/)
       .optional()
-      .default("1m"),
+      .default('1m'),
     docsPerSecond: z.number().int().optional(),
     error: z
-      .object({ action: z.literal("init"), message: z.string() })
+      .object({ action: z.literal('init'), message: z.string() })
       .passthrough()
       .optional(),
     fieldHistoryLength: z.number().int(),
@@ -6687,19 +6093,19 @@ export const Security_Entity_Analytics_API_EngineDescriptor = z
       .string()
       .regex(/[smdh]$/)
       .optional()
-      .default("1m"),
+      .default('1m'),
     indexPattern: Security_Entity_Analytics_API_IndexPattern,
     lookbackPeriod: z
       .string()
       .regex(/[smdh]$/)
       .optional()
-      .default("24h"),
+      .default('24h'),
     status: Security_Entity_Analytics_API_EngineStatus,
     timeout: z
       .string()
       .regex(/[smdh]$/)
       .optional()
-      .default("180s"),
+      .default('180s'),
     timestampField: z.string().optional(),
     type: Security_Entity_Analytics_API_EntityType,
   })
@@ -6709,27 +6115,26 @@ export const InitEntityEngine_Body = z
     delay: z
       .string()
       .regex(/[smdh]$/)
-      .default("1m"),
+      .default('1m'),
     docsPerSecond: z.number().int().default(-1),
-    enrichPolicyExecutionInterval:
-      Security_Entity_Analytics_API_Interval.regex(/^[1-9]\d*[smh]$/),
+    enrichPolicyExecutionInterval: Security_Entity_Analytics_API_Interval.regex(/^[1-9]\d*[smh]$/),
     fieldHistoryLength: z.number().int().default(10),
     filter: z.string(),
     frequency: z
       .string()
       .regex(/[smdh]$/)
-      .default("1m"),
+      .default('1m'),
     indexPattern: Security_Entity_Analytics_API_IndexPattern,
     lookbackPeriod: z
       .string()
       .regex(/[smdh]$/)
-      .default("3h"),
+      .default('3h'),
     maxPageSearchSize: z.number().int().default(500),
     timeout: z
       .string()
       .regex(/[smdh]$/)
-      .default("180s"),
-    timestampField: z.string().default("@timestamp"),
+      .default('180s'),
+    timestampField: z.string().default('@timestamp'),
   })
   .partial()
   .passthrough();
@@ -6750,11 +6155,11 @@ export const Security_Entity_Analytics_API_EngineMetadata = z
   .object({ Type: z.string() })
   .passthrough();
 export const Security_Entity_Analytics_API_EntityRiskLevels = z.enum([
-  "Unknown",
-  "Low",
-  "Moderate",
-  "High",
-  "Critical",
+  'Unknown',
+  'Low',
+  'Moderate',
+  'High',
+  'Critical',
 ]);
 export const Security_Entity_Analytics_API_RiskScoreInput = z
   .object({
@@ -6769,7 +6174,7 @@ export const Security_Entity_Analytics_API_RiskScoreInput = z
   .passthrough();
 export const Security_Entity_Analytics_API_EntityRiskScoreRecord = z
   .object({
-    "@timestamp": z.string().datetime({ offset: true }),
+    '@timestamp': z.string().datetime({ offset: true }),
     calculated_level: Security_Entity_Analytics_API_EntityRiskLevels,
     calculated_score: z.number(),
     calculated_score_norm: z.number().gte(0).lte(100),
@@ -6777,8 +6182,7 @@ export const Security_Entity_Analytics_API_EntityRiskScoreRecord = z
     category_1_score: z.number(),
     category_2_count: z.number().int().optional(),
     category_2_score: z.number().optional(),
-    criticality_level:
-      Security_Entity_Analytics_API_AssetCriticalityLevel.optional(),
+    criticality_level: Security_Entity_Analytics_API_AssetCriticalityLevel.optional(),
     criticality_modifier: z.number().optional(),
     id_field: z.string(),
     id_value: z.string(),
@@ -6788,7 +6192,7 @@ export const Security_Entity_Analytics_API_EntityRiskScoreRecord = z
   .passthrough();
 export const Security_Entity_Analytics_API_UserEntity = z
   .object({
-    "@timestamp": z.string().datetime({ offset: true }).optional(),
+    '@timestamp': z.string().datetime({ offset: true }).optional(),
     asset: z
       .object({
         criticality: Security_Entity_Analytics_API_AssetCriticalityLevel,
@@ -6824,7 +6228,7 @@ export const Security_Entity_Analytics_API_UserEntity = z
   .passthrough();
 export const Security_Entity_Analytics_API_HostEntity = z
   .object({
-    "@timestamp": z.string().datetime({ offset: true }).optional(),
+    '@timestamp': z.string().datetime({ offset: true }).optional(),
     asset: z
       .object({
         criticality: Security_Entity_Analytics_API_AssetCriticalityLevel,
@@ -6861,7 +6265,7 @@ export const Security_Entity_Analytics_API_HostEntity = z
   .passthrough();
 export const Security_Entity_Analytics_API_ServiceEntity = z
   .object({
-    "@timestamp": z.string().datetime({ offset: true }).optional(),
+    '@timestamp': z.string().datetime({ offset: true }).optional(),
     asset: z
       .object({
         criticality: Security_Entity_Analytics_API_AssetCriticalityLevel,
@@ -6891,7 +6295,7 @@ export const Security_Entity_Analytics_API_ServiceEntity = z
   .passthrough();
 export const Security_Entity_Analytics_API_GenericEntity = z
   .object({
-    "@timestamp": z.string().datetime({ offset: true }).optional(),
+    '@timestamp': z.string().datetime({ offset: true }).optional(),
     asset: z
       .object({
         criticality: Security_Entity_Analytics_API_AssetCriticalityLevel,
@@ -6938,29 +6342,22 @@ export const Security_Entity_Analytics_API_TransformStatsMetadata = z
   })
   .passthrough();
 export const Security_Entity_Analytics_API_EngineComponentResource = z.enum([
-  "entity_engine",
-  "entity_definition",
-  "index",
-  "component_template",
-  "index_template",
-  "ingest_pipeline",
-  "enrich_policy",
-  "task",
-  "transform",
+  'entity_engine',
+  'entity_definition',
+  'index',
+  'component_template',
+  'index_template',
+  'ingest_pipeline',
+  'enrich_policy',
+  'task',
+  'transform',
 ]);
 export const Security_Entity_Analytics_API_EngineComponentStatus = z
   .object({
     errors: z
-      .array(
-        z
-          .object({ message: z.string(), title: z.string() })
-          .partial()
-          .passthrough()
-      )
+      .array(z.object({ message: z.string(), title: z.string() }).partial().passthrough())
       .optional(),
-    health: z
-      .enum(["green", "yellow", "red", "unavailable", "unknown"])
-      .optional(),
+    health: z.enum(['green', 'yellow', 'red', 'unavailable', 'unknown']).optional(),
     id: z.string(),
     installed: z.boolean(),
     metadata: Security_Entity_Analytics_API_TransformStatsMetadata.optional(),
@@ -6968,32 +6365,29 @@ export const Security_Entity_Analytics_API_EngineComponentStatus = z
   })
   .passthrough();
 export const Security_Entity_Analytics_API_StoreStatus = z.enum([
-  "not_installed",
-  "installing",
-  "running",
-  "stopped",
-  "error",
+  'not_installed',
+  'installing',
+  'running',
+  'stopped',
+  'error',
 ]);
 export const Security_Exceptions_API_ExceptionListDescription = z.string();
 export const Security_Exceptions_API_ExceptionListId = z.string();
-export const Security_Exceptions_API_ExceptionListMeta = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Exceptions_API_ExceptionListMeta = z.object({}).partial().passthrough();
 export const Security_Exceptions_API_ExceptionListName = z.string();
 export const Security_Exceptions_API_ExceptionListOsTypeArray = z.array(
   Security_Exceptions_API_ExceptionListOsType
 );
 export const Security_Exceptions_API_ExceptionListTags = z.array(z.string());
 export const Security_Exceptions_API_ExceptionListType = z.enum([
-  "detection",
-  "rule_default",
-  "endpoint",
-  "endpoint_trusted_apps",
-  "endpoint_trusted_devices",
-  "endpoint_events",
-  "endpoint_host_isolation_exceptions",
-  "endpoint_blocklists",
+  'detection',
+  'rule_default',
+  'endpoint',
+  'endpoint_trusted_apps',
+  'endpoint_trusted_devices',
+  'endpoint_events',
+  'endpoint_host_isolation_exceptions',
+  'endpoint_blocklists',
 ]);
 export const Security_Exceptions_API_ExceptionListVersion = z.number();
 export const Security_Exceptions_API_ExceptionList = z
@@ -7027,9 +6421,7 @@ export const CreateExceptionList_Body = z
     os_types: Security_Exceptions_API_ExceptionListOsTypeArray.optional(),
     tags: Security_Exceptions_API_ExceptionListTags.optional(),
     type: Security_Exceptions_API_ExceptionListType,
-    version: Security_Exceptions_API_ExceptionListVersion.int()
-      .gte(1)
-      .optional(),
+    version: Security_Exceptions_API_ExceptionListVersion.int().gte(1).optional(),
   })
   .passthrough();
 export const UpdateExceptionList_Body = z
@@ -7044,16 +6436,12 @@ export const UpdateExceptionList_Body = z
     os_types: Security_Exceptions_API_ExceptionListOsTypeArray.optional(),
     tags: Security_Exceptions_API_ExceptionListTags.optional(),
     type: Security_Exceptions_API_ExceptionListType,
-    version: Security_Exceptions_API_ExceptionListVersion.int()
-      .gte(1)
-      .optional(),
+    version: Security_Exceptions_API_ExceptionListVersion.int().gte(1).optional(),
   })
   .passthrough();
 export const Security_Exceptions_API_ExceptionListsImportBulkError = z
   .object({
-    error: z
-      .object({ message: z.string(), status_code: z.number().int() })
-      .passthrough(),
+    error: z.object({ message: z.string(), status_code: z.number().int() }).passthrough(),
     id: Security_Exceptions_API_ExceptionListId.min(1).optional(),
     item_id: Security_Exceptions_API_ExceptionListItemHumanId.min(1).optional(),
     list_id: Security_Exceptions_API_ExceptionListHumanId.min(1).optional(),
@@ -7070,8 +6458,7 @@ export const Security_Exceptions_API_CreateExceptionListItemCommentArray = z.arr
 );
 export const CreateExceptionListItem_Body = z
   .object({
-    comments:
-      Security_Exceptions_API_CreateExceptionListItemCommentArray.optional(),
+    comments: Security_Exceptions_API_CreateExceptionListItemCommentArray.optional(),
     description: Security_Exceptions_API_ExceptionListItemDescription,
     entries: Security_Exceptions_API_ExceptionListItemEntryArray,
     expire_time: Security_Exceptions_API_ExceptionListItemExpireTime.datetime({
@@ -7099,8 +6486,7 @@ export const Security_Exceptions_API_UpdateExceptionListItemCommentArray = z.arr
 export const UpdateExceptionListItem_Body = z
   .object({
     _version: z.string().optional(),
-    comments:
-      Security_Exceptions_API_UpdateExceptionListItemCommentArray.optional(),
+    comments: Security_Exceptions_API_UpdateExceptionListItemCommentArray.optional(),
     description: Security_Exceptions_API_ExceptionListItemDescription,
     entries: Security_Exceptions_API_ExceptionListItemEntryArray,
     expire_time: Security_Exceptions_API_ExceptionListItemExpireTime.datetime({
@@ -7131,9 +6517,7 @@ export const post_fleet_agent_download_sources_Body = z.object({
   proxy_id: z.string().nullish(),
   secrets: z
     .object({
-      ssl: z
-        .object({ key: z.union([z.object({ id: z.string() }), z.string()]) })
-        .partial(),
+      ssl: z.object({ key: z.union([z.object({ id: z.string() }), z.string()]) }).partial(),
     })
     .partial()
     .optional(),
@@ -7162,9 +6546,7 @@ export const post_fleet_agent_policies_Body = z.object({
     })
     .partial()
     .optional(),
-  agent_features: z
-    .array(z.object({ enabled: z.boolean(), name: z.string() }))
-    .optional(),
+  agent_features: z.array(z.object({ enabled: z.boolean(), name: z.string() })).optional(),
   agentless: z
     .object({
       cloud_connectors: z.object({
@@ -7185,9 +6567,7 @@ export const post_fleet_agent_policies_Body = z.object({
   fleet_server_host_id: z.string().nullish(),
   force: z.boolean().optional(),
   global_data_tags: z
-    .array(
-      z.object({ name: z.string(), value: z.union([z.string(), z.number()]) })
-    )
+    .array(z.object({ name: z.string(), value: z.union([z.string(), z.number()]) }))
     .optional(),
   has_fleet_server: z.boolean().optional(),
   id: z.string().optional(),
@@ -7210,7 +6590,7 @@ export const post_fleet_agent_policies_Body = z.object({
     })
     .partial()
     .optional(),
-  monitoring_enabled: z.array(z.enum(["logs", "metrics", "traces"])).optional(),
+  monitoring_enabled: z.array(z.enum(['logs', 'metrics', 'traces'])).optional(),
   monitoring_http: z
     .object({
       buffer: z.object({ enabled: z.boolean().default(false) }).partial(),
@@ -7226,9 +6606,7 @@ export const post_fleet_agent_policies_Body = z.object({
   namespace: z.string().min(1),
   overrides: z.object({}).partial().passthrough().nullish(),
   required_versions: z
-    .array(
-      z.object({ percentage: z.number().gte(0).lte(100), version: z.string() })
-    )
+    .array(z.object({ percentage: z.number().gte(0).lte(100), version: z.string() }))
     .nullish(),
   space_ids: z.array(z.string()).optional(),
   supports_agentless: z.boolean().nullish().default(false),
@@ -7255,9 +6633,7 @@ export const put_fleet_agent_policies_agentpolicyid_Body = z.object({
     })
     .partial()
     .optional(),
-  agent_features: z
-    .array(z.object({ enabled: z.boolean(), name: z.string() }))
-    .optional(),
+  agent_features: z.array(z.object({ enabled: z.boolean(), name: z.string() })).optional(),
   agentless: z
     .object({
       cloud_connectors: z.object({
@@ -7279,9 +6655,7 @@ export const put_fleet_agent_policies_agentpolicyid_Body = z.object({
   fleet_server_host_id: z.string().nullish(),
   force: z.boolean().optional(),
   global_data_tags: z
-    .array(
-      z.object({ name: z.string(), value: z.union([z.string(), z.number()]) })
-    )
+    .array(z.object({ name: z.string(), value: z.union([z.string(), z.number()]) }))
     .optional(),
   has_fleet_server: z.boolean().optional(),
   id: z.string().optional(),
@@ -7304,7 +6678,7 @@ export const put_fleet_agent_policies_agentpolicyid_Body = z.object({
     })
     .partial()
     .optional(),
-  monitoring_enabled: z.array(z.enum(["logs", "metrics", "traces"])).optional(),
+  monitoring_enabled: z.array(z.enum(['logs', 'metrics', 'traces'])).optional(),
   monitoring_http: z
     .object({
       buffer: z.object({ enabled: z.boolean().default(false) }).partial(),
@@ -7320,9 +6694,7 @@ export const put_fleet_agent_policies_agentpolicyid_Body = z.object({
   namespace: z.string().min(1),
   overrides: z.object({}).partial().passthrough().nullish(),
   required_versions: z
-    .array(
-      z.object({ percentage: z.number().gte(0).lte(100), version: z.string() })
-    )
+    .array(z.object({ percentage: z.number().gte(0).lte(100), version: z.string() }))
     .nullish(),
   space_ids: z.array(z.string()).optional(),
   supports_agentless: z.boolean().nullish().default(false),
@@ -7352,18 +6724,18 @@ export const post_fleet_agents_agentid_actions_Body = z.object({
     z.object({
       ack_data: z.unknown(),
       data: z.unknown(),
-      type: z.enum(["z.any()", "z.any()", "z.any()"]),
+      type: z.enum(['z.any()', 'z.any()', 'z.any()']),
     }),
     z.object({
       data: z.object({
-        log_level: z.enum(["debug", "info", "warning", "error"]).nullable(),
+        log_level: z.enum(['debug', 'info', 'warning', 'error']).nullable(),
       }),
-      type: z.literal("z.any()"),
+      type: z.literal('z.any()'),
     }),
   ]),
 });
 export const post_fleet_agents_agentid_request_diagnostics_Body = z
-  .object({ additional_metrics: z.array(z.literal("z.any()")) })
+  .object({ additional_metrics: z.array(z.literal('z.any()')) })
   .partial();
 export const post_fleet_agents_agentid_unenroll_Body = z
   .object({ force: z.boolean(), revoke: z.boolean() })
@@ -7381,7 +6753,7 @@ export const post_fleet_agents_bulk_reassign_Body = z.object({
   policy_id: z.string(),
 });
 export const post_fleet_agents_bulk_request_diagnostics_Body = z.object({
-  additional_metrics: z.array(z.literal("z.any()")).optional(),
+  additional_metrics: z.array(z.literal('z.any()')).optional(),
   agents: z.union([z.array(z.string()), z.string()]),
   batchSize: z.number().optional(),
 });
@@ -7422,7 +6794,7 @@ export const post_fleet_epm_custom_integrations_Body = z.object({
   datasets: z.array(
     z.object({
       name: z.string(),
-      type: z.enum(["logs", "metrics", "traces", "synthetics", "profiling"]),
+      type: z.enum(['logs', 'metrics', 'traces', 'synthetics', 'profiling']),
     })
   ),
   force: z.boolean().optional(),
@@ -7453,9 +6825,7 @@ export const post_fleet_epm_packages_bulk_uninstall_Body = z.object({
 });
 export const post_fleet_epm_packages_bulk_upgrade_Body = z.object({
   force: z.boolean().optional().default(false),
-  packages: z
-    .array(z.object({ name: z.string(), version: z.string().optional() }))
-    .min(1),
+  packages: z.array(z.object({ name: z.string(), version: z.string().optional() })).min(1),
   prerelease: z.boolean().optional(),
   upgrade_package_policies: z.boolean().optional().default(false),
 });
@@ -7468,8 +6838,9 @@ export const post_fleet_epm_packages_pkgname_pkgversion_Body = z
 export const post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_Body = z
   .object({ force: z.boolean(), space_ids: z.array(z.string()).min(1) })
   .partial();
-export const post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body =
-  z.object({ transforms: z.array(z.object({ transformId: z.string() })) });
+export const post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body = z.object({
+  transforms: z.array(z.object({ transformId: z.string() })),
+});
 export const searchAfter = z.array(z.union([z.string(), z.number()])).optional();
 export const post_fleet_fleet_server_hosts_Body = z.object({
   host_urls: z.array(z.string()).min(1),
@@ -7494,7 +6865,7 @@ export const post_fleet_fleet_server_hosts_Body = z.object({
     .object({
       certificate: z.string(),
       certificate_authorities: z.array(z.string()),
-      client_auth: z.enum(["optional", "required", "none"]),
+      client_auth: z.enum(['optional', 'required', 'none']),
       es_certificate: z.string(),
       es_certificate_authorities: z.array(z.string()),
       es_key: z.string(),
@@ -7524,7 +6895,7 @@ export const put_fleet_fleet_server_hosts_itemid_Body = z.object({
     .object({
       certificate: z.string(),
       certificate_authorities: z.array(z.string()),
-      client_auth: z.enum(["optional", "required", "none"]),
+      client_auth: z.enum(['optional', 'required', 'none']),
       es_certificate: z.string(),
       es_certificate_authorities: z.array(z.string()),
       es_key: z.string(),
@@ -7546,15 +6917,11 @@ export const post_fleet_outputs_Body = z.union([
     is_internal: z.boolean().optional(),
     is_preconfigured: z.boolean().optional(),
     name: z.string(),
-    preset: z
-      .enum(["balanced", "custom", "throughput", "scale", "latency"])
-      .optional(),
+    preset: z.enum(['balanced', 'custom', 'throughput', 'scale', 'latency']).optional(),
     proxy_id: z.string().nullish(),
     secrets: z
       .object({
-        ssl: z
-          .object({ key: z.union([z.object({ id: z.string() }), z.string()]) })
-          .partial(),
+        ssl: z.object({ key: z.union([z.object({ id: z.string() }), z.string()]) }).partial(),
       })
       .partial()
       .optional(),
@@ -7577,11 +6944,11 @@ export const post_fleet_outputs_Body = z.union([
         certificate: z.string(),
         certificate_authorities: z.array(z.string()),
         key: z.string(),
-        verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+        verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
       })
       .partial()
       .nullish(),
-    type: z.literal("elasticsearch"),
+    type: z.literal('elasticsearch'),
     write_to_logs_streams: z.boolean().optional(),
   }),
   z.object({
@@ -7598,16 +6965,12 @@ export const post_fleet_outputs_Body = z.union([
     kibana_api_key: z.string().nullish(),
     kibana_url: z.string().nullish(),
     name: z.string(),
-    preset: z
-      .enum(["balanced", "custom", "throughput", "scale", "latency"])
-      .optional(),
+    preset: z.enum(['balanced', 'custom', 'throughput', 'scale', 'latency']).optional(),
     proxy_id: z.string().nullish(),
     secrets: z
       .object({
         service_token: z.union([z.object({ id: z.string() }), z.string()]),
-        ssl: z
-          .object({ key: z.union([z.object({ id: z.string() }), z.string()]) })
-          .partial(),
+        ssl: z.object({ key: z.union([z.object({ id: z.string() }), z.string()]) }).partial(),
       })
       .partial()
       .optional(),
@@ -7631,13 +6994,13 @@ export const post_fleet_outputs_Body = z.union([
         certificate: z.string(),
         certificate_authorities: z.array(z.string()),
         key: z.string(),
-        verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+        verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
       })
       .partial()
       .nullish(),
     sync_integrations: z.boolean().optional(),
     sync_uninstalled_integrations: z.boolean().optional(),
-    type: z.literal("remote_elasticsearch"),
+    type: z.literal('remote_elasticsearch'),
     write_to_logs_streams: z.boolean().optional(),
   }),
   z.object({
@@ -7655,9 +7018,7 @@ export const post_fleet_outputs_Body = z.union([
     proxy_id: z.string().nullish(),
     secrets: z
       .object({
-        ssl: z
-          .object({ key: z.union([z.object({ id: z.string() }), z.string()]) })
-          .partial(),
+        ssl: z.object({ key: z.union([z.object({ id: z.string() }), z.string()]) }).partial(),
       })
       .partial()
       .optional(),
@@ -7680,33 +7041,26 @@ export const post_fleet_outputs_Body = z.union([
         certificate: z.string(),
         certificate_authorities: z.array(z.string()),
         key: z.string(),
-        verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+        verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
       })
       .partial()
       .nullish(),
-    type: z.literal("logstash"),
+    type: z.literal('logstash'),
     write_to_logs_streams: z.boolean().optional(),
   }),
   z.object({
     allow_edit: z.array(z.string()).optional(),
-    auth_type: z.enum(["none", "user_pass", "ssl", "kerberos"]),
+    auth_type: z.enum(['none', 'user_pass', 'ssl', 'kerberos']),
     broker_timeout: z.number().optional(),
     ca_sha256: z.string().nullish(),
     ca_trusted_fingerprint: z.string().nullish(),
     client_id: z.string().optional(),
-    compression: z.enum(["gzip", "snappy", "lz4", "none"]).optional(),
+    compression: z.enum(['gzip', 'snappy', 'lz4', 'none']).optional(),
     compression_level: z.union([z.number(), z.unknown()]).nullable(),
     config_yaml: z.string().nullish(),
-    connection_type: z
-      .union([z.enum(["plaintext", "encryption"]), z.unknown()])
-      .nullable(),
-    hash: z
-      .object({ hash: z.string(), random: z.boolean() })
-      .partial()
-      .optional(),
-    headers: z
-      .array(z.object({ key: z.string(), value: z.string() }))
-      .optional(),
+    connection_type: z.union([z.enum(['plaintext', 'encryption']), z.unknown()]).nullable(),
+    hash: z.object({ hash: z.string(), random: z.boolean() }).partial().optional(),
+    headers: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
     hosts: z.array(z.string()).min(1),
     id: z.string().optional(),
     is_default: z.boolean().optional().default(false),
@@ -7715,19 +7069,15 @@ export const post_fleet_outputs_Body = z.union([
     is_preconfigured: z.boolean().optional(),
     key: z.string().optional(),
     name: z.string(),
-    partition: z.enum(["random", "round_robin", "hash"]).optional(),
-    password: z
-      .union([z.unknown(), z.union([z.string(), z.unknown()])])
-      .nullable(),
+    partition: z.enum(['random', 'round_robin', 'hash']).optional(),
+    password: z.union([z.unknown(), z.union([z.string(), z.unknown()])]).nullable(),
     proxy_id: z.string().nullish(),
     random: z.object({ group_events: z.number() }).partial().optional(),
-    required_acks: z
-      .union([z.literal(1), z.literal(0), z.literal(-1)])
-      .optional(),
+    required_acks: z.union([z.literal(1), z.literal(0), z.literal(-1)]).optional(),
     round_robin: z.object({ group_events: z.number() }).partial().optional(),
     sasl: z
       .object({
-        mechanism: z.enum(["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"]),
+        mechanism: z.enum(['PLAIN', 'SCRAM-SHA-256', 'SCRAM-SHA-512']),
       })
       .partial()
       .nullish(),
@@ -7759,13 +7109,13 @@ export const post_fleet_outputs_Body = z.union([
         certificate: z.string(),
         certificate_authorities: z.array(z.string()),
         key: z.string(),
-        verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+        verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
       })
       .partial()
       .nullish(),
     timeout: z.number().optional(),
     topic: z.string().optional(),
-    type: z.literal("kafka"),
+    type: z.literal('kafka'),
     username: z.union([z.string(), z.unknown()]).nullable(),
     version: z.string().optional(),
     write_to_logs_streams: z.boolean().optional(),
@@ -7785,7 +7135,7 @@ export const put_fleet_outputs_outputid_Body = z.union([
       is_internal: z.boolean(),
       is_preconfigured: z.boolean(),
       name: z.string(),
-      preset: z.enum(["balanced", "custom", "throughput", "scale", "latency"]),
+      preset: z.enum(['balanced', 'custom', 'throughput', 'scale', 'latency']),
       proxy_id: z.string().nullable(),
       secrets: z
         .object({
@@ -7815,11 +7165,11 @@ export const put_fleet_outputs_outputid_Body = z.union([
           certificate: z.string(),
           certificate_authorities: z.array(z.string()),
           key: z.string(),
-          verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+          verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
         })
         .partial()
         .nullable(),
-      type: z.literal("elasticsearch"),
+      type: z.literal('elasticsearch'),
       write_to_logs_streams: z.boolean(),
     })
     .partial(),
@@ -7838,7 +7188,7 @@ export const put_fleet_outputs_outputid_Body = z.union([
       kibana_api_key: z.string().nullable(),
       kibana_url: z.string().nullable(),
       name: z.string(),
-      preset: z.enum(["balanced", "custom", "throughput", "scale", "latency"]),
+      preset: z.enum(['balanced', 'custom', 'throughput', 'scale', 'latency']),
       proxy_id: z.string().nullable(),
       secrets: z
         .object({
@@ -7870,13 +7220,13 @@ export const put_fleet_outputs_outputid_Body = z.union([
           certificate: z.string(),
           certificate_authorities: z.array(z.string()),
           key: z.string(),
-          verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+          verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
         })
         .partial()
         .nullable(),
       sync_integrations: z.boolean(),
       sync_uninstalled_integrations: z.boolean(),
-      type: z.literal("remote_elasticsearch"),
+      type: z.literal('remote_elasticsearch'),
       write_to_logs_streams: z.boolean(),
     })
     .partial(),
@@ -7922,34 +7272,27 @@ export const put_fleet_outputs_outputid_Body = z.union([
           certificate: z.string(),
           certificate_authorities: z.array(z.string()),
           key: z.string(),
-          verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+          verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
         })
         .partial()
         .nullable(),
-      type: z.literal("logstash"),
+      type: z.literal('logstash'),
       write_to_logs_streams: z.boolean(),
     })
     .partial(),
   z.object({
     allow_edit: z.array(z.string()).optional(),
-    auth_type: z.enum(["none", "user_pass", "ssl", "kerberos"]).optional(),
+    auth_type: z.enum(['none', 'user_pass', 'ssl', 'kerberos']).optional(),
     broker_timeout: z.number().optional(),
     ca_sha256: z.string().nullish(),
     ca_trusted_fingerprint: z.string().nullish(),
     client_id: z.string().optional(),
-    compression: z.enum(["gzip", "snappy", "lz4", "none"]).optional(),
+    compression: z.enum(['gzip', 'snappy', 'lz4', 'none']).optional(),
     compression_level: z.union([z.number(), z.unknown()]).nullable(),
     config_yaml: z.string().nullish(),
-    connection_type: z
-      .union([z.enum(["plaintext", "encryption"]), z.unknown()])
-      .nullable(),
-    hash: z
-      .object({ hash: z.string(), random: z.boolean() })
-      .partial()
-      .optional(),
-    headers: z
-      .array(z.object({ key: z.string(), value: z.string() }))
-      .optional(),
+    connection_type: z.union([z.enum(['plaintext', 'encryption']), z.unknown()]).nullable(),
+    hash: z.object({ hash: z.string(), random: z.boolean() }).partial().optional(),
+    headers: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
     hosts: z.array(z.string()).min(1).optional(),
     id: z.string().optional(),
     is_default: z.boolean().optional().default(false),
@@ -7958,19 +7301,15 @@ export const put_fleet_outputs_outputid_Body = z.union([
     is_preconfigured: z.boolean().optional(),
     key: z.string().optional(),
     name: z.string(),
-    partition: z.enum(["random", "round_robin", "hash"]).optional(),
-    password: z
-      .union([z.unknown(), z.union([z.string(), z.unknown()])])
-      .nullable(),
+    partition: z.enum(['random', 'round_robin', 'hash']).optional(),
+    password: z.union([z.unknown(), z.union([z.string(), z.unknown()])]).nullable(),
     proxy_id: z.string().nullish(),
     random: z.object({ group_events: z.number() }).partial().optional(),
-    required_acks: z
-      .union([z.literal(1), z.literal(0), z.literal(-1)])
-      .optional(),
+    required_acks: z.union([z.literal(1), z.literal(0), z.literal(-1)]).optional(),
     round_robin: z.object({ group_events: z.number() }).partial().optional(),
     sasl: z
       .object({
-        mechanism: z.enum(["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"]),
+        mechanism: z.enum(['PLAIN', 'SCRAM-SHA-256', 'SCRAM-SHA-512']),
       })
       .partial()
       .nullish(),
@@ -8002,13 +7341,13 @@ export const put_fleet_outputs_outputid_Body = z.union([
         certificate: z.string(),
         certificate_authorities: z.array(z.string()),
         key: z.string(),
-        verification_mode: z.enum(["full", "none", "certificate", "strict"]),
+        verification_mode: z.enum(['full', 'none', 'certificate', 'strict']),
       })
       .partial()
       .nullish(),
     timeout: z.number().optional(),
     topic: z.string().optional(),
-    type: z.literal("kafka").optional(),
+    type: z.literal('kafka').optional(),
     username: z.union([z.string(), z.unknown()]).nullable(),
     version: z.string().optional(),
     write_to_logs_streams: z.boolean().optional(),
@@ -8055,9 +7394,7 @@ export const post_fleet_package_policies_Body = z.union([
                   .object({
                     dynamic_dataset: z.boolean(),
                     dynamic_namespace: z.boolean(),
-                    privileges: z
-                      .object({ indices: z.array(z.string()) })
-                      .partial(),
+                    privileges: z.object({ indices: z.array(z.string()) }).partial(),
                   })
                   .partial()
                   .optional(),
@@ -8066,7 +7403,7 @@ export const post_fleet_package_policies_Body = z.union([
               enabled: z.boolean(),
               id: z.string().optional(),
               keep_enabled: z.boolean().optional(),
-              release: z.enum(["ga", "beta", "experimental"]).optional(),
+              release: z.enum(['ga', 'beta', 'experimental']).optional(),
               vars: z
                 .record(
                   z.object({
@@ -8269,9 +7606,7 @@ export const put_fleet_package_policies_packagepolicyid_Body = z.union([
                     .object({
                       dynamic_dataset: z.boolean(),
                       dynamic_namespace: z.boolean(),
-                      privileges: z
-                        .object({ indices: z.array(z.string()) })
-                        .partial(),
+                      privileges: z.object({ indices: z.array(z.string()) }).partial(),
                     })
                     .partial()
                     .optional(),
@@ -8280,7 +7615,7 @@ export const put_fleet_package_policies_packagepolicyid_Body = z.union([
                 enabled: z.boolean(),
                 id: z.string().optional(),
                 keep_enabled: z.boolean().optional(),
-                release: z.enum(["ga", "beta", "experimental"]).optional(),
+                release: z.enum(['ga', 'beta', 'experimental']).optional(),
                 vars: z
                   .record(
                     z.object({
@@ -8454,9 +7789,7 @@ export const post_fleet_proxies_Body = z.object({
   id: z.string().optional(),
   is_preconfigured: z.boolean().optional().default(false),
   name: z.string(),
-  proxy_headers: z
-    .record(z.union([z.string(), z.boolean(), z.number()]))
-    .nullish(),
+  proxy_headers: z.record(z.union([z.string(), z.boolean(), z.number()])).nullish(),
   url: z.string(),
 });
 export const put_fleet_proxies_itemid_Body = z.object({
@@ -8464,9 +7797,7 @@ export const put_fleet_proxies_itemid_Body = z.object({
   certificate_authorities: z.string().nullable(),
   certificate_key: z.string().nullable(),
   name: z.string().optional(),
-  proxy_headers: z
-    .record(z.union([z.string(), z.boolean(), z.number()]))
-    .nullable(),
+  proxy_headers: z.record(z.union([z.string(), z.boolean(), z.number()])).nullable(),
   url: z.string().optional(),
 });
 export const put_fleet_settings_Body = z
@@ -8493,35 +7824,35 @@ export const Security_Lists_API_ListMetadata = z.object({}).partial().passthroug
 export const Security_Lists_API_ListName = z.string();
 export const Security_Lists_API_ListSerializer = z.string();
 export const Security_Lists_API_ListType = z.enum([
-  "binary",
-  "boolean",
-  "byte",
-  "date",
-  "date_nanos",
-  "date_range",
-  "double",
-  "double_range",
-  "float",
-  "float_range",
-  "geo_point",
-  "geo_shape",
-  "half_float",
-  "integer",
-  "integer_range",
-  "ip",
-  "ip_range",
-  "keyword",
-  "long",
-  "long_range",
-  "shape",
-  "short",
-  "text",
+  'binary',
+  'boolean',
+  'byte',
+  'date',
+  'date_nanos',
+  'date_range',
+  'double',
+  'double_range',
+  'float',
+  'float_range',
+  'geo_point',
+  'geo_shape',
+  'half_float',
+  'integer',
+  'integer_range',
+  'ip',
+  'ip_range',
+  'keyword',
+  'long',
+  'long_range',
+  'shape',
+  'short',
+  'text',
 ]);
 export const Security_Lists_API_ListVersion = z.number();
 export const Security_Lists_API_List = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
-    "@timestamp": z.string().datetime({ offset: true }).optional(),
+    '@timestamp': z.string().datetime({ offset: true }).optional(),
     created_at: z.string().datetime({ offset: true }),
     created_by: z.string(),
     description: Security_Lists_API_ListDescription.min(1),
@@ -8582,15 +7913,12 @@ export const UpdateList_Body = z
   .passthrough();
 export const Security_Lists_API_FindListsCursor = z.string();
 export const Security_Lists_API_ListItemId = z.string();
-export const Security_Lists_API_ListItemMetadata = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Lists_API_ListItemMetadata = z.object({}).partial().passthrough();
 export const Security_Lists_API_ListItemValue = z.string();
 export const Security_Lists_API_ListItem = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
-    "@timestamp": z.string().datetime({ offset: true }).optional(),
+    '@timestamp': z.string().datetime({ offset: true }).optional(),
     created_at: z.string().datetime({ offset: true }),
     created_by: z.string(),
     deserializer: Security_Lists_API_ListDeserializer.optional(),
@@ -8610,7 +7938,7 @@ export const PatchListItem_Body = z
     _version: Security_Lists_API_ListVersionId.optional(),
     id: Security_Lists_API_ListItemId.min(1),
     meta: Security_Lists_API_ListItemMetadata.optional(),
-    refresh: z.enum(["true", "false", "wait_for"]).optional(),
+    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
     value: Security_Lists_API_ListItemValue.min(1).optional(),
   })
   .passthrough();
@@ -8619,7 +7947,7 @@ export const CreateListItem_Body = z
     id: Security_Lists_API_ListItemId.min(1).optional(),
     list_id: Security_Lists_API_ListId.min(1),
     meta: Security_Lists_API_ListItemMetadata.optional(),
-    refresh: z.enum(["true", "false", "wait_for"]).optional(),
+    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
     value: Security_Lists_API_ListItemValue.min(1),
   })
   .passthrough();
@@ -8677,9 +8005,7 @@ export const post_maintenance_window_Body = z.object({
       timezone: z.string().optional(),
     }),
   }),
-  scope: z
-    .object({ alerting: z.object({ query: z.object({ kql: z.string() }) }) })
-    .optional(),
+  scope: z.object({ alerting: z.object({ query: z.object({ kql: z.string() }) }) }).optional(),
   title: z.string(),
 });
 export const patch_maintenance_window_id_Body = z
@@ -8728,29 +8054,17 @@ export const Machine_learning_APIs_mlSyncResponseTrainedModels = z
   .passthrough();
 export const Machine_learning_APIs_mlSyncResponseSavedObjectsCreated = z
   .object({
-    "anomaly-detector": z.record(
-      Machine_learning_APIs_mlSyncResponseAnomalyDetectors
-    ),
-    "data-frame-analytics": z.record(
-      Machine_learning_APIs_mlSyncResponseDataFrameAnalytics
-    ),
-    "trained-model": z.record(
-      Machine_learning_APIs_mlSyncResponseTrainedModels
-    ),
+    'anomaly-detector': z.record(Machine_learning_APIs_mlSyncResponseAnomalyDetectors),
+    'data-frame-analytics': z.record(Machine_learning_APIs_mlSyncResponseDataFrameAnalytics),
+    'trained-model': z.record(Machine_learning_APIs_mlSyncResponseTrainedModels),
   })
   .partial()
   .passthrough();
 export const Machine_learning_APIs_mlSyncResponseSavedObjectsDeleted = z
   .object({
-    "anomaly-detector": z.record(
-      Machine_learning_APIs_mlSyncResponseAnomalyDetectors
-    ),
-    "data-frame-analytics": z.record(
-      Machine_learning_APIs_mlSyncResponseDataFrameAnalytics
-    ),
-    "trained-model": z.record(
-      Machine_learning_APIs_mlSyncResponseTrainedModels
-    ),
+    'anomaly-detector': z.record(Machine_learning_APIs_mlSyncResponseAnomalyDetectors),
+    'data-frame-analytics': z.record(Machine_learning_APIs_mlSyncResponseDataFrameAnalytics),
+    'trained-model': z.record(Machine_learning_APIs_mlSyncResponseTrainedModels),
   })
   .partial()
   .passthrough();
@@ -8758,10 +8072,8 @@ export const Machine_learning_APIs_mlSync200Response = z
   .object({
     datafeedsAdded: z.record(Machine_learning_APIs_mlSyncResponseDatafeeds),
     datafeedsRemoved: z.record(Machine_learning_APIs_mlSyncResponseDatafeeds),
-    savedObjectsCreated:
-      Machine_learning_APIs_mlSyncResponseSavedObjectsCreated,
-    savedObjectsDeleted:
-      Machine_learning_APIs_mlSyncResponseSavedObjectsDeleted,
+    savedObjectsCreated: Machine_learning_APIs_mlSyncResponseSavedObjectsCreated,
+    savedObjectsDeleted: Machine_learning_APIs_mlSyncResponseSavedObjectsDeleted,
   })
   .partial()
   .passthrough();
@@ -8831,19 +8143,19 @@ export const Observability_AI_Assistant_API_FunctionCall = z
   .object({
     arguments: z.string().optional(),
     name: z.string(),
-    trigger: z.enum(["assistant", "user", "elastic"]),
+    trigger: z.enum(['assistant', 'user', 'elastic']),
   })
   .passthrough();
 export const Observability_AI_Assistant_API_MessageRoleEnum = z.enum([
-  "system",
-  "assistant",
-  "function",
-  "user",
-  "elastic",
+  'system',
+  'assistant',
+  'function',
+  'user',
+  'elastic',
 ]);
 export const Observability_AI_Assistant_API_Message = z
   .object({
-    "@timestamp": z.string(),
+    '@timestamp': z.string(),
     message: z
       .object({
         content: z.string().optional(),
@@ -8862,18 +8174,13 @@ export const observability_ai_assistant_chat_complete_Body = z
     connectorId: z.string(),
     conversationId: z.string().optional(),
     disableFunctions: z.boolean().optional(),
-    instructions: z
-      .array(Observability_AI_Assistant_API_Instruction)
-      .optional(),
+    instructions: z.array(Observability_AI_Assistant_API_Instruction).optional(),
     messages: z.array(Observability_AI_Assistant_API_Message),
     persist: z.boolean(),
     title: z.string().optional(),
   })
   .passthrough();
-export const Security_Osquery_API_FindLiveQueryResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_FindLiveQueryResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_ECSMappingItem = z
   .object({
     field: z.string(),
@@ -8881,11 +8188,8 @@ export const Security_Osquery_API_ECSMappingItem = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_ECSMapping = z.record(
-  Security_Osquery_API_ECSMappingItem
-);
-export const Security_Osquery_API_ECSMappingOrUndefined =
-  Security_Osquery_API_ECSMapping;
+export const Security_Osquery_API_ECSMapping = z.record(Security_Osquery_API_ECSMappingItem);
+export const Security_Osquery_API_ECSMappingOrUndefined = Security_Osquery_API_ECSMapping;
 export const Security_Osquery_API_PackId = z.string();
 export const Security_Osquery_API_PackIdOrUndefined = Security_Osquery_API_PackId;
 export const Security_Osquery_API_QueryId = z.string();
@@ -8910,13 +8214,10 @@ export const Security_Osquery_API_ArrayQueriesItem = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_ArrayQueries = z.array(
-  Security_Osquery_API_ArrayQueriesItem
-);
+export const Security_Osquery_API_ArrayQueries = z.array(Security_Osquery_API_ArrayQueriesItem);
 export const Security_Osquery_API_QueryOrUndefined = Security_Osquery_API_Query;
 export const Security_Osquery_API_SavedQueryId = z.string();
-export const Security_Osquery_API_SavedQueryIdOrUndefined =
-  Security_Osquery_API_SavedQueryId;
+export const Security_Osquery_API_SavedQueryIdOrUndefined = Security_Osquery_API_SavedQueryId;
 export const Security_Osquery_API_CreateLiveQueryRequestBody = z
   .object({
     agent_all: z.boolean(),
@@ -8935,10 +8236,7 @@ export const Security_Osquery_API_CreateLiveQueryRequestBody = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_CreateLiveQueryResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_CreateLiveQueryResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_FindLiveQueryDetailsResponse = z
   .object({})
   .partial()
@@ -8947,19 +8245,14 @@ export const Security_Osquery_API_GetLiveQueryResultsResponse = z
   .object({})
   .partial()
   .passthrough();
-export const Security_Osquery_API_FindPacksResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_FindPacksResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_PackDescription = z.string();
-export const Security_Osquery_API_PackDescriptionOrUndefined =
-  Security_Osquery_API_PackDescription;
+export const Security_Osquery_API_PackDescriptionOrUndefined = Security_Osquery_API_PackDescription;
 export const Security_Osquery_API_Enabled = z.boolean();
 export const Security_Osquery_API_EnabledOrUndefined = Security_Osquery_API_Enabled;
 export const Security_Osquery_API_PackName = z.string();
 export const Security_Osquery_API_PolicyIds = z.array(z.string());
-export const Security_Osquery_API_PolicyIdsOrUndefined =
-  Security_Osquery_API_PolicyIds;
+export const Security_Osquery_API_PolicyIdsOrUndefined = Security_Osquery_API_PolicyIds;
 export const Security_Osquery_API_ObjectQueriesItem = z
   .object({
     ecs_mapping: Security_Osquery_API_ECSMappingOrUndefined.nullable(),
@@ -8973,9 +8266,7 @@ export const Security_Osquery_API_ObjectQueriesItem = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_ObjectQueries = z.record(
-  Security_Osquery_API_ObjectQueriesItem
-);
+export const Security_Osquery_API_ObjectQueries = z.record(Security_Osquery_API_ObjectQueriesItem);
 export const Security_Osquery_API_Shards = z.record(z.number());
 export const Security_Osquery_API_CreatePacksRequestBody = z
   .object({
@@ -8988,14 +8279,8 @@ export const Security_Osquery_API_CreatePacksRequestBody = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_CreatePacksResponse = z
-  .object({})
-  .partial()
-  .passthrough();
-export const Security_Osquery_API_FindPackResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_CreatePacksResponse = z.object({}).partial().passthrough();
+export const Security_Osquery_API_FindPackResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_UpdatePacksRequestBody = z
   .object({
     description: Security_Osquery_API_PackDescriptionOrUndefined.nullable(),
@@ -9007,22 +8292,15 @@ export const Security_Osquery_API_UpdatePacksRequestBody = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_UpdatePacksResponse = z
-  .object({})
-  .partial()
-  .passthrough();
-export const Security_Osquery_API_FindSavedQueryResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_UpdatePacksResponse = z.object({}).partial().passthrough();
+export const Security_Osquery_API_FindSavedQueryResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_SavedQueryDescription = z.string();
 export const Security_Osquery_API_SavedQueryDescriptionOrUndefined =
   Security_Osquery_API_SavedQueryDescription;
 export const Security_Osquery_API_Interval = z.string();
 export const Security_Osquery_API_CreateSavedQueryRequestBody = z
   .object({
-    description:
-      Security_Osquery_API_SavedQueryDescriptionOrUndefined.nullable(),
+    description: Security_Osquery_API_SavedQueryDescriptionOrUndefined.nullable(),
     ecs_mapping: Security_Osquery_API_ECSMappingOrUndefined.nullable(),
     id: Security_Osquery_API_SavedQueryId,
     interval: Security_Osquery_API_Interval,
@@ -9034,14 +8312,8 @@ export const Security_Osquery_API_CreateSavedQueryRequestBody = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_CreateSavedQueryResponse = z
-  .object({})
-  .partial()
-  .passthrough();
-export const Security_Osquery_API_DefaultSuccessResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_CreateSavedQueryResponse = z.object({}).partial().passthrough();
+export const Security_Osquery_API_DefaultSuccessResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_FindSavedQueryDetailResponse = z
   .object({})
   .partial()
@@ -9049,8 +8321,7 @@ export const Security_Osquery_API_FindSavedQueryDetailResponse = z
 export const Security_Osquery_API_IntervalOrUndefined = Security_Osquery_API_Interval;
 export const Security_Osquery_API_UpdateSavedQueryRequestBody = z
   .object({
-    description:
-      Security_Osquery_API_SavedQueryDescriptionOrUndefined.nullable(),
+    description: Security_Osquery_API_SavedQueryDescriptionOrUndefined.nullable(),
     ecs_mapping: Security_Osquery_API_ECSMappingOrUndefined.nullable(),
     id: Security_Osquery_API_SavedQueryId,
     interval: Security_Osquery_API_IntervalOrUndefined.nullable(),
@@ -9062,10 +8333,7 @@ export const Security_Osquery_API_UpdateSavedQueryRequestBody = z
   })
   .partial()
   .passthrough();
-export const Security_Osquery_API_UpdateSavedQueryResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Security_Osquery_API_UpdateSavedQueryResponse = z.object({}).partial().passthrough();
 export const PersistPinnedEventRoute_Body = z
   .object({
     eventId: z.string(),
@@ -9086,10 +8354,9 @@ export const Security_Timeline_API_BarePinnedEvent =
   Security_Timeline_API_PinnedEventCreatedAndUpdatedMetadata.and(
     z.object({ eventId: z.string(), timelineId: z.string() }).passthrough()
   );
-export const Security_Timeline_API_PinnedEvent =
-  Security_Timeline_API_BarePinnedEvent.and(
-    z.object({ pinnedEventId: z.string(), version: z.string() }).passthrough()
-  );
+export const Security_Timeline_API_PinnedEvent = Security_Timeline_API_BarePinnedEvent.and(
+  z.object({ pinnedEventId: z.string(), version: z.string() }).passthrough()
+);
 export const Security_Timeline_API_PersistPinnedEventResponse = z.union([
   Security_Timeline_API_PinnedEvent,
   z.object({ unpinned: z.boolean() }).passthrough(),
@@ -9100,31 +8367,23 @@ export const Security_Entity_Analytics_API_TaskManagerUnavailableResponse = z
 export const Security_Entity_Analytics_API_CleanUpRiskEngineErrorResponse = z
   .object({
     cleanup_successful: z.boolean(),
-    errors: z.array(
-      z.object({ error: z.string(), seq: z.number().int() }).passthrough()
-    ),
+    errors: z.array(z.object({ error: z.string(), seq: z.number().int() }).passthrough()),
   })
   .passthrough();
 export const ConfigureRiskEngineSavedObject_Body = z
   .object({
     exclude_alert_statuses: z.array(z.string()),
     exclude_alert_tags: z.array(z.string()),
-    range: z
-      .object({ end: z.string(), start: z.string() })
-      .partial()
-      .passthrough(),
+    range: z.object({ end: z.string(), start: z.string() }).partial().passthrough(),
   })
   .partial()
   .passthrough();
-export const Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse =
-  z
-    .object({
-      errors: z.array(
-        z.object({ error: z.string(), seq: z.number().int() }).passthrough()
-      ),
-      risk_engine_saved_object_configured: z.boolean(),
-    })
-    .passthrough();
+export const Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse = z
+  .object({
+    errors: z.array(z.object({ error: z.string(), seq: z.number().int() }).passthrough()),
+    risk_engine_saved_object_configured: z.boolean(),
+  })
+  .passthrough();
 export const Security_Entity_Analytics_API_RiskEngineScheduleNowResponse = z
   .object({ success: z.boolean() })
   .partial()
@@ -9199,9 +8458,7 @@ export const Security_AI_Assistant_API_AnonymizationFieldDetailsInError = z
   .passthrough();
 export const Security_AI_Assistant_API_NormalizedAnonymizationFieldError = z
   .object({
-    anonymization_fields: z.array(
-      Security_AI_Assistant_API_AnonymizationFieldDetailsInError
-    ),
+    anonymization_fields: z.array(Security_AI_Assistant_API_AnonymizationFieldDetailsInError),
     err_code: z.string().optional(),
     message: z.string(),
     status_code: z.number().int(),
@@ -9223,23 +8480,21 @@ export const Security_AI_Assistant_API_AnonymizationFieldResponse = z
     updatedBy: z.string().optional(),
   })
   .passthrough();
-export const Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason =
-  z.literal("ANONYMIZATION_FIELD_NOT_MODIFIED");
+export const Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason = z.literal(
+  'ANONYMIZATION_FIELD_NOT_MODIFIED'
+);
 export const Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult = z
   .object({
     id: z.string(),
     name: z.string().optional(),
-    skip_reason:
-      Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason,
+    skip_reason: Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason,
   })
   .passthrough();
 export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResults = z
   .object({
     created: z.array(Security_AI_Assistant_API_AnonymizationFieldResponse),
     deleted: z.array(z.string()),
-    skipped: z.array(
-      Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult
-    ),
+    skipped: z.array(Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult),
     updated: z.array(Security_AI_Assistant_API_AnonymizationFieldResponse),
   })
   .passthrough();
@@ -9256,11 +8511,8 @@ export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResponse
     anonymization_fields_count: z.number().int().optional(),
     attributes: z
       .object({
-        errors: z
-          .array(Security_AI_Assistant_API_NormalizedAnonymizationFieldError)
-          .optional(),
-        results:
-          Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResults,
+        errors: z.array(Security_AI_Assistant_API_NormalizedAnonymizationFieldError).optional(),
+        results: Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResults,
         summary: Security_AI_Assistant_API_BulkCrudActionSummary,
       })
       .passthrough(),
@@ -9269,15 +8521,8 @@ export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResponse
     success: z.boolean().optional(),
   })
   .passthrough();
-export const Security_AI_Assistant_API_MessageData = z
-  .object({})
-  .partial()
-  .passthrough();
-export const Security_AI_Assistant_API_ChatMessageRole = z.enum([
-  "system",
-  "user",
-  "assistant",
-]);
+export const Security_AI_Assistant_API_MessageData = z.object({}).partial().passthrough();
+export const Security_AI_Assistant_API_ChatMessageRole = z.enum(['system', 'user', 'assistant']);
 export const Security_AI_Assistant_API_ChatMessage = z
   .object({
     content: z.string().optional(),
@@ -9304,11 +8549,7 @@ export const DeleteAllConversations_Body = z
   .object({ excludedIds: z.array(z.string()) })
   .partial()
   .passthrough();
-export const Security_AI_Assistant_API_Provider = z.enum([
-  "OpenAI",
-  "Azure OpenAI",
-  "Other",
-]);
+export const Security_AI_Assistant_API_Provider = z.enum(['OpenAI', 'Azure OpenAI', 'Other']);
 export const Security_AI_Assistant_API_ApiConfig = z
   .object({
     actionTypeId: z.string(),
@@ -9318,10 +8559,7 @@ export const Security_AI_Assistant_API_ApiConfig = z
     provider: Security_AI_Assistant_API_Provider.optional(),
   })
   .passthrough();
-export const Security_AI_Assistant_API_ConversationCategory = z.enum([
-  "assistant",
-  "insights",
-]);
+export const Security_AI_Assistant_API_ConversationCategory = z.enum(['assistant', 'insights']);
 export const Security_AI_Assistant_API_BaseContentReference = z
   .object({ id: z.string(), type: z.string() })
   .passthrough();
@@ -9331,26 +8569,24 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryContentReference =
       .object({
         knowledgeBaseEntryId: z.string(),
         knowledgeBaseEntryName: z.string(),
-        type: z.literal("KnowledgeBaseEntry"),
+        type: z.literal('KnowledgeBaseEntry'),
       })
       .passthrough()
   );
 export const Security_AI_Assistant_API_SecurityAlertContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
-    z
-      .object({ alertId: z.string(), type: z.literal("SecurityAlert") })
-      .passthrough()
+    z.object({ alertId: z.string(), type: z.literal('SecurityAlert') }).passthrough()
   );
 export const Security_AI_Assistant_API_SecurityAlertsPageContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
-    z.object({ type: z.literal("SecurityAlertsPage") }).passthrough()
+    z.object({ type: z.literal('SecurityAlertsPage') }).passthrough()
   );
 export const Security_AI_Assistant_API_ProductDocumentationContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z
       .object({
         title: z.string(),
-        type: z.literal("ProductDocumentation"),
+        type: z.literal('ProductDocumentation'),
         url: z.string(),
       })
       .passthrough()
@@ -9361,11 +8597,8 @@ export const Security_AI_Assistant_API_EsqlContentReference =
       .object({
         label: z.string(),
         query: z.string(),
-        timerange: z
-          .object({ from: z.string(), to: z.string() })
-          .passthrough()
-          .optional(),
-        type: z.literal("EsqlQuery"),
+        timerange: z.object({ from: z.string(), to: z.string() }).passthrough().optional(),
+        type: z.literal('EsqlQuery'),
       })
       .passthrough()
   );
@@ -9375,7 +8608,7 @@ export const Security_AI_Assistant_API_HrefContentReference =
       .object({
         href: z.string(),
         label: z.string().optional(),
-        type: z.literal("Href"),
+        type: z.literal('Href'),
       })
       .passthrough()
   );
@@ -9394,11 +8627,7 @@ export const Security_AI_Assistant_API_MessageMetadata = z
   .partial()
   .passthrough();
 export const Security_AI_Assistant_API_Reader = z.object({}).partial().passthrough();
-export const Security_AI_Assistant_API_MessageRole = z.enum([
-  "system",
-  "user",
-  "assistant",
-]);
+export const Security_AI_Assistant_API_MessageRole = z.enum(['system', 'user', 'assistant']);
 export const Security_AI_Assistant_API_TraceData = z
   .object({ traceId: z.string(), transactionId: z.string() })
   .partial()
@@ -9466,16 +8695,16 @@ export const Security_AI_Assistant_API_KnowledgeBaseResponse = z
   .partial()
   .passthrough();
 export const Security_AI_Assistant_API_KnowledgeBaseResource = z.enum([
-  "security_labs",
-  "defend_insights",
-  "user",
+  'security_labs',
+  'defend_insights',
+  'user',
 ]);
 export const Security_AI_Assistant_API_DocumentEntryRequiredFields = z
   .object({
     kbResource: Security_AI_Assistant_API_KnowledgeBaseResource,
     source: z.string(),
     text: z.string(),
-    type: z.literal("document"),
+    type: z.literal('document'),
   })
   .passthrough();
 export const Security_AI_Assistant_API_Vector = z
@@ -9501,7 +8730,7 @@ export const Security_AI_Assistant_API_IndexEntryRequiredFields = z
     field: z.string(),
     index: z.string(),
     queryDescription: z.string(),
-    type: z.literal("index"),
+    type: z.literal('index'),
   })
   .passthrough();
 export const Security_AI_Assistant_API_InputSchema = z.array(
@@ -9621,30 +8850,26 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError = z
 export const Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError = z
   .object({
     err_code: z.string().optional(),
-    knowledgeBaseEntries: z.array(
-      Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError
-    ),
+    knowledgeBaseEntries: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError),
     message: z.string(),
     statusCode: z.number().int(),
   })
   .passthrough();
-export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason =
-  z.literal("KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED");
+export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason = z.literal(
+  'KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED'
+);
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult = z
   .object({
     id: z.string(),
     name: z.string().optional(),
-    skip_reason:
-      Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason,
+    skip_reason: Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason,
   })
   .passthrough();
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults = z
   .object({
     created: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryResponse),
     deleted: z.array(z.string()),
-    skipped: z.array(
-      Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult
-    ),
+    skipped: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult),
     updated: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryResponse),
   })
   .passthrough();
@@ -9660,13 +8885,9 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResponse 
   .object({
     attributes: z
       .object({
-        errors: z
-          .array(Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError)
-          .optional(),
-        results:
-          Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults,
-        summary:
-          Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionSummary,
+        errors: z.array(Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError).optional(),
+        results: Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults,
+        summary: Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionSummary,
       })
       .passthrough(),
     knowledgeBaseEntriesCount: z.number().int().optional(),
@@ -9682,7 +8903,7 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps = z.un
   Security_AI_Assistant_API_DocumentEntryCreateFields,
   Security_AI_Assistant_API_IndexEntryCreateFields,
 ]);
-export const Security_AI_Assistant_API_PromptType = z.enum(["system", "quick"]);
+export const Security_AI_Assistant_API_PromptType = z.enum(['system', 'quick']);
 export const Security_AI_Assistant_API_PromptCreateProps = z
   .object({
     categories: z.array(z.string()).optional(),
@@ -9749,7 +8970,7 @@ export const Security_AI_Assistant_API_PromptResponse = z
   })
   .passthrough();
 export const Security_AI_Assistant_API_PromptsBulkActionSkipReason = z.literal(
-  "PROMPT_FIELD_NOT_MODIFIED"
+  'PROMPT_FIELD_NOT_MODIFIED'
 );
 export const Security_AI_Assistant_API_PromptsBulkActionSkipResult = z
   .object({
@@ -9770,9 +8991,7 @@ export const Security_AI_Assistant_API_PromptsBulkCrudActionResponse = z
   .object({
     attributes: z
       .object({
-        errors: z
-          .array(Security_AI_Assistant_API_NormalizedPromptError)
-          .optional(),
+        errors: z.array(Security_AI_Assistant_API_NormalizedPromptError).optional(),
         results: Security_AI_Assistant_API_PromptsBulkCrudActionResults,
         summary: Security_AI_Assistant_API_BulkCrudActionSummary,
       })
@@ -9789,7 +9008,7 @@ export const post_security_role_query_Body = z
     from: z.number(),
     query: z.string(),
     size: z.number(),
-    sort: z.object({ direction: z.enum(["asc", "desc"]), field: z.string() }),
+    sort: z.object({ direction: z.enum(['asc', 'desc']), field: z.string() }),
   })
   .partial();
 export const put_security_role_name_Body = z.object({
@@ -9831,9 +9050,9 @@ export const put_security_role_name_Body = z.object({
         base: z.union([z.array(z.string()), z.array(z.string())]).nullable(),
         feature: z.record(z.array(z.string())).optional(),
         spaces: z
-          .union([z.array(z.literal("*")), z.array(z.string())])
+          .union([z.array(z.literal('*')), z.array(z.string())])
           .optional()
-          .default(["*"]),
+          .default(['*']),
       })
     )
     .optional(),
@@ -9877,14 +9096,12 @@ export const post_security_roles_Body = z.object({
       kibana: z
         .array(
           z.object({
-            base: z
-              .union([z.array(z.string()), z.array(z.string())])
-              .nullable(),
+            base: z.union([z.array(z.string()), z.array(z.string())]).nullable(),
             feature: z.record(z.array(z.string())).optional(),
             spaces: z
-              .union([z.array(z.literal("*")), z.array(z.string())])
+              .union([z.array(z.literal('*')), z.array(z.string())])
               .optional()
-              .default(["*"]),
+              .default(['*']),
           })
         )
         .optional(),
@@ -9894,12 +9111,10 @@ export const post_security_roles_Body = z.object({
 });
 export const post_security_session_invalidate_Body = z
   .object({
-    match: z.enum(["all", "query"]),
+    match: z.enum(['all', 'query']),
     query: z
       .object({
-        provider: z
-          .object({ name: z.string().optional(), type: z.string() })
-          .passthrough(),
+        provider: z.object({ name: z.string().optional(), type: z.string() }).passthrough(),
         username: z.string().optional(),
       })
       .passthrough()
@@ -9975,9 +9190,7 @@ export const post_spaces_update_objects_spaces_Body = z.object({
   spacesToAdd: z.array(z.string()),
   spacesToRemove: z.array(z.string()),
 });
-export const include_authorized_purposes = z
-  .union([z.literal(false), z.boolean()])
-  .nullable();
+export const include_authorized_purposes = z.union([z.literal(false), z.boolean()]).nullable();
 export const post_spaces_space_Body = z.object({
   _reserved: z.boolean().optional(),
   color: z.string().optional(),
@@ -9987,7 +9200,7 @@ export const post_spaces_space_Body = z.object({
   imageUrl: z.string().optional(),
   initials: z.string().max(2).optional(),
   name: z.string().min(1),
-  solution: z.enum(["security", "oblt", "es", "classic"]).optional(),
+  solution: z.enum(['security', 'oblt', 'es', 'classic']).optional(),
 });
 export const Kibana_HTTP_APIs_core_status_response = z.object({
   metrics: z.object({
@@ -10005,7 +9218,7 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
       elasticsearch: z.object({
         detail: z.string().optional(),
         documentationUrl: z.string().optional(),
-        level: z.enum(["available", "degraded", "unavailable", "critical"]),
+        level: z.enum(['available', 'degraded', 'unavailable', 'critical']),
         meta: z.object({}).partial().passthrough(),
         summary: z.string(),
       }),
@@ -10013,7 +9226,7 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
         .object({
           detail: z.string().optional(),
           documentationUrl: z.string().optional(),
-          level: z.enum(["available", "degraded", "unavailable", "critical"]),
+          level: z.enum(['available', 'degraded', 'unavailable', 'critical']),
           meta: z.object({}).partial().passthrough(),
           summary: z.string(),
         })
@@ -10021,7 +9234,7 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
       savedObjects: z.object({
         detail: z.string().optional(),
         documentationUrl: z.string().optional(),
-        level: z.enum(["available", "degraded", "unavailable", "critical"]),
+        level: z.enum(['available', 'degraded', 'unavailable', 'critical']),
         meta: z.object({}).partial().passthrough(),
         summary: z.string(),
       }),
@@ -10029,7 +9242,7 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
     overall: z.object({
       detail: z.string().optional(),
       documentationUrl: z.string().optional(),
-      level: z.enum(["available", "degraded", "unavailable", "critical"]),
+      level: z.enum(['available', 'degraded', 'unavailable', 'critical']),
       meta: z.object({}).partial().passthrough(),
       summary: z.string(),
     }),
@@ -10037,7 +9250,7 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
       z.object({
         detail: z.string().optional(),
         documentationUrl: z.string().optional(),
-        level: z.enum(["available", "degraded", "unavailable", "critical"]),
+        level: z.enum(['available', 'degraded', 'unavailable', 'critical']),
         meta: z.object({}).partial().passthrough(),
         summary: z.string(),
       })
@@ -10046,7 +9259,7 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
   uuid: z.string(),
   version: z.object({
     build_date: z.string(),
-    build_flavor: z.enum(["serverless", "traditional"]),
+    build_flavor: z.enum(['serverless', 'traditional']),
     build_hash: z.string(),
     build_number: z.number(),
     build_snapshot: z.boolean(),
@@ -10056,15 +9269,11 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
 export const Kibana_HTTP_APIs_core_status_redactedResponse = z.object({
   status: z.object({
     overall: z.object({
-      level: z.enum(["available", "degraded", "unavailable", "critical"]),
+      level: z.enum(['available', 'degraded', 'unavailable', 'critical']),
     }),
   }),
 });
-export const get_streams_Body = z.union([
-  z.object({}).partial(),
-  z.unknown(),
-  z.unknown(),
-]);
+export const get_streams_Body = z.union([z.object({}).partial(), z.unknown(), z.unknown()]);
 export const put_streams_name_Body = z.union([
   z.union([
     z
@@ -10090,11 +9299,7 @@ export const put_streams_name_Body = z.union([
               z
                 .object({ id: z.string().min(1), title: z.string().min(1) })
                 .passthrough()
-                .and(
-                  z
-                    .object({ kql: z.object({ query: z.string() }) })
-                    .passthrough()
-                )
+                .and(z.object({ kql: z.object({ query: z.string() }) }).passthrough())
             ),
             rules: z.array(z.string()),
           })
@@ -10112,20 +9317,14 @@ export const put_streams_name_Body = z.union([
                   .object({})
                   .partial()
                   .passthrough()
-                  .and(
-                    z
-                      .object({ description: z.string(), name: z.string() })
-                      .passthrough()
-                  )
+                  .and(z.object({ description: z.string(), name: z.string() }).passthrough())
                   .and(
                     z
                       .object({
                         ingest: z.object({
                           lifecycle: z.union([
                             z.object({
-                              dsl: z
-                                .object({ data_retention: z.string().min(1) })
-                                .partial(),
+                              dsl: z.object({ data_retention: z.string().min(1) }).partial(),
                             }),
                             z.object({
                               ilm: z.object({ policy: z.string().min(1) }),
@@ -10137,11 +9336,8 @@ export const put_streams_name_Body = z.union([
                               z.union([
                                 z.union([
                                   z.object({
-                                    action: z.literal("grok"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('grok'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     from: z.string().min(1),
                                     ignore_failure: z.boolean().optional(),
@@ -10152,93 +9348,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -10259,15 +9403,9 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("dissect"),
-                                    append_separator: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('dissect'),
+                                    append_separator: z.string().min(1).optional(),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     from: z.string().min(1),
                                     ignore_failure: z.boolean().optional(),
@@ -10278,93 +9416,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -10385,11 +9471,8 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("date"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('date'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     formats: z.array(z.string().min(1)),
                                     from: z.string().min(1),
@@ -10401,93 +9484,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -10508,11 +9539,8 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("rename"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('rename'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     from: z.string().min(1),
                                     ignore_failure: z.boolean().optional(),
@@ -10524,93 +9552,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -10631,12 +9607,9 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("set"),
+                                    action: z.literal('set'),
                                     copy_from: z.string().min(1).optional(),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     ignore_failure: z.boolean().optional(),
                                     override: z.boolean().optional(),
@@ -10647,93 +9620,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -10754,12 +9675,9 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("append"),
+                                    action: z.literal('append'),
                                     allow_duplicates: z.boolean().optional(),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     ignore_failure: z.boolean().optional(),
                                     to: z.string().min(1),
@@ -10769,93 +9687,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -10876,17 +9742,12 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("manual_ingest_pipeline"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('manual_ingest_pipeline'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     ignore_failure: z.boolean().optional(),
                                     on_failure: z
-                                      .array(
-                                        z.object({}).partial().passthrough()
-                                      )
+                                      .array(z.object({}).partial().passthrough())
                                       .optional(),
                                     processors: z.array(
                                       z.object({
@@ -10943,93 +9804,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -11056,93 +9865,41 @@ export const put_streams_name_Body = z.union([
                                       z.union([
                                         z.object({
                                           contains: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           endsWith: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           eq: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           field: z.string().min(1),
                                           gt: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           gte: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           lt: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           lte: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           neq: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           range: z
                                             .object({
-                                              gt: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
-                                              gte: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
-                                              lt: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
-                                              lte: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
+                                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                                              lte: z.union([z.string(), z.number(), z.boolean()]),
                                             })
                                             .partial()
                                             .optional(),
                                           startsWith: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                         }),
                                         z.object({
@@ -11160,11 +9917,7 @@ export const put_streams_name_Body = z.union([
                                         always: z.object({}).partial(),
                                       }),
                                     ])
-                                    .and(
-                                      z
-                                        .object({ steps: z.array(z.unknown()) })
-                                        .passthrough()
-                                    ),
+                                    .and(z.object({ steps: z.array(z.unknown()) }).passthrough()),
                                 }),
                               ])
                             ),
@@ -11206,116 +9959,56 @@ export const put_streams_name_Body = z.union([
                                     z.object({
                                       format: z.string().min(1).optional(),
                                       type: z.enum([
-                                        "keyword",
-                                        "match_only_text",
-                                        "long",
-                                        "double",
-                                        "date",
-                                        "boolean",
-                                        "ip",
+                                        'keyword',
+                                        'match_only_text',
+                                        'long',
+                                        'double',
+                                        'date',
+                                        'boolean',
+                                        'ip',
                                       ]),
                                     }),
-                                    z.object({ type: z.literal("system") }),
+                                    z.object({ type: z.literal('system') }),
                                   ])
                                 )
                             ),
                             routing: z.array(
                               z.object({
                                 destination: z.string().min(1),
-                                status: z
-                                  .enum(["enabled", "disabled"])
-                                  .optional(),
+                                status: z.enum(['enabled', 'disabled']).optional(),
                                 where: z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -11360,11 +10053,7 @@ export const put_streams_name_Body = z.union([
               z
                 .object({ id: z.string().min(1), title: z.string().min(1) })
                 .passthrough()
-                .and(
-                  z
-                    .object({ kql: z.object({ query: z.string() }) })
-                    .passthrough()
-                )
+                .and(z.object({ kql: z.object({ query: z.string() }) }).passthrough())
             ),
             rules: z.array(z.string()),
           })
@@ -11382,9 +10071,7 @@ export const put_streams_name_Body = z.union([
                   ingest: z.object({
                     lifecycle: z.union([
                       z.object({
-                        dsl: z
-                          .object({ data_retention: z.string().min(1) })
-                          .partial(),
+                        dsl: z.object({ data_retention: z.string().min(1) }).partial(),
                       }),
                       z.object({
                         ilm: z.object({ policy: z.string().min(1) }),
@@ -11396,7 +10083,7 @@ export const put_streams_name_Body = z.union([
                         z.union([
                           z.union([
                             z.object({
-                              action: z.literal("grok"),
+                              action: z.literal('grok'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               from: z.string().min(1),
@@ -11408,93 +10095,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -11511,7 +10140,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("dissect"),
+                              action: z.literal('dissect'),
                               append_separator: z.string().min(1).optional(),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
@@ -11524,93 +10153,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -11627,7 +10198,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("date"),
+                              action: z.literal('date'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               formats: z.array(z.string().min(1)),
@@ -11640,93 +10211,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -11743,7 +10256,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("rename"),
+                              action: z.literal('rename'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               from: z.string().min(1),
@@ -11756,93 +10269,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -11859,7 +10314,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("set"),
+                              action: z.literal('set'),
                               copy_from: z.string().min(1).optional(),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
@@ -11872,93 +10327,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -11975,7 +10372,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("append"),
+                              action: z.literal('append'),
                               allow_duplicates: z.boolean().optional(),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
@@ -11987,93 +10384,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -12090,13 +10429,11 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("manual_ingest_pipeline"),
+                              action: z.literal('manual_ingest_pipeline'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               ignore_failure: z.boolean().optional(),
-                              on_failure: z
-                                .array(z.object({}).partial().passthrough())
-                                .optional(),
+                              on_failure: z.array(z.object({}).partial().passthrough()).optional(),
                               processors: z.array(
                                 z.object({
                                   append: z.unknown(),
@@ -12152,93 +10489,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -12261,93 +10540,29 @@ export const put_streams_name_Body = z.union([
                                 z.union([
                                   z.object({
                                     contains: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
+                                      .union([z.string(), z.number(), z.boolean()])
                                       .optional(),
                                     endsWith: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
+                                      .union([z.string(), z.number(), z.boolean()])
                                       .optional(),
-                                    eq: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
+                                    eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                     field: z.string().min(1),
-                                    gt: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    gte: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    lt: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    lte: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    neq: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
+                                    gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                     range: z
                                       .object({
-                                        gt: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
-                                        gte: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
-                                        lt: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
-                                        lte: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
+                                        gt: z.union([z.string(), z.number(), z.boolean()]),
+                                        gte: z.union([z.string(), z.number(), z.boolean()]),
+                                        lt: z.union([z.string(), z.number(), z.boolean()]),
+                                        lte: z.union([z.string(), z.number(), z.boolean()]),
                                       })
                                       .partial()
                                       .optional(),
                                     startsWith: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
+                                      .union([z.string(), z.number(), z.boolean()])
                                       .optional(),
                                   }),
                                   z.object({
@@ -12361,11 +10576,7 @@ export const put_streams_name_Body = z.union([
                                 z.object({ never: z.object({}).partial() }),
                                 z.object({ always: z.object({}).partial() }),
                               ])
-                              .and(
-                                z
-                                  .object({ steps: z.array(z.unknown()) })
-                                  .passthrough()
-                              ),
+                              .and(z.object({ steps: z.array(z.unknown()) }).passthrough()),
                           }),
                         ])
                       ),
@@ -12401,11 +10612,7 @@ export const put_streams_name_Body = z.union([
               z
                 .object({ id: z.string().min(1), title: z.string().min(1) })
                 .passthrough()
-                .and(
-                  z
-                    .object({ kql: z.object({ query: z.string() }) })
-                    .passthrough()
-                )
+                .and(z.object({ kql: z.object({ query: z.string() }) }).passthrough())
             ),
             rules: z.array(z.string()),
           })
@@ -12423,20 +10630,14 @@ export const put_streams_name_Body = z.union([
                   .object({})
                   .partial()
                   .passthrough()
-                  .and(
-                    z
-                      .object({ description: z.string(), name: z.string() })
-                      .passthrough()
-                  )
+                  .and(z.object({ description: z.string(), name: z.string() }).passthrough())
                   .and(
                     z
                       .object({
                         ingest: z.object({
                           lifecycle: z.union([
                             z.object({
-                              dsl: z
-                                .object({ data_retention: z.string().min(1) })
-                                .partial(),
+                              dsl: z.object({ data_retention: z.string().min(1) }).partial(),
                             }),
                             z.object({
                               ilm: z.object({ policy: z.string().min(1) }),
@@ -12448,11 +10649,8 @@ export const put_streams_name_Body = z.union([
                               z.union([
                                 z.union([
                                   z.object({
-                                    action: z.literal("grok"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('grok'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     from: z.string().min(1),
                                     ignore_failure: z.boolean().optional(),
@@ -12463,93 +10661,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -12570,15 +10716,9 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("dissect"),
-                                    append_separator: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('dissect'),
+                                    append_separator: z.string().min(1).optional(),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     from: z.string().min(1),
                                     ignore_failure: z.boolean().optional(),
@@ -12589,93 +10729,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -12696,11 +10784,8 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("date"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('date'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     formats: z.array(z.string().min(1)),
                                     from: z.string().min(1),
@@ -12712,93 +10797,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -12819,11 +10852,8 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("rename"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('rename'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     from: z.string().min(1),
                                     ignore_failure: z.boolean().optional(),
@@ -12835,93 +10865,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -12942,12 +10920,9 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("set"),
+                                    action: z.literal('set'),
                                     copy_from: z.string().min(1).optional(),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     ignore_failure: z.boolean().optional(),
                                     override: z.boolean().optional(),
@@ -12958,93 +10933,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -13065,12 +10988,9 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("append"),
+                                    action: z.literal('append'),
                                     allow_duplicates: z.boolean().optional(),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     ignore_failure: z.boolean().optional(),
                                     to: z.string().min(1),
@@ -13080,93 +11000,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -13187,17 +11055,12 @@ export const put_streams_name_Body = z.union([
                                       .optional(),
                                   }),
                                   z.object({
-                                    action: z.literal("manual_ingest_pipeline"),
-                                    customIdentifier: z
-                                      .string()
-                                      .min(1)
-                                      .optional(),
+                                    action: z.literal('manual_ingest_pipeline'),
+                                    customIdentifier: z.string().min(1).optional(),
                                     description: z.string().optional(),
                                     ignore_failure: z.boolean().optional(),
                                     on_failure: z
-                                      .array(
-                                        z.object({}).partial().passthrough()
-                                      )
+                                      .array(z.object({}).partial().passthrough())
                                       .optional(),
                                     processors: z.array(
                                       z.object({
@@ -13254,93 +11117,41 @@ export const put_streams_name_Body = z.union([
                                         z.union([
                                           z.object({
                                             contains: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             endsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             eq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             field: z.string().min(1),
                                             gt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             gte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lt: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             lte: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             neq: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                             range: z
                                               .object({
-                                                gt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                gte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lt: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
-                                                lte: z.union([
-                                                  z.string(),
-                                                  z.number(),
-                                                  z.boolean(),
-                                                ]),
+                                                gt: z.union([z.string(), z.number(), z.boolean()]),
+                                                gte: z.union([z.string(), z.number(), z.boolean()]),
+                                                lt: z.union([z.string(), z.number(), z.boolean()]),
+                                                lte: z.union([z.string(), z.number(), z.boolean()]),
                                               })
                                               .partial()
                                               .optional(),
                                             startsWith: z
-                                              .union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ])
+                                              .union([z.string(), z.number(), z.boolean()])
                                               .optional(),
                                           }),
                                           z.object({
@@ -13367,93 +11178,41 @@ export const put_streams_name_Body = z.union([
                                       z.union([
                                         z.object({
                                           contains: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           endsWith: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           eq: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           field: z.string().min(1),
                                           gt: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           gte: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           lt: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           lte: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           neq: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                           range: z
                                             .object({
-                                              gt: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
-                                              gte: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
-                                              lt: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
-                                              lte: z.union([
-                                                z.string(),
-                                                z.number(),
-                                                z.boolean(),
-                                              ]),
+                                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                                              lte: z.union([z.string(), z.number(), z.boolean()]),
                                             })
                                             .partial()
                                             .optional(),
                                           startsWith: z
-                                            .union([
-                                              z.string(),
-                                              z.number(),
-                                              z.boolean(),
-                                            ])
+                                            .union([z.string(), z.number(), z.boolean()])
                                             .optional(),
                                         }),
                                         z.object({
@@ -13471,11 +11230,7 @@ export const put_streams_name_Body = z.union([
                                         always: z.object({}).partial(),
                                       }),
                                     ])
-                                    .and(
-                                      z
-                                        .object({ steps: z.array(z.unknown()) })
-                                        .passthrough()
-                                    ),
+                                    .and(z.object({ steps: z.array(z.unknown()) }).passthrough()),
                                 }),
                               ])
                             ),
@@ -13518,16 +11273,16 @@ export const put_streams_name_Body = z.union([
                                       z.object({
                                         format: z.string().min(1).optional(),
                                         type: z.enum([
-                                          "keyword",
-                                          "match_only_text",
-                                          "long",
-                                          "double",
-                                          "date",
-                                          "boolean",
-                                          "ip",
+                                          'keyword',
+                                          'match_only_text',
+                                          'long',
+                                          'double',
+                                          'date',
+                                          'boolean',
+                                          'ip',
                                         ]),
                                       }),
-                                      z.object({ type: z.literal("system") }),
+                                      z.object({ type: z.literal('system') }),
                                     ])
                                   )
                               ),
@@ -13561,11 +11316,7 @@ export const put_streams_name_Body = z.union([
               z
                 .object({ id: z.string().min(1), title: z.string().min(1) })
                 .passthrough()
-                .and(
-                  z
-                    .object({ kql: z.object({ query: z.string() }) })
-                    .passthrough()
-                )
+                .and(z.object({ kql: z.object({ query: z.string() }) }).passthrough())
             ),
             rules: z.array(z.string()),
           })
@@ -13583,9 +11334,7 @@ export const put_streams_name_Body = z.union([
                   ingest: z.object({
                     lifecycle: z.union([
                       z.object({
-                        dsl: z
-                          .object({ data_retention: z.string().min(1) })
-                          .partial(),
+                        dsl: z.object({ data_retention: z.string().min(1) }).partial(),
                       }),
                       z.object({
                         ilm: z.object({ policy: z.string().min(1) }),
@@ -13597,7 +11346,7 @@ export const put_streams_name_Body = z.union([
                         z.union([
                           z.union([
                             z.object({
-                              action: z.literal("grok"),
+                              action: z.literal('grok'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               from: z.string().min(1),
@@ -13609,93 +11358,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -13712,7 +11403,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("dissect"),
+                              action: z.literal('dissect'),
                               append_separator: z.string().min(1).optional(),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
@@ -13725,93 +11416,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -13828,7 +11461,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("date"),
+                              action: z.literal('date'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               formats: z.array(z.string().min(1)),
@@ -13841,93 +11474,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -13944,7 +11519,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("rename"),
+                              action: z.literal('rename'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               from: z.string().min(1),
@@ -13957,93 +11532,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -14060,7 +11577,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("set"),
+                              action: z.literal('set'),
                               copy_from: z.string().min(1).optional(),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
@@ -14073,93 +11590,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -14176,7 +11635,7 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("append"),
+                              action: z.literal('append'),
                               allow_duplicates: z.boolean().optional(),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
@@ -14188,93 +11647,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -14291,13 +11692,11 @@ export const put_streams_name_Body = z.union([
                                 .optional(),
                             }),
                             z.object({
-                              action: z.literal("manual_ingest_pipeline"),
+                              action: z.literal('manual_ingest_pipeline'),
                               customIdentifier: z.string().min(1).optional(),
                               description: z.string().optional(),
                               ignore_failure: z.boolean().optional(),
-                              on_failure: z
-                                .array(z.object({}).partial().passthrough())
-                                .optional(),
+                              on_failure: z.array(z.object({}).partial().passthrough()).optional(),
                               processors: z.array(
                                 z.object({
                                   append: z.unknown(),
@@ -14353,93 +11752,35 @@ export const put_streams_name_Body = z.union([
                                   z.union([
                                     z.object({
                                       contains: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       endsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      eq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       field: z.string().min(1),
-                                      gt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       gte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
-                                      lt: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
-                                        .optional(),
+                                      lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                       lte: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       neq: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                       range: z
                                         .object({
-                                          gt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          gte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lt: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
-                                          lte: z.union([
-                                            z.string(),
-                                            z.number(),
-                                            z.boolean(),
-                                          ]),
+                                          gt: z.union([z.string(), z.number(), z.boolean()]),
+                                          gte: z.union([z.string(), z.number(), z.boolean()]),
+                                          lt: z.union([z.string(), z.number(), z.boolean()]),
+                                          lte: z.union([z.string(), z.number(), z.boolean()]),
                                         })
                                         .partial()
                                         .optional(),
                                       startsWith: z
-                                        .union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ])
+                                        .union([z.string(), z.number(), z.boolean()])
                                         .optional(),
                                     }),
                                     z.object({
@@ -14462,93 +11803,29 @@ export const put_streams_name_Body = z.union([
                                 z.union([
                                   z.object({
                                     contains: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
+                                      .union([z.string(), z.number(), z.boolean()])
                                       .optional(),
                                     endsWith: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
+                                      .union([z.string(), z.number(), z.boolean()])
                                       .optional(),
-                                    eq: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
+                                    eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                     field: z.string().min(1),
-                                    gt: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    gte: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    lt: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    lte: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
-                                    neq: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
-                                      .optional(),
+                                    gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                                    neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                                     range: z
                                       .object({
-                                        gt: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
-                                        gte: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
-                                        lt: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
-                                        lte: z.union([
-                                          z.string(),
-                                          z.number(),
-                                          z.boolean(),
-                                        ]),
+                                        gt: z.union([z.string(), z.number(), z.boolean()]),
+                                        gte: z.union([z.string(), z.number(), z.boolean()]),
+                                        lt: z.union([z.string(), z.number(), z.boolean()]),
+                                        lte: z.union([z.string(), z.number(), z.boolean()]),
                                       })
                                       .partial()
                                       .optional(),
                                     startsWith: z
-                                      .union([
-                                        z.string(),
-                                        z.number(),
-                                        z.boolean(),
-                                      ])
+                                      .union([z.string(), z.number(), z.boolean()])
                                       .optional(),
                                   }),
                                   z.object({
@@ -14562,11 +11839,7 @@ export const put_streams_name_Body = z.union([
                                 z.object({ never: z.object({}).partial() }),
                                 z.object({ always: z.object({}).partial() }),
                               ])
-                              .and(
-                                z
-                                  .object({ steps: z.array(z.unknown()) })
-                                  .passthrough()
-                              ),
+                              .and(z.object({ steps: z.array(z.unknown()) }).passthrough()),
                           }),
                         ])
                       ),
@@ -14603,9 +11876,7 @@ export const put_streams_name_Body = z.union([
             z
               .object({ id: z.string().min(1), title: z.string().min(1) })
               .passthrough()
-              .and(
-                z.object({ kql: z.object({ query: z.string() }) }).passthrough()
-              )
+              .and(z.object({ kql: z.object({ query: z.string() }) }).passthrough())
           ),
           rules: z.array(z.string()),
         })
@@ -14633,7 +11904,7 @@ export const put_streams_name_Body = z.union([
     .and(z.object({}).partial().passthrough()),
 ]);
 export const post_streams_name_fork_Body = z.object({
-  status: z.enum(["enabled", "disabled"]).optional(),
+  status: z.enum(['enabled', 'disabled']).optional(),
   stream: z.object({ name: z.string() }),
   where: z.union([
     z.union([
@@ -14690,7 +11961,7 @@ export const put_streams_name_ingest_Body = z.object({
             z.union([
               z.union([
                 z.object({
-                  action: z.literal("grok"),
+                  action: z.literal('grok'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   from: z.string().min(1),
@@ -14701,59 +11972,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -14769,7 +12006,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("dissect"),
+                  action: z.literal('dissect'),
                   append_separator: z.string().min(1).optional(),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
@@ -14781,59 +12018,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -14849,7 +12052,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("date"),
+                  action: z.literal('date'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   formats: z.array(z.string().min(1)),
@@ -14861,59 +12064,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -14929,7 +12098,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("rename"),
+                  action: z.literal('rename'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   from: z.string().min(1),
@@ -14941,59 +12110,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15009,7 +12144,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("set"),
+                  action: z.literal('set'),
                   copy_from: z.string().min(1).optional(),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
@@ -15021,59 +12156,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15089,7 +12190,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("append"),
+                  action: z.literal('append'),
                   allow_duplicates: z.boolean().optional(),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
@@ -15100,59 +12201,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15168,13 +12235,11 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("manual_ingest_pipeline"),
+                  action: z.literal('manual_ingest_pipeline'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   ignore_failure: z.boolean().optional(),
-                  on_failure: z
-                    .array(z.object({}).partial().passthrough())
-                    .optional(),
+                  on_failure: z.array(z.object({}).partial().passthrough()).optional(),
                   processors: z.array(
                     z.object({
                       append: z.unknown(),
@@ -15229,59 +12294,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15302,31 +12333,15 @@ export const put_streams_name_ingest_Body = z.object({
                   .union([
                     z.union([
                       z.object({
-                        contains: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        endsWith: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        eq: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         field: z.string().min(1),
-                        gt: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        gte: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        lt: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        lte: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        neq: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         range: z
                           .object({
                             gt: z.union([z.string(), z.number(), z.boolean()]),
@@ -15336,9 +12351,7 @@ export const put_streams_name_ingest_Body = z.object({
                           })
                           .partial()
                           .optional(),
-                        startsWith: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                       }),
                       z.object({
                         exists: z.boolean().optional(),
@@ -15366,21 +12379,9 @@ export const put_streams_name_ingest_Body = z.object({
                 z
                   .record(
                     z.union([
-                      z.union([
-                        z.string(),
-                        z.number(),
-                        z.boolean(),
-                        z.unknown(),
-                        z.unknown(),
-                      ]),
+                      z.union([z.string(), z.number(), z.boolean(), z.unknown(), z.unknown()]),
                       z.array(
-                        z.union([
-                          z.string(),
-                          z.number(),
-                          z.boolean(),
-                          z.unknown(),
-                          z.unknown(),
-                        ])
+                        z.union([z.string(), z.number(), z.boolean(), z.unknown(), z.unknown()])
                       ),
                       z.unknown(),
                     ])
@@ -15390,51 +12391,35 @@ export const put_streams_name_ingest_Body = z.object({
                       z.object({
                         format: z.string().min(1).optional(),
                         type: z.enum([
-                          "keyword",
-                          "match_only_text",
-                          "long",
-                          "double",
-                          "date",
-                          "boolean",
-                          "ip",
+                          'keyword',
+                          'match_only_text',
+                          'long',
+                          'double',
+                          'date',
+                          'boolean',
+                          'ip',
                         ]),
                       }),
-                      z.object({ type: z.literal("system") }),
+                      z.object({ type: z.literal('system') }),
                     ])
                   )
               ),
               routing: z.array(
                 z.object({
                   destination: z.string().min(1),
-                  status: z.enum(["enabled", "disabled"]).optional(),
+                  status: z.enum(['enabled', 'disabled']).optional(),
                   where: z.union([
                     z.union([
                       z.object({
-                        contains: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        endsWith: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        eq: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         field: z.string().min(1),
-                        gt: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        gte: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        lt: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        lte: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        neq: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         range: z
                           .object({
                             gt: z.union([z.string(), z.number(), z.boolean()]),
@@ -15444,9 +12429,7 @@ export const put_streams_name_ingest_Body = z.object({
                           })
                           .partial()
                           .optional(),
-                        startsWith: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                       }),
                       z.object({
                         exists: z.boolean().optional(),
@@ -15479,7 +12462,7 @@ export const put_streams_name_ingest_Body = z.object({
             z.union([
               z.union([
                 z.object({
-                  action: z.literal("grok"),
+                  action: z.literal('grok'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   from: z.string().min(1),
@@ -15490,59 +12473,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15558,7 +12507,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("dissect"),
+                  action: z.literal('dissect'),
                   append_separator: z.string().min(1).optional(),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
@@ -15570,59 +12519,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15638,7 +12553,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("date"),
+                  action: z.literal('date'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   formats: z.array(z.string().min(1)),
@@ -15650,59 +12565,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15718,7 +12599,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("rename"),
+                  action: z.literal('rename'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   from: z.string().min(1),
@@ -15730,59 +12611,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15798,7 +12645,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("set"),
+                  action: z.literal('set'),
                   copy_from: z.string().min(1).optional(),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
@@ -15810,59 +12657,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15878,7 +12691,7 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("append"),
+                  action: z.literal('append'),
                   allow_duplicates: z.boolean().optional(),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
@@ -15889,59 +12702,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -15957,13 +12736,11 @@ export const put_streams_name_ingest_Body = z.object({
                     .optional(),
                 }),
                 z.object({
-                  action: z.literal("manual_ingest_pipeline"),
+                  action: z.literal('manual_ingest_pipeline'),
                   customIdentifier: z.string().min(1).optional(),
                   description: z.string().optional(),
                   ignore_failure: z.boolean().optional(),
-                  on_failure: z
-                    .array(z.object({}).partial().passthrough())
-                    .optional(),
+                  on_failure: z.array(z.object({}).partial().passthrough()).optional(),
                   processors: z.array(
                     z.object({
                       append: z.unknown(),
@@ -16018,59 +12795,25 @@ export const put_streams_name_ingest_Body = z.object({
                     .union([
                       z.union([
                         z.object({
-                          contains: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          endsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          eq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           field: z.string().min(1),
-                          gt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          gte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lt: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          lte: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
-                          neq: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                          neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                           range: z
                             .object({
-                              gt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              gte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lt: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
-                              lte: z.union([
-                                z.string(),
-                                z.number(),
-                                z.boolean(),
-                              ]),
+                              gt: z.union([z.string(), z.number(), z.boolean()]),
+                              gte: z.union([z.string(), z.number(), z.boolean()]),
+                              lt: z.union([z.string(), z.number(), z.boolean()]),
+                              lte: z.union([z.string(), z.number(), z.boolean()]),
                             })
                             .partial()
                             .optional(),
-                          startsWith: z
-                            .union([z.string(), z.number(), z.boolean()])
-                            .optional(),
+                          startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         }),
                         z.object({
                           exists: z.boolean().optional(),
@@ -16091,31 +12834,15 @@ export const put_streams_name_ingest_Body = z.object({
                   .union([
                     z.union([
                       z.object({
-                        contains: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        endsWith: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        eq: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        contains: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        endsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         field: z.string().min(1),
-                        gt: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        gte: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        lt: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        lte: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
-                        neq: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        gt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        gte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        lt: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        lte: z.union([z.string(), z.number(), z.boolean()]).optional(),
+                        neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
                         range: z
                           .object({
                             gt: z.union([z.string(), z.number(), z.boolean()]),
@@ -16125,9 +12852,7 @@ export const put_streams_name_ingest_Body = z.object({
                           })
                           .partial()
                           .optional(),
-                        startsWith: z
-                          .union([z.string(), z.number(), z.boolean()])
-                          .optional(),
+                        startsWith: z.union([z.string(), z.number(), z.boolean()]).optional(),
                       }),
                       z.object({
                         exists: z.boolean().optional(),
@@ -16156,21 +12881,9 @@ export const put_streams_name_ingest_Body = z.object({
                   z
                     .record(
                       z.union([
-                        z.union([
-                          z.string(),
-                          z.number(),
-                          z.boolean(),
-                          z.unknown(),
-                          z.unknown(),
-                        ]),
+                        z.union([z.string(), z.number(), z.boolean(), z.unknown(), z.unknown()]),
                         z.array(
-                          z.union([
-                            z.string(),
-                            z.number(),
-                            z.boolean(),
-                            z.unknown(),
-                            z.unknown(),
-                          ])
+                          z.union([z.string(), z.number(), z.boolean(), z.unknown(), z.unknown()])
                         ),
                         z.unknown(),
                       ])
@@ -16180,16 +12893,16 @@ export const put_streams_name_ingest_Body = z.object({
                         z.object({
                           format: z.string().min(1).optional(),
                           type: z.enum([
-                            "keyword",
-                            "match_only_text",
-                            "long",
-                            "double",
-                            "date",
-                            "boolean",
-                            "ip",
+                            'keyword',
+                            'match_only_text',
+                            'long',
+                            'double',
+                            'date',
+                            'boolean',
+                            'ip',
                           ]),
                         }),
-                        z.object({ type: z.literal("system") }),
+                        z.object({ type: z.literal('system') }),
                       ])
                     )
                 ),
@@ -16207,9 +12920,7 @@ export const post_streams_name_content_export_Body = z.object({
     z.object({
       objects: z.object({
         queries: z.array(z.object({ id: z.string() })),
-        routing: z.array(
-          z.unknown().and(z.object({ destination: z.string() }).passthrough())
-        ),
+        routing: z.array(z.unknown().and(z.object({ destination: z.string() }).passthrough())),
       }),
     }),
   ]),
@@ -16231,9 +12942,7 @@ export const post_streams_name_queries_bulk_Body = z.object({
         index: z
           .object({ id: z.string().min(1), title: z.string().min(1) })
           .passthrough()
-          .and(
-            z.object({ kql: z.object({ query: z.string() }) }).passthrough()
-          ),
+          .and(z.object({ kql: z.object({ query: z.string() }) }).passthrough()),
       }),
       z.object({ delete: z.object({ id: z.string() }) }),
     ])
@@ -16248,14 +12957,11 @@ export const post_streams_name_significant_events_preview_Body = z.object({
 });
 export const locations = z.union([z.string(), z.array(z.any())]).optional();
 export const monitorTypes = z
-  .union([z.enum(["browser", "http", "icmp", "tcp"]), z.array(z.any())])
+  .union([z.enum(['browser', 'http', 'icmp', 'tcp']), z.array(z.any())])
   .optional();
 export const schedules = z.union([z.array(z.any()), z.string()]).optional();
 export const useLogicalAndFor = z
-  .union([
-    z.enum(["tags", "locations"]),
-    z.array(z.enum(["tags", "locations"])),
-  ])
+  .union([z.enum(['tags', 'locations']), z.array(z.enum(['tags', 'locations']))])
   .optional();
 export const Synthetics_commonMonitorFields = z
   .object({
@@ -16264,12 +12970,12 @@ export const Synthetics_commonMonitorFields = z
     labels: z.record(z.string()).optional(),
     locations: z.array(z.string()).optional(),
     name: z.string(),
-    namespace: z.string().optional().default("default"),
+    namespace: z.string().optional().default('default'),
     params: z.string().optional(),
     private_locations: z.array(z.string()).optional(),
     retest_on_failure: z.boolean().optional().default(true),
     schedule: z.number().optional(),
-    "service.name": z.string().optional(),
+    'service.name': z.string().optional(),
     tags: z.array(z.string()).optional(),
     timeout: z.number().optional().default(16),
   })
@@ -16280,12 +12986,9 @@ export const Synthetics_browserMonitorFields = Synthetics_commonMonitorFields.an
       ignore_https_errors: z.boolean().optional().default(false),
       inline_script: z.string(),
       playwright_options: z.object({}).partial().passthrough().optional(),
-      screenshots: z
-        .enum(["on", "off", "only-on-failure"])
-        .optional()
-        .default("on"),
+      screenshots: z.enum(['on', 'off', 'only-on-failure']).optional().default('on'),
       synthetics_args: z.array(z.any()).optional(),
-      type: z.literal("browser"),
+      type: z.literal('browser'),
     })
     .passthrough()
 );
@@ -16298,7 +13001,7 @@ export const Synthetics_httpMonitorFields = Synthetics_commonMonitorFields.and(
             .object({
               body: z.string(),
               headers: z.object({}).partial().passthrough(),
-              method: z.enum(["HEAD", "GET", "POST", "OPTIONS"]),
+              method: z.enum(['HEAD', 'GET', 'POST', 'OPTIONS']),
             })
             .partial()
             .passthrough(),
@@ -16316,13 +13019,13 @@ export const Synthetics_httpMonitorFields = Synthetics_commonMonitorFields.and(
       ipv4: z.boolean().optional().default(true),
       ipv6: z.boolean().optional().default(true),
       max_redirects: z.number().optional().default(0),
-      mode: z.enum(["all", "any"]).optional().default("any"),
+      mode: z.enum(['all', 'any']).optional().default('any'),
       password: z.string().optional(),
       proxy_headers: z.object({}).partial().passthrough().optional(),
       proxy_url: z.string().optional(),
       response: z.object({}).partial().passthrough().optional(),
       ssl: z.object({}).partial().passthrough().optional(),
-      type: z.literal("http"),
+      type: z.literal('http'),
       url: z.string(),
       username: z.string().optional(),
     })
@@ -16332,7 +13035,7 @@ export const Synthetics_icmpMonitorFields = Synthetics_commonMonitorFields.and(
   z
     .object({
       host: z.string(),
-      type: z.literal("icmp"),
+      type: z.literal('icmp'),
       wait: z.number().optional().default(1),
     })
     .passthrough()
@@ -16344,19 +13047,17 @@ export const Synthetics_tcpMonitorFields = Synthetics_commonMonitorFields.and(
       proxy_url: z.string().optional(),
       proxy_use_local_resolver: z.boolean().optional().default(false),
       ssl: z.object({}).partial().passthrough().optional(),
-      type: z.literal("tcp"),
+      type: z.literal('tcp'),
     })
     .passthrough()
 );
-export const post_synthetic_monitors_Body = z.discriminatedUnion("type", [
+export const post_synthetic_monitors_Body = z.discriminatedUnion('type', [
   Synthetics_browserMonitorFields,
   Synthetics_httpMonitorFields,
   Synthetics_icmpMonitorFields,
   Synthetics_tcpMonitorFields,
 ]);
-export const delete_synthetic_monitors_Body = z
-  .object({ ids: z.array(z.string()) })
-  .passthrough();
+export const delete_synthetic_monitors_Body = z.object({ ids: z.array(z.string()) }).passthrough();
 export const Synthetics_getParameterResponse = z
   .object({
     description: z.string(),
@@ -16415,19 +13116,13 @@ export const Synthetics_getPrivateLocation = z
 export const post_private_location_Body = z
   .object({
     agentPolicyId: z.string(),
-    geo: z
-      .object({ lat: z.number(), lon: z.number() })
-      .passthrough()
-      .optional(),
+    geo: z.object({ lat: z.number(), lon: z.number() }).passthrough().optional(),
     label: z.string(),
     spaces: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
   })
   .passthrough();
-export const Task_manager_health_APIs_configuration = z
-  .object({})
-  .partial()
-  .passthrough();
+export const Task_manager_health_APIs_configuration = z.object({}).partial().passthrough();
 export const Task_manager_health_APIs_workload = z.object({}).partial().passthrough();
 export const Task_manager_health_APIs_health_response = z
   .object({
@@ -16479,7 +13174,7 @@ export const Security_Timeline_API_QueryMatchResult = z
   })
   .partial()
   .passthrough();
-export const Security_Timeline_API_DataProviderType = z.enum(["default", "template"]);
+export const Security_Timeline_API_DataProviderType = z.enum(['default', 'template']);
 export const Security_Timeline_API_DataProviderQueryMatch = z
   .object({
     enabled: z.boolean().nullable(),
@@ -16506,24 +13201,24 @@ export const Security_Timeline_API_DataProviderResult = z
   .partial()
   .passthrough();
 export const Security_Timeline_API_RowRendererId = z.enum([
-  "alert",
-  "alerts",
-  "auditd",
-  "auditd_file",
-  "library",
-  "netflow",
-  "plain",
-  "registry",
-  "suricata",
-  "system",
-  "system_dns",
-  "system_endgame_process",
-  "system_file",
-  "system_fim",
-  "system_security_event",
-  "system_socket",
-  "threat_match",
-  "zeek",
+  'alert',
+  'alerts',
+  'auditd',
+  'auditd_file',
+  'library',
+  'netflow',
+  'plain',
+  'registry',
+  'suricata',
+  'system',
+  'system_dns',
+  'system_endgame_process',
+  'system_file',
+  'system_fim',
+  'system_security_event',
+  'system_socket',
+  'threat_match',
+  'zeek',
 ]);
 export const Security_Timeline_API_FavoriteTimelineResult = z
   .object({
@@ -16593,12 +13288,8 @@ export const Security_Timeline_API_Sort = z.union([
   Security_Timeline_API_SortObject,
   z.array(Security_Timeline_API_SortObject),
 ]);
-export const Security_Timeline_API_TimelineStatus = z.enum([
-  "active",
-  "draft",
-  "immutable",
-]);
-export const Security_Timeline_API_TimelineType = z.enum(["default", "template"]);
+export const Security_Timeline_API_TimelineStatus = z.enum(['active', 'draft', 'immutable']);
+export const Security_Timeline_API_TimelineType = z.enum(['default', 'template']);
 export const Security_Timeline_API_SavedTimeline = z
   .object({
     columns: z.array(Security_Timeline_API_ColumnHeaderResult).nullable(),
@@ -16627,9 +13318,7 @@ export const Security_Timeline_API_SavedTimeline = z
       .passthrough()
       .nullable(),
     eventType: z.string().nullable(),
-    excludedRowRendererIds: z
-      .array(Security_Timeline_API_RowRendererId)
-      .nullable(),
+    excludedRowRendererIds: z.array(Security_Timeline_API_RowRendererId).nullable(),
     favorite: z.array(Security_Timeline_API_FavoriteTimelineResult).nullable(),
     filters: z.array(Security_Timeline_API_FilterTimelineResult).nullable(),
     indexNames: z.array(z.string()).nullable(),
@@ -16652,23 +13341,20 @@ export const Security_Timeline_API_SavedTimelineWithSavedObjectId =
   Security_Timeline_API_SavedTimeline.and(
     z.object({ savedObjectId: z.string(), version: z.string() }).passthrough()
   );
-export const Security_Timeline_API_TimelineResponse =
-  Security_Timeline_API_SavedTimeline.and(
-    Security_Timeline_API_SavedTimelineWithSavedObjectId
-  ).and(
-    z
-      .object({
-        eventIdToNoteIds: z.array(Security_Timeline_API_Note).nullable(),
-        noteIds: z.array(z.string()).nullable(),
-        notes: z.array(Security_Timeline_API_Note).nullable(),
-        pinnedEventIds: z.array(z.string()).nullable(),
-        pinnedEventsSaveObject: z
-          .array(Security_Timeline_API_PinnedEvent)
-          .nullable(),
-      })
-      .partial()
-      .passthrough()
-  );
+export const Security_Timeline_API_TimelineResponse = Security_Timeline_API_SavedTimeline.and(
+  Security_Timeline_API_SavedTimelineWithSavedObjectId
+).and(
+  z
+    .object({
+      eventIdToNoteIds: z.array(Security_Timeline_API_Note).nullable(),
+      noteIds: z.array(z.string()).nullable(),
+      notes: z.array(Security_Timeline_API_Note).nullable(),
+      pinnedEventIds: z.array(z.string()).nullable(),
+      pinnedEventsSaveObject: z.array(Security_Timeline_API_PinnedEvent).nullable(),
+    })
+    .partial()
+    .passthrough()
+);
 export const PatchTimeline_Body = z
   .object({
     timeline: Security_Timeline_API_SavedTimeline,
@@ -16721,7 +13407,7 @@ export const Security_Timeline_API_FavoriteTimelineResponse = z
 export const ImportTimelines_Body = z
   .object({
     file: z.unknown(),
-    isImmutable: z.enum(["true", "false"]).optional(),
+    isImmutable: z.enum(['true', 'false']).optional(),
   })
   .passthrough();
 export const Security_Timeline_API_ImportTimelineResult = z
@@ -16729,10 +13415,7 @@ export const Security_Timeline_API_ImportTimelineResult = z
     errors: z.array(
       z
         .object({
-          error: z
-            .object({ message: z.string(), status_code: z.number() })
-            .partial()
-            .passthrough(),
+          error: z.object({ message: z.string(), status_code: z.number() }).partial().passthrough(),
           id: z.string(),
         })
         .partial()
@@ -16753,52 +13436,42 @@ export const Security_Timeline_API_TimelineSavedToReturnObject =
         noteIds: z.array(z.string()).nullish(),
         notes: z.array(Security_Timeline_API_Note).nullish(),
         pinnedEventIds: z.array(z.string()).nullish(),
-        pinnedEventsSaveObject: z
-          .array(Security_Timeline_API_PinnedEvent)
-          .nullish(),
+        pinnedEventsSaveObject: z.array(Security_Timeline_API_PinnedEvent).nullish(),
         savedObjectId: z.string(),
         version: z.string(),
       })
       .passthrough()
   );
-export const Security_Timeline_API_ImportTimelines =
-  Security_Timeline_API_SavedTimeline.and(
-    z
-      .object({
-        eventNotes: z.array(Security_Timeline_API_BareNote).nullable(),
-        globalNotes: z.array(Security_Timeline_API_BareNote).nullable(),
-        pinnedEventIds: z.array(z.string()).nullable(),
-        savedObjectId: z.string().nullable(),
-        version: z.string().nullable(),
-      })
-      .passthrough()
-  );
+export const Security_Timeline_API_ImportTimelines = Security_Timeline_API_SavedTimeline.and(
+  z
+    .object({
+      eventNotes: z.array(Security_Timeline_API_BareNote).nullable(),
+      globalNotes: z.array(Security_Timeline_API_BareNote).nullable(),
+      pinnedEventIds: z.array(z.string()).nullable(),
+      savedObjectId: z.string().nullable(),
+      version: z.string().nullable(),
+    })
+    .passthrough()
+);
 export const InstallPrepackedTimelines_Body = z
   .object({
-    prepackagedTimelines: z.array(
-      Security_Timeline_API_TimelineSavedToReturnObject.nullable()
-    ),
-    timelinesToInstall: z.array(
-      Security_Timeline_API_ImportTimelines.nullable()
-    ),
-    timelinesToUpdate: z.array(
-      Security_Timeline_API_ImportTimelines.nullable()
-    ),
+    prepackagedTimelines: z.array(Security_Timeline_API_TimelineSavedToReturnObject.nullable()),
+    timelinesToInstall: z.array(Security_Timeline_API_ImportTimelines.nullable()),
+    timelinesToUpdate: z.array(Security_Timeline_API_ImportTimelines.nullable()),
   })
   .passthrough();
 export const Security_Timeline_API_SavedObjectResolveAliasPurpose = z.enum([
-  "savedObjectConversion",
-  "savedObjectImport",
+  'savedObjectConversion',
+  'savedObjectImport',
 ]);
 export const Security_Timeline_API_SavedObjectResolveOutcome = z.enum([
-  "exactMatch",
-  "aliasMatch",
-  "conflict",
+  'exactMatch',
+  'aliasMatch',
+  'conflict',
 ]);
 export const Security_Timeline_API_ResolvedTimeline = z
   .object({
-    alias_purpose:
-      Security_Timeline_API_SavedObjectResolveAliasPurpose.optional(),
+    alias_purpose: Security_Timeline_API_SavedObjectResolveAliasPurpose.optional(),
     alias_target_id: z.string().optional(),
     outcome: Security_Timeline_API_SavedObjectResolveOutcome,
     timeline: Security_Timeline_API_TimelineSavedToReturnObject,
@@ -16817,11 +13490,11 @@ export const put_uptime_settings_Body = z
       })
       .partial()
       .passthrough(),
-    heartbeatIndices: z.string().default("heartbeat-*"),
+    heartbeatIndices: z.string().default('heartbeat-*'),
   })
   .partial()
   .passthrough();
-export const SLOs_budgeting_method = z.enum(["occurrences", "timeslices"]);
+export const SLOs_budgeting_method = z.enum(['occurrences', 'timeslices']);
 export const SLOs_group_by = z.union([z.string(), z.array(z.string())]);
 export const SLOs_filter_meta = z
   .object({
@@ -16927,7 +13600,7 @@ export const SLOs_indicator_properties_custom_metric = z
               z.union([
                 z
                   .object({
-                    aggregation: z.literal("sum"),
+                    aggregation: z.literal('sum'),
                     field: z.string(),
                     filter: z.string().optional(),
                     name: z.string().regex(/^[A-Z]$/),
@@ -16935,7 +13608,7 @@ export const SLOs_indicator_properties_custom_metric = z
                   .passthrough(),
                 z
                   .object({
-                    aggregation: z.literal("doc_count"),
+                    aggregation: z.literal('doc_count'),
                     filter: z.string().optional(),
                     name: z.string().regex(/^[A-Z]$/),
                   })
@@ -16953,7 +13626,7 @@ export const SLOs_indicator_properties_custom_metric = z
               z.union([
                 z
                   .object({
-                    aggregation: z.literal("sum"),
+                    aggregation: z.literal('sum'),
                     field: z.string(),
                     filter: z.string().optional(),
                     name: z.string().regex(/^[A-Z]$/),
@@ -16961,7 +13634,7 @@ export const SLOs_indicator_properties_custom_metric = z
                   .passthrough(),
                 z
                   .object({
-                    aggregation: z.literal("doc_count"),
+                    aggregation: z.literal('doc_count'),
                     filter: z.string().optional(),
                     name: z.string().regex(/^[A-Z]$/),
                   })
@@ -16983,7 +13656,7 @@ export const SLOs_indicator_properties_histogram = z
         filter: z.string().optional(),
         good: z
           .object({
-            aggregation: z.enum(["value_count", "range"]),
+            aggregation: z.enum(['value_count', 'range']),
             field: z.string(),
             filter: z.string().optional(),
             from: z.number().optional(),
@@ -16994,7 +13667,7 @@ export const SLOs_indicator_properties_histogram = z
         timestampField: z.string(),
         total: z
           .object({
-            aggregation: z.enum(["value_count", "range"]),
+            aggregation: z.enum(['value_count', 'range']),
             field: z.string(),
             filter: z.string().optional(),
             from: z.number().optional(),
@@ -17008,15 +13681,7 @@ export const SLOs_indicator_properties_histogram = z
   .passthrough();
 export const SLOs_timeslice_metric_basic_metric_with_field = z
   .object({
-    aggregation: z.enum([
-      "sum",
-      "avg",
-      "min",
-      "max",
-      "std_deviation",
-      "last_value",
-      "cardinality",
-    ]),
+    aggregation: z.enum(['sum', 'avg', 'min', 'max', 'std_deviation', 'last_value', 'cardinality']),
     field: z.string(),
     filter: z.string().optional(),
     name: z.string().regex(/^[A-Z]$/),
@@ -17024,7 +13689,7 @@ export const SLOs_timeslice_metric_basic_metric_with_field = z
   .passthrough();
 export const SLOs_timeslice_metric_percentile_metric = z
   .object({
-    aggregation: z.literal("percentile"),
+    aggregation: z.literal('percentile'),
     field: z.string(),
     filter: z.string().optional(),
     name: z.string().regex(/^[A-Z]$/),
@@ -17033,7 +13698,7 @@ export const SLOs_timeslice_metric_percentile_metric = z
   .passthrough();
 export const SLOs_timeslice_metric_doc_count_metric = z
   .object({
-    aggregation: z.literal("doc_count"),
+    aggregation: z.literal('doc_count'),
     filter: z.string().optional(),
     name: z.string().regex(/^[A-Z]$/),
   })
@@ -17047,7 +13712,7 @@ export const SLOs_indicator_properties_timeslice_metric = z
         index: z.string(),
         metric: z
           .object({
-            comparator: z.enum(["GT", "GTE", "LT", "LTE"]),
+            comparator: z.enum(['GT', 'GTE', 'LT', 'LTE']),
             equation: z.string(),
             metrics: z.array(
               z.union([
@@ -17074,9 +13739,9 @@ export const SLOs_objective = z
   .passthrough();
 export const SLOs_settings = z
   .object({
-    frequency: z.string().default("1m"),
+    frequency: z.string().default('1m'),
     preventInitialBackfill: z.boolean().default(false),
-    syncDelay: z.string().default("1m"),
+    syncDelay: z.string().default('1m'),
     syncField: z.string(),
   })
   .partial()
@@ -17089,12 +13754,7 @@ export const SLOs_error_budget = z
     remaining: z.number(),
   })
   .passthrough();
-export const SLOs_summary_status = z.enum([
-  "NO_DATA",
-  "HEALTHY",
-  "DEGRADING",
-  "VIOLATED",
-]);
+export const SLOs_summary_status = z.enum(['NO_DATA', 'HEALTHY', 'DEGRADING', 'VIOLATED']);
 export const SLOs_summary = z
   .object({
     errorBudget: SLOs_error_budget,
@@ -17105,7 +13765,7 @@ export const SLOs_summary = z
 export const SLOs_time_window = z
   .object({
     duration: z.string(),
-    type: z.enum(["rolling", "calendarAligned"]),
+    type: z.enum(['rolling', 'calendarAligned']),
   })
   .passthrough();
 export const SLOs_slo_with_summary_response = z
@@ -17116,7 +13776,7 @@ export const SLOs_slo_with_summary_response = z
     enabled: z.boolean(),
     groupBy: SLOs_group_by,
     id: z.string(),
-    indicator: z.discriminatedUnion("type", [
+    indicator: z.discriminatedUnion('type', [
       SLOs_indicator_properties_custom_kql,
       SLOs_indicator_properties_apm_availability,
       SLOs_indicator_properties_apm_latency,
@@ -17184,22 +13844,14 @@ export const SLOs_create_slo_response = z.object({ id: z.string() }).passthrough
 export const SLOs_409_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
-export const SLOs_bulk_delete_request = z
-  .object({ list: z.array(z.string()) })
-  .passthrough();
-export const SLOs_bulk_delete_response = z
-  .object({ taskId: z.string() })
-  .partial()
-  .passthrough();
+export const SLOs_bulk_delete_request = z.object({ list: z.array(z.string()) }).passthrough();
+export const SLOs_bulk_delete_response = z.object({ taskId: z.string() }).partial().passthrough();
 export const SLOs_bulk_delete_status_response = z
   .object({
     error: z.string(),
     isDone: z.boolean(),
     results: z.array(
-      z
-        .object({ error: z.string(), id: z.string(), success: z.boolean() })
-        .partial()
-        .passthrough()
+      z.object({ error: z.string(), id: z.string(), success: z.boolean() }).partial().passthrough()
     ),
   })
   .partial()
@@ -17209,11 +13861,11 @@ export const SLOs_bulk_purge_rollup_request = z
     list: z.array(z.string()),
     purgePolicy: z.union([
       z
-        .object({ age: z.string(), purgeType: z.literal("fixed-age") })
+        .object({ age: z.string(), purgeType: z.literal('fixed-age') })
         .partial()
         .passthrough(),
       z
-        .object({ purgeType: z.literal("fixed-time"), timestamp: z.string() })
+        .object({ purgeType: z.literal('fixed-time'), timestamp: z.string() })
         .partial()
         .passthrough(),
     ]),
@@ -17225,9 +13877,7 @@ export const SLOs_bulk_purge_rollup_response = z
   .passthrough();
 export const SLOs_delete_slo_instances_request = z
   .object({
-    list: z.array(
-      z.object({ instanceId: z.string(), sloId: z.string() }).passthrough()
-    ),
+    list: z.array(z.object({ instanceId: z.string(), sloId: z.string() }).passthrough()),
   })
   .passthrough();
 export const SLOs_update_slo_request = z
@@ -17259,7 +13909,7 @@ export const SLOs_slo_definition_response = z
     enabled: z.boolean(),
     groupBy: SLOs_group_by,
     id: z.string(),
-    indicator: z.discriminatedUnion("type", [
+    indicator: z.discriminatedUnion('type', [
       SLOs_indicator_properties_custom_kql,
       SLOs_indicator_properties_apm_availability,
       SLOs_indicator_properties_apm_latency,
@@ -17305,35 +13955,33 @@ export const Saved_objects_attributes = z.object({}).partial().passthrough();
 export const Saved_objects_initial_namespaces = z.array(z.any());
 export const Saved_objects_references = z.array(z.any());
 export const Security_AI_Assistant_API_FindAnonymizationFieldsSortField = z.enum([
-  "created_at",
-  "anonymized",
-  "allowed",
-  "field",
-  "updated_at",
+  'created_at',
+  'anonymized',
+  'allowed',
+  'field',
+  'updated_at',
 ]);
 export const Security_AI_Assistant_API_FindConversationsSortField = z.enum([
-  "created_at",
-  "title",
-  "updated_at",
+  'created_at',
+  'title',
+  'updated_at',
 ]);
 export const Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField = z.enum([
-  "created_at",
-  "is_default",
-  "title",
-  "updated_at",
+  'created_at',
+  'is_default',
+  'title',
+  'updated_at',
 ]);
 export const Security_AI_Assistant_API_FindPromptsSortField = z.enum([
-  "created_at",
-  "is_default",
-  "name",
-  "updated_at",
+  'created_at',
+  'is_default',
+  'name',
+  'updated_at',
 ]);
-export const Security_AI_Assistant_API_SortOrder = z.enum(["asc", "desc"]);
+export const Security_AI_Assistant_API_SortOrder = z.enum(['asc', 'desc']);
 export const Security_Detections_API_AlertsIndexMigrationError = z
   .object({
-    error: z
-      .object({ message: z.string(), status_code: z.string() })
-      .passthrough(),
+    error: z.object({ message: z.string(), status_code: z.string() }).passthrough(),
     index: z.string(),
   })
   .passthrough();
@@ -17356,25 +14004,25 @@ export const Security_Detections_API_AlertVersion = z
   .object({ count: z.number().int(), version: z.number().int() })
   .passthrough();
 export const Security_Detections_API_FindRulesSortField = z.enum([
-  "created_at",
-  "createdAt",
-  "enabled",
-  "execution_summary.last_execution.date",
-  "execution_summary.last_execution.metrics.execution_gap_duration_s",
-  "execution_summary.last_execution.metrics.total_indexing_duration_ms",
-  "execution_summary.last_execution.metrics.total_search_duration_ms",
-  "execution_summary.last_execution.status",
-  "name",
-  "risk_score",
-  "riskScore",
-  "severity",
-  "updated_at",
-  "updatedAt",
+  'created_at',
+  'createdAt',
+  'enabled',
+  'execution_summary.last_execution.date',
+  'execution_summary.last_execution.metrics.execution_gap_duration_s',
+  'execution_summary.last_execution.metrics.total_indexing_duration_ms',
+  'execution_summary.last_execution.metrics.total_search_duration_ms',
+  'execution_summary.last_execution.status',
+  'name',
+  'risk_score',
+  'riskScore',
+  'severity',
+  'updated_at',
+  'updatedAt',
 ]);
 export const Security_Detections_API_MigrationStatus = z
   .object({
     id: Security_Detections_API_NonEmptyString.min(1),
-    status: z.enum(["success", "failure", "pending"]),
+    status: z.enum(['success', 'failure', 'pending']),
     updated: z.string().datetime({ offset: true }),
     version: z.number().int(),
   })
@@ -17397,7 +14045,7 @@ export const Security_Detections_API_MigrationCleanupResult = z
       .optional(),
     id: z.string(),
     sourceIndex: z.string(),
-    status: z.enum(["success", "failure", "pending"]),
+    status: z.enum(['success', 'failure', 'pending']),
     updated: z.string().datetime({ offset: true }),
     version: z.string(),
   })
@@ -17412,7 +14060,7 @@ export const Security_Detections_API_MigrationFinalizationResult = z
       .optional(),
     id: z.string(),
     sourceIndex: z.string(),
-    status: z.enum(["success", "failure", "pending"]),
+    status: z.enum(['success', 'failure', 'pending']),
     updated: z.string().datetime({ offset: true }),
     version: z.string(),
   })
@@ -17420,7 +14068,7 @@ export const Security_Detections_API_MigrationFinalizationResult = z
 export const Security_Detections_API_SkippedAlertsIndexMigration = z
   .object({ index: z.string() })
   .passthrough();
-export const Security_Detections_API_SortOrder = z.enum(["asc", "desc"]);
+export const Security_Detections_API_SortOrder = z.enum(['asc', 'desc']);
 export const Security_Endpoint_Exceptions_API_EndpointListItem =
   Security_Endpoint_Exceptions_API_ExceptionListItem;
 export const Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter =
@@ -17430,22 +14078,22 @@ export const Security_Endpoint_Management_API_Commands = z.array(
 );
 export const Security_Endpoint_Management_API_EndDate = z.string();
 export const Security_Endpoint_Management_API_HostStatuses = z.array(
-  z.enum(["healthy", "offline", "updating", "inactive", "unenrolled"])
+  z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])
 );
 export const Security_Endpoint_Management_API_Kuery = z.string();
 export const Security_Endpoint_Management_API_Page = z.number();
 export const Security_Endpoint_Management_API_PageSize = z.number();
-export const Security_Endpoint_Management_API_SortDirection = z.enum(["asc", "desc"]);
+export const Security_Endpoint_Management_API_SortDirection = z.enum(['asc', 'desc']);
 export const Security_Endpoint_Management_API_SortField = z.enum([
-  "enrolled_at",
-  "metadata.host.hostname",
-  "host_status",
-  "metadata.Endpoint.policy.applied.name",
-  "metadata.Endpoint.policy.applied.status",
-  "metadata.host.os.name",
-  "metadata.host.ip",
-  "metadata.agent.version",
-  "last_checkin",
+  'enrolled_at',
+  'metadata.host.hostname',
+  'host_status',
+  'metadata.Endpoint.policy.applied.name',
+  'metadata.Endpoint.policy.applied.status',
+  'metadata.host.os.name',
+  'metadata.host.ip',
+  'metadata.agent.version',
+  'last_checkin',
 ]);
 export const Security_Endpoint_Management_API_StartDate = z.string();
 export const Security_Endpoint_Management_API_Types = z.array(
@@ -17471,29 +14119,21 @@ export const Security_Lists_API_FindListsFilter = z.string();
 export const Security_Osquery_API_KueryOrUndefined = z.string();
 export const Security_Osquery_API_PageOrUndefined = z.number();
 export const Security_Osquery_API_PageSizeOrUndefined = z.number();
-export const Security_Osquery_API_SortOrderOrUndefined = z.enum(["asc", "desc"]);
+export const Security_Osquery_API_SortOrderOrUndefined = z.enum(['asc', 'desc']);
 export const Security_Osquery_API_SortOrUndefined = z.string();
 export const Security_Timeline_API_AssociatedFilterType = z.enum([
-  "all",
-  "document_only",
-  "saved_object_only",
-  "document_and_saved_object",
-  "orphan",
+  'all',
+  'document_only',
+  'saved_object_only',
+  'document_and_saved_object',
+  'orphan',
 ]);
-export const Security_Timeline_API_DocumentIds = z.union([
-  z.array(z.string()),
-  z.string(),
-]);
-export const Security_Timeline_API_PersistTimelineResponse =
-  Security_Timeline_API_TimelineResponse;
-export const Security_Timeline_API_SavedObjectIds = z.union([
-  z.array(z.string()),
-  z.string(),
-]);
+export const Security_Timeline_API_DocumentIds = z.union([z.array(z.string()), z.string()]);
+export const Security_Timeline_API_PersistTimelineResponse = Security_Timeline_API_TimelineResponse;
+export const Security_Timeline_API_SavedObjectIds = z.union([z.array(z.string()), z.string()]);
 export const Security_Timeline_API_SortFieldTimeline = z.enum([
-  "title",
-  "description",
-  "updated",
-  "created",
+  'title',
+  'description',
+  'updated',
+  'created',
 ]);
-

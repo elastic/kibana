@@ -34,7 +34,10 @@ import {
   createUnifiedActionsProvider,
 } from '../lib/monaco_providers';
 import { createStepExecutionProvider } from '../lib/monaco_providers/step_execution_provider';
-import { ElasticsearchMonacoConnectorHandler, KibanaMonacoConnectorHandler } from '../lib/monaco_connectors';
+import {
+  ElasticsearchMonacoConnectorHandler,
+  KibanaMonacoConnectorHandler,
+} from '../lib/monaco_connectors';
 import { registerMonacoConnectorHandler } from '../lib/monaco_providers';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
 
@@ -110,8 +113,8 @@ const getStepNodesWithType = (yamlDocument: YAML.Document): any[] => {
           const ancestor = path[i];
           if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
             // Check if this map contains a type field
-            const hasType = ancestor.items.some((item: any) => 
-              isPair(item) && isScalar(item.key) && item.key.value === 'type'
+            const hasType = ancestor.items.some(
+              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
             );
             if (hasType) {
               stepNodes.push(ancestor);
@@ -608,9 +611,9 @@ export const WorkflowYAMLEditor = ({
         isEditorMounted,
         hasEditor: !!editorRef.current,
         hasYamlDocument: !!yamlDocument,
-        yamlDocumentContents: yamlDocument?.contents ? 'has contents' : 'no contents'
+        yamlDocumentContents: yamlDocument?.contents ? 'has contents' : 'no contents',
       });
-      
+
       if (!isEditorMounted || !editorRef.current || !yamlDocument) {
         console.log('❌ DECORATION EARLY RETURN: Missing requirements');
         return;
@@ -636,7 +639,7 @@ export const WorkflowYAMLEditor = ({
       // Find all steps with connector types
       const stepNodes = getStepNodesWithType(yamlDocument);
       console.log('🔍 Found step nodes:', stepNodes.length);
-      
+
       for (const stepNode of stepNodes) {
         const typePair = stepNode.items.find((item: any) => item.key?.value === 'type');
         if (!typePair?.value?.value) continue;
@@ -645,23 +648,23 @@ export const WorkflowYAMLEditor = ({
 
         // Skip decoration for very short connector types to avoid false matches
         if (connectorType.length < 3) {
-          continue;  // Skip this iteration
+          continue; // Skip this iteration
         }
 
         const typeRange = typePair.value.range;
-        
+
         console.log('🔍 DEBUG typeRange:', { connectorType, typeRange });
-        
+
         if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
 
         // Get icon and class based on connector type
         const { className } = getConnectorIcon(connectorType);
-        
+
         if (className) {
           // typeRange format: [startOffset, valueStartOffset, endOffset]
           const valueStartOffset = typeRange[1]; // Start of the value (after quotes if present)
           const valueEndOffset = typeRange[2]; // End of the value
-          
+
           // Convert character offsets to Monaco positions
           const startPosition = model.getPositionAt(valueStartOffset);
           const endPosition = model.getPositionAt(valueEndOffset);
@@ -669,17 +672,17 @@ export const WorkflowYAMLEditor = ({
           // Get the line content to check if "type:" is at the beginning
           const currentLineContent = model.getLineContent(startPosition.lineNumber);
           const trimmedLine = currentLineContent.trimStart();
-          
+
           // Check if this line starts with "type:" (after whitespace)
           if (!trimmedLine.startsWith('type:')) {
             console.log(`Skipping decoration: "type:" not at line start for ${connectorType}`);
             continue; // Skip this decoration
           }
-          
+
           // Debug: Check what the actual character at valueEndOffset is
           const charAtEnd = model.getValue().charAt(valueEndOffset);
           const charAtEndMinus1 = model.getValue().charAt(valueEndOffset - 1);
-          
+
           console.log(`🎯 Adding decoration for ${connectorType}:`, {
             startPosition: { line: startPosition.lineNumber, column: startPosition.column },
             endPosition: { line: endPosition.lineNumber, column: endPosition.column },
@@ -693,59 +696,71 @@ export const WorkflowYAMLEditor = ({
               startLineNumber: startPosition.lineNumber,
               startColumn: startPosition.column,
               endLineNumber: endPosition.lineNumber,
-              endColumn: endPosition.column
-            })
+              endColumn: endPosition.column,
+            }),
           });
 
           // Validate positions are valid
           if (startPosition.lineNumber < 1 || endPosition.lineNumber < 1) {
-            console.warn(`🚨 Invalid position for ${connectorType}:`, { startPosition, endPosition });
+            console.warn(`🚨 Invalid position for ${connectorType}:`, {
+              startPosition,
+              endPosition,
+            });
             continue;
           }
-          
+
           // Create unique position key to avoid duplicates
           const positionKey = `${endPosition.lineNumber}:${endPosition.column}`;
           console.log(`🔍 Position ${positionKey} for ${connectorType}`);
-          
+
           // Temporarily disable duplicate prevention to debug
           // if (processedPositions.has(positionKey)) {
           //   console.log(`⚠️ Skipping duplicate decoration at ${positionKey} for ${connectorType}`);
           //   continue;
           // }
           // processedPositions.add(positionKey);
-          
+
           // The issue: startPosition and endPosition might be on different lines
           // We need to find which line actually contains the connector type
-          console.log(`🔍 Start line ${startPosition.lineNumber}, End line ${endPosition.lineNumber}`);
-          
+          console.log(
+            `🔍 Start line ${startPosition.lineNumber}, End line ${endPosition.lineNumber}`
+          );
+
           // Try to find the connector type in the start position line first
           let targetLineNumber = startPosition.lineNumber;
           let lineContent = model.getLineContent(targetLineNumber);
           let typeIndex = lineContent.indexOf(connectorType);
-          
-          // If not found on start line, check end line  
+
+          // If not found on start line, check end line
           if (typeIndex === -1 && endPosition.lineNumber !== startPosition.lineNumber) {
             targetLineNumber = endPosition.lineNumber;
             lineContent = model.getLineContent(targetLineNumber);
             typeIndex = lineContent.indexOf(connectorType);
             console.log(`🔍 Trying end line ${targetLineNumber}: "${lineContent}"`);
           }
-          
-          let actualStartColumn, actualEndColumn;
+
+          let actualStartColumn;
+          let actualEndColumn;
           if (typeIndex !== -1) {
             // Found the connector type in the line
             actualStartColumn = typeIndex + 1; // +1 for 1-based indexing
             actualEndColumn = typeIndex + connectorType.length + 1; // +1 for 1-based indexing
-            console.log(`🎯 Found ${connectorType} on line ${targetLineNumber} in "${lineContent}"`);
-            console.log(`🎯 Type starts at index ${typeIndex}, columns ${actualStartColumn}-${actualEndColumn}`);
+            console.log(
+              `🎯 Found ${connectorType} on line ${targetLineNumber} in "${lineContent}"`
+            );
+            console.log(
+              `🎯 Type starts at index ${typeIndex}, columns ${actualStartColumn}-${actualEndColumn}`
+            );
           } else {
             // Fallback to calculated position
             targetLineNumber = startPosition.lineNumber;
             actualStartColumn = startPosition.column;
             actualEndColumn = endPosition.column;
-            console.log(`⚠️ Could not find ${connectorType} in any line, using calculated positions`);
+            console.log(
+              `⚠️ Could not find ${connectorType} in any line, using calculated positions`
+            );
           }
-          
+
           // Background highlighting and after content (working version)
           const decorations_to_add = [
             // Background highlighting on the connector type text
@@ -761,15 +776,17 @@ export const WorkflowYAMLEditor = ({
               },
             },
           ];
-          
+
           decorations.push(...decorations_to_add);
-          
-          console.log(`✅ Adding ${decorations_to_add.length} decorations for ${connectorType} at ${positionKey}`);
+
+          console.log(
+            `✅ Adding ${decorations_to_add.length} decorations for ${connectorType} at ${positionKey}`
+          );
         }
       }
 
       console.log('🎯 Creating decorations collection with', decorations.length, 'decorations');
-      
+
       if (decorations.length > 0) {
         connectorTypeDecorationCollectionRef.current =
           editor.createDecorationsCollection(decorations);
@@ -785,11 +802,9 @@ export const WorkflowYAMLEditor = ({
       return { className: 'elasticsearch' };
     } else if (connectorType.startsWith('kibana.')) {
       return { className: 'kibana' };
-      
-    } else if (connectorType.startsWith("inference")){
-        return {className: "inference"}
-    }
-    else {
+    } else if (connectorType.startsWith('inference')) {
+      return { className: 'inference' };
+    } else {
       return { className: connectorType };
     }
   };
@@ -824,8 +839,8 @@ export const WorkflowYAMLEditor = ({
 
     // Add global CSS for Monaco hover widgets
     const styleId = 'workflow-monaco-hover-styles';
-    let existingStyle = document.getElementById(styleId);
-    
+    const existingStyle = document.getElementById(styleId);
+
     if (!existingStyle) {
       const style = document.createElement('style');
       style.id = styleId;
@@ -1186,24 +1201,26 @@ const componentStyles = {
       },
       // Enhanced Monaco hover styling for better readability
       // Target multiple possible hover widget classes
-      '&, & .monaco-editor, & .monaco-hover, & .monaco-editor-hover, & .editor-hover-widget, & [class*="hover"]': {
-        '--hover-width': '600px',
-        '--hover-min-width': '500px',
-        '--hover-max-width': '800px',
-        '--hover-max-height': '600px',
-      },
-      '.monaco-editor .monaco-editor-hover, .monaco-hover, .editor-hover-widget, [class*="monaco-hover"], [class*="editor-hover"]': {
-        width: '600px !important',
-        minWidth: '500px !important',
-        maxWidth: '800px !important',
-        maxHeight: '400px !important',
-        fontSize: '13px !important',
-        zIndex: 1000,
-        overflowY: 'auto !important',
-        overflowX: 'hidden !important',
-        display: 'flex !important',
-        flexDirection: 'column !important',
-      },
+      '&, & .monaco-editor, & .monaco-hover, & .monaco-editor-hover, & .editor-hover-widget, & [class*="hover"]':
+        {
+          '--hover-width': '600px',
+          '--hover-min-width': '500px',
+          '--hover-max-width': '800px',
+          '--hover-max-height': '600px',
+        },
+      '.monaco-editor .monaco-editor-hover, .monaco-hover, .editor-hover-widget, [class*="monaco-hover"], [class*="editor-hover"]':
+        {
+          width: '600px !important',
+          minWidth: '500px !important',
+          maxWidth: '800px !important',
+          maxHeight: '400px !important',
+          fontSize: '13px !important',
+          zIndex: 1000,
+          overflowY: 'auto !important',
+          overflowX: 'hidden !important',
+          display: 'flex !important',
+          flexDirection: 'column !important',
+        },
       '.monaco-editor .monaco-editor-hover .monaco-hover-content': {
         width: '100% !important',
         minWidth: '500px !important',

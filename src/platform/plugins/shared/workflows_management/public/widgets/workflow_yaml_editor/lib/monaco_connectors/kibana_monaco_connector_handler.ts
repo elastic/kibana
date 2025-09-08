@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
@@ -38,18 +38,20 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   private readonly kibanaHost?: string;
   private readonly connectorExamples: Map<string, ConnectorExamples>;
 
-  constructor(options: {
-    http?: HttpSetup;
-    notifications?: NotificationsSetup;
-    kibanaHost?: string;
-    generatedConnectors?: Array<{
-      type: string;
-      description?: string;
-      examples?: ConnectorExamples;
-      methods?: string[];
-      patterns?: string[];
-    }>;
-  } = {}) {
+  constructor(
+    options: {
+      http?: HttpSetup;
+      notifications?: NotificationsSetup;
+      kibanaHost?: string;
+      generatedConnectors?: Array<{
+        type: string;
+        description?: string;
+        examples?: ConnectorExamples;
+        methods?: string[];
+        patterns?: string[];
+      }>;
+    } = {}
+  ) {
     super('KibanaMonacoConnectorHandler', 90, ['kibana.']);
     this.http = options.http;
     this.notifications = options.notifications;
@@ -76,7 +78,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // Get connector information from schema
       const connector = this.getConnectorInfo(connectorType);
       const withParams = this.extractWithParams(stepContext.stepNode);
-      
+
       // Extract API information from connector type
       const apiInfo = this.parseKibanaConnectorType(connectorType, connector);
       if (!apiInfo) {
@@ -96,9 +98,13 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const content = [
         `**Endpoint**: \`${apiInfo.method} ${apiInfo.path}\``,
         '',
-        `**Description**: ${apiInfo.description || `Execute ${apiInfo.method} request to ${apiInfo.path}`}`,
+        `**Description**: ${
+          apiInfo.description || `Execute ${apiInfo.method} request to ${apiInfo.path}`
+        }`,
         '',
-        documentationUrl ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **[View API Documentation](${documentationUrl})** - Opens in new tab` : '',
+        documentationUrl
+          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **[View API Documentation](${documentationUrl})** - Opens in new tab`
+          : '',
         documentationUrl ? '' : '',
         `### <span style="text-shadow: 0 0 4px rgba(0,200,0,0.4); opacity: 0.8;">⚡</span> Request Example`,
         '```http',
@@ -109,7 +115,9 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         examples ? '' : '',
         '---',
         `_<span style="text-shadow: 0 0 3px rgba(255,255,0,0.4); opacity: 0.7;">💡</span> Use Ctrl+Space for parameter autocomplete_`,
-      ].filter(line => line !== null).join('\n');
+      ]
+        .filter((line) => line !== null)
+        .join('\n');
 
       return this.createMarkdownContent(content);
     } catch (error) {
@@ -127,16 +135,11 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     // Add actions if we have the necessary services
     if (this.http && this.notifications) {
       actions.push(
-        this.createActionInfo(
-          'copy-step',
-          'Copy Step',
-          () => this.copyStep(context),
-          {
-            icon: 'copy',
-            tooltip: 'Copy workflow step',
-            priority: 12,
-          }
-        )
+        this.createActionInfo('copy-step', 'Copy Step', () => this.copyStep(context), {
+          icon: 'copy',
+          tooltip: 'Copy workflow step',
+          priority: 12,
+        })
       );
     }
 
@@ -167,13 +170,18 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         this.connectorExamples.set(connector.type, connector.examples);
       }
     }
-    console.log(`KibanaMonacoConnectorHandler: Processed ${this.connectorExamples.size} connector examples`);
+    console.log(
+      `KibanaMonacoConnectorHandler: Processed ${this.connectorExamples.size} connector examples`
+    );
   }
 
   /**
    * Parse Kibana connector type to extract API information
    */
-  private parseKibanaConnectorType(connectorType: string, connector?: any): {
+  private parseKibanaConnectorType(
+    connectorType: string,
+    connector?: any
+  ): {
     method: string;
     path: string;
     operationId: string;
@@ -181,12 +189,13 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   } | null {
     // Extract operation ID from connector type (kibana.operationId)
     const operationId = connectorType.replace('kibana.', '');
-    
+
     // Use connector information if available
     const method = connector?.methods?.[0] || 'POST';
-    const path = connector?.patterns?.[0] || `/api/${operationId.replace(/([A-Z])/g, '/$1').toLowerCase()}`;
+    const path =
+      connector?.patterns?.[0] || `/api/${operationId.replace(/([A-Z])/g, '/$1').toLowerCase()}`;
     const description = connector?.description || `Kibana ${operationId} API endpoint`;
-    
+
     return {
       method,
       path,
@@ -213,7 +222,9 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       lines.push('', '**Example Parameters:**');
       lines.push('```yaml');
       for (const [key, value] of Object.entries(examples.params)) {
-        lines.push(`${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`);
+        lines.push(
+          `${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
+        );
       }
       lines.push('```');
     }
@@ -248,19 +259,17 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   private getDocumentationUrl(connectorType: string): string | null {
     try {
       const connector = this.getConnectorInfo(connectorType);
-      
+
       if (connector?.documentation) {
         // Similar to Console, replace version placeholders with current version
         let docUrl = connector.documentation;
-        
+
         // Replace common version placeholders with 'current' for stable links
-        docUrl = docUrl
-          .replace('/master/', '/current/')
-          .replace('/{branch}/', '/current/');
-          
+        docUrl = docUrl.replace('/master/', '/current/').replace('/{branch}/', '/current/');
+
         return docUrl;
       }
-      
+
       // Fallback to generic Kibana API docs
       return 'https://www.elastic.co/guide/en/kibana/current/api.html';
     } catch (error) {
@@ -276,7 +285,11 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     apiInfo: { method: string; path: string },
     withParams: Record<string, any>
   ): string {
-    const lines = [`${apiInfo.method} ${apiInfo.path}`, 'Content-Type: application/json', 'kbn-xsrf: true'];
+    const lines = [
+      `${apiInfo.method} ${apiInfo.path}`,
+      'Content-Type: application/json',
+      'kbn-xsrf: true',
+    ];
 
     if (Object.keys(withParams).length > 0) {
       lines.push('');
@@ -324,9 +337,9 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
 
       // Get the entire step YAML
       const stepYaml = stepContext.stepNode?.toString() || '';
-      
+
       await navigator.clipboard.writeText(stepYaml);
-      
+
       if (this.notifications) {
         this.notifications.toasts.addSuccess({
           title: 'Copied to clipboard',
@@ -359,7 +372,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const curlCommand = this.generateCurlCommand(kibanaUrl, apiInfo, withParams);
 
       await navigator.clipboard.writeText(curlCommand);
-      
+
       if (this.notifications) {
         this.notifications.toasts.addSuccess({
           title: 'Copied to clipboard',
@@ -391,7 +404,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const fetchCode = this.generateFetchCode(apiInfo, withParams);
 
       await navigator.clipboard.writeText(fetchCode);
-      
+
       if (this.notifications) {
         this.notifications.toasts.addSuccess({
           title: 'Copied to clipboard',
@@ -411,7 +424,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // This could open the Kibana API docs or OpenAPI explorer
       const docsUrl = `${this.kibanaHost || 'http://localhost:5601'}/app/dev_tools#/console`;
       window.open(docsUrl, '_blank');
-      
+
       if (this.notifications) {
         this.notifications.toasts.addInfo({
           title: 'API Documentation',
