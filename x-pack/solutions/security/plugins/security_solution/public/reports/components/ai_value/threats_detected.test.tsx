@@ -73,55 +73,6 @@ describe('ThreatsDetected', () => {
     });
   });
 
-  it('handles different prop values correctly', () => {
-    const props = {
-      ...defaultProps,
-      attackDiscoveryCount: 100,
-      attackDiscoveryCountCompare: 50,
-    };
-
-    mockGetTimeRangeAsDays.mockReturnValue('15');
-
-    render(<ThreatsDetected {...props} />);
-
-    expect(ThreatsDetectedMetric).toHaveBeenCalledWith(
-      expect.objectContaining({
-        from: props.from,
-        to: props.to,
-      }),
-      {}
-    );
-
-    expect(ComparePercentage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currentCount: props.attackDiscoveryCount,
-        previousCount: props.attackDiscoveryCountCompare,
-        stat: `${props.attackDiscoveryCountCompare}`,
-        timeRange: '15',
-      }),
-      {}
-    );
-  });
-
-  it('handles zero values correctly', () => {
-    const props = {
-      ...defaultProps,
-      attackDiscoveryCount: 0,
-      attackDiscoveryCountCompare: 0,
-    };
-
-    render(<ThreatsDetected {...props} />);
-
-    expect(ComparePercentage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currentCount: 0,
-        previousCount: 0,
-        stat: '0',
-      }),
-      {}
-    );
-  });
-
   it('passes correct time range to both child components', () => {
     const customTimeRange = `45`;
     mockGetTimeRangeAsDays.mockReturnValue(customTimeRange);

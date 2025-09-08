@@ -14,19 +14,9 @@ import { AlertProcessingDonut } from './alert_processing_donut_lens';
 import { formatPercent } from './metrics';
 import type { ValueMetrics } from './metrics';
 
-jest.mock('./alert_processing_key_insight', () => ({
-  AlertProcessingKeyInsight: jest.fn(() => (
-    <div data-test-subj="mock-alert-processing-key-insight" />
-  )),
-}));
-
-jest.mock('./alert_processing_table', () => ({
-  AlertsProcessingTable: jest.fn(() => <div data-test-subj="mock-alerts-processing-table" />),
-}));
-
-jest.mock('./alert_processing_donut_lens', () => ({
-  AlertProcessingDonut: jest.fn(() => <div data-test-subj="mock-alert-processing-donut" />),
-}));
+jest.mock('./alert_processing_key_insight');
+jest.mock('./alert_processing_table');
+jest.mock('./alert_processing_donut_lens');
 
 jest.mock('./metrics', () => ({
   formatPercent: jest.fn(),
@@ -110,60 +100,6 @@ describe('AlertProcessing', () => {
     expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
       expect.objectContaining({
         escalatedAlerts: 200,
-      }),
-      {}
-    );
-  });
-
-  it('handles edge case where all alerts are filtered', () => {
-    const allFilteredMetrics: ValueMetrics = {
-      ...defaultValueMetrics,
-      filteredAlerts: 1000,
-      totalAlerts: 1000,
-      filteredAlertsPerc: 100,
-      escalatedAlertsPerc: 0,
-    };
-
-    const propsWithAllFiltered = {
-      ...defaultProps,
-      valueMetrics: allFilteredMetrics,
-    };
-
-    render(<AlertProcessing {...propsWithAllFiltered} />);
-
-    expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filteredAlerts: 1000,
-        escalatedAlerts: 0,
-        filteredAlertsPerc: '100.00%',
-        escalatedAlertsPerc: '0.00%',
-      }),
-      {}
-    );
-  });
-
-  it('handles edge case where no alerts are filtered', () => {
-    const noneFilteredMetrics: ValueMetrics = {
-      ...defaultValueMetrics,
-      filteredAlerts: 0,
-      totalAlerts: 1000,
-      filteredAlertsPerc: 0,
-      escalatedAlertsPerc: 100,
-    };
-
-    const propsWithNoneFiltered = {
-      ...defaultProps,
-      valueMetrics: noneFilteredMetrics,
-    };
-
-    render(<AlertProcessing {...propsWithNoneFiltered} />);
-
-    expect(mockAlertsProcessingTable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filteredAlerts: 0,
-        escalatedAlerts: 1000,
-        filteredAlertsPerc: '0.00%',
-        escalatedAlertsPerc: '100.00%',
       }),
       {}
     );

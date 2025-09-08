@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AlertProcessingKeyInsight } from './alert_processing_key_insight';
@@ -25,6 +25,10 @@ export const AlertProcessing: React.FC<Props> = ({ valueMetrics, from, to, attac
   const {
     euiTheme: { size },
   } = useEuiTheme();
+  const escalatedAlerts = useMemo(
+    () => valueMetrics.totalAlerts - valueMetrics.filteredAlerts,
+    [valueMetrics.filteredAlerts, valueMetrics.totalAlerts]
+  );
   return (
     <div
       css={css`
@@ -45,7 +49,7 @@ export const AlertProcessing: React.FC<Props> = ({ valueMetrics, from, to, attac
           <AlertProcessingDonut attackAlertIds={attackAlertIds} from={from} to={to} />
           <AlertsProcessingTable
             filteredAlerts={valueMetrics.filteredAlerts}
-            escalatedAlerts={valueMetrics.totalAlerts - valueMetrics.filteredAlerts}
+            escalatedAlerts={escalatedAlerts}
             filteredAlertsPerc={formatPercent(valueMetrics.filteredAlertsPerc)}
             escalatedAlertsPerc={formatPercent(valueMetrics.escalatedAlertsPerc)}
           />

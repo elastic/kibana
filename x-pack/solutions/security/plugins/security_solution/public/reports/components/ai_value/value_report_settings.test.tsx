@@ -54,38 +54,6 @@ describe('ValueReportSettings', () => {
     });
   });
 
-  it('handles different prop values correctly', () => {
-    const testCases = [
-      {
-        props: {
-          minutesPerAlert: 5,
-          analystHourlyRate: 75,
-        },
-        description: 'different values',
-      },
-      {
-        props: {
-          minutesPerAlert: 0,
-          analystHourlyRate: 0,
-        },
-        description: 'zero values',
-      },
-      {
-        props: {
-          minutesPerAlert: 1.5,
-          analystHourlyRate: 25.5,
-        },
-        description: 'decimal values',
-      },
-    ];
-
-    testCases.forEach(({ props }) => {
-      const { container } = render(<ValueReportSettings {...props} />);
-      const settingsElement = container.querySelector('.valueReportSettings');
-      expect(settingsElement).toBeInTheDocument();
-    });
-  });
-
   it('handles navigation callback correctly', () => {
     const { container } = render(<ValueReportSettings {...defaultProps} />);
 

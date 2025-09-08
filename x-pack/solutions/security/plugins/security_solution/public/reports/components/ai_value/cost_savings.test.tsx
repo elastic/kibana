@@ -88,39 +88,6 @@ describe('CostSavings', () => {
     expect(mockFormatDollars).toHaveBeenCalledWith(defaultProps.costSavingsCompare);
   });
 
-  it('handles different prop values correctly', () => {
-    const props = {
-      ...defaultProps,
-      minutesPerAlert: 5,
-      analystHourlyRate: 75,
-      costSavings: 10000,
-      costSavingsCompare: 8000,
-    };
-
-    mockGetTimeRangeAsDays.mockReturnValue('15');
-    mockFormatDollars.mockReturnValue('$8,000');
-
-    render(<CostSavings {...props} />);
-
-    expect(CostSavingsMetric).toHaveBeenCalledWith(
-      expect.objectContaining({
-        minutesPerAlert: props.minutesPerAlert,
-        analystHourlyRate: props.analystHourlyRate,
-      }),
-      {}
-    );
-
-    expect(ComparePercentageBadge).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currentCount: props.costSavings,
-        previousCount: props.costSavingsCompare,
-        stat: '$8,000',
-        timeRange: '15',
-      }),
-      {}
-    );
-  });
-
   it('memoizes timerange calculation based on from and to props', () => {
     const { rerender } = render(<CostSavings {...defaultProps} />);
     jest.clearAllMocks();

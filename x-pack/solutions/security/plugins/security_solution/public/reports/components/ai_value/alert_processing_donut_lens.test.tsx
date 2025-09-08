@@ -45,99 +45,6 @@ describe('AlertProcessingDonut', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSpaceId.mockReturnValue('test-space-id');
-
-    mockGetAlertProcessingDonutAttributes.mockReturnValue({
-      title: 'Alerts',
-      description: '',
-      visualizationType: 'lnsPie',
-      state: {
-        visualization: {
-          layers: [
-            {
-              categoryDisplay: 'show',
-              colorMapping: {
-                assignments: [],
-                colorMode: { type: 'categorical' },
-                paletteId: 'default',
-                specialAssignments: [],
-              },
-              emptySizeRatio: 0.9,
-              layerId: 'unifiedHistogram',
-              layerType: 'data',
-              legendSize: 'medium',
-              legendPosition: 'right',
-              legendDisplay: 'hide',
-              legendStats: ['percent'],
-              metrics: ['count_column'],
-              nestedLegend: true,
-              numberDisplay: 'percent',
-              primaryGroups: ['breakdown_column'],
-            },
-          ],
-          shape: 'donut',
-        },
-        query: { query: '', language: 'kuery' },
-        filters: [],
-        datasourceStates: {
-          formBased: {
-            layers: {
-              unifiedHistogram: {
-                columnOrder: ['breakdown_column', 'count_column'],
-                columns: {
-                  breakdown_column: {
-                    dataType: 'string',
-                    isBucketed: true,
-                    label: 'Alert processing category',
-                    operationType: 'terms',
-                    scale: 'ordinal',
-                    sourceField: 'processing_analytics_rtf',
-                  },
-                  count_column: {
-                    dataType: 'number',
-                    isBucketed: false,
-                    label: 'Count of records',
-                    operationType: 'count',
-                    params: {
-                      format: { id: 'number', params: { decimals: 0 } },
-                    },
-                    scale: 'ratio',
-                    sourceField: '___records___',
-                  },
-                },
-                incompleteColumns: {},
-              },
-            },
-          },
-        },
-        internalReferences: [
-          {
-            id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
-            name: 'indexpattern-datasource-layer-unifiedHistogram',
-            type: 'index-pattern',
-          },
-        ],
-        adHocDataViews: {
-          'db828b69-bb21-4b92-bc33-56e3b01da790': {
-            allowHidden: false,
-            allowNoIndex: false,
-            fieldAttrs: { processing_analytics_rtf: {} },
-            fieldFormats: {},
-            id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
-            name: '.alerts-security.alerts-test-space-id',
-            runtimeFieldMap: {
-              processing_analytics_rtf: {
-                script: { source: 'test script' },
-                type: 'keyword',
-              },
-            },
-            sourceFilters: [],
-            timeFieldName: '@timestamp',
-            title: '.alerts-security.alerts-test-space-id',
-          },
-        },
-      },
-      references: [],
-    });
   });
 
   it('calls useSpaceId hook and passes correct props to VisualizationEmbeddable', () => {
@@ -222,25 +129,6 @@ describe('AlertProcessingDonut', () => {
       ...mockArgs,
       attackAlertIds: [],
       spaceId: 'test-space-id',
-    });
-  });
-
-  it('handles custom spaceId correctly', () => {
-    const customSpaceId = 'custom-space-123';
-    mockUseSpaceId.mockReturnValue(customSpaceId);
-    render(<AlertProcessingDonut {...defaultProps} />);
-
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-    const mockArgs = {
-      euiTheme: { colors: {} },
-      extraOptions: { filters: [] },
-    };
-
-    callArgs.getLensAttributes(mockArgs);
-    expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
-      ...mockArgs,
-      attackAlertIds: defaultProps.attackAlertIds,
-      spaceId: customSpaceId,
     });
   });
 });

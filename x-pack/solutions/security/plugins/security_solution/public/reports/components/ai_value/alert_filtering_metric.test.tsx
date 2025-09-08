@@ -45,73 +45,26 @@ const defaultProps = {
 };
 
 describe('AlertFilteringMetric', () => {
+  const excludeAlertsFilters = {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+    },
+    query: {
+      bool: {
+        must_not: [
+          { match_phrase: { 'kibana.alert.uuid': 'alert-1' } },
+          { match_phrase: { 'kibana.alert.uuid': 'alert-2' } },
+          { match_phrase: { 'kibana.alert.uuid': 'alert-3' } },
+        ],
+      },
+    },
+  };
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockGetExcludeAlertsFilters.mockReturnValue([
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-        },
-        query: {
-          bool: {
-            must_not: [
-              { match_phrase: { 'kibana.alert.uuid': 'alert-1' } },
-              { match_phrase: { 'kibana.alert.uuid': 'alert-2' } },
-              { match_phrase: { 'kibana.alert.uuid': 'alert-3' } },
-            ],
-          },
-        },
-      },
-    ]);
-
-    mockGetAlertFilteringMetricLensAttributes.mockReturnValue({
-      description: '',
-      state: {
-        adHocDataViews: {},
-        datasourceStates: {
-          formBased: {
-            layers: {
-              unifiedHistogram: {
-                columnOrder: ['count_column'],
-                columns: {
-                  count_column: {
-                    customLabel: true,
-                    dataType: 'number',
-                    isBucketed: false,
-                    label: 'Alert filtering rate',
-                    operationType: 'formula',
-                    params: {
-                      format: { id: 'percent', params: { decimals: 2 } },
-                    },
-                    references: ['countColumnX1'],
-                  },
-                },
-                incompleteColumns: {},
-              },
-            },
-          },
-        },
-        filters: [],
-        internalReferences: [],
-        query: { language: 'kuery', query: '_id :*' },
-        visualization: {
-          icon: 'visLine',
-          iconAlign: 'right',
-          valuesTextAlign: 'left',
-          layerId: 'unifiedHistogram',
-          layerType: 'data',
-          metricAccessor: 'count_column',
-          secondaryTrend: { type: 'none' },
-          showBar: false,
-        },
-      },
-      title: 'Alert filtering rate',
-      visualizationType: 'lnsMetric',
-      references: [],
-    });
+    mockGetExcludeAlertsFilters.mockReturnValue([excludeAlertsFilters]);
   });
 
   it('passes correct props to VisualizationEmbeddable and calls getExcludeAlertsFilters', () => {
@@ -143,24 +96,7 @@ describe('AlertFilteringMetric', () => {
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
         extraOptions: {
-          filters: [
-            {
-              meta: {
-                alias: null,
-                negate: false,
-                disabled: false,
-              },
-              query: {
-                bool: {
-                  must_not: [
-                    { match_phrase: { 'kibana.alert.uuid': 'alert-1' } },
-                    { match_phrase: { 'kibana.alert.uuid': 'alert-2' } },
-                    { match_phrase: { 'kibana.alert.uuid': 'alert-3' } },
-                  ],
-                },
-              },
-            },
-          ],
+          filters: [excludeAlertsFilters],
         },
       }),
       {}
