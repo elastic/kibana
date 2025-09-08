@@ -155,9 +155,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
+    const { event, ...manualInputs } = inputs;
     const context = {
-      ...inputs,
+      event,
       spaceId,
+      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
@@ -274,6 +276,14 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     return await this.workflowsService.getStepExecution(params, spaceId);
+  }
+
+  public async cancelWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<void> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return await workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   public async getWorkflowStats(spaceId: string) {

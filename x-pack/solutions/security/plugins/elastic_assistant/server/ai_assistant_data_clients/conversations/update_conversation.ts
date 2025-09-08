@@ -47,11 +47,6 @@ export interface UpdateConversationSchema {
     provider?: Provider;
     model?: string;
   };
-  summary?: {
-    '@timestamp': string;
-    semantic_content?: string;
-    summarized_message_ids?: UUID[];
-  };
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
   updated_at?: string;
@@ -103,13 +98,14 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
     id,
-    summary,
+    users,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
     id,
     updated_at: updatedAt,
     ...(title ? { title } : {}),
+    ...(users ? { users } : {}),
     ...(apiConfig
       ? {
           api_config: {
@@ -161,15 +157,6 @@ export const transformToUpdateScheme = (
                 }
               : {}),
           })),
-        }
-      : {}),
-    ...(summary
-      ? {
-          summary: {
-            '@timestamp': updatedAt,
-            semantic_content: summary.semanticContent,
-            summarized_message_ids: summary.summarizedMessageIds,
-          },
         }
       : {}),
   };

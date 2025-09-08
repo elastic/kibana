@@ -141,6 +141,7 @@ import {
 } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
+import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -637,6 +638,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      defendInsightsPolicyResponseFailure:
+        config.experimentalFeatures.defendInsightsPolicyResponseFailure,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -654,6 +657,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
+      licenseService,
     });
 
     this.endpointAppContextService.start({
@@ -742,6 +746,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         .catch(() => {}); // it shouldn't refuse, but just in case
     }
 
+    let queryConfig: TelemetryQueryConfiguration | undefined;
+
+    if (this.config.telemetry?.queryConfig !== undefined) {
+      queryConfig = {
+        pageSize: this.config.telemetry.queryConfig.pageSize ?? 500,
+        maxResponseSize: this.config.telemetry.queryConfig.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
+        maxCompressedResponseSize:
+          this.config.telemetry.queryConfig.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
+      };
+    }
+
     this.telemetryReceiver
       .start(
         core,
@@ -749,7 +764,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         DEFAULT_ALERTS_INDEX,
         this.endpointAppContextService,
         exceptionListClient,
-        packageService
+        packageService,
+        queryConfig
       )
       .catch(() => {});
 
