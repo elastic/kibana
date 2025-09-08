@@ -140,15 +140,10 @@ describe('AlertProcessingDonut', () => {
     });
   });
 
-  it('calls useSpaceId hook', () => {
+  it('calls useSpaceId hook and passes correct props to VisualizationEmbeddable', () => {
     render(<AlertProcessingDonut {...defaultProps} />);
 
     expect(mockUseSpaceId).toHaveBeenCalled();
-  });
-
-  it('passes all required props to VisualizationEmbeddable', () => {
-    render(<AlertProcessingDonut {...defaultProps} />);
-
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
         applyGlobalQueriesAndFilters: false,
@@ -165,20 +160,17 @@ describe('AlertProcessingDonut', () => {
           VisualizationContextMenuActions.addToNewCase,
           VisualizationContextMenuActions.inspect,
         ],
+        getLensAttributes: expect.any(Function),
       }),
       {}
     );
-  });
-
-  it('passes getLensAttributes function to VisualizationEmbeddable', () => {
-    render(<AlertProcessingDonut {...defaultProps} />);
 
     const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     expect(callArgs.getLensAttributes).toBeDefined();
     expect(typeof callArgs.getLensAttributes).toBe('function');
   });
 
-  it('getLensAttributes function calls getAlertProcessingDonutAttributes with correct args', () => {
+  it('handles getLensAttributes function calls and various spaceId scenarios correctly', () => {
     render(<AlertProcessingDonut {...defaultProps} />);
 
     const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
@@ -194,15 +186,9 @@ describe('AlertProcessingDonut', () => {
       attackAlertIds: defaultProps.attackAlertIds,
       spaceId: 'test-space-id',
     });
-  });
 
-  it('handles null/undefined spaceId from useSpaceId hook', () => {
-    const testCases = [
-      { spaceId: null, description: 'null' },
-      { spaceId: undefined, description: 'undefined' },
-    ];
-
-    testCases.forEach(({ spaceId }) => {
+    const testCases = [null, undefined];
+    testCases.forEach((spaceId) => {
       jest.clearAllMocks();
       // @ts-ignore
       mockUseSpaceId.mockReturnValue(spaceId);
@@ -210,11 +196,6 @@ describe('AlertProcessingDonut', () => {
       render(<AlertProcessingDonut {...defaultProps} />);
 
       const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-      const mockArgs = {
-        euiTheme: { colors: {} },
-        extraOptions: { filters: [] },
-      };
-
       callArgs.getLensAttributes(mockArgs);
 
       expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
@@ -225,76 +206,39 @@ describe('AlertProcessingDonut', () => {
     });
   });
 
-  it('handles empty attackAlertIds array', () => {
-    const propsWithEmptyIds = {
-      ...defaultProps,
-      attackAlertIds: [],
+  it('handles various attackAlertIds scenarios and different spaceId values correctly', () => {
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
     };
-
+    const propsWithEmptyIds = { ...defaultProps, attackAlertIds: [] };
     render(<AlertProcessingDonut {...propsWithEmptyIds} />);
-
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-    const mockArgs = {
-      euiTheme: { colors: {} },
-      extraOptions: { filters: [] },
-    };
-
+    let callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     callArgs.getLensAttributes(mockArgs);
-
     expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       attackAlertIds: [],
       spaceId: 'test-space-id',
     });
-  });
-
-  it('handles single attackAlertId', () => {
-    const propsWithSingleId = {
-      ...defaultProps,
-      attackAlertIds: ['single-alert-id'],
-    };
-
+    const propsWithSingleId = { ...defaultProps, attackAlertIds: ['single-alert-id'] };
     render(<AlertProcessingDonut {...propsWithSingleId} />);
-
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-    const mockArgs = {
-      euiTheme: { colors: {} },
-      extraOptions: { filters: [] },
-    };
-
+    callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[1][0];
     callArgs.getLensAttributes(mockArgs);
-
     expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       attackAlertIds: ['single-alert-id'],
       spaceId: 'test-space-id',
     });
-  });
-
-  it('handles different spaceId values', () => {
     const customSpaceId = 'custom-space-123';
     mockUseSpaceId.mockReturnValue(customSpaceId);
-
     render(<AlertProcessingDonut {...defaultProps} />);
-
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-    const mockArgs = {
-      euiTheme: { colors: {} },
-      extraOptions: { filters: [] },
-    };
-
+    callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[2][0];
     callArgs.getLensAttributes(mockArgs);
-
     expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       attackAlertIds: defaultProps.attackAlertIds,
       spaceId: customSpaceId,
     });
-  });
-
-  it('calls VisualizationEmbeddable with correct arguments', () => {
-    render(<AlertProcessingDonut {...defaultProps} />);
-
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
         applyGlobalQueriesAndFilters: false,

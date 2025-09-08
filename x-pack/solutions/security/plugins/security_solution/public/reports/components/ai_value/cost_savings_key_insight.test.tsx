@@ -108,18 +108,15 @@ describe('CostSavingsKeyInsight', () => {
     );
   });
 
-  it('renders component correctly and calls expected hooks', async () => {
+  it('renders component correctly, calls expected hooks, and handles various scenarios', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
-      // Component rendering
       expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-      // Hook calls
       expect(mockUseKibana).toHaveBeenCalled();
       expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
       expect(mockUseAssistantAvailability).toHaveBeenCalled();
@@ -131,19 +128,14 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
-  });
 
-  it('handles various error conditions and edge cases', () => {
-    // Null lensResponse
     const { rerender } = render(<CostSavingsKeyInsight lensResponse={null} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
 
-    // Null prompts
     mockUseFindCostSavingsPrompts.mockReturnValue(null);
     rerender(<CostSavingsKeyInsight {...defaultProps} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
 
-    // Missing connectorId
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
         // @ts-ignore
@@ -156,8 +148,7 @@ describe('CostSavingsKeyInsight', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('handles license and assistant availability scenarios correctly', async () => {
-    // Non-enterprise license
+  it('handles license, assistant availability, and chatComplete operations correctly', async () => {
     mockLicenseService.isEnterprise.mockReturnValue(false);
     const { rerender } = render(<CostSavingsKeyInsight {...defaultProps} />);
     await waitFor(() => {
@@ -169,8 +160,6 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
-
-    // Disabled assistant
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: false,
       isAssistantEnabled: false,
@@ -185,13 +174,9 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
-  });
-
-  it('handles chatComplete operations and prompt construction correctly', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
-      // ChatComplete call with correct parameters
       expect(mockChatComplete).toHaveBeenCalledWith({
         connectorId: 'test-connector-id',
         messages: [
@@ -201,8 +186,6 @@ describe('CostSavingsKeyInsight', () => {
           },
         ],
       });
-
-      // Prompt construction with lensResponse data
       expect(mockChatComplete).toHaveBeenCalledWith({
         connectorId: 'test-connector-id',
         messages: [
@@ -214,12 +197,8 @@ describe('CostSavingsKeyInsight', () => {
           },
         ],
       });
-
-      // Display insight result
       expect(screen.getByText(chatCompleteResult)).toBeInTheDocument();
     });
-
-    // Handle chatComplete error
     const mockChatCompleteError = jest.fn().mockRejectedValue(new Error('API Error'));
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
@@ -229,7 +208,7 @@ describe('CostSavingsKeyInsight', () => {
         },
       })
     );
-    const { rerender } = render(<CostSavingsKeyInsight {...defaultProps} />);
+    render(<CostSavingsKeyInsight {...defaultProps} />);
     await waitFor(() => {
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });

@@ -101,7 +101,7 @@ describe('AIValueMetrics', () => {
     });
   });
 
-  it('renders nothing when loading', () => {
+  it('handles loading state and renders components correctly', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
       isLoading: true,
@@ -110,11 +110,15 @@ describe('AIValueMetrics', () => {
     });
 
     const { container } = render(<AIValueMetrics {...defaultProps} />);
-
     expect(container.firstChild).toBeNull();
-  });
 
-  it('renders the component with correct structure when not loading', () => {
+    mockUseValueMetrics.mockReturnValue({
+      attackAlertIds: ['alert-1', 'alert-2'],
+      isLoading: false,
+      valueMetrics: mockValueMetrics,
+      valueMetricsCompare: mockValueMetricsCompare,
+    });
+
     render(<AIValueMetrics {...defaultProps} />);
 
     expect(ExecutiveSummary).toHaveBeenCalledWith(
@@ -160,7 +164,7 @@ describe('AIValueMetrics', () => {
     );
   });
 
-  it('calls useValueMetrics with correct parameters', () => {
+  it('handles hook calls and parameter passing correctly', () => {
     render(<AIValueMetrics {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith({
@@ -169,10 +173,6 @@ describe('AIValueMetrics', () => {
       minutesPerAlert: 10,
       analystHourlyRate: 50,
     });
-  });
-
-  it('calls setHasAttackDiscoveries with correct value', () => {
-    render(<AIValueMetrics {...defaultProps} />);
 
     expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(true);
   });
@@ -195,26 +195,14 @@ describe('AIValueMetrics', () => {
     expect(CostSavingsTrend).not.toHaveBeenCalled();
   });
 
-  it('handles different uiSettings values correctly', () => {
-    const testCases = [
-      {
-        minutesPerAlert: 5,
-        analystHourlyRate: 75,
-        description: 'different values',
-      },
-      {
-        minutesPerAlert: 0,
-        analystHourlyRate: 0,
-        description: 'zero values',
-      },
-      {
-        minutesPerAlert: 15,
-        analystHourlyRate: 100,
-        description: 'higher values',
-      },
+  it('handles different uiSettings values, time ranges, and parameter variations correctly', () => {
+    const uiSettingsTestCases = [
+      { minutesPerAlert: 5, analystHourlyRate: 75 },
+      { minutesPerAlert: 0, analystHourlyRate: 0 },
+      { minutesPerAlert: 15, analystHourlyRate: 100 },
     ];
 
-    testCases.forEach(({ minutesPerAlert, analystHourlyRate, description }) => {
+    uiSettingsTestCases.forEach(({ minutesPerAlert, analystHourlyRate }) => {
       jest.clearAllMocks();
 
       mockUseKibana.mockReturnValue(
@@ -246,35 +234,25 @@ describe('AIValueMetrics', () => {
         analystHourlyRate,
       });
     });
-  });
-
-  it('calls useValueMetrics with correct parameters on initial render', () => {
-    render(<AIValueMetrics {...defaultProps} />);
-
-    expect(mockUseValueMetrics).toHaveBeenCalledWith({
-      from: defaultProps.from,
-      to: defaultProps.to,
-      minutesPerAlert: 10,
-      analystHourlyRate: 50,
-    });
-  });
-
-  it('handles different time ranges correctly', () => {
-    const testCases = [
-      {
-        from: '2023-01-01T00:00:00.000Z',
-        to: '2023-01-02T00:00:00.000Z',
-        description: 'single day',
-      },
-      {
-        from: '2023-01-01T00:00:00.000Z',
-        to: '2023-12-31T23:59:59.999Z',
-        description: 'full year',
-      },
+    const timeRangeTestCases = [
+      { from: '2023-01-01T00:00:00.000Z', to: '2023-01-02T00:00:00.000Z' },
+      { from: '2023-01-01T00:00:00.000Z', to: '2023-12-31T23:59:59.999Z' },
     ];
 
-    testCases.forEach(({ from, to, description }) => {
+    timeRangeTestCases.forEach(({ from, to }) => {
       jest.clearAllMocks();
+      mockUseKibana.mockReturnValue(
+        createMockKibanaServices({
+          uiSettings: {
+            // @ts-ignore
+            get: jest.fn((key: string) => {
+              if (key === DEFAULT_VALUE_REPORT_MINUTES) return 10;
+              if (key === DEFAULT_VALUE_REPORT_RATE) return 50;
+              return null;
+            }),
+          },
+        })
+      );
 
       mockUseValueMetrics.mockReturnValue({
         attackAlertIds: ['alert-1'],

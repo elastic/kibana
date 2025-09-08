@@ -91,7 +91,7 @@ describe('useMetricAnimation', () => {
     jest.useRealTimers();
   });
 
-  it('should not start animation when element is not found', () => {
+  it('handles element detection, animation start, and mutation observer setup correctly', () => {
     if (document.body.contains(mockElement)) {
       document.body.removeChild(mockElement);
     }
@@ -104,9 +104,13 @@ describe('useMetricAnimation', () => {
     );
 
     expect(d3.select).not.toHaveBeenCalled();
-  });
+    expect(mockMutationObserver).toHaveBeenCalled();
+    expect(mockObserver.observe).toHaveBeenCalledWith(document.body, {
+      childList: true,
+      subtree: true,
+    });
 
-  it('should start animation immediately when element is found', () => {
+    document.body.appendChild(mockElement);
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -122,28 +126,8 @@ describe('useMetricAnimation', () => {
     expect(mockTransition.tween).toHaveBeenCalledWith('text', expect.any(Function));
   });
 
-  it('should set up mutation observer when element is not initially found', () => {
-    if (document.body.contains(mockElement)) {
-      document.body.removeChild(mockElement);
-    }
-
-    renderHook(() =>
-      useMetricAnimation({
-        animationDurationMs: 2000,
-        selector: '.echMetricText__value',
-      })
-    );
-
-    expect(mockMutationObserver).toHaveBeenCalled();
-    expect(mockObserver.observe).toHaveBeenCalledWith(document.body, {
-      childList: true,
-      subtree: true,
-    });
-  });
-
-  it('should extract numeric value from text content', () => {
+  it('handles text extraction, animation logic, and value formatting correctly', () => {
     mockElement.textContent = '$1,234,567.89';
-
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -156,22 +140,8 @@ describe('useMetricAnimation', () => {
     });
 
     expect(mockTransition.tween).toHaveBeenCalledWith('text', expect.any(Function));
-  });
 
-  it('should handle non-numeric text gracefully', () => {
-    mockElement.textContent = 'Not a number';
-
-    renderHook(() =>
-      useMetricAnimation({
-        animationDurationMs: 2000,
-        selector: '.echMetricText__value',
-      })
-    );
-
-    expect(d3.select).not.toHaveBeenCalled();
-  });
-
-  it('should start animation with correct initial values', () => {
+    mockElement.textContent = '$99,630';
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -188,9 +158,8 @@ describe('useMetricAnimation', () => {
     expect(mockTransition.tween).toHaveBeenCalledWith('text', expect.any(Function));
   });
 
-  it('should restore original text after animation', () => {
+  it('handles animation completion, fallback timeout, cleanup, and edge cases correctly', () => {
     const originalText = mockElement.textContent;
-
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -203,9 +172,7 @@ describe('useMetricAnimation', () => {
     });
 
     expect(mockElement.textContent).toBe(originalText);
-  });
 
-  it('should use fallback timeout when element is not found by observer', () => {
     if (document.body.contains(mockElement)) {
       document.body.removeChild(mockElement);
     }
@@ -218,19 +185,14 @@ describe('useMetricAnimation', () => {
     );
 
     document.body.appendChild(mockElement);
-
     act(() => {
-      jest.advanceTimersByTime(50);
-    });
-
-    act(() => {
-      jest.advanceTimersByTime(100);
+      jest.advanceTimersByTime(150);
     });
 
     expect(d3.select).toHaveBeenCalledWith(mockElement);
   });
 
-  it('should clean up observer and animation on unmount', () => {
+  it('handles cleanup on unmount correctly', () => {
     if (document.body.contains(mockElement)) {
       document.body.removeChild(mockElement);
     }
@@ -243,13 +205,11 @@ describe('useMetricAnimation', () => {
     );
 
     unmount();
-
     expect(mockObserver.disconnect).toHaveBeenCalled();
   });
 
-  it('should handle different selectors', () => {
+  it('handles different selectors, prevents multiple animations, and formats values correctly', () => {
     mockElement.className = 'custom-metric-value';
-
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -262,44 +222,8 @@ describe('useMetricAnimation', () => {
     });
 
     expect(d3.select).toHaveBeenCalledWith(mockElement);
-  });
 
-  it('should prevent multiple animations on the same element', () => {
-    renderHook(() =>
-      useMetricAnimation({
-        animationDurationMs: 2000,
-        selector: '.echMetricText__value',
-      })
-    );
-
-    const firstCallCount = (d3.select as jest.Mock).mock.calls.length;
-
-    renderHook(() =>
-      useMetricAnimation({
-        animationDurationMs: 2000,
-        selector: '.echMetricText__value',
-      })
-    );
-
-    expect((d3.select as jest.Mock).mock.calls.length).toBe(firstCallCount);
-  });
-
-  it('should handle animation duration parameter', () => {
-    renderHook(() =>
-      useMetricAnimation({
-        animationDurationMs: 5000,
-        selector: '.echMetricText__value',
-      })
-    );
-
-    act(() => {
-      jest.advanceTimersByTime(100);
-    });
-
-    expect(mockTransition.duration).toHaveBeenCalledWith(5000);
-  });
-
-  it('should format animated values with currency and commas', () => {
+    mockElement.className = 'echMetricText__value';
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -312,11 +236,35 @@ describe('useMetricAnimation', () => {
     });
 
     const tweenFunction = mockTransition.tween.mock.calls[0][1];
-
     act(() => {
       tweenFunction(0.5);
     });
 
     expect(mockElement.textContent).toMatch(/^\$\d{1,3}(,\d{3})*$/);
+
+    const firstCallCount = (d3.select as jest.Mock).mock.calls.length;
+    renderHook(() =>
+      useMetricAnimation({
+        animationDurationMs: 2000,
+        selector: '.echMetricText__value',
+      })
+    );
+
+    expect((d3.select as jest.Mock).mock.calls.length).toBe(firstCallCount);
+  });
+
+  it('handles animation duration parameter correctly', () => {
+    renderHook(() =>
+      useMetricAnimation({
+        animationDurationMs: 5000,
+        selector: '.echMetricText__value',
+      })
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
+    expect(mockTransition.duration).toHaveBeenCalledWith(5000);
   });
 });

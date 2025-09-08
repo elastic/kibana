@@ -38,178 +38,155 @@ describe('getAlertFilteringMetricLensAttributes', () => {
     totalAlerts: defaultTotalAlerts,
   };
 
-  it('returns lens attributes with correct basic and state structure', () => {
+  it('returns lens attributes with correct basic structure, datasource, column, and visualization configurations', () => {
     const result = getAlertFilteringMetricLensAttributes(defaultArgs);
 
     // Basic structure
-    expect(result).toHaveProperty('description', '');
-    expect(result).toHaveProperty('title', 'Alert filtering rate');
-    expect(result).toHaveProperty('visualizationType', 'lnsMetric');
-    expect(result).toHaveProperty('type', 'lens');
-    expect(result).toHaveProperty('version', 'WzI0LDFd');
-    expect(result).toHaveProperty('updated_at', '2025-07-21T15:51:38.660Z');
+    expect(result).toEqual(
+      expect.objectContaining({
+        description: '',
+        title: 'Alert filtering rate',
+        visualizationType: 'lnsMetric',
+        type: 'lens',
+        version: 'WzI0LDFd',
+        updated_at: '2025-07-21T15:51:38.660Z',
+      })
+    );
 
     // State structure
-    expect(result.state).toHaveProperty('adHocDataViews', {});
-    expect(result.state).toHaveProperty('datasourceStates');
-    expect(result.state).toHaveProperty('filters', []);
-    expect(result.state).toHaveProperty('internalReferences', []);
-    expect(result.state).toHaveProperty('query', { language: 'kuery', query: '_id :*' });
-    expect(result.state).toHaveProperty('visualization');
+    expect(result.state).toEqual(
+      expect.objectContaining({
+        adHocDataViews: {},
+        datasourceStates: expect.objectContaining({
+          formBased: expect.objectContaining({
+            layers: expect.objectContaining({
+              unifiedHistogram: expect.objectContaining({
+                columnOrder: ['count_column', 'countColumnX0', 'countColumnX1'],
+                columns: expect.any(Object),
+                incompleteColumns: {},
+              }),
+            }),
+          }),
+        }),
+        filters: [],
+        internalReferences: [],
+        query: { language: 'kuery', query: '_id :*' },
+        visualization: expect.any(Object),
+      })
+    );
   });
 
-  it('returns lens attributes with correct datasource states and layer configuration', () => {
+  it('handles column configurations, visualization, references, filters, and parameter variations correctly', () => {
     const result = getAlertFilteringMetricLensAttributes(defaultArgs);
 
-    const datasourceStates = result.state.datasourceStates;
-    expect(datasourceStates).toHaveProperty('formBased');
-    expect(datasourceStates.formBased).toHaveProperty('layers');
-    expect(datasourceStates.formBased?.layers).toHaveProperty('unifiedHistogram');
-
-    const layer = datasourceStates.formBased?.layers.unifiedHistogram;
-    expect(layer).toHaveProperty('columnOrder', ['count_column', 'countColumnX0', 'countColumnX1']);
-    expect(layer).toHaveProperty('columns');
-    expect(layer).toHaveProperty('incompleteColumns', {});
-  });
-
-  it('returns lens attributes with correct column configurations and parameters', () => {
-    const result = getAlertFilteringMetricLensAttributes(defaultArgs);
-
-    // Count column configuration
-    const countColumn =
-      result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns.count_column;
-    expect(countColumn).toHaveProperty('customLabel', true);
-    expect(countColumn).toHaveProperty('dataType', 'number');
-    expect(countColumn).toHaveProperty('isBucketed', false);
-    expect(countColumn).toHaveProperty('label', 'Alert filtering rate');
-    expect(countColumn).toHaveProperty('operationType', 'formula');
-    expect(countColumn).toHaveProperty('references', ['countColumnX1']);
-
-    // Formula parameters
-    const formulaColumn = countColumn as unknown as FormulaColumn;
-    expect(formulaColumn?.params).toHaveProperty('format', {
-      id: 'percent',
-      params: { decimals: 2 },
-    });
-    expect(formulaColumn?.params).toHaveProperty('formula', `count()/${defaultTotalAlerts}`);
-    expect(formulaColumn?.params).toHaveProperty('isFormulaBroken', false);
-
-    // CountColumnX0 configuration
-    const countColumnX0 =
-      result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns.countColumnX0;
-    const countColumnX0Params = countColumnX0 as unknown as { params: { emptyAsNull: boolean } };
-    expect(countColumnX0).toHaveProperty('customLabel', true);
-    expect(countColumnX0).toHaveProperty('dataType', 'number');
-    expect(countColumnX0).toHaveProperty('isBucketed', false);
-    expect(countColumnX0).toHaveProperty('label', `Part of count()/${defaultTotalAlerts}`);
-    expect(countColumnX0).toHaveProperty('operationType', 'count');
-    expect(countColumnX0).toHaveProperty('sourceField', '___records___');
-    expect(countColumnX0Params?.params).toHaveProperty('emptyAsNull', false);
-
-    // CountColumnX1 configuration
-    const countColumnX1 =
-      result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns.countColumnX1;
-    expect(countColumnX1).toHaveProperty('customLabel', true);
-    expect(countColumnX1).toHaveProperty('dataType', 'number');
-    expect(countColumnX1).toHaveProperty('isBucketed', false);
-    expect(countColumnX1).toHaveProperty('label', `Part of count()/${defaultTotalAlerts}`);
-    expect(countColumnX1).toHaveProperty('operationType', 'math');
-    expect(countColumnX1).toHaveProperty('references', ['countColumnX0']);
-
-    // Math operation parameters
-    const mathColumn = countColumnX1 as unknown as MathColumn;
-    const tinymathAst = mathColumn?.params.tinymathAst;
-    expect(tinymathAst).toHaveProperty('args', ['countColumnX0', defaultTotalAlerts]);
-    expect(tinymathAst).toHaveProperty('location', { max: 12, min: 0 });
-    expect(tinymathAst).toHaveProperty('name', 'divide');
-    expect(tinymathAst).toHaveProperty('text', `count()/${defaultTotalAlerts}`);
-    expect(tinymathAst).toHaveProperty('type', 'function');
-  });
-
-  it('returns lens attributes with correct visualization configuration and references', () => {
-    const result = getAlertFilteringMetricLensAttributes(defaultArgs);
+    // Column configurations
+    const layer = result.state.datasourceStates.formBased?.layers.unifiedHistogram;
+    expect(layer?.columns).toEqual(
+      expect.objectContaining({
+        count_column: expect.objectContaining({
+          customLabel: true,
+          dataType: 'number',
+          isBucketed: false,
+          label: 'Alert filtering rate',
+          operationType: 'formula',
+          references: ['countColumnX1'],
+          params: expect.objectContaining({
+            format: { id: 'percent', params: { decimals: 2 } },
+            formula: `count()/${defaultTotalAlerts}`,
+            isFormulaBroken: false,
+          }),
+        }),
+        countColumnX0: expect.objectContaining({
+          customLabel: true,
+          dataType: 'number',
+          isBucketed: false,
+          label: `Part of count()/${defaultTotalAlerts}`,
+          operationType: 'count',
+          sourceField: '___records___',
+          params: expect.objectContaining({ emptyAsNull: false }),
+        }),
+        countColumnX1: expect.objectContaining({
+          customLabel: true,
+          dataType: 'number',
+          isBucketed: false,
+          label: `Part of count()/${defaultTotalAlerts}`,
+          operationType: 'math',
+          references: ['countColumnX0'],
+          params: expect.objectContaining({
+            tinymathAst: expect.objectContaining({
+              args: ['countColumnX0', defaultTotalAlerts],
+              location: { max: 12, min: 0 },
+              name: 'divide',
+              text: `count()/${defaultTotalAlerts}`,
+              type: 'function',
+            }),
+          }),
+        }),
+      })
+    );
 
     // Visualization configuration
-    const visualization = result.state.visualization;
-    expect(visualization).toHaveProperty('icon', 'visLine');
-    expect(visualization).toHaveProperty('iconAlign', 'right');
-    expect(visualization).toHaveProperty('valuesTextAlign', 'left');
-    expect(visualization).toHaveProperty('layerId', 'unifiedHistogram');
-    expect(visualization).toHaveProperty('layerType', 'data');
-    expect(visualization).toHaveProperty('metricAccessor', 'count_column');
-    expect(visualization).toHaveProperty('secondaryTrend', { type: 'none' });
-    expect(visualization).toHaveProperty('showBar', false);
+    expect(result.state.visualization).toEqual(
+      expect.objectContaining({
+        icon: 'visLine',
+        iconAlign: 'right',
+        valuesTextAlign: 'left',
+        layerId: 'unifiedHistogram',
+        layerType: 'data',
+        metricAccessor: 'count_column',
+        secondaryTrend: { type: 'none' },
+        showBar: false,
+      })
+    );
 
     // References
-    expect(result.references).toHaveLength(2);
-    expect(result.references[0]).toEqual({
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-unifiedHistogram',
-      type: 'index-pattern',
-    });
-    expect(result.references[1]).toEqual({
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-3c03ff91-8a1b-4696-acd1-6f9c768ed1a3',
-      type: 'index-pattern',
-    });
-  });
+    expect(result.references).toEqual([
+      {
+        id: '{dataViewId}',
+        name: 'indexpattern-datasource-layer-unifiedHistogram',
+        type: 'index-pattern',
+      },
+      {
+        id: '{dataViewId}',
+        name: 'indexpattern-datasource-layer-3c03ff91-8a1b-4696-acd1-6f9c768ed1a3',
+        type: 'index-pattern',
+      },
+    ]);
 
-  it('handles filters correctly with various extraOptions configurations', () => {
-    // No extraOptions
-    const result1 = getAlertFilteringMetricLensAttributes(defaultArgs);
-    expect(result1.state.filters).toEqual([]);
-
-    // Empty extraOptions
-    const result2 = getAlertFilteringMetricLensAttributes({
-      ...defaultArgs,
-      extraOptions: {},
-    });
-    expect(result2.state.filters).toEqual([]);
-
-    // With filters
+    // Test filters and parameter variations
     const mockFilters = [
       { meta: { alias: 'test filter', disabled: false, negate: false } },
     ] as ExtraOptions['filters'];
-    const result3 = getAlertFilteringMetricLensAttributes({
-      ...defaultArgs,
-      extraOptions: { filters: mockFilters },
-    });
-    expect(result3.state.filters).toEqual(mockFilters);
-  });
 
-  it('handles various totalAlerts values correctly', () => {
-    const testCases = [
-      { totalAlerts: 500, description: 'normal value' },
-      { totalAlerts: 0, description: 'zero value' },
-      { totalAlerts: 1000000, description: 'large value' },
-    ];
-
-    testCases.forEach(({ totalAlerts, description }) => {
-      const result = getAlertFilteringMetricLensAttributes({
+    // Test different filter scenarios
+    expect(getAlertFilteringMetricLensAttributes(defaultArgs).state.filters).toEqual([]);
+    expect(
+      getAlertFilteringMetricLensAttributes({ ...defaultArgs, extraOptions: {} }).state.filters
+    ).toEqual([]);
+    expect(
+      getAlertFilteringMetricLensAttributes({
         ...defaultArgs,
-        totalAlerts,
-      });
+        extraOptions: { filters: mockFilters },
+      }).state.filters
+    ).toEqual(mockFilters);
 
-      const countColumn =
-        result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns.count_column;
-      const formulaColumn = countColumn as unknown as FormulaColumn;
-      expect(formulaColumn?.params.formula).toBe(`count()/${totalAlerts}`);
-      expect(countColumn?.label).toBe('Alert filtering rate');
+    // Test various totalAlerts values
+    const testCases = [500, 0, 1000000];
+    testCases.forEach((totalAlerts) => {
+      const testResult = getAlertFilteringMetricLensAttributes({ ...defaultArgs, totalAlerts });
+      const testLayer = testResult.state.datasourceStates.formBased?.layers.unifiedHistogram;
+      const testFormulaColumn = testLayer?.columns.count_column as unknown as FormulaColumn;
+      const testMathColumn = testLayer?.columns.countColumnX1 as unknown as MathColumn;
 
-      const countColumnX0 =
-        result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns.countColumnX0;
-      expect(countColumnX0?.label).toBe(`Part of count()/${totalAlerts}`);
-
-      const countColumnX1 =
-        result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns.countColumnX1;
-      const mathColumn = countColumnX1 as unknown as MathColumn;
-      expect(countColumnX1?.label).toBe(`Part of count()/${totalAlerts}`);
-      expect(mathColumn?.params.tinymathAst.args).toEqual(['countColumnX0', totalAlerts]);
-      expect(mathColumn?.params.tinymathAst.text).toBe(`count()/${totalAlerts}`);
+      expect(testFormulaColumn?.params.formula).toBe(`count()/${totalAlerts}`);
+      expect(testLayer?.columns.count_column?.label).toBe('Alert filtering rate');
+      expect(testLayer?.columns.countColumnX0?.label).toBe(`Part of count()/${totalAlerts}`);
+      expect(testLayer?.columns.countColumnX1?.label).toBe(`Part of count()/${totalAlerts}`);
+      expect(testMathColumn?.params.tinymathAst.args).toEqual(['countColumnX0', totalAlerts]);
+      expect(testMathColumn?.params.tinymathAst.text).toBe(`count()/${totalAlerts}`);
     });
-  });
 
-  it('returns lens attributes with extraOptions containing multiple properties', () => {
+    // Test extraOptions with multiple properties
     const extraOptions: ExtraOptions = {
       breakdownField: 'test.field',
       dnsIsPtrIncluded: true,
@@ -221,11 +198,8 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         { meta: { alias: 'test', disabled: false, negate: false } },
       ] as ExtraOptions['filters'],
     };
-    const result = getAlertFilteringMetricLensAttributes({
-      ...defaultArgs,
-      extraOptions,
-    });
-
-    expect(result.state.filters).toEqual(extraOptions.filters);
+    expect(
+      getAlertFilteringMetricLensAttributes({ ...defaultArgs, extraOptions }).state.filters
+    ).toEqual(extraOptions.filters);
   });
 });
