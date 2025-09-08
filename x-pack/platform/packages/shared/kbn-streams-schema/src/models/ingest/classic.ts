@@ -17,6 +17,8 @@ import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 import type { FieldDefinition } from '../../fields';
 import { fieldDefinitionSchema } from '../../fields';
+import type { FailureStore } from './failure_store';
+import { failureStoreSchema } from './failure_store';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -50,6 +52,7 @@ export namespace ClassicStream {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
     effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
+    failure_store?: FailureStore;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -77,6 +80,7 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
         elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
         data_stream_exists: z.boolean(),
         effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
+        failure_store: z.optional(failureStoreSchema),
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
