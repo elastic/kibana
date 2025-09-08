@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'userProfiles', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header', 'userProfiles', 'settings', 'security']);
 
   describe('Cloud Links integration: Unprivileged User', function () {
     before(async () => {
@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
         })
         .expect(200);
+
+      await PageObjects.security.forceLogout({ waitForLoginPage: false });
     });
 
     beforeEach(async () => {
