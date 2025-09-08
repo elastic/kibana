@@ -7,10 +7,10 @@
 
 // Create a mock for the privilege check used within the table to
 // enable/disable the 'New Filter' button.
-jest.mock('../../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
-jest.mock('../../../services/ml_api_service', () => 'ml');
+jest.mock('@kbn/ml-services/ml_api_service', () => 'ml');
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
