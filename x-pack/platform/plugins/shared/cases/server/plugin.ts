@@ -216,7 +216,7 @@ export class CasePlugin
         scheduleCAISchedulerTask({
           taskManager: plugins.taskManager,
           logger: this.logger,
-        });
+        }).catch(() => {}); // it shouldn't reject, but just in case
         createCasesAnalyticsIndexes({
           esClient: core.elasticsearch.client.asInternalUser,
           logger: this.logger,
