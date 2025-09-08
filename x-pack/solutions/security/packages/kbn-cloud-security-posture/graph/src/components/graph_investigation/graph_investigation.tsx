@@ -27,7 +27,7 @@ import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_fi
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
-import { showErrorToast } from '../utils';
+import { isLabelNode, showErrorToast } from '../utils';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -258,17 +258,47 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       ({ state: { isOpen } }) => isOpen
     );
 
+    const { originEventIdsSet, originAlertIdsSet } = useMemo(() => {
+      const eventIds = new Set<string>();
+      const alertIds = new Set<string>();
+
+      originEventIds.forEach(({ id, isAlert }) => {
+        if (isAlert) {
+          alertIds.add(id);
+        } else {
+          eventIds.add(id);
+        }
+      });
+
+      return {
+        originEventIdsSet: eventIds,
+        originAlertIdsSet: alertIds,
+      };
+    }, [originEventIds]);
+
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
+          // Only label/entity nodes have documentsData. Narrow using in operator.
+          const documentsIds: string[] =
+            'documentsData' in node && Array.isArray(node.documentsData)
+              ? node.documentsData.map((d) => d.id)
+              : [];
+          const isOrigin = documentsIds.some((id) => originEventIdsSet.has(id));
+          const isOriginAlert = documentsIds.some((id) => originAlertIdsSet.has(id));
+
           if (isEntityNode(node)) {
             return {
               ...node,
+              isOrigin,
+              isOriginAlert,
               expandButtonClick: nodeExpandButtonClickHandler,
             };
-          } else if (node.shape === 'label') {
+          } else if (isLabelNode(node)) {
             return {
               ...node,
+              isOrigin,
+              isOriginAlert,
               expandButtonClick: labelExpandButtonClickHandler,
             };
           }
@@ -277,7 +307,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes]);
+    }, [data?.nodes, originEventIdsSet, originAlertIdsSet]);
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
