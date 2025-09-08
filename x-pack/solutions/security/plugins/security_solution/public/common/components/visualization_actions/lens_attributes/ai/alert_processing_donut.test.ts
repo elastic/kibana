@@ -9,9 +9,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { getAlertProcessingDonutAttributes } from './alert_processing_donut';
 import type { ExtraOptions } from '../../types';
 
-interface WithParams {
-  params: Record<string, unknown>;
-}
 interface WithLayers {
   layers: Array<Record<string, unknown>>;
 }
