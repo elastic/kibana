@@ -34,6 +34,8 @@ export const FailureResponse = schema.object(
     errors: schema.maybe(
       schema.arrayOf(schema.object({ title: schema.string(), code: schema.string() }))
     ),
+    took: schema.maybe(schema.number()),
+    requestId: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' }
 );
