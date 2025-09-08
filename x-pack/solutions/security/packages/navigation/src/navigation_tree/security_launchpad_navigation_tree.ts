@@ -10,7 +10,7 @@ import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-interface LaunchpadNavigationTreeOptions {
+export interface LaunchpadNavigationTreeOptions {
   hasAiValueAccess?: boolean;
 }
 
