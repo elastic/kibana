@@ -134,7 +134,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
             defaultMessage: 'Add control',
           }),
           icon: 'controlsHorizontal',
-          'data-test-subj': 'dashboardAddControlButton',
+          'data-test-subj': 'dashboard-controls-menu-button',
           panel: 1,
         },
         {
