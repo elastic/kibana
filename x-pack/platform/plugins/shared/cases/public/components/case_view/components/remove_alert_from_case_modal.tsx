@@ -8,17 +8,17 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DeleteAttachmentConfirmationModal } from '../../user_actions/delete_attachment_confirmation_modal';
-import { useRemoveAlertFromCase } from '../../../containers/use_remove_alert_from_case';
+import { useRemoveAlertFromCase } from '../../../containers/use_remove_alerts_from_case';
 
 export interface RemoveAlertModalProps {
   caseId: string;
-  alertId: string[];
+  alertIds: string[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
 const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
-  ({ caseId, alertId, onClose, onSuccess }) => {
+  ({ caseId, alertIds, onClose, onSuccess }) => {
     const { mutateAsync: removeAlertFromComment } = useRemoveAlertFromCase(caseId);
 
     const removalSuccessToast = i18n.translate(
@@ -26,18 +26,18 @@ const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
       {
         defaultMessage: '{alertCount, plural, one {Alert} other {# alerts}} removed from case',
         values: {
-          alertCount: alertId.length,
+          alertCount: alertIds.length,
         },
       }
     );
     const handleRemoveAlert = useCallback(() => {
       removeAlertFromComment({
-        alertIds: alertId,
+        alertIds,
         successToasterTitle: removalSuccessToast,
       }).then(() => onSuccess());
 
       onClose();
-    }, [alertId, onClose, onSuccess, removeAlertFromComment, removalSuccessToast]);
+    }, [alertIds, onClose, onSuccess, removeAlertFromComment, removalSuccessToast]);
 
     return (
       <DeleteAttachmentConfirmationModal
@@ -52,7 +52,7 @@ const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
         title={i18n.translate('xpack.cases.caseView.alerts.actions.removeFromCaseTitle', {
           defaultMessage: 'Remove {alertCount, plural, one {alert} other {# alerts}} from case',
           values: {
-            alertCount: alertId.length,
+            alertCount: alertIds.length,
           },
         })}
       />

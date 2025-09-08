@@ -486,14 +486,14 @@ export const removeAlertFromComment = async ({
   caseAttachments: AlertAttachmentUI[];
   signal?: AbortSignal;
 }): Promise<PromiseSettledResult<Attachment | void>[]> => {
-  const attachmentMap = new Map<string, AlertAttachmentUI & { alertIdxs: number[] }>();
+  const attachmentMap = new Map<string, AlertAttachmentUI & { alertIndices: number[] }>();
 
   alertIdsToRemove.forEach((alertIdToRemove) => {
-    let alertIdxsToRemove: number[] = [];
+    let alertIndicesToRemove: number[] = [];
     const alertAttachment = caseAttachments.find((attachment) => {
       const idx = attachment.alertId.indexOf(alertIdToRemove.toString());
       if (idx > -1) {
-        alertIdxsToRemove = [idx];
+        alertIndicesToRemove = [idx];
         return attachment;
       }
       return undefined;
@@ -505,12 +505,12 @@ export const removeAlertFromComment = async ({
 
     const existingAttachment = attachmentMap.get(alertAttachment.id);
     if (existingAttachment) {
-      existingAttachment.alertIdxs.push(...alertIdxsToRemove);
+      existingAttachment.alertIndices.push(...alertIndicesToRemove);
       attachmentMap.set(alertAttachment.id, existingAttachment);
     } else {
       attachmentMap.set(alertAttachment.id, {
         ...alertAttachment,
-        alertIdxs: alertIdxsToRemove,
+        alertIndices: alertIndicesToRemove,
       });
     }
   });
@@ -520,8 +520,8 @@ export const removeAlertFromComment = async ({
       const { alertId, index, id, version, rule, owner } = alertAttachment;
 
       if (Array.isArray(alertId) && Array.isArray(index)) {
-        const newAlertId = alertId.filter((_, i) => !alertAttachment.alertIdxs?.includes(i));
-        const newIndex = index.filter((_, i) => !alertAttachment?.alertIdxs?.includes(i));
+        const newAlertId = alertId.filter((_, i) => !alertAttachment.alertIndices?.includes(i));
+        const newIndex = index.filter((_, i) => !alertAttachment?.alertIndices?.includes(i));
 
         if (newAlertId.length > 0 && newIndex.length > 0) {
           return patchComment({

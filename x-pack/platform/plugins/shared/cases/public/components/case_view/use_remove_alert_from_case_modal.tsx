@@ -25,12 +25,12 @@ export const useRemoveAlertFromCaseModal = ({
   }, [dispatch]);
 
   const openModal = useCallback(
-    ({ alertId, caseId }: { alertId: string[]; caseId: string }) => {
+    ({ alertIds, caseId }: { alertIds: string[]; caseId: string }) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_REMOVE_ALERT_MODAL,
         payload: {
           caseId,
-          alertId,
+          alertIds,
           onClose: () => {
             closeModal();
             return onClose?.();

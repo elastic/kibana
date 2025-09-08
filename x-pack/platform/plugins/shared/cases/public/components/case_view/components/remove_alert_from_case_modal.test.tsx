@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RemoveAlertFromCaseModal from './remove_alert_from_case_modal';
-import { useRemoveAlertFromCase } from '../../../containers/use_remove_alert_from_case';
+import { useRemoveAlertFromCase } from '../../../containers/use_remove_alerts_from_case';
 
-jest.mock('../../../containers/use_remove_alert_from_case');
+jest.mock('../../../containers/use_remove_alerts_from_case');
 
 const useRemoveAlertFromCaseMock = useRemoveAlertFromCase as jest.Mock;
 
@@ -31,7 +31,7 @@ describe('RemoveAlertFromCaseModal', () => {
     render(
       <RemoveAlertFromCaseModal
         caseId="case-1"
-        alertId={['alert-1', 'alert-2']}
+        alertIds={['alert-1', 'alert-2']}
         onClose={onClose}
         onSuccess={onSuccess}
       />
@@ -43,7 +43,7 @@ describe('RemoveAlertFromCaseModal', () => {
     render(
       <RemoveAlertFromCaseModal
         caseId="case-1"
-        alertId={['alert-1', 'alert-2']}
+        alertIds={['alert-1', 'alert-2']}
         onClose={onClose}
         onSuccess={onSuccess}
       />
@@ -58,7 +58,7 @@ describe('RemoveAlertFromCaseModal', () => {
     render(
       <RemoveAlertFromCaseModal
         caseId="case-1"
-        alertId={['alert-1', 'alert-2']}
+        alertIds={['alert-1', 'alert-2']}
         onClose={onClose}
         onSuccess={onSuccess}
       />

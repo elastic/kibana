@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useRemoveAlertFromCase } from './use_remove_alert_from_case';
+import { useRemoveAlertFromCase } from './use_remove_alerts_from_case';
 import * as api from './api';
 import * as useGetCaseModule from './use_get_case';
 import type { UseGetCase } from './use_get_case';

@@ -39,7 +39,7 @@ export const useCaseActions = ({
 
   const handleRemoveAlertsFromCaseClick = () => {
     removeAlertModal?.open({
-      alertId: alerts.map((alert) => alert._id),
+      alertIds: alerts.map((alert) => alert._id),
       caseId: caseId as string,
     });
   };

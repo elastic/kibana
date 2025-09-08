@@ -331,7 +331,7 @@ export const useBulkRemoveFromCaseActions = ({
             onClick: (alerts?: TimelineItem[]) => {
               if (alerts?.length) {
                 removeAlertModal.open({
-                  alertId: alerts.map((alert) => alert._id),
+                  alertIds: alerts.map((alert) => alert._id),
                   caseId,
                 });
               }
