@@ -221,10 +221,12 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         const nodeId = stepId;
+        const node = this.getNode(nodeId) as any;
         const stepStartedAt = new Date();
 
         const stepExecution = {
           stepId: nodeId,
+          stepType: node?.configuration.type,
           path: [...(workflowExecution.stack || [])],
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
           status: ExecutionStatus.RUNNING,

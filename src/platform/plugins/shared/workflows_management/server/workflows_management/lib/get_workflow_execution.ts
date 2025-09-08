@@ -15,7 +15,6 @@ import type {
 } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml_utils';
-import { buildStepExecutionsTree } from './build_step_executions_tree';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -99,11 +98,6 @@ function transformToWorkflowExecutionDetailDto(
   return {
     ...workflowExecution,
     stepExecutions,
-    stepExecutionsTree: buildStepExecutionsTree(
-      workflowExecution.workflowDefinition,
-      workflowExecution.status,
-      stepExecutions
-    ),
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
     yaml,
   };

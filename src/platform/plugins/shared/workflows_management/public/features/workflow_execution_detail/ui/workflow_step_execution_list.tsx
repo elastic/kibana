@@ -38,6 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icon';
+import { buildStepExecutionsTree } from './build_step_executions_tree';
 
 function isForeachIteration(stepId: string) {
   return stepId.split(':').length > 1 && !isNaN(parseInt(stepId.split(':')[1], 10));
@@ -201,7 +202,7 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (!execution || !execution.stepExecutionsTree) {
+  } else if (!execution) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -221,8 +222,9 @@ export const WorkflowStepExecutionList = ({
     for (const stepExecution of execution.stepExecutions) {
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
+    const stepExecutionsTree = buildStepExecutionsTree(Array.from(stepExecutionMap.values()));
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
-      execution.stepExecutionsTree,
+      stepExecutionsTree,
       stepExecutionMap,
       euiTheme,
       selectedId,

@@ -75,6 +75,7 @@ export interface EsWorkflowStepExecution {
   spaceId: string;
   id: string;
   stepId: string;
+  stepType?: string;
 
   /** Current step's scope path */
   path: string[];
@@ -111,22 +112,6 @@ export interface WorkflowExecutionLogModel {
   level: string;
 }
 
-/**
- * Interface for representing a step in a nested tree structure
- */
-export interface StepListTreeItem {
-  stepId: string;
-  stepType: string;
-  executionIndex: number;
-  children: StepListTreeItem[];
-}
-
-export interface StepExecutionTreeItem extends StepListTreeItem {
-  status: ExecutionStatus | null;
-  stepExecutionId: string | null;
-  children: StepExecutionTreeItem[];
-}
-
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
@@ -137,7 +122,6 @@ export interface WorkflowExecutionDto {
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
   stepExecutions: WorkflowStepExecutionDto[];
-  stepExecutionsTree: StepExecutionTreeItem[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;

@@ -65,9 +65,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = new graphlib.Graph({ directed: true });
-    workflowExecutionGraph.setNode('node1', { id: 'node1' });
-    workflowExecutionGraph.setNode('node2', { id: 'node2' });
-    workflowExecutionGraph.setNode('node3', { id: 'node3' });
+    workflowExecutionGraph.setNode('node1', {
+      id: 'node1',
+      configuration: { type: 'fakeStepType1' },
+    });
+    workflowExecutionGraph.setNode('node2', {
+      id: 'node2',
+      configuration: { type: 'fakeStepType2' },
+    });
+    workflowExecutionGraph.setNode('node3', {
+      id: 'node3',
+      configuration: { type: 'fakeStepType3' },
+    });
     workflowExecutionGraph.setEdge('node1', 'node2');
     workflowExecutionGraph.setEdge('node2', 'node3');
 
@@ -82,7 +91,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('getNodeSuccessors', () => {
     it('should return the successors of a given node', () => {
       const successors = underTest.getNodeSuccessors('node1');
-      expect(successors).toEqual([{ id: 'node2' }]);
+      expect(successors).toEqual([expect.objectContaining({ id: 'node2' })]);
     });
 
     it('should return an empty array if the node has no successors', () => {
@@ -100,20 +109,20 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should return the current executing node', () => {
       underTest.goToStep('node1');
       const currentStep = underTest.getCurrentStep();
-      expect(currentStep).toEqual({ id: 'node1' });
+      expect(currentStep).toEqual(expect.objectContaining({ id: 'node1' }));
     });
 
     it('should return next node after calling gotToNextNode', () => {
       underTest.goToStep('node1'); // Start at node1
       underTest.goToNextStep();
       const currentStep = underTest.getCurrentStep();
-      expect(currentStep).toEqual({ id: 'node2' });
+      expect(currentStep).toEqual(expect.objectContaining({ id: 'node2' }));
     });
 
     it('should go to a specific node', () => {
       underTest.goToStep('node3');
       const currentStep = underTest.getCurrentStep();
-      expect(currentStep).toEqual({ id: 'node3' });
+      expect(currentStep).toEqual(expect.objectContaining({ id: 'node3' }));
     });
   });
 
@@ -191,7 +200,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should set current step to the first node in the workflow', async () => {
       await underTest.start();
-      expect(underTest.getCurrentStep()).toEqual({ id: 'node1' });
+      expect(underTest.getCurrentStep()).toEqual(expect.objectContaining({ id: 'node1' }));
     });
 
     it('should start the workflow execution and update workflow status in runtime', async () => {
@@ -236,7 +245,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should set current step to the node from execution', async () => {
       await underTest.resume();
 
-      expect(underTest.getCurrentStep()).toEqual({ id: 'node2' });
+      expect(underTest.getCurrentStep()).toEqual(expect.objectContaining({ id: 'node2' }));
     });
 
     it('should update workflow status to RUNNING', async () => {
@@ -288,6 +297,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           path: ['scope1', 'scope2', 'node3'],
+        })
+      );
+    });
+
+    it('should save step type', async () => {
+      await underTest.startStep('node3');
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stepType: 'fakeStepType3',
         })
       );
     });
