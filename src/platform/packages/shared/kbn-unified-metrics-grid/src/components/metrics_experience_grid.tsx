@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EuiFlexGridProps } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import {
@@ -32,6 +33,7 @@ import { DimensionsSelector } from './toolbar/dimensions_selector';
 import { ValuesSelector } from './toolbar/values_selector';
 import { useMetricFieldsQuery } from '../hooks';
 import { FullScreenWrapper } from './fullscreen_wrapper/fullscreen_wrapper';
+import { MetricsGridSearchControl } from './search_control/search_control';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -47,6 +49,28 @@ export const MetricsExperienceGrid = ({
   const valueFilters = useAppSelector(selectValueFilters);
   const isFullscreen = useAppSelector(selectIsFullscreen);
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
+
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useDebounce(
+    () => {
+      setDebouncedSearchTerm(searchTerm);
+    },
+    300,
+    [searchTerm]
+  );
+
+  const handleShowSearch = useCallback(() => {
+    setShowSearchInput(true);
+  }, []);
+
+  const handleClearSearch = useCallback(() => {
+    setShowSearchInput(false);
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+  }, []);
 
   const timeRange = useMemo(() => getTimeRange(), [getTimeRange]);
 
@@ -89,15 +113,18 @@ export const MetricsExperienceGrid = ({
 
   const pageSize = columns === 4 ? 20 : 15;
   const actions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
+    ...(!showSearchInput
+      ? [
+          {
+            iconType: 'search',
+            label: i18n.translate('metricsExperience.searchButton', {
+              defaultMessage: 'Search',
+            }),
+            onClick: handleShowSearch,
+            'data-test-subj': 'metricsExperienceToolbarSearch',
+          },
+        ]
+      : []),
     {
       iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
       label: isFullscreen
@@ -107,7 +134,6 @@ export const MetricsExperienceGrid = ({
         : i18n.translate('metricsExperience.fullScreenButton', {
             defaultMessage: 'Enter fullscreen',
           }),
-
       onClick: () => {
         dispatch(toggleFullscreen());
       },
@@ -163,13 +189,22 @@ export const MetricsExperienceGrid = ({
   }, [valueFilters]);
 
   const filteredFields = useMemo(() => {
-    return fields.filter(
+    let result = fields.filter(
       (field) =>
         !field.noData &&
         (dimensions.length === 0 ||
           dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
     );
-  }, [fields, dimensions]);
+    if (debouncedSearchTerm) {
+      const search = debouncedSearchTerm.toLowerCase();
+      result = result.filter(
+        (field) =>
+          field.name?.toLowerCase().includes(search) ||
+          field.description?.toLowerCase().includes(search)
+      );
+    }
+    return result;
+  }, [fields, debouncedSearchTerm, dimensions]);
 
   // Calculate pagination
   const totalPages = useMemo(
@@ -196,6 +231,14 @@ export const MetricsExperienceGrid = ({
         toolbar={{
           leftSide: rightSideComponents,
           rightSide: actions,
+          rightSideAppend: showSearchInput ? (
+            <MetricsGridSearchControl
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              onClear={handleClearSearch}
+              data-test-subj="metricsExperienceToolbarSearchInput"
+            />
+          ) : undefined,
         }}
       >
         <section
