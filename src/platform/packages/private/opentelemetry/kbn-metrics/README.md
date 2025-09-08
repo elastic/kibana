@@ -29,10 +29,10 @@ Whenever you want to instrument your code with any metric, you can do this with 
 
 1. Get your meter scoped to your plugin or area of the code.
 2. Create your metric and record values. The metrics can be a counter, gauge, or histogram (to learn the differences, refer to the [OTel docs](https://opentelemetry.io/docs/specs/otel/metrics/api/#meter-operations)).
-   * Mind that there are 2 (+1) flavors of these APIs:
-     1. Push-based: you can increment the counter, or record new measurements to your metric whenever an event happens.
-     2. Pull-based (includes `*Observable*` in the API's name): you provide a fetcher to be called when the exporter is about to report.
-     3. Pull-based with a batching mechanism: using `meter.addBatchObservableCallback` you can optimize the collection of metrics by batching them together, so the same result from an API can be reported in multiple metrics.
+   * Mind that there are 2 flavors of these APIs:
+     1. Push-based: You can increment the counter or record new measurements to your metric whenever an event happens.
+     2. Pull-based (includes `*Observable*` in the API's name): You provide a fetcher to be called when the exporter is about to report.
+        + If multiple pull-based metrics come from the result of the same method, you can optimize their collection by batching their callbacks together using `meter.addBatchObservableCallback`.
 
 ```typescript
 import { metrics } from '@opentelemetry/api';
@@ -43,7 +43,7 @@ const meter = metrics.getMeter('kibana.ops');
 // 2. Create the metric: the name of the counter ends as `metrics.uptime` in the document.
 // NOTE: All counters registered for the same meter are reported in the same document.
 
-// 2.1 Push metric
+// 2.a. Push metric
 const metricShort = meter.createGauge('elu.history.short', { valueType: ValueType.DOUBLE });
 const metricMedium = meter.createGauge('elu.history.medium', { valueType: ValueType.DOUBLE });
 const metricLong = meter.createGauge('elu.history.medium', { valueType: ValueType.DOUBLE });
@@ -53,14 +53,14 @@ this.elu$.subscribe(({ short, medium, long }) => {
   metricLong.record(long, { ...anyOptionalLabels });
 });
 
-// 2.2. Observable metric
+// 2.b. Observable metric
 meter
   .createObservableCounter('uptime', { unit: 's', valueType: ValueType.INT })
   .addCallback((result) => {
     result.observe(process.uptime(), { ...anyOptionalLabels });
   });
 
-// 2.3. Batching metric
+// 2.b.+ Batching multiple observable metrics
 const memoryHeapLimit = meter.createObservableUpDownCounter('v8js.memory.heap.limit');
 const memoryHeapUsed = meter.createObservableUpDownCounter('v8js.memory.heap.used');
 const memoryHeapAvailable = meter.createObservableUpDownCounter('v8js.memory.heap.available_size');
@@ -129,6 +129,11 @@ The [OTel docs](https://opentelemetry.io/docs/concepts/signals/metrics/) provide
 A quick summary:
 
 1. Use `Histogram` when you are able to record your metric in push-based mode, and when you're interested in value statistics like _How many requests took less than 1s?_.
-2. The difference between a `Counter` and an `UpDownCounter` is that the former is an always growing metric, while the latter can increase or decrease.
+2. The difference between a `Counter` and an `UpDownCounter` is that the former is an always-growing metric, while the latter can increase or decrease.
 3. Use a `Counter` (or `UpDownCounter`) instead of a `Gauge` if your metric can be summed up (e.g. number of requests or process' memory usage). 
 4. Use a `Gauge` when it doesn't make sense to sum up the metric (e.g. process' uptime or event loop delay).
+
+### Attributes
+
+When defining the attributes, it's important to consider the time series that it will generate and how they will be analyzed.
+For example, to report the number of open sockets using an `UpDownCounter` named `elasticsearch.client.sockets.usage`, we may add the attribute `elasticsearch.client.sockets.state` to differentiate between `active` and `idle` sockets. However, we don't want to report `open` vs. `closed` in this situation. The reason is that, during analysis, we may want to sum all values to understand the total number of open sockets (used or not) for a specific ES client. Adding the `closed` state to the same metric will force us to always handle that state separately. If we needed to track the number of closed sockets over time, we should create a separate `Counter` named `elasticsearch.client.sockets.closed` for it.
