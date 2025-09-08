@@ -1079,7 +1079,21 @@ export class CstToAstConverter {
   }
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
-    return this.toSource(ctx._index);
+    if (ctx._index) {
+      return this.toSource(ctx._index);
+    } else {
+      return Builder.expression.source.node(
+        {
+          sourceType: 'index',
+          name: '',
+        },
+        {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: true,
+          text: ctx?.getText(),
+        }
+      );
+    }
   }
 
   // ------------------------------------------------------------- CHANGE_POINT
@@ -1338,8 +1352,32 @@ export class CstToAstConverter {
     }
 
     const withOption = this.fromCommandNamedParameters(namedParamsCtx);
-    if (withOption && !withOption.incomplete) {
+
+    if (!withOption) {
+      return;
+    }
+
+    // check the existence of inference_id
+    const namedParameters = withOption.args[0] as ast.ESQLMap | undefined;
+    command.inferenceId = undefined;
+
+    if (namedParameters) {
       command.args.push(withOption);
+
+      command.inferenceId = Builder.expression.literal.string(
+        '',
+        { name: 'inferenceId' },
+        { incomplete: true }
+      );
+
+      const inferenceIdParam = namedParameters?.entries.find(
+        (param) => param.key.valueUnquoted === 'inference_id'
+      )?.value as ast.ESQLStringLiteral;
+
+      if (inferenceIdParam) {
+        command.inferenceId = inferenceIdParam;
+        command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
+      }
     }
   }
 
@@ -2373,8 +2411,13 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
+
       if (entry) {
         map.entries.push(entry);
+
+        if (entry.incomplete) {
+          map.incomplete = true;
+        }
       } else {
         map.incomplete = true;
       }
@@ -2388,17 +2431,40 @@ export class CstToAstConverter {
     const valueCtx = ctx._value;
 
     if (keyCtx && valueCtx) {
+      let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression;
+      if (!key) {
+        return undefined;
+      }
 
-      const entry = Builder.expression.entry(key, value, {
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      });
+      const constantCtx = valueCtx.constant();
 
-      return entry;
+      if (constantCtx) {
+        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+      }
+
+      const mapExpressionCtx = valueCtx.mapExpression();
+
+      if (mapExpressionCtx) {
+        value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (!value) {
+        value = this.fromParserRuleToUnknown(valueCtx);
+        value.incomplete = true;
+      }
+
+      if (value) {
+        const entry = Builder.expression.entry(key, value, {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+        });
+
+        return entry;
+      }
     }
+    return undefined;
   }
 
   // ----------------------------------------------------- constant expressions
