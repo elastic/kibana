@@ -316,7 +316,7 @@ export const CustomScriptSelector = memo<
       )}
     </EuiPopover>
   ) : (
-    <EuiText size="s" color="subdued">
+    <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
       <EuiIcon type="warning" size="s" color="subdued" />{' '}
       <FormattedMessage
         id="xpack.securitySolution.endpoint.customScriptSelector.noMultipleArgs"
