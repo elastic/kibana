@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -19,10 +20,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { isEsqlTool, isIndexSearchTool } from '@kbn/onechat-common/tools';
 import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useParams } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
 import type {
   CreateToolPayload,
@@ -44,7 +47,7 @@ import {
   transformIndexSearchFormDataForUpdate,
   transformIndexSearchToolToFormData,
 } from '../../utils/transform_index_search_form_data';
-import { OnechatTestFlyout } from './execute/test_tools';
+import { ToolTestFlyout } from './execute/test_tools';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
 import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
@@ -77,7 +80,33 @@ export type ToolProps = ToolCreateProps | ToolEditProps | ToolViewProps;
 export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
-  const form = useToolForm(tool);
+  const [searchParams] = useSearchParams();
+  const { toolType: toolTypeParam } = useParams<{ toolType?: string }>();
+
+  const toolTypeFromParams = useMemo(() => {
+    switch (toolTypeParam) {
+      case ToolType.esql:
+        return ToolType.esql;
+      case ToolType.index_search:
+        return ToolType.index_search;
+      default:
+        return undefined;
+    }
+  }, [toolTypeParam]);
+
+  const initialToolTypeFromUrl = useMemo(() => {
+    const queryParam = searchParams.get('toolType');
+    switch (queryParam) {
+      case ToolType.esql:
+        return ToolType.esql;
+      case ToolType.index_search:
+        return ToolType.index_search;
+      default:
+        return undefined;
+    }
+  }, [searchParams]);
+
+  const form = useToolForm(tool, toolTypeFromParams ?? initialToolTypeFromUrl);
   const { reset, formState, watch, handleSubmit } = form;
   const { errors } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
@@ -137,8 +166,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     if (tool) {
       if (isEsqlTool(tool)) {
         reset(transformEsqlToolToFormData(tool));
-      } else if (tool.type === ToolType.index_search) {
-        reset(transformIndexSearchToolToFormData(tool as any));
+      } else if (isIndexSearchTool(tool)) {
+        reset(transformIndexSearchToolToFormData(tool));
       } else if (tool.type === ToolType.builtin) {
         reset(transformBuiltInToolToFormData(tool));
       }
@@ -171,7 +200,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const saveAndTestButton = (
     <EuiButton
       size="s"
-      iconType="eye"
+      iconType="play"
       onClick={handleSubmit(handleSaveAndTest)}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
@@ -190,7 +219,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       size="s"
       onClick={handleTestTool}
       disabled={Object.keys(errors).length > 0}
-      iconType="eye"
+      iconType="play"
       css={css`
         width: 124px;
       `}
@@ -239,7 +268,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
               )}
               {showTestFlyout && currentToolId && (
-                <OnechatTestFlyout
+                <ToolTestFlyout
                   isOpen={showTestFlyout}
                   isLoading={isLoading}
                   toolId={currentToolId}
@@ -253,6 +282,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               )}
             </>
           )}
+          <EuiSpacer size="xl" />
         </KibanaPageTemplate.Section>
         <KibanaPageTemplate.BottomBar
           css={css`

@@ -61,10 +61,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const testMenuItem = (
     <EuiContextMenuItem
-      icon="eye"
+      icon="play"
       key="test"
       size="s"
-      disabled // Not implemented
       onClick={() => {
         testTool(tool.id);
         setIsOpen(false);
@@ -104,7 +103,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const menuItems = isPersistedTool(tool)
     ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
-    : [viewMenuItem];
+    : [testMenuItem, viewMenuItem];
 
   return (
     <EuiPopover

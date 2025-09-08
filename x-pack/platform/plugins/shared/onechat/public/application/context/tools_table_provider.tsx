@@ -38,21 +38,21 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
 
   const createTool = useCallback(
     (toolType: ToolType) => {
-      navigateToOnechatUrl(appPaths.tools.new({ toolType }));
+      navigateToOnechatUrl(appPaths.tools.newWithType({ toolType }));
     },
     [navigateToOnechatUrl]
   );
 
   const getCreateToolUrl = useCallback(
     (toolType: ToolType) => {
-      return createOnechatUrl(appPaths.tools.new({ toolType }));
+      return createOnechatUrl(appPaths.tools.newWithType({ toolType }));
     },
     [createOnechatUrl]
   );
 
   const editTool = useCallback(
     (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.edit({ toolId }));
+      navigateToOnechatUrl(appPaths.tools.details({ toolId }));
     },
     [navigateToOnechatUrl]
   );
@@ -66,7 +66,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
 
   const getEditToolUrl = useCallback(
     (toolId: string) => {
-      return createOnechatUrl(appPaths.tools.edit({ toolId }));
+      return createOnechatUrl(appPaths.tools.details({ toolId }));
     },
     [createOnechatUrl]
   );
@@ -80,14 +80,14 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
 
   const cloneTool = useCallback(
     (toolId: string, toolType: ToolType) => {
-      navigateToOnechatUrl(appPaths.tools.new({ toolType }), { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
     },
     [navigateToOnechatUrl]
   );
 
   const getCloneToolUrl = useCallback(
     (toolId: string, toolType: ToolType) => {
-      return createOnechatUrl(appPaths.tools.new({ toolType }), {
+      return createOnechatUrl(appPaths.tools.new, {
         [TOOL_SOURCE_QUERY_PARAM]: toolId,
       });
     },

@@ -29,6 +29,7 @@ export const transformFormDataToIndexSearchTool = (
   return {
     id: data.toolId,
     description: data.description,
+    readonly: false,
     configuration: {
       pattern: data.pattern,
     },
@@ -40,11 +41,11 @@ export const transformFormDataToIndexSearchTool = (
 export const transformIndexSearchFormDataForCreate = (
   data: IndexSearchToolFormData
 ): CreateToolPayload => {
-  return transformFormDataToIndexSearchTool(data);
+  return omit(transformFormDataToIndexSearchTool(data), ['readonly']);
 };
 
 export const transformIndexSearchFormDataForUpdate = (
   data: IndexSearchToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToIndexSearchTool(data), ['id', 'type']);
+  return omit(transformFormDataToIndexSearchTool(data), ['id', 'type', 'readonly']);
 };

@@ -167,6 +167,12 @@ export const i18nMessages = {
             defaultMessage: 'ES|QL',
           }
         ),
+        indexSearchOption: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.type.indexSearchOption',
+          {
+            defaultMessage: 'Index search',
+          }
+        ),
       },
       indexSearch: {
         patternLabel: i18n.translate(

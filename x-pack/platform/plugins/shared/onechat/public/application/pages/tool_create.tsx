@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import type { ToolType } from '@kbn/onechat-common';
-import { useParams } from 'react-router-dom';
 import { CreateTool } from '../components/tools/create_tool';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
 export const OnechatToolCreatePage = () => {
-  const { toolType } = useParams<{ toolType: ToolType }>();
   useBreadcrumb([
     {
       text: labels.tools.title,
@@ -22,7 +19,7 @@ export const OnechatToolCreatePage = () => {
     },
     {
       text: labels.tools.newToolTitle,
-      path: appPaths.tools.new({ toolType }),
+      path: appPaths.tools.new,
     },
   ]);
   return <CreateTool />;

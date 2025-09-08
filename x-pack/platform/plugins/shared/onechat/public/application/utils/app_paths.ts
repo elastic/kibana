@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/onechat-common';
 import { newConversationId } from './new_conversation';
 
 export const appPaths = {
@@ -28,12 +27,8 @@ export const appPaths = {
   },
   tools: {
     list: '/tools',
-    new: ({ toolType }: { toolType: ToolType }) => {
-      return `/tools/new/${toolType}`;
-    },
-    edit: ({ toolId }: { toolId: string }) => {
-      return `/tools/${toolId}`;
-    },
+    new: '/tools/new',
+    newWithType: ({ toolType }: { toolType: string }) => `/tools/new/${toolType}`,
     details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
   },
 };
