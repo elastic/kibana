@@ -35,7 +35,7 @@ export function useControllableState<T>({
   defaultValue?: undefined;
 }): [T | undefined, SetStateFn<T | undefined>] {
   const [internalState, setInternalState, onChangeRef] = useInternalState({
-    initialValue: (prop ?? defaultValue) as T | undefined,
+    initialValue: defaultValue,
     onChange,
   });
   const isControlled = prop !== undefined && !!onChange;

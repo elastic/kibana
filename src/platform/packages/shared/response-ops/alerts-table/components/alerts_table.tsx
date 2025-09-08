@@ -229,7 +229,7 @@ const AlertsTableContent = typedForwardRef(
     const [sort, setSort] = useControllableState({
       prop: sortProp,
       onChange: onSortChange,
-      defaultValue: DEFAULT_SORT,
+      defaultValue: localStorageAlertsTableConfig?.sort ?? sortProp ?? DEFAULT_SORT,
     });
     const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
       prop: expandedAlertIndexProp,
