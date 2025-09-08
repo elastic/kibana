@@ -66,11 +66,11 @@ function injectControlReferences(
     try {
       if (transforms?.transformOut) {
         transformedControls.push(
-          transforms.transformOut(
-            control.id,
-            control,
-            references
-          ) as ControlsGroupState['controls'][number]
+          transforms.transformOut({
+            id: control.id,
+            state: control,
+            references,
+          }) as ControlsGroupState['controls'][number]
         );
       } else {
         transformedControls.push(control);

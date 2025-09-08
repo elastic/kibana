@@ -13,10 +13,13 @@ import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } 
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { injectReferences } from './references';
 
-export function transformOut(
-  storedState: StoredLinksEmbeddableState | StoredLinksByValueState910,
-  references?: Reference[]
-) {
+export function transformOut({
+  state: storedState,
+  references,
+}: {
+  state: StoredLinksEmbeddableState | StoredLinksByValueState910;
+  references?: Reference[];
+}) {
   const state = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);

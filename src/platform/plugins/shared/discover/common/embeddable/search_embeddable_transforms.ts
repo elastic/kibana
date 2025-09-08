@@ -12,7 +12,7 @@ import { extractTabs } from '@kbn/saved-search-plugin/common';
 import type { SearchEmbeddableSerializedState } from '../../public';
 
 export const searchEmbeddableTransforms: EmbeddableTransforms<SearchEmbeddableSerializedState> = {
-  transformOut: (state) => {
+  transformOut: ({ state }) => {
     if (!state.attributes) return state;
     const attributes = extractTabs(state.attributes);
     return { ...state, attributes };

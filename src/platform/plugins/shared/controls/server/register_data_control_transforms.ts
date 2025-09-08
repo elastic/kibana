@@ -16,7 +16,7 @@ export const registerDataControlTransforms = (
   prefix: string
 ) => {
   embeddable.registerTransforms(type, {
-    transformIn: (id, state) => extractReferences(id, state, prefix),
-    transformOut: injectReferences,
+    transformIn: ({ id, state }) => extractReferences(id, state, prefix),
+    transformOut: ({ id, state, references }) => injectReferences(id, state, references),
   });
 };

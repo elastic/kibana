@@ -66,7 +66,7 @@ function transformPanelIn(panel: DashboardPanel): {
   let references: undefined | SavedObjectReference[];
   try {
     if (transforms?.transformIn) {
-      const transformed = transforms.transformIn(idx, panelConfig);
+      const transformed = transforms.transformIn({ id: idx, state: panelConfig });
       if (panel.type === 'optionsListControl')
         console.log('TRANSFORMED IN - BEFORE', { panelConfig });
       transformedPanelConfig = transformed.state;

@@ -19,7 +19,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
   if (!controlGroupInput) return { references: [] };
 
   const { controls } = controlGroupInput;
-
+  console.log('IN!', { controls });
   let references: Reference[] = [];
   const updatedControls = Object.fromEntries(
     controls.map((controlState, index) => {
@@ -29,7 +29,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       let transformedControlState = controlState as Partial<ControlsGroupState['controls'][number]>;
       try {
         if (transforms?.transformIn) {
-          const transformed = transforms.transformIn(id, controlState);
+          const transformed = transforms.transformIn({ id, state: controlState });
           transformedControlState = transformed.state;
           references = [...references, ...(transformed.references ?? [])];
         }

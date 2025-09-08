@@ -16,10 +16,11 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 const REFERENCE_NAME_PREFIX = 'controlGroup_';
 
 export function extractReferences(
-  id: string,
+  id: string | undefined,
   state: DataControlState,
   referenceNameSuffix: string
 ): { state: Omit<DataControlState, 'dataViewId'>; references?: Reference[] } {
+  if (!id) return { state, references: [] };
   return {
     state: { ...omit(state, 'dataViewId') },
     references: [
@@ -33,7 +34,7 @@ export function extractReferences(
 }
 
 export function injectReferences(
-  id: string,
+  id: string | undefined,
   state: Omit<DataControlState, 'dataViewId'>,
   references: Reference[] = []
 ): DataControlState {

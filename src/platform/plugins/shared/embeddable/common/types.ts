@@ -13,11 +13,8 @@ export type EmbeddableTransforms<
   StoredState extends object = object,
   State extends object = object
 > = {
-  transformOut?: (id: string, state: StoredState, references?: Reference[]) => State;
-  transformIn?: (
-    id: string,
-    state: State
-  ) => {
+  transformOut?: (args: { id?: string; state: StoredState; references?: Reference[] }) => State;
+  transformIn?: (args: { id?: string; state: State }) => {
     state: StoredState;
     references?: Reference[];
   };

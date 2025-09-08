@@ -80,7 +80,11 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(panelIndex, panelConfig, references);
+      transformedPanelConfig = transforms.transformOut({
+        id: panelIndex,
+        state: panelConfig,
+        references,
+      });
       if (panelType === 'optionsListControl')
         console.log('TRANSFORMED OUT', { transformedPanelConfig });
     }
