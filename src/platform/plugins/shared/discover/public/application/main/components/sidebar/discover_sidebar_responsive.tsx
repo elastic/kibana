@@ -326,9 +326,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
-  // As part of this POC, i am still not sure if my extension should only return recommended fields or
-  // something more generic. So i will process with generic logic,
-  // but will keep naming specific to Recommended Fields
   const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
   const additionalFieldGroups = useMemo(() => {
     return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))(sidebarState.allFields);
