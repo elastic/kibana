@@ -6,7 +6,7 @@
  */
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo } from 'react';
+import React, { useCallback, useRef, useMemo, memo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
@@ -45,7 +45,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const selectDataView = useSelectDataView();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats, onAppLeave },
   } = useKibana();
 
   const canEditDataView = useMemo(
@@ -129,6 +129,18 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     },
     [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
+
+  // clearing browser fields cache when user leaves the app
+  // this is to account for any new fields added outside of security solution
+  useEffect(() => {
+    onAppLeave?.((actions) => {
+      browserFieldsManager.clearCache();
+      return actions.default();
+    });
+    return () => {
+      onAppLeave?.((actions) => actions.default());
+    };
+  }, [onAppLeave]);
 
   const getDataViewHelpText = useCallback(
     (dv: DataView) =>
