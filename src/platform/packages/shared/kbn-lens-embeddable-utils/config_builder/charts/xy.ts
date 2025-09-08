@@ -42,7 +42,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,
       yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
-      yRight: config.axisTitleVisibility?.showBreakdownTitle ?? true,
+      yRight: config.axisTitleVisibility?.showYRightAxisTitle ?? true,
     },
     legend: {
       isVisible: config.legend?.show ?? true,

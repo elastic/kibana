@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './value_formatters';
-export * from './value_formatters/constants';
-export * from './esql/create_esql_query';
-export * from './esql/constants';
+export const DIMENSIONS_COLUMN = 'dimensions';

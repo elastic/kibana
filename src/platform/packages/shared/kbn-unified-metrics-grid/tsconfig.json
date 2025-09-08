@@ -19,7 +19,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
-    "@kbn/esql-editor",
+    "@kbn/esql-utils",
     "@kbn/data-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-embeddable-utils",

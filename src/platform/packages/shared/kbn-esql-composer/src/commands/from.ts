@@ -13,7 +13,7 @@ import type { QueryPipeline } from '../types';
 
 /**
  * The entry point for the ESQL composer pipeline. Creates a new query
- * starting with a `FROM` clause.
+ * starting with a `FROM` or `TS` clause.
  *
  * @param patterns The index patterns to query.
  * @returns A `QueryPipeline` instance to which other composer commands can be chained.

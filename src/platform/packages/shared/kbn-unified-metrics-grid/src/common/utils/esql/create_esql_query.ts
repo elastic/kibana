@@ -9,7 +9,8 @@
 
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { QueryOperator } from '@kbn/esql-composer';
-import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
+import { DIMENSIONS_COLUMN } from './constants';
 
 interface CreateESQLQueryParams {
   metricField: string;
@@ -21,6 +22,7 @@ interface CreateESQLQueryParams {
 }
 
 const separator = '\u203A'.normalize('NFC');
+
 export function createESQLQuery({
   index = 'metrics-*',
   instrument,
@@ -79,9 +81,9 @@ export function createESQLQuery({
         ),
     ...(dimensions.length > 0
       ? dimensions.length === 1
-        ? [evaluate(`dimensions = ??dim`, { dim: dimensions[0] })]
+        ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
         : [
-            evaluate(`dimensions = CONCAT(${dimensions.join(`, " ${separator} ", `)})`),
+            evaluate(`${DIMENSIONS_COLUMN} = CONCAT(${dimensions.join(`, " ${separator} ", `)})`),
             drop(`${dimensions.join(',')}`),
           ]
       : [])

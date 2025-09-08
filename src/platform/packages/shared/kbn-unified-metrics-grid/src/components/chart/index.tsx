@@ -87,6 +87,7 @@ export const Chart: React.FC<ChartProps> = ({
     searchSessionId,
     unit: metric.unit,
     discoverFetch$,
+    abortController,
   });
 
   return (

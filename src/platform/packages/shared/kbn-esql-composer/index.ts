@@ -23,6 +23,7 @@ export { keep } from './src/commands/keep';
 export { where } from './src/commands/where';
 export { stats } from './src/commands/stats';
 export { limit } from './src/commands/limit';
+export { rename } from './src/commands/rename';
 export { sort, SortOrder } from './src/commands/sort';
 
 export type { QueryOperator } from './src/types';

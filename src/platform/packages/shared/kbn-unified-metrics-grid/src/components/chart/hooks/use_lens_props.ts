@@ -35,6 +35,7 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
+  | 'abortController'
 >;
 export const useLensProps = ({
   title,
@@ -46,6 +47,7 @@ export const useLensProps = ({
   color,
   searchSessionId,
   discoverFetch$,
+  abortController,
 }: {
   title: string;
   query: string;
@@ -54,6 +56,7 @@ export const useLensProps = ({
   unit?: string;
   timeRange: TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
+  abortController?: AbortController;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
   const chartLayers = useChartLayers({
     query,
@@ -62,6 +65,7 @@ export const useLensProps = ({
     timeRange,
     unit,
     color,
+    abortController,
   });
 
   const attributes$ = useRef(new BehaviorSubject<LensAttributes | undefined>(undefined));
@@ -80,7 +84,7 @@ export const useLensProps = ({
             axisTitleVisibility: {
               showXAxisTitle: false,
               showYAxisTitle: false,
-              showBreakdownTitle: false,
+              showYRightAxisTitle: false,
             },
             layers: chartLayers,
             fittingFunction: 'Linear',
@@ -149,6 +153,7 @@ const getLensProps = ({
   searchSessionId?: string;
   attributes: LensAttributes;
   timeRange: TimeRange;
+  abortController?: AbortController;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',

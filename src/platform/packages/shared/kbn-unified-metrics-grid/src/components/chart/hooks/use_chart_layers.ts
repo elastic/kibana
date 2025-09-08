@@ -10,9 +10,10 @@
 import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import useAsync from 'react-use/lib/useAsync';
-import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { DIMENSIONS_COLUMN } from '../../../common/utils';
 import { useEsqlQueryInfo } from '../../../hooks';
 
 export const useChartLayers = ({
@@ -21,6 +22,7 @@ export const useChartLayers = ({
   color,
   seriesType,
   services,
+  abortController,
 }: {
   query: string;
   color?: string;
@@ -28,24 +30,20 @@ export const useChartLayers = ({
   timeRange: TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   services: ChartSectionProps['services'];
+  abortController?: AbortController;
 } & Pick<ChartSectionProps, 'services'>): Array<LensSeriesLayer> => {
   const queryInfo = useEsqlQueryInfo({ query });
 
-  const { value: table } = useAsync(
+  const { value: columns = [] } = useAsync(
     () =>
-      fetchFieldsFromESQL(
-        {
-          esql: `${query} | LIMIT 0`,
-        },
-        services.expressions,
-        timeRange,
-        undefined,
-        '@timestamp'
-      ),
+      getESQLQueryColumns({
+        esqlQuery: query,
+        search: services.data.search.search,
+        signal: abortController?.signal,
+      }),
+
     [query, services!.expressions, timeRange]
   );
-
-  const columns = useMemo(() => table?.columns ?? [], [table?.columns]);
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
     const xAxisColumn = columns.find((col) => col.meta.type === 'date');
@@ -53,7 +51,10 @@ export const useChartLayers = ({
 
     const yAxis: LensBaseLayer[] = columns
       .filter(
-        (col) => col.meta.type !== 'date' && !queryInfo.dimensions.some((dim) => dim === col.name)
+        (col) =>
+          col.name !== DIMENSIONS_COLUMN &&
+          col.meta.type !== 'date' &&
+          !queryInfo.dimensions.some((dim) => dim === col.name)
       )
       .map((col) => ({
         label: col.name,
@@ -70,7 +71,7 @@ export const useChartLayers = ({
         seriesType,
         xAxis,
         yAxis,
-        breakdown: hasDimensions ? 'dimensions' : undefined,
+        breakdown: hasDimensions ? DIMENSIONS_COLUMN : undefined,
       },
     ];
   }, [columns, queryInfo.dimensions, seriesType, color]);
