@@ -14,7 +14,7 @@ import { SelectionDropdown } from './group_selection_combobox/selection_dropdown
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
-import { useTableHelper, flexRender, type Table, type CellContext } from '../../lib/core/table';
+import { TableHeader, useTableHelper, type Table, type CellContext } from '../../lib/core/table';
 import {
   useRowVirtualizerHelper,
   getGridHeaderPositioningStyle,
@@ -171,13 +171,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem>
-                    {headerColumns.map((header) => {
-                      return (
-                        <React.Fragment key={header.id}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </React.Fragment>
-                      );
-                    })}
+                    <TableHeader headerColumns={headerColumns} />
                   </EuiFlexItem>
                   <React.Fragment>
                     {activeStickyIndex !== null && enableStickyGroupHeader && (
