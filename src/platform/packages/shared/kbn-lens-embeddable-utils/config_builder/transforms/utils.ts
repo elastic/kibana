@@ -25,7 +25,7 @@ import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
-import type { AnyLensStateColumn } from './columns/types';
+import type { AnyLensStateColumn, AnyBucketLensStateColumn, AnyMetricLensStateColumn } from './columns/types';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -62,9 +62,9 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
     id,
   }));
   if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
-    return fromBucketLensStateToAPI(column, columnMap);
+    return fromBucketLensStateToAPI(column as AnyBucketLensStateColumn, columnMap);
   }
-  return getMetricApiColumnFromLensState(column, layer.columns);
+  return getMetricApiColumnFromLensState(column as AnyMetricLensStateColumn, layer.columns as Record<string, AnyMetricLensStateColumn>);
 };
 
 /**

@@ -74,6 +74,10 @@ export function fromBucketLensApiToLensState(
 }
 
 export function fromBucketLensStateToAPI(
+  column: AnyBucketLensStateColumn,
+  columns: { column: AnyLensStateColumn; id: string }[]
+): LensApiBucketOperations | undefined;
+export function fromBucketLensStateToAPI(
   column: FiltersIndexPatternColumn,
   columns: { column: AnyLensStateColumn; id: string }[]
 ): LensApiFiltersOperation;

@@ -210,6 +210,10 @@ export function fromMetricAPItoLensState(
 }
 
 export function getMetricApiColumnFromLensState(
+  options: AnyMetricLensStateColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiAllMetricOperations;
+export function getMetricApiColumnFromLensState(
   column: CountIndexPatternColumn,
   columns: Record<string, AnyMetricLensStateColumn>
 ): LensApiCountMetricOperation;
@@ -301,7 +305,6 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
@@ -316,7 +319,6 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
@@ -331,7 +333,6 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
@@ -346,7 +347,6 @@ export function getMetricApiColumnFromLensState(
     }
     const refLensStateColumn = columns[options.references[0]];
     const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
       refLensStateColumn,
       columns
     ) as LensApiReferableMetricOperations;
