@@ -15,7 +15,9 @@ import { ComponentTemplatePanel } from './component_template_panel';
 import { IndexTemplateDetails } from './index_template_details';
 import { IngestPipelineDetails } from './ingest_pipeline_details';
 import { DataStreamDetails } from './data_stream_details';
-import { DeleteStreamPanel, IndexConfiguration, Row, RowMetadata } from './wired_advanced_view';
+import { IndexConfiguration } from './advanced_view/index_configuration';
+import { DeleteStreamPanel } from './advanced_view/delete_stream';
+import { Row, RowMetadata } from './advanced_view/row';
 
 export function UnmanagedElasticsearchAssets({
   definition,
