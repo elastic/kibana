@@ -43,7 +43,7 @@ export default {
     nodeIdsToCenterOn: {
       control: { type: 'object' },
       description:
-        'Array of origin node IDs (nodes that have hasOriginEvents=true) the graph must center on',
+        'Array of origin node IDs (nodes that have isOrigin=true or isOriginAlert=true) the graph must center on',
     },
   },
   decorators: [GlobalStylesStorybookDecorator],

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
+import { EuiText, EuiPanel } from '@elastic/eui';
 import { Graph } from './graph/graph';
 import type { NodeViewModel, EdgeViewModel } from './types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
@@ -23,38 +23,30 @@ const meta: Meta<GraphCenteringStoryProps> = {
   render: ({ title, description, nodes, edges, interactive, isLocked, ...props }) => {
     return (
       <ThemeProvider theme={{ darkMode: false }}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {(title || description) && (
-            <EuiFlexItem grow={false}>
-              <EuiPanel paddingSize="m">
-                {title && (
-                  <EuiText>
-                    <h3>{title}</h3>
-                  </EuiText>
-                )}
-                {description && (
-                  <EuiText size="s" color="subdued">
-                    <p>{description}</p>
-                  </EuiText>
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
+        <EuiPanel paddingSize="m">
+          {title && (
+            <EuiText>
+              <h3>{title}</h3>
+            </EuiText>
           )}
-          <EuiFlexItem>
-            <Graph
-              css={css`
-                height: 400px;
-                width: 100%;
-                border-radius: 6px;
-              `}
-              nodes={nodes ?? []}
-              edges={edges ?? []}
-              interactive={interactive ?? true}
-              isLocked={isLocked ?? false}
-              {...props}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          {description && (
+            <EuiText size="s" color="subdued">
+              <p>{description}</p>
+            </EuiText>
+          )}
+        </EuiPanel>
+        <Graph
+          css={css`
+            height: calc(100% - 80px);
+            width: 100%;
+            border-radius: 6px;
+          `}
+          nodes={nodes ?? []}
+          edges={edges ?? []}
+          interactive={interactive ?? true}
+          isLocked={isLocked ?? false}
+          {...props}
+        />
       </ThemeProvider>
     );
   },
@@ -78,25 +70,53 @@ const meta: Meta<GraphCenteringStoryProps> = {
 export default meta;
 type Story = StoryObj<GraphCenteringStoryProps>;
 
-const createNode = ({
+// Helper for regular entity nodes (never origin / origin alert)
+const createEntityNode = ({
   id,
-  hasOriginEvents = false,
   shape = 'ellipse',
   color = 'primary',
 }: {
   id: string;
-  hasOriginEvents?: boolean;
   shape?: NodeViewModel['shape'];
   color?: NodeViewModel['color'];
 }): NodeViewModel =>
   ({
     id,
-    label: hasOriginEvents ? `Origin ${id}` : `Regular ${id}`,
-    color: hasOriginEvents ? 'danger' : color,
+    label: `Entity ${id}`,
+    color,
     shape,
-    hasOriginEvents,
-    icon: shape === 'ellipse' ? 'user' : shape === 'hexagon' ? 'storage' : 'globe',
+    // entity nodes should NOT have origin flags
+    isOrigin: false,
+    isOriginAlert: false,
+    icon:
+      shape === 'ellipse'
+        ? 'user'
+        : shape === 'hexagon'
+        ? 'storage'
+        : shape === 'diamond'
+        ? 'globe'
+        : 'globe',
   } as NodeViewModel);
+
+// Helper for label nodes that can be either origin or origin alert
+const createLabelNode = ({
+  id,
+  isOrigin = false,
+  isOriginAlert = false,
+}: {
+  id: string;
+  isOrigin?: boolean;
+  isOriginAlert?: boolean;
+}): NodeViewModel => {
+  return {
+    id,
+    shape: 'label',
+    label: id,
+    color: isOriginAlert ? 'danger' : 'primary',
+    isOrigin,
+    isOriginAlert,
+  } as NodeViewModel;
+};
 
 const createEdge = ({
   id,
@@ -119,61 +139,107 @@ export const NoOriginNodes: Story = {
   args: {
     title: 'No Origin Nodes',
     description:
-      'Graph with no origin nodes. The center button is hidden since there are no nodes to center on.',
+      'Graph with no origin / origin alert label nodes. The center control is hidden since there are no origin nodes.',
     nodes: [
-      createNode({ id: 'node1A', hasOriginEvents: false, shape: 'ellipse' }),
-      createNode({ id: 'node1B', hasOriginEvents: false, shape: 'ellipse' }),
-      createNode({ id: 'node2', hasOriginEvents: false, shape: 'hexagon' }),
-      createNode({ id: 'node3', hasOriginEvents: false, shape: 'diamond' }),
-      createNode({ id: 'node4', hasOriginEvents: false, shape: 'rectangle' }),
+      createEntityNode({ id: 'node1', shape: 'hexagon' }),
+      createEntityNode({ id: 'node2', shape: 'diamond' }),
+      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+
+      createLabelNode({ id: 'noOriginEvent' }),
+      createLabelNode({ id: 'noOriginAlert' }),
     ],
     edges: [
-      createEdge({ id: 'edge1A', source: 'node1A', target: 'node2' }),
-      createEdge({ id: 'edge1B', source: 'node1B', target: 'node2' }),
-      createEdge({ id: 'edge2', source: 'node2', target: 'node3' }),
-      createEdge({ id: 'edge3', source: 'node3', target: 'node4' }),
+      createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
+      createEdge({ id: 'noOriginEventToNode2', source: 'noOriginEvent', target: 'node2' }),
+
+      createEdge({ id: 'node2ToNoOriginAlert', source: 'node2', target: 'noOriginAlert' }),
+      createEdge({ id: 'noOriginAlertToNode3', source: 'noOriginAlert', target: 'node3' }),
     ],
   },
 };
 
-export const SingleOriginNode: Story = {
+export const SingleOriginEvent: Story = {
   args: {
-    title: 'Single Origin Node',
-    description:
-      'Graph with one origin node (red user) and several connected nodes. The center button should focus on the origin node.',
+    title: 'Single Origin Event',
+    description: 'Graph with one origin event',
     nodes: [
-      createNode({ id: 'node1A', hasOriginEvents: true, shape: 'ellipse' }),
-      createNode({ id: 'node1B', hasOriginEvents: false, shape: 'ellipse' }),
-      createNode({ id: 'node2', hasOriginEvents: false, shape: 'hexagon' }),
-      createNode({ id: 'node3', hasOriginEvents: false, shape: 'diamond' }),
-      createNode({ id: 'node4', hasOriginEvents: false, shape: 'rectangle' }),
+      createEntityNode({ id: 'node1', shape: 'hexagon' }),
+      createEntityNode({ id: 'node2', shape: 'diamond' }),
+      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+
+      createLabelNode({ id: 'noOriginEvent' }),
+      createLabelNode({ id: 'noOriginAlert' }),
+      createLabelNode({ id: 'originEvent', isOrigin: true }),
     ],
     edges: [
-      createEdge({ id: 'edge1A', source: 'node1A', target: 'node2' }),
-      createEdge({ id: 'edge1B', source: 'node1B', target: 'node2' }),
-      createEdge({ id: 'edge2', source: 'node2', target: 'node3' }),
-      createEdge({ id: 'edge3', source: 'node3', target: 'node4' }),
+      createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
+      createEdge({ id: 'noOriginEventToNode2', source: 'noOriginEvent', target: 'node2' }),
+
+      createEdge({ id: 'node2ToNoOriginAlert', source: 'node2', target: 'noOriginAlert' }),
+      createEdge({ id: 'noOriginAlertToNode3', source: 'noOriginAlert', target: 'node3' }),
+
+      createEdge({ id: 'node3ToOriginEvent', source: 'node3', target: 'originEvent' }),
+      createEdge({ id: 'originEventToNode4', source: 'originEvent', target: 'node4' }),
+    ],
+  },
+};
+
+export const SingleOriginAlert: Story = {
+  args: {
+    title: 'Single Origin Alert',
+    description: 'Graph with one origin alert',
+    nodes: [
+      createEntityNode({ id: 'node1', shape: 'hexagon' }),
+      createEntityNode({ id: 'node2', shape: 'diamond' }),
+      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+
+      createLabelNode({ id: 'noOriginEvent' }),
+      createLabelNode({ id: 'noOriginAlert' }),
+      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
+    ],
+    edges: [
+      createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
+      createEdge({ id: 'noOriginEventToNode2', source: 'noOriginEvent', target: 'node2' }),
+
+      createEdge({ id: 'node2ToNoOriginAlert', source: 'node2', target: 'noOriginAlert' }),
+      createEdge({ id: 'noOriginAlertToNode3', source: 'noOriginAlert', target: 'node3' }),
+
+      createEdge({ id: 'node3ToOriginAlert', source: 'node3', target: 'originAlert' }),
+      createEdge({ id: 'originAlertToNode4', source: 'originAlert', target: 'node4' }),
     ],
   },
 };
 
 export const MultipleOriginNodes: Story = {
   args: {
-    title: 'Multiple Origin Nodes',
-    description:
-      'Graph with multiple origin nodes (red nodes) scattered across the layout. The center button should focus on all origin nodes.',
+    title: 'Multiple origin nodes',
+    description: 'Graph with one origin event and one origin alert.',
     nodes: [
-      createNode({ id: 'node1A', hasOriginEvents: true, shape: 'ellipse' }),
-      createNode({ id: 'node1B', hasOriginEvents: true, shape: 'ellipse' }),
-      createNode({ id: 'node2', hasOriginEvents: false, shape: 'hexagon' }),
-      createNode({ id: 'node3', hasOriginEvents: false, shape: 'diamond' }),
-      createNode({ id: 'node4', hasOriginEvents: false, shape: 'rectangle' }),
+      createEntityNode({ id: 'node1', shape: 'hexagon' }),
+      createEntityNode({ id: 'node2', shape: 'diamond' }),
+      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+      createEntityNode({ id: 'node5', shape: 'rectangle' }),
+
+      createLabelNode({ id: 'noOriginEvent' }),
+      createLabelNode({ id: 'noOriginAlert' }),
+      createLabelNode({ id: 'originEvent', isOrigin: true }),
+      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
-      createEdge({ id: 'edge1A', source: 'node1A', target: 'node2' }),
-      createEdge({ id: 'edge1B', source: 'node1B', target: 'node2' }),
-      createEdge({ id: 'edge2', source: 'node2', target: 'node3' }),
-      createEdge({ id: 'edge3', source: 'node3', target: 'node4' }),
+      createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
+      createEdge({ id: 'noOriginEventToNode2', source: 'noOriginEvent', target: 'node2' }),
+
+      createEdge({ id: 'node2ToNoOriginAlert', source: 'node2', target: 'noOriginAlert' }),
+      createEdge({ id: 'noOriginAlertToNode3', source: 'noOriginAlert', target: 'node3' }),
+
+      createEdge({ id: 'node3ToOriginEvent', source: 'node3', target: 'originEvent' }),
+      createEdge({ id: 'originEventToNode4', source: 'originEvent', target: 'node4' }),
+
+      createEdge({ id: 'node4ToOriginAlert', source: 'node4', target: 'originAlert' }),
+      createEdge({ id: 'originAlertToNode5', source: 'originAlert', target: 'node5' }),
     ],
   },
 };
@@ -182,20 +248,32 @@ export const NonInteractiveGraph: Story = {
   args: {
     title: 'Non-Interactive Graph',
     description:
-      'Graph in non-interactive mode. Controls are hidden since user cannot interact with the graph.',
+      'Graph in non-interactive mode. Controls are hidden since the user cannot interact; also no origin label nodes are present.',
     interactive: false,
     nodes: [
-      createNode({ id: 'node1A', hasOriginEvents: false, shape: 'ellipse' }),
-      createNode({ id: 'node1B', hasOriginEvents: false, shape: 'ellipse' }),
-      createNode({ id: 'node2', hasOriginEvents: false, shape: 'hexagon' }),
-      createNode({ id: 'node3', hasOriginEvents: false, shape: 'diamond' }),
-      createNode({ id: 'node4', hasOriginEvents: false, shape: 'rectangle' }),
+      createEntityNode({ id: 'node1', shape: 'hexagon' }),
+      createEntityNode({ id: 'node2', shape: 'diamond' }),
+      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+      createEntityNode({ id: 'node5', shape: 'rectangle' }),
+
+      createLabelNode({ id: 'noOriginEvent' }),
+      createLabelNode({ id: 'noOriginAlert' }),
+      createLabelNode({ id: 'originEvent', isOrigin: true }),
+      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
-      createEdge({ id: 'edge1A', source: 'node1A', target: 'node2' }),
-      createEdge({ id: 'edge1B', source: 'node1B', target: 'node2' }),
-      createEdge({ id: 'edge2', source: 'node2', target: 'node3' }),
-      createEdge({ id: 'edge3', source: 'node3', target: 'node4' }),
+      createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
+      createEdge({ id: 'noOriginEventToNode2', source: 'noOriginEvent', target: 'node2' }),
+
+      createEdge({ id: 'node2ToNoOriginAlert', source: 'node2', target: 'noOriginAlert' }),
+      createEdge({ id: 'noOriginAlertToNode3', source: 'noOriginAlert', target: 'node3' }),
+
+      createEdge({ id: 'node3ToOriginEvent', source: 'node3', target: 'originEvent' }),
+      createEdge({ id: 'originEventToNode4', source: 'originEvent', target: 'node4' }),
+
+      createEdge({ id: 'node4ToOriginAlert', source: 'node4', target: 'originAlert' }),
+      createEdge({ id: 'originAlertToNode5', source: 'originAlert', target: 'node5' }),
     ],
   },
 };
@@ -204,21 +282,33 @@ export const LockedGraph: Story = {
   args: {
     title: 'Locked graph',
     description:
-      'Graph in interactive mode but locked. Controls are visible and nodes are interactive but graph is not pannable',
+      'Interactive but locked graph (panning disabled) with one origin event and origin alert',
     interactive: true,
     isLocked: true,
     nodes: [
-      createNode({ id: 'node1A', hasOriginEvents: true, shape: 'ellipse' }),
-      createNode({ id: 'node1B', hasOriginEvents: true, shape: 'ellipse' }),
-      createNode({ id: 'node2', hasOriginEvents: false, shape: 'hexagon' }),
-      createNode({ id: 'node3', hasOriginEvents: false, shape: 'diamond' }),
-      createNode({ id: 'node4', hasOriginEvents: false, shape: 'rectangle' }),
+      createEntityNode({ id: 'node1', shape: 'hexagon' }),
+      createEntityNode({ id: 'node2', shape: 'diamond' }),
+      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+      createEntityNode({ id: 'node5', shape: 'rectangle' }),
+
+      createLabelNode({ id: 'noOriginEvent' }),
+      createLabelNode({ id: 'noOriginAlert' }),
+      createLabelNode({ id: 'originEvent', isOrigin: true }),
+      createLabelNode({ id: 'originAlert', isOriginAlert: true }),
     ],
     edges: [
-      createEdge({ id: 'edge1A', source: 'node1A', target: 'node2' }),
-      createEdge({ id: 'edge1B', source: 'node1B', target: 'node2' }),
-      createEdge({ id: 'edge2', source: 'node2', target: 'node3' }),
-      createEdge({ id: 'edge3', source: 'node3', target: 'node4' }),
+      createEdge({ id: 'node1ToNoOriginEvent', source: 'node1', target: 'noOriginEvent' }),
+      createEdge({ id: 'noOriginEventToNode2', source: 'noOriginEvent', target: 'node2' }),
+
+      createEdge({ id: 'node2ToNoOriginAlert', source: 'node2', target: 'noOriginAlert' }),
+      createEdge({ id: 'noOriginAlertToNode3', source: 'noOriginAlert', target: 'node3' }),
+
+      createEdge({ id: 'node3ToOriginEvent', source: 'node3', target: 'originEvent' }),
+      createEdge({ id: 'originEventToNode4', source: 'originEvent', target: 'node4' }),
+
+      createEdge({ id: 'node4ToOriginAlert', source: 'node4', target: 'originAlert' }),
+      createEdge({ id: 'originAlertToNode5', source: 'originAlert', target: 'node5' }),
     ],
   },
 };
