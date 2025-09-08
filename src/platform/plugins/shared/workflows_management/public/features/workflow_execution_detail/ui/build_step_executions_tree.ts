@@ -24,10 +24,12 @@ export interface StepExecutionTreeItem extends StepListTreeItem {
 }
 
 function getStepTreeType(
-  previousStepId: string,
-  stepExecutionsMap: Map<string, WorkflowStepExecutionDto>
+  currentStep: WorkflowStepExecutionDto | undefined,
+  previousStepExecution: WorkflowStepExecutionDto | undefined
 ) {
-  const previousStepExecution = stepExecutionsMap.get(previousStepId);
+  if (currentStep?.stepType) {
+    return currentStep.stepType;
+  }
 
   if (previousStepExecution) {
     if (previousStepExecution.stepType === 'foreach') {
@@ -58,17 +60,16 @@ export function buildStepExecutionsTree(
 
   for (const { path: pathParts } of stepExecutionsMap.values()) {
     let current: any = root;
-    const visited: string[] = [];
-    let previousPart: string | null = null;
+    const fullPath: string[] = [];
 
     for (const currentPart of pathParts) {
-      visited.push(currentPart);
+      fullPath.push(currentPart);
 
       if (!current[currentPart as keyof typeof current]) {
-        const fullKey = visited.join('>');
+        const currentFullKey = fullPath.join('>');
         let result: StepExecutionTreeItem;
-        if (stepExecutionsMap.has(fullKey)) {
-          const stepExecution = stepExecutionsMap.get(fullKey)!;
+        if (stepExecutionsMap.has(currentFullKey)) {
+          const stepExecution = stepExecutionsMap.get(currentFullKey)!;
           result = {
             stepId: currentPart,
             stepType: stepExecution.stepType!,
@@ -80,7 +81,10 @@ export function buildStepExecutionsTree(
         } else {
           result = {
             stepId: currentPart,
-            stepType: getStepTreeType(previousPart!, stepExecutionsMap) as any,
+            stepType: getStepTreeType(
+              stepExecutionsMap.get(currentFullKey),
+              stepExecutionsMap.get(fullPath.slice(0, fullPath.length - 1).join('>'))
+            ) as any,
             executionIndex: 0,
             stepExecutionId: undefined as any,
             status: ExecutionStatus.SKIPPED,
@@ -91,7 +95,6 @@ export function buildStepExecutionsTree(
         current[currentPart as string] = result;
       }
       current = (current[currentPart as keyof typeof current] as any).children;
-      previousPart = currentPart;
     }
   }
 
