@@ -20,10 +20,11 @@ export const styles = (
   size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>
 ) => ({
   rowHeaderSlotWrapper: css({
-    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
     borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    paddingLeft: euiTheme.size.s,
+    flexGrow: 0,
   }),
   rowWrapper: css({
     display: 'flex',
