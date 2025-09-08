@@ -6,11 +6,11 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures';
-import { generateEntitiesPriorityUpdateIndexTemplateConfig } from './entities_priority_update_template';
+import { generateEntitiesUpdatesIndexTemplateConfig } from './entities_updates_template';
 
-describe('generateEntitiesPriorityUpdateIndexTemplateConfig(definition)', () => {
+describe('generateEntitiesUpdatesIndexTemplateConfig(definition)', () => {
   it('should generate a valid index template for custom definition', () => {
-    const template = generateEntitiesPriorityUpdateIndexTemplateConfig(entityDefinition);
+    const template = generateEntitiesUpdatesIndexTemplateConfig(entityDefinition);
     expect(template).toMatchSnapshot();
   });
 });

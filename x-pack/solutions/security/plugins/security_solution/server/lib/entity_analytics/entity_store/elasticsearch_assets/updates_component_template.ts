@@ -21,19 +21,16 @@ const DEFAULT_MAPPINGS: Record<PropertyName, MappingProperty> = {
 
 const FIELDS_TO_IGNORE = ['_index'];
 
-const getComponentTemplateName = (definitionId: string) =>
-  `${definitionId}-priority-update@platform`;
+const getComponentTemplateName = (definitionId: string) => `${definitionId}-updates@platform`;
 
-export const createPriorityUpdateEntityIndexComponentTemplate = (
+export const createEntityUpdatesIndexComponentTemplate = (
   description: EntityEngineInstallationDescriptor,
   esClient: ElasticsearchClient
 ) => {
-  return esClient.cluster.putComponentTemplate(buildPriorityUpdateComponentTemplate(description));
+  return esClient.cluster.putComponentTemplate(buildUpdatesComponentTemplate(description));
 };
 
-export function buildPriorityUpdateComponentTemplate(
-  description: EntityEngineInstallationDescriptor
-) {
+export function buildUpdatesComponentTemplate(description: EntityEngineInstallationDescriptor) {
   return {
     name: getComponentTemplateName(description.id),
     template: {
@@ -60,9 +57,6 @@ function buildMappings({
   }
 
   properties[identityField] = identityFieldMapping;
-  properties[`${entityType}.entity.Metadata.priority`] = {
-    type: 'integer',
-  };
 
   return {
     properties: { ...DEFAULT_MAPPINGS, ...properties },

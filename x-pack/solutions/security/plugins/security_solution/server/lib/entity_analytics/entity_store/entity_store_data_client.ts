@@ -124,11 +124,11 @@ import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from './saved_object';
 import {
-  createEntityPriorityUpdateIndex,
-  deleteEntityPriorityUpdateIndex,
-} from './elasticsearch_assets/priority_update_entity_index';
+  createEntityUpdatesIndex,
+  deleteEntityUpdatesIndex,
+} from './elasticsearch_assets/updates_entity_index';
 import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
-import { createPriorityUpdateEntityIndexComponentTemplate } from './elasticsearch_assets/priority_update_component_template';
+import { createEntityUpdatesIndexComponentTemplate } from './elasticsearch_assets/updates_component_template';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -509,11 +509,11 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
 
-      /* Priority update components */
-      await createPriorityUpdateEntityIndexComponentTemplate(description, this.esClient);
-      this.log(`debug`, entityType, `Created entity priority update index component template`);
-      await createEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
-      this.log(`debug`, entityType, `Created entity priority update index`);
+      /* Updates componenets components */
+      await createEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log(`debug`, entityType, `Created entity updates index component template`);
+      await createEntityUpdatesIndex(entityType, this.esClient, namespace, logger);
+      this.log(`debug`, entityType, `Created entity updates index`);
 
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
@@ -772,8 +772,8 @@ export class EntityStoreDataClient {
       await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
       this.log('debug', entityType, `Deleted entity store snapshot task`);
 
-      await deleteEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
-      this.log('debug', entityType, `Delete entity priority index`);
+      await deleteEntityUpdatesIndex(entityType, this.esClient, namespace, logger);
+      this.log('debug', entityType, `Delete entity updates index`);
 
       if (deleteData) {
         await deleteEntityIndex({

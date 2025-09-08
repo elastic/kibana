@@ -19,7 +19,7 @@ import { retryTransientEsErrors } from './entities/helpers/retry';
 import { generateEntitiesLatestIndexTemplateConfig } from './entities/templates/entities_latest_template';
 import { generateEntitiesHistoryIndexTemplateConfig } from './entities/templates/entities_history_template';
 import { generateEntitiesResetIndexTemplateConfig } from './entities/templates/entities_reset_template';
-import { generateEntitiesPriorityUpdateIndexTemplateConfig } from './entities/templates/entities_priority_update_template';
+import { generateEntitiesUpdatesIndexTemplateConfig } from './entities/templates/entities_updates_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -92,20 +92,20 @@ export async function createAndInstallTemplates(
   const latestTemplate = generateEntitiesLatestIndexTemplateConfig(definition);
   const historyTemplate = generateEntitiesHistoryIndexTemplateConfig(definition);
   const resetTemplate = generateEntitiesResetIndexTemplateConfig(definition);
-  const priorityUpdateTemplate = generateEntitiesPriorityUpdateIndexTemplateConfig(definition);
+  const updatesTemplate = generateEntitiesUpdatesIndexTemplateConfig(definition);
 
   await Promise.all([
     upsertTemplate({ esClient, template: latestTemplate, logger }),
     upsertTemplate({ esClient, template: historyTemplate, logger }),
     upsertTemplate({ esClient, template: resetTemplate, logger }),
-    upsertTemplate({ esClient, template: priorityUpdateTemplate, logger }),
+    upsertTemplate({ esClient, template: updatesTemplate, logger }),
   ]);
 
   return [
     { type: 'template', id: latestTemplate.name },
-    { type: 'template', id: priorityUpdateTemplate.name },
     { type: 'template', id: historyTemplate.name },
     { type: 'template', id: resetTemplate.name },
+    { type: 'template', id: updatesTemplate.name },
   ];
 }
 

@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { createEngineDescription } from '../installation/engine_description';
-import { buildPriorityUpdateComponentTemplate } from './priority_update_component_template';
+import { buildUpdatesComponentTemplate } from './updates_component_template';
 
-describe('buildPriorityUpdateComponentTemplate', () => {
+describe('buildUpdatesComponentTemplate', () => {
   it('matches snapshot', () => {
     const description = createEngineDescription({
       entityType: 'host',
@@ -24,6 +24,6 @@ describe('buildPriorityUpdateComponentTemplate', () => {
       },
     });
 
-    expect(buildPriorityUpdateComponentTemplate(description)).toMatchSnapshot();
+    expect(buildUpdatesComponentTemplate(description)).toMatchSnapshot();
   });
 });

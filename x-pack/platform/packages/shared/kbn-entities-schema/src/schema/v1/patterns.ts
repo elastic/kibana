@@ -8,13 +8,13 @@
 export const ENTITY_BASE_PREFIX = 'entities';
 export const ENTITY_HISTORY = 'history' as const;
 export const ENTITY_LATEST = 'latest' as const;
-export const ENTITY_PRIORITY_UPDATES = 'priority_updates' as const;
+export const ENTITY_UPDATES = 'updates' as const;
 export const ENTITY_RESET = 'reset' as const;
 
 export const ENTITY_SCHEMA_VERSION_V1 = 'v1';
 
 type SchemaVersion = `v${number}`;
-type Dataset = typeof ENTITY_LATEST | typeof ENTITY_HISTORY | typeof ENTITY_RESET | typeof ENTITY_PRIORITY_UPDATES;
+type Dataset = typeof ENTITY_LATEST | typeof ENTITY_HISTORY | typeof ENTITY_RESET | typeof ENTITY_UPDATES;
 
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;

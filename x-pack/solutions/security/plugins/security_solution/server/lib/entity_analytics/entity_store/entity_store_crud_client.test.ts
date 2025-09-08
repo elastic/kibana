@@ -184,16 +184,13 @@ describe('EntityStoreCrudClient', () => {
       });
 
       expect(esClientMock.create).toBeCalledWith({
-        index: '.entities.v1.priority_updates.security_host_default',
+        index: '.entities.v1.updates.security_host_default',
         id: '123',
         document: {
           '@timestamp': mockedDate.toISOString(),
           host: {
             name: 'host-1',
             entity: {
-              Metadata: {
-                priority: 1,
-              },
               ...doc.entity,
             },
           },
@@ -258,16 +255,13 @@ describe('EntityStoreCrudClient', () => {
       });
 
       expect(esClientMock.create).toBeCalledWith({
-        index: '.entities.v1.priority_updates.security_host_default',
+        index: '.entities.v1.updates.security_host_default',
         id: '123',
         document: {
           '@timestamp': mockedDate.toISOString(),
           host: {
             name: 'host-1',
             entity: {
-              Metadata: {
-                priority: 1,
-              },
               ...doc.entity,
             },
           },
