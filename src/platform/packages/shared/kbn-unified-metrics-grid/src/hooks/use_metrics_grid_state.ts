@@ -41,6 +41,14 @@ export const useMetricsGridState = () => {
     (values: string[]) => dispatch(setValueFilters(values)),
     [dispatch]
   );
+
+  const onClearAllDimensions = useCallback(() => {
+    dispatch(setDimensions([]));
+    dispatch(setValueFilters([]));
+  }, [dispatch]);
+
+  const onClearValues = useCallback(() => onValuesChange([]), [onValuesChange]);
+
   const onPageChange = useCallback((page: number) => dispatch(setCurrentPage(page)), [dispatch]);
 
   return {
@@ -50,5 +58,7 @@ export const useMetricsGridState = () => {
     onDimensionsChange,
     onValuesChange,
     onPageChange,
+    onClearAllDimensions,
+    onClearValues,
   };
 };
