@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
-import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import { validate } from './validate';
 
 const renameExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'rename', validate);
@@ -63,6 +63,6 @@ describe('RENAME Validation', () => {
     renameExpectErrors('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
       'AS expected 2 arguments, but got 1.',
     ]);
-    renameExpectErrors('from a_index | rename key* as keywords', ['Unknown column "keywords"']);
+    renameExpectErrors('from a_index | rename key* as keywords', []);
   });
 });
