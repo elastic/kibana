@@ -36,9 +36,7 @@ export function StepExecutionTreeItemLabel({
   const styles = useMemoCss(componentStyles);
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
-  if (stepId.split(':').length > 1) {
-    stepId = stepId.split(':')[1];
-  }
+
   return (
     <EuiFlexGroup
       alignItems="baseline"

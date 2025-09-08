@@ -40,30 +40,9 @@ import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icon';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 
-function isForeachIteration(stepId: string) {
-  return stepId.split(':').length > 1 && !isNaN(parseInt(stepId.split(':')[1], 10));
-}
-
-function isIfBranch(stepId: string) {
-  return (
-    stepId.split(':').length > 1 &&
-    (stepId.split(':')[1] === 'true' || stepId.split(':')[1] === 'false')
-  );
-}
-
-function getStepType(stepId: string, stepType: string) {
-  if (isForeachIteration(stepId)) {
-    return 'foreach-iteration';
-  }
-  if (isIfBranch(stepId)) {
-    return 'if-branch';
-  }
-  return stepType;
-}
-
 // handle special nodes like foreachstep:0, foreachstep:1, if:true, if:false
 function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | null) {
-  const stepType = getStepType(item.stepId, item.stepType);
+  const stepType = item.stepType;
   if (
     (stepType === 'foreach-iteration' ||
       stepType === 'foreach' ||
@@ -95,9 +74,7 @@ function convertTreeToEuiTreeViewItems(
     return {
       ...item,
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      icon: (
-        <StepIcon stepType={getStepType(item.stepId, item.stepType)} executionStatus={status} />
-      ),
+      icon: <StepIcon stepType={item.stepType} executionStatus={status} />,
       css:
         status && isDangerousStatus(status)
           ? css`
