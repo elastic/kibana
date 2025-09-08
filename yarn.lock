@@ -29332,10 +29332,10 @@ ripemd160@=2.0.1, ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^2.0.0"
     inherits "^2.0.1"
 
-rison-node@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-1.0.2.tgz#b7b5f37f39f5ae2a51a973a33c9aa17239a33e4b"
-  integrity sha1-t7Xzfzn1ripRqXOjPJqhcjmjPks=
+rison-node@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-2.1.1.tgz#3db68c6a736442a5494826f86fc8d675933934a5"
+  integrity sha512-GuV0OnSL2erZJ0j/9YUsrAdfSh3mGcrq+4wM4PqRftOYT7+TRhxbMrpVZaGC5YIPwncIoOM7PPnskDku5Ywg1Q==
 
 robots-parser@^3.0.1:
   version "3.0.1"

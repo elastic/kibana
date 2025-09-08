@@ -1377,7 +1377,7 @@
     "remark-stringify": "^8.0.3",
     "require-in-the-middle": "^7.5.2",
     "reselect": "^4.1.8",
-    "rison-node": "1.0.2",
+    "rison-node": "2.1.1",
     "rxjs": "^7.8.2",
     "safe-squel": "^5.12.5",
     "seedrandom": "^3.0.5",
