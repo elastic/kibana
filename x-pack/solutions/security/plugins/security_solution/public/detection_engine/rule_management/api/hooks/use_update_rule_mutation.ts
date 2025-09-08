@@ -11,7 +11,7 @@ import type {
   RuleResponse,
   RuleUpdateProps,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { transformOutput } from '../../../common/transforms';
+import { transformOutput } from '../../utils/transforms';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRule } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';

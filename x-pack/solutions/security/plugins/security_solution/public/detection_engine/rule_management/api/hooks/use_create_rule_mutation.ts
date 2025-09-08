@@ -12,7 +12,7 @@ import type {
   RuleCreateProps,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { transformOutput } from '../../../common/transforms';
+import { transformOutput } from '../../utils/transforms';
 import { createRule } from '../api';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';

@@ -2659,6 +2659,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/common/components/missing_privileges @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/popover_items @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_form_with_warnings @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/fleet_integrations @elastic/security-detection-rule-management
