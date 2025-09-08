@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export type Refetch = () => void;
-
-export interface InspectQuery {
-  dsl: string[];
-  response: string[];
-}
+export type * from './types';

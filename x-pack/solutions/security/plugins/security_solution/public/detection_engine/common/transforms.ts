@@ -11,7 +11,7 @@ import type {
   RuleCreateProps,
   RuleResponse,
   RuleUpdateProps,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../common/api/detection_engine/model/rule_schema';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these
@@ -62,7 +62,7 @@ export const transformInput = (rule: RuleResponse): RuleResponse => addIdToThrea
  * @param rule The rule to add an id to the threat matches.
  * @returns rule The rule but with id added to the threat array and entries
  */
-export const addIdToThreatMatchArray = (rule: RuleResponse): RuleResponse => {
+const addIdToThreatMatchArray = (rule: RuleResponse): RuleResponse => {
   if (rule.type === 'threat_match' && rule.threat_mapping != null) {
     const threatMapWithId = rule.threat_mapping.map((mapping) => {
       const newEntries = mapping.entries.map((entry) => addIdToItem(entry));
@@ -83,7 +83,7 @@ export const addIdToThreatMatchArray = (rule: RuleResponse): RuleResponse => {
  * @param rule The rule to remove an id from the threat matches.
  * @returns rule The rule but with id removed from the threat array and entries
  */
-export const removeIdFromThreatMatchArray = (
+const removeIdFromThreatMatchArray = (
   rule: RuleCreateProps | RuleUpdateProps
 ): RuleCreateProps | RuleUpdateProps => {
   if (rule.type === 'threat_match' && rule.threat_mapping != null) {

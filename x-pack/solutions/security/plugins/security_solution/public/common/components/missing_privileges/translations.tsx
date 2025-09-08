@@ -16,35 +16,53 @@ import {
   SECURITY_FEATURE_ID,
 } from '../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
-import type { MissingPrivileges } from '../../hooks/alerts/use_missing_privileges';
-import {
-  DetectionsRequirementsLink,
-  SecuritySolutionRequirementsLink,
-} from '../../../common/components/links_to_docs';
+import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
+import { DetectionsRequirementsLink, SecuritySolutionRequirementsLink } from '../links_to_docs';
+
+export const PRIVILEGES_MISSING_TITLE = i18n.translate(
+  'xpack.securitySolution.common.onboarding.assistantCard.missingPrivileges.title',
+  {
+    defaultMessage: 'Missing privileges',
+  }
+);
+
+export const PRIVILEGES_REQUIRED_TITLE = i18n.translate(
+  'xpack.securitySolution.common.onboarding.assistantCard.requiredPrivileges',
+  {
+    defaultMessage: 'The minimum Kibana privileges required to use this feature are:',
+  }
+);
+
+export const CONTACT_ADMINISTRATOR = i18n.translate(
+  'xpack.securitySolution.common.onboarding.assistantCard.missingPrivileges.contactAdministrator',
+  {
+    defaultMessage: 'Contact your administrator for assistance.',
+  }
+);
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle',
+  'xpack.securitySolution.common.missingPrivilegesCallOut.messageTitle',
   {
     defaultMessage: 'Insufficient privileges',
   }
 );
 
 const CANNOT_EDIT_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditRules',
+  'xpack.securitySolution.common.missingPrivilegesCallOut.cannotEditRules',
   {
     defaultMessage: 'Without that privilege you cannot create or edit detection engine rules.',
   }
 );
 
 const CANNOT_EDIT_LISTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditLists',
+  'xpack.securitySolution.common.missingPrivilegesCallOut.cannotEditLists',
   {
     defaultMessage: 'Without these privileges, you cannot create or edit value lists.',
   }
 );
 
 const CANNOT_EDIT_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditAlerts',
+  'xpack.securitySolution.common.missingPrivilegesCallOut.cannotEditAlerts',
   {
     defaultMessage: 'Without these privileges, you cannot view or change status of alerts.',
   }
@@ -55,13 +73,13 @@ export const missingPrivilegesCallOutBody = ({
   featurePrivileges = [],
 }: MissingPrivileges) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"
+    id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.messageDetail"
     defaultMessage="{essence} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
     values={{
       essence: (
         <p>
           <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.essenceDescription"
+            id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.essenceDescription"
             defaultMessage="You need the following privileges to fully access this functionality. Contact your administrator for further assistance."
           />
         </p>
@@ -70,7 +88,7 @@ export const missingPrivilegesCallOutBody = ({
         indexPrivileges.length > 0 ? (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
+              id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
               defaultMessage="Missing Elasticsearch index privileges:"
             />
             <ul>
@@ -84,7 +102,7 @@ export const missingPrivilegesCallOutBody = ({
         featurePrivileges.length > 0 ? (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+              id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
               defaultMessage="Missing Kibana feature privileges:"
             />
             <ul>
@@ -155,7 +173,7 @@ const missingPrivilegesMessage = (index: string, privileges: string[]) => {
 
 const missingIndexPrivileges = (index: string, privileges: string[]) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges"
+    id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.missingIndexPrivileges"
     defaultMessage="Missing {privileges} privileges for the {index} index. {explanation}"
     values={{
       privileges: <CommaSeparatedValues values={privileges} />,
@@ -167,7 +185,7 @@ const missingIndexPrivileges = (index: string, privileges: string[]) => (
 
 const missingDataStreamPrivileges = (dataStream: string, privileges: string[]) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingDataStreamPrivileges"
+    id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.missingDataStreamPrivileges"
     defaultMessage="Missing {privileges} privileges for the {dataStream} data stream. {explanation}"
     values={{
       privileges: <CommaSeparatedValues values={privileges} />,
@@ -179,7 +197,7 @@ const missingDataStreamPrivileges = (dataStream: string, privileges: string[]) =
 
 const missingFeaturePrivileges = (feature: string, privileges: string[]) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
+    id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
     defaultMessage="Missing {privileges} privileges for the {index} feature. {explanation}"
     values={{
       privileges: <CommaSeparatedValues values={privileges} />,
