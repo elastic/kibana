@@ -136,4 +136,12 @@ A quick summary:
 ### Attributes
 
 When defining the attributes, it's important to consider the time series that it will generate and how they will be analyzed.
-For example, to report the number of open sockets using an `UpDownCounter` named `elasticsearch.client.sockets.usage`, we may add the attribute `elasticsearch.client.sockets.state` to differentiate between `active` and `idle` sockets. However, we don't want to report `open` vs. `closed` in this situation. The reason is that, during analysis, we may want to sum all values to understand the total number of open sockets (used or not) for a specific ES client. Adding the `closed` state to the same metric will force us to always handle that state separately. If we needed to track the number of closed sockets over time, we should create a separate `Counter` named `elasticsearch.client.sockets.closed` for it.
+
+For example, consider reporting the number of open sockets using an `UpDownCounter` named `elasticsearch.client.sockets.usage`:
+
+* ✅ We may add the attribute `elasticsearch.client.sockets.state` to differentiate between `active` and `idle` sockets.
+* ❌ However, we don't want to report `open` vs. `closed` in this situation.
+
+The reason is that, during analysis, we may want to sum all values to understand the total number of open sockets (used or not) for a specific ES client. Adding the `closed` state to the same metric will force us to always handle that state separately. 
+
+If we needed to track the number of closed sockets over time, we should create a separate `Counter` named `elasticsearch.client.sockets.closed` for it.
