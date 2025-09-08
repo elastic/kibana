@@ -18,7 +18,6 @@ import {
   isSingleLayer,
   generateLayer,
 } from './utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
