@@ -34,7 +34,7 @@ export function FailureStoreIngestionRate({
             <EuiText>
               <h5>
                 {i18n.translate('xpack.streams.failureStoreEnabled.ingestionRatePanel', {
-                  defaultMessage: 'Ingestion rate over time',
+                  defaultMessage: 'Failure ingestion rate over time',
                 })}
               </h5>
             </EuiText>

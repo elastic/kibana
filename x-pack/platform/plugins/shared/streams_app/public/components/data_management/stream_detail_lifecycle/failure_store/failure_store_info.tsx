@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { RetentionCard } from './cards/retention_card';
@@ -31,8 +31,15 @@ export const FailureStoreInfo = ({
       <EuiText>
         <h4>
           {i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.title', {
-            defaultMessage: 'Failure store',
+            defaultMessage: 'Failure store ',
           })}
+          <EuiIconTip
+            content={i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.tooltip', {
+              defaultMessage:
+                'A failure store is a secondary set of indices inside a data stream, dedicated to storing failed documents.',
+            })}
+            position="right"
+          />
         </h4>
       </EuiText>
       <EuiFlexGroup>
