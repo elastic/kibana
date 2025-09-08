@@ -29,6 +29,12 @@ export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
 /**
+ * Tabs actions, i.e. when user renames tab, reorders tabs, closes tab, reaches tabs limit etc
+ */
+export const TABS_EVENT_TYPE = 'discover_tabs';
+export const TABS_EVENT_NAME = 'eventName';
+
+/**
  * This function is statically imported since analytics registrations must happen at setup,
  * while the EBT manager is loaded dynamically when needed to avoid page load bundle bloat
  */
@@ -96,6 +102,19 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The resolved name of the active profile',
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: TABS_EVENT_TYPE,
+    schema: {
+      [TABS_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
         },
       },
     },

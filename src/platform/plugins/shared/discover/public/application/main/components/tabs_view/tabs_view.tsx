@@ -8,7 +8,7 @@
  */
 
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   createTabItem,
@@ -21,6 +21,7 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { TabsEventName } from '../../../../ebt_manager';
 
 export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
@@ -30,6 +31,20 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+
+  const tabsEbtManager = useMemo(
+    () => services.ebtManager.createScopedEBTManager(),
+    [services.ebtManager]
+  );
+
+  const onEvent: UnifiedTabsProps['onEvent'] = useCallback(
+    (eventName, payload) => {
+      if (Object.values(TabsEventName).includes(eventName as TabsEventName)) {
+        void tabsEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
+      }
+    },
+    [tabsEbtManager]
+  );
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -57,6 +72,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       getPreviewData={getPreviewData}
       renderContent={renderContent}
       onChanged={onChanged}
+      onEvent={onEvent}
     />
   );
 };

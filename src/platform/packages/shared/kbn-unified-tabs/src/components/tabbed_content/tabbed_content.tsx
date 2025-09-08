@@ -38,6 +38,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
+  onEvent: (eventName: string, payload?: any) => void; // TODO better type for payload
 }
 
 export interface TabbedContentState {
@@ -56,6 +57,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   createItem,
   onChanged,
   getPreviewData,
+  onEvent,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -84,8 +86,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       const editedItem = { ...item, label: newLabel };
       tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
+      onEvent('tabRenamed');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onSelect = useCallback(
