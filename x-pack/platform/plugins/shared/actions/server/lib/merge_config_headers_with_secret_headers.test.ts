@@ -19,7 +19,7 @@ describe('mergeConfigHeadersWithSecretHeaders', () => {
       secretKey: 'secretValue',
     });
   });
-  it('merges config and secret headers correclty if the keys are the same', () => {
+  it('merges config and secret headers correctly if the keys are the same', () => {
     expect(
       mergeConfigHeadersWithSecretHeaders({ key: 'configValue' }, { key: 'secretValue' })
     ).toEqual({
