@@ -283,7 +283,7 @@ export const WorkflowYAMLEditor = ({
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
   const stepExecutionsRef = useRef<EsWorkflowStepExecution[] | undefined>(stepExecutions);
-  
+
   // Keep stepExecutionsRef in sync
   useEffect(() => {
     stepExecutionsRef.current = stepExecutions;
@@ -355,13 +355,13 @@ export const WorkflowYAMLEditor = ({
       try {
         const value = model.getValue();
         const parsedDocument = YAML.parseDocument(value ?? '');
-        
+
         console.log('🔄 YAML document changing, clearing all decorations first');
         clearAllDecorations();
-        
+
         setYamlDocument(parsedDocument);
         yamlDocumentRef.current = parsedDocument;
-        
+
         console.log('✅ YAML document updated, decorations will be recreated');
       } catch (error) {
         console.error('❌ Error parsing YAML document:', error);
@@ -486,10 +486,10 @@ export const WorkflowYAMLEditor = ({
         propValueLength: props.value.length,
         propValueStart: props.value.substring(0, 50) + '...',
       });
-      
+
       // Always clear decorations first when switching executions/revisions
       clearAllDecorations();
-      
+
       // Check if Monaco editor content matches props.value
       const model = editorRef.current.getModel();
       if (model) {
@@ -498,9 +498,9 @@ export const WorkflowYAMLEditor = ({
           console.log('🔄 Monaco content differs from props.value, waiting for editor update', {
             currentLength: currentContent.length,
             propsLength: props.value.length,
-            match: currentContent === props.value
+            match: currentContent === props.value,
           });
-          
+
           // Wait a bit longer for Monaco to update its content, then force re-parse
           setTimeout(() => {
             console.log('🔄 Re-parsing YAML document for new execution revision');
@@ -569,28 +569,37 @@ export const WorkflowYAMLEditor = ({
             hasYamlDocument: !!yamlDocument,
             hasYamlDocumentRef: !!yamlDocumentRef.current,
             readOnly,
-            transition: 'execution-navigation'
+            transition: 'execution-navigation',
           });
-          
+
           // Ensure yamlDocumentRef is synchronized
           if (yamlDocument && !yamlDocumentRef.current) {
             yamlDocumentRef.current = yamlDocument;
           }
-          
-          // Additional check: if we have stepExecutions but no yamlDocument, 
+
+          // Additional check: if we have stepExecutions but no yamlDocument,
           // the document might not be parsed yet - skip and let next update handle it
           if (stepExecutions?.length > 0 && !yamlDocumentRef.current) {
-            console.warn('🎯 StepExecutions present but no YAML document - waiting for document parse');
+            console.warn(
+              '🎯 StepExecutions present but no YAML document - waiting for document parse'
+            );
             return;
           }
-          
+
           const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
             getYamlDocument: () => {
-              console.log('🎯 StepExecutionProvider getYamlDocument called, returning:', !!yamlDocumentRef.current);
+              console.log(
+                '🎯 StepExecutionProvider getYamlDocument called, returning:',
+                !!yamlDocumentRef.current
+              );
               return yamlDocumentRef.current;
             },
             getStepExecutions: () => {
-              console.log('🎯 StepExecutionProvider getStepExecutions called, returning:', stepExecutionsRef.current?.length || 0, 'executions');
+              console.log(
+                '🎯 StepExecutionProvider getStepExecutions called, returning:',
+                stepExecutionsRef.current?.length || 0,
+                'executions'
+              );
               return stepExecutionsRef.current || [];
             },
             getHighlightStep: () => highlightStep || null,
@@ -940,8 +949,8 @@ export const WorkflowYAMLEditor = ({
 
     // Add global CSS for Monaco hover widgets - avoid interfering with internal widgets
     const styleId = 'workflow-monaco-hover-styles';
-    let existingStyle = document.getElementById(styleId);
-    
+    const existingStyle = document.getElementById(styleId);
+
     if (!existingStyle) {
       const style = document.createElement('style');
       style.id = styleId;
@@ -1293,33 +1302,37 @@ const componentStyles = {
           borderRadius: '50%',
         },
       },
-       // Enhanced Monaco hover styling for better readability - EXCLUDE glyph and contrib widgets
-       // Only target our custom hover widgets, not Monaco's internal ones (especially glyph hovers)
-       '&, & .monaco-editor, & .monaco-hover:not([class*="contrib"]):not([class*="glyph"]), & .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"])': {
-         '--hover-width': '600px',
-         '--hover-min-width': '500px',
-         '--hover-max-width': '800px',
-         '--hover-max-height': '600px',
-       },
-       '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]), .monaco-hover:not([class*="contrib"]):not([class*="glyph"])': {
-         width: '600px',
-         minWidth: '500px',
-         maxWidth: '800px',
-         maxHeight: '400px',
-         fontSize: '13px',
-         zIndex: 999, // Lower than Monaco's internal widgets
-       },
-       '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .monaco-hover-content': {
-         width: '100%',
-         minWidth: '500px',
-         maxWidth: '800px',
-         padding: '12px 16px',
-       },
-      '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents': {
-        width: '100%',
-        minWidth: '500px',
-        maxWidth: '800px',
-      },
+      // Enhanced Monaco hover styling for better readability - EXCLUDE glyph and contrib widgets
+      // Only target our custom hover widgets, not Monaco's internal ones (especially glyph hovers)
+      '&, & .monaco-editor, & .monaco-hover:not([class*="contrib"]):not([class*="glyph"]), & .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"])':
+        {
+          '--hover-width': '600px',
+          '--hover-min-width': '500px',
+          '--hover-max-width': '800px',
+          '--hover-max-height': '600px',
+        },
+      '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]), .monaco-hover:not([class*="contrib"]):not([class*="glyph"])':
+        {
+          width: '600px',
+          minWidth: '500px',
+          maxWidth: '800px',
+          maxHeight: '400px',
+          fontSize: '13px',
+          zIndex: 999, // Lower than Monaco's internal widgets
+        },
+      '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .monaco-hover-content':
+        {
+          width: '100%',
+          minWidth: '500px',
+          maxWidth: '800px',
+          padding: '12px 16px',
+        },
+      '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents':
+        {
+          width: '100%',
+          minWidth: '500px',
+          maxWidth: '800px',
+        },
       // Ensure Monaco's internal glyph hover widgets work properly
       '& [class*="modesGlyphHoverWidget"], & [class*="glyph"][class*="hover"]': {
         display: 'block',
@@ -1564,4 +1577,3 @@ const componentStyles = {
     overflow: 'hidden',
   }),
 };
-

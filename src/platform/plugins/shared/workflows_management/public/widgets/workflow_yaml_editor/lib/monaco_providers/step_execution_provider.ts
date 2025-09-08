@@ -72,7 +72,7 @@ export class StepExecutionProvider {
           hasModel: !!model,
           hasYamlDocument: !!yamlDocument,
           isReadOnly: this.isReadOnly(),
-          stepExecutionsLength: stepExecutions?.length || 0
+          stepExecutionsLength: stepExecutions?.length || 0,
         });
         return;
       }
@@ -118,66 +118,68 @@ export class StepExecutionProvider {
             if (stepRange.startLineNumber < 1 || stepRange.endLineNumber > lineCount) {
               console.warn(`❌ Invalid stepRange for stepId: ${stepExecution.stepId}`, {
                 stepRange: `${stepRange.startLineNumber}-${stepRange.endLineNumber}`,
-                modelLineCount: lineCount
+                modelLineCount: lineCount,
               });
               return null;
             }
 
             // Find the line with the YAML list marker (-) that precedes this step
             let dashLineNumber = stepRange.startLineNumber;
-          
-          // Search backwards from the step start to find the line with the dash
-          for (let lineNum = stepRange.startLineNumber; lineNum >= 1; lineNum--) {
-            const lineContent = model.getLineContent(lineNum);
-            const trimmedContent = lineContent.trim();
-            
-            // Check if this line starts with a dash and contains relevant content
-            if (trimmedContent.startsWith('-') && 
-                (trimmedContent.includes('name:') || 
-                 trimmedContent.includes(stepExecution.stepId) ||
-                 lineNum === stepRange.startLineNumber - 1)) {
-              dashLineNumber = lineNum;
-              break;
-            }
-            
-            // Don't search too far back
-            if (stepRange.startLineNumber - lineNum > 3) {
-              break;
-            }
-          }
 
-          // Glyph decoration for status icon - position at the dash line
-          const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
-            range: new monaco.Range(
-              dashLineNumber,
-              1, // Start at column 1 for consistent glyph positioning
-              dashLineNumber,
-              1 // End at column 1 for single-point positioning
-            ),
-            options: {
-              glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
-                !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-              }`,
-            },
-          };
+            // Search backwards from the step start to find the line with the dash
+            for (let lineNum = stepRange.startLineNumber; lineNum >= 1; lineNum--) {
+              const lineContent = model.getLineContent(lineNum);
+              const trimmedContent = lineContent.trim();
 
-          // Background decoration for execution status - from dash line to end of step
-          const bgClassName = `step-execution-${stepExecution.status} ${
-            !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-          }`;
-          const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
-            range: new monaco.Range(
-              dashLineNumber, // Start from the dash line
-              1, // Start at column 1
-              stepRange.endLineNumber,
-              stepRange.endColumn
-            ),
-            options: {
-              className: bgClassName,
-              marginClassName: bgClassName,
-              isWholeLine: true,
-            },
-          };
+              // Check if this line starts with a dash and contains relevant content
+              if (
+                trimmedContent.startsWith('-') &&
+                (trimmedContent.includes('name:') ||
+                  trimmedContent.includes(stepExecution.stepId) ||
+                  lineNum === stepRange.startLineNumber - 1)
+              ) {
+                dashLineNumber = lineNum;
+                break;
+              }
+
+              // Don't search too far back
+              if (stepRange.startLineNumber - lineNum > 3) {
+                break;
+              }
+            }
+
+            // Glyph decoration for status icon - position at the dash line
+            const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
+              range: new monaco.Range(
+                dashLineNumber,
+                1, // Start at column 1 for consistent glyph positioning
+                dashLineNumber,
+                1 // End at column 1 for single-point positioning
+              ),
+              options: {
+                glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
+                  !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+                }`,
+              },
+            };
+
+            // Background decoration for execution status - from dash line to end of step
+            const bgClassName = `step-execution-${stepExecution.status} ${
+              !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+            }`;
+            const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
+              range: new monaco.Range(
+                dashLineNumber, // Start from the dash line
+                1, // Start at column 1
+                stepRange.endLineNumber,
+                stepRange.endColumn
+              ),
+              options: {
+                className: bgClassName,
+                marginClassName: bgClassName,
+                isWholeLine: true,
+              },
+            };
 
             return [glyphDecoration, backgroundDecoration];
           } catch (error) {
@@ -190,7 +192,13 @@ export class StepExecutionProvider {
 
       this.decorationsCollection = this.editor.createDecorationsCollection(decorations);
 
-      console.log('✅ StepExecutionProvider: Applied', decorations.length, 'decorations for', stepExecutions.length, 'steps');
+      console.log(
+        '✅ StepExecutionProvider: Applied',
+        decorations.length,
+        'decorations for',
+        stepExecutions.length,
+        'steps'
+      );
     } catch (error) {
       console.error('🎯 StepExecutionProvider: Error in updateDecorations:', error);
     }
