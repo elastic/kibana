@@ -8,9 +8,9 @@ paths:
     post:
       summary: Cancel a response action
       operationId: CancelAction
-      description: Cancel a running or pending response action.
+      description: Cancel a running or pending response action (Applies only to some agent types).
       x-codegen-enabled: true
-      x-labels: [ess, serverless]
+      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
@@ -57,7 +57,7 @@ components:
               description: Optional comment explaining the reason for canceling the action
             agent_type:
               type: string
-              enum: [endpoint, sentinel_one, crowdstrike, microsoft_defender_endpoint]
+              enum: [ endpoint, sentinel_one, crowdstrike, microsoft_defender_endpoint ]
               default: endpoint
               description: The agent type to target for the action
         - type: object
@@ -75,5 +75,5 @@ components:
       summary: Cancel a response action
       value:
         action_id: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
-        endpoint_ids: ['2f8e9c3a-5d4e-4f5a-9b1c-3e4f5a6b7c8d']
+        endpoint_ids: [ '2f8e9c3a-5d4e-4f5a-9b1c-3e4f5a6b7c8d' ]
         comment: 'Cancelling action due to change in requirements'
