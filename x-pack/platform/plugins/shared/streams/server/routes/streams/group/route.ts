@@ -11,7 +11,7 @@ import { Group, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
 import type { QueryAsset } from '../../../../common/assets';
 
 export interface GroupObjectGetResponse {
@@ -103,11 +103,11 @@ const upsertGroupRoute = createServerRoute({
 
     const dashboards = assets
       .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
-      .map((asset) => asset[ASSET_ID]);
+      .map((asset) => asset[ASSET_UUID]);
 
     const rules = assets
       .filter((asset) => asset[ASSET_TYPE] === 'rule')
-      .map((asset) => asset[ASSET_ID]);
+      .map((asset) => asset[ASSET_UUID]);
 
     const queries = assets
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
@@ -116,13 +116,13 @@ const upsertGroupRoute = createServerRoute({
     const { name: _name, ...stream } = definition;
 
     const upsertRequest: Streams.GroupStream.UpsertRequest = {
+      dashboards,
       stream: {
         ...stream,
         group,
       },
-      dashboards,
-      rules,
       queries,
+      rules,
     };
 
     return await streamsClient.upsertStream({

@@ -396,7 +396,7 @@ export class AssetClient {
               perPage: idsByType.slo.length,
             })
             .then((soResponse) => {
-              const sloDefinitionsById = keyBy(soResponse.saved_objects, 'attributes.id');
+              const sloDefinitionsById = keyBy(soResponse.saved_objects, 'slo.attributes.id');
 
               return idsByType.slo.flatMap((sloId) => {
                 const sloDefinition = sloDefinitionsById[sloId];

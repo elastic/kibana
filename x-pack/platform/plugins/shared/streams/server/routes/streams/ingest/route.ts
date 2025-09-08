@@ -25,25 +25,25 @@ async function getAssets({
 }: {
   name: string;
   assetClient: AssetClient;
-}): Promise<{ dashboards: string[]; rules: string[]; queries: StreamQuery[] }> {
+}): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
   const assets = await assetClient.getAssets(name);
 
   const dashboards = assets
     .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
     .map((asset) => asset[ASSET_ID]);
 
-  const rules = assets
-    .filter((asset) => asset[ASSET_TYPE] === 'rule')
-    .map((asset) => asset[ASSET_ID]);
-
   const queries = assets
     .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
     .map((asset) => asset.query);
 
+  const rules = assets
+    .filter((asset) => asset[ASSET_TYPE] === 'rule')
+    .map((asset) => asset[ASSET_ID]);
+
   return {
     dashboards,
-    rules,
     queries,
+    rules,
   };
 }
 
@@ -58,7 +58,7 @@ async function updateWiredIngest({
   name: string;
   ingest: WiredIngest;
 }) {
-  const { dashboards, rules, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
@@ -72,13 +72,13 @@ async function updateWiredIngest({
   const { name: _name, ...stream } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
+    dashboards,
+    queries,
     stream: {
       ...stream,
       ingest,
     },
-    dashboards,
     rules,
-    queries,
   };
 
   return await streamsClient.upsertStream({
@@ -98,7 +98,7 @@ async function updateClassicIngest({
   name: string;
   ingest: ClassicIngest;
 }) {
-  const { dashboards, rules, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
@@ -112,13 +112,13 @@ async function updateClassicIngest({
   const { name: _name, ...stream } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
+    dashboards,
+    queries,
     stream: {
       ...stream,
       ingest,
     },
-    dashboards,
     rules,
-    queries,
   };
 
   return await streamsClient.upsertStream({

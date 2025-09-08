@@ -105,8 +105,8 @@ export function GroupStreamModificationFlyout({
         params: {
           path: { name: formData.name },
           body: {
-            rules: [],
             queries: [],
+            rules: [],
             ...streamBaseData,
             dashboards: formData.dashboards.map((dashboard) => dashboard.id),
             stream: {
