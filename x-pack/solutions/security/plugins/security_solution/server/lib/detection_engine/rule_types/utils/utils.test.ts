@@ -431,8 +431,8 @@ describe('utils', () => {
 
       expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ['list_id_single', 'endpoint_list'],
-          namespaceType: ['single', 'agnostic'],
+          listId: ['list_id_single'],
+          namespaceType: ['single'],
           perPage: 1_000,
           filter: [],
           maxSize: undefined,
