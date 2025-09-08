@@ -162,6 +162,8 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
           label: action,
           color: isOriginAlert || isAlert ? 'danger' : 'primary',
+          isOrigin,
+          isOriginAlert,
           shape: 'label',
           documentsData: parseDocumentsData(docs),
         };
