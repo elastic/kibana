@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React from 'react';
@@ -18,6 +18,11 @@ import { ToolQuickActions } from './tools_table_quick_actions';
 
 export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
   return [
+    // Readonly indicator
+    {
+      width: '30px',
+      render: (tool: ToolDefinitionWithSchema) => (tool.readonly ? <EuiIcon type="lock" /> : null),
+    },
     {
       field: 'id',
       name: labels.tools.toolIdLabel,
