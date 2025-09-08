@@ -13,7 +13,7 @@ import { useConversationTitle } from '../../hooks/use_conversation';
 
 export const ConversationTitle: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-  const title = useConversationTitle();
+  const { title, isLoading } = useConversationTitle();
 
   const labels = {
     ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
@@ -35,9 +35,11 @@ export const ConversationTitle: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={sectionStyles}>
-      <EuiTitle aria-label={labels.ariaLabel} size="xxs">
-        <h1>{title || labels.newConversationDisplay}</h1>
-      </EuiTitle>
+      {!isLoading && (
+        <EuiTitle aria-label={labels.ariaLabel} size="xxs">
+          <h1>{title || labels.newConversationDisplay}</h1>
+        </EuiTitle>
+      )}
     </EuiPageHeaderSection>
   );
 };
