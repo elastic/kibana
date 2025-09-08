@@ -19,6 +19,21 @@ import type { Type } from './type';
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 /**
+ * General type that encompases all possible schema types
+ *
+ *  - simple types
+ *  - object types
+ *  - Reference types
+ *  - types returned from a function
+ *  - type with and without defaults
+ */
+type GeneralSchemaType =
+  | TypeOrLazyType<any, never>
+  | TypeOrLazyType<any, any>
+  | ObjectTypeOrLazyType<any, never>
+  | ObjectTypeOrLazyType<any, any>;
+
+/**
  * Resulting schema type.
  *
  * @alias `TypeOfOutput`
@@ -29,7 +44,7 @@ type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
  * const MySchemaType = TypeOf<typeof mySchema>;
  * ```
  */
-export type TypeOf<RT extends TypeOrLazyType> = TypeOfOutput<RT>;
+export type TypeOf<RT extends GeneralSchemaType> = TypeOfOutput<RT>;
 
 /**
  * Output type of schema after all defaults are applied.
@@ -41,7 +56,7 @@ export type TypeOf<RT extends TypeOrLazyType> = TypeOfOutput<RT>;
  * const MySchemaType = TypeOfOutput<typeof mySchema>;
  * ```
  */
-export type TypeOfOutput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> = Simplify<
+export type TypeOfOutput<RT extends GeneralSchemaType> = Simplify<
   RT extends ObjectTypeOrLazyType<infer V, infer D>
     ? ObjectTypeOutput<V>
     : RT extends Type<infer V, infer D>
@@ -82,7 +97,7 @@ type OptionalOutputProperties<Base extends ObjectProps<Props>> = Pick<
  * const MySchemaType = TypeOfInput<typeof mySchema>;
  * ```
  */
-export type TypeOfInput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> = Simplify<
+export type TypeOfInput<RT extends GeneralSchemaType> = Simplify<
   RT extends ObjectTypeOrLazyType<infer V, infer D>
     ? [D] extends [never]
       ? ObjectTypeInput<V>
