@@ -141,8 +141,6 @@ export const labelNodeDataSchema = schema.allOf([
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
-    isOrigin: schema.maybe(schema.boolean()),
-    isOriginAlert: schema.maybe(schema.boolean()),
   }),
 ]);
 
