@@ -70,6 +70,7 @@ import {
   StreamType,
   Lazy,
 } from './src/types';
+import type { ByteSizeValueType } from './src/types/byte_size_type';
 
 export type {
   AnyType,
@@ -132,9 +133,9 @@ function number<D extends DefaultValue<number> = never>(
   return new NumberType(options);
 }
 
-function byteSize<D extends ByteSizeValue = never>(
+function byteSize<D extends ByteSizeValueType = never>(
   options?: ByteSizeOptions<D>
-): Type<ByteSizeValue, D> {
+): Type<ByteSizeValue, [D] extends [never] ? never : ByteSizeValue> {
   return new ByteSizeType(options);
 }
 

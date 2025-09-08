@@ -17,6 +17,9 @@ import { Type } from './type';
 // we need to special-case defaultValue as we want to handle string inputs too
 export type ByteSizeValueType = ByteSizeValue | string | number;
 
+/**
+ * Does not support function or `Reference` as `defaultValue`
+ */
 export interface ByteSizeOptions<D extends ByteSizeValueType> {
   defaultValue?: D;
   validate?: (value: ByteSizeValue) => string | void;
@@ -24,7 +27,10 @@ export interface ByteSizeOptions<D extends ByteSizeValueType> {
   max?: ByteSizeValue | string | number;
 }
 
-export class ByteSizeType<D extends ByteSizeValueType> extends Type<ByteSizeValue, [D] extends [never] ? never : ByteSizeValue> {
+export class ByteSizeType<D extends ByteSizeValueType> extends Type<
+  ByteSizeValue,
+  [D] extends [never] ? never : ByteSizeValue
+> {
   constructor(options: ByteSizeOptions<D> = {}) {
     let schema = internals.bytes();
 
@@ -37,7 +43,9 @@ export class ByteSizeType<D extends ByteSizeValueType> extends Type<ByteSizeValu
     }
 
     super(schema, {
-      defaultValue: ensureByteSizeValue(options.defaultValue) as [D] extends [never] ? never : ByteSizeValue,
+      defaultValue: ensureByteSizeValue(options.defaultValue) as [D] extends [never]
+        ? never
+        : ByteSizeValue,
       validate: options.validate,
     });
   }
