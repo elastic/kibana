@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { asyncMap } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardAttributes, DashboardPanel } from '../../../server';
@@ -44,7 +46,11 @@ async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
   if (!transforms?.transformOut) return panel;
 
   try {
-    const transformedPanelConfig = transforms.transformOut(panel.panelConfig, references);
+    const transformedPanelConfig = transforms.transformOut(
+      panel.gridData.i,
+      panel.panelConfig,
+      references
+    );
     return {
       ...panel,
       panelConfig: transformedPanelConfig,

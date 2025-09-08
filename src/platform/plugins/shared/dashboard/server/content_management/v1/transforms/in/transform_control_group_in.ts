@@ -29,7 +29,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       let transformedControlState = controlState as Partial<ControlsGroupState['controls'][number]>;
       try {
         if (transforms?.transformIn) {
-          const transformed = transforms.transformIn(controlState);
+          const transformed = transforms.transformIn(id, controlState);
           transformedControlState = transformed.state;
           references = [...references, ...(transformed.references ?? [])];
         }

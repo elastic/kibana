@@ -11,9 +11,14 @@ import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, WithRequiredProperty } from '@kbn/utility-types';
 
 import { embeddableService, logger } from '../../../../kibana_services';
+
+type ControlWithRequiredId = WithRequiredProperty<
+  ControlsGroupState['controls'][number] & { order?: number; explicitInput: object },
+  'id'
+>;
 
 /**
  * Transform functions for serialized controls state.
@@ -30,13 +35,13 @@ export const transformControlsState: (
   return injectControlReferences(state, references);
 };
 
-export function transformControlObjectToArray(controls: Record<string, SerializableRecord>) {
+export function transformControlObjectToArray(
+  controls: Record<string, SerializableRecord>
+): Array<SerializableRecord> {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
-export function transformControlProperties(
-  controls: Array<SerializableRecord & { order?: number }>
-): ControlsGroupState['controls'] {
+export function transformControlProperties(controls: Array<ControlWithRequiredId>) {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
@@ -47,11 +52,11 @@ export function transformControlProperties(
         width,
         ...(explicitInput as SerializableRecord),
       };
-    }) as ControlsGroupState['controls'];
+    });
 }
 
 function injectControlReferences(
-  controls: ControlsGroupState['controls'],
+  controls: Array<ControlWithRequiredId>,
   references: Reference[]
 ): ControlsGroupState['controls'] {
   const transformedControls: ControlsGroupState['controls'] = [];
@@ -61,7 +66,11 @@ function injectControlReferences(
     try {
       if (transforms?.transformOut) {
         transformedControls.push(
-          transforms.transformOut(control, references) as ControlsGroupState['controls'][number]
+          transforms.transformOut(
+            control.id,
+            control,
+            references
+          ) as ControlsGroupState['controls'][number]
         );
       } else {
         transformedControls.push(control);

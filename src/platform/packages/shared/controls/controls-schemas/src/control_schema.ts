@@ -12,7 +12,6 @@ import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
-    id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
     title: schema.maybe(
       schema.string({ meta: { description: 'A human-readable title for the control' } })
     ),

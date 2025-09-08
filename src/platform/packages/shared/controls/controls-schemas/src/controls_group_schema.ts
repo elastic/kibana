@@ -33,6 +33,7 @@ const controlWidthSchema = schema.oneOf(
 );
 
 const stickyControlSchema = schema.object({
+  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: schema.maybe(controlWidthSchema),
   grow: schema.maybe(
     schema.boolean({
@@ -40,23 +41,26 @@ const stickyControlSchema = schema.object({
       meta: { description: 'Expand width of the control panel to fit available space.' },
     })
   ),
-  enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
 export const controlsGroupSchema = schema.object({
   controls: schema.arrayOf(
     // order will be determined by the array
     schema.oneOf([
-      schema.allOf([
-        schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-        optionsListControlSchema,
-        stickyControlSchema,
-      ]),
-      schema.allOf([
-        schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
-        rangeSliderControlSchema,
-        stickyControlSchema,
-      ]),
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
+          optionsListControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
+          rangeSliderControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }),
     ]),
     {
       defaultValue: [],

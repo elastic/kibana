@@ -27,7 +27,6 @@ import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...titleComparators,
-  id: 'referenceEquality', // TODO: Remove this?
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   useGlobalFilters: (a, b) => a ?? true === b ?? true,
@@ -68,7 +67,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   >(
     state,
     {
-      id: controlId,
       dataViewId: '',
       fieldName: '',
       useGlobalFilters: true,
