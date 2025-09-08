@@ -7,6 +7,6 @@
 
 import { isEqual } from 'lodash';
 
-export const areFieldsEqual = (a: unknown | undefined, b: unknown | undefined): boolean => {
+export const areFieldsEqual = (a: unknown, b: unknown): boolean => {
   return isEqual(a, b);
 };

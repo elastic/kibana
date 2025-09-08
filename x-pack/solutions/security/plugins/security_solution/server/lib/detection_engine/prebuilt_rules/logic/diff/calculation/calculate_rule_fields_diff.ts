@@ -28,27 +28,35 @@ import type {
   RuleDiffOutcome,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff_outcome';
 
+/**
+ * Determines the diff between two rule response objects and returns a list of every rule field
+ */
 export const calculateRuleFieldsDiff = ({
-  baseRule,
-  currentRule,
+  ruleA,
+  ruleB,
 }: {
-  baseRule: RuleResponse;
-  currentRule: RuleResponse;
+  ruleA: RuleResponse;
+  ruleB: RuleResponse;
 }): RuleDiffOutcome<TwoWayDiffRule> => {
-  const normalizedBaseRule = normalizeRuleResponse(baseRule);
-  const normalizedCurrentRule = normalizeRuleResponse(currentRule);
+  const normalizedRuleA = normalizeRuleResponse(ruleA);
+  const normalizedRuleB = normalizeRuleResponse(ruleB);
 
   const fieldsDiff: Partial<RuleDiffOutcome<TwoWayDiffRule>> = {};
 
-  const keys = new Set([...Object.keys(normalizedBaseRule), ...Object.keys(normalizedCurrentRule)]);
+  const keys = new Set([...Object.keys(normalizedRuleA), ...Object.keys(normalizedRuleB)]);
   for (const key of keys) {
     const fieldKey = key as keyof TwoWayDiffRule;
-    const baseValue = normalizedBaseRule[fieldKey];
-    const currentValue = normalizedCurrentRule[fieldKey];
-    const comparator = allFieldsComparators[fieldKey] as (a: unknown, b: unknown) => boolean;
+    const valueA = normalizedRuleA[fieldKey];
+    const valueB = normalizedRuleB[fieldKey];
+
+    const comparator = allFieldsComparators[fieldKey] as
+      | ((a: unknown, b: unknown) => boolean)
+      | undefined;
+
+    // We only compare fields if there is a comparator explicitly defined for the field in the lists below
     if (comparator) {
       fieldsDiff[fieldKey] = {
-        is_equal: comparator(baseValue, currentValue),
+        is_equal: comparator(valueA, valueB),
       };
     }
   }

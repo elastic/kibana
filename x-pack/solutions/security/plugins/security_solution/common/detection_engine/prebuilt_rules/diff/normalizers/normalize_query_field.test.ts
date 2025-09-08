@@ -8,9 +8,27 @@
 import { normalizeQueryField } from './normalize_query_field';
 
 describe('normalizeQueryField', () => {
-  it('trims the query field', () => {
-    const normalizedQueryField = normalizeQueryField('\n\tquery where true\n\n');
+  it('trims new lines from the query field', () => {
+    const normalizedQueryField = normalizeQueryField('\nquery where true\n\n');
 
     expect(normalizedQueryField).toEqual('query where true');
+  });
+
+  it('trims tabs from the query field', () => {
+    const normalizedQueryField = normalizeQueryField('\tquery where true\t');
+
+    expect(normalizedQueryField).toEqual('query where true');
+  });
+
+  it('trims whitespace from the query field', () => {
+    const normalizedQueryField = normalizeQueryField('  query where true   ');
+
+    expect(normalizedQueryField).toEqual('query where true');
+  });
+
+  it('defaults to empty string when query is undefined', () => {
+    const normalizedQueryField = normalizeQueryField(undefined);
+
+    expect(normalizedQueryField).toEqual('');
   });
 });

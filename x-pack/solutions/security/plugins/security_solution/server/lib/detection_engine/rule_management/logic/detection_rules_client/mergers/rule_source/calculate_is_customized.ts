@@ -59,6 +59,6 @@ export function calculateIsCustomized({
  * @returns true if all rule fields are equal, false otherwise
  */
 function areRulesEqual(ruleA: RuleResponse, ruleB: RuleResponse) {
-  const fieldsDiff = calculateRuleFieldsDiff({ baseRule: ruleA, currentRule: ruleB });
+  const fieldsDiff = calculateRuleFieldsDiff({ ruleA, ruleB });
   return Object.values(fieldsDiff).every((field) => field.is_equal === true);
 }

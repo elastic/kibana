@@ -17,7 +17,7 @@ export const normalizeFilterArray = (filters: RuleFilterArray | undefined): Rule
     meta: filter.meta
       ? {
           negate: filter.meta.negate,
-          disabled: filter.meta.disabled !== undefined ? filter.meta.disabled : false,
+          disabled: filter.meta.disabled ?? false,
           params: filter.meta.params,
           relation: 'relation' in filter.meta ? filter.meta?.relation : undefined,
           type: filter.meta.type ?? 'custom',

@@ -30,6 +30,32 @@ const mockFilter: Filter = {
 };
 
 describe('normalizeFilterArray', () => {
+  it('returns an empty array when filters field is undefined', () => {
+    const normalizedFilter = normalizeFilterArray(undefined);
+
+    expect(normalizedFilter).toEqual([]);
+  });
+
+  it('returns an empty array when filters field is empty array', () => {
+    const normalizedFilter = normalizeFilterArray([]);
+
+    expect(normalizedFilter).toEqual([]);
+  });
+
+  it('omits the meta field when not present in the filter object', () => {
+    const normalizedFilter = normalizeFilterArray([{ ...mockFilter, meta: undefined }]);
+
+    expect(normalizedFilter).toEqual([
+      {
+        query: {
+          term: {
+            field: 'value',
+          },
+        },
+      },
+    ]);
+  });
+
   it('normalizes filters[].query when all fields present', () => {
     const normalizedFilter = normalizeFilterArray([mockFilter]);
 
@@ -45,13 +71,11 @@ describe('normalizeFilterArray', () => {
   });
 
   it('normalizes filters[].query when query object is missing', () => {
-    const normalizedFilter = normalizeFilterArray([{ ...mockFilter, query: undefined }]);
+    const normalizedFilter = normalizeFilterArray([
+      { ...mockFilter, query: undefined },
+    ]) as Filter[];
 
-    expect(normalizedFilter).not.toMatchObject([
-      {
-        query: expect.anything(),
-      },
-    ]);
+    expect(normalizedFilter[0].query).toBeUndefined();
   });
 
   it.each([
@@ -61,6 +85,11 @@ describe('normalizeFilterArray', () => {
       expectedFilterMeta: {
         negate: false,
         disabled: false,
+        type: 'phrase',
+        key: 'test',
+        params: {
+          query: 'value',
+        },
       },
     },
     {
@@ -69,6 +98,11 @@ describe('normalizeFilterArray', () => {
       expectedFilterMeta: {
         negate: false,
         disabled: false,
+        type: 'phrase',
+        key: 'test',
+        params: {
+          query: 'value',
+        },
       },
     },
     {
@@ -76,6 +110,11 @@ describe('normalizeFilterArray', () => {
       filter: { ...mockFilter, meta: { ...mockFilter.meta, negate: undefined } },
       expectedFilterMeta: {
         disabled: false,
+        type: 'phrase',
+        key: 'test',
+        params: {
+          query: 'value',
+        },
       },
     },
     {
@@ -84,28 +123,20 @@ describe('normalizeFilterArray', () => {
       expectedFilterMeta: {
         negate: false,
         disabled: false,
+        type: 'phrase',
+        key: 'test',
+        params: {
+          query: 'value',
+        },
       },
     },
   ])('normalizes filters[].meta $caseName', ({ filter, expectedFilterMeta }) => {
     const normalizedFilter = normalizeFilterArray([filter]);
 
-    expect(normalizedFilter).toMatchObject([
-      {
+    expect(normalizedFilter).toEqual([
+      expect.objectContaining({
         meta: expectedFilterMeta,
-      },
-    ]);
-  });
-
-  it('normalizes filters[].meta when query object is missing', () => {
-    const normalizedFilter = normalizeFilterArray([{ ...mockFilter, query: undefined }]);
-
-    expect(normalizedFilter).toMatchObject([
-      {
-        meta: {
-          negate: false,
-          disabled: false,
-        },
-      },
+      }),
     ]);
   });
 });

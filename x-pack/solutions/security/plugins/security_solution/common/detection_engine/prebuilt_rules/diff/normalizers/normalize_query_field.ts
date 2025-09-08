@@ -7,6 +7,6 @@
 
 import type { RuleQuery } from '../../../../api/detection_engine/model/rule_schema';
 
-export const normalizeQueryField = (query: RuleQuery) => {
-  return query?.trim();
+export const normalizeQueryField = (query: RuleQuery | undefined): RuleQuery => {
+  return query?.trim() ?? '';
 };

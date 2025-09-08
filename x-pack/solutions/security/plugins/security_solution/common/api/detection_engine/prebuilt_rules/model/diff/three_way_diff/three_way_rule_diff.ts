@@ -54,7 +54,7 @@ export type ThreeWayRuleFieldsDiff = CommonThreeWayFieldsDiff &
     | NewTermsThreeWayFieldsDiff
   );
 
-interface BaseRuleDiff {
+interface ThreeWayBaseRuleDiff {
   num_fields_with_updates: number;
   num_fields_with_conflicts: number;
   num_fields_with_non_solvable_conflicts: number;
@@ -65,7 +65,7 @@ interface BaseRuleDiff {
  * This diff can be useful for internal server-side calculations or debugging.
  * Note that this is a pretty large object so returning it from the API might be undesirable.
  */
-export interface FullThreeWayRuleDiff extends BaseRuleDiff {
+export interface FullThreeWayRuleDiff extends ThreeWayBaseRuleDiff {
   fields: ThreeWayRuleFieldsDiff;
 }
 
@@ -73,7 +73,7 @@ export interface FullThreeWayRuleDiff extends BaseRuleDiff {
  * Partial rule diff contains diffs only for those rule fields that have some changes to them.
  * This diff can be useful for returning info from REST API endpoints because its size is tolerable.
  */
-export interface PartialThreeWayRuleDiff extends BaseRuleDiff {
+export interface PartialThreeWayRuleDiff extends ThreeWayBaseRuleDiff {
   fields: Partial<ThreeWayRuleFieldsDiff>;
 }
 

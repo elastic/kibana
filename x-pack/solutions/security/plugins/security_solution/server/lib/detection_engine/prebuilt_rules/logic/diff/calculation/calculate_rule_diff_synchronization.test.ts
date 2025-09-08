@@ -59,26 +59,42 @@ const NEW_TERMS_PREBUILT_RULE_RESPONSE = convertPrebuiltRuleAssetToRuleResponse(
   NEW_TERMS_PREBUILT_RULE_ASSET
 );
 
-describe('synchronizing rule diff calculations', () => {
+/**
+ * This test suite's purpose is to ensure uniformity between the two different types of rule
+ * diff calculation we utilize in the prebuilt rule customization code. We have a two-way comparison
+ * (calculateRuleFieldsDiff) and a three-way comparison (calculateThreeWayRuleFieldsDiff) that share
+ * underlying comparison logic, but perform calculate their results from different rule structures.
+ *
+ * The two-way diff uses the `RuleResponse` type for its rule comparison schema while the three-way
+ * diff uses the `DiffableRule` schema. While the results for each of these diffing calculations have
+ * differences in return structure and schema, the determination for if a field is customized should
+ * be the same across both functions.
+ *
+ * In these tests, we test for every field we diff on in `RuleResponse` to determine if both our two-
+ * way diff and our three-way diff functions return the same result and don't diverge in logical
+ * comparison. We do this by explicitly defining a base rule field and a modified rule field, and then
+ * calculating diff objects with both diff methods and ensuring both comparisons give equatable results.
+ */
+describe('synchronizing 2-way and 3-way rule diff calculations', () => {
   const testDiffCalculationEquality = ({
     fieldName,
     diffableFieldName,
     baseRule,
-    updatedRule,
+    modifiedRule,
   }: {
     fieldName: string;
     diffableFieldName: string;
     baseRule: RuleResponse;
-    updatedRule: RuleResponse;
+    modifiedRule: RuleResponse;
   }) => {
     const twoWayDiff = calculateRuleFieldsDiff({
-      baseRule,
-      currentRule: updatedRule,
+      ruleA: baseRule,
+      ruleB: modifiedRule,
     });
     const threeWayDiff = calculateThreeWayRuleFieldsDiff({
       base_version: MissingVersion,
       current_version: convertRuleToDiffable(baseRule),
-      target_version: convertRuleToDiffable(updatedRule),
+      target_version: convertRuleToDiffable(modifiedRule),
     });
 
     expect(twoWayDiff[fieldName as keyof TwoWayDiffRule]?.is_equal).toEqual(false);
@@ -89,8 +105,8 @@ describe('synchronizing rule diff calculations', () => {
 
   it('unmodified rule objects', () => {
     const twoWayDiff = calculateRuleFieldsDiff({
-      baseRule: CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
-      currentRule: CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+      ruleA: CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+      ruleB: CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
     });
     const threeWayDiff = calculateThreeWayRuleFieldsDiff({
       base_version: MissingVersion,
@@ -108,7 +124,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         name: 'base name',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         name: 'updated name',
       };
@@ -117,7 +133,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'name',
         diffableFieldName: 'name',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -126,7 +142,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         version: 1,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         version: 2,
       };
@@ -135,7 +151,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'version',
         diffableFieldName: 'version',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -144,7 +160,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         tags: ['test one'],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         tags: ['test one', 'test two'],
       };
@@ -153,7 +169,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'tags',
         diffableFieldName: 'tags',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -162,7 +178,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         description: 'test description',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         description: 'updated test description',
       };
@@ -171,7 +187,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'description',
         diffableFieldName: 'description',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -180,7 +196,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         severity: SeverityEnum.low,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         severity: SeverityEnum.high,
       };
@@ -189,7 +205,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'severity',
         diffableFieldName: 'severity',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -205,7 +221,7 @@ describe('synchronizing rule diff calculations', () => {
           },
         ],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         severity_mapping: [
           {
@@ -221,7 +237,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'severity_mapping',
         diffableFieldName: 'severity_mapping',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -230,7 +246,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         risk_score: 30,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         risk_score: 40,
       };
@@ -239,7 +255,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'risk_score',
         diffableFieldName: 'risk_score',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -248,7 +264,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         risk_score_mapping: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         risk_score_mapping: [
           { field: 'event.risk_score', operator: 'equals' as const, value: 'updated value' },
@@ -259,7 +275,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'risk_score_mapping',
         diffableFieldName: 'risk_score_mapping',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -268,7 +284,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         references: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         references: ['http://test.test'],
       };
@@ -277,7 +293,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'references',
         diffableFieldName: 'references',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -286,7 +302,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         false_positives: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         false_positives: ['test false positive'],
       };
@@ -295,7 +311,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'false_positives',
         diffableFieldName: 'false_positives',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -304,7 +320,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         threat: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         threat: [
           {
@@ -322,7 +338,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat',
         diffableFieldName: 'threat',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -331,7 +347,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         note: '## base markdown',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         note: '## updated markdown',
       };
@@ -340,7 +356,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'note',
         diffableFieldName: 'note',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -349,7 +365,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         setup: '## base markdown',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         setup: '## updated markdown',
       };
@@ -358,7 +374,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'setup',
         diffableFieldName: 'setup',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -367,7 +383,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         related_integrations: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         related_integrations: [{ package: 'package-test', version: '^1.2.3' }],
       };
@@ -376,7 +392,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'related_integrations',
         diffableFieldName: 'related_integrations',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -385,7 +401,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         required_fields: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
       };
@@ -394,7 +410,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'required_fields',
         diffableFieldName: 'required_fields',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -403,7 +419,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         max_signals: 100,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         max_signals: 50,
       };
@@ -412,7 +428,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'max_signals',
         diffableFieldName: 'max_signals',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -421,7 +437,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         investigation_fields: { field_names: ['foo', 'bar'] },
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         investigation_fields: { field_names: ['blob', 'boop'] },
       };
@@ -430,7 +446,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'investigation_fields',
         diffableFieldName: 'investigation_fields',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -439,7 +455,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         rule_name_override: 'field.name',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         rule_name_override: 'field.updated.name',
       };
@@ -448,7 +464,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'rule_name_override',
         diffableFieldName: 'rule_name_override',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -457,7 +473,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         timestamp_override: 'field.name',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         timestamp_override: 'field.updated.name',
       };
@@ -466,7 +482,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'timestamp_override',
         diffableFieldName: 'timestamp_override',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -482,7 +498,7 @@ describe('synchronizing rule diff calculations', () => {
         timestamp_override: 'field.name',
         timestamp_override_fallback_disabled: false,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         timestamp_override: 'field.name',
         timestamp_override_fallback_disabled: true,
@@ -492,7 +508,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'timestamp_override_fallback_disabled',
         diffableFieldName: 'timestamp_override',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -501,7 +517,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         timeline_id: 'base-timeline-id',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         timeline_id: 'updated-timeline-id',
       };
@@ -510,7 +526,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'timeline_id',
         diffableFieldName: 'timeline_template',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -526,7 +542,7 @@ describe('synchronizing rule diff calculations', () => {
         timeline_id: 'timeline-id-123',
         timeline_title: 'base timeline title',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         timeline_id: 'timeline-id-123',
         timeline_title: 'updated timeline title',
@@ -536,7 +552,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'timeline_title',
         diffableFieldName: 'timeline_template',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -545,7 +561,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         building_block_type: 'base type',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         building_block_type: 'updated type',
       };
@@ -554,7 +570,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'building_block_type',
         diffableFieldName: 'building_block',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -563,7 +579,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         from: 'now-10m',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         from: 'now-5m',
       };
@@ -572,7 +588,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'from',
         diffableFieldName: 'rule_schedule',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -581,7 +597,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         to: 'now',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         to: 'now-5m',
       };
@@ -590,7 +606,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'to',
         diffableFieldName: 'rule_schedule',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -599,7 +615,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         interval: '5m',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         interval: '10m',
       };
@@ -608,7 +624,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'interval',
         diffableFieldName: 'rule_schedule',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -617,7 +633,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'type',
         diffableFieldName: 'type',
         baseRule: CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
-        updatedRule: EQL_PREBUILT_RULE_RESPONSE,
+        modifiedRule: EQL_PREBUILT_RULE_RESPONSE,
       });
     });
   });
@@ -628,7 +644,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         query: 'event.code: "test"',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         query: 'event.code: "updated test"',
       };
@@ -637,7 +653,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'query',
         diffableFieldName: 'kql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -647,7 +663,7 @@ describe('synchronizing rule diff calculations', () => {
         language: 'lucene' as const,
       } as RuleResponse;
 
-      const UPDATED_PREBUILT_RULE_RESPONSE: RuleResponse = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE: RuleResponse = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         language: 'kuery' as const,
       } as RuleResponse;
@@ -656,7 +672,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'language',
         diffableFieldName: 'kql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -665,7 +681,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         filters: [],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         filters: [
           {
@@ -691,7 +707,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'filters',
         diffableFieldName: 'kql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -700,7 +716,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         data_view_id: 'test-data-view',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         data_view_id: 'updated-test-data-view',
       };
@@ -709,7 +725,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'data_view_id',
         diffableFieldName: 'data_source',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -718,7 +734,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         index: ['pattern-1', 'pattern-2'],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         index: ['pattern-1', 'pattern-2', 'pattern-3'],
       };
@@ -727,7 +743,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'index',
         diffableFieldName: 'data_source',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -736,7 +752,7 @@ describe('synchronizing rule diff calculations', () => {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         alert_suppression: undefined,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
         alert_suppression: {
           group_by: ['host.name'],
@@ -749,7 +765,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'alert_suppression',
         diffableFieldName: 'alert_suppression',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
@@ -760,7 +776,7 @@ describe('synchronizing rule diff calculations', () => {
         ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
         saved_id: 'saved-id',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
         saved_id: 'updated-saved-id',
       };
@@ -769,7 +785,65 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'saved_id',
         diffableFieldName: 'kql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"data_view_id" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'test-data-view',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'updated-test-data-view',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'data_view_id',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"index" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2'],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2', 'pattern-3'],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'index',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
+        alert_suppression: undefined,
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...SAVED_QUERY_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
@@ -780,7 +854,7 @@ describe('synchronizing rule diff calculations', () => {
         ...EQL_PREBUILT_RULE_RESPONSE,
         query: 'process where true',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...EQL_PREBUILT_RULE_RESPONSE,
         query: 'process where false',
       };
@@ -789,7 +863,42 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'query',
         diffableFieldName: 'eql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"filters" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        filters: [],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        filters: [
+          {
+            meta: {
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'test',
+              params: {
+                query: 'value',
+              },
+            },
+            query: {
+              term: {
+                field: 'value',
+              },
+            },
+          },
+        ],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'filters',
+        diffableFieldName: 'eql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -798,7 +907,7 @@ describe('synchronizing rule diff calculations', () => {
         ...EQL_PREBUILT_RULE_RESPONSE,
         event_category_override: 'host.name',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...EQL_PREBUILT_RULE_RESPONSE,
         event_category_override: 'host.type',
       };
@@ -807,7 +916,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'event_category_override',
         diffableFieldName: 'eql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -816,7 +925,7 @@ describe('synchronizing rule diff calculations', () => {
         ...EQL_PREBUILT_RULE_RESPONSE,
         tiebreaker_field: 'host.name',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...EQL_PREBUILT_RULE_RESPONSE,
         tiebreaker_field: 'host.type',
       };
@@ -825,7 +934,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'tiebreaker_field',
         diffableFieldName: 'eql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -834,7 +943,7 @@ describe('synchronizing rule diff calculations', () => {
         ...EQL_PREBUILT_RULE_RESPONSE,
         timestamp_field: 'event.ingested',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...EQL_PREBUILT_RULE_RESPONSE,
         timestamp_field: 'event.occurance',
       };
@@ -843,7 +952,65 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'timestamp_field',
         diffableFieldName: 'eql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"data_view_id" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'test-data-view',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'updated-test-data-view',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'data_view_id',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"index" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2'],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2', 'pattern-3'],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'index',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        alert_suppression: undefined,
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...EQL_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
@@ -854,7 +1021,7 @@ describe('synchronizing rule diff calculations', () => {
         ...ESQL_PREBUILT_RULE_RESPONSE,
         query: 'GET event IN *',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...ESQL_PREBUILT_RULE_RESPONSE,
         query: 'GET host IN *',
       };
@@ -863,7 +1030,29 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'query',
         diffableFieldName: 'esql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...ESQL_PREBUILT_RULE_RESPONSE,
+        alert_suppression: undefined,
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...ESQL_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
@@ -874,7 +1063,7 @@ describe('synchronizing rule diff calculations', () => {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         query: 'event.code: "test"',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         query: 'event.code: "updated test"',
       };
@@ -883,7 +1072,61 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'query',
         diffableFieldName: 'kql_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"language" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        language: 'lucene' as const,
+      } as RuleResponse;
+
+      const MODIFIED_PREBUILT_RULE_RESPONSE: RuleResponse = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        language: 'kuery' as const,
+      } as RuleResponse;
+
+      testDiffCalculationEquality({
+        fieldName: 'language',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"filters" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        filters: [],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        filters: [
+          {
+            meta: {
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'test',
+              params: {
+                query: 'value',
+              },
+            },
+            query: {
+              term: {
+                field: 'value',
+              },
+            },
+          },
+        ],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'filters',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -892,7 +1135,7 @@ describe('synchronizing rule diff calculations', () => {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_query: 'event.code: "test"',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_query: 'event.code: "updated test"',
       };
@@ -901,7 +1144,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat_query',
         diffableFieldName: 'threat_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -927,7 +1170,7 @@ describe('synchronizing rule diff calculations', () => {
           },
         ],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_filters: [],
       };
@@ -936,7 +1179,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat_filters',
         diffableFieldName: 'threat_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -945,7 +1188,7 @@ describe('synchronizing rule diff calculations', () => {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_language: 'kuery' as const,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_language: 'lucene' as const,
       };
@@ -954,7 +1197,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat_language',
         diffableFieldName: 'threat_query',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -963,7 +1206,7 @@ describe('synchronizing rule diff calculations', () => {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_index: ['test-index-1'],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_index: ['test-index-2'],
       };
@@ -972,7 +1215,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat_index',
         diffableFieldName: 'threat_index',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -981,7 +1224,7 @@ describe('synchronizing rule diff calculations', () => {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_indicator_path: 'C:over/there.exe',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_indicator_path: 'C:over/here.exe',
       };
@@ -990,7 +1233,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat_indicator_path',
         diffableFieldName: 'threat_indicator_path',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -1009,7 +1252,7 @@ describe('synchronizing rule diff calculations', () => {
           },
         ],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
         threat_mapping: [
           {
@@ -1028,12 +1271,142 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threat_mapping',
         diffableFieldName: 'threat_mapping',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"data_view_id" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'test-data-view',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'updated-test-data-view',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'data_view_id',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"index" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2'],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2', 'pattern-3'],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'index',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        alert_suppression: undefined,
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THREAT_MATCH_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
 
   describe('threshold rule fields', () => {
+    it('"query" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        query: 'event.code: "test"',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        query: 'event.code: "updated test"',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'query',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"language" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        language: 'lucene' as const,
+      } as RuleResponse;
+
+      const MODIFIED_PREBUILT_RULE_RESPONSE: RuleResponse = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        language: 'kuery' as const,
+      } as RuleResponse;
+
+      testDiffCalculationEquality({
+        fieldName: 'language',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"filters" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        filters: [],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        filters: [
+          {
+            meta: {
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'test',
+              params: {
+                query: 'value',
+              },
+            },
+            query: {
+              term: {
+                field: 'value',
+              },
+            },
+          },
+        ],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'filters',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
     it('"threshold" field', () => {
       const BASE_PREBUILT_RULE_RESPONSE = {
         ...THRESHOLD_PREBUILT_RULE_RESPONSE,
@@ -1043,7 +1416,7 @@ describe('synchronizing rule diff calculations', () => {
           cardinality: [{ field: 'host.id', value: 2 }],
         },
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...THRESHOLD_PREBUILT_RULE_RESPONSE,
         threshold: {
           field: ['host.name'],
@@ -1056,7 +1429,69 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'threshold',
         diffableFieldName: 'threshold',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"data_view_id" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'test-data-view',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'updated-test-data-view',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'data_view_id',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"index" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2'],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2', 'pattern-3'],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'index',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 1, unit: AlertSuppressionDurationUnitEnum.h },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...THRESHOLD_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
@@ -1067,7 +1502,7 @@ describe('synchronizing rule diff calculations', () => {
         ...MACHINE_LEARNING_PREBUILT_RULE_RESPONSE,
         machine_learning_job_id: 'base-ml-test-id',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...MACHINE_LEARNING_PREBUILT_RULE_RESPONSE,
         machine_learning_job_id: 'updated-ml-test-id',
       };
@@ -1076,7 +1511,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'machine_learning_job_id',
         diffableFieldName: 'machine_learning_job_id',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -1085,7 +1520,7 @@ describe('synchronizing rule diff calculations', () => {
         ...MACHINE_LEARNING_PREBUILT_RULE_RESPONSE,
         anomaly_threshold: 20,
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...MACHINE_LEARNING_PREBUILT_RULE_RESPONSE,
         anomaly_threshold: 45,
       };
@@ -1094,18 +1529,116 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'anomaly_threshold',
         diffableFieldName: 'anomaly_threshold',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...MACHINE_LEARNING_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 10, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...MACHINE_LEARNING_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
   });
 
   describe('new terms fields', () => {
-    it('"machine_learning_job_id" field', () => {
+    it('"query" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        query: 'event.code: "test"',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        query: 'event.code: "updated test"',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'query',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"language" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        language: 'lucene' as const,
+      } as RuleResponse;
+
+      const MODIFIED_PREBUILT_RULE_RESPONSE: RuleResponse = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        language: 'kuery' as const,
+      } as RuleResponse;
+
+      testDiffCalculationEquality({
+        fieldName: 'language',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"filters" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        filters: [],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        filters: [
+          {
+            meta: {
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'test',
+              params: {
+                query: 'value',
+              },
+            },
+            query: {
+              term: {
+                field: 'value',
+              },
+            },
+          },
+        ],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'filters',
+        diffableFieldName: 'kql_query',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"new_terms_fields" field', () => {
       const BASE_PREBUILT_RULE_RESPONSE = {
         ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
         new_terms_fields: ['host.name'],
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
         new_terms_fields: ['host.name', 'event.action'],
       };
@@ -1114,7 +1647,7 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'new_terms_fields',
         diffableFieldName: 'new_terms_fields',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
     });
 
@@ -1123,7 +1656,7 @@ describe('synchronizing rule diff calculations', () => {
         ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
         history_window_start: 'now-7d',
       };
-      const UPDATED_PREBUILT_RULE_RESPONSE = {
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
         ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
         history_window_start: 'now-21d',
       };
@@ -1132,8 +1665,201 @@ describe('synchronizing rule diff calculations', () => {
         fieldName: 'history_window_start',
         diffableFieldName: 'history_window_start',
         baseRule: BASE_PREBUILT_RULE_RESPONSE,
-        updatedRule: UPDATED_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
       });
+    });
+
+    it('"data_view_id" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'test-data-view',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        data_view_id: 'updated-test-data-view',
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'data_view_id',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"index" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2'],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        index: ['pattern-1', 'pattern-2', 'pattern-3'],
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'index',
+        diffableFieldName: 'data_source',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+
+    it('"alert_suppression" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['event.code'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...NEW_TERMS_PREBUILT_RULE_RESPONSE,
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: AlertSuppressionDurationUnitEnum.m },
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+        },
+      };
+
+      testDiffCalculationEquality({
+        fieldName: 'alert_suppression',
+        diffableFieldName: 'alert_suppression',
+        baseRule: BASE_PREBUILT_RULE_RESPONSE,
+        modifiedRule: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+    });
+  });
+
+  describe('non-customizable fields', () => {
+    it('"actions" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        actions: [],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        actions: [
+          {
+            id: 'id',
+            group: 'group',
+            params: {},
+            action_type_id: 'action_type_id',
+          },
+        ],
+      };
+      const twoWayDiff = calculateRuleFieldsDiff({
+        ruleA: BASE_PREBUILT_RULE_RESPONSE,
+        ruleB: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+      const threeWayDiff = calculateThreeWayRuleFieldsDiff({
+        base_version: MissingVersion,
+        current_version: convertRuleToDiffable(BASE_PREBUILT_RULE_RESPONSE),
+        target_version: convertRuleToDiffable(MODIFIED_PREBUILT_RULE_RESPONSE),
+      });
+
+      expect(twoWayDiff).not.toHaveProperty('actions');
+      expect(threeWayDiff).not.toHaveProperty('actions');
+    });
+
+    it('"exceptions_list" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        exceptions_list: [],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        exceptions_list: [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            namespace_type: 'agnostic' as const,
+            type: 'endpoint' as const,
+          },
+        ],
+      };
+      const twoWayDiff = calculateRuleFieldsDiff({
+        ruleA: BASE_PREBUILT_RULE_RESPONSE,
+        ruleB: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+      const threeWayDiff = calculateThreeWayRuleFieldsDiff({
+        base_version: MissingVersion,
+        current_version: convertRuleToDiffable(BASE_PREBUILT_RULE_RESPONSE),
+        target_version: convertRuleToDiffable(MODIFIED_PREBUILT_RULE_RESPONSE),
+      });
+
+      expect(twoWayDiff).not.toHaveProperty('exceptions_list');
+      expect(threeWayDiff).not.toHaveProperty('exceptions_list');
+    });
+
+    it('"enabled" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        enabled: true,
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        enabled: false,
+      };
+      const twoWayDiff = calculateRuleFieldsDiff({
+        ruleA: BASE_PREBUILT_RULE_RESPONSE,
+        ruleB: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+      const threeWayDiff = calculateThreeWayRuleFieldsDiff({
+        base_version: MissingVersion,
+        current_version: convertRuleToDiffable(BASE_PREBUILT_RULE_RESPONSE),
+        target_version: convertRuleToDiffable(MODIFIED_PREBUILT_RULE_RESPONSE),
+      });
+
+      expect(twoWayDiff).not.toHaveProperty('enabled');
+      expect(threeWayDiff).not.toHaveProperty('enabled');
+    });
+
+    it('"author" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        author: ['base author'],
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        author: ['new author'],
+      };
+      const twoWayDiff = calculateRuleFieldsDiff({
+        ruleA: BASE_PREBUILT_RULE_RESPONSE,
+        ruleB: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+      const threeWayDiff = calculateThreeWayRuleFieldsDiff({
+        base_version: MissingVersion,
+        current_version: convertRuleToDiffable(BASE_PREBUILT_RULE_RESPONSE),
+        target_version: convertRuleToDiffable(MODIFIED_PREBUILT_RULE_RESPONSE),
+      });
+
+      expect(twoWayDiff).not.toHaveProperty('author');
+      expect(threeWayDiff).not.toHaveProperty('author');
+    });
+
+    it('"license" field', () => {
+      const BASE_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        license: 'base-license',
+      };
+      const MODIFIED_PREBUILT_RULE_RESPONSE = {
+        ...CUSTOM_QUERY_PREBUILT_RULE_RESPONSE,
+        license: 'updated-license',
+      };
+      const twoWayDiff = calculateRuleFieldsDiff({
+        ruleA: BASE_PREBUILT_RULE_RESPONSE,
+        ruleB: MODIFIED_PREBUILT_RULE_RESPONSE,
+      });
+      const threeWayDiff = calculateThreeWayRuleFieldsDiff({
+        base_version: MissingVersion,
+        current_version: convertRuleToDiffable(BASE_PREBUILT_RULE_RESPONSE),
+        target_version: convertRuleToDiffable(MODIFIED_PREBUILT_RULE_RESPONSE),
+      });
+
+      expect(twoWayDiff).not.toHaveProperty('license');
+      expect(threeWayDiff).not.toHaveProperty('license');
     });
   });
 });
