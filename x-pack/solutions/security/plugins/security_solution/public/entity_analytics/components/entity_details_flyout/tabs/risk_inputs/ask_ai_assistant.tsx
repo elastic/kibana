@@ -23,7 +23,7 @@ export interface ExplainWithAiAssistantProps<T extends EntityType> {
   entityName: string;
 }
 
-const currentReplacements = {};
+const CURRENT_REPLACEMENTS = {} as const;
 
 export const AskAiAssistant = <T extends EntityType>({
   entityType,
@@ -35,12 +35,12 @@ export const AskAiAssistant = <T extends EntityType>({
 
   const { anonymizedValues, replacements }: AnonymizedValues = useMemo(() => {
     if (!anonymizationFields.data) {
-      return { anonymizedValues: [], replacements: currentReplacements };
+      return { anonymizedValues: [], replacements: CURRENT_REPLACEMENTS };
     }
 
     return getAnonymizedValues({
       anonymizationFields: anonymizationFields.data,
-      currentReplacements,
+      currentReplacements: CURRENT_REPLACEMENTS,
       field: entityField,
       getAnonymizedValue,
       rawData: { [entityField]: [entityName] },
