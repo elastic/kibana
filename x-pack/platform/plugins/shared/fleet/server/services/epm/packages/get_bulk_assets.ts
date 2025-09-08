@@ -86,10 +86,7 @@ export async function getBulkAssets(
         }
       }
 
-      let title: string | undefined;
-      if (types[obj.type]?.management?.getTitle) {
-        title = types[obj.type]!.management!.getTitle!(obj) ?? obj.attributes?.title;
-      }
+      const title = types[obj.type]?.management?.getTitle?.(obj) ?? obj.attributes?.title;
 
       return {
         id: obj.id,
