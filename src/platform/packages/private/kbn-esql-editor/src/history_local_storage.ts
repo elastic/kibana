@@ -74,7 +74,6 @@ export const getStorageStats = () => {
     storageUsagePercent: parseFloat(
       Math.round((storageSizeKB / MAX_STORAGE_SIZE_KB) * 100).toFixed(2)
     ), // Round to 2 decimals
->>>>>>> main
   };
 };
 
