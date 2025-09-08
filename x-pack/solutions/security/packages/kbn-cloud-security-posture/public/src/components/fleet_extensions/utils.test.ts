@@ -249,14 +249,24 @@ describe('getDefaultAzureCredentialsType', () => {
 
   it('should return "service_principal_with_client_secret" for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
+    const result = getDefaultAzureCredentialsType(
+      packageInfo,
+      TEMPLATE_NAME,
+      setupTechnology,
+      false
+    );
 
     expect(result).toBe('service_principal_with_client_secret');
   });
 
-  it('shold return "arm_template" for agent-based, when arm_template is available', () => {
+  it('should return "arm_template" for agent-based, when arm_template is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
+    const result = getDefaultAzureCredentialsType(
+      packageInfo,
+      TEMPLATE_NAME,
+      setupTechnology,
+      false
+    );
 
     expect(result).toBe('arm_template');
   });
@@ -281,7 +291,12 @@ describe('getDefaultAzureCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
+    const result = getDefaultAzureCredentialsType(
+      packageInfo,
+      TEMPLATE_NAME,
+      setupTechnology,
+      false
+    );
 
     expect(result).toBe('managed_identity');
   });

@@ -374,13 +374,13 @@ export const mockConfig: CloudSetupConfig = {
   shortName: 'Test',
   overviewPath: '/overview',
   getStartedPath: '/get-started',
-  cloudConnectorEnabledVersion: '3.0.0',
   showCloudTemplates: true,
   providers: {
     aws: {
       type: 'aws-input-type',
       enableOrganization: true,
       getStartedPath: '/aws/start',
+      cloudConnectorEnabledVersion: '3.0.0',
     },
     gcp: {
       type: 'gcp-input-type',
