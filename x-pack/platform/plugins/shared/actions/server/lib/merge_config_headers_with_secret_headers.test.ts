@@ -42,7 +42,7 @@ describe('mergeConfigHeadersWithSecretHeaders', () => {
       secretKey: 'secretValue',
     });
   });
-  it('should return only secretHeaders when secretHeaders is null', () => {
+  it('should return only configHeaders when secretHeaders is null', () => {
     expect(mergeConfigHeadersWithSecretHeaders({ configKey: 'configValue' }, null)).toEqual({
       configKey: 'configValue',
     });
