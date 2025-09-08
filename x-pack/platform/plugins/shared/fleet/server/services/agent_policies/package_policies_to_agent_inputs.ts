@@ -17,7 +17,6 @@ import type {
   PackageInfo,
   PackagePolicyInput,
   NewPackagePolicyInput,
-  NewPackagePolicy,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
@@ -29,7 +28,7 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
 
 export function getInputId(
   input: NewPackagePolicyInput,
-  packagePolicy: NewPackagePolicy & { id: string },
+  packagePolicyId?: string,
   packageInfo?: PackageInfo
 ): string {
   // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
@@ -37,10 +36,10 @@ export function getInputId(
   const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
 
   return appendInputId
-    ? `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
-        packagePolicy.id
+    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+        packagePolicyId ? `-${packagePolicyId}` : ''
       }`
-    : packagePolicy.id?.toString() || '';
+    : packagePolicyId || 'default';
 }
 
 export const storedPackagePolicyToAgentInputs = (
@@ -63,7 +62,7 @@ export const storedPackagePolicyToAgentInputs = (
 
     const fullInput: FullAgentPolicyInput = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
-      id: input.id ?? getInputId(input, packagePolicy, packageInfo), // Generate input id if not already set
+      id: input.id ?? getInputId(input, packagePolicy.id, packageInfo), // Generate input id if not already set
       revision: packagePolicy.revision,
       name: packagePolicy.name,
       type: input.type,

@@ -16,14 +16,12 @@ import { getInputId } from '../agent_policies/package_policies_to_agent_inputs';
  */
 export function getInputsWithIds(
   packagePolicy: NewPackagePolicy,
-  packagePolicyId: string = 'default',
+  packagePolicyId?: string,
   allEnabled?: boolean,
   packageInfo?: PackageInfo
 ): PackagePolicy['inputs'] {
   return packagePolicy.inputs.map((input) => {
-    const inputId = input.id
-      ? input.id
-      : getInputId(input, { ...packagePolicy, id: packagePolicyId.toString() }, packageInfo);
+    const inputId = input.id ? input.id : getInputId(input, packagePolicyId, packageInfo);
 
     return {
       ...input,
