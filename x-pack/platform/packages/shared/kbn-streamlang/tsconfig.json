@@ -16,6 +16,7 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/zod-helpers",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/esql-ast"
   ]
 }
