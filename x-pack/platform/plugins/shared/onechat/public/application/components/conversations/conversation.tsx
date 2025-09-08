@@ -13,8 +13,8 @@ import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
-import { useConversationId } from '../../hooks/use_conversation_id';
 import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
+import { useConversationId } from '../../hooks/use_conversation_id';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -23,6 +23,25 @@ const conversationContainerStyles = css`
   ${fullHeightStyles}
   width: 100%;
 `;
+
+const scrollToMostRecentRound = () => {
+  requestAnimationFrame(() => {
+    const conversationRoundsElement = document.querySelector(
+      '[id="onechatConversationRoundsContainer"]'
+    );
+    if (conversationRoundsElement) {
+      const rounds = conversationRoundsElement.children;
+      if (rounds.length >= 1) {
+        // Get the last round (the user's last message)
+        const lastRound = rounds[rounds.length - 1] as HTMLElement;
+        lastRound.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  });
+};
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
@@ -69,7 +88,8 @@ export const Conversation: React.FC<{}> = () => {
             <EuiResizablePanel initialSize={20} minSize="20%">
               <ConversationInputForm
                 onSubmit={() => {
-                  setStickToBottom(true);
+                  setStickToBottom(false);
+                  scrollToMostRecentRound();
                 }}
               />
             </EuiResizablePanel>

@@ -42,6 +42,8 @@ export const ConversationRounds: React.FC<{}> = () => {
               key={index}
               // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
               input={<EuiText size="s">{input.message}</EuiText>}
+              isResponseLoading={isResponseLoading}
+              isCurrentRound={isCurrentRound}
               outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (
