@@ -1121,7 +1121,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "task|global: 8277e4031824bb161fa73897294701786c15eb9a",
         "task|mappings: 131b7c0f6418540178fbb46ac6f5f21018c716cf",
         "task|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "task|10.7.0: 523a817afabb5d405bd4a4a0e9e4738927d6abb8",
+        "task|10.7.0: 862db2dec024d5a259cd1414fd7d545634cf0401",
         "task|10.6.0: 3e759553f2a6e8a7670fc736204b44f08486e058",
         "task|10.5.0: 6c935f36864dc1bac9f6c06899ba87db2dfc8c42",
         "task|10.4.0: ded00177bbb2185a7668ae522268e8d1d89d5dfb",
