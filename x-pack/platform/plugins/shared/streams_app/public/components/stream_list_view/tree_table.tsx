@@ -153,8 +153,7 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
-          width: '200px',
-          truncateText: { lines: 2 },
+          width: '220px',
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
               lifecycle={item.effective_lifecycle!}

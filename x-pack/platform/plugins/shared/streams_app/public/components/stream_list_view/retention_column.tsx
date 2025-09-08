@@ -54,6 +54,12 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             defaultMessage: 'ILM policy: {name}, click to edit the policy in a new tab',
             values: { name: lifecycle.ilm.policy },
           })}
+          css={{
+            whiteSpace: 'nowrap' as const,
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            maxWidth: '150px',
+          }}
         >
           {lifecycle.ilm.policy}
         </EuiLink>
