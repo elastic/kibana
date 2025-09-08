@@ -9,6 +9,10 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { getThreatsDetectedMetricLensAttributes } from './threats_detected_metric';
 import type { ExtraOptions } from '../../types';
 
+interface WithParams {
+  params: Record<string, unknown>;
+}
+
 describe('getThreatsDetectedMetricLensAttributes', () => {
   const defaultEuiTheme = {} as EuiThemeComputed;
   const defaultSpaceId = 'default';
@@ -70,13 +74,13 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
     const datasourceStates = result.state.datasourceStates;
     expect(datasourceStates).toHaveProperty('formBased');
     expect(datasourceStates.formBased).toHaveProperty('layers');
-    expect(datasourceStates.formBased.layers).toHaveProperty('unifiedHistogram');
+    expect(datasourceStates.formBased?.layers).toHaveProperty('unifiedHistogram');
   });
 
   it('returns lens attributes with correct layer configuration', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
 
-    const layer = result.state.datasourceStates.formBased.layers.unifiedHistogram;
+    const layer = result.state.datasourceStates.formBased?.layers.unifiedHistogram;
     expect(layer).toHaveProperty('columnOrder', ['count_column']);
     expect(layer).toHaveProperty('columns');
     expect(layer).toHaveProperty('incompleteColumns', {});
@@ -86,7 +90,7 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
 
     const countColumn =
-      result.state.datasourceStates.formBased.layers.unifiedHistogram.columns.count_column;
+      result.state.datasourceStates.formBased?.layers.unifiedHistogram?.columns.count_column;
     expect(countColumn).toHaveProperty('customLabel', true);
     expect(countColumn).toHaveProperty('dataType', 'number');
     expect(countColumn).toHaveProperty('isBucketed', false);
@@ -99,9 +103,9 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
   it('returns lens attributes with correct count_column parameters', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
 
-    const countColumn =
-      result.state.datasourceStates.formBased.layers.unifiedHistogram.columns.count_column;
-    expect(countColumn.params).toHaveProperty('format', {
+    const countColumn = result.state.datasourceStates.formBased?.layers.unifiedHistogram?.columns
+      .count_column as unknown as WithParams;
+    expect(countColumn?.params).toHaveProperty('format', {
       id: 'number',
       params: { decimals: 0 },
     });
@@ -111,12 +115,12 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
 
     expect(result.state.internalReferences).toHaveLength(2);
-    expect(result.state.internalReferences[0]).toEqual({
+    expect(result.state.internalReferences?.[0]).toEqual({
       id: '99d292f8-524f-4aad-9e37-81c17f8331fb',
       name: 'indexpattern-datasource-layer-unifiedHistogram',
       type: 'index-pattern',
     });
-    expect(result.state.internalReferences[1]).toEqual({
+    expect(result.state.internalReferences?.[1]).toEqual({
       id: '99d292f8-524f-4aad-9e37-81c17f8331fb',
       name: 'indexpattern-datasource-layer-c17b2286-3a97-4ce3-b27c-02343d0a5d51',
       type: 'index-pattern',
@@ -133,7 +137,7 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
   it('returns lens attributes with correct data view configuration', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
 
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
+    const dataView = result.state.adHocDataViews?.['99d292f8-524f-4aad-9e37-81c17f8331fb'];
     expect(dataView).toHaveProperty('allowHidden', false);
     expect(dataView).toHaveProperty('allowNoIndex', false);
     expect(dataView).toHaveProperty('fieldAttrs', {});
@@ -144,55 +148,32 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
     expect(dataView).toHaveProperty('runtimeFieldMap', {});
   });
 
-  it('returns lens attributes with correct data view name and title', () => {
-    const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
+  it('returns lens attributes with correct data view name and title for various spaceId configurations', () => {
+    const testCases = [
+      { spaceId: defaultSpaceId, description: 'default space' },
+      { spaceId: 'custom-space', description: 'custom space' },
+      { spaceId: 'space-with-special-chars-123', description: 'space with special characters' },
+      { spaceId: '', description: 'empty space' },
+      { spaceId: '123', description: 'numeric space' },
+      { spaceId: 'space.with.dots', description: 'space with dots' },
+    ];
 
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
-    const expectedName = `.alerts-security.attack.discovery.alerts-${defaultSpaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${defaultSpaceId}*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
-  });
+    testCases.forEach(({ spaceId, description }) => {
+      const result = getThreatsDetectedMetricLensAttributes({
+        ...defaultArgs,
+        spaceId,
+      });
 
-  it('returns lens attributes with different spaceId', () => {
-    const spaceId = 'custom-space';
-    const result = getThreatsDetectedMetricLensAttributes({
-      ...defaultArgs,
-      spaceId,
+      const dataView = result.state.adHocDataViews?.['99d292f8-524f-4aad-9e37-81c17f8331fb'];
+      const expectedName = spaceId
+        ? `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`
+        : `.alerts-security.attack.discovery.alerts-*,.adhoc.alerts-security.attack.discovery.alerts-*`;
+      expect(dataView?.name).toBe(expectedName);
+      expect(dataView?.title).toBe(expectedName);
     });
-
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
-    const expectedName = `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
   });
 
-  it('returns lens attributes with special characters in spaceId', () => {
-    const spaceId = 'space-with-special-chars-123';
-    const result = getThreatsDetectedMetricLensAttributes({
-      ...defaultArgs,
-      spaceId,
-    });
-
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
-    const expectedName = `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
-  });
-
-  it('returns lens attributes with empty spaceId', () => {
-    const spaceId = '';
-    const result = getThreatsDetectedMetricLensAttributes({
-      ...defaultArgs,
-      spaceId,
-    });
-
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
-    const expectedName = `.alerts-security.attack.discovery.alerts-*,.adhoc.alerts-security.attack.discovery.alerts-*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
-  });
-
-  it('returns lens attributes with extraOptions parameter', () => {
+  it('returns lens attributes with unused parameters (extraOptions, stackByField, esql, euiTheme)', () => {
     const extraOptions: ExtraOptions = {
       breakdownField: 'test.field',
       dnsIsPtrIncluded: true,
@@ -204,49 +185,35 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
         { meta: { alias: 'test', disabled: false, negate: false } },
       ] as ExtraOptions['filters'],
     };
-    const result = getThreatsDetectedMetricLensAttributes({
+    const euiTheme = { colors: { primary: '#0066CC' } } as EuiThemeComputed;
+
+    // Test that unused parameters don't affect the result
+    const resultWithExtraOptions = getThreatsDetectedMetricLensAttributes({
       ...defaultArgs,
       extraOptions,
     });
+    expect(resultWithExtraOptions.state.filters).toEqual([]);
 
-    // The function doesn't use extraOptions, so it should return the same result
-    expect(result.state.filters).toEqual([]);
-  });
-
-  it('returns lens attributes with stackByField parameter', () => {
-    const stackByField = 'test.field';
-    const result = getThreatsDetectedMetricLensAttributes({
+    const resultWithStackByField = getThreatsDetectedMetricLensAttributes({
       ...defaultArgs,
-      stackByField,
+      stackByField: 'test.field',
     });
+    expect(resultWithStackByField.title).toBe('Real threats detected');
 
-    // The function doesn't use stackByField, so it should return the same result
-    expect(result.title).toBe('Real threats detected');
-  });
-
-  it('returns lens attributes with esql parameter', () => {
-    const esql = 'SELECT * FROM test-*';
-    const result = getThreatsDetectedMetricLensAttributes({
+    const resultWithEsql = getThreatsDetectedMetricLensAttributes({
       ...defaultArgs,
-      esql,
+      esql: 'SELECT * FROM test-*',
     });
-
-    // The function doesn't use esql, so it should return the same result
-    expect(result.state.query).toEqual({
+    expect(resultWithEsql.state.query).toEqual({
       language: 'kuery',
       query: '',
     });
-  });
 
-  it('returns lens attributes with euiTheme parameter', () => {
-    const euiTheme = { colors: { primary: '#0066CC' } } as EuiThemeComputed;
-    const result = getThreatsDetectedMetricLensAttributes({
+    const resultWithEuiTheme = getThreatsDetectedMetricLensAttributes({
       ...defaultArgs,
       euiTheme,
     });
-
-    // The function doesn't use euiTheme, so it should return the same result
-    expect(result.title).toBe('Real threats detected');
+    expect(resultWithEuiTheme.title).toBe('Real threats detected');
   });
 
   it('returns lens attributes with all parameters provided', () => {
@@ -266,35 +233,9 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
     });
 
     // Only spaceId should affect the result
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
+    const dataView = result.state.adHocDataViews?.['99d292f8-524f-4aad-9e37-81c17f8331fb'];
     const expectedName = `.alerts-security.attack.discovery.alerts-test-space*,.adhoc.alerts-security.attack.discovery.alerts-test-space*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
-  });
-
-  it('returns lens attributes with numeric spaceId', () => {
-    const spaceId = '123';
-    const result = getThreatsDetectedMetricLensAttributes({
-      ...defaultArgs,
-      spaceId,
-    });
-
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
-    const expectedName = `.alerts-security.attack.discovery.alerts-123*,.adhoc.alerts-security.attack.discovery.alerts-123*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
-  });
-
-  it('returns lens attributes with spaceId containing dots', () => {
-    const spaceId = 'space.with.dots';
-    const result = getThreatsDetectedMetricLensAttributes({
-      ...defaultArgs,
-      spaceId,
-    });
-
-    const dataView = result.state.adHocDataViews['99d292f8-524f-4aad-9e37-81c17f8331fb'];
-    const expectedName = `.alerts-security.attack.discovery.alerts-space.with.dots*,.adhoc.alerts-security.attack.discovery.alerts-space.with.dots*`;
-    expect(dataView.name).toBe(expectedName);
-    expect(dataView.title).toBe(expectedName);
+    expect(dataView?.name).toBe(expectedName);
+    expect(dataView?.title).toBe(expectedName);
   });
 });

@@ -9,6 +9,16 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { getAlertProcessingDonutAttributes } from './alert_processing_donut';
 import type { ExtraOptions } from '../../types';
 
+interface WithParams {
+  params: Record<string, unknown>;
+}
+interface WithLayers {
+  layers: Array<Record<string, unknown>>;
+}
+interface WithRuntimeFieldMap {
+  runtimeFieldMap: Record<string, { script: { source: string } }>;
+}
+
 describe('getAlertProcessingDonutAttributes', () => {
   const defaultEuiTheme = {} as EuiThemeComputed;
   const defaultAttackAlertIds = ['alert-1', 'alert-2', 'alert-3'];
@@ -52,7 +62,7 @@ describe('getAlertProcessingDonutAttributes', () => {
   it('returns lens attributes with correct visualization configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const visualization = result.state.visualization;
+    const visualization = result.state.visualization as unknown as WithLayers;
     expect(visualization).toHaveProperty('layers');
     expect(visualization).toHaveProperty('shape', 'donut');
     expect(visualization.layers).toHaveLength(1);
@@ -61,7 +71,7 @@ describe('getAlertProcessingDonutAttributes', () => {
   it('returns lens attributes with correct layer configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const layer = result.state.visualization.layers[0];
+    const layer = (result.state.visualization as unknown as WithLayers).layers[0];
     expect(layer).toHaveProperty('categoryDisplay', 'show');
     expect(layer).toHaveProperty('emptySizeRatio', 0.9);
     expect(layer).toHaveProperty('layerId', 'unifiedHistogram');
@@ -79,65 +89,71 @@ describe('getAlertProcessingDonutAttributes', () => {
   it('returns lens attributes with correct color mapping configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const colorMapping = result.state.visualization.layers[0].colorMapping;
+    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
+      .colorMapping as Record<string, unknown>;
     expect(colorMapping).toHaveProperty('assignments');
     expect(colorMapping).toHaveProperty('colorMode', { type: 'categorical' });
     expect(colorMapping).toHaveProperty('paletteId', 'default');
     expect(colorMapping).toHaveProperty('specialAssignments');
-    expect(colorMapping.assignments).toHaveLength(2);
-    expect(colorMapping.specialAssignments).toHaveLength(1);
+    expect(colorMapping.assignments as unknown[]).toHaveLength(2);
+    expect(colorMapping.specialAssignments as unknown[]).toHaveLength(1);
   });
 
   it('returns lens attributes with correct AI Filtered color assignment', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const aiFilteredAssignment = result.state.visualization.layers[0].colorMapping.assignments[0];
-    expect(aiFilteredAssignment).toHaveProperty('color', {
+    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
+      .colorMapping as Record<string, unknown>;
+    const assignment = (colorMapping.assignments as unknown[])[0] as Record<string, unknown>;
+    expect(assignment).toHaveProperty('color', {
       colorIndex: 0,
       paletteId: 'default',
       type: 'categorical',
     });
-    expect(aiFilteredAssignment).toHaveProperty('rules', [
+    expect(assignment).toHaveProperty('rules', [
       {
         type: 'raw',
         value: 'AI Filtered',
       },
     ]);
-    expect(aiFilteredAssignment).toHaveProperty('touched', false);
+    expect(assignment).toHaveProperty('touched', false);
   });
 
   it('returns lens attributes with correct Escalated color assignment', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const escalatedAssignment = result.state.visualization.layers[0].colorMapping.assignments[1];
-    expect(escalatedAssignment).toHaveProperty('color', {
+    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
+      .colorMapping as Record<string, unknown>;
+    const assignment = (colorMapping.assignments as unknown[])[1] as Record<string, unknown>;
+    expect(assignment).toHaveProperty('color', {
       colorIndex: 9,
       paletteId: 'default',
       type: 'categorical',
     });
-    expect(escalatedAssignment).toHaveProperty('rules', [
+    expect(assignment).toHaveProperty('rules', [
       {
         type: 'raw',
         value: 'Escalated',
       },
     ]);
-    expect(escalatedAssignment).toHaveProperty('touched', false);
+    expect(assignment).toHaveProperty('touched', false);
   });
 
   it('returns lens attributes with correct special assignments', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const specialAssignment =
-      result.state.visualization.layers[0].colorMapping.specialAssignments[0];
-    expect(specialAssignment).toHaveProperty('color', {
+    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
+      .colorMapping as Record<string, unknown>;
+    const assignment = (colorMapping.specialAssignments as unknown[])[0] as Record<string, unknown>;
+    expect(assignment).toHaveProperty('color', {
       type: 'loop',
     });
-    expect(specialAssignment).toHaveProperty('rules', [
+    expect(assignment).toHaveProperty('rules', [
       {
         type: 'other',
       },
     ]);
-    expect(specialAssignment).toHaveProperty('touched', false);
+    expect(assignment).toHaveProperty('touched', false);
   });
 
   it('returns lens attributes with correct datasource states', () => {
@@ -146,13 +162,13 @@ describe('getAlertProcessingDonutAttributes', () => {
     const datasourceStates = result.state.datasourceStates;
     expect(datasourceStates).toHaveProperty('formBased');
     expect(datasourceStates.formBased).toHaveProperty('layers');
-    expect(datasourceStates.formBased.layers).toHaveProperty('unifiedHistogram');
+    expect(datasourceStates.formBased?.layers).toHaveProperty('unifiedHistogram');
   });
 
   it('returns lens attributes with correct layer column configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const layer = result.state.datasourceStates.formBased.layers.unifiedHistogram;
+    const layer = result.state.datasourceStates.formBased?.layers.unifiedHistogram;
     expect(layer).toHaveProperty('columnOrder', ['breakdown_column', 'count_column']);
     expect(layer).toHaveProperty('columns');
     expect(layer).toHaveProperty('incompleteColumns', {});
@@ -162,7 +178,7 @@ describe('getAlertProcessingDonutAttributes', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     const breakdownColumn =
-      result.state.datasourceStates.formBased.layers.unifiedHistogram.columns.breakdown_column;
+      result.state.datasourceStates.formBased?.layers.unifiedHistogram?.columns.breakdown_column;
     expect(breakdownColumn).toHaveProperty('dataType', 'string');
     expect(breakdownColumn).toHaveProperty('isBucketed', true);
     expect(breakdownColumn).toHaveProperty('label', 'Alert processing category');
@@ -174,26 +190,26 @@ describe('getAlertProcessingDonutAttributes', () => {
   it('returns lens attributes with correct breakdown_column parameters', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const breakdownColumn =
-      result.state.datasourceStates.formBased.layers.unifiedHistogram.columns.breakdown_column;
-    expect(breakdownColumn.params).toHaveProperty('missingBucket', true);
-    expect(breakdownColumn.params).toHaveProperty('orderBy', {
+    const breakdownColumn = result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns
+      .breakdown_column as unknown as WithParams;
+    expect(breakdownColumn?.params).toHaveProperty('missingBucket', true);
+    expect(breakdownColumn?.params).toHaveProperty('orderBy', {
       columnId: 'count_column',
       type: 'column',
     });
-    expect(breakdownColumn.params).toHaveProperty('orderDirection', 'desc');
-    expect(breakdownColumn.params).toHaveProperty('otherBucket', true);
-    expect(breakdownColumn.params).toHaveProperty('parentFormat', {
+    expect(breakdownColumn?.params).toHaveProperty('orderDirection', 'desc');
+    expect(breakdownColumn?.params).toHaveProperty('otherBucket', true);
+    expect(breakdownColumn?.params).toHaveProperty('parentFormat', {
       id: 'terms',
     });
-    expect(breakdownColumn.params).toHaveProperty('size', 3);
+    expect(breakdownColumn?.params).toHaveProperty('size', 3);
   });
 
   it('returns lens attributes with correct count_column configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     const countColumn =
-      result.state.datasourceStates.formBased.layers.unifiedHistogram.columns.count_column;
+      result.state.datasourceStates.formBased?.layers.unifiedHistogram?.columns.count_column;
     expect(countColumn).toHaveProperty('dataType', 'number');
     expect(countColumn).toHaveProperty('isBucketed', false);
     expect(countColumn).toHaveProperty('label', 'Count of records');
@@ -205,9 +221,9 @@ describe('getAlertProcessingDonutAttributes', () => {
   it('returns lens attributes with correct count_column parameters', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const countColumn =
-      result.state.datasourceStates.formBased.layers.unifiedHistogram.columns.count_column;
-    expect(countColumn.params).toHaveProperty('format', {
+    const countColumn = result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns
+      .count_column as unknown as WithParams;
+    expect(countColumn?.params).toHaveProperty('format', {
       id: 'number',
       params: {
         decimals: 0,
@@ -219,7 +235,7 @@ describe('getAlertProcessingDonutAttributes', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     expect(result.state.internalReferences).toHaveLength(1);
-    expect(result.state.internalReferences[0]).toEqual({
+    expect(result.state.internalReferences?.[0]).toEqual({
       id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
       name: 'indexpattern-datasource-layer-unifiedHistogram',
       type: 'index-pattern',
@@ -236,7 +252,9 @@ describe('getAlertProcessingDonutAttributes', () => {
   it('returns lens attributes with correct data view configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const dataView = result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'];
+    const dataView = result.state.adHocDataViews?.[
+      'db828b69-bb21-4b92-bc33-56e3b01da790'
+    ] as unknown as Record<string, unknown>;
     expect(dataView).toHaveProperty('allowHidden', false);
     expect(dataView).toHaveProperty('allowNoIndex', false);
     expect(dataView).toHaveProperty('fieldAttrs', {
@@ -250,102 +268,75 @@ describe('getAlertProcessingDonutAttributes', () => {
     expect(dataView).toHaveProperty('title', `.alerts-security.alerts-${defaultSpaceId}`);
   });
 
-  it('returns lens attributes with correct runtime field map', () => {
+  it('returns lens attributes with correct runtime field configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
-    const runtimeFieldMap =
-      result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'].runtimeFieldMap;
+    const runtimeFieldMap = (
+      result.state.adHocDataViews?.[
+        'db828b69-bb21-4b92-bc33-56e3b01da790'
+      ] as unknown as WithRuntimeFieldMap
+    )?.runtimeFieldMap;
+
+    // Test runtime field map structure
     expect(runtimeFieldMap).toHaveProperty('processing_analytics_rtf');
-    expect(runtimeFieldMap.processing_analytics_rtf).toHaveProperty('type', 'keyword');
-    expect(runtimeFieldMap.processing_analytics_rtf).toHaveProperty('script');
-  });
+    expect(runtimeFieldMap?.processing_analytics_rtf).toHaveProperty('type', 'keyword');
+    expect(runtimeFieldMap?.processing_analytics_rtf).toHaveProperty('script');
 
-  it('returns lens attributes with correct runtime field script', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const script =
-      result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'].runtimeFieldMap
-        .processing_analytics_rtf.script;
+    // Test runtime field script content
+    const script = runtimeFieldMap?.processing_analytics_rtf.script;
     expect(script).toHaveProperty('source');
-    expect(script.source).toContain(JSON.stringify(defaultAttackAlertIds));
-    expect(script.source).toContain('emit("Escalated")');
-    expect(script.source).toContain('emit("AI Filtered")');
+    expect(script?.source).toContain(JSON.stringify(defaultAttackAlertIds));
+    expect(script?.source).toContain('emit("Escalated")');
+    expect(script?.source).toContain('emit("AI Filtered")');
   });
 
-  it('returns lens attributes with different attackAlertIds', () => {
-    const attackAlertIds = ['different-alert-1', 'different-alert-2'];
-    const result = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      attackAlertIds,
-    });
+  it('returns lens attributes with various attackAlertIds configurations', () => {
+    const testCases = [
+      {
+        attackAlertIds: ['different-alert-1', 'different-alert-2'],
+        description: 'multiple alerts',
+      },
+      { attackAlertIds: [], description: 'empty array' },
+      { attackAlertIds: ['single-alert'], description: 'single alert' },
+      {
+        attackAlertIds: Array.from({ length: 100 }, (_, i) => `alert-${i}`),
+        description: 'large number of alerts',
+      },
+    ];
 
-    const script =
-      result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'].runtimeFieldMap
-        .processing_analytics_rtf.script;
-    expect(script.source).toContain(JSON.stringify(attackAlertIds));
+    testCases.forEach(({ attackAlertIds, description }) => {
+      const result = getAlertProcessingDonutAttributes({
+        ...defaultArgs,
+        attackAlertIds,
+      });
+
+      const script = (
+        result.state.adHocDataViews?.[
+          'db828b69-bb21-4b92-bc33-56e3b01da790'
+        ] as unknown as WithRuntimeFieldMap
+      )?.runtimeFieldMap.processing_analytics_rtf.script;
+      expect(script?.source).toContain(JSON.stringify(attackAlertIds));
+    });
   });
 
-  it('returns lens attributes with different spaceId', () => {
-    const spaceId = 'custom-space';
-    const result = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      spaceId,
+  it('returns lens attributes with various spaceId configurations', () => {
+    const testCases = [
+      { spaceId: 'custom-space', description: 'custom space' },
+      { spaceId: 'space-with-special-chars-123', description: 'space with special characters' },
+    ];
+
+    testCases.forEach(({ spaceId, description }) => {
+      const result = getAlertProcessingDonutAttributes({
+        ...defaultArgs,
+        spaceId,
+      });
+
+      const dataView = result.state.adHocDataViews?.[
+        'db828b69-bb21-4b92-bc33-56e3b01da790'
+      ] as unknown as Record<string, unknown>;
+      expect(dataView?.name).toBe(`.alerts-security.alerts-${spaceId}`);
+      expect(dataView?.title).toBe(`.alerts-security.alerts-${spaceId}`);
     });
-
-    const dataView = result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'];
-    expect(dataView.name).toBe(`.alerts-security.alerts-${spaceId}`);
-    expect(dataView.title).toBe(`.alerts-security.alerts-${spaceId}`);
-  });
-
-  it('returns lens attributes with empty attackAlertIds array', () => {
-    const attackAlertIds: string[] = [];
-    const result = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      attackAlertIds,
-    });
-
-    const script =
-      result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'].runtimeFieldMap
-        .processing_analytics_rtf.script;
-    expect(script.source).toContain(JSON.stringify(attackAlertIds));
-  });
-
-  it('returns lens attributes with single attackAlertId', () => {
-    const attackAlertIds = ['single-alert'];
-    const result = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      attackAlertIds,
-    });
-
-    const script =
-      result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'].runtimeFieldMap
-        .processing_analytics_rtf.script;
-    expect(script.source).toContain(JSON.stringify(attackAlertIds));
-  });
-
-  it('returns lens attributes with large number of attackAlertIds', () => {
-    const attackAlertIds = Array.from({ length: 100 }, (_, i) => `alert-${i}`);
-    const result = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      attackAlertIds,
-    });
-
-    const script =
-      result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'].runtimeFieldMap
-        .processing_analytics_rtf.script;
-    expect(script.source).toContain(JSON.stringify(attackAlertIds));
-  });
-
-  it('returns lens attributes with special characters in spaceId', () => {
-    const spaceId = 'space-with-special-chars-123';
-    const result = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      spaceId,
-    });
-
-    const dataView = result.state.adHocDataViews['db828b69-bb21-4b92-bc33-56e3b01da790'];
-    expect(dataView.name).toBe(`.alerts-security.alerts-${spaceId}`);
-    expect(dataView.title).toBe(`.alerts-security.alerts-${spaceId}`);
   });
 
   it('returns lens attributes with extraOptions parameter', () => {
