@@ -278,6 +278,28 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             </EuiFormRow>
             <EuiSpacer size="m" />
 
+            {agents.length === 1 && (<EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                          defaultMessage="Replace token"
+                        />
+                      }
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        fullWidth
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, replace_token: e.target.value },
+                          })
+                        }
+                      />
+                    </EuiFormRow>)}
+             
+            {agents.length === 1 && (<EuiSpacer size="m" />)}
+
             {/* Additional Settings Section */}
             <EuiFormRow fullWidth>
               <EuiAccordion
@@ -582,37 +604,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                             }
                           />
                         </EuiFlexItem>
-                        {/* Replace token shouldnt be an option when bulk migrating */}
-                        {agents.length === 1 && (
-                          <EuiFlexItem>
-                            <EuiSwitch
-                              data-test-subj="migrateAgentFlyoutReplaceTokenButton"
-                              label={
-                                <FormattedMessage
-                                  id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
-                                  defaultMessage="Replace Token"
-                                />
-                              }
-                              checked={
-                                (
-                                  formContent.settings as MigrateSingleAgentRequest['body']['settings']
-                                )?.replace_token ?? false
-                              }
-                              onChange={(e) => {
-                                // Only allow setting replace_token when migrating a single agent
-                                if ('id' in formContent) {
-                                  setFormContent({
-                                    ...formContent,
-                                    settings: {
-                                      ...formContent.settings,
-                                      replace_token: e.target.checked,
-                                    },
-                                  });
-                                }
-                              }}
-                            />
-                          </EuiFlexItem>
-                        )}
                       </EuiFlexGroup>
                     </EuiFormRow>
                   </EuiAccordion>

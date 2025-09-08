@@ -200,7 +200,7 @@ export interface MigrateSingleAgentRequest {
       proxy_url?: string;
       staging?: boolean;
       tags?: string;
-      replace_token?: boolean;
+      replace_token?: string;
     };
   };
 }

@@ -100,7 +100,7 @@ export const MigrateOptionsSchema = {
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.boolean()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
-  replace_token: schema.maybe(schema.boolean()),
+  replace_token: schema.maybe(schema.string()),
 };
 export const BulkMigrateOptionsSchema = {
   ca_sha256: schema.maybe(schema.string()),
