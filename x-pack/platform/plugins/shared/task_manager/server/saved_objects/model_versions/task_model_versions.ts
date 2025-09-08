@@ -96,7 +96,7 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
   '7': {
     changes: [],
     schemas: {
-      forwardCompatibility: taskSchemaV6.extends({}, { unknowns: 'ignore' }),
+      forwardCompatibility: taskSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV7,
     },
   },
