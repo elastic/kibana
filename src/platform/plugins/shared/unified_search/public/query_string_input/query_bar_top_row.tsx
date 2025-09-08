@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+// import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
@@ -38,7 +38,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
-  EuiLink,
+  // EuiLink,
   EuiFieldText,
   EuiPanel,
 } from '@elastic/eui';
@@ -920,14 +920,14 @@ export const QueryBarTopRow = React.memo(
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
-              {Boolean(props.isNLToESQLConversionEnabled) &&
+              {/* {Boolean(props.isNLToESQLConversionEnabled) &&
                 isQueryLangSelected &&
                 props.query &&
                 isOfAggregateQueryType(props.query) && (
                   <EuiLink onClick={() => setIsNLToESQLModalVisible(true)}>
                     <AssistantBeacon size="m" backgroundColor="emptyShade" />
                   </EuiLink>
-                )}
+                )} */}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}

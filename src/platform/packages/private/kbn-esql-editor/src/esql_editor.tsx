@@ -21,6 +21,8 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Parser } from '@kbn/esql-ast/src/parser/parser';
+import { walk, type ESQLFunction, isStringLiteral } from '@kbn/esql-ast';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import type { CodeEditorProps } from '@kbn/code-editor';
@@ -158,6 +160,87 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
+  // Add CSS styles for the glyph icons
+  const searchGlyphStyles = css`
+    .esql-search-glyph {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .esql-search-glyph:hover {
+      border-radius: 2px;
+      background-color: ${theme.euiTheme.colors.lightShade};
+    }
+
+    .esql-search-glyph::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      background-image: url('data:image/png;base64,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');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: block;
+      filter: grayscale(1) opacity(0.7);
+    }
+
+    .esql-search-glyph:hover::before {
+      filter: grayscale(0) opacity(1);
+    }
+  `;
+  const searchBadgeClassName = 'resourcesBadge';
+
+  const searchBadgeStyle = css`
+    .${searchBadgeClassName} {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      padding-block: 2px;
+      padding-inline: 6px 8px;
+      max-inline-size: 100%;
+      font-size: 0.8571rem;
+      line-height: 18px;
+      font-weight: 500;
+      white-space: nowrap;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: start;
+      border: 1px solid ${theme.euiTheme.colors.borderBasePlain};
+      background-color: ${theme.euiTheme.colors.emptyShade};
+      color: ${theme.euiTheme.colors.text} !important;
+      position: relative;
+    }
+
+    .${searchBadgeClassName}::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background-image: url('https://icons.veryicon.com/png/o/education-technology/education-app/search-137.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      margin-right: 4px;
+      display: inline-block;
+      flex-shrink: 0;
+      filter: grayscale(1) opacity(0.7);
+    }
+
+    .${searchBadgeClassName}:hover {
+      border-color: ${theme.euiTheme.colors.primary};
+      background-color: ${theme.euiTheme.colors.lightestShade};
+    }
+
+    .${searchBadgeClassName}:hover::before {
+      filter: grayscale(0) opacity(1);
+    }
+  `;
+
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
     [esqlVariables, query.esql]
@@ -248,6 +331,118 @@ const ESQLEditorInternal = function ESQLEditor({
       editor1.current?.executeEdits('comment', edits);
     }
   }, []);
+
+  // Handle glyph margin clicks for search functionality
+  const handleSearchGlyphClick = useCallback((e: monaco.editor.IEditorMouseEvent) => {
+    if (e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN) {
+      const lineNumber = e.target.position?.lineNumber;
+      if (lineNumber && editor1.current) {
+        // Get the current query content
+        const currentQuery = editor1.current.getValue();
+
+        // Append | WHERE KQL() to the end of the query
+        const newQuery = currentQuery.trim()
+          ? `${currentQuery.trim()} | WHERE KQL("  debug  ")`
+          : '| WHERE KQL("  debug  ")';
+
+        // Update the editor content
+        editor1.current.setValue(newQuery);
+
+        // Position cursor inside the KQL() parentheses
+        const lines = newQuery.split('\n');
+        const lastLineNumber = lines.length;
+        const lastLine = lines[lastLineNumber - 1];
+        const kqlPosition = lastLine.indexOf('KQL(') + 4; // Position after 'KQL('
+
+        editor1.current.setPosition({
+          lineNumber: lastLineNumber,
+          column: kqlPosition + 1,
+        });
+
+        // Focus the editor
+        editor1.current.focus();
+      }
+    }
+  }, []);
+
+  const addSearchGlyph = useCallback(() => {
+    editor1.current?.createDecorationsCollection([
+      {
+        range: new monaco.Range(1, 1, 1, 1),
+        options: {
+          glyphMarginClassName: 'esql-search-glyph',
+          showIfCollapsed: true,
+        },
+      },
+    ]);
+  }, []);
+
+  const addSearchDecorator = useCallback(() => {
+    const lineCount = editorModel.current?.getLineCount() || 1;
+    for (let i = 1; i <= lineCount; i++) {
+      const decorations = editor1.current?.getLineDecorations(i) ?? [];
+      // Only remove decorations that are NOT the search glyph
+      const decorationsToRemove = decorations.filter(
+        (d) => !d.options.glyphMarginClassName?.includes('esql-search-glyph')
+      );
+      if (decorationsToRemove.length > 0) {
+        editor1.current?.removeDecorations(decorationsToRemove.map((d) => d.id));
+      }
+    }
+
+    const { root } = Parser.parse(query.esql);
+    const functions: ESQLFunction[] = [];
+
+    walk(root, {
+      visitFunction: (node) => functions.push(node),
+    });
+
+    const searchFunctions = functions.filter(({ name }) => name === 'kql');
+
+    if (!searchFunctions.length) {
+      return [];
+    }
+
+    const searchQueries = searchFunctions
+      .map((func) => {
+        if (func.args.length > 0 && isStringLiteral(func.args[0])) {
+          return func.args[0];
+        }
+        return '';
+      })
+      .filter((arg) => arg !== '');
+
+    if (!searchQueries.length) {
+      return [];
+    }
+
+    if (searchQueries[0] && typeof searchQueries[0] !== 'string') {
+      const range = new monaco.Range(
+        1,
+        searchQueries[0].location.min + 2,
+        1,
+        searchQueries[0].location.max + 1
+      );
+      editor1?.current?.createDecorationsCollection([
+        {
+          range,
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: searchBadgeClassName,
+          },
+        },
+      ]);
+    }
+  }, [editorModel, query.esql]);
+
+  useEffect(
+    function updateOnQueryChange() {
+      addSearchDecorator();
+      addSearchGlyph();
+    },
+    [query.esql, addSearchDecorator, addSearchGlyph]
+  );
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -840,6 +1035,7 @@ const ESQLEditorInternal = function ESQLEditor({
         bottom: 8,
       },
       quickSuggestions: false,
+      glyphMargin: true,
       inlineSuggest: {
         enabled: true,
         showToolbar: 'onHover',
@@ -867,7 +1063,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
-    <>
+    <div css={[searchGlyphStyles, searchBadgeStyle]}>
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -1042,6 +1238,12 @@ const ESQLEditorInternal = function ESQLEditor({
                       },
                     });
 
+                    // Add search glyph click handler
+                    editor.onMouseDown(handleSearchGlyphClick);
+
+                    // Add search glyph to the first line using createDecorationsCollection
+                    addSearchGlyph();
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
                       const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
@@ -1191,7 +1393,7 @@ const ESQLEditorInternal = function ESQLEditor({
         ),
         document.body
       )}
-    </>
+    </div>
   );
 
   return editorPanel;

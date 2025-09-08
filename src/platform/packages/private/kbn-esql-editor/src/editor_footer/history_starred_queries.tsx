@@ -413,18 +413,6 @@ export function QueryList({
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
-        search={{
-          box: {
-            incremental: true,
-            placeholder: isStarredTab
-              ? i18n.translate('esqlEditor.query.starredQueriesSearchPlaceholder', {
-                  defaultMessage: 'Search starred queries...',
-                })
-              : i18n.translate('esqlEditor.query.queryHistorySearchPlaceholder', {
-                  defaultMessage: 'Search query history...',
-                }),
-          },
-        }}
         css={tableStyling}
         tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />

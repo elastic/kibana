@@ -360,7 +360,13 @@ export async function inlineSuggest(
 ): Promise<{ items: InlineSuggestionItem[] }> {
   try {
     const trimmedText = processQuery(textBeforeCursor).toLowerCase();
+    const trimmedFullText = processQuery(fullText).toLowerCase();
     const isManualTrigger = triggerKind === 'manual';
+
+    if (trimmedText !== trimmedFullText) {
+      // Don't show suggestions if cursor is not at the end of the query
+      return { items: [] };
+    }
 
     // Fetch data sources and field information
     const fromCommand = await getFromCommand(trimmedText, callbacks);
