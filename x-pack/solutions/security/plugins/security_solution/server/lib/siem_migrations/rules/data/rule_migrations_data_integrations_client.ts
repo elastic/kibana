@@ -96,13 +96,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       function_score: {
         query: {
           bool: {
-            must: {
-              semantic: {
-                query:
-                  'risk score threshold alert risk based analytics mitre attack tactics techniques risk object splunk enterprise security risk scoring risk severity',
-                field: 'elser_embedding',
-              },
-            },
+            must: { semantic: { query: semanticQuery, field: 'elser_embedding' } },
             filter: { exists: { field: 'data_streams' } },
           },
         },
