@@ -94,8 +94,6 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
                 count: originalDashboardsCount,
               });
 
-              logger.error(JSON.stringify({ items, originalDashboardsExport }, null, 2));
-
               const resourceIdentifier = new DashboardResourceIdentifier(
                 items[0].original_dashboard.vendor
               );
