@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
@@ -44,7 +44,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'An Jira Service Management action',
+            name: 'A Jira Service Management action',
             connector_type_id: '.jira-service-management',
             config: {
               apiUrl: simulatorUrl,
@@ -60,7 +60,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
           is_preconfigured: false,
           is_system_action: false,
           is_deprecated: false,
-          name: 'An Jira Service Management action',
+          name: 'A Jira Service Management action',
           connector_type_id: '.jira-service-management',
           is_missing_secrets: false,
           config: {
@@ -69,12 +69,60 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
         });
       });
 
+      it('should return 400 Bad Request when creating the connector without the apiUrl', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A Jira Service Management action',
+            connector_type_id: '.jira-service-management',
+            config: {},
+            secrets: {
+              apiKey: '123',
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
+      it('should return 400 Bad Request when creating the connector with a apiUrl that is not allowed', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A Jira Service Management action',
+            connector_type_id: '.jira-service-management',
+            config: {
+              apiUrl: 'http://jsm.mynonexistent.com',
+            },
+            secrets: {
+              apiKey: '123',
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: error validating url: target url "http://jsm.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+            });
+          });
+      });
+
       it('should return 400 Bad Request when creating the connector without secrets', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'An Jira Service Management action',
+            name: 'A Jira Service Management action',
             connector_type_id: '.jira-service-management',
             config: {
               apiUrl: simulatorUrl,
@@ -601,7 +649,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'An Jira Service Management simulator',
+            name: 'A Jira Service Management simulator',
             connector_type_id: '.jira-service-management',
             config: {
               apiUrl: url,

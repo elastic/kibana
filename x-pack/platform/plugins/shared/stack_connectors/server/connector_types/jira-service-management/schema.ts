@@ -10,10 +10,7 @@ import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
 export const ConfigSchema = schema.object({
-  /**
-   * Only used for testing purposes, to direct the connector to a different URL
-   */
-  apiUrl: schema.maybe(schema.string()),
+  apiUrl: schema.string(),
 });
 
 export const SecretsSchema = schema.object({

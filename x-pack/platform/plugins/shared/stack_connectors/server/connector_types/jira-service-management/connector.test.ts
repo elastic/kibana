@@ -72,7 +72,7 @@ describe('JiraServiceManagementConnector', () => {
 
     connector = new JiraServiceManagementConnector({
       configurationUtilities: mockedActionsConfig,
-      config: {},
+      config: { apiUrl: 'https://api.atlassian.com' },
       connector: { id: '1', type: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID },
       secrets: { apiKey: '123' },
       logger,

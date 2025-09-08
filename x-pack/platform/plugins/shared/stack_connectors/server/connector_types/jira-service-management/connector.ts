@@ -11,7 +11,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import type { Writable } from 'type-fest';
+import { join } from 'path';
 import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
 import type {
   CloseAlertParams,
@@ -23,13 +23,8 @@ import type {
 import * as i18n from './translations';
 import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
 
-const JSM_INTEGRATION_EVENTS_API_BASE_PATH = 'https://api.atlassian.com/jsm/ops/integration/v2/';
-
 export class JiraServiceManagementConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {
-    if (!params.config.apiUrl) {
-      (params.config as Writable<Config>).apiUrl = JSM_INTEGRATION_EVENTS_API_BASE_PATH;
-    }
     super(params);
 
     this.registerSubAction({
@@ -137,12 +132,13 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
     const fullURL = this.concatPathToURL(`alerts/${newAlias}/close`);
     fullURL.searchParams.set('identifierType', 'alias');
 
-    const url = fullURL.toString();
+    const { alias, ...paramsWithoutAlias } = params;
 
     const res = await this.request(
       {
         method: 'post',
-        url,
+        url: fullURL.toString(),
+        data: paramsWithoutAlias,
         headers: this.createHeaders(),
         responseSchema: Response,
       },
@@ -153,6 +149,6 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
   }
 
   private concatPathToURL(path: string) {
-    return new URL(path, this.config.apiUrl);
+    return new URL(path, join(this.config.apiUrl, '/jsm/ops/integration/v2/'));
   }
 }

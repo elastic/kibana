@@ -8,3 +8,5 @@
 import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 
 export const DEFAULT_ALIAS = `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`;
+
+export const DEFAULT_URL = `https://api.atlassian.com` as const;

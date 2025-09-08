@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const API_URL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.jiraServiceManagement.apiUrlLabel',
+  {
+    defaultMessage: 'API URL',
+  }
+);
+
 export const API_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.jiraServiceManagement.apiKeySecret',
   {
