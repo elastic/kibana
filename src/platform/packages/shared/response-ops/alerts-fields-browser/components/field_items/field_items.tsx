@@ -113,9 +113,11 @@ const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): Fiel
           <EuiFlexItem grow={false}>
             <EuiIconTip
               content={type}
-              data-test-subj={`field-${name}-icon`}
               css={styles.icon}
               type={getIconFromType(type ?? null)}
+              iconProps={{
+                'data-test-subj': `field-${name}-icon`,
+              }}
             />
           </EuiFlexItem>
 

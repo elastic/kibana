@@ -46,8 +46,10 @@ export const appIdColumn: EuiBasicTableColumn<UISession> = {
     return (
       <EuiIconTip
         content={appToTooltip(appId) ?? capitalize(app)}
-        data-test-subj="sessionManagementAppIcon"
         type={`${app}App`}
+        iconProps={{
+          'data-test-subj': 'sessionManagementAppIcon',
+        }}
       />
     );
   },

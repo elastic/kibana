@@ -147,7 +147,9 @@ export const getTableColumns = (
                 type="checkInCircleFilled"
                 color="success"
                 size="m"
-                data-test-subj="ESQLEditor-queryHistory-success"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-success',
+                }}
               />
             );
           case 'error':
@@ -175,7 +177,9 @@ export const getTableColumns = (
                 type="warning"
                 color="warning"
                 size="m"
-                data-test-subj="ESQLEditor-queryHistory-warning"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-warning',
+                }}
               />
             );
         }

@@ -30,7 +30,9 @@ export const getIconHeaderColumns = ({
       name: (
         <EuiIconTip
           content={i18n.NOTES}
-          data-test-subj="notes-count-header-icon"
+          iconProps={{
+            'data-test-subj': 'notes-count-header-icon',
+          }}
           size="m"
           type="editorComment"
         />
@@ -48,7 +50,9 @@ export const getIconHeaderColumns = ({
       name: (
         <EuiIconTip
           content={i18n.PINNED_EVENTS}
-          data-test-subj="pinned-event-header-icon"
+          iconProps={{
+            'data-test-subj': 'pinned-event-header-icon',
+          }}
           size="m"
           type="pin"
         />
@@ -68,7 +72,9 @@ export const getIconHeaderColumns = ({
       name: (
         <EuiIconTip
           content={i18n.FAVORITES}
-          data-test-subj="favorites-header-icon"
+          iconProps={{
+            'data-test-subj': 'favorites-header-icon',
+          }}
           size="m"
           type="starEmpty"
         />
