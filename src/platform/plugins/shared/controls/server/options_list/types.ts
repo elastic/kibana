@@ -11,7 +11,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import type {
   OptionsListParsedSuggestions,
-  OptionsListDSLRequestBody,
+  OptionsListRequestBody,
 } from '../../common/options_list/types';
 
 export interface EsBucket {
@@ -21,11 +21,11 @@ export interface EsBucket {
 }
 
 export interface OptionsListValidationAggregationBuilder {
-  buildAggregation: (req: OptionsListDSLRequestBody) => unknown;
-  parse: (response: SearchResponse, req: OptionsListDSLRequestBody) => OptionsListSelection[];
+  buildAggregation: (req: OptionsListRequestBody) => unknown;
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListSelection[];
 }
 
 export interface OptionsListSuggestionAggregationBuilder {
-  buildAggregation: (req: OptionsListDSLRequestBody) => unknown;
-  parse: (response: SearchResponse, req: OptionsListDSLRequestBody) => OptionsListParsedSuggestions;
+  buildAggregation: (req: OptionsListRequestBody) => unknown;
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListParsedSuggestions;
 }

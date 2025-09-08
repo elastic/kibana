@@ -12,7 +12,7 @@ import { get } from 'lodash';
 
 import { isValidSearch } from '../../../common/options_list/is_valid_search';
 import type {
-  OptionsListDSLRequestBody,
+  OptionsListRequestBody,
   OptionsListSuggestions,
 } from '../../../common/options_list/types';
 import type { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
@@ -26,7 +26,7 @@ export const getExactMatchAggregationBuilder: () => OptionsListSuggestionAggrega
   exactMatchAggregationBuilder;
 
 const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
-  buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListDSLRequestBody) => {
+  buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
     if (!isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique: 'exact' })) {
       return {};
     }

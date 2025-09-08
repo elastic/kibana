@@ -8,13 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
+import type { OptionsListRequestBody } from '../../../common/options_list/types';
 import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 
 describe('options list fetch all suggestions query', () => {
   describe('suggestion aggregation', () => {
     test('number field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -49,7 +49,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('nested string (keyword, text+keyword) field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -90,7 +90,7 @@ describe('options list fetch all suggestions query', () => {
 
   describe('suggestion parsing', () => {
     test('test parsing for number field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -143,7 +143,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('test parsing for boolean field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'cancelled',
         allowExpensiveQueries: true,
@@ -194,7 +194,7 @@ describe('options list fetch all suggestions query', () => {
     });
 
     test('test parsing for date field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: '@timestamp',
         allowExpensiveQueries: true,

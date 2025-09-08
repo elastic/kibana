@@ -8,13 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
+import type { OptionsListRequestBody } from '../../../common/options_list/types';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 
 describe('options list exact match search query', () => {
   describe('suggestion aggregation', () => {
     test('string (keyword, text+keyword) field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -46,7 +46,7 @@ describe('options list exact match search query', () => {
     });
 
     test('nested string (keyword, text+keyword) field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
         allowExpensiveQueries: true,
@@ -89,7 +89,7 @@ describe('options list exact match search query', () => {
     });
 
     test('numeric field', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
         allowExpensiveQueries: true,
@@ -123,7 +123,7 @@ describe('options list exact match search query', () => {
 
   describe('parsing', () => {
     test('parses keyword result', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: 'cool',
         allowExpensiveQueries: true,
@@ -164,7 +164,7 @@ describe('options list exact match search query', () => {
   });
 
   test('parses numeric field result', () => {
-    const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+    const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
       allowExpensiveQueries: true,

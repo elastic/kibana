@@ -86,53 +86,31 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
 /**
  * The Options list request type taken in by the public Options List service.
  */
-interface OptionsListRequestBase
-  extends Pick<OptionsListControlState, 'searchTechnique' | 'sort' | 'selectedOptions'> {
-  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  allowExpensiveQueries: boolean;
-  runPastTimeout?: boolean;
-  searchString?: string;
-  size: number;
-  ignoreValidations?: boolean;
-  timeRange?: TimeRange;
-  dataView?: DataView;
-  filters?: Filter[];
-  field?: FieldSpec;
-  query?: Query | AggregateQuery;
-}
-
-export type OptionsListDSLRequest = OptionsListRequestBase &
-  Required<Pick<OptionsListRequestBase, 'dataView' | 'field'>>;
-
-export type OptionsListESQLRequest = Omit<
-  OptionsListRequestBase,
-  'query' | 'size' | 'allowExpensiveQueries'
+export type OptionsListRequest = Omit<
+  OptionsListRequestBody,
+  'filters' | 'fieldName' | 'fieldSpec'
 > & {
-  query: AggregateQuery;
-};
-
-export type OptionsListRequest = OptionsListDSLRequest | OptionsListESQLRequest;
-
-export const isOptionsListDSLRequest = (request: unknown): request is OptionsListDSLRequest => {
-  const req = request as OptionsListDSLRequest;
-  return Object.hasOwn(req, 'dataView') && Object.hasOwn(req, 'field');
-};
-export const isOptionsListESQLRequest = (request: unknown): request is OptionsListESQLRequest => {
-  const req = request as OptionsListESQLRequest;
-  return (
-    !Object.hasOwn(req, 'dataView') &&
-    !Object.hasOwn(req, 'field') &&
-    Object.hasOwn(req, 'query') &&
-    Object.hasOwn(req.query, 'esql')
-  );
+  timeRange?: TimeRange;
+  dataView: DataView;
+  filters?: Filter[];
+  field: FieldSpec;
+  query?: Query | AggregateQuery;
 };
 
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListDSLRequestBody
-  extends Omit<OptionsListRequestBase, 'filters' | 'fieldSpec'>,
-    Pick<OptionsListDSLControlState, 'fieldName'> {
+export interface OptionsListRequestBody
+  extends Pick<
+    OptionsListDSLControlState,
+    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
+  > {
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  allowExpensiveQueries: boolean;
+  ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
+  runPastTimeout?: boolean;
+  searchString?: string;
   fieldSpec?: FieldSpec;
+  size: number;
 }

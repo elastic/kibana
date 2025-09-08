@@ -10,7 +10,7 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
+import type { OptionsListRequestBody } from '../../../common/options_list/types';
 import * as ExactMatch from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
 
@@ -39,7 +39,7 @@ describe('options list type-specific search queries', () => {
   describe('suggestion aggregation', () => {
     test('for unsupported field types, return exact match search instead', () => {
       const exactMatchSpy = jest.spyOn(ExactMatch, 'getExactMatchAggregationBuilder');
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'success',
         allowExpensiveQueries: true,
@@ -52,7 +52,7 @@ describe('options list type-specific search queries', () => {
 
     describe('string (keyword, text+keyword, or nested) field', () => {
       test('test keyword field, with a search string', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'cooool',
           allowExpensiveQueries: true,
@@ -98,7 +98,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('test keyword field, with wildcard search and basic search string', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'c',
           searchTechnique: 'wildcard',
@@ -145,7 +145,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('test keyword field, with wildcard search and search string that needs to be escaped', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: '.c?o&o[l*',
           searchTechnique: 'wildcard',
@@ -192,7 +192,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('test nested field, with a search string', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'cooool',
           allowExpensiveQueries: true,
@@ -250,7 +250,7 @@ describe('options list type-specific search queries', () => {
 
     describe('IP field', () => {
       test('handles an invalid search', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
           allowExpensiveQueries: true,
@@ -265,7 +265,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('full IPv4 in the search string, creates IP range aggregation with CIDR mask', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
           allowExpensiveQueries: true,
@@ -313,7 +313,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('full IPv6 in the search string, creates IP range aggregation with CIDR mask', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
           allowExpensiveQueries: true,
@@ -361,7 +361,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('partial IPv4 in the search string, creates IP range aggregation with min and max', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
           searchString: '41.77',
@@ -409,7 +409,7 @@ describe('options list type-specific search queries', () => {
       });
 
       test('partial IPv46 in the search string, creates IP range aggregation with min and max', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
           searchString: 'cdb6:',
@@ -460,7 +460,7 @@ describe('options list type-specific search queries', () => {
 
     describe('numeric field', () => {
       test('handles an invalid search', () => {
-        const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'bytes',
           allowExpensiveQueries: true,
@@ -480,7 +480,7 @@ describe('options list type-specific search queries', () => {
 
   describe('suggestion parsing', () => {
     test('parses string (keyword, text+keyword) result', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: 'cool',
         allowExpensiveQueries: true,
@@ -527,7 +527,7 @@ describe('options list type-specific search queries', () => {
     });
 
     test('parses string nested result', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: 'co',
         fieldName: 'coolNestedField',
@@ -579,7 +579,7 @@ describe('options list type-specific search queries', () => {
     });
 
     test('parses mixed IPv4 and IPv6 result', () => {
-      const optionsListRequestBodyMock: OptionsListDSLRequestBody = {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: '21',
         fieldName: 'clientip',

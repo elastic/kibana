@@ -11,7 +11,7 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
 import type {
-  OptionsListDSLRequestBody,
+  OptionsListRequestBody,
   OptionsListSuggestions,
 } from '../../../common/options_list/types';
 import type { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
@@ -31,7 +31,7 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
     sort,
     size,
     allowExpensiveQueries,
-  }: OptionsListDSLRequestBody) => {
+  }: OptionsListRequestBody) => {
     let suggestionsAgg: { suggestions: any; unique_terms?: any } = {
       suggestions: {
         terms: {
@@ -70,7 +70,7 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
 
     return suggestionsAgg;
   },
-  parse: (rawEsResult, { fieldSpec, allowExpensiveQueries }: OptionsListDSLRequestBody) => {
+  parse: (rawEsResult, { fieldSpec, allowExpensiveQueries }: OptionsListRequestBody) => {
     const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
     const suggestions = get(
       rawEsResult,
