@@ -15,25 +15,26 @@ import type {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
+import type { controlsGroupSchema } from '@kbn/controls-schemas';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { WithRequiredProperty } from '@kbn/utility-types';
+import type { CONTENT_ID } from '../../../common/content_management';
 import type {
-  dashboardItemSchema,
-  panelGridDataSchema,
-  panelSchema,
-  sectionSchema,
-  filterSchema,
-  querySchema,
   dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
   dashboardGetResultSchema,
+  dashboardItemSchema,
   dashboardSearchOptionsSchema,
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
+  filterSchema,
   optionsSchema,
+  panelGridDataSchema,
+  panelSchema,
+  querySchema,
+  sectionSchema,
 } from './cm_services';
-import type { CONTENT_ID } from '../../../common/content_management';
 
 export type DashboardFilter = TypeOf<typeof filterSchema>;
 export type DashboardQuery = TypeOf<typeof querySchema>;
@@ -56,6 +57,19 @@ export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
   attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
+};
+
+export type StoredControlState = Pick<
+  TypeOf<typeof controlsGroupSchema>['controls'][number],
+  'grow' | 'type' | 'width'
+> & {
+  order: number; // order is generated from the array order
+  id: string; // id is required
+  dataViewRefName?: string;
+  explicitInput: Omit<
+    TypeOf<typeof controlsGroupSchema>['controls'][number],
+    'grow' | 'type' | 'width'
+  >;
 };
 
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;

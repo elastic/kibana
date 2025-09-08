@@ -12,20 +12,23 @@ import { omit } from 'lodash';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type { StoredDataControlState } from '../server/types';
 
 const REFERENCE_NAME_PREFIX = 'controlGroup_';
 
 export function extractReferences(
-  id: string | undefined,
   state: DataControlState,
   referenceNameSuffix: string
-): { state: Omit<DataControlState, 'dataViewId'>; references?: Reference[] } {
-  if (!id) return { state, references: [] };
+): { state: StoredDataControlState; references?: Reference[] } {
+  const refName = `${referenceNameSuffix}:${state.dataViewId}`;
   return {
-    state: { ...omit(state, 'dataViewId') },
+    state: {
+      ...omit(state, 'dataViewId'),
+      dataViewRefName: refName,
+    },
     references: [
       {
-        name: getReferenceName(id, referenceNameSuffix),
+        name: refName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: state.dataViewId,
       },
@@ -35,30 +38,19 @@ export function extractReferences(
 
 export function injectReferences(
   id: string | undefined,
-  state: Omit<DataControlState, 'dataViewId'>,
+  state: StoredDataControlState,
+  referenceNameSuffix: string,
   references: Reference[] = []
 ): DataControlState {
-  const deserializedState = {
-    dataViewId: '',
-    ...state,
-  };
-  (references ?? []).forEach((reference) => {
-    const referenceName = reference.name;
-    const { controlId } = parseReferenceName(referenceName);
-    if (id === controlId) deserializedState.dataViewId = reference.id;
-  });
-  return { ...deserializedState };
+  let { dataViewRefName } = state;
+  if (!dataViewRefName && id) {
+    // backwards compatibility for when we didn't store the ref name with the saved object (<v9.2.0)
+    dataViewRefName = getLegacyReferenceName(id, referenceNameSuffix);
+  }
+  const dataViewRef = references.find(({ name }) => name === dataViewRefName);
+  return { ...omit(state, 'dataViewRefName'), dataViewId: dataViewRef?.id ?? '' };
 }
 
-function getReferenceName(controlId: string, referenceNameSuffix: string) {
+function getLegacyReferenceName(controlId: string, referenceNameSuffix: string) {
   return `${REFERENCE_NAME_PREFIX}${controlId}:${referenceNameSuffix}`;
-}
-
-function parseReferenceName(referenceName: string) {
-  return {
-    controlId: referenceName.substring(
-      REFERENCE_NAME_PREFIX.length,
-      referenceName.lastIndexOf(':')
-    ),
-  };
 }

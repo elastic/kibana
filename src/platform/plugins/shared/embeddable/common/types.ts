@@ -13,8 +13,16 @@ export type EmbeddableTransforms<
   StoredState extends object = object,
   State extends object = object
 > = {
-  transformOut?: (args: { id?: string; state: StoredState; references?: Reference[] }) => State;
-  transformIn?: (args: { id?: string; state: State }) => {
+  transformOut?: (args: {
+    state: StoredState;
+    references?: Reference[];
+    /**
+     * @deprecated ID is passed as an argument for legacy reference names that require it
+     * to fetch their old references. It should not be used for new reference names.
+     */
+    id?: string;
+  }) => State;
+  transformIn?: (args: { state: State }) => {
     state: StoredState;
     references?: Reference[];
   };

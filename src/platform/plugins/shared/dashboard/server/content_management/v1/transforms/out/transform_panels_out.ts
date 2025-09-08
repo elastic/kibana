@@ -81,7 +81,6 @@ function transformPanelProperties(
   try {
     if (transforms?.transformOut) {
       transformedPanelConfig = transforms.transformOut({
-        id: panelIndex,
         state: panelConfig,
         references,
       });

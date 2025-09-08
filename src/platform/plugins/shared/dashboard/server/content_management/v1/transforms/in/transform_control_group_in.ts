@@ -14,24 +14,32 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import { embeddableService, logger } from '../../../../kibana_services';
+import type { StoredControlState } from '../../types';
+import { prefixReferencesFromPanel } from '../../../../../common';
 
 export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) {
   if (!controlGroupInput) return { references: [] };
 
   const { controls } = controlGroupInput;
-  console.log('IN!', { controls });
   let references: Reference[] = [];
   const updatedControls = Object.fromEntries(
     controls.map((controlState, index) => {
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      let transformedControlState = controlState as Partial<ControlsGroupState['controls'][number]>;
+      let transformedControlState = controlState as Partial<StoredControlState>;
       try {
         if (transforms?.transformIn) {
-          const transformed = transforms.transformIn({ id, state: controlState });
-          transformedControlState = transformed.state;
-          references = [...references, ...(transformed.references ?? [])];
+          const transformed = transforms.transformIn({ state: controlState });
+          // prefix all the references with their IDs
+          references = [
+            ...references,
+            ...prefixReferencesFromPanel(id, transformed.references ?? []),
+          ];
+          // update the reference names in the SO
+          const transformedState = transformed.state as StoredControlState;
+          transformedState.dataViewRefName = `${id}:${transformedState.dataViewRefName}`;
+          transformedControlState = transformedState;
         }
       } catch (transformInError) {
         // do not prevent save if transformIn throws

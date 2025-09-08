@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
+import { flow, omit } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { SerializableRecord, WithRequiredProperty } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import { embeddableService, logger } from '../../../../kibana_services';
-
-type ControlWithRequiredId = WithRequiredProperty<
-  ControlsGroupState['controls'][number] & { order?: number; explicitInput: object },
-  'id'
->;
+import type { StoredControlState } from '../../types';
 
 /**
  * Transform functions for serialized controls state.
@@ -41,7 +37,7 @@ export function transformControlObjectToArray(
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
-export function transformControlProperties(controls: Array<ControlWithRequiredId>) {
+export function transformControlProperties(controls: Array<StoredControlState>) {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
@@ -56,7 +52,7 @@ export function transformControlProperties(controls: Array<ControlWithRequiredId
 }
 
 function injectControlReferences(
-  controls: Array<ControlWithRequiredId>,
+  controls: Array<StoredControlState>,
   references: Reference[]
 ): ControlsGroupState['controls'] {
   const transformedControls: ControlsGroupState['controls'] = [];
@@ -65,6 +61,7 @@ function injectControlReferences(
     const transforms = embeddableService.getTransforms(control.type);
     try {
       if (transforms?.transformOut) {
+        console.log({ control, references });
         transformedControls.push(
           transforms.transformOut({
             id: control.id,
@@ -82,6 +79,8 @@ function injectControlReferences(
       );
     }
   });
+
+  console.log({ transformedControls });
 
   return transformedControls;
 }
