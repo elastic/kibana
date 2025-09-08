@@ -568,7 +568,7 @@ describe('RelatedDashboardsClient', () => {
               },
             },
           },
-        },
+        } as any,
       });
 
       // @ts-ignore private method access for testing only
