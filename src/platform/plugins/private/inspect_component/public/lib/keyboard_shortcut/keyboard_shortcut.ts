@@ -31,3 +31,9 @@ export const isMac = (): boolean =>
   ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
     .toLowerCase()
     .includes('mac');
+
+/**
+ * Check if Escape key was pressed.
+ * @return {boolean} 'true' if Escape key was pressed, 'false' otherwise.
+ */
+export const isEscapeKey = (event: KeyboardEvent): boolean => event.key === 'Escape';

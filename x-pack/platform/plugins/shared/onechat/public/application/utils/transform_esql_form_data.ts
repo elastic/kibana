@@ -10,24 +10,29 @@ import type { EsqlToolDefinition, EsqlToolFieldTypes } from '@kbn/onechat-common
 import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
-import type { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
+import {
+  EsqlParamSource,
+  type EsqlToolFormData,
+} from '../components/tools/form/types/tool_form_types';
 
 /**
  * Transforms an ES|QL tool into its UI form representation.
  * @param tool - The ES|QL tool to transform.
  * @returns The ES|QL tool form data.
  */
-export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): OnechatEsqlToolFormData => {
+export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): EsqlToolFormData => {
   return {
-    name: tool.id,
+    toolId: tool.id,
     description: tool.description,
     esql: tool.configuration.query,
-    tags: tool.tags,
+    labels: tool.tags,
     params: Object.entries(tool.configuration.params).map(([name, { type, description }]) => ({
       name,
       type,
       description,
+      source: EsqlParamSource.Custom,
     })),
+    type: ToolType.esql,
   };
 };
 
@@ -36,11 +41,12 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): OnechatEs
  * @param data - The ES|QL form data to transform.
  * @returns The transformed data as an ES|QL tool.
  */
-export const transformFormDataToEsqlTool = (data: OnechatEsqlToolFormData): EsqlToolDefinition => {
+export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDefinition => {
   const esqlParams = new Set(getESQLQueryVariables(data.esql));
   return {
-    id: data.name,
+    id: data.toolId,
     description: data.description,
+    readonly: false,
     configuration: {
       query: data.esql,
       params: data.params
@@ -54,7 +60,7 @@ export const transformFormDataToEsqlTool = (data: OnechatEsqlToolFormData): Esql
         }, {} as Record<string, { type: EsqlToolFieldTypes; description: string }>),
     },
     type: ToolType.esql,
-    tags: data.tags,
+    tags: data.labels,
   };
 };
 
@@ -63,10 +69,8 @@ export const transformFormDataToEsqlTool = (data: OnechatEsqlToolFormData): Esql
  * @param data - The ES|QL form data to transform.
  * @returns The payload for the create tools API.
  */
-export const transformEsqlFormDataForCreate = (
-  data: OnechatEsqlToolFormData
-): CreateToolPayload => {
-  return transformFormDataToEsqlTool(data);
+export const transformEsqlFormDataForCreate = (data: EsqlToolFormData): CreateToolPayload => {
+  return omit(transformFormDataToEsqlTool(data), ['readonly']);
 };
 
 /**
@@ -74,8 +78,6 @@ export const transformEsqlFormDataForCreate = (
  * @param data - The ES|QL form data to transform.
  * @returns The payload for the update tool API.
  */
-export const transformEsqlFormDataForUpdate = (
-  data: OnechatEsqlToolFormData
-): UpdateToolPayload => {
-  return omit(transformFormDataToEsqlTool(data), ['id', 'type']);
+export const transformEsqlFormDataForUpdate = (data: EsqlToolFormData): UpdateToolPayload => {
+  return omit(transformFormDataToEsqlTool(data), ['id', 'type', 'readonly']);
 };

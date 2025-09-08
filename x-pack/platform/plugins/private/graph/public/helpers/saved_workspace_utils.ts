@@ -109,7 +109,7 @@ export async function getSavedWorkspace(contentClient: ContentClient, id: string
   const resp = resolveResult.item;
 
   if (!resp.attributes) {
-    throw new SavedObjectNotFound(savedWorkspaceType, id || '');
+    throw new SavedObjectNotFound({ type: savedWorkspaceType, id: id || '' });
   }
 
   const savedObject = {

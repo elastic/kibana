@@ -41,6 +41,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 1,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
         {
           id: '1',
@@ -52,6 +53,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 2,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
         {
           id: '2',
@@ -63,6 +65,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 3,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
         {
           id: '4',
@@ -74,6 +77,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 4,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
         {
           id: '5',
@@ -85,6 +89,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 5,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
         {
           id: '6',
@@ -96,6 +101,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 6,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
         {
           id: '7',
@@ -107,6 +113,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           topologicalIndex: 7,
           executionIndex: 0,
           spaceId: 'default',
+          path: [],
         },
       ],
     },

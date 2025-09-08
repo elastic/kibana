@@ -8,10 +8,11 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { SelectableEntry } from '@kbn/unified-histogram';
-import { ToolbarSelector } from '@kbn/unified-histogram';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
+import { ClearAllSection } from './clear_all_section';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -20,12 +21,14 @@ interface DimensionsFilterProps {
   }>;
   selectedDimensions: string[];
   onChange: (dimensions: string[]) => void;
+  onClear: () => void;
 }
 
 export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
+  onClear,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -97,7 +100,7 @@ export const DimensionsSelector = ({
     if (selectedDimensions.length === 0) {
       return (
         <FormattedMessage
-          id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabel"
+          id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
           defaultMessage="No dimensions selected"
         />
       );
@@ -106,7 +109,7 @@ export const DimensionsSelector = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <FormattedMessage
-            id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabelWithSelection"
+            id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
             defaultMessage="Dimensions"
           />
         </EuiFlexItem>
@@ -116,6 +119,23 @@ export const DimensionsSelector = ({
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
+
+  const popoverContentBelowSearch = useMemo(() => {
+    return (
+      <ClearAllSection
+        selectedOptionsLength={selectedDimensions.length}
+        onClearAllAction={onClear}
+        selectedOptionsMessage={i18n.translate(
+          'metricsExperience.dimensionsSelector.selectedStatusMessage',
+          {
+            defaultMessage:
+              '{count, plural, one {# dimension selected} other {# dimensions selected}}',
+            values: { count: selectedDimensions.length },
+          }
+        )}
+      />
+    );
+  }, [onClear, selectedDimensions.length]);
 
   return (
     <ToolbarSelector
@@ -131,6 +151,7 @@ export const DimensionsSelector = ({
       options={options}
       singleSelection={false}
       onChange={handleChange}
+      popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
 };

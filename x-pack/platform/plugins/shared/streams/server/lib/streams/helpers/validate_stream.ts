@@ -8,6 +8,7 @@
 import type { Streams } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
+import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
@@ -40,5 +41,16 @@ export function validateRootStreamChanges(
 
   if (isInheritLifecycle(nextStreamDefinition.ingest.lifecycle)) {
     throw new MalformedStreamError('Root stream cannot inherit lifecycle');
+  }
+}
+
+export function validateNoManualIngestPipelineUsage(steps: StreamlangStep[]) {
+  for (const step of steps) {
+    if ('action' in step && step.action === 'manual_ingest_pipeline') {
+      throw new MalformedStreamError('Manual ingest pipelines are not allowed');
+    }
+    if ('where' in step && step.where && 'steps' in step.where) {
+      validateNoManualIngestPipelineUsage(step.where.steps);
+    }
   }
 }

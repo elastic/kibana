@@ -16,6 +16,7 @@ import {
 import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type {
+  DocumentMatchFilterOptions,
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
@@ -57,6 +58,9 @@ export const useStreamRoutingEvents = () => {
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
+      },
+      setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
+        service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
       },
     }),
     [service]

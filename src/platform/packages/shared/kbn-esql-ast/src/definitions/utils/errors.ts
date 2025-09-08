@@ -294,6 +294,24 @@ Expected one of:
         }),
         type: 'warning',
       };
+
+    case 'inferenceIdRequired':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.inferenceIdRequired', {
+          defaultMessage: '"inference_id" parameter is required for {command}.',
+          values: { command: out.command.toUpperCase() },
+        }),
+        type: 'error',
+      };
+
+    case 'unsupportedQueryType':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedQueryType', {
+          defaultMessage: '{command} query must be of type text. Found {expressionType}',
+          values: { command: out.command.toUpperCase(), expressionType: out.expressionType },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }

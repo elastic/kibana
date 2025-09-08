@@ -41,6 +41,9 @@ export interface EsWorkflowExecution {
   createdBy: string;
   startedAt: string;
   finishedAt: string;
+  cancelRequested: boolean;
+  cancelledAt?: string;
+  cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
@@ -63,6 +66,9 @@ export interface EsWorkflowStepExecution {
   spaceId: string;
   id: string;
   stepId: string;
+
+  /** Current step's scope path */
+  path: string[];
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;

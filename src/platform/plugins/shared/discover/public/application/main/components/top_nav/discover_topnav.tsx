@@ -17,7 +17,6 @@ import { useSavedSearchInitial } from '../../state_management/discover_state_pro
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
@@ -33,6 +32,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -151,8 +151,7 @@ export const DiscoverTopNav = ({
         return;
       }
       if (needsSave) {
-        onSaveSearch({
-          savedSearch: stateContainer.savedSearchState.getState(),
+        onSaveDiscoverSession({
           services,
           state: stateContainer,
           onClose: () =>

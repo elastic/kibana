@@ -536,7 +536,7 @@ paths:
             application/json:
               schema:
                 $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationStats'
-        204:
+        404:
           description: Indicates the migration id was not found.
 
   /internal/siem_migrations/rules/{migration_id}/stop:

@@ -640,7 +640,7 @@ describe('autocomplete', () => {
         ]
       );
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'index1',
+        '',
         'dateField',
         'textField'
       );
@@ -651,7 +651,7 @@ describe('autocomplete', () => {
           { text: 'index1 | ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1, ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1 METADATA ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `index1${q.queryString}`),
         ],
         undefined,
         [
@@ -664,7 +664,7 @@ describe('autocomplete', () => {
       );
 
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'index2',
+        '',
         'dateField',
         'textField'
       );
@@ -674,7 +674,7 @@ describe('autocomplete', () => {
           { text: 'index2 | ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2, ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2 METADATA ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,
         [
@@ -691,7 +691,7 @@ describe('autocomplete', () => {
       // range to cover "bar" and not "foo$bar". We have to make sure
       // we're setting it ourselves.
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'foo$bar',
+        '',
         'dateField',
         'textField'
       );
@@ -716,7 +716,7 @@ describe('autocomplete', () => {
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 5, end: 12 },
           },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `foo$bar${q.queryString}`),
         ],
         undefined,
         [, [{ name: 'foo$bar', hidden: false }]]
@@ -724,7 +724,7 @@ describe('autocomplete', () => {
 
       // This is an identifier that matches multiple sources
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'i*',
+        '',
         'dateField',
         'textField'
       );
@@ -734,7 +734,7 @@ describe('autocomplete', () => {
           { text: 'i* | ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i*, ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i* METADATA ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `i*${q.queryString}`),
         ],
         undefined,
         [

@@ -19,7 +19,7 @@ const useConversation = () => {
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
-  const { data: conversation } = useQuery({
+  const { data: conversation, isLoading } = useQuery({
     queryKey,
     // Disable query if we are on a new conversation or if there is a message currently being sent
     // Otherwise a refetch will overwrite our optimistic updates
@@ -32,7 +32,7 @@ const useConversation = () => {
     },
   });
 
-  return { conversation };
+  return { conversation, isLoading };
 };
 
 export const useAgentId = () => {
@@ -41,8 +41,8 @@ export const useAgentId = () => {
 };
 
 export const useConversationTitle = () => {
-  const { conversation } = useConversation();
-  return conversation?.title ?? '';
+  const { conversation, isLoading } = useConversation();
+  return { title: conversation?.title ?? '', isLoading };
 };
 
 export const useConversationRounds = () => {

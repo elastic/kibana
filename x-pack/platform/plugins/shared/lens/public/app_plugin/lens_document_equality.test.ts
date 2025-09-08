@@ -16,6 +16,7 @@ import type {
   Visualization,
   VisualizationMap,
 } from '../types';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 const visualizationType = 'lnsSomeVis';
 
@@ -48,6 +49,7 @@ const defaultDoc: LensDocument = {
       type: 'index-pattern',
     },
   ],
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 describe('lens document equality', () => {

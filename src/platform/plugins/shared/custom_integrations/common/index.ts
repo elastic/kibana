@@ -60,6 +60,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   network: { title: 'Network', parent_id: undefined },
   network_security: { title: 'Network', parent_id: 'security' },
   notification: { title: 'Notification', parent_id: 'observability' },
+  opentelemetry: { title: 'OpenTelemetry', parent_id: undefined },
   observability: { title: 'Observability', parent_id: undefined },
   os_system: { title: 'Operating Systems', parent_id: undefined },
   process_manager: { title: 'Process Manager', parent_id: 'observability' },

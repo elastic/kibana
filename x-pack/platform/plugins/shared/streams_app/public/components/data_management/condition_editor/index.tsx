@@ -32,7 +32,6 @@ import {
 import { isPlainObject } from 'lodash';
 import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
-import { useResizeChecker } from '@kbn/react-hooks';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
@@ -120,8 +119,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
-  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
-
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
@@ -153,26 +150,23 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
-          <CodeEditor
-            dataTestSubj="streamsAppConditionEditorCodeEditor"
-            height={200}
-            languageId="json"
-            value={JSON.stringify(condition, null, 2)}
-            onChange={(value) => {
-              try {
-                handleConditionChange(JSON.parse(value));
-              } catch (error: unknown) {
-                // do nothing
-              }
-            }}
-            editorDidMount={setupResizeChecker}
-            editorWillUnmount={destroyResizeChecker}
-            options={{
-              readOnly: status === 'disabled',
-            }}
-          />
-        </div>
+        <CodeEditor
+          dataTestSubj="streamsAppConditionEditorCodeEditor"
+          height={200}
+          languageId="json"
+          value={JSON.stringify(condition, null, 2)}
+          onChange={(value) => {
+            try {
+              handleConditionChange(JSON.parse(value));
+            } catch (error: unknown) {
+              // do nothing
+            }
+          }}
+          options={{
+            readOnly: status === 'disabled',
+            automaticLayout: true,
+          }}
+        />
       ) : isFilterCondition ? (
         <FilterForm
           disabled={status === 'disabled'}

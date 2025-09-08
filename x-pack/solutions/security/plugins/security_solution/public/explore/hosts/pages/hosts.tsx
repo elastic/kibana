@@ -189,9 +189,12 @@ const HostsComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
+            {/* TODO: newDataViewPicker - Can be removed after migration to new dataview picker */}
             <SiemSearchBar
               id={InputsModelId.global}
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
+              }
             />
           </FiltersGlobal>
 

@@ -91,7 +91,7 @@ describe('ExitForeachNodeImpl', () => {
       expect(wfExecutionRuntimeManager.setStepResult).not.toHaveBeenCalled();
     });
 
-    it('should exit scope', async () => {
+    it('should exit iteration scope', async () => {
       await underTest.run();
       expect(exitScope).toHaveBeenCalledTimes(1);
     });
@@ -137,9 +137,9 @@ describe('ExitForeachNodeImpl', () => {
       );
     });
 
-    it('should exit scope', async () => {
+    it('should exit iteration scope and whole foreach scope', async () => {
       await underTest.run();
-      expect(exitScope).toHaveBeenCalledTimes(1);
+      expect(exitScope).toHaveBeenCalledTimes(2);
     });
   });
 });

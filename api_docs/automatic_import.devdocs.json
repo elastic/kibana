@@ -153,7 +153,28 @@
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "automaticImport",
+          "id": "def-server.AutomaticImportPluginStart.inference",
+          "type": "Object",
+          "tags": [],
+          "label": "inference",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceServerStart",
+              "text": "InferenceServerStart"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

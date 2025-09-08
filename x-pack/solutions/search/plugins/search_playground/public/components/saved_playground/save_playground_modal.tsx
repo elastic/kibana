@@ -39,7 +39,7 @@ function makePlaygroundName(name?: string) {
         values: { name },
       })
     : i18n.translate('xpack.searchPlayground.savedPlayground.defaultName', {
-        defaultMessage: 'New RAG Playground',
+        defaultMessage: 'New Playground',
       });
 }
 
@@ -84,7 +84,7 @@ export const SavePlaygroundModal = ({
           reset(newPlayground);
           notifications.toasts.addSuccess({
             title: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.title', {
-              defaultMessage: 'RAG playground saved',
+              defaultMessage: 'playground saved',
             }),
             text: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.text', {
               defaultMessage: '{name} was saved.',
@@ -99,7 +99,7 @@ export const SavePlaygroundModal = ({
           const errorMessage = getErrorMessage(error);
           notifications.toasts.addError(error instanceof Error ? error : new Error(errorMessage), {
             title: i18n.translate('xpack.searchPlayground.savedPlayground.saveError.title', {
-              defaultMessage: 'Error saving RAG playground',
+              defaultMessage: 'Error saving playground',
             }),
             toastMessage: errorMessage,
           });
@@ -131,12 +131,12 @@ export const SavePlaygroundModal = ({
           {saveAs ? (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.savePlaygroundModal.title"
-              defaultMessage="Save RAG playground as"
+              defaultMessage="Save playground as"
             />
           ) : (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.savePlaygroundModal.title"
-              defaultMessage="Save RAG playground"
+              defaultMessage="Save playground"
             />
           )}
         </EuiModalHeaderTitle>

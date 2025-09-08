@@ -64,7 +64,7 @@ export const EditPlaygroundNameModal = ({
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.searchPlayground.savedPlayground.nameEditModal.title"
-            defaultMessage="Edit RAG playground name"
+            defaultMessage="Edit playground name"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>

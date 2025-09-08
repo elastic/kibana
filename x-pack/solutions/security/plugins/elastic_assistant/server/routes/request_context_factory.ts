@@ -216,6 +216,19 @@ export class RequestContextFactory implements IRequestContextFactory {
           contentReferencesEnabled: params?.contentReferencesEnabled,
         });
       }),
+
+      getCheckpointSaver: memoize(async () => {
+        if (!this.assistantService.getIsCheckpointSaverEnabled()) {
+          return null;
+        }
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createCheckpointSaver({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
+        });
+      }),
     };
   }
 }
