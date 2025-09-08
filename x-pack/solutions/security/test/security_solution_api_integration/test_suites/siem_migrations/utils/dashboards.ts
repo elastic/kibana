@@ -25,7 +25,7 @@ import type {
   GetDashboardMigrationStatsResponse,
   UpdateDashboardMigrationRequestBody,
   GetDashboardMigrationDashboardsRequestQuery,
-  GetDashboardMigrationDashboardsResponse
+  GetDashboardMigrationDashboardsResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type SuperTest from 'supertest';
 import { replaceParams } from '@kbn/openapi-common/shared';
