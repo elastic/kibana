@@ -28,7 +28,7 @@ export type SecurityTelemetryFtrProviderContext = GenericFtrProviderContext<
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.ts')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
