@@ -23,7 +23,7 @@ export function fieldWildcardMatcher(globs: string[] = [], metaFields: unknown[]
       return false;
     }
     try {
-      return globs.some((p) => makeRegEx(p).test(`${val}`));
+      return globs.some((p) => makeRegEx(p).test(String(val)));
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e.toString());
