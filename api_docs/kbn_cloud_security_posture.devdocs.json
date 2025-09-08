@@ -799,7 +799,7 @@
             "section": "def-public.UseCspOptions",
             "text": "UseCspOptions"
           },
-          ", isPreview?: boolean) => { index: string; size: number; aggs: { count: { filters: { other_bucket_key: string; filters: { [x: string]: { term: { 'vulnerability.severity': { value: string; case_insensitive: boolean; }; }; }; }; }; }; }; ignore_unavailable: boolean; query: { bool: { filter: (",
+          ", isPreview?: boolean) => { index: string; size: number; aggs: { count: { filters: { other_bucket_key: string; filters: { [x: string]: { term: { 'vulnerability.severity': { value: string; case_insensitive: boolean; }; }; }; }; }; }; by_datastream_dataset: { terms: { field: string; size: number; }; }; }; ignore_unavailable: boolean; query: { bool: { filter: (",
           "QueryDslQueryContainer",
           " | undefined)[]; }; }; sort: { [key: string]: string; }[] | undefined; }"
         ],
@@ -1362,12 +1362,10 @@
             "description": [],
             "signature": [
               "{ aws: ",
-              "CloudProviderConfig",
-              "; azure: ",
-              "CloudProviderConfig",
+              "AwsCloudProviderConfig",
               "; gcp: ",
               "CloudProviderConfig",
-              "; }"
+              "; azure: AzureProviderConfig; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
             "deprecated": false,
@@ -1588,13 +1586,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
@@ -1744,7 +1736,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2023,6 +2015,23 @@
               "<",
               "AggregationsStringRareTermsBucketKeys",
               ">"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingsAggs.by_datastream_dataset",
+            "type": "Object",
+            "tags": [],
+            "label": "by_datastream_dataset",
+            "description": [],
+            "signature": [
+              "AggregationsMultiBucketAggregateBase",
+              "<",
+              "AggregationsStringRareTermsBucketKeys",
+              "> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
@@ -3081,36 +3090,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.AWS_ORGANIZATION_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "AWS_ORGANIZATION_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"organization-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.AWS_SINGLE_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "AWS_SINGLE_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"single-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
         "type": "Type",
         "tags": [],
@@ -3251,36 +3230,6 @@
           " & { id: \"findings-vulnerability-panel-preview\"; params: BaseVulnerabilityFlyoutProps & PreviewModeProps; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.GCP_ORGANIZATION_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "GCP_ORGANIZATION_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"organization-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.GCP_SINGLE_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "GCP_SINGLE_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"single-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

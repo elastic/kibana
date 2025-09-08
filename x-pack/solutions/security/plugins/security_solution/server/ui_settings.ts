@@ -30,6 +30,7 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
@@ -44,6 +45,8 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
   DEFAULT_VALUE_REPORT_MINUTES,
   DEFAULT_VALUE_REPORT_RATE,
 } from '../common/constants';
@@ -248,6 +251,26 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
+    ...(experimentalFeatures.siemReadinessDashboard && {
+      [ENABLE_SIEM_READINESS_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+          defaultMessage: 'Enable SIEM Readiness Dashboard',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+          {
+            defaultMessage: `Enable the SIEM Readiness Dashboard within Security Solution. When enabled, you can access the new SIEM Readiness page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Cloud Connector',
@@ -345,6 +368,51 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.continueSuppressionWindowAdvancedSettingEnabled
+      ? {
+          [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+              {
+                defaultMessage: 'Default suppression behavior on alert closure',
+              }
+            ),
+            value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+              {
+                defaultMessage:
+                  'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+              }
+            ),
+            type: 'select',
+            schema: schema.oneOf([
+              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+            ]),
+            options: [
+              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+            ],
+            optionLabels: {
+              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+                {
+                  defaultMessage: 'Restart suppression',
+                }
+              ),
+              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+                {
+                  defaultMessage: 'Continue suppression until window ends',
+                }
+              ),
+            },
+            category: [APP_ID],
+            requiresPageReload: false,
+          },
+        }
+      : {}),
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
         defaultMessage: 'Related integrations',

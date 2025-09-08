@@ -101,7 +101,7 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Workflow ID')).toBeInTheDocument();
+      expect(screen.getByText('Select Workflow')).toBeInTheDocument();
       expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
     });
   });
@@ -132,7 +132,13 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
+        body: JSON.stringify({
+          limit: 1000,
+          page: 1,
+          query: '',
+        }),
+      });
     });
 
     // Check that the selectable component is rendered
@@ -149,7 +155,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
+        body: JSON.stringify({
+          limit: 1000,
+          page: 1,
+          query: '',
+        }),
+      });
     });
 
     await waitFor(() => {
@@ -495,7 +507,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
+        body: JSON.stringify({
+          limit: 1000,
+          page: 1,
+          query: '',
+        }),
+      });
     });
 
     await waitFor(() => {
@@ -574,7 +592,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
+        body: JSON.stringify({
+          limit: 1000,
+          page: 1,
+          query: '',
+        }),
+      });
     });
 
     await waitFor(() => {
@@ -650,7 +674,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
+        body: JSON.stringify({
+          limit: 1000,
+          page: 1,
+          query: '',
+        }),
+      });
     });
 
     await waitFor(() => {
@@ -716,7 +746,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
+        body: JSON.stringify({
+          limit: 1000,
+          page: 1,
+          query: '',
+        }),
+      });
     });
 
     // Click on the input to open the popover

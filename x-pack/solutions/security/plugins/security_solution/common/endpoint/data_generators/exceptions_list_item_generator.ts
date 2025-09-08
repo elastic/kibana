@@ -408,4 +408,43 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       ...overrides,
     };
   }
+
+  generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    // Use HOST field by default for compatibility with all OS types
+    // USERNAME field can only be used with Windows-only OS
+    const defaultEntries: ExceptionListItemSchema['entries'] = [
+      {
+        field: 'host.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: `host_${this.randomString(5)}`,
+      },
+    ];
+
+    return this.generate({
+      name: `Trusted device (${this.randomString(5)})`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
+      entries: defaultEntries,
+      ...overrides,
+    });
+  }
+
+  generateTrustedDeviceForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDeviceForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
 }

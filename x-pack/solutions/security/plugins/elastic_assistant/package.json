@@ -8,6 +8,7 @@
     "evaluate-model": "node ./scripts/model_evaluator",
     "generate-security-ai-prompts": "node ./scripts/generate_security_ai_prompts",
     "draw-graph": "node ./scripts/draw_graph",
-    "encode-security-labs-content": "node ./scripts/encode_security_labs_content"
+    "encode-security-labs-content": "node ./scripts/encode_security_labs_content",
+    "stress-test-mappings": "node ./scripts/stess_test_mappings"
   }
 }

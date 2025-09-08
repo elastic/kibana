@@ -10,10 +10,11 @@
 import type { HTMLAttributes } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import { MenuItem } from '../menu_item';
 import type { SideNavLogo } from '../../../types';
+import { useTooltip } from '../../hooks/use_tooltip';
 
 export interface SideNavLogoProps extends HTMLAttributes<HTMLAnchorElement>, SideNavLogo {
   id: string;
@@ -31,6 +32,7 @@ export const SideNavLogoComponent = ({
   ...props
 }: SideNavLogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const { tooltipRef, handleMouseOut } = useTooltip();
 
   /**
    * In Figma, the logo icon is 20x20.
@@ -51,7 +53,7 @@ export const SideNavLogoComponent = ({
     }
   `;
 
-  return (
+  const menuItem = (
     <div css={wrapperStyles}>
       <MenuItem
         aria-label={`${label} homepage`}
@@ -65,4 +67,21 @@ export const SideNavLogoComponent = ({
       </MenuItem>
     </div>
   );
+
+  if (isCollapsed) {
+    return (
+      <EuiToolTip
+        ref={tooltipRef}
+        content={label}
+        disableScreenReaderOutput
+        onMouseOut={handleMouseOut}
+        position="right"
+        repositionOnScroll
+      >
+        {menuItem}
+      </EuiToolTip>
+    );
+  }
+
+  return menuItem;
 };
