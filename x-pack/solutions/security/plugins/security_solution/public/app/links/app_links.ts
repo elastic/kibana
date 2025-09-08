@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
-import { aiValueLinks } from '../../reports/links';
+import { getAiValueFilteredLinks } from '../../reports/links';
 import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
@@ -27,7 +27,6 @@ import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
-  aiValueLinks,
   alertsLink,
   alertSummaryLink,
   attackDiscoveryLinks,
@@ -50,10 +49,10 @@ export const getFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<AppLinkItems> => {
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+  const aiValueFilteredLinks = await getAiValueFilteredLinks(core, plugins);
 
-  return Object.freeze([
+  const filteredLinks = [
     dashboardsLinks,
-    aiValueLinks,
     alertsLink,
     alertSummaryLink,
     attackDiscoveryLinks,
@@ -69,5 +68,12 @@ export const getFilteredLinks = async (
     onboardingLinks,
     managementFilteredLinks,
     siemReadinessLinks,
-  ]);
+  ];
+
+  // Add AI Value links only if user has required role
+  if (aiValueFilteredLinks) {
+    filteredLinks.push(aiValueFilteredLinks);
+  }
+
+  return Object.freeze(filteredLinks);
 };

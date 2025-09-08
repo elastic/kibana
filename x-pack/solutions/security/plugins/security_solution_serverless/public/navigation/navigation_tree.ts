@@ -19,87 +19,101 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Security' }
 );
 
-export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
-  body: [
-    {
-      type: 'navGroup',
-      id: 'security_solution_nav',
-      title: SOLUTION_NAME,
-      icon: 'logoSecurity',
-      breadcrumbStatus: 'hidden',
-      isCollapsible: false,
-      defaultIsCollapsed: false,
-      children: [
-        {
-          link: 'discover',
-        },
-        defaultNavigationTree.dashboards(),
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.rules(),
-            {
-              id: SecurityPageName.alerts,
-              link: securityLink(SecurityPageName.alerts),
-            },
-            {
-              id: SecurityPageName.attackDiscovery,
-              link: securityLink(SecurityPageName.attackDiscovery),
-            },
-            {
-              id: SecurityPageName.cloudSecurityPostureFindings,
-              link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
-            },
-            defaultNavigationTree.cases(),
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.entityAnalytics(),
-            defaultNavigationTree.explore(),
-            defaultNavigationTree.investigations(),
-            {
-              id: SecurityPageName.threatIntelligence,
-              link: securityLink(SecurityPageName.threatIntelligence),
-            },
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.assetInventory,
-              link: securityLink(SecurityPageName.assetInventory),
-            },
-            defaultNavigationTree.assets(services),
-            {
-              id: SecurityPageName.siemReadiness,
-              link: securityLink(SecurityPageName.siemReadiness),
-            },
-          ],
-        },
-        defaultNavigationTree.ml(),
-      ],
-    },
-  ],
-  footer: [
-    {
-      id: 'security_solution_nav_footer',
-      type: 'navGroup',
-      children: [
-        {
-          id: SecurityPageName.landing,
-          link: securityLink(SecurityPageName.landing),
-          icon: 'launch',
-        },
-        {
-          link: 'dev_tools',
-          title: i18nStrings.devTools,
-          icon: 'editorCodeBlock',
-        },
-        createStackManagementNavigationTree(),
-      ],
-    },
-  ],
-});
+export const createNavigationTree = async (
+  services: Services
+): Promise<NavigationTreeDefinition> => {
+  // Check if user has AI Value access
+  let hasAiValueAccess = false;
+  try {
+    const currentUser = await services.security.authc.getCurrentUser();
+    if (currentUser) {
+      const userRoles = currentUser.roles || [];
+      const allowedRoles = ['admin', 'soc_manager'];
+      hasAiValueAccess = allowedRoles.some((role) => userRoles.includes(role));
+    }
+  } catch (error) {
+    // If we can't get the current user, default to no access
+    hasAiValueAccess = false;
+  }
+
+  return {
+    body: [
+      {
+        type: 'navGroup',
+        id: 'security_solution_nav',
+        title: SOLUTION_NAME,
+        icon: 'logoSecurity',
+        breadcrumbStatus: 'hidden',
+        isCollapsible: false,
+        defaultIsCollapsed: false,
+        children: [
+          {
+            link: 'discover',
+          },
+          defaultNavigationTree.dashboards(),
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              defaultNavigationTree.rules(),
+              {
+                id: SecurityPageName.alerts,
+                link: securityLink(SecurityPageName.alerts),
+              },
+              {
+                id: SecurityPageName.attackDiscovery,
+                link: securityLink(SecurityPageName.attackDiscovery),
+              },
+              {
+                id: SecurityPageName.cloudSecurityPostureFindings,
+                link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+              },
+              defaultNavigationTree.cases(),
+            ],
+          },
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              defaultNavigationTree.entityAnalytics(),
+              defaultNavigationTree.explore(),
+              defaultNavigationTree.investigations(),
+              {
+                id: SecurityPageName.threatIntelligence,
+                link: securityLink(SecurityPageName.threatIntelligence),
+              },
+            ],
+          },
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              {
+                id: SecurityPageName.assetInventory,
+                link: securityLink(SecurityPageName.assetInventory),
+              },
+              defaultNavigationTree.assets(services),
+              {
+                id: SecurityPageName.siemReadiness,
+                link: securityLink(SecurityPageName.siemReadiness),
+              },
+            ],
+          },
+          defaultNavigationTree.ml(),
+        ],
+      },
+    ],
+    footer: [
+      {
+        id: 'security_solution_nav_footer',
+        type: 'navGroup',
+        children: [
+          defaultNavigationTree.launchpad({ hasAiValueAccess }),
+          {
+            link: 'dev_tools',
+            title: i18nStrings.devTools,
+            icon: 'editorCodeBlock',
+          },
+          createStackManagementNavigationTree(),
+        ],
+      },
+    ],
+  };
+};

@@ -31,6 +31,11 @@ export const i18nStrings = {
       defaultMessage: 'Explore',
     }),
   },
+  launchpad: {
+    title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
+      defaultMessage: 'Security launchpad',
+    }),
+  },
   assets: {
     title: i18n.translate('securitySolutionPackages.navLinks.assets', {
       defaultMessage: 'Assets',
