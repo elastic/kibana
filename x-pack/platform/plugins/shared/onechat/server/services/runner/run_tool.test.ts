@@ -125,7 +125,6 @@ describe('runTool', () => {
     });
 
     expect(results).toEqual({
-      runId: expect.any(String),
       results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
   });
@@ -174,10 +173,7 @@ describe('runTool', () => {
     };
 
     tool.handler.mockImplementation((toolParams, { events }) => {
-      events.emit({
-        type: 'test-event',
-        data: { foo: 'bar' },
-      });
+      events.reportProgress('some progress');
       return { results: [{ type: ToolResultType.other, data: { foo: 'bar' } }] };
     });
 
@@ -188,9 +184,9 @@ describe('runTool', () => {
 
     expect(emittedEvents).toHaveLength(1);
     expect(emittedEvents[0]).toEqual({
-      type: 'test-event',
+      type: 'tool_progress',
       data: {
-        foo: 'bar',
+        message: 'some progress',
       },
     });
   });
