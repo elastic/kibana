@@ -104,6 +104,29 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
   // add settings
   if (isObject(migratedDefinition.ingest) && !('settings' in migratedDefinition.ingest)) {
     set(migratedDefinition, 'ingest.settings', {});
+  }
+
+  // Add metadata to Group stream if missing
+  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      group: {
+        ...migratedDefinition.group,
+        metadata: {},
+      },
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add tags to Group stream if missing
+  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      group: {
+        ...migratedDefinition.group,
+        tags: [],
+      },
+    };
     hasBeenMigrated = true;
   }
 

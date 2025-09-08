@@ -12,7 +12,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
-import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -98,6 +98,14 @@ export interface UpdateLifecycleAction {
   };
 }
 
+export interface UpdateDataStreamMappingsAction {
+  type: 'update_data_stream_mappings';
+  request: {
+    name: string;
+    mappings: StreamsMappingProperties;
+  };
+}
+
 export interface DeleteDatastreamAction {
   type: 'delete_datastream';
   request: {
@@ -152,6 +160,7 @@ export type ElasticsearchAction =
   | UpdateDefaultIngestPipelineAction
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
+  | UpdateDataStreamMappingsAction
   | DeleteQueriesAction
   | UpdateIngestSettingsAction;
 
@@ -171,6 +180,7 @@ export interface ActionsByType {
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
+  update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
 }

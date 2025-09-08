@@ -8,8 +8,8 @@
 import type { Feature } from 'geojson';
 import type { ReactNode } from 'react';
 import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { ImportFailure } from '@kbn/file-upload-common';
 import type { IImporter } from '../types';
-import type { ImportFailure } from '../../../common/types';
 
 export interface GeoFilePreview {
   features: Feature[];

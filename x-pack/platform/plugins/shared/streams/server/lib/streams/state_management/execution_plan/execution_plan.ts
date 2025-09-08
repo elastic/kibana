@@ -15,6 +15,7 @@ import {
 import {
   deleteDataStream,
   updateDataStreamsLifecycle,
+  updateDataStreamsMappings,
   rolloverDataStream,
   upsertDataStream,
   updateDefaultIngestPipeline,
@@ -40,6 +41,7 @@ import type {
   DeleteIngestPipelineAction,
   DeleteQueriesAction,
   ElasticsearchAction,
+  UpdateDataStreamMappingsAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
@@ -80,6 +82,7 @@ export class ExecutionPlan {
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
+      update_data_stream_mappings: [],
       delete_queries: [],
       update_ingest_settings: [],
     };
@@ -167,6 +170,7 @@ export class ExecutionPlan {
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
+        update_data_stream_mappings,
         delete_queries,
         update_ingest_settings,
         ...rest
@@ -193,6 +197,7 @@ export class ExecutionPlan {
       await Promise.all([
         this.rollover(rollover),
         this.updateLifecycle(update_lifecycle),
+        this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
       ]);
 
@@ -286,6 +291,19 @@ export class ExecutionPlan {
           names: [action.request.name],
           lifecycle: action.request.lifecycle,
           isServerless: this.dependencies.isServerless,
+        })
+      )
+    );
+  }
+
+  private async updateDataStreamMappingsAndRollover(actions: UpdateDataStreamMappingsAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsMappings({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+          mappings: action.request.mappings,
         })
       )
     );
