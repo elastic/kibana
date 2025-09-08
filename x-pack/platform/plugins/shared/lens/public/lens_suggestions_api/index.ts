@@ -94,10 +94,11 @@ export const suggestionsApi = ({
     dataViews,
   }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
 
+  const chartType = preferredChartType?.toLowerCase();
+
   // check if there is an XY chart suggested
   // if user has requested for a line or area, we want to sligthly change the state
   // to return line / area instead of a bar chart
-  const chartType = preferredChartType?.toLowerCase();
   const XYSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
   // a type can be area, line, area_stacked, area_percentage etc
   const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
@@ -113,6 +114,25 @@ export const suggestionsApi = ({
       },
     ];
   }
+
+  // check if there is a pie chart suggested
+  // if user has requested for a donut, we want to sligthly change the state
+  // to return a donut instead of a pie chart
+  const pieSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsPie');
+  const isDonut = chartType === 'donut';
+  if (pieSuggestion && chartType && isDonut) {
+    const visualizationState = visualizationMap[
+      pieSuggestion.visualizationId
+    ]?.switchVisualizationType?.(chartType, pieSuggestion?.visualizationState);
+
+    return [
+      {
+        ...pieSuggestion,
+        visualizationState,
+      },
+    ];
+  }
+
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
   const suggestionsList = [activeVisualization, ...newSuggestions];
