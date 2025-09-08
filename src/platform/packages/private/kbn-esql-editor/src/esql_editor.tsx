@@ -18,6 +18,7 @@ import {
   type EuiButtonColor,
   useGeneratedHtmlId,
   EuiFormLabel,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -31,6 +32,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
@@ -71,6 +73,8 @@ import type {
   ControlsContext,
 } from './types';
 import { useRestorableState, withRestorableState } from './restorable_state';
+import { getHistoryItems } from './history_local_storage';
+import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -130,8 +134,27 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { dataViews, expressions, application, core, fieldsMetadata, uiSettings, uiActions, data } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    application,
+    core,
+    fieldsMetadata,
+    uiSettings,
+    uiActions,
+    data,
+    usageCollection,
+  } = kibana.services;
+
+  const favoritesClient = useMemo(
+    () =>
+      new FavoritesClient<StarredQueryMetadata>('esql_editor', 'esql_query', {
+        http: core.http,
+        userProfile: core.userProfile,
+        usageCollection,
+      }),
+    [core.http, core.userProfile, usageCollection]
+  );
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -165,6 +188,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [isLLMLoading, setIsLLMLoading] = useState(false);
   const [abortController, setAbortController] = useState(new AbortController());
 
   // contains both client side validation and server messages
@@ -557,9 +581,42 @@ const ESQLEditorInternal = function ESQLEditor({
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
+      getHistoryStarredItems: async () => {
+        const historyItems = getHistoryItems('desc');
+        const { favoriteMetadata } = (await favoritesClient?.getFavorites()) || {};
+
+        const items = historyItems.map((item) => item.queryString);
+
+        Object.keys(favoriteMetadata).forEach((id) => {
+          const item = favoriteMetadata[id];
+          const { queryString } = item;
+          items.push(queryString);
+        });
+        return items;
+      },
+      getESQLCompletionFromLLM: async (queryString: string) => {
+        setIsLLMLoading(true);
+        try {
+          const message: { content: string } = await core.http.post(
+            '/internal/esql/esql_completion',
+            {
+              body: JSON.stringify({ query: queryString }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          return message.content;
+        } catch (error) {
+          return '';
+        } finally {
+          setIsLLMLoading(false);
+        }
+      },
     };
     return callbacks;
   }, [
+    favoritesClient,
     fieldsMetadata,
     kibana.services?.esql,
     dataSourcesCache,
@@ -702,6 +759,21 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
 
+  const inlineCompletionsProvider = useMemo(() => {
+    return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
+  }, [esqlCallbacks]);
+
+  // Store reference to the provider for triggering LLM suggestions
+  const inlineCompletionsProviderRef = useRef<
+    (monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void }) | undefined
+  >();
+
+  useEffect(() => {
+    inlineCompletionsProviderRef.current = inlineCompletionsProvider as
+      | (monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void })
+      | undefined;
+  }, [inlineCompletionsProvider]);
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -747,6 +819,7 @@ const ESQLEditorInternal = function ESQLEditor({
       accessibilitySupport: 'auto',
       autoIndent: 'keep',
       automaticLayout: true,
+      contextmenu: true,
       fixedOverflowWidgets: true,
       folding: false,
       fontSize: 14,
@@ -766,7 +839,13 @@ const ESQLEditorInternal = function ESQLEditor({
         top: 8,
         bottom: 8,
       },
-      quickSuggestions: true,
+      quickSuggestions: false,
+      inlineSuggest: {
+        enabled: true,
+        showToolbar: 'onHover',
+        suppressSuggestions: false,
+        keepOnBlur: false,
+      },
       readOnly: isDisabled,
       renderLineHighlight: 'line',
       renderLineHighlightOnlyWhenFocus: true,
@@ -844,6 +923,7 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      {isLLMLoading && <EuiProgress size="xs" color="accent" />}
       <EuiFlexGroup
         gutterSize="none"
         css={{
@@ -867,7 +947,13 @@ const ESQLEditorInternal = function ESQLEditor({
                 position: relative;
               `}
             >
-              <div css={styles.editorContainer}>
+              <div
+                css={styles.editorContainer}
+                onContextMenu={(e) => {
+                  // Prevent browser's default context menu to ensure Monaco's context menu always appears
+                  e.preventDefault();
+                }}
+              >
                 <CodeEditor
                   htmlId={htmlId}
                   aria-label={formLabel}
@@ -885,6 +971,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  inlineCompletionsProvider={inlineCompletionsProvider}
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
@@ -899,7 +986,14 @@ const ESQLEditorInternal = function ESQLEditor({
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown((e) => {
+                      // Don't interfere with right-clicks (context menu) - let Monaco handle them
+                      if (e.event.rightButton) {
+                        // Ensure the browser's default context menu is prevented
+                        e.event.preventDefault();
+                        return;
+                      }
+
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
@@ -922,6 +1016,32 @@ const ESQLEditorInternal = function ESQLEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
+
+                    // Add keyboard shortcut for inline suggestions
+                    editor.addAction({
+                      id: 'esql.triggerInlineSuggestions',
+                      label: 'ES|QL: Get AI Suggestions',
+                      keybindings: [
+                        // eslint-disable-next-line no-bitwise
+                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+                      ],
+                      contextMenuGroupId: 'navigation',
+                      run: (editorInstance) => {
+                        // Set the flag to indicate our custom action was triggered
+                        inlineCompletionsProviderRef.current?.triggerLLMSuggestions();
+
+                        try {
+                          editorInstance.trigger(
+                            'manual',
+                            'editor.action.inlineSuggest.trigger',
+                            {}
+                          );
+                        } catch (error) {
+                          // nothing to do here
+                        }
+                      },
+                    });
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
                       const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);

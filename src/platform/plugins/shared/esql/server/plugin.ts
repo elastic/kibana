@@ -13,12 +13,17 @@ import type { ContentManagementServerSetup } from '@kbn/content-management-plugi
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
+import type { EsqlServerPluginSetup, EsqlServerPluginStart } from './types';
 
-export interface EsqlServerPluginSetup {
-  getExtensionsRegistry: () => ESQLExtensionsRegistry;
-}
-
-export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
+export class EsqlServerPlugin
+  implements
+    Plugin<
+      EsqlServerPluginSetup,
+      void,
+      { contentManagement: ContentManagementServerSetup },
+      EsqlServerPluginStart
+    >
+{
   private readonly initContext: PluginInitializerContext;
   private extensionsRegistry: ESQLExtensionsRegistry = new ESQLExtensionsRegistry();
 
@@ -26,7 +31,10 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
     this.initContext = { ...initContext };
   }
 
-  public setup(core: CoreSetup, plugins: { contentManagement: ContentManagementServerSetup }) {
+  public setup(
+    core: CoreSetup<EsqlServerPluginStart, void>,
+    plugins: { contentManagement: ContentManagementServerSetup }
+  ) {
     const { initContext } = this;
 
     core.uiSettings.register(getUiSettings());

@@ -97,6 +97,13 @@ export interface CodeEditorProps {
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
+   * Inline completions provider for inline suggestions
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.InlineCompletionsProvider.html
+   */
+  inlineCompletionsProvider?: monaco.languages.InlineCompletionsProvider;
+
+  /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
@@ -219,6 +226,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   suggestionProvider,
   signatureProvider,
   hoverProvider,
+  inlineCompletionsProvider,
   placeholder,
   languageConfiguration,
   codeActions,
@@ -442,6 +450,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           monaco.languages.registerHoverProvider(languageId, hoverProvider);
         }
 
+        if (inlineCompletionsProvider) {
+          monaco.languages.registerInlineCompletionsProvider(languageId, inlineCompletionsProvider);
+        }
+
         if (languageConfiguration) {
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
@@ -464,6 +476,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       suggestionProvider,
       signatureProvider,
       hoverProvider,
+      inlineCompletionsProvider,
       codeActions,
       languageConfiguration,
       enableFindAction,
