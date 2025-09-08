@@ -22,59 +22,65 @@ const mockLogger = {
   trace: jest.fn(),
 } as any as Logger;
 
-let counter = 0;
+let timestampCounter = 0;
 function getNextTimestamp() {
-  counter++;
-  return new Date(counter * 1000).toISOString();
+  timestampCounter++;
+  return new Date(timestampCounter * 1000).toISOString();
 }
 
-const userMessage: (msg: string) => Message = (msg: string) => ({
-  '@timestamp': getNextTimestamp(),
-  message: {
-    role: MessageRole.User,
-    content: msg,
-  },
-});
-
-const assistantMessage: (msg: string) => Message = (msg: string) => ({
-  '@timestamp': getNextTimestamp(),
-  message: {
-    content: msg,
-    role: MessageRole.Assistant,
-  },
-});
-
-const getTool = (
-  toolName: 'get_dataset_info' | 'query' | 'execute_query' | 'visualize_query'
-): Message[] => [
-  {
+function userMessage(msg: string) {
+  return {
     '@timestamp': getNextTimestamp(),
     message: {
-      content: '',
-      function_call: {
-        name: toolName,
-        arguments: JSON.stringify({}),
-        trigger: MessageRole.Assistant,
-      },
+      role: MessageRole.User,
+      content: msg,
+    },
+  };
+}
+
+function assistantMessage(msg: string) {
+  return {
+    '@timestamp': getNextTimestamp(),
+    message: {
+      content: msg,
       role: MessageRole.Assistant,
     },
-  },
-  {
-    '@timestamp': getNextTimestamp(),
-    message: {
-      content: JSON.stringify({ response: `${toolName} response` }),
-      name: toolName,
-      role: MessageRole.User,
+  };
+}
+
+function getTool(
+  toolName: 'get_dataset_info' | 'query' | 'execute_query' | 'visualize_query'
+): Message[] {
+  return [
+    {
+      '@timestamp': getNextTimestamp(),
+      message: {
+        content: '',
+        function_call: {
+          name: toolName,
+          arguments: JSON.stringify({}),
+          trigger: MessageRole.Assistant,
+        },
+        role: MessageRole.Assistant,
+      },
     },
-  },
-];
+    {
+      '@timestamp': getNextTimestamp(),
+      message: {
+        content: JSON.stringify({ response: `${toolName} response` }),
+        name: toolName,
+        role: MessageRole.User,
+      },
+    },
+  ];
+}
 
 function hasToolMessage(toolName: string) {
   return (msg: Message) =>
     msg.message.name === toolName || msg.message.function_call?.name === toolName;
 }
 
-const formatMessage = (msg: Message) => {
+function formatMessage(msg: Message) {
   const toolName = msg.message.function_call?.name
     ? `${msg.message.function_call.name} (request)`
     : msg.message.name
@@ -84,14 +90,16 @@ const formatMessage = (msg: Message) => {
   return toolName
     ? { role: msg.message.role, toolName }
     : { role: msg.message.role, message: msg.message.content };
-};
+}
 
 describe('collapseInternalToolCalls', () => {
+  const availableToolNames = ['get_dataset_info', 'query'];
+
   beforeEach(() => {
     jest.clearAllMocks();
+    timestampCounter = 0;
   });
 
-  const availableToolNames = ['get_dataset_info', 'query'];
   it('should not collapse messages if there are no tool calls', () => {
     const messages: Message[] = [userMessage('hello'), assistantMessage('hi there')];
     const collapsedMessages = collapseInternalToolCalls({
@@ -403,6 +411,22 @@ describe('collapseInternalToolCalls', () => {
         { role: 'user', message: 'What about the unique IPs?' },
       ]);
     });
+  });
+
+  it('should warn and leave messages unchanged when tool result JSON parse fails during collapse', () => {
+    const malformedToolResult = getTool('query');
+    malformedToolResult[1].message.content = '{ "response": "ok", '; // invalid JSON
+
+    const messages: Message[] = [...malformedToolResult, ...getTool('execute_query')];
+
+    const collapsedMessages = collapseInternalToolCalls({
+      messages,
+      availableToolNames: ['query'],
+      logger: mockLogger,
+    });
+
+    expect(collapsedMessages).toEqual(messages);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
   });
 });
 
