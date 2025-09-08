@@ -55,8 +55,6 @@ export const generateEsql = async ({
     esClient,
   });
 
-  console.log('*** resolved resource', JSON.stringify(resolvedResource, null, 2));
-
   const esqlEvents$ = naturalLanguageToEsql({
     // @ts-expect-error using a scoped inference client
     connectorId: undefined,
