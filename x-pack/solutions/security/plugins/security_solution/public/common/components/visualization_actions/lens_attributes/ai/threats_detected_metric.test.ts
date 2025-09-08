@@ -9,10 +9,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { getThreatsDetectedMetricLensAttributes } from './threats_detected_metric';
 import type { ExtraOptions } from '../../types';
 
-interface WithParams {
-  params: Record<string, unknown>;
-}
-
 describe('getThreatsDetectedMetricLensAttributes', () => {
   const defaultEuiTheme = {} as EuiThemeComputed;
   const defaultSpaceId = 'default';
@@ -32,7 +28,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
         title: 'Real threats detected',
         visualizationType: 'lnsMetric',
         type: 'lens',
-        version: 'WzI0LDFd',
         updated_at: '2025-07-21T15:51:38.660Z',
         references: [],
       })
