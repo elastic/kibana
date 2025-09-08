@@ -98,7 +98,7 @@ describe('metricsDataSourceProfileProvider', () => {
           ...mockServices.core,
           featureFlags: {
             ...mockServices.core.featureFlags,
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            getBooleanValue: jest.fn().mockReturnValue(false),
           },
         },
       });
