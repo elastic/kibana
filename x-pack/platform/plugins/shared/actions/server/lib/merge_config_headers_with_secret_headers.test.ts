@@ -47,7 +47,7 @@ describe('mergeConfigHeadersWithSecretHeaders', () => {
       configKey: 'configValue',
     });
   });
-  it('should return only secretHeaders when secretHeaders is undefined', () => {
+  it('should return only configHeaders when secretHeaders is undefined', () => {
     expect(mergeConfigHeadersWithSecretHeaders({ configKey: 'configValue' }, undefined)).toEqual({
       configKey: 'configValue',
     });
