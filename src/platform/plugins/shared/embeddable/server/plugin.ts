@@ -32,13 +32,13 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
+  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
   getTransforms: (type: string) => EmbeddableTransforms | undefined;
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
-  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -62,6 +62,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         this.transformsRegistry[type] = transforms;
       },
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
+      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
+      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
       telemetry: getTelemetryFunction(
         this.getEmbeddableFactory,
         this.enhancementsRegistry.getEnhancement
@@ -88,8 +90,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
       telemetry: getTelemetryFunction(
         this.getEmbeddableFactory,
         this.enhancementsRegistry.getEnhancement

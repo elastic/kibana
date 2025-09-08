@@ -78,6 +78,9 @@ export interface EmbeddableSetup {
    * @deprecated
    */
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+
+  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
+  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }
 
 export interface EmbeddableStart {
@@ -85,6 +88,4 @@ export interface EmbeddableStart {
   getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
   hasTransforms: (type: string) => boolean;
   getEnhancement: (enhancementId: string) => PersistableState;
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
-  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }

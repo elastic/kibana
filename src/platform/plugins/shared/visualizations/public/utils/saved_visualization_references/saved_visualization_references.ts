@@ -18,8 +18,14 @@ import { isObject } from 'lodash';
 import type { VisualizeSavedVisInputState } from '../../embeddable/types';
 import type { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
-import { extractControlsReferences, injectControlsReferences } from '../../../common/references/controls_references';
-import { extractTimeSeriesReferences, injectTimeSeriesReferences } from '../../../common/references/timeseries_references';
+import {
+  extractControlsReferences,
+  injectControlsReferences,
+} from '../../../common/references/controls_references';
+import {
+  extractTimeSeriesReferences,
+  injectTimeSeriesReferences,
+} from '../../../common/references/timeseries_references';
 
 const isValidSavedVis = (savedVis: unknown): savedVis is SavedVisState =>
   isObject(savedVis) && 'type' in savedVis && 'params' in savedVis;

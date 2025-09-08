@@ -46,6 +46,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerAddFromLibraryType,
       registerTransforms,
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
+      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
+      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
     };
   }
 
@@ -73,8 +75,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getTransforms,
       hasTransforms,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
     };
 
     setKibanaServices(core, embeddableStart, deps);

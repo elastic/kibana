@@ -15,13 +15,13 @@ import { VIS_SAVED_OBJECT_REF_NAME } from './constants';
 import { injectVisReferences } from '../../references/inject_vis_references';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(state: StoredVisualizeEmbeddableState, references: Reference[]) {
+  function transformOut(state: StoredVisualizeEmbeddableState, references?: Reference[]) {
     const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references)
+      ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
 
     // by ref
-    const savedObjectRef = references.find(
+    const savedObjectRef = (references ?? []).find(
       (ref) => VISUALIZE_SAVED_OBJECT_TYPE === ref.type && ref.name === VIS_SAVED_OBJECT_REF_NAME
     );
     if (savedObjectRef) {
@@ -36,7 +36,7 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     if ((state as StoredVisualizeByValueState).savedVis) {
       const savedVis = injectVisReferences(
         (state as StoredVisualizeByValueState).savedVis,
-        references
+        references ?? []
       );
 
       return {

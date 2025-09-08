@@ -7,19 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  extractControlsReferences,
-  injectControlsReferences,
-} from '../../../common/references/controls_references';
-export {
-  extractTimeSeriesReferences,
-  injectTimeSeriesReferences,
-} from '../../../common/references/timeseries_references';
-
-export {
-  extractReferences,
-  injectReferences,
-  serializeReferences,
-  deserializeReferences,
-  convertSavedObjectAttributesToReferences,
-} from './saved_visualization_references';
+export { getTransforms } from '../../common/embeddable/transforms/get_transforms';
+export { getVisualizeEmbeddableFactory } from './visualize_embeddable';

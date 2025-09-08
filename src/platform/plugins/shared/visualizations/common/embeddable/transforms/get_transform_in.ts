@@ -8,6 +8,7 @@
  */
 
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { Reference } from '@kbn/content-management-utils';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -16,9 +17,17 @@ import type {
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractVisReferences } from '../../references/extract_vis_references';
 import { VIS_SAVED_OBJECT_REF_NAME } from './constants';
+import type {
+  StoredVisualizeByReferenceState,
+  StoredVisualizeByValueState,
+  StoredVisualizeEmbeddableState,
+} from './types';
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
-  function transformIn(state: VisualizeEmbeddableState) {
+  function transformIn(state: VisualizeEmbeddableState): {
+    state: StoredVisualizeEmbeddableState;
+    references: Reference[];
+  } {
     const { enhancementsState, enhancementsReferences } = state.enhancements
       ? transformEnhancementsIn(state.enhancements)
       : { enhancementsState: undefined, enhancementsReferences: [] };
@@ -30,12 +39,12 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
         state: {
           ...rest,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        },
+        } as StoredVisualizeByReferenceState,
         references: [
           {
             name: VIS_SAVED_OBJECT_REF_NAME,
             type: VISUALIZE_SAVED_OBJECT_TYPE,
-            id: savedObjectId,
+            id: savedObjectId!,
           },
           ...enhancementsReferences,
         ],
@@ -53,7 +62,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
           ...state,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
           savedVis,
-        },
+        } as StoredVisualizeByValueState,
         references: [...references, ...enhancementsReferences],
       };
     }
