@@ -62,7 +62,7 @@ export class EnhancementsRegistry {
       const { state, references } = enhancementStateManger
         ? enhancementStateManger.extract(enhancementsState[key] as SerializableRecord)
         : { state: enhancementsState[key], references: [] };
-        outputEnhancementsState[key] = state;
+      outputEnhancementsState[key] = state;
       extractedReferences.push(...references);
     });
 
@@ -75,7 +75,10 @@ export class EnhancementsRegistry {
   /**
    * Injects enhancements state with references
    */
-  public transformOut = (enhancementsState: { [key: string]: unknown }, references: Reference[]) => {
+  public transformOut = (
+    enhancementsState: { [key: string]: unknown },
+    references: Reference[]
+  ) => {
     const outputEnhancementsState: { [key: string]: unknown } = {};
     Object.keys(enhancementsState).forEach((key) => {
       if (!enhancementsState[key]) return;
