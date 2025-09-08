@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { uniqBy } from 'lodash';
 import { handleFragment, columnExists } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
@@ -122,6 +123,9 @@ export const getFieldSuggestions = async (
   const union = suggestionUnion(sourceFields, joinFields);
 
   for (const commonField of intersection) {
+    if (commonField.command?.id === 'esql.control.fields.create') {
+      continue;
+    }
     commonField.sortText = '1';
     commonField.documentation = {
       value: i18n.translate('kbn-esql-ast.esql.autocomplete.join.sharedField', {
@@ -143,7 +147,7 @@ export const getFieldSuggestions = async (
   }
 
   return {
-    suggestions: [...intersection, ...union],
+    suggestions: uniqBy([...intersection, ...union], 'label'),
     lookupIndexFieldExists: (field: string) =>
       lookupIndexFieldSet.set.has(unescapeColumnName(field)),
   };
