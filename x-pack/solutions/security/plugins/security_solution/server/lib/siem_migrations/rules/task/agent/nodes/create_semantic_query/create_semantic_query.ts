@@ -6,7 +6,7 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ChatModel } from '../../../util/actions_client_chat';
+import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { GraphNode } from '../../types';
 import { CREATE_SEMANTIC_QUERY_PROMPT } from './prompts';
 

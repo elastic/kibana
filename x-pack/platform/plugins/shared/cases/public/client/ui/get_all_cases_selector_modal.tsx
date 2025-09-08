@@ -59,12 +59,14 @@ export const getAllCasesSelectorModalNoProviderLazy = ({
   hiddenStatuses,
   onRowClick,
   onClose,
+  getAttachments,
 }: AllCasesSelectorModalProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <AllCasesSelectorModalLazy
       hiddenStatuses={hiddenStatuses}
       onRowClick={onRowClick}
       onClose={onClose}
+      getAttachments={getAttachments}
     />
   </Suspense>
 );
