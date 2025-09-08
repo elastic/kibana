@@ -25,6 +25,7 @@ describe('conversation model converters', () => {
           user_name: 'user_name',
           rounds: [
             {
+              id: 'round-1',
               input: {
                 message: 'some message',
               },
@@ -58,6 +59,7 @@ describe('conversation model converters', () => {
 
         rounds: [
           {
+            id: 'round-1',
             input: {
               message: 'some message',
             },
@@ -125,6 +127,7 @@ describe('conversation model converters', () => {
         updated_at: updateDate,
         rounds: [
           {
+            id: 'round-1',
             input: {
               message: 'some message',
             },
@@ -148,6 +151,7 @@ describe('conversation model converters', () => {
         user_name: 'user_name',
         rounds: [
           {
+            id: 'round-1',
             input: {
               message: 'some message',
             },

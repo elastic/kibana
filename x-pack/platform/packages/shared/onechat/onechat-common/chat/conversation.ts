@@ -117,6 +117,8 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
  * related to this particular round.
  */
 export interface ConversationRound {
+  /** unique id for this round */
+  id: string;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
