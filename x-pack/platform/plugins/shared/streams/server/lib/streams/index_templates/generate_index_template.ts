@@ -35,12 +35,16 @@ export function generateIndexTemplate(name: string) {
     },
     data_stream: {
       hidden: false,
-      failure_store: false,
     },
     template: {
       settings: {
         index: {
           default_pipeline: getProcessingPipelineName(name),
+        },
+      },
+      data_stream_options: {
+        failure_store: {
+          enabled: true,
         },
       },
       mappings: {

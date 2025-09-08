@@ -14,11 +14,13 @@ import type {
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type {
   AWS_ORGANIZATION_ACCOUNT,
-  AWS_SETUP_FORMAT,
   AWS_SINGLE_ACCOUNT,
   AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SETUP_FORMAT,
   AZURE_SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
+import type {
+  AWS_SETUP_FORMAT,
+  AZURE_SETUP_FORMAT,
   AWS_PROVIDER,
   GCP_PROVIDER,
   AZURE_PROVIDER,
@@ -31,8 +33,30 @@ export interface CloudProviderConfig {
   enableOrganization?: boolean;
   getStartedPath: string;
   enabled?: boolean;
-  manualFieldsEnabled?: boolean;
 }
+
+export type AwsInputs =
+  | 'access_key_id'
+  | 'secret_access_key'
+  | 'session_token'
+  | 'role_arn'
+  | 'shared_credential_file'
+  | 'credential_profile_name'
+  | 'aws.credentials.external_id';
+
+export type AwsInputFieldMapping = {
+  [key in AwsInputs]?: string;
+};
+
+export type AwsCloudProviderConfig = CloudProviderConfig & {
+  inputFieldMapping?: AwsInputFieldMapping;
+};
+
+type GcpCloudProviderConfig = CloudProviderConfig;
+type AzureProviderConfig = CloudProviderConfig & {
+  manualFieldsEnabled?: boolean;
+};
+
 export interface CloudSetupConfig {
   policyTemplate: string;
   name: string;
@@ -43,7 +67,11 @@ export interface CloudSetupConfig {
   getStartedPath: string;
   cloudConnectorEnabledVersion: string;
   showCloudTemplates: boolean;
-  providers: Record<CloudProviders, CloudProviderConfig>;
+  providers: {
+    aws: AwsCloudProviderConfig;
+    gcp: GcpCloudProviderConfig;
+    azure: AzureProviderConfig;
+  };
 }
 
 export type UpdatePolicy = ({
