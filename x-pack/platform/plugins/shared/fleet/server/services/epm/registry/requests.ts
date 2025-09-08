@@ -33,6 +33,10 @@ async function registryFetch(url: string) {
     }`;
     const responseError = new RegistryResponseError(message, status);
 
+    // retry 5xx errors
+    if (status >= 500) {
+      throw responseError;
+    }
     throw new pRetry.AbortError(responseError);
   }
 }
@@ -59,7 +63,7 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
         //
         // throwing in onFailedAttempt will abandon all retries & fail the request
         // we only want to retry system errors, so re-throw for everything else
-        if (!isSystemError(error)) {
+        if (!isSystemError(error) && !isRegistry5xxError(error)) {
           throw error;
         }
       },
@@ -138,6 +142,13 @@ function isFetchError(error: FailedAttemptErrors): error is FetchError {
 
 function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
+}
+
+function isRegistry5xxError(error: FailedAttemptErrors): boolean {
+  return (
+    (error instanceof RegistryResponseError || error.name === 'RegistryResponseError') &&
+    ((error as RegistryResponseError)?.status ?? 0) >= 500
+  );
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {

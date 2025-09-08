@@ -20,6 +20,7 @@ import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { MemorySaver } from '@langchain/langgraph-checkpoint';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -68,6 +69,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     tools: [],
     savedObjectsClient: {} as unknown as SavedObjectsClientContract,
     contentReferencesStore: {} as unknown as ContentReferencesStore,
+    checkpointSaver: new MemorySaver(),
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -106,6 +108,7 @@ async function getDefendInsightsGraph(logger: Logger): Promise<Drawable> {
     endpointIds: ['mock-endpoint-1'],
     anonymizationFields: [],
     esClient: mockEsClient,
+    kbDataClient: null,
     llm: mockLlm as unknown as ActionsClientLlm,
     logger,
     replacements: {},
