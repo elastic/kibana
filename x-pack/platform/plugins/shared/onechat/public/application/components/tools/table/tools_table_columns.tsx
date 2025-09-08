@@ -6,22 +6,28 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';
 import { ToolContextMenu } from './tools_table_context_menu';
 import { ToolIdWithDescription } from './tools_table_id';
 import { ToolQuickActions } from './tools_table_quick_actions';
 
+const readonlyTooltip = i18n.translate('xpack.onechat.tools.table.readonlyTooltip', {
+  defaultMessage: 'Read-only',
+});
+
 export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
   return [
     // Readonly indicator
     {
       width: '30px',
-      render: (tool: ToolDefinitionWithSchema) => (tool.readonly ? <EuiIcon type="lock" /> : null),
+      render: (tool: ToolDefinitionWithSchema) =>
+        tool.readonly ? <EuiIconTip type="lock" content={readonlyTooltip} /> : null,
     },
     {
       field: 'id',
