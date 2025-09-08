@@ -122,7 +122,8 @@ export const parseAggregationResults = ({
           }
         });
         if (fieldsSet.length > 0) {
-          sourceFields[field.label] = Array.from(fieldsSet);
+          const isArray = Array.isArray(fieldsSet);
+          sourceFields[field.label] = Array.from(isArray ? fieldsSet.flat() : fieldsSet);
         }
       });
     }

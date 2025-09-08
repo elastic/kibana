@@ -172,21 +172,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-
-        const name = alertDoc['host.name'];
-        expect(Array.isArray(name)).to.be(true);
-        expect(name.length > 0).to.be(true);
-        expect(name[0]).to.be('host-1');
-
-        const hostname = alertDoc['host.hostname'];
-        expect(Array.isArray(hostname)).to.be(true);
-        expect(hostname.length > 0).to.be(true);
-        expect(hostname[0]).to.be('host-1');
-
-        const hostId = alertDoc['host.id'];
-        expect(Array.isArray(hostId)).to.be(true);
-        expect(hostId.length > 0).to.be(true);
-        expect(hostId[0]).to.be('1');
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -298,21 +286,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-
-        const name = alertDoc['host.name'];
-        expect(Array.isArray(name)).to.be(true);
-        expect(name.length).greaterThan(0);
-        expect(name[0]).to.be('host-1');
-
-        const hostname = alertDoc['host.hostname'];
-        expect(Array.isArray(hostname)).to.be(true);
-        expect(hostname.length).greaterThan(0);
-        expect(hostname[0]).to.be('host-1');
-
-        const hostId = alertDoc['host.id'];
-        expect(Array.isArray(hostId)).to.be(true);
-        expect(hostId.length).greaterThan(0);
-        expect(hostId[0]).to.be('1');
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -423,21 +399,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-
-        const name = alertDoc['host.name'];
-        expect(Array.isArray(name)).to.be(true);
-        expect(name.length > 0).to.be(true);
-        expect(name[0]).to.be('host-1');
-
-        const hostname = alertDoc['host.hostname'];
-        expect(Array.isArray(hostname)).to.be(true);
-        expect(hostname.length > 0).to.be(true);
-        expect(hostname[0]).to.be('host-1');
-
-        const hostId = alertDoc['host.id'];
-        expect(Array.isArray(hostId)).to.be(true);
-        expect(hostId.length > 0).to.be(true);
-        expect(hostId[0]).to.be('1');
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -520,20 +484,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-        const name = alertDoc['host.name'];
-        expect(Array.isArray(name)).to.be(true);
-        expect(name.length).greaterThan(0);
-        expect(name[0]).to.be('host-1');
-
-        const hostname = alertDoc['host.hostname'];
-        expect(Array.isArray(hostname)).to.be(true);
-        expect(hostname.length).greaterThan(0);
-        expect(hostname[0]).to.be('host-1');
-
-        const hostId = alertDoc['host.id'];
-        expect(Array.isArray(hostId)).to.be(true);
-        expect(hostId.length).greaterThan(0);
-        expect(hostId[0]).to.be('1');
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 
@@ -1098,21 +1051,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-
-        const name = alertDoc['host.name'];
-        expect(Array.isArray(name)).to.be(true);
-        expect(name.length).greaterThan(0);
-        expect(name[0]).to.be('host-1');
-
-        const hostname = alertDoc['host.hostname'];
-        expect(Array.isArray(hostname)).to.be(true);
-        expect(hostname.length).greaterThan(0);
-        expect(hostname[0]).to.be('host-1');
-
-        const hostId = alertDoc['host.id'];
-        expect(Array.isArray(hostId)).to.be(true);
-        expect(hostId.length).greaterThan(0);
-        expect(hostId[0]).to.be('1');
+        expect(alertDoc['host.name'][0]).to.be('host-1');
+        expect(alertDoc['host.hostname'][0]).to.be('host-1');
+        expect(alertDoc['host.id'][0]).to.be('1');
       })
     );
 

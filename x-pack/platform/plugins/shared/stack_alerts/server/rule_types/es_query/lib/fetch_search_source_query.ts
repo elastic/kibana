@@ -28,9 +28,9 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import type { OnlySearchSourceRuleParams } from '../types';
+import type { OnlySearchSourceRuleParams, EsQuerySourceFields } from '../types';
 import { getComparatorScript } from '../../../../common';
-import { checkForShardFailures, getSourceFields } from '../util';
+import { checkForShardFailures } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -47,6 +47,7 @@ export interface FetchSearchSourceQueryOpts {
   };
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 export async function fetchSearchSourceQuery({
@@ -58,6 +59,7 @@ export async function fetchSearchSourceQuery({
   services,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchSearchSourceQueryOpts) {
   const { logger, getSearchSourceClient, ruleResultService } = services;
   const searchSourceClient = await getSearchSourceClient();
@@ -111,7 +113,6 @@ export async function fetchSearchSourceQuery({
     spacePrefix,
     filterToExcludeHitsFromPreviousRun
   );
-  const sourceFields = getSourceFields();
 
   return {
     link,

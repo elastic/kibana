@@ -19,9 +19,9 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { getComparatorScript } from '../../../../common';
-import type { OnlyEsQueryRuleParams } from '../types';
+import type { OnlyEsQueryRuleParams, EsQuerySourceFields } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { getParsedQuery, checkForShardFailures, getSourceFields } from '../util';
+import { getParsedQuery, checkForShardFailures } from '../util';
 
 export interface FetchEsQueryOpts {
   ruleId: string;
@@ -38,6 +38,7 @@ export interface FetchEsQueryOpts {
   alertLimit?: number;
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 /**
@@ -53,6 +54,7 @@ export async function fetchEsQuery({
   alertLimit,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchEsQueryOpts) {
   const { scopedClusterClient, logger, ruleResultService, share } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
@@ -149,7 +151,6 @@ export async function fetchEsQuery({
   }
 
   const link = generateLink(params, filter, discoverLocator, dateStart, dateEnd, spacePrefix);
-  const sourceFields = getSourceFields();
 
   return {
     parsedResults: parseAggregationResults({

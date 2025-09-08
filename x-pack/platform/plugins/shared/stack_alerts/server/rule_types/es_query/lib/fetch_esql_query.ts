@@ -19,8 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
-import type { OnlyEsqlQueryRuleParams } from '../types';
-import { getSourceFields } from '../util';
+import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -35,6 +34,7 @@ export interface FetchEsqlQueryOpts {
   };
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 export async function fetchEsqlQuery({
@@ -45,6 +45,7 @@ export async function fetchEsqlQuery({
   spacePrefix,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchEsqlQueryOpts) {
   const { logger, scopedClusterClient, share, ruleResultService } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
@@ -91,7 +92,6 @@ export async function fetchEsqlQuery({
   }
 
   const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
-  const sourceFields = getSourceFields();
 
   return {
     link,
