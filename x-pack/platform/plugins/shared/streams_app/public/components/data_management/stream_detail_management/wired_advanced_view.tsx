@@ -69,11 +69,16 @@ export function WiredAdvancedView({
   );
 }
 
-function toStringValues(settings: IngestStreamSettings) {
-  return Object.entries(settings).reduce<
-    Record<string, { invalid: boolean; value: string; from?: string }>
+function toStringValues(settings: IngestStreamSettings, effectiveSettings: IngestStreamSettings) {
+  return Object.entries(effectiveSettings).reduce<
+    Record<string, { invalid: boolean; default: boolean; value: string; from?: string }>
   >((acc, [key, setting]) => {
-    acc[key] = { ...setting, value: String(setting.value), invalid: false };
+    acc[key] = {
+      ...setting,
+      value: String(setting.value),
+      invalid: false,
+      default: !settings[key as keyof IngestStreamSettings] && !('from' in setting),
+    };
     return acc;
   }, {});
 }
@@ -98,12 +103,12 @@ export function Settings({
     },
   } = useKibana();
   const originalSettings = useMemo(
-    () => toStringValues(definition.effective_settings),
+    () => toStringValues(definition.stream.ingest.settings, definition.effective_settings),
     [definition]
   );
   const [settings, setSettings] = useState<
-    Record<string, { invalid: boolean; value: string; from?: string }>
-  >(toStringValues(definition.effective_settings));
+    Record<string, { default: boolean; invalid: boolean; value: string; from?: string }>
+  >(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
   const hasChanges = useMemo(
     () => !isEqual(originalSettings, settings),
     [originalSettings, settings]
@@ -190,7 +195,12 @@ export function Settings({
                 const invalid = !!value && isInvalidInteger(value);
                 setSettings((prev) => ({
                   ...prev,
-                  'index.number_of_shards': { value, invalid, from: definition.stream.name },
+                  'index.number_of_shards': {
+                    value,
+                    invalid,
+                    default: false,
+                    from: definition.stream.name,
+                  },
                 }));
               }
             }}
@@ -229,7 +239,12 @@ export function Settings({
                 const invalid = !!value && isInvalidInteger(value);
                 setSettings((prev) => ({
                   ...prev,
-                  'index.number_of_replicas': { value, invalid, from: definition.stream.name },
+                  'index.number_of_replicas': {
+                    value,
+                    invalid,
+                    default: false,
+                    from: definition.stream.name,
+                  },
                 }));
               }
             }}
@@ -271,7 +286,12 @@ export function Settings({
             const invalid = !!value && !parseDuration(value) && Number(value) !== -1;
             setSettings((prev) => ({
               ...prev,
-              'index.refresh_interval': { value, invalid, from: definition.stream.name },
+              'index.refresh_interval': {
+                value,
+                invalid,
+                default: false,
+                from: definition.stream.name,
+              },
             }));
           }
         }}
@@ -284,7 +304,11 @@ export function Settings({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             isDisabled={!hasChanges || isUpdating}
-            onClick={() => setSettings(toStringValues(definition.effective_settings))}
+            onClick={() =>
+              setSettings(
+                toStringValues(definition.stream.ingest.settings, definition.effective_settings)
+              )
+            }
           >
             {i18n.translate('xpack.streams.streamDetailView.cancelChangesButton', {
               defaultMessage: 'Cancel',
@@ -357,8 +381,7 @@ function SettingRow({
   label: string;
   inputLabel: string;
   description: string;
-  originalSetting?: { value: string; from?: string };
-  setting?: { value: string; from?: string };
+  setting?: { value: string; default: boolean; from?: string };
   valueDescription?: string;
   isInvalid: boolean;
   onChange: (value: string) => void;
@@ -374,7 +397,8 @@ function SettingRow({
               <EuiFieldText
                 name={label}
                 isInvalid={isInvalid}
-                value={setting?.value ?? ''}
+                placeholder={setting?.default ? `${setting.value} (default)` : ''}
+                value={!setting?.default ? setting?.value ?? '' : ''}
                 onChange={(e) => onChange(e.target.value)}
               />
             </EuiFormRow>
