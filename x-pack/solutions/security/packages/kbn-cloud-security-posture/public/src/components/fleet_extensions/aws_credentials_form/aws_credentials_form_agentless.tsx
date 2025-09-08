@@ -77,16 +77,14 @@ export const AwsCredentialsFormAgentless = ({
     templateName,
     showCloudTemplates,
     shortName,
-    showSelectedProviderCloudConnectors,
-    selectedProviderCloudConnectorRemoteRoleTemplate,
+    awsCloudConnectorRemoteRoleTemplate,
+    awsCloudConnectors,
   } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
-  const awsCredentialsType = getAgentlessCredentialsType(
-    input,
-    showSelectedProviderCloudConnectors
-  );
+  const awsCredentialsType = getAgentlessCredentialsType(input, awsCloudConnectors);
+
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
@@ -121,7 +119,7 @@ export const AwsCredentialsFormAgentless = ({
     },
     [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
       accordianTitleLink: <EuiLink>{'Steps to Generate Cloud Connection'}</EuiLink>,
-      templateUrl: selectedProviderCloudConnectorRemoteRoleTemplate,
+      templateUrl: awsCloudConnectorRemoteRoleTemplate,
     },
   };
 
@@ -130,7 +128,7 @@ export const AwsCredentialsFormAgentless = ({
   const isCloudFormationSupported =
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
-  const agentlessOptions = showSelectedProviderCloudConnectors
+  const agentlessOptions = awsCloudConnectors
     ? getAwsCloudConnectorsCredentialsFormOptions(awsInputFieldMapping)
     : getAwsAgentlessFormOptions(awsInputFieldMapping);
 
@@ -141,7 +139,7 @@ export const AwsCredentialsFormAgentless = ({
     if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
       return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
     }
-    if (showSelectedProviderCloudConnectors) {
+    if (awsCloudConnectors) {
       return getAwsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
     }
 
@@ -151,7 +149,7 @@ export const AwsCredentialsFormAgentless = ({
   const disabled =
     isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
-    showSelectedProviderCloudConnectors;
+    awsCloudConnectors;
 
   const showCloudFormationAccordion = isCloudFormationSupported && showCloudTemplates;
 
@@ -166,7 +164,7 @@ export const AwsCredentialsFormAgentless = ({
     <>
       <AWSSetupInfoContent
         info={
-          showSelectedProviderCloudConnectors ? (
+          awsCloudConnectors ? (
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContentAgentlessCloudConnector"
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
@@ -220,7 +218,7 @@ export const AwsCredentialsFormAgentless = ({
               getCloudCredentialVarsConfig({
                 setupTechnology,
                 optionId,
-                showCloudConnectors: showSelectedProviderCloudConnectors,
+                showCloudConnectors: awsCloudConnectors,
                 provider: AWS_PROVIDER,
               })
             ),
