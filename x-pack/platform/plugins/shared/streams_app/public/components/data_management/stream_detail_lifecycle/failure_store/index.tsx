@@ -6,15 +6,22 @@
  */
 import React, { useState } from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { FailureStoreModal } from '@kbn/failure-store-modal';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
+
+// Lazy load the FailureStoreModal to reduce bundle size
+const LazyFailureStoreModal = React.lazy(async () => ({
+  default: (await import('@kbn/failure-store-modal')).FailureStoreModal,
+}));
+
+const FailureStoreModal = withSuspense(LazyFailureStoreModal);
 
 export const StreamDetailFailureStore = ({
   definition,

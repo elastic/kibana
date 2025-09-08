@@ -6,24 +6,21 @@
  */
 
 import { z } from '@kbn/zod';
-import { getFailureStoreStats } from '../../../lib/streams/stream_crud';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { createServerRoute } from '../../create_server_route';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
+import { getFailureStoreStats } from '../../../../lib/streams/stream_crud';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { createServerRoute } from '../../../create_server_route';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
 
 export interface UpdateFailureStoreResponse {
   acknowledged: true;
 }
 
 export const getFailureStoreStatsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/failure_store/stats 2023-10-31',
+  endpoint: 'GET /api/streams/{name}/failure_store/stats',
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Get failure store stats',
     description: 'Gets the failure store statistics for a stream',
-    availability: {
-      stability: 'experimental',
-    },
   },
   security: {
     authz: {
@@ -52,14 +49,11 @@ export const getFailureStoreStatsRoute = createServerRoute({
 });
 
 export const updateFailureStoreRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/_failure_store 2023-10-31',
+  endpoint: 'PUT /api/streams/{name}/_failure_store',
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Update failure store configuration',
     description: 'Updates the failure store configuration for a stream',
-    availability: {
-      stability: 'experimental',
-    },
   },
   security: {
     authz: {

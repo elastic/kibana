@@ -57989,59 +57989,6 @@
         "x-state": "Technical Preview"
       }
     },
-    "/api/streams/{name}/_failure_store": {
-      "put": {
-        "description": "Updates the failure store configuration for a stream<br/><br/>[Required authorization] Route required privileges: manage_stream.",
-        "operationId": "put-streams-name-failure-store",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "customRetentionPeriod": {
-                    "type": "string"
-                  },
-                  "failureStoreEnabled": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "failureStoreEnabled"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Update failure store configuration",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
     "/api/streams/{name}/_fork": {
       "post": {
         "description": "Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.",
@@ -65021,52 +64968,6 @@
         },
         "responses": {},
         "summary": "Link a dashboard to a stream",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
-    "/api/streams/{name}/failure_store/stats": {
-      "get": {
-        "description": "Gets the failure store statistics for a stream<br/><br/>[Required authorization] Route required privileges: read_stream.",
-        "operationId": "get-streams-name-failure-store-stats",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Get failure store stats",
         "tags": [
           "streams"
         ],
