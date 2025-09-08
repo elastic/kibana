@@ -43,8 +43,8 @@ export const createCasesAnalyticsIndex = ({
     esClient,
     isServerless,
     taskManager,
-    indexName: getDestinationIndexName(spaceId, owner),
-    indexAlias: getDestinationIndexAlias(spaceId, owner),
+    indexName: getCasesDestinationIndexName(spaceId, owner),
+    indexAlias: getCasesDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_CASES_INDEX_VERSION,
     mappings: CAI_CASES_INDEX_MAPPINGS,
     painlessScriptId: CAI_CASES_INDEX_SCRIPT_ID,
@@ -69,7 +69,7 @@ export const scheduleCasesAnalyticsSyncTask = ({
   scheduleCAISynchronizationTask({
     taskId,
     sourceIndex: CAI_CASES_SOURCE_INDEX,
-    destIndex: getDestinationIndexName(spaceId, owner),
+    destIndex: getCasesDestinationIndexName(spaceId, owner),
     spaceId,
     owner,
     syncType: CAI_CASES_SYNC_TYPE,
@@ -80,10 +80,10 @@ export const scheduleCasesAnalyticsSyncTask = ({
   });
 };
 
-function getDestinationIndexName(spaceId: string, owner: Owner) {
+export function getCasesDestinationIndexName(spaceId: string, owner: Owner) {
   return `${CAI_CASES_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
 }
 
-function getDestinationIndexAlias(spaceId: string, owner: Owner) {
+export function getCasesDestinationIndexAlias(spaceId: string, owner: Owner) {
   return `${CAI_CASES_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
 }

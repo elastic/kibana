@@ -48,7 +48,7 @@ export const getCommentsSourceQuery = (spaceId: string, owner: Owner): QueryDslQ
 export const CAI_COMMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
 const CAI_COMMENTS_BACKFILL_TASK_ID = 'cai_comments_backfill_task';
-export const getCAIBackfillTaskId = (spaceId: string, owner: Owner): string => {
+export const getCAICommentsBackfillTaskId = (spaceId: string, owner: Owner): string => {
   return `${CAI_COMMENTS_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
 };
 

@@ -43,8 +43,8 @@ export const createActivityAnalyticsIndex = ({
     esClient,
     isServerless,
     taskManager,
-    indexName: getDestinationIndexName(spaceId, owner),
-    indexAlias: getDestinationIndexAlias(spaceId, owner),
+    indexName: getActivityDestinationIndexName(spaceId, owner),
+    indexAlias: getActivityDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_ACTIVITY_INDEX_VERSION,
     mappings: CAI_ACTIVITY_INDEX_MAPPINGS,
     painlessScriptId: CAI_ACTIVITY_INDEX_SCRIPT_ID,
@@ -69,7 +69,7 @@ export const scheduleActivityAnalyticsSyncTask = ({
   scheduleCAISynchronizationTask({
     taskId,
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-    destIndex: getDestinationIndexName(spaceId, owner),
+    destIndex: getActivityDestinationIndexName(spaceId, owner),
     spaceId,
     owner,
     syncType: CAI_ACTIVITY_SYNC_TYPE,
@@ -80,10 +80,10 @@ export const scheduleActivityAnalyticsSyncTask = ({
   });
 };
 
-function getDestinationIndexName(spaceId: string, owner: Owner) {
+export function getActivityDestinationIndexName(spaceId: string, owner: Owner) {
   return `${CAI_ACTIVITY_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
 }
 
-function getDestinationIndexAlias(spaceId: string, owner: Owner) {
+function getActivityDestinationIndexAlias(spaceId: string, owner: Owner) {
   return `${CAI_ACTIVITY_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
 }

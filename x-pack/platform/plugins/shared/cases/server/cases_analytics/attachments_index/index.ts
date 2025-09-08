@@ -43,8 +43,8 @@ export const createAttachmentsAnalyticsIndex = ({
     esClient,
     isServerless,
     taskManager,
-    indexName: getDestinationIndexName(spaceId, owner),
-    indexAlias: getDestinationIndexAlias(spaceId, owner),
+    indexName: getAttachmentsDestinationIndexName(spaceId, owner),
+    indexAlias: getAttachmentsDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_ATTACHMENTS_INDEX_VERSION,
     mappings: CAI_ATTACHMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
@@ -69,7 +69,7 @@ export const scheduleAttachmentsAnalyticsSyncTask = ({
   scheduleCAISynchronizationTask({
     taskId,
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-    destIndex: getDestinationIndexName(spaceId, owner),
+    destIndex: getAttachmentsDestinationIndexName(spaceId, owner),
     taskManager,
     spaceId,
     owner,
@@ -80,10 +80,10 @@ export const scheduleAttachmentsAnalyticsSyncTask = ({
   });
 };
 
-function getDestinationIndexName(spaceId: string, owner: Owner) {
+export function getAttachmentsDestinationIndexName(spaceId: string, owner: Owner) {
   return `${CAI_ATTACHMENTS_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
 }
 
-function getDestinationIndexAlias(spaceId: string, owner: Owner) {
+function getAttachmentsDestinationIndexAlias(spaceId: string, owner: Owner) {
   return `${CAI_ATTACHMENTS_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
 }

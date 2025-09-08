@@ -15,7 +15,7 @@ import {
   CAI_COMMENTS_INDEX_VERSION,
   CAI_COMMENTS_SOURCE_INDEX,
   getCommentsSourceQuery,
-  getCAIBackfillTaskId,
+  getCAICommentsBackfillTaskId,
   getCAICommentsSynchronizationTaskId,
   CAI_COMMENTS_SYNC_TYPE,
 } from './constants';
@@ -43,13 +43,13 @@ export const createCommentsAnalyticsIndex = ({
     esClient,
     isServerless,
     taskManager,
-    indexName: getDestinationIndexName(spaceId, owner),
-    indexAlias: getDestinationIndexAlias(spaceId, owner),
+    indexName: getCommentsDestinationIndexName(spaceId, owner),
+    indexAlias: getCommentsDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_COMMENTS_INDEX_VERSION,
     mappings: CAI_COMMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_COMMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_COMMENTS_INDEX_SCRIPT,
-    taskId: getCAIBackfillTaskId(spaceId, owner),
+    taskId: getCAICommentsBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
     sourceQuery: getCommentsSourceQuery(spaceId, owner),
   });
@@ -69,7 +69,7 @@ export const scheduleCommentsAnalyticsSyncTask = ({
   scheduleCAISynchronizationTask({
     taskId,
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-    destIndex: getDestinationIndexName(spaceId, owner),
+    destIndex: getCommentsDestinationIndexName(spaceId, owner),
     taskManager,
     owner,
     spaceId,
@@ -80,10 +80,10 @@ export const scheduleCommentsAnalyticsSyncTask = ({
   });
 };
 
-function getDestinationIndexName(spaceId: string, owner: Owner) {
+export function getCommentsDestinationIndexName(spaceId: string, owner: Owner) {
   return `${CAI_COMMENTS_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
 }
 
-function getDestinationIndexAlias(spaceId: string, owner: Owner) {
+function getCommentsDestinationIndexAlias(spaceId: string, owner: Owner) {
   return `${CAI_COMMENTS_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
 }
