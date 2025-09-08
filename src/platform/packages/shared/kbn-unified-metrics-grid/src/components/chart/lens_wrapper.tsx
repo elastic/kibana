@@ -10,11 +10,15 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { useBoolean } from '@kbn/react-hooks';
 import type { LensProps } from './hooks/use_lens_props';
+import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 
 export type LensWrapperProps = {
-  lensProps: LensProps | undefined;
+  lensProps: LensProps;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
+
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
 
 export function LensWrapper({
   lensProps,
@@ -24,8 +28,9 @@ export function LensWrapper({
   abortController,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
+  const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
 
-  const lens = services.lens;
+  const { EmbeddableComponent, SaveModalComponent } = services.lens;
 
   const chartCss = css`
     position: relative;
@@ -55,17 +60,32 @@ export function LensWrapper({
     }
   `;
 
+  const extraActions = useLensExtraActions({
+    copyToDashboard: { onClick: toggleSaveModalVisible },
+  });
+
   return (
-    lensProps && (
+    <>
       <div css={chartCss}>
-        <lens.EmbeddableComponent
+        <EmbeddableComponent
           {...lensProps}
+          extraActions={extraActions}
           abortController={abortController}
+          disabledActions={DEFAULT_DISABLED_ACTIONS}
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
         />
       </div>
-    )
+      {isSaveModalVisible && (
+        <SaveModalComponent
+          initialInput={{ attributes: lensProps.attributes }}
+          onClose={toggleSaveModalVisible}
+          // Disables saving ESQL charts to the library.
+          // it will only copy it to a dashboard
+          isSaveable={false}
+        />
+      )}
+    </>
   );
 }
