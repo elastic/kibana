@@ -13,9 +13,10 @@ import type { CascadeSizing } from '../../types';
 
 export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) => ({
   rowHeaderSlotWrapper: css({
-    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
     borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    paddingLeft: euiTheme.size.s,
+    flexGrow: 0,
   }),
 });
