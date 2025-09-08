@@ -7,7 +7,15 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiIcon, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiCallOut,
+  EuiBadge,
+  useEuiTheme,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CLASH_ERROR_TYPE, CLASH_TYPE } from '@kbn/file-upload';
 import type { FileClash } from '@kbn/file-upload/file_upload_manager';
@@ -18,79 +26,12 @@ interface Props {
 
 export const FileClashResult: FC<Props> = ({ fileClash }) => {
   if (fileClash.clash === CLASH_ERROR_TYPE.ERROR) {
-    if (fileClash.clashType === CLASH_TYPE.FORMAT) {
-      return (
-        <EuiCallOut
-          color="danger"
-          iconType="warning"
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.fileStatus.fileFormatClash"
-              defaultMessage="File format different from other files"
-            />
-          }
-        />
-      );
-    }
-
-    if (fileClash.clashType === CLASH_TYPE.MAPPING) {
-      return (
-        <EuiCallOut
-          color="danger"
-          iconType="warning"
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.fileStatus.mappingClash"
-              defaultMessage="Mappings incompatible with other files"
-            />
-          }
-        />
-      );
-    }
-
-    if (fileClash.clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING) {
-      return (
-        <EuiCallOut
-          color="danger"
-          iconType="warning"
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.fileStatus.existingIndexMappingClash"
-              defaultMessage="Mappings incompatible with existing index"
-            />
-          }
-        />
-      );
-    }
-
-    if (fileClash.clashType === CLASH_TYPE.UNSUPPORTED) {
-      return (
-        <EuiCallOut
-          color="danger"
-          iconType="warning"
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.fileStatus.fileFormatNotSupported"
-              defaultMessage="File format not supported"
-            />
-          }
-        />
-      );
-    }
+    return <EuiCallOut color="danger" iconType="warning" title={getClashText(fileClash)} />;
   }
 
   if (fileClash.clash === CLASH_ERROR_TYPE.WARNING) {
     return (
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
-        title={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.fileStatus.fileClashWarning"
-            defaultMessage="Mappings may be incompatible with the existing index"
-          />
-        }
-      >
+      <EuiCallOut color="warning" iconType="warning" title={getClashText(fileClash)}>
         {fileClash.newFields?.length || fileClash.missingFields?.length ? (
           <EuiSpacer size="s" />
         ) : null}
@@ -123,12 +64,74 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
   }
 };
 
+function getClashText(fileClash: FileClash) {
+  if (fileClash.clash === CLASH_ERROR_TYPE.ERROR) {
+    if (fileClash.clashType === CLASH_TYPE.FORMAT) {
+      return (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileStatus.fileFormatClash"
+          defaultMessage="File format different from other files"
+        />
+      );
+    }
+
+    if (fileClash.clashType === CLASH_TYPE.MAPPING) {
+      return (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileStatus.mappingClash"
+          defaultMessage="Mappings incompatible with other files"
+        />
+      );
+    }
+
+    if (fileClash.clashType === CLASH_TYPE.EXISTING_INDEX_MAPPING) {
+      return (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileStatus.existingIndexMappingClash"
+          defaultMessage="Mappings incompatible with existing index"
+        />
+      );
+    }
+
+    if (fileClash.clashType === CLASH_TYPE.UNSUPPORTED) {
+      return (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileStatus.fileFormatNotSupported"
+          defaultMessage="File format not supported"
+        />
+      );
+    }
+  }
+
+  if (fileClash.clash === CLASH_ERROR_TYPE.WARNING) {
+    return (
+      <FormattedMessage
+        id="xpack.dataVisualizer.file.fileStatus.fileClashWarning"
+        defaultMessage="Mappings may be incompatible with the existing index"
+      />
+    );
+  }
+}
+
 export const FileClashIcon: FC<Props> = ({ fileClash }) => {
+  const { euiTheme } = useEuiTheme();
   switch (fileClash.clash) {
     case CLASH_ERROR_TYPE.ERROR:
-      return <EuiIcon type="alert" color="danger" />;
+      return (
+        <EuiToolTip content={getClashText(fileClash)}>
+          <EuiBadge color={euiTheme.colors.backgroundBaseDanger}>
+            <EuiIcon type="alert" color="danger" size="m" />
+          </EuiBadge>
+        </EuiToolTip>
+      );
     case CLASH_ERROR_TYPE.WARNING:
-      return <EuiIcon type="warning" color="warning" />;
+      return (
+        <EuiToolTip content={getClashText(fileClash)}>
+          <EuiBadge color={euiTheme.colors.backgroundBaseWarning}>
+            <EuiIcon type="warning" color="warning" size="m" />
+          </EuiBadge>
+        </EuiToolTip>
+      );
     default:
       return null;
   }

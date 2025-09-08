@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -113,6 +114,10 @@ export const FileStatus: FC<Props> = ({
           </>
         ) : (
           <>
+            {showResults === false ? (
+              <EuiProgress size="xs" color="primary" position="absolute" />
+            ) : null}
+
             <EuiAccordion
               id="accordion1"
               isDisabled={fileStatus.results === null && fileStatus.analysisError === undefined}
@@ -139,28 +144,36 @@ export const FileStatus: FC<Props> = ({
               extraAction={
                 <>
                   {fileStatus.results !== null ? (
-                    <>
-                      <AnalysisExplanation fileStatus={fileStatus} />
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <AnalysisExplanation fileStatus={fileStatus} />
+                      </EuiFlexItem>
 
-                      <AnalysisOverrides
-                        fileStatus={fileStatus}
-                        analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
-                      />
+                      <EuiFlexItem grow={false}>
+                        <AnalysisOverrides
+                          fileStatus={fileStatus}
+                          analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
+                            index
+                          )}
+                        />
+                      </EuiFlexItem>
 
                       {/* TODO, remove button should be stop if analysis is in progress */}
-                      <EuiButtonIcon
-                        onClick={() => deleteFile(index)}
-                        iconType="trash"
-                        size="xs"
-                        color="danger"
-                        aria-label={i18n.translate(
-                          'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                          {
-                            defaultMessage: 'Remove file',
-                          }
-                        )}
-                      />
-                    </>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          onClick={() => deleteFile(index)}
+                          iconType="trash"
+                          size="xs"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                            {
+                              defaultMessage: 'Remove file',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   ) : null}
                 </>
               }
