@@ -42,7 +42,7 @@ export const useChartLayers = ({
         signal: abortController?.signal,
       }),
 
-    [query, services.expressions, timeRange]
+    [query, services.data.search.search, timeRange]
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {

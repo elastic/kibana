@@ -93,7 +93,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         layers: mockChartLayers,
         axisTitleVisibility: {
-          showBreakdownTitle: false,
+          showYRightAxisTitle: false,
           showXAxisTitle: false,
           showYAxisTitle: false,
         },

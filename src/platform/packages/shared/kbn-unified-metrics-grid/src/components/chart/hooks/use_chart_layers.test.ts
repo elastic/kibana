@@ -9,28 +9,30 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChartLayers } from './use_chart_layers';
-import * as esqlModule from '@kbn/esql-editor';
+import * as esqlModule from '@kbn/esql-utils';
 import * as esqlHook from '../../../hooks';
 import type { ChartSectionProps, UnifiedHistogramServices } from '@kbn/unified-histogram/types';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import { DIMENSIONS_COLUMN } from '../../../common/utils';
 
-jest.mock('@kbn/esql-editor', () => ({
-  fetchFieldsFromESQL: jest.fn(),
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLQueryColumns: jest.fn(),
 }));
 jest.mock('../../../hooks', () => ({
   useEsqlQueryInfo: jest.fn(),
 }));
 
-const fetchFieldsFromESQLMock = esqlModule.fetchFieldsFromESQL as jest.MockedFunction<
-  typeof esqlModule.fetchFieldsFromESQL
+const getESQLQueryColumnsMock = esqlModule.getESQLQueryColumns as jest.MockedFunction<
+  typeof esqlModule.getESQLQueryColumns
 >;
 const useEsqlQueryInfoMock = esqlHook.useEsqlQueryInfo as jest.MockedFunction<
   typeof esqlHook.useEsqlQueryInfo
 >;
 
 const servicesMock: Partial<UnifiedHistogramServices> = {
-  expressions: expressionsPluginMock.createStartContract(),
+  data: dataPluginMock.createStartContract(),
 };
 
 describe('useChartLayers', () => {
@@ -45,13 +47,7 @@ describe('useChartLayers', () => {
   });
 
   it('returns empty yAxis if no columns', async () => {
-    fetchFieldsFromESQLMock.mockResolvedValue(
-      Promise.resolve({
-        columns: [],
-        rows: [],
-        type: 'datatable',
-      })
-    );
+    getESQLQueryColumnsMock.mockResolvedValue([]);
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: [],
       columns: [],
@@ -74,26 +70,20 @@ describe('useChartLayers', () => {
     });
 
     const layer = result.current[0];
-    expect(layer.xAxis).toBe('@timestamp');
+    expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
     expect(layer.yAxis).toEqual([]);
     expect(layer.seriesType).toBe('line');
     expect(layer.breakdown).toBeUndefined();
   });
 
   it('maps columns correctly to yAxis and uses dimensions for breakdown', async () => {
-    fetchFieldsFromESQLMock.mockResolvedValue(
-      Promise.resolve({
-        columns: [
-          { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
-          { name: 'value', meta: { type: 'number' }, id: 'value' },
-          { name: 'dimension', meta: { type: 'number' }, id: 'dimension' },
-        ],
-        rows: [],
-        type: 'datatable',
-      })
-    );
+    getESQLQueryColumnsMock.mockResolvedValue([
+      { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
+      { name: 'value', meta: { type: 'number' }, id: 'value' },
+      { name: DIMENSIONS_COLUMN, meta: { type: 'number' }, id: DIMENSIONS_COLUMN },
+    ]);
     useEsqlQueryInfoMock.mockReturnValue({
-      dimensions: ['dimension'],
+      dimensions: [DIMENSIONS_COLUMN],
       columns: [],
       metricField: '',
       indices: [],
@@ -114,25 +104,20 @@ describe('useChartLayers', () => {
     });
 
     const layer = result.current[0];
-    expect(layer.xAxis).toBe('@timestamp');
+    expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
     expect(layer.yAxis).toHaveLength(1);
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    expect(layer.breakdown).toBe('dimensions');
+    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN);
   });
 
   it('uses first date column as xAxis', async () => {
-    fetchFieldsFromESQLMock.mockResolvedValue(
-      Promise.resolve({
-        columns: [
-          { name: 'timestamp_field', meta: { type: 'date' }, id: 'timestamp_field' },
-          { name: 'metric', meta: { type: 'number' }, id: 'metric' },
-        ],
-        rows: [],
-        type: 'datatable',
-      })
-    );
+    getESQLQueryColumnsMock.mockResolvedValue([
+      { name: 'timestamp_field', meta: { type: 'date' }, id: 'timestamp_field' },
+      { name: 'metric', meta: { type: 'number' }, id: 'metric' },
+    ]);
+
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: [],
       columns: [],
@@ -153,6 +138,9 @@ describe('useChartLayers', () => {
       expect(result.current).toHaveLength(1);
     });
 
-    expect(result.current[0].xAxis).toBe('timestamp_field');
+    expect(result.current[0].xAxis).toStrictEqual({
+      field: 'timestamp_field',
+      type: 'dateHistogram',
+    });
   });
 });
