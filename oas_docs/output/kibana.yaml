@@ -28292,6 +28292,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -28705,6 +28706,7 @@ paths:
                                       - data_stream_ilm_policy
                                       - transform
                                       - ml_model
+                                      - knowledge_base
                                     type: string
                                   version:
                                     type: string
@@ -29015,6 +29017,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -29172,6 +29175,7 @@ paths:
                                               - data_stream_ilm_policy
                                               - transform
                                               - ml_model
+                                              - knowledge_base
                                             type: string
                                           version:
                                             type: string
@@ -29669,6 +29673,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -29958,6 +29963,7 @@ paths:
                                     - data_stream_ilm_policy
                                     - transform
                                     - ml_model
+                                    - knowledge_base
                                   type: string
                                 version:
                                   type: string
@@ -30330,6 +30336,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -30625,6 +30632,7 @@ paths:
                                     - data_stream_ilm_policy
                                     - transform
                                     - ml_model
+                                    - knowledge_base
                                   type: string
                                 version:
                                   type: string
