@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
   ChromeStart,
   ChromeBreadcrumb,
@@ -108,6 +109,8 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getBodyClasses$(): Observable<string[]>;
+
+  getGlobalFooter$(): Observable<ReactNode>;
 
   /**
    * Used only by the serverless plugin to customize project-style chrome.
