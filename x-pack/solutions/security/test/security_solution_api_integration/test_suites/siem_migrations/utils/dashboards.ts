@@ -23,6 +23,7 @@ import type {
   CreateDashboardMigrationResponse,
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsResponse,
+  UpdateDashboardMigrationRequestBody,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type SuperTest from 'supertest';
 import { replaceParams } from '@kbn/openapi-common/shared';
@@ -86,6 +87,27 @@ export const dashboardMigrationRouteFactory = (supertest: SuperTest.Agent) => {
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    update: async ({
+      migrationId,
+      body,
+      expectStatusCode = 200,
+    }: MigrationRequestParams & { body: UpdateDashboardMigrationRequestBody }): Promise<{
+      body: undefined;
+    }> => {
+      const url = replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .patch(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(body);
 
       assertStatusCode(expectStatusCode, response);
       return response;

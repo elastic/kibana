@@ -10,6 +10,7 @@ import { registerSiemDashboardMigrationsCreateRoute } from './create';
 import { registerSiemDashboardMigrationsCreateDashboardsRoute } from './dashboards/create';
 import { registerSiemDashboardMigrationsStatsRoute } from './stats';
 import { registerSiemDashboardMigrationsGetRoute } from './get';
+import { registerSiemDashboardMigrationsUpdateRoute } from './update';
 import { registerSiemDashboardMigrationsResourceGetMissingRoute } from './resources/missing';
 
 export const registerSiemDashboardMigrationsRoutes = (
@@ -19,6 +20,7 @@ export const registerSiemDashboardMigrationsRoutes = (
   // ===== Dashboard Migrations ======
   registerSiemDashboardMigrationsCreateRoute(router, logger);
   registerSiemDashboardMigrationsGetRoute(router, logger);
+  registerSiemDashboardMigrationsUpdateRoute(router, logger);
 
   // ===== Stats ========
   registerSiemDashboardMigrationsStatsRoute(router, logger);
