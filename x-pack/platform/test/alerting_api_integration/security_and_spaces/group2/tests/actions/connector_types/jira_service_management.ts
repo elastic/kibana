@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
