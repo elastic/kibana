@@ -117,9 +117,9 @@ export const Graph = memo<GraphProps>(
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
-    // Filter the ids of those nodes that have origin events
-    const nodesWithOriginEvents = useMemo(
-      () => nodes.filter((node) => node.hasOriginEvents).map((node) => node.id),
+    // Filter the ids of those nodes that are origin events
+    const originNodeIds = useMemo(
+      () => nodes.filter((node) => node.isOrigin || node.isOriginAlert).map((node) => node.id),
       [nodes]
     );
 
@@ -189,7 +189,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={nodesWithOriginEvents} />
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
             </Panel>
           )}
           {children}
