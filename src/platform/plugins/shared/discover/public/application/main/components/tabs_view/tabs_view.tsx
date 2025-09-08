@@ -22,6 +22,8 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 
+const MAX_TABS_COUNT = 25;
+
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -52,6 +54,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
+      maxItemsCount={MAX_TABS_COUNT}
       hideTabsBar={hideTabsBar}
       createItem={createItem}
       getPreviewData={getPreviewData}
