@@ -10,13 +10,9 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { extractReferences as extractSearchSourceReferences } from '@kbn/data-plugin/common';
-import { isObject } from 'lodash';
-import type { SavedVisState, SerializedVis } from '../types';
+import type { SerializedVis } from '../types';
 import { extractControlsReferences } from './controls_references';
 import { extractTimeSeriesReferences } from './timeseries_references';
-
-const isValidSavedVis = (savedVis: unknown): savedVis is SavedVisState =>
-  isObject(savedVis) && 'type' in savedVis && 'params' in savedVis;
 
 // Data plugin's `isSerializedSearchSource` does not actually rule out objects that aren't serialized search source fields
 function isSerializedSearchSource(
@@ -57,7 +53,7 @@ export function extractVisReferences(savedVis: SerializedVis) {
   }
 
   // Extract index patterns from controls
-  if (isValidSavedVis(savedVis)) {
+  if (savedVis.params) {
     extractControlsReferences(savedVis.type, savedVis.params, references);
     extractTimeSeriesReferences(savedVis.type, savedVis.params, references);
   }
