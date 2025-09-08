@@ -162,7 +162,7 @@ streamlangApiTest.describe(
         const { processors } = asIngest(streamlangDSL);
         const { query } = asEsql(streamlangDSL);
 
-        const docs = [{ log: { level: 'info' } }];
+        const docs = [{ case: 'missing', log: { level: 'info' } }];
         const { errors } = await testBed.ingest('ingest-dissect-fail', docs, processors);
         expect(errors[0].reason).toContain('field [message] not present as part of path [message]');
 
@@ -170,7 +170,10 @@ streamlangApiTest.describe(
         await testBed.ingest('esql-dissect-fail', [docForMapping, ...docs]);
         const esqlResult = await esql.queryOnIndex('esql-dissect-fail', query);
         expect(esqlResult.documentsWithoutKeywords.length).toBe(2);
-        expect(esqlResult.documentsWithoutKeywords[1].message).toBeNull();
+        expect(
+          // Filtering is needed as ES|QL's FORK may return documents in different order
+          esqlResult.documentsWithoutKeywords.filter((d) => d.case === 'missing')[0].message
+        ).toBeNull();
       }
     );
   }

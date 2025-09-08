@@ -8,8 +8,8 @@
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { GrokProcessor } from '../../../../types/processors';
-import type { Condition } from '../../../../types/conditions';
 import { parseMultiGrokPatterns } from '../../../../types/utils/grok_patterns';
+import { conditionToESQL } from '../condition_to_esql';
 import {
   castFieldsToGrokTypes,
   buildOptInCondition,
@@ -60,10 +60,7 @@ import {
  *    | DROP _fork
  *    ```
  */
-export function convertGrokProcessorToESQL(
-  processor: GrokProcessor,
-  conditionToESQL: (c: Condition) => ESQLAstItem
-): ESQLAstCommand[] {
+export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCommand[] {
   const {
     from,
     patterns, // eslint-disable-next-line @typescript-eslint/naming-convention

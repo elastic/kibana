@@ -8,8 +8,8 @@
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { DissectProcessor } from '../../../../types/processors';
-import type { Condition } from '../../../../types/conditions';
 import { parseMultiDissectPatterns } from '../../../../types/utils/dissect_patterns';
+import { conditionToESQL } from '../condition_to_esql';
 import { castFieldsToString, buildOptInCondition, buildOptOutCondition, buildFork } from './common';
 
 /**
@@ -55,10 +55,7 @@ import { castFieldsToString, buildOptInCondition, buildOptOutCondition, buildFor
  *      | DROP _fork
  *    ```
  */
-export function convertDissectProcessorToESQL(
-  processor: DissectProcessor,
-  conditionToESQL: (c: Condition) => ESQLAstItem
-): ESQLAstCommand[] {
+export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQLAstCommand[] {
   const {
     from,
     pattern, // eslint-disable-next-line @typescript-eslint/naming-convention
