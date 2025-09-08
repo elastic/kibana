@@ -119,7 +119,7 @@ export const suggestionsApi = ({
   // if user has requested for a donut, we want to sligthly change the state
   // to return a donut instead of a pie chart
   const pieSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsPie');
-  const isDonut = chartType === ChartType.Donut;
+  const isDonut = preferredChartType === ChartType.Donut;
   if (pieSuggestion && chartType && isDonut) {
     const visualizationState = visualizationMap[
       pieSuggestion.visualizationId
