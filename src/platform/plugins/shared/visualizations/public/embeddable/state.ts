@@ -9,8 +9,7 @@
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
-import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
-import { isEmpty, omit } from 'lodash';
+import { isEmpty } from 'lodash';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type {
   VisualizeByReferenceState,
@@ -28,7 +27,6 @@ import {
   getTheme,
   getUserProfile,
 } from '../services';
-import { serializeReferences } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import type {
@@ -38,7 +36,6 @@ import type {
   VisualizeSavedVisInputState,
   ExtraSavedObjectProperties,
 } from './types';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../legacy/embeddable';
 
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeEmbeddableState> | { rawState: undefined }
@@ -96,9 +93,6 @@ export const deserializeSavedObjectState = async ({
     savedObjectId
   );
 
-  console.log('searchSource', searchSource);
-  console.log('searchSourceFields', searchSourceFields);
-
   const panelTitle = embeddableTitle ?? title;
   const panelDescription = embeddableDescription ?? description;
   return {
@@ -130,7 +124,7 @@ export const serializeState: (props: {
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
-  serializeDynamicActions?: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined;
+  getDynamicActionsState?: (() => DynamicActionsSerializedState) | undefined;
   timeRange?: VisualizeRuntimeState['timeRange'];
 }) => Required<SerializedPanelState<VisualizeSerializedState>> = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
@@ -138,14 +132,10 @@ export const serializeState: (props: {
   id,
   savedObjectProperties,
   linkedToLibrary,
-  serializeDynamicActions,
+  getDynamicActionsState,
   timeRange,
 }) => {
-  const { references, serializedSearchSource } = serializeReferences(serializedVis);
-
-  const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-    serializeDynamicActions?.() ?? {};
-
+  const dynamicActionsState = getDynamicActionsState ? getDynamicActionsState() : {};
   // save by reference
   if (linkedToLibrary && id) {
     return {
@@ -154,22 +144,11 @@ export const serializeState: (props: {
         ...dynamicActionsState,
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
         ...(timeRange ? { timeRange } : {}),
+        savedObjectId: id,
       } as VisualizeSavedObjectInputState,
-      references: [
-        ...references,
-        ...(dynamicActionsReferences ?? []),
-        {
-          name: SAVED_OBJECT_REF_NAME,
-          type: VISUALIZE_EMBEDDABLE_TYPE,
-          id,
-        },
-      ],
+      references: []
     };
   }
-
-  const savedSearchRefName = serializedVis.data.savedSearchId
-    ? references.find((r) => r.id === serializedVis.data.savedSearchId)?.name
-    : undefined;
 
   return {
     rawState: {
@@ -180,17 +159,8 @@ export const serializeState: (props: {
       savedVis: {
         ...serializedVis,
         id,
-        data: {
-          ...omit(serializedVis.data, 'savedSearchId'),
-          searchSource: serializedSearchSource,
-          ...(savedSearchRefName
-            ? {
-                savedSearchRefName,
-              }
-            : {}),
-        },
       },
     } as VisualizeSavedVisInputState,
-    references: [...references, ...(dynamicActionsReferences ?? [])],
+    references: []
   };
 };

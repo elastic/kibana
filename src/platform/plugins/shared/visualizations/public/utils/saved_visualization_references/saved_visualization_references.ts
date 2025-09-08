@@ -14,8 +14,7 @@ import {
   injectSearchSourceReferences,
 } from '@kbn/data-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { isObject } from 'lodash';
-import type { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
+import type { SavedVisState, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 import {
   extractControlsReferences,
@@ -25,56 +24,6 @@ import {
   extractTimeSeriesReferences,
   injectTimeSeriesReferences,
 } from '../../../common/references/timeseries_references';
-
-const isValidSavedVis = (savedVis: unknown): savedVis is SavedVisState =>
-  isObject(savedVis) && 'type' in savedVis && 'params' in savedVis;
-
-// Data plugin's `isSerializedSearchSource` does not actually rule out objects that aren't serialized search source fields
-function isSerializedSearchSource(
-  maybeSerializedSearchSource: unknown
-): maybeSerializedSearchSource is SerializedSearchSourceFields {
-  return (
-    typeof maybeSerializedSearchSource === 'object' &&
-    maybeSerializedSearchSource !== null &&
-    !Object.hasOwn(maybeSerializedSearchSource, 'dependencies') &&
-    !Object.hasOwn(maybeSerializedSearchSource, 'fields')
-  );
-}
-
-export function serializeReferences(savedVis: SerializedVis) {
-  const { searchSource, savedSearchId } = savedVis.data;
-  const references: Reference[] = [];
-  let serializedSearchSource = searchSource;
-
-  // TSVB uses legacy visualization state, which doesn't serialize search source properly
-  if (!isSerializedSearchSource(searchSource)) {
-    serializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
-  }
-
-  if (searchSource) {
-    const [extractedSearchSource, searchSourceReferences] =
-      extractSearchSourceReferences(serializedSearchSource);
-    serializedSearchSource = extractedSearchSource;
-    searchSourceReferences.forEach((r) => references.push(r));
-  }
-
-  // Extract saved search
-  if (savedSearchId) {
-    references.push({
-      name: 'search_0',
-      type: 'search',
-      id: String(savedSearchId),
-    });
-  }
-
-  // Extract index patterns from controls
-  if (isValidSavedVis(savedVis)) {
-    extractControlsReferences(savedVis.type, savedVis.params, references);
-    extractTimeSeriesReferences(savedVis.type, savedVis.params, references);
-  }
-
-  return { references, serializedSearchSource };
-}
 
 export function convertSavedObjectAttributesToReferences(attributes: {
   kibanaSavedObjectMeta?: { searchSourceJSON: string };

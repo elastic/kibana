@@ -165,7 +165,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        serializeDynamicActions: dynamicActionsManager?.serializeState,
+        getDynamicActionsState: dynamicActionsManager?.getLatestState,
         ...timeRangeManager.getLatestState(),
       });
     };

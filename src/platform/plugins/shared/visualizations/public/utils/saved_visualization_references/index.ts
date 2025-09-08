@@ -19,7 +19,5 @@ export {
 export {
   extractReferences,
   injectReferences,
-  serializeReferences,
-  deserializeReferences,
   convertSavedObjectAttributesToReferences,
 } from './saved_visualization_references';
