@@ -14,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { RuleActionPanel } from './rule_action_panel';
 
-jest.mock('../../../services/job_service', () => 'mlJobService');
+jest.mock('@kbn/ml-services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
 // The mock is hoisted to the top, so need to prefix the filter variable

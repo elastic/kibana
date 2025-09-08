@@ -6,7 +6,7 @@
  */
 
 // Mock the mlJobService that is imported for saving rules.
-jest.mock('../../services/job_service', () => 'mlJobService');
+jest.mock('@kbn/ml-services/job_service', () => 'mlJobService');
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';

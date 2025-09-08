@@ -18,7 +18,7 @@ const mockAnnotationUpdatesService = {
 
 const mockReact = React;
 
-jest.mock('../../../services/job_service', () => {
+jest.mock('@kbn/ml-services/job_service', () => {
   const mockMlJobService = {
     getJob: jest.fn(),
   };
@@ -27,7 +27,7 @@ jest.mock('../../../services/job_service', () => {
   };
 });
 
-jest.mock('../../../services/ml_api_service', () => {
+jest.mock('@kbn/ml-services/ml_api_service', () => {
   const { of } = require('rxjs');
   const mockAnnotations$ = of({ annotations: [] });
   return {

@@ -11,7 +11,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { EventsTable } from './events_table';
 
-jest.mock('../../../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   usePermissionCheck: () => [true, true],
 }));
 
