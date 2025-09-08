@@ -2385,7 +2385,7 @@ describe('generateOtelcolConfig', () => {
         },
         processors: {
           transform: {
-            metrics_statements: [
+            metric_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
           },
@@ -2416,7 +2416,7 @@ describe('generateOtelcolConfig', () => {
       {
         id: 'stream-id-1',
         data_stream: {
-          dataset: 'somedataset',
+          dataset: 'otherdataset',
           type: 'metrics',
         },
         receivers: {
@@ -2430,7 +2430,7 @@ describe('generateOtelcolConfig', () => {
         },
         processors: {
           transform: {
-            metrics_statements: [
+            metric_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
           },
@@ -2482,12 +2482,12 @@ describe('generateOtelcolConfig', () => {
         },
         processors: {
           "transform/1": {
-            metrics_statements: [
+            metric_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
           },
           "transform/2": {
-            metrics_statements: [
+            metric_statements: [
               'set(metric.description, "Sum") where metric.type == "Sum"',
             ],
           },
@@ -2528,8 +2528,15 @@ describe('generateOtelcolConfig', () => {
       },
       processors: {
         "transform/test-1.stream-id-1": {
-          metrics_statements: [
+          metric_statements: [
             'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+        "transform/test-1.stream-id-1.routing": {
+          metric_statements: [
+            'set(attributes["data_stream.type"], "metrics")',
+            'set(attributes["data_stream.dataset"], "somedataset")',
+            'set(attributes["data_stream.namespace"], "default")',
           ],
         },
       },
@@ -2543,9 +2550,9 @@ describe('generateOtelcolConfig', () => {
       },
       service: {
         pipelines: {
-          "metrics/test-1": {
+          "metrics/test-1.stream-id-1": {
             receivers: ["httpcheck/test-1.stream-id-1"],
-            processors: ["transform/test-1.stream-id-1"],
+            processors: ["transform/test-1.stream-id-1", "transform/test-1.stream-id-1.routing"],
             exporters: ["forward"],
           },
           metrics: {
@@ -2571,8 +2578,15 @@ describe('generateOtelcolConfig', () => {
       },
       processors: {
         "transform/test-1.stream-id-1": {
-          metrics_statements: [
+          metric_statements: [
             'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+        "transform/test-1.stream-id-1.routing": {
+          metric_statements: [
+            'set(attributes["data_stream.type"], "metrics")',
+            'set(attributes["data_stream.dataset"], "somedataset")',
+            'set(attributes["data_stream.namespace"], "default")',
           ],
         },
       },
@@ -2586,9 +2600,9 @@ describe('generateOtelcolConfig', () => {
       },
       service: {
         pipelines: {
-          "metrics/test-1": {
+          "metrics/test-1.stream-id-1": {
             receivers: ["httpcheck/test-1.stream-id-1"],
-            processors: ["transform/test-1.stream-id-1"],
+            processors: ["transform/test-1.stream-id-1", "transform/test-1.stream-id-1.routing"],
             exporters: ["forward"],
           },
           metrics: {
@@ -2621,13 +2635,27 @@ describe('generateOtelcolConfig', () => {
       },
       processors: {
         "transform/test-1.stream-id-1": {
-          metrics_statements: [
+          metric_statements: [
             'set(metric.description, "Sum") where metric.type == "Sum"',
           ],
         },
         "transform/test-2.stream-id-1": {
-          metrics_statements: [
+          metric_statements: [
             'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+        "transform/test-1.stream-id-1.routing": {
+          metric_statements: [
+            'set(attributes["data_stream.type"], "metrics")',
+            'set(attributes["data_stream.dataset"], "somedataset")',
+            'set(attributes["data_stream.namespace"], "default")',
+          ],
+        },
+        "transform/test-2.stream-id-1.routing": {
+          metric_statements: [
+            'set(attributes["data_stream.type"], "metrics")',
+            'set(attributes["data_stream.dataset"], "otherdataset")',
+            'set(attributes["data_stream.namespace"], "default")',
           ],
         },
       },
@@ -2641,14 +2669,14 @@ describe('generateOtelcolConfig', () => {
       },
       service: {
         pipelines: {
-          "metrics/test-1": {
+          "metrics/test-1.stream-id-1": {
             receivers: ["httpcheck/test-1.stream-id-1"],
-            processors: ["transform/test-1.stream-id-1"],
+            processors: ["transform/test-1.stream-id-1", "transform/test-1.stream-id-1.routing"],
             exporters: ["forward"],
           },
-          "metrics/test-2": {
+          "metrics/test-2.stream-id-1": {
             receivers: ["httpcheck/test-2.stream-id-1"],
-            processors: ["transform/test-2.stream-id-1"],
+            processors: ["transform/test-2.stream-id-1", "transform/test-2.stream-id-1.routing"],
             exporters: ["forward"],
           },
           metrics: {
@@ -2681,13 +2709,20 @@ describe('generateOtelcolConfig', () => {
       },
       processors: {
         "transform/1/test-3.stream-id-1": {
-          metrics_statements: [
+          metric_statements: [
             'set(metric.description, "Sum") where metric.type == "Sum"',
           ],
         },
         "transform/2/test-3.stream-id-1": {
-          metrics_statements: [
+          metric_statements: [
             'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+        "transform/test-3.stream-id-1.routing": {
+          metric_statements: [
+            'set(attributes["data_stream.type"], "metrics")',
+            'set(attributes["data_stream.dataset"], "somedataset")',
+            'set(attributes["data_stream.namespace"], "default")',
           ],
         },
       },
@@ -2701,9 +2736,9 @@ describe('generateOtelcolConfig', () => {
       },
       service: {
         pipelines: {
-          "metrics/test-3": {
+          "metrics/test-3.stream-id-1": {
             receivers: ["httpcheck/1/test-3.stream-id-1", "httpcheck/2/test-3.stream-id-1"],
-            processors: ["transform/1/test-3.stream-id-1", "transform/2/test-3.stream-id-1"],
+            processors: ["transform/1/test-3.stream-id-1", "transform/2/test-3.stream-id-1", "transform/test-3.stream-id-1.routing"],
             exporters: ["forward"],
           },
           metrics: {

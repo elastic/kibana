@@ -894,25 +894,30 @@ export function getBinarySourceSettings(
 }
 
 // Generate OTel Collector policy
-export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[], dataOutput: Output) {
+export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput: Output) {
   const otelConfigs : OTelCollectorConfig[] = inputs.
     filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE).
     flatMap((input) => {
-      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((inputStream) => {
-        const suffix = input.id + "." + inputStream.id
-        return {
-          ...addSuffixToOtelcolComponentsConfig('extensions', inputStream?.extensions, suffix),
-          ...addSuffixToOtelcolComponentsConfig('receivers',  inputStream?.receivers,  suffix),
-          ...addSuffixToOtelcolComponentsConfig('processors', inputStream?.processors, suffix),
-          ...addSuffixToOtelcolComponentsConfig('connectors', inputStream?.connectors, suffix),
-          ...addSuffixToOtelcolComponentsConfig('exporters',  inputStream?.exporters,  suffix),
-          ...(inputStream?.service ? { service: {
-            ...inputStream.service,
-            ...addSuffixToOtelcolComponentsConfig('pipelines',
-                addSuffixToOtelcolPipelinesComponents(inputStream.service.pipelines, suffix),
-                input.id),
+      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
+        const suffix = input.id + "." + stream.id;
+        const attributesTransform = generateOTelAttributesTransform(
+          stream.data_stream.type? stream.data_stream.type: 'logs',
+          stream.data_stream.dataset,
+          input.data_stream.namespace,
+          suffix,
+        );
+        return appendOtelComponents({
+          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
+          ...addSuffixToOtelcolComponentsConfig('receivers',  suffix, stream?.receivers),
+          ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
+          ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
+          ...addSuffixToOtelcolComponentsConfig('exporters',  suffix, stream?.exporters),
+          ...(stream?.service ? { service: {
+            ...stream.service,
+            ...addSuffixToOtelcolComponentsConfig('pipelines', suffix,
+                addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)),
           }} : {}),
-        };
+        }, 'processors', [attributesTransform]);
       });
 
       return otelInputs;
@@ -927,7 +932,41 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateA
   return attachExporter(config, dataOutput);
 }
 
-function addSuffixToOtelcolComponentsConfig(type: string, components: Record<string, any>, suffix: string) {
+function generateOTelAttributesTransform(type: string, dataset: string, namespace: string, suffix: string) {
+  // We want the singular of logs/metrics/traces.
+  const signalType = type.substring(0, type.length-1);
+  return {
+    [`transform/${suffix}.routing`]: {
+      [`${signalType}_statements`]: [
+        `set(attributes["data_stream.type"], "${type}")`,
+        `set(attributes["data_stream.dataset"], "${dataset}")`,
+        `set(attributes["data_stream.namespace"], "${namespace}")`,
+      ],
+    },
+  }
+}
+
+function appendOtelComponents(config: OTelCollectorConfig, type: string, components: Record<string, Record<string, any>>[]): OTelCollectorConfig {
+  components.forEach((component) => {
+    Object.assign(config, config, {
+      [type]: {
+        ...Object.entries(config).find(([key]) => key === type)?.[1],
+        ...component,
+      },
+    });
+    if (config.service?.pipelines) {
+      Object.values(config.service.pipelines).forEach((pipeline) => {
+        Object.keys(component).forEach((id) => {
+          pipeline.processors = (pipeline.processors? pipeline.processors: []).concat([id]);
+        })
+      });
+    }
+  });
+
+  return config
+}
+
+function addSuffixToOtelcolComponentsConfig(type: string, suffix: string, components: Record<string, any>) {
   if (!components) {
     return {}
   }
