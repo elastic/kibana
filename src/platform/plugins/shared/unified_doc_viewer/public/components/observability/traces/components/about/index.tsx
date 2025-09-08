@@ -36,7 +36,7 @@ import {
   getSpanFieldConfigurations,
   getTransactionFieldConfigurations,
 } from './field_configurations';
-import { useTraceRootSpanContext } from '../../doc_viewer_overview/hooks/use_trace_root_span';
+import { useFetchTraceRootItemContext } from '../../doc_viewer_overview/hooks/use_fetch_trace_root_item';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -72,7 +72,7 @@ export interface AboutProps
 export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const traceRootSpan = useTraceRootSpanContext();
+  const traceRootItem = useFetchTraceRootItemContext();
 
   const aboutFieldConfigurations = {
     ...getSharedFieldConfigurations(flattenedHit),
@@ -90,7 +90,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
         duration={value as number}
         size="xs"
         parent={{
-          duration: traceRootSpan?.span?.duration,
+          duration: traceRootItem?.item?.duration,
           type: 'trace',
         }}
       />

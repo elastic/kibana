@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { lastValueFrom } from 'rxjs';
-import { DURATION, TRANSACTION_DURATION } from '@kbn/apm-types';
+import { DURATION, SPAN_DURATION, TRANSACTION_DURATION } from '@kbn/apm-types';
 import { waitFor } from '@testing-library/dom';
 import { renderHook } from '@testing-library/react';
+import { TraceRootItemProvider, useFetchTraceRootItemContext } from './use_fetch_trace_root_item';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { TraceRootSpanProvider, useTraceRootSpanContext } from './use_trace_root_span';
 
 jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -57,21 +57,21 @@ beforeEach(() => {
   lastValueFromMock.mockReset();
 });
 
-describe('useTraceRootSpan hook', () => {
+describe('useFetchTraceRootItem hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TraceRootSpanProvider traceId="test-trace">{children}</TraceRootSpanProvider>
+    <TraceRootItemProvider traceId="test-trace">{children}</TraceRootItemProvider>
   );
 
-  it('should start with loading true and span as null', async () => {
+  it('should start with loading true and item as null', async () => {
     lastValueFromMock.mockResolvedValue({});
 
-    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should update span when data is fetched successfully APM', async () => {
+  it('should update item when transaction data is fetched successfully APM', async () => {
     const transactionDuration = 1;
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
@@ -87,16 +87,15 @@ describe('useTraceRootSpan hook', () => {
       },
     });
 
-    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.span?.duration).toBe(transactionDuration);
+    expect(result.current.item?.duration).toBe(transactionDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
-
-  it('should update span when data is fetched successfully OTel', async () => {
+  it('should update item when span data is fetched successfully APM', async () => {
     const spanDuration = 1;
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
@@ -104,7 +103,7 @@ describe('useTraceRootSpan hook', () => {
           hits: [
             {
               fields: {
-                [DURATION]: spanDuration,
+                [SPAN_DURATION]: spanDuration,
               },
             },
           ],
@@ -112,29 +111,54 @@ describe('useTraceRootSpan hook', () => {
       },
     });
 
-    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.span?.duration).toBe(spanDuration);
+    expect(result.current.item?.duration).toBe(spanDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle errors and set transaction to null, and show a toast error', async () => {
-    const errorMessage = 'Search error';
-    lastValueFromMock.mockRejectedValue(new Error(errorMessage));
+  it('should update item when span data is fetched successfully OTel', async () => {
+    const traceRootItemDuration = 1;
+    lastValueFromMock.mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                [DURATION]: traceRootItemDuration,
+              },
+            },
+          ],
+        },
+      },
+    });
 
-    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.span).toBeNull();
+    expect(result.current.item?.duration).toBe(traceRootItemDuration);
+    expect(lastValueFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle errors and set item to null, and show a toast error', async () => {
+    const errorMessage = 'Search error';
+    lastValueFromMock.mockRejectedValue(new Error(errorMessage));
+
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.item).toBeNull();
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'An error occurred while fetching the root span of the trace',
+        title: 'An error occurred while fetching the root item of the trace',
         text: errorMessage,
       })
     );

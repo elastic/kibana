@@ -10,7 +10,7 @@
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DURATION, PARENT_ID, TRACE_ID, TRANSACTION_DURATION } from '@kbn/apm-types';
+import { DURATION, PARENT_ID, SPAN_DURATION, TRACE_ID, TRANSACTION_DURATION } from '@kbn/apm-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -65,16 +65,16 @@ export interface Span {
   duration: number;
 }
 
-const useTraceRootSpan = ({ traceId }: UseRootTransactionParams) => {
+const useFetchTraceRootItem = ({ traceId }: UseRootTransactionParams) => {
   const { indexes } = useDataSourcesContext();
   const indexPattern = indexes.apm.traces;
   const { core, data } = getUnifiedDocViewerServices();
-  const [span, setSpan] = useState<Span | null>(null);
+  const [item, setItem] = useState<Span | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!traceId) {
-      setSpan(null);
+      setItem(null);
       setLoading(false);
       return;
     }
@@ -90,21 +90,25 @@ const useTraceRootSpan = ({ traceId }: UseRootTransactionParams) => {
           : undefined;
 
         const fields = result?.rawResponse.hits.hits[0]?.fields;
-        const transactionDuration = fields?.[TRANSACTION_DURATION] || fields?.[DURATION];
+        const itemDuration =
+          fields?.[TRANSACTION_DURATION] || fields?.[SPAN_DURATION] || fields?.[DURATION];
 
-        setSpan({
-          duration: transactionDuration,
+        setItem({
+          duration: itemDuration,
         });
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
-            title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTraceRootSpan.error', {
-              defaultMessage: 'An error occurred while fetching the root span of the trace',
-            }),
+            title: i18n.translate(
+              'unifiedDocViewer.docViewerTraceOverview.useFetchTraceRootItem.error',
+              {
+                defaultMessage: 'An error occurred while fetching the root item of the trace',
+              }
+            ),
             text: error.message,
           });
-          setSpan(null);
+          setItem(null);
         }
       } finally {
         setLoading(false);
@@ -117,7 +121,8 @@ const useTraceRootSpan = ({ traceId }: UseRootTransactionParams) => {
       controller.abort();
     };
   }, [data, core.notifications.toasts, traceId, indexPattern]);
-  return { loading, span };
+  return { loading, item };
 };
 
-export const [TraceRootSpanProvider, useTraceRootSpanContext] = createContainer(useTraceRootSpan);
+export const [TraceRootItemProvider, useFetchTraceRootItemContext] =
+  createContainer(useFetchTraceRootItem);
