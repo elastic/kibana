@@ -4260,6 +4260,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "separateMajorMinor": true,
+      "allowedVersions": "<5.0.0",
       "enabled": true
     },
     {
