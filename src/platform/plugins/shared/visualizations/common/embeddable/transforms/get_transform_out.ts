@@ -9,9 +9,10 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { StoredVisualizeEmbeddableState } from './types';
+import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
 import { VIS_SAVED_OBJECT_REF_NAME } from './constants';
+import { injectVisReferences } from '../../references/inject_vis_references';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
   function transformOut(state: StoredVisualizeEmbeddableState, references: Reference[]) {
@@ -19,11 +20,10 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       ? transformEnhancementsOut(state.enhancements, references)
       : undefined;
 
+    // by ref
     const savedObjectRef = references.find(
       (ref) => VISUALIZE_SAVED_OBJECT_TYPE === ref.type && ref.name === VIS_SAVED_OBJECT_REF_NAME
     );
-
-    // by ref
     if (savedObjectRef) {
       return {
         ...state,
@@ -31,6 +31,22 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
         savedObjectId: savedObjectRef.id,
       };
     }
+
+    // by value
+    if ((state as StoredVisualizeByValueState).savedVis) {
+      const savedVis = injectVisReferences(
+        (state as StoredVisualizeByValueState).savedVis,
+        references
+      );
+
+      return {
+        ...state,
+        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        savedVis,
+      };
+    }
+
+    throw new Error('Unable to inject references from Visualization state, unexpected state');
   }
   return transformOut;
 }
