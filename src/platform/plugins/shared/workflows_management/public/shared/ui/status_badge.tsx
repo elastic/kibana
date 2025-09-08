@@ -66,8 +66,8 @@ const getExecutionStatusColorsMap = (
       tokenColor: 'euiColorVis9' as const,
     },
     [ExecutionStatus.CANCELLED]: {
-      color: euiTheme.colors.danger,
-      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       tokenColor: 'gray',
     },
     [ExecutionStatus.SKIPPED]: {

@@ -95,7 +95,23 @@ steps:
       message: '--------------------------'
 `;
 const result = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data;
+const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data as WorkflowYaml;
+
+// export interface WorkflowExecutionDto {
+//   spaceId: string;
+//   id: string;
+//   status: ExecutionStatus;
+//   startedAt: string;
+//   finishedAt: string;
+//   workflowId?: string;
+//   workflowName?: string;
+//   workflowDefinition: WorkflowYaml;
+//   stepExecutions: WorkflowStepExecutionDto[];
+//   stepExecutionsTree: StepExecutionTreeItem[];
+//   duration: number | null;
+//   triggeredBy?: string; // 'manual' or 'scheduled'
+//   yaml: string;
+// }
 
 export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
   args: {
@@ -105,21 +121,9 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
       workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
       workflowDefinition: definition,
       yaml,
-      context: {
-        spaceId: 'default',
-        inputs: {},
-      },
       status: ExecutionStatus.COMPLETED,
-      createdAt: '2025-09-02T20:43:54.613Z',
-      createdBy: '',
-      lastUpdatedAt: '2025-09-02T20:43:54.613Z',
-      lastUpdatedBy: '',
       triggeredBy: 'manual',
-      traceId: '4b2f5c40fef59b826f95c2cabb7e3c97',
-      stack: [],
-      entryTransactionId: 'ccf0694a6d0dafc2',
       startedAt: '2025-09-02T20:43:57.441Z',
-      currentNodeId: 'print-exit-dash',
       finishedAt: '2025-09-02T20:44:15.945Z',
       duration: 18504,
       stepExecutions: [
@@ -552,21 +556,9 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionList> = {
       workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
       workflowDefinition: definition,
       yaml,
-      context: {
-        spaceId: 'default',
-        inputs: {},
-      },
       status: ExecutionStatus.COMPLETED,
-      createdAt: '2025-09-02T20:43:54.613Z',
-      createdBy: '',
-      lastUpdatedAt: '2025-09-02T20:43:54.613Z',
-      lastUpdatedBy: '',
       triggeredBy: 'manual',
-      traceId: '4b2f5c40fef59b826f95c2cabb7e3c97',
-      stack: [],
-      entryTransactionId: 'ccf0694a6d0dafc2',
       startedAt: '2025-09-02T20:43:57.441Z',
-      currentNodeId: 'print-exit-dash',
       finishedAt: '2025-09-02T20:44:15.945Z',
       duration: 18504,
       stepExecutions: [],

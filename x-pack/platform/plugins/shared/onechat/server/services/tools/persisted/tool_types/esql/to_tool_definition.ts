@@ -24,6 +24,7 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
     description,
     tags,
     configuration,
+    readonly: false,
     schema: createSchemaFromParams(configuration.params) as TSchema,
     handler: async (params, { esClient }) => {
       const client = esClient.asCurrentUser;

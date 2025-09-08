@@ -638,6 +638,49 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: '/api/workflowExecutions/{workflowExecutionId}/cancel',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_execution_cancel'],
+            },
+          ],
+        },
+      },
+      validate: {
+        params: schema.object({
+          workflowExecutionId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { workflowExecutionId } = request.params;
+        const spaceId = spaces.getSpaceId(request);
+
+        await api.cancelWorkflowExecution(workflowExecutionId, spaceId);
+        return response.ok();
+      } catch (error) {
+        if (error instanceof WorkflowExecutionNotFoundError) {
+          return response.notFound();
+        }
+
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+
   router.get(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/logs',
