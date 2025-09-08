@@ -15,6 +15,7 @@ import { registerSiemDashboardMigrationsStartRoute } from './start';
 import { registerSiemDashboardMigrationsStopRoute } from './stop';
 import { registerSiemDashboardMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemDashboardMigrationsResourceGetMissingRoute } from './resources/missing';
+import { registerSiemDashboardMigrationsGetDashboardsRoute } from './dashboards/get';
 
 export const registerSiemDashboardMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -27,6 +28,10 @@ export const registerSiemDashboardMigrationsRoutes = (
 
   // ===== Dashboards ======
   registerSiemDashboardMigrationsCreateDashboardsRoute(router, logger);
+  registerSiemDashboardMigrationsGetDashboardsRoute(router, logger);
+
+  // ===== Resources ======
+  registerSiemDashboardMigrationsResourceGetMissingRoute(router, logger);
 
   // ===== Stats ========
   registerSiemDashboardMigrationsStatsRoute(router, logger);
@@ -39,7 +44,4 @@ export const registerSiemDashboardMigrationsRoutes = (
     // This route is not intended to be used by the end user, but rather for internal purposes.
     registerSiemDashboardMigrationsEvaluateRoute(router, logger);
   }
-
-  // ===== Resources ======
-  registerSiemDashboardMigrationsResourceGetMissingRoute(router, logger);
 };

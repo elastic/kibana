@@ -12,8 +12,10 @@ export const SIEM_DASHBOARD_MIGRATIONS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboard
 export const SIEM_DASHBOARD_MIGRATION_EVALUATE_PATH =
   `${SIEM_DASHBOARD_MIGRATIONS_PATH}/evaluate` as const;
 
-// Migration ID specific routes
+export const SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH =
+  `${SIEM_DASHBOARD_MIGRATIONS_PATH}/stats` as const;
 
+// Migration ID specific routes
 export const SIEM_DASHBOARD_MIGRATION_PATH =
   `${SIEM_DASHBOARD_MIGRATIONS_PATH}/{migration_id}` as const;
 
@@ -30,5 +32,8 @@ export const SIEM_DASHBOARD_MIGRATION_STATS_PATH =
 export const SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH =
   `${SIEM_DASHBOARD_MIGRATION_PATH}/translation_stats` as const;
 
+export const SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH =
+  `${SIEM_DASHBOARD_MIGRATION_PATH}/resources` as const;
+
 export const SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH =
-  `${SIEM_DASHBOARD_MIGRATION_PATH}/resources/missing` as const;
+  `${SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH}/missing` as const;
