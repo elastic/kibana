@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { modelVersion1, modelVersion2, modelVersion3, modelVersion4, modelVersion5 } from '.';
+import { modelVersion1, modelVersion2, modelVersion3, modelVersion4 } from '.';
 
 describe('Model versions', () => {
   describe('version 1', () => {
