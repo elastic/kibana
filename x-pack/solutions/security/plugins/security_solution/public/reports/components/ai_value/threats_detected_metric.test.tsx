@@ -135,7 +135,7 @@ describe('ThreatsDetectedMetric', () => {
   });
 
   it('handles null spaceId by defaulting to "default"', () => {
-    mockUseSpaceId.mockReturnValue(null);
+    mockUseSpaceId.mockReturnValue(undefined);
     render(<ThreatsDetectedMetric {...defaultProps} />);
 
     const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];

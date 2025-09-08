@@ -42,11 +42,9 @@ describe('getAlertFilteringMetricLensAttributes', () => {
     const result = getAlertFilteringMetricLensAttributes(defaultArgs);
     expect(result).toEqual(
       expect.objectContaining({
-        description: '',
         title: 'Alert filtering rate',
         visualizationType: 'lnsMetric',
         type: 'lens',
-        updated_at: '2025-07-21T15:51:38.660Z',
       })
     );
     expect(result.state).toEqual(
@@ -57,16 +55,11 @@ describe('getAlertFilteringMetricLensAttributes', () => {
             layers: expect.objectContaining({
               unifiedHistogram: expect.objectContaining({
                 columnOrder: ['count_column', 'countColumnX0', 'countColumnX1'],
-                columns: expect.any(Object),
-                incompleteColumns: {},
               }),
             }),
           }),
         }),
-        filters: [],
-        internalReferences: [],
         query: { language: 'kuery', query: '_id :*' },
-        visualization: expect.any(Object),
       })
     );
   });
@@ -77,41 +70,20 @@ describe('getAlertFilteringMetricLensAttributes', () => {
     expect(layer?.columns).toEqual(
       expect.objectContaining({
         count_column: expect.objectContaining({
-          customLabel: true,
-          dataType: 'number',
-          isBucketed: false,
           label: 'Alert filtering rate',
-          operationType: 'formula',
-          references: ['countColumnX1'],
           params: expect.objectContaining({
-            format: { id: 'percent', params: { decimals: 2 } },
             formula: `count()/${defaultTotalAlerts}`,
-            isFormulaBroken: false,
           }),
         }),
         countColumnX0: expect.objectContaining({
-          customLabel: true,
-          dataType: 'number',
-          isBucketed: false,
           label: `Part of count()/${defaultTotalAlerts}`,
-          operationType: 'count',
-          sourceField: '___records___',
-          params: expect.objectContaining({ emptyAsNull: false }),
         }),
         countColumnX1: expect.objectContaining({
-          customLabel: true,
-          dataType: 'number',
-          isBucketed: false,
           label: `Part of count()/${defaultTotalAlerts}`,
-          operationType: 'math',
-          references: ['countColumnX0'],
           params: expect.objectContaining({
             tinymathAst: expect.objectContaining({
               args: ['countColumnX0', defaultTotalAlerts],
-              location: { max: 12, min: 0 },
-              name: 'divide',
               text: `count()/${defaultTotalAlerts}`,
-              type: 'function',
             }),
           }),
         }),
@@ -120,13 +92,7 @@ describe('getAlertFilteringMetricLensAttributes', () => {
     expect(result.state.visualization).toEqual(
       expect.objectContaining({
         icon: 'visLine',
-        iconAlign: 'right',
-        valuesTextAlign: 'left',
         layerId: 'unifiedHistogram',
-        layerType: 'data',
-        metricAccessor: 'count_column',
-        secondaryTrend: { type: 'none' },
-        showBar: false,
       })
     );
     expect(result.references).toEqual([

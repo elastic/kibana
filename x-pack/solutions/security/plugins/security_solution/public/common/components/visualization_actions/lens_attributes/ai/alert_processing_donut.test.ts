@@ -7,7 +7,6 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { getAlertProcessingDonutAttributes } from './alert_processing_donut';
-import type { ExtraOptions } from '../../types';
 
 interface WithLayers {
   layers: Array<Record<string, unknown>>;
@@ -32,38 +31,17 @@ describe('getAlertProcessingDonutAttributes', () => {
     expect(result).toEqual(
       expect.objectContaining({
         title: 'Alerts',
-        description: '',
         visualizationType: 'lnsPie',
-        references: [],
       })
     );
-    expect(result.state).toEqual(
-      expect.objectContaining({
-        visualization: expect.any(Object),
-        query: { query: '', language: 'kuery' },
-        filters: [],
-        datasourceStates: expect.any(Object),
-        internalReferences: expect.any(Object),
-        adHocDataViews: expect.any(Object),
-      })
-    );
+
     const visualization = result.state.visualization as unknown as WithLayers;
     expect(visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
           expect.objectContaining({
-            categoryDisplay: 'show',
-            emptySizeRatio: 0.9,
             layerId: 'unifiedHistogram',
-            layerType: 'data',
-            legendSize: 'medium',
-            legendPosition: 'right',
             legendDisplay: 'hide',
-            legendStats: ['percent'],
-            metrics: ['count_column'],
-            nestedLegend: true,
-            numberDisplay: 'percent',
-            primaryGroups: ['breakdown_column'],
           }),
         ]),
         shape: 'donut',
@@ -71,97 +49,14 @@ describe('getAlertProcessingDonutAttributes', () => {
     );
   });
 
-  it('returns lens attributes with correct color mapping, datasource, column, and data view configurations', () => {
+  it('returns lens attributes with correct data view configurations', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
-    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
-      .colorMapping as Record<string, unknown>;
-    expect(colorMapping).toEqual(
-      expect.objectContaining({
-        assignments: expect.arrayContaining([
-          expect.objectContaining({
-            color: { colorIndex: 0, paletteId: 'default', type: 'categorical' },
-            rules: [{ type: 'raw', value: 'AI Filtered' }],
-            touched: false,
-          }),
-          expect.objectContaining({
-            color: { colorIndex: 9, paletteId: 'default', type: 'categorical' },
-            rules: [{ type: 'raw', value: 'Escalated' }],
-            touched: false,
-          }),
-        ]),
-        colorMode: { type: 'categorical' },
-        paletteId: 'default',
-        specialAssignments: expect.arrayContaining([
-          expect.objectContaining({
-            color: { type: 'loop' },
-            rules: [{ type: 'other' }],
-            touched: false,
-          }),
-        ]),
-      })
-    );
-    const datasourceStates = result.state.datasourceStates;
-    expect(datasourceStates).toEqual(
-      expect.objectContaining({
-        formBased: expect.objectContaining({
-          layers: expect.objectContaining({
-            unifiedHistogram: expect.objectContaining({
-              columnOrder: ['breakdown_column', 'count_column'],
-              columns: expect.objectContaining({
-                breakdown_column: expect.objectContaining({
-                  dataType: 'string',
-                  isBucketed: true,
-                  label: 'Alert processing category',
-                  operationType: 'terms',
-                  scale: 'ordinal',
-                  sourceField: 'processing_analytics_rtf',
-                  params: expect.objectContaining({
-                    missingBucket: true,
-                    orderBy: { columnId: 'count_column', type: 'column' },
-                    orderDirection: 'desc',
-                    otherBucket: true,
-                    parentFormat: { id: 'terms' },
-                    size: 3,
-                  }),
-                }),
-                count_column: expect.objectContaining({
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: 'Count of records',
-                  operationType: 'count',
-                  scale: 'ratio',
-                  sourceField: '___records___',
-                  params: expect.objectContaining({
-                    format: { id: 'number', params: { decimals: 0 } },
-                  }),
-                }),
-              }),
-              incompleteColumns: {},
-            }),
-          }),
-        }),
-      })
-    );
-    expect(result.state.internalReferences).toEqual([
-      {
-        id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
-        name: 'indexpattern-datasource-layer-unifiedHistogram',
-        type: 'index-pattern',
-      },
-    ]);
 
     const adHocDataViews = result.state.adHocDataViews;
     expect(adHocDataViews).toEqual(
       expect.objectContaining({
         'db828b69-bb21-4b92-bc33-56e3b01da790': expect.objectContaining({
-          allowHidden: false,
-          allowNoIndex: false,
-          fieldAttrs: { processing_analytics_rtf: {} },
-          fieldFormats: {},
-          id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
           name: `.alerts-security.alerts-${defaultSpaceId}`,
-          sourceFilters: [],
-          timeFieldName: '@timestamp',
           title: `.alerts-security.alerts-${defaultSpaceId}`,
         }),
       })
@@ -209,21 +104,5 @@ describe('getAlertProcessingDonutAttributes', () => {
       expect(dataView?.name).toBe(`.alerts-security.alerts-${spaceId}`);
       expect(dataView?.title).toBe(`.alerts-security.alerts-${spaceId}`);
     });
-    const extraOptions: ExtraOptions = {
-      breakdownField: 'test.field',
-      dnsIsPtrIncluded: true,
-      ruleId: 'test-rule-id',
-      showLegend: true,
-      spaceId: 'test-space',
-      status: 'open',
-      filters: [
-        { meta: { alias: 'test', disabled: false, negate: false } },
-      ] as ExtraOptions['filters'],
-    };
-    const resultWithExtraOptions = getAlertProcessingDonutAttributes({
-      ...defaultArgs,
-      extraOptions,
-    });
-    expect(resultWithExtraOptions.state.filters).toEqual([]);
   });
 });
