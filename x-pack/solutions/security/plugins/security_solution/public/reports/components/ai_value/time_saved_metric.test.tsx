@@ -136,7 +136,7 @@ describe('TimeSavedMetric', () => {
       { minutesPerAlert: 5.5, description: 'decimal' },
     ];
 
-    testCases.forEach(({ minutesPerAlert, description }) => {
+    testCases.forEach(({ minutesPerAlert }) => {
       jest.clearAllMocks();
 
       const props = { ...defaultProps, minutesPerAlert };

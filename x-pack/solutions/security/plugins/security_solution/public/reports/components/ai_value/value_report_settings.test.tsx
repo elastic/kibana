@@ -85,7 +85,7 @@ describe('ValueReportSettings', () => {
       },
     ];
 
-    testCases.forEach(({ props, description }) => {
+    testCases.forEach(({ props }) => {
       const { container } = render(<ValueReportSettings {...props} />);
       const settingsElement = container.querySelector('.valueReportSettings');
       expect(settingsElement).toBeInTheDocument();

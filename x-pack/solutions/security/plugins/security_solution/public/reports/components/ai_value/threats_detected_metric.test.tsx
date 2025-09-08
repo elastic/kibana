@@ -211,7 +211,7 @@ describe('ThreatsDetectedMetric', () => {
       },
     ];
 
-    testCases.forEach(({ from, to, description }) => {
+    testCases.forEach(({ from, to }) => {
       jest.clearAllMocks();
       mockUseSpaceId.mockReturnValue('test-space-id');
       mockGetThreatsDetectedMetricLensAttributes.mockReturnValue({

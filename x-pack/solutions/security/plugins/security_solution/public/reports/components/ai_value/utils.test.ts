@@ -79,7 +79,7 @@ describe('utils', () => {
         },
       ];
 
-      testCases.forEach(({ colorFamily, expectedColor, description }) => {
+      testCases.forEach(({ colorFamily, expectedColor }) => {
         mockGetPercChange.mockReturnValue('25.0%');
 
         const result = getPercentInfo({
@@ -110,7 +110,7 @@ describe('utils', () => {
         },
       ];
 
-      testCases.forEach(({ percentageChange, expectedColor, description }) => {
+      testCases.forEach(({ percentageChange, expectedColor }) => {
         mockGetPercChange.mockReturnValue(percentageChange);
 
         const result = getPercentInfo({
@@ -254,7 +254,7 @@ describe('utils', () => {
         },
       ];
 
-      testCases.forEach(({ alertIds, description }) => {
+      testCases.forEach(({ alertIds }) => {
         const result = getExcludeAlertsFilters(alertIds);
 
         expect(result[0].query.bool.must_not).toHaveLength(alertIds.length);
