@@ -21280,7 +21280,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -21846,7 +21847,8 @@
                                         "ilm_policy",
                                         "data_stream_ilm_policy",
                                         "transform",
-                                        "ml_model"
+                                        "ml_model",
+                                        "knowledge_base"
                                       ],
                                       "type": "string"
                                     },
@@ -21970,6 +21972,10 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "previous_version": {
+                                "nullable": true,
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string"
@@ -22294,7 +22300,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -22512,7 +22519,8 @@
                                                 "ilm_policy",
                                                 "data_stream_ilm_policy",
                                                 "transform",
-                                                "ml_model"
+                                                "ml_model",
+                                                "knowledge_base"
                                               ],
                                               "type": "string"
                                             },
@@ -23580,7 +23588,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -23999,7 +24008,8 @@
                                       "ilm_policy",
                                       "data_stream_ilm_policy",
                                       "transform",
-                                      "ml_model"
+                                      "ml_model",
+                                      "knowledge_base"
                                     ],
                                     "type": "string"
                                   },
@@ -24123,6 +24133,10 @@
                                 "type": "string"
                               },
                               "type": "array"
+                            },
+                            "previous_version": {
+                              "nullable": true,
+                              "type": "string"
                             },
                             "type": {
                               "type": "string"
@@ -24531,7 +24545,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -24947,7 +24962,8 @@
                                       "ilm_policy",
                                       "data_stream_ilm_policy",
                                       "transform",
-                                      "ml_model"
+                                      "ml_model",
+                                      "knowledge_base"
                                     ],
                                     "type": "string"
                                   },
@@ -25071,6 +25087,10 @@
                                 "type": "string"
                               },
                               "type": "array"
+                            },
+                            "previous_version": {
+                              "nullable": true,
+                              "type": "string"
                             },
                             "type": {
                               "type": "string"
@@ -46795,10 +46815,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -50090,10 +50117,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -52942,10 +52976,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -55933,10 +55974,17 @@
                                   ]
                                 },
                                 "type": "array"
+                              },
+                              "rules": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
+                              "rules",
                               "queries"
                             ],
                             "type": "object"
@@ -58787,10 +58835,17 @@
                               ]
                             },
                             "type": "array"
+                          },
+                          "rules": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
                           }
                         },
                         "required": [
                           "dashboards",
+                          "rules",
                           "queries"
                         ],
                         "type": "object"
@@ -58820,6 +58875,12 @@
                                         },
                                         "type": "array"
                                       },
+                                      "metadata": {
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
                                       "tags": {
                                         "items": {
                                           "type": "string"
@@ -58828,6 +58889,7 @@
                                       }
                                     },
                                     "required": [
+                                      "metadata",
                                       "tags",
                                       "members"
                                     ],
@@ -59292,6 +59354,12 @@
                         },
                         "type": "array"
                       },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
                       "tags": {
                         "items": {
                           "type": "string"
@@ -59300,6 +59368,7 @@
                       }
                     },
                     "required": [
+                      "metadata",
                       "tags",
                       "members"
                     ],
@@ -66143,6 +66212,178 @@
         },
         "responses": {},
         "summary": "Upsert a query to a stream",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/rules": {
+      "get": {
+        "description": "Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "get-streams-name-rules",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Get stream rules",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/rules/{ruleId}": {
+      "delete": {
+        "description": "Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
+        "operationId": "delete-streams-name-rules-ruleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Unlink a rule from a stream",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "put": {
+        "description": "Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
+        "operationId": "put-streams-name-rules-ruleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Link a rule to a stream",
         "tags": [
           "streams"
         ],
