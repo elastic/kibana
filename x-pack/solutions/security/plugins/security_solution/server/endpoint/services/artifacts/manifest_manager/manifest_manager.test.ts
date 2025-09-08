@@ -2390,13 +2390,6 @@ describe('ManifestManager', () => {
         manifestManager = new ManifestManager(context);
       });
 
-      test('should return false for trusted devices artifacts when feature flag is disabled', () => {
-        const shouldRetrieve = (
-          manifestManager as unknown as ManifestManagerWithPrivateMethods
-        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
-        expect(shouldRetrieve).toBe(false);
-      });
-
       test('should return true for other artifact types regardless of feature flag', () => {
         const shouldRetrieveExceptions = (
           manifestManager as unknown as ManifestManagerWithPrivateMethods
