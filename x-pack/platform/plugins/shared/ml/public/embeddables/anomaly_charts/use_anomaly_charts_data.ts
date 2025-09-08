@@ -13,7 +13,7 @@ import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer_constants';
+import { OVERALL_LABEL, SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer';
 
 import type { AnomalyChartsServices, AnomalyChartsApi } from '../types';
 import { getJobsObservable } from '../common/get_jobs_observable';

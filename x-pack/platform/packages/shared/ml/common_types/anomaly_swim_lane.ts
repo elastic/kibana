@@ -14,7 +14,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { JobId } from './anomaly_detection_jobs/job';
 
 // local definition to avoid circular dependency
-// import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
+// import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 type SwimlaneType = 'overall' | 'viewBy';
 
 /** Manual input by the user */

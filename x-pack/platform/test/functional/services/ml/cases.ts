@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
