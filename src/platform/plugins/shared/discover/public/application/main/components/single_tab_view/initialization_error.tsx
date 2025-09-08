@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import useMount from 'react-use/lib/useMount';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import React from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
+import { useInternalStateSelector } from '../../state_management/redux';
+import { DiscoverError } from '../../../../components/common/error_alert';
 
-export const RedirectWhenSavedObjectNotFound = ({
-  error,
-  discoverSessionId,
-}: {
-  error: SavedObjectNotFound;
-  discoverSessionId: string | undefined;
-}) => {
+export const InitializationError = ({ error }: { error: Error }) => {
+  if (error instanceof SavedObjectNotFound) {
+    return <RedirectWhenSavedObjectNotFound error={error} />;
+  }
+
+  return <DiscoverError error={error} />;
+};
+
+const RedirectWhenSavedObjectNotFound = ({ error }: { error: SavedObjectNotFound }) => {
   const {
     application: { navigateToApp },
     core,
@@ -29,6 +33,7 @@ export const RedirectWhenSavedObjectNotFound = ({
     toastNotifications,
     urlTracker,
   } = useDiscoverServices();
+  const discoverSessionId = useInternalStateSelector((state) => state.persistedDiscoverSession?.id);
 
   useMount(() => {
     const redirect = redirectWhenMissing({
@@ -39,7 +44,7 @@ export const RedirectWhenSavedObjectNotFound = ({
         search: '/',
         'index-pattern': {
           app: 'management',
-          path: `kibana/objects/savedSearches/${discoverSessionId}`,
+          path: `kibana/objects/search/${discoverSessionId}`,
         },
       },
       toastNotifications,

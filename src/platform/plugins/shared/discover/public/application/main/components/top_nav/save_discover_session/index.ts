@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { BrandedLoadingIndicator } from './branded_loading_indicator';
-export { NoDataPage } from './no_data_page';
-export { DiscoverSessionView, type DiscoverSessionViewProps } from './session_view';
+export { onSaveDiscoverSession } from './on_save_discover_session';

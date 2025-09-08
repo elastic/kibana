@@ -10,12 +10,12 @@
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearchAttributes } from '../../../common';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
-import { toSavedSearchAttributes } from '../../../common/service/saved_searches_utils';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import { toSavedSearchAttributes } from '../../common/service/saved_searches_utils';
+import type { SavedSearchCrudTypes } from '../../common/content_management';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import type { SavedSearchAttributes } from '../../common';
 
 export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
