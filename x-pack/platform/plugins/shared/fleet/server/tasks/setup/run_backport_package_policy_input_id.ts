@@ -19,59 +19,72 @@ export async function runBackportPackagePolicyInputId(params: {
 }) {
   const esClient = appContextService.getInternalUserESClient();
   const savedObjectsClient = appContextService.getInternalUserSOClient();
-  return _runBackportPackagePolicyInputId(savedObjectsClient, esClient);
+
+  return _runBackportPackagePolicyInputId(
+    savedObjectsClient,
+    esClient,
+    params.logger,
+    params.abortController
+  );
 }
 
 export async function _runBackportPackagePolicyInputId(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  abortController?: AbortController
 ) {
   for await (const items of await packagePolicyService.fetchAllItems(soClient)) {
+    if (abortController?.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
     const packagePolicyToUpdate = items.reduce((acc, packagePolicy) => {
       if (packagePolicy.inputs.some((input) => !input.id)) {
         acc.push(packagePolicy);
       }
       return acc;
     }, [] as PackagePolicy[]);
+
     if (packagePolicyToUpdate.length === 0) {
       continue;
     }
-    try {
-      const updates: Pick<PackagePolicy, 'id' | 'inputs'>[] = [];
-      for (const packagePolicy of packagePolicyToUpdate) {
-        if (!packagePolicy.package) {
-          continue;
-        }
 
-        try {
-          const pkgInfo = await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-            ignoreUnverified: true,
-            prerelease: true,
-          });
-
-          const inputs = getInputsWithIds(packagePolicy, packagePolicy.id, undefined, pkgInfo);
-          updates.push({ id: packagePolicy.id, inputs });
-        } catch (e) {
-          //  TODO log error
-        }
+    const updates: Pick<PackagePolicy, 'id' | 'inputs'>[] = [];
+    for (const packagePolicy of packagePolicyToUpdate) {
+      if (abortController?.signal.aborted) {
+        throw new Error('Task was aborted');
+      }
+      if (!packagePolicy.package) {
+        continue;
       }
 
-      const soType = await getPackagePolicySavedObjectType();
+      try {
+        const pkgInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          ignoreUnverified: true,
+          prerelease: true,
+        });
 
-      await soClient.bulkUpdate(
-        updates.map((update) => ({
-          type: soType,
-          id: update.id,
-          attributes: {
-            inputs: update.inputs,
-          },
-        }))
-      );
-    } catch (e) {
-      // TODO log errors
+        const inputs = getInputsWithIds(packagePolicy, packagePolicy.id, undefined, pkgInfo);
+        updates.push({ id: packagePolicy.id, inputs });
+      } catch (error) {
+        logger.error(`Failed to backport package policy ${packagePolicy.id}: ${error.message}`, {
+          error,
+        });
+      }
     }
+
+    const soType = await getPackagePolicySavedObjectType();
+    await soClient.bulkUpdate(
+      updates.map((update) => ({
+        type: soType,
+        id: update.id,
+        attributes: {
+          inputs: update.inputs,
+        },
+      }))
+    );
   }
 }
