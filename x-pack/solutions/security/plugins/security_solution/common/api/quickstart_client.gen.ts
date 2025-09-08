@@ -397,8 +397,12 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
+  GetAllDashboardMigrationsStatsResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationDashboardsRequestQueryInput,
+  GetDashboardMigrationDashboardsRequestParamsInput,
+  GetDashboardMigrationDashboardsResponse,
   GetDashboardMigrationResourcesRequestQueryInput,
   GetDashboardMigrationResourcesRequestParamsInput,
   GetDashboardMigrationResourcesResponse,
@@ -1446,6 +1450,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migrations stats for all migrations stored in the system
+   */
+  async getAllDashboardMigrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetAllDashboardMigrationsStats`);
+    return this.kbnClient
+      .request<GetAllDashboardMigrationsStatsResponse>({
+        path: '/internal/siem_migrations/dashboards/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the rule migrations stats for all migrations stored in the system
    */
   async getAllStatsRuleMigration() {
@@ -1501,6 +1520,26 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboards added to an existing dashboard migration
+   */
+  async getDashboardMigrationDashboards(props: GetDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request<GetDashboardMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2567,7 +2606,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Run a shell command on an endpoint.
+   * Run a script on a host. Currently supported only for some agent types.
    */
   async runScriptAction(props: RunScriptActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
@@ -3133,6 +3172,10 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationDashboardsProps {
+  query: GetDashboardMigrationDashboardsRequestQueryInput;
+  params: GetDashboardMigrationDashboardsRequestParamsInput;
 }
 export interface GetDashboardMigrationResourcesProps {
   query: GetDashboardMigrationResourcesRequestQueryInput;
