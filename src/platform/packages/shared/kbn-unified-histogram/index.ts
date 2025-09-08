@@ -25,9 +25,6 @@ export {
   type UnifiedHistogramChartProps,
   ChartSectionTemplate,
   type ChartSectionTemplateProps,
-  ToolbarSelector,
-  type ToolbarSelectorProps,
-  type SelectableEntry,
   useFetch,
 } from './components/chart';
 export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
