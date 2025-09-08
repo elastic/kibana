@@ -9,4 +9,3 @@
 
 export * from './get_cell_renderers';
 export { getColumnsConfiguration } from './get_columns_configuration';
-export { getRecommendedFields } from './get_recommended_fields';

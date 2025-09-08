@@ -15,7 +15,7 @@ import {
 } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getCellRenderers, getColumnsConfiguration, getRecommendedFields } from './accessors';
+import { getCellRenderers, getColumnsConfiguration } from './accessors';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
@@ -40,7 +40,6 @@ export const createTracesDataSourceProfileProvider = ({
     }),
     getCellRenderers,
     getColumnsConfiguration,
-    getRecommendedFields,
   },
   resolve: (params) => {
     if (
