@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -76,9 +76,7 @@ export function Overview({
   return (
     <DataSourcesProvider indexes={indexes}>
       <TraceRootItemProvider traceId={traceId}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="m"
+        <div
           ref={setContainerRef}
           css={
             containerHeight
@@ -89,55 +87,34 @@ export function Overview({
               : undefined
           }
         >
-          <EuiFlexItem>
-            <EuiSpacer size="m" />
-            <About
-              hit={hit}
-              dataView={dataView}
-              filter={filter}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiSpacer size="m" />
-            <SimilarSpans
-              spanName={flattenedHit[SPAN_NAME]}
-              serviceName={serviceName}
-              transactionName={flattenedHit[TRANSACTION_NAME]}
-              transactionType={flattenedHit[TRANSACTION_TYPE]}
-              isOtelSpan={isOtelSpan}
-              duration={duration || 0}
-            />
-          </EuiFlexItem>
-
+          <EuiSpacer size="m" />
+          <About
+            hit={hit}
+            dataView={dataView}
+            filter={filter}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
+          />
+          <EuiSpacer size="m" />
+          <SimilarSpans
+            spanName={flattenedHit[SPAN_NAME]}
+            serviceName={serviceName}
+            transactionName={flattenedHit[TRANSACTION_NAME]}
+            transactionType={flattenedHit[TRANSACTION_TYPE]}
+            isOtelSpan={isOtelSpan}
+            duration={duration || 0}
+          />
           {showWaterfall && docId ? (
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <Trace
-                dataView={dataView}
-                traceId={traceId}
-                serviceName={serviceName || ''}
-                docId={docId}
-              />
-            </EuiFlexItem>
-          ) : null}
-          {docId ? (
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <SpanLinks traceId={traceId} docId={docId} />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <EuiSpacer size="m" />
-            <TraceContextLogEvents
+            <Trace
+              dataView={dataView}
               traceId={traceId}
-              spanId={spanId}
-              transactionId={transactionId}
+              serviceName={serviceName || ''}
+              docId={docId}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          ) : null}
+          {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
+          <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
+        </div>
       </TraceRootItemProvider>
     </DataSourcesProvider>
   );
