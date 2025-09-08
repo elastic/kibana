@@ -22,7 +22,7 @@
       "taskManager",
       "usageCollection"
     ],
-    "optionalPlugins": ["cloud", "serverless"],
+    "optionalPlugins": ["cloud", "serverless", "globalSearch"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

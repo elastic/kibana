@@ -75,13 +75,6 @@ const connectors: ConnectorContract[] = [
       })
     ),
   },
-  {
-    type: 'delay',
-    paramsSchema: z.object({
-      delay: z.number(),
-    }),
-    outputSchema: z.null(),
-  },
 ];
 
 export const getOutputSchemaForStepType = (stepType: string) => {
@@ -106,7 +99,7 @@ const AlertSchema = z.object({
 
 const SummarizedAlertsChunkSchema = z.object({
   count: z.number(),
-  data: z.array(AlertSchema),
+  data: z.array(z.union([AlertSchema, z.any()])),
 });
 
 const RuleSchema = z.object({

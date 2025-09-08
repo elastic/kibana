@@ -43,7 +43,6 @@
     "@kbn/search-navigation",
     "@kbn/search-queries",
     "@kbn/sample-data-ingest",
-    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiIconTip } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
@@ -70,6 +69,7 @@ export function AnnotationsLayerHeader({
   title: string | undefined;
   hasUnsavedChanges: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <StaticHeader
       icon={IconChartBarAnnotations}
@@ -92,7 +92,7 @@ export function AnnotationsLayerHeader({
                 defaultMessage: 'Unsaved changes',
               })}
               type="dot"
-              color={euiThemeVars.euiColorSuccess}
+              color={euiTheme.colors.success}
             />
           </div>
         )

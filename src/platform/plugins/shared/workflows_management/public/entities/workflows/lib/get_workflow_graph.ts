@@ -9,6 +9,7 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { getTriggerLabel } from '../../../shared/lib/graph_utils';
 
 export type WorkflowGraphNodeType =
   | 'if'
@@ -17,6 +18,7 @@ export type WorkflowGraphNodeType =
   | 'action'
   | 'foreach'
   | 'atomic'
+  | 'http'
   | 'trigger';
 
 export interface WorkflowGraphNodeLabel {
@@ -29,20 +31,7 @@ export interface WorkflowGraphNodeLabel {
 
 export type WorkflowGraph = graphlib.Graph<WorkflowGraphNodeLabel>;
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'merge', 'trigger'];
-
-function getTriggerLabel(triggerType: string) {
-  switch (triggerType) {
-    case 'triggers.elastic.manual':
-      return 'Manual';
-    case 'triggers.elastic.detectionRule':
-      return 'Detection Rule';
-    case 'triggers.elastic.scheduled':
-      return 'Scheduled';
-    default:
-      return triggerType;
-  }
-}
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

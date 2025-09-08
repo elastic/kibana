@@ -8,7 +8,7 @@ import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import type { TickFormatter } from '@elastic/charts';
-import type { FormattedChangePoint } from '../change_point';
+import type { FormattedChangePoint } from './change_point';
 import { ChangePointSummary } from '../change_point_summary';
 
 export function getAnnotationFromFormattedChangePoint({

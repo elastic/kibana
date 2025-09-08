@@ -52,6 +52,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
+  const deploymentMode =
+    (isEditPage || isAgentlessSelected) && packagePolicy.supports_agentless
+      ? 'agentless'
+      : 'default';
   const packagePolicyTemplates = useMemo(
     () =>
       showOnlyIntegration
@@ -102,11 +106,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
               const isInputAvailable =
                 packagePolicyInput &&
-                isInputAllowedForDeploymentMode(
-                  packagePolicyInput,
-                  isAgentlessSelected && packagePolicy.supports_agentless ? 'agentless' : 'default',
-                  packageInfo
-                );
+                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo);
 
               return isInputAvailable ? (
                 <EuiFlexItem key={packageInput.type}>

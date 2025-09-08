@@ -101,6 +101,7 @@ export const GeneratePatternButton = ({
               <EuiPopover
                 id={splitButtonPopoverId}
                 isOpen={isPopoverOpen}
+                closePopover={() => closePopover()}
                 button={
                   <EuiButtonIcon
                     data-test-subj="streamsAppGrokAiPickConnectorButton"

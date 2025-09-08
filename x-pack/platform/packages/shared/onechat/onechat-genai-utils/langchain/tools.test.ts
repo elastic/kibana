@@ -21,6 +21,7 @@ const createTool = (
     type: ToolType.builtin,
     description: '',
     configuration: {},
+    readonly: false,
     tags: [],
     schema: z.object({}),
     execute: jest.fn(),
@@ -84,18 +85,18 @@ describe('createToolIdMappings', () => {
     const mappings = toRecord(createToolIdMappings(tools));
 
     expect(mappings).toEqual({
-      '.internal_tool': 'internal_tool',
+      '.internal_tool': '_internal_tool',
       'user-defined-tool': 'user-defined-tool',
     });
   });
 
   it('handles naming conflicts', () => {
-    const tools = [createTool('.some_tool'), createTool('some_tool')];
+    const tools = [createTool('^some_tool'), createTool('some_tool')];
 
     const mappings = toRecord(createToolIdMappings(tools));
 
     expect(mappings).toEqual({
-      '.some_tool': 'some_tool',
+      '^some_tool': 'some_tool',
       some_tool: 'some_tool_1',
     });
   });

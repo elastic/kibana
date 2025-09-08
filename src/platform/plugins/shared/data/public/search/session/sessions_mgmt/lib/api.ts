@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import type { ApplicationStart, FeatureFlagsStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
@@ -17,11 +17,13 @@ import type { SearchSessionSavedObject } from '../types';
 import type { ISessionsClient } from '../../sessions_client';
 import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
 interface SearchSessionManagementDeps {
   notifications: NotificationsStart;
   application: ApplicationStart;
   usageCollector?: SearchUsageCollector;
+  featureFlags: FeatureFlagsStart;
 }
 
 interface FetchReturn {
@@ -36,7 +38,7 @@ export class SearchSessionsMgmtAPI {
     private deps: SearchSessionManagementDeps
   ) {}
 
-  public async fetchTableData(): Promise<FetchReturn> {
+  public async fetchTableData({ appId }: { appId?: string } = {}): Promise<FetchReturn> {
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -51,11 +53,23 @@ export class SearchSessionsMgmtAPI {
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
       tap(() => {
+        const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
+          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+          false
+        );
+
         this.deps.notifications.toasts.addDanger(
-          i18n.translate('data.mgmt.searchSessions.api.fetchTimeout', {
-            defaultMessage: 'Fetching the Search Session info timed out after {timeout} seconds',
-            values: { timeout: refreshTimeout.asSeconds() },
-          })
+          hasBackgroundSearchEnabled
+            ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchFetchTimeout', {
+                defaultMessage:
+                  'Fetching the Background Search info timed out after {timeout} seconds',
+                values: { timeout: refreshTimeout.asSeconds() },
+              })
+            : i18n.translate('data.mgmt.searchSessions.api.fetchTimeout', {
+                defaultMessage:
+                  'Fetching the Search Session info timed out after {timeout} seconds',
+                values: { timeout: refreshTimeout.asSeconds() },
+              })
         );
       }),
       mapTo(null)
@@ -66,7 +80,10 @@ export class SearchSessionsMgmtAPI {
       const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         return {
-          savedObjects: result.saved_objects as SearchSessionSavedObject[],
+          savedObjects: result.saved_objects.filter((object) => {
+            if (!appId) return true;
+            return object.attributes.appId === appId;
+          }) as SearchSessionSavedObject[],
           statuses: result.statuses,
         };
       }
@@ -92,59 +109,98 @@ export class SearchSessionsMgmtAPI {
 
   // Delete and expire
   public async sendDelete(id: string): Promise<void> {
+    const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+      false
+    );
+
     this.deps.usageCollector?.trackSessionDeleted();
     try {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('data.mgmt.searchSessions.api.deleted', {
-          defaultMessage: 'The search session was deleted.',
-        }),
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchDeleted', {
+              defaultMessage: 'The background search was deleted.',
+            })
+          : i18n.translate('data.mgmt.searchSessions.api.deleted', {
+              defaultMessage: 'The search session was deleted.',
+            }),
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('data.mgmt.searchSessions.api.deletedError', {
-          defaultMessage: 'Failed to delete the search session!',
-        }),
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchDeletedError', {
+              defaultMessage: 'Failed to delete the background search!',
+            })
+          : i18n.translate('data.mgmt.searchSessions.api.deletedError', {
+              defaultMessage: 'Failed to delete the search session!',
+            }),
       });
     }
   }
 
   // Extend
   public async sendExtend(id: string, expires: string): Promise<void> {
+    const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+      false
+    );
+
     this.deps.usageCollector?.trackSessionExtended();
     try {
       await this.sessionsClient.extend(id, expires);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('data.mgmt.searchSessions.api.extended', {
-          defaultMessage: 'The search session was extended.',
-        }),
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchExtended', {
+              defaultMessage: 'The background search was extended.',
+            })
+          : i18n.translate('data.mgmt.searchSessions.api.extended', {
+              defaultMessage: 'The search session was extended.',
+            }),
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('data.mgmt.searchSessions.api.extendError', {
-          defaultMessage: 'Failed to extend the search session!',
-        }),
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchExtendError', {
+              defaultMessage: 'Failed to extend the background search!',
+            })
+          : i18n.translate('data.mgmt.searchSessions.api.extendError', {
+              defaultMessage: 'Failed to extend the search session!',
+            }),
       });
     }
   }
 
   // Change the user-facing name of a search session
   public async sendRename(id: string, newName: string): Promise<void> {
+    const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+      false
+    );
+
     try {
       await this.sessionsClient.rename(id, newName);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('data.mgmt.searchSessions.api.rename', {
-          defaultMessage: 'The search session was renamed',
-        }),
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchRename', {
+              defaultMessage: 'The background search was renamed',
+            })
+          : i18n.translate('data.mgmt.searchSessions.api.rename', {
+              defaultMessage: 'The search session was renamed',
+            }),
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('data.mgmt.searchSessions.api.renameError', {
-          defaultMessage: 'Failed to rename the search session',
-        }),
+        title: hasBackgroundSearchEnabled
+          ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchRenameError', {
+              defaultMessage: 'Failed to rename the background search',
+            })
+          : i18n.translate('data.mgmt.searchSessions.api.renameError', {
+              defaultMessage: 'Failed to rename the search session',
+            }),
       });
     }
   }

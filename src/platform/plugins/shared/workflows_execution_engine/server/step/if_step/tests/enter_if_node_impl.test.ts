@@ -20,12 +20,14 @@ describe('EnterIfNodeImpl', () => {
   let startStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
   let getNodeSuccessors: jest.Mock<any, any, any>;
+  let enterScope: jest.Mock<any, any, any>;
   let workflowContextLoggerMock: IWorkflowEventLogger;
   let workflowContextManagerMock: WorkflowContextManager;
 
   beforeEach(() => {
     startStep = jest.fn();
     goToStep = jest.fn();
+    enterScope = jest.fn();
     getNodeSuccessors = jest.fn();
     workflowContextLoggerMock = {
       logDebug: jest.fn(),
@@ -45,6 +47,7 @@ describe('EnterIfNodeImpl', () => {
       startStep,
       goToStep,
       getNodeSuccessors,
+      enterScope,
     } as any;
     impl = new EnterIfNodeImpl(
       step,
@@ -56,12 +59,12 @@ describe('EnterIfNodeImpl', () => {
     getNodeSuccessors.mockReturnValue([
       {
         id: 'thenNode',
-        type: 'enter-condition-branch',
+        type: 'enter-then-branch',
         condition: 'true',
       } as EnterConditionBranchNode,
       {
         id: 'elseNode',
-        type: 'enter-condition-branch',
+        type: 'enter-else-branch',
       } as EnterConditionBranchNode,
     ]);
   });
@@ -71,17 +74,32 @@ describe('EnterIfNodeImpl', () => {
     expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledWith(step.id);
   });
 
+  it('should enter scope', async () => {
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be called after startStep', async () => {
+    await impl.run();
+    expect(startStep).toHaveBeenCalled();
+    expect(enterScope).toHaveBeenCalled();
+    expect(startStep.mock.invocationCallOrder[0]).toBeLessThan(
+      enterScope.mock.invocationCallOrder[0]
+    );
+  });
+
   describe('then branch', () => {
     beforeEach(() => {
       getNodeSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:alert',
         } as EnterConditionBranchNode,
         {
           id: 'elseNode',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
         } as EnterConditionBranchNode,
       ]);
     });
@@ -104,12 +122,12 @@ describe('EnterIfNodeImpl', () => {
       getNodeSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:rule',
         } as EnterConditionBranchNode,
         {
           id: 'elseNode',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
         } as EnterConditionBranchNode,
       ]);
     });
@@ -132,7 +150,7 @@ describe('EnterIfNodeImpl', () => {
       getNodeSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:rule',
         } as EnterConditionBranchNode,
       ]);
@@ -152,10 +170,10 @@ describe('EnterIfNodeImpl', () => {
     });
   });
 
-  it('should throw an error if successors are not enter-condition-branch', async () => {
+  it('should throw an error if successors are not enter-then-branch or enter-else-branch', async () => {
     getNodeSuccessors.mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${step.id} must have only 'enter-condition-branch' successors, but found: some-other-type.`
+      `EnterIfNode with id ${step.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
     );
   });
 
@@ -163,7 +181,7 @@ describe('EnterIfNodeImpl', () => {
     getNodeSuccessors.mockReturnValueOnce([
       {
         id: 'thenNode',
-        type: 'enter-condition-branch',
+        type: 'enter-then-branch',
         condition: 'invalid""condition',
       } as EnterConditionBranchNode,
     ]);

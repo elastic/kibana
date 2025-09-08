@@ -75,10 +75,12 @@ export function SparkPlot({
       color: `rgba(0,0,0,0)`,
     },
     axes: {
+      tickLine: {
+        visible: false,
+      },
       gridLine: {
         horizontal: {
-          opacity: 1,
-          stroke: `rgba(0,0,0,1)`,
+          visible: false,
         },
       },
     },
@@ -97,7 +99,7 @@ export function SparkPlot({
     <Chart
       size={{
         width: '100%',
-        height: compressed ? 64 : 48,
+        height: !compressed ? 144 : 48,
       }}
     >
       <Tooltip
@@ -105,7 +107,8 @@ export function SparkPlot({
           return xFormatter(data.value);
         }}
       />
-      <Axis id="y_axis" position="left" hide />
+      <Axis id="y_axis" position="left" hide domain={{ min: 0, max: NaN }} />
+      <Axis id="x_axis" position="bottom" hide={compressed} />
       <Settings
         theme={[sparkplotChartTheme, baseTheme]}
         baseTheme={defaultTheme}
@@ -122,6 +125,7 @@ export function SparkPlot({
           yAccessors={['y']}
           data={timeseries}
           enableHistogramMode
+          yNice
         />
       ) : (
         <LineSeries

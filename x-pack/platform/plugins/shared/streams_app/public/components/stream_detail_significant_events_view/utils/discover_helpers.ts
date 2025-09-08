@@ -6,17 +6,16 @@
  */
 
 import type { TimeState } from '@kbn/es-query';
-import type { Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream, buildEsqlQuery } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
-import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 
 export function buildDiscoverParams(
-  significantEvent: SignificantEventItem,
+  query: StreamQuery,
   definition: Streams.all.Definition,
   timeState: TimeState
 ) {
-  const esqlQuery = buildEsqlQuery(getIndexPatternsForStream(definition), significantEvent.query);
+  const esqlQuery = buildEsqlQuery(getIndexPatternsForStream(definition), query);
 
   return {
     timeRange: {

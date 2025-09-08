@@ -4,11 +4,11 @@ workflow:
   version: 1
   enabled: true
   triggers:
-    - type: triggers.elastic.scheduled
+    - type: scheduled
       with:
         every: 1
         unit: day
-    - type: triggers.elastic.manual
+    - type: manual
   steps:
     - name: AI Summary
       type: openai.completion

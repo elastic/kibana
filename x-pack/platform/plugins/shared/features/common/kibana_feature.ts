@@ -160,6 +160,8 @@ export interface KibanaFeatureConfig {
    * Indicates whether the feature is available as a standalone feature. The feature can still be
    * referenced by other features, but it will not be displayed in any feature management UIs. By default, all features
    * are visible.
+   *
+   * @note This flag is designed for use via configuration overrides, and very select use cases. Please consult prior to use.
    */
   hidden?: boolean;
 

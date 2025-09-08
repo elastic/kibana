@@ -53,8 +53,6 @@ const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
 const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
-const INSPECT_TOKENS_LABEL = 'Inspect tokens';
-const INSPECT_TOKENS_HANDLER_ID = 'editor.action.inspectTokens';
 const { collapseLiteralStrings } = XJson;
 
 export class MonacoEditorActionsProvider {
@@ -62,8 +60,7 @@ export class MonacoEditorActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void,
-    private isDevMode: boolean
+    private setEditorActionsCss: (css: CSSProperties) => void
   ) {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
@@ -111,9 +108,6 @@ export class MonacoEditorActionsProvider {
       // trigger autocomplete on backspace
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
-      }
-      if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
-        this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
       }
     });
   }

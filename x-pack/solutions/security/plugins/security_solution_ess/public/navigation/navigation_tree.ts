@@ -24,6 +24,13 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       isCollapsible: false,
       children: [
         {
+          link: securityLink(SecurityPageName.landing),
+          title: SOLUTION_NAME,
+          icon: 'logoSecurity',
+          renderAs: 'home',
+          sideNavVersion: 'v2',
+        },
+        {
           link: 'discover',
         },
         defaultNavigationTree.dashboards(),
@@ -64,6 +71,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.assetInventory,
               link: securityLink(SecurityPageName.assetInventory),
+            },
+            {
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
             },
             defaultNavigationTree.assets(services),
           ],

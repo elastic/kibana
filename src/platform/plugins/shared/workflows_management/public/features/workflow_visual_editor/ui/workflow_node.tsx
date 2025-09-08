@@ -17,11 +17,7 @@ import React from 'react';
 import type { NodeType } from '../lib/get_layouted_nodes_and_edges';
 import { flowNodeTypes } from '../lib/get_layouted_nodes_and_edges';
 
-const triggerNodeTypes = [
-  'triggers.elastic.manual',
-  'triggers.elastic.detectionRule',
-  'triggers.elastic.scheduled',
-];
+const triggerNodeTypes = ['manual', 'alert', 'scheduled'];
 const actionNodeTypes = ['console', 'slack', 'delay', 'inference.unified_inference'];
 
 function getNodeIcon(nodeType: string, color: string) {
@@ -36,11 +32,11 @@ function getNodeIcon(nodeType: string, color: string) {
       return <EuiIcon type="logoSlack" color={color} />;
     case 'inference.unified_inference':
       return <EuiIcon type="sparkles" color={color} />;
-    case 'triggers.elastic.manual':
+    case 'manual':
       return <EuiIcon type="accessibility" color={color} />;
-    case 'triggers.elastic.detectionRule':
+    case 'alert':
       return <EuiIcon type="warning" color={color} />;
-    case 'triggers.elastic.scheduled':
+    case 'scheduled':
       return <EuiIcon type="clock" color={color} />;
     case 'delay':
       return <EuiIcon type="clock" color={color} />;
