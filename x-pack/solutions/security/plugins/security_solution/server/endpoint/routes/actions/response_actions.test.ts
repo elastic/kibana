@@ -1070,6 +1070,12 @@ describe('Response actions', () => {
       };
 
       beforeEach(() => {
+        // Enable the experimental feature for cancel actions
+        endpointContext.experimentalFeatures = {
+          ...endpointContext.experimentalFeatures,
+          microsoftDefenderEndpointCancelEnabled: true,
+        };
+
         // Store the original mock implementation
         originalGetResponseActionsClientMock =
           (getResponseActionsClientMock as jest.Mock).getMockImplementation() || jest.fn();

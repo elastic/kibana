@@ -40,6 +40,7 @@ jest.mock('../shared/hooks', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../common/experimental_features_service');
 
 jest.useFakeTimers();
 
@@ -188,6 +189,7 @@ describe('PendingActionsSelector', () => {
     // Mock user privileges - default to having all permissions
     mockUseUserPrivileges.mockReturnValue({
       endpointPrivileges: {
+        canWriteSecuritySolution: true,
         canIsolateHost: true,
         canUnIsolateHost: true,
         canKillProcess: true,
@@ -350,6 +352,7 @@ describe('PendingActionsSelector', () => {
       // Mock privileges without isolate permission
       mockUseUserPrivileges.mockReturnValue({
         endpointPrivileges: {
+          canWriteSecuritySolution: true,
           canIsolateHost: false, // User cannot cancel isolate actions
           canUnIsolateHost: true,
           canKillProcess: true,

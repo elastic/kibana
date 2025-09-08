@@ -13,7 +13,11 @@ export const getEndpointPrivilegesInitialStateMock = ({
   ...overrides
 }: Partial<EndpointPrivileges> = {}): EndpointPrivileges => {
   const endpointPrivilegesMock: EndpointPrivileges = {
-    ...getEndpointAuthzInitialStateMock(overrides),
+    ...getEndpointAuthzInitialStateMock({
+      // canCancelResponseActions should remain false as it requires dynamic validation
+      canCancelResponseActions: false,
+      ...overrides
+    }),
     loading,
   };
 
