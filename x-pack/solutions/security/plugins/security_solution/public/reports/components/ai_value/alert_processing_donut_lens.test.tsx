@@ -195,8 +195,8 @@ describe('AlertProcessingDonut', () => {
 
       render(<AlertProcessingDonut {...defaultProps} />);
 
-      const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-      callArgs.getLensAttributes(mockArgs);
+      const newArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+      newArgs.getLensAttributes(mockArgs);
 
       expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
         ...mockArgs,
