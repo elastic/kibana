@@ -10,7 +10,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import {
   MissingPrivilegesDescription,
   MissingPrivilegesTooltip,
-} from '../../../../common/missing_privileges';
+} from '../../../../common/components/missing_privileges';
 import type { CapabilitiesLevel } from '../../../common/service';
 
 export const WithMissingPrivilegesTooltip = <P extends { isAuthorized: boolean }>(
