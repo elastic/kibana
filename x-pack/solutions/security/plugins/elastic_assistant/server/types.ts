@@ -90,6 +90,10 @@ export interface ElasticAssistantPluginStart {
    */
   inference: InferenceServerStart;
   /**
+   * Analytics service setup contract.
+   */
+  telemetry: AnalyticsServiceSetup;
+  /**
    * Register features to be used by the elastic assistant.
    *
    * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
@@ -152,6 +156,7 @@ export interface ElasticAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
+  analytics: AnalyticsServiceSetup;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {

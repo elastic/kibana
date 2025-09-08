@@ -147,6 +147,8 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { knowledgeBaseRetrievalInternalTool } from './assistant/tools/knowledge_base/knowledge_base_retrieval_internal_tool';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { knowledgeBaseWriteInternalTool } from './assistant/tools/knowledge_base/knowledge_base_write_internal_tool';
+import { securityLabsKnowledgeInternalTool } from './assistant/tools/security_labs/security_labs_knowledge_internal_tool';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -252,6 +254,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.onechat.tools.register(alertCountsInternalTool());
     plugins.onechat.tools.register(productDocumentationInternalTool(core.getStartServices));
     plugins.onechat.tools.register(knowledgeBaseRetrievalInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(knowledgeBaseWriteInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 

@@ -84,6 +84,10 @@ Always provide clear, actionable recommendations and explain your reasoning.`,
             { type: ToolType.builtin, tool_ids: ['knowledge-base-retrieval-internal-tool'] },
             // Include the product-documentation-internal-tool
             { type: ToolType.builtin, tool_ids: ['product-documentation-internal-tool'] },
+            // Include the security-labs-knowledge-internal-tool
+            { type: ToolType.builtin, tool_ids: ['security-labs-knowledge-internal-tool'] },
+            // Include the knowledge-base-write-internal-tool
+            { type: ToolType.builtin, tool_ids: ['knowledge-base-write-internal-tool'] },
             // Include all built-in tools for comprehensive security analysis
             { type: ToolType.builtin, tool_ids: ['*'] },
           ],
