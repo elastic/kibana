@@ -18,20 +18,18 @@ import { i18n } from '@kbn/i18n';
 import { useController, useFormContext } from 'react-hook-form';
 import { labels } from '../../../../../utils/i18n';
 import { useIndexSearchSources } from '../../../../../hooks/tools/use_resolve_search_sources';
-interface PatternFormContext {
-  pattern: string;
-}
+import type { IndexSearchToolFormData } from '../../types/tool_form_types';
 
 const DEFAULT_PAGE_SIZE = 5;
 
 export const IndexSearchPattern: React.FC = () => {
-  const { control, setValue, setError, clearErrors } = useFormContext<PatternFormContext>();
+  const { control, setValue, setError, clearErrors } = useFormContext<IndexSearchToolFormData>();
   const {
     field: { ref, value, onChange, onBlur, name },
     fieldState,
   } = useController({ name: 'pattern', control });
 
-  const patternValue = (value as string) ?? '';
+  const patternValue = value ?? '';
   const hasQuery = (patternValue.trim().length ?? 0) > 0;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -42,12 +40,16 @@ export const IndexSearchPattern: React.FC = () => {
 
   const { data, isLoading } = useIndexSearchSources({
     pattern: patternValue,
-    page: pageIndex + 1,
-    perPage: pageSize,
   });
 
   const items = useMemo(() => (hasQuery ? data?.results ?? [] : []), [data, hasQuery]);
   const total = hasQuery ? data?.total ?? 0 : 0;
+
+  const pageOfItems = useMemo(() => {
+    const start = pageIndex * pageSize;
+    const end = start + pageSize;
+    return items.slice(start, end);
+  }, [items, pageIndex, pageSize]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -141,7 +143,7 @@ export const IndexSearchPattern: React.FC = () => {
       <EuiSpacer size="s" />
 
       <EuiBasicTable
-        items={items}
+        items={pageOfItems}
         columns={columns}
         loading={hasQuery ? isLoading : false}
         rowHeader="name"
@@ -157,7 +159,7 @@ export const IndexSearchPattern: React.FC = () => {
         pagination={{
           pageIndex,
           pageSize,
-          totalItemCount: total,
+          totalItemCount: items.length,
           pageSizeOptions: [5, 10, 25, 50],
           showPerPageOptions: true,
         }}

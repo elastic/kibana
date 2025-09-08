@@ -16,6 +16,7 @@ import type {
   UpdateToolResponse,
   BulkDeleteToolResponse,
   ExecuteToolResponse,
+  ResolveSearchSourcesResponse,
 } from '../../../common/http_api/tools';
 
 export class ToolsService {
@@ -65,20 +66,10 @@ export class ToolsService {
     });
   }
 
-  async resolveSearchSources({
-    pattern,
-    page,
-    perPage,
-  }: {
-    pattern: string;
-    page?: number;
-    perPage?: number;
-  }) {
-    const query: Record<string, string | number> = { pattern };
-    if (page) query.page = page;
-    if (perPage) query.per_page = perPage;
-    return await this.http.get<
-      import('../../../common/http_api/tools').ResolveSearchSourcesResponse
-    >('/internal/chat/tools/_resolve_search_sources', { query });
+  async resolveSearchSources({ pattern }: { pattern: string }) {
+    return await this.http.get<ResolveSearchSourcesResponse>(
+      '/internal/chat/tools/_resolve_search_sources',
+      { query: { pattern } }
+    );
   }
 }

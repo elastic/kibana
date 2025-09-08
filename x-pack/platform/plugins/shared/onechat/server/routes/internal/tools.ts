@@ -75,8 +75,6 @@ export function registerInternalToolsRoutes({
       validate: {
         query: schema.object({
           pattern: schema.string(),
-          page: schema.maybe(schema.number({ min: 1 })),
-          per_page: schema.maybe(schema.number({ min: 1, max: 100 })),
         }),
       },
       options: { access: 'internal' },
@@ -86,7 +84,7 @@ export function registerInternalToolsRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-      const { pattern, page = 1, per_page: perPage = 5 } = request.query;
+      const { pattern } = request.query;
 
       const {
         indices,
@@ -94,7 +92,6 @@ export function registerInternalToolsRoutes({
         data_streams: dataStreams,
       } = await listSearchSources({
         pattern,
-        perTypeLimit: perPage * page,
         includeHidden: false,
         includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: true,
@@ -102,20 +99,16 @@ export function registerInternalToolsRoutes({
         esClient,
       });
 
-      const all = [
+      const results = [
         ...indices.map((i) => ({ type: 'index' as const, name: i.name })),
         ...aliases.map((a) => ({ type: 'alias' as const, name: a.name })),
         ...dataStreams.map((d) => ({ type: 'data_stream' as const, name: d.name })),
       ];
 
-      const start = (page - 1) * perPage;
-      const end = start + perPage;
-      const results = all.slice(start, end);
-
       return response.ok<ResolveSearchSourcesResponse>({
         body: {
           results,
-          total: all.length,
+          total: results.length,
         },
       });
     })

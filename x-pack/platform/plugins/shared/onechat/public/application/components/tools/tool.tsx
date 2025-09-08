@@ -100,6 +100,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const currentToolId = watch('toolId');
 
+  // Handle opening test tool flyout on navigation
   useEffect(() => {
     const shouldOpen = searchParams.get(OPEN_TEST_FLYOUT_QUERY_PARAM) === 'true';
     if (shouldOpen && currentToolId && !showTestFlyout) {
