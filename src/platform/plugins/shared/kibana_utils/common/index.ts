@@ -8,7 +8,7 @@
  */
 
 export { Defer, defer } from './defer';
-export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
+export { fieldWildcardMatcher, fieldWildcardFilter, makeRegEx } from './field_wildcard';
 export { of } from './of';
 export type {
   BaseState,

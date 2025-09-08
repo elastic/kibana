@@ -11,6 +11,7 @@ import React, { useState, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { makeRegEx } from '@kbn/kibana-utils-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 
 interface AddFilterProps {
@@ -27,11 +28,27 @@ const sourcePlaceholder = i18n.translate(
 
 export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
   const [filter, setFilter] = useState<string>('');
+  const [isInvalid, setIsInvalid] = useState<boolean>(false);
 
   const onAddButtonClick = useCallback(() => {
     onAddFilter(filter);
     setFilter('');
   }, [filter, onAddFilter]);
+
+  const validateFilter = useCallback((value: string) => {
+    if (value.length === 0) {
+      setIsInvalid(true);
+      return;
+    }
+
+    try {
+      // test value is not important, just that the created regex is able to compile
+      makeRegEx(value).test('');
+    } catch (e) {
+      setIsInvalid(true);
+      return;
+    }
+  }, []);
 
   return (
     <EuiFlexGroup>
@@ -40,6 +57,8 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
           fullWidth
           value={filter}
           data-test-subj="fieldFilterInput"
+          isInvalid={isInvalid}
+          onBlur={(e) => validateFilter(e.target.value.trim())}
           onChange={(e) => setFilter(e.target.value.trim())}
           placeholder={sourcePlaceholder}
         />
@@ -47,7 +66,7 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
       <EuiFlexItem>
         <EuiButton
           data-test-subj="addFieldFilterButton"
-          isDisabled={filter.length === 0}
+          isDisabled={filter.length === 0 || isInvalid}
           onClick={onAddButtonClick}
         >
           <FormattedMessage
