@@ -29,8 +29,14 @@ import {
   browserAuthFixture,
   pageObjectsParallelFixture,
   validateTagsFixture,
+  visualRegressionParallelFixture,
 } from '../../fixtures/scope/test';
-import type { BrowserAuthFixture, ScoutPage, PageObjects } from '../../fixtures/scope/test';
+import type {
+  BrowserAuthFixture,
+  ScoutPage,
+  PageObjects,
+  VisualRegression,
+} from '../../fixtures/scope/test';
 
 export const scoutParallelFixtures = mergeTests(
   // worker scope fixtures
@@ -41,13 +47,15 @@ export const scoutParallelFixtures = mergeTests(
   browserAuthFixture,
   scoutPageParallelFixture,
   pageObjectsParallelFixture,
-  validateTagsFixture
+  validateTagsFixture,
+  visualRegressionParallelFixture
 );
 
 export interface ScoutParallelTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
+  visualRegression: VisualRegression;
 }
 
 export interface ScoutParallelWorkerFixtures {

@@ -17,3 +17,5 @@ export type { PageObjects } from './page_objects';
 export { persistentContext } from './context';
 export { perfTrackerFixture } from './performance';
 export type { PerfTrackerFixture } from './performance';
+export { visualRegressionFixture, visualRegressionParallelFixture } from './visual_regression';
+export type { VisualRegression } from './visual_regression';

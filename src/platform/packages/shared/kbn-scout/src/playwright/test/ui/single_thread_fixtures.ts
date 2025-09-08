@@ -34,12 +34,14 @@ import {
   validateTagsFixture,
   persistentContext,
   perfTrackerFixture,
+  visualRegressionFixture,
 } from '../../fixtures/scope/test';
 import type {
   BrowserAuthFixture,
   ScoutPage,
   PageObjects,
   PerfTrackerFixture,
+  VisualRegression,
 } from '../../fixtures/scope/test';
 export type { ScoutPage, PageObjects, BrowserAuthFixture } from '../../fixtures/scope/test';
 export type { ApiServicesFixture, LighthouseAuditOptions } from '../../fixtures/scope/worker';
@@ -58,7 +60,9 @@ export const scoutFixtures = mergeTests(
   pageObjectsFixture,
   validateTagsFixture,
   // performance fixtures
-  perfTrackerFixture
+  perfTrackerFixture,
+  // visual regression helpers
+  visualRegressionFixture
 );
 
 export interface ScoutTestFixtures {
@@ -66,6 +70,7 @@ export interface ScoutTestFixtures {
   page: ScoutPage;
   pageObjects: PageObjects;
   perfTracker: PerfTrackerFixture;
+  visualRegression: VisualRegression;
 }
 
 export interface ScoutWorkerFixtures extends ApiServicesFixture {

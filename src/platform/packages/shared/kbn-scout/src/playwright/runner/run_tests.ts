@@ -15,6 +15,11 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getFlags } from '@kbn/dev-cli-runner';
+import { findPackageForPath } from '@kbn/repo-packages';
+import {
+  SCOUT_VISUAL_REGRESSION_ENABLED,
+  SCOUT_VISUAL_REGRESSION_PLUGIN_NAME,
+} from '@kbn/scout-info';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
@@ -140,12 +145,28 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
+  // Handle visual regression capture if enabled via environment variable
+  if (SCOUT_VISUAL_REGRESSION_ENABLED) {
+    log.info('Visual Regression Capture Enabled');
+
+    if (!SCOUT_VISUAL_REGRESSION_PLUGIN_NAME) {
+      const configDir = resolve(REPO_ROOT, options.configPath);
+      const packageInfo = findPackageForPath(REPO_ROOT, configDir);
+
+      if (packageInfo && packageInfo.id) {
+        // Remove @kbn/ prefix
+        process.env.SCOUT_VISUAL_REGRESSION_PLUGIN_NAME = packageInfo.id.replace(/^@kbn\//, '');
+      }
+    }
+  }
+
   const pwGrepTag = getPlaywrightGrepTag(options.mode);
   const pwConfigPath = options.configPath;
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
   const globalFlags = getFlags(process.argv.slice(2), {
     allowUnexpected: true,
   });
+
   // Temporarily use `debug` log level for Playwright tests to better understand performance issues;
   // We are going to change it to `info` in the future. This change doesn't affect Test Servers logging.
   const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
