@@ -16,6 +16,7 @@ import type {
 } from '../types';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractVisReferences } from '../../references/extract_vis_references';
+import { VIS_SAVED_OBJECT_REF_NAME } from './constants';
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
   function transformIn(state: VisualizeEmbeddableState) {
@@ -33,7 +34,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
         },
         references: [
           {
-            name: 'savedObjectRef',
+            name: VIS_SAVED_OBJECT_REF_NAME,
             type: VISUALIZE_SAVED_OBJECT_TYPE,
             id: savedObjectId,
           },

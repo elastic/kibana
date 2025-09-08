@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Reference } from '@kbn/content-management-utils/src/types';
+import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { StoredVisualizeEmbeddableState } from './types';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
+import { VIS_SAVED_OBJECT_REF_NAME } from './constants';
+
+export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
+  function transformOut(state: StoredVisualizeEmbeddableState, references: Reference[]) {
+    const enhancementsState = state.enhancements
+      ? transformEnhancementsOut(state.enhancements, references)
+      : undefined;
+
+    const savedObjectRef = references.find(
+      (ref) => VISUALIZE_SAVED_OBJECT_TYPE === ref.type && ref.name === VIS_SAVED_OBJECT_REF_NAME
+    );
+
+    // by ref
+    if (savedObjectRef) {
+      return {
+        ...state,
+        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        savedObjectId: savedObjectRef.id,
+      };
+    }
+  }
+  return transformOut;
+}

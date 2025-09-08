@@ -196,11 +196,7 @@ export const serializeState: (props: {
   serializeDynamicActions,
   timeRange,
 }) => {
-  console.log('serializedVis', serializedVis);
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
-
-  console.log('references', references);
-  console.log('serializedSearchSource', serializedSearchSource);
 
   const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
     serializeDynamicActions?.() ?? {};
