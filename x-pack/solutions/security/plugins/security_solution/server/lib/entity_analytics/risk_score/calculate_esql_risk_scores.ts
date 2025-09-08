@@ -66,7 +66,7 @@ export const calculateScoresWithESQL = async (
         console.log(JSON.stringify(compositeQuery));
       });
 
-    if (!response.aggregations) {
+    if (!response?.aggregations) {
       throw new Error('No aggregations in composite response');
     }
 
@@ -213,11 +213,7 @@ export const getESQL = (entityType: EntityType, entities: string[], sampleSize: 
     | WHERE ${identifierField} IN (${entities.map((e) => `"${e}"`).join(',')})
       AND risk_score IS NOT NULL
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "timestamp": """", time::keyword, """", "description": """", rule_name, """\", "id": \"""", alert_id, """\" } """)
-      /** 
-       * The pablo fn works on multivalue fields only.
-       * We need to agg the risk_score into a mv field, which is why we do TOP.
-       * The 50 would be whatever max we get from the bucket.doc_count in the composite query
-       **/
+
     | STATS
          alert_count = count(risk_score),
          scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), 1.5),
