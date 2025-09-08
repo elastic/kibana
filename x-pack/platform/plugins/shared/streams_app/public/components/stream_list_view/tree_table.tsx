@@ -25,7 +25,6 @@ import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './uti
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { DiscoverBadgeButton } from '../stream_badges';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
@@ -36,6 +35,7 @@ import {
   NO_STREAMS_MESSAGE,
   DOCUMENTS_COLUMN_HEADER,
 } from './translations';
+import { DiscoverBadgeButton } from '../stream_badges';
 
 export function StreamsTreeTable({
   loading,
@@ -172,8 +172,16 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: false,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) =>
-            item.definition && <DiscoverBadgeButton definition={item.definition} />,
+          render: (_: unknown, item: TableRow) => (
+            <DiscoverBadgeButton
+              definition={
+                {
+                  stream: item.stream,
+                  data_stream_exists: !!item.data_stream,
+                } as Streams.ingest.all.GetResponse
+              }
+            />
+          ),
         },
       ]}
       itemId="name"

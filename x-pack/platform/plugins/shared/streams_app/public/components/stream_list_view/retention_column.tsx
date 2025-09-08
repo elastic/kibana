@@ -14,7 +14,7 @@ import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { isDslLifecycle, isErrorLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { INFINITE_RETENTION_LABEL, NO_DATA_SHORT_LABEL, NO_RETENTION_LABEL } from './translations';
-import { formatDuration } from '../data_management/stream_detail_lifecycle/helpers';
+import { getTimeSizeAndUnitLabel } from '../data_management/stream_detail_lifecycle/helpers/format_size_units';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
@@ -55,32 +55,31 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             values: { name: lifecycle.ilm.policy },
           })}
         >
-          {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
-            defaultMessage: '{name}',
-            values: {
-              name: lifecycle.ilm.policy,
-            },
-          })}
+          {lifecycle.ilm.policy}
         </EuiLink>
         <EuiBadge color="hollow">
-          <EuiText size="s">ILM</EuiText>
+          <EuiText size="s">
+            {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
+              defaultMessage: 'ILM',
+            })}
+          </EuiText>
         </EuiBadge>
       </EuiFlexGroup>
     );
   }
 
   if (isDslLifecycle(lifecycle)) {
-    const duration = formatDuration(lifecycle.dsl.data_retention);
-    if (duration) {
+    const retentionValue = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
+    if (retentionValue) {
       return (
         <span
           tabIndex={0}
           aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.dslRetentionAriaLabel', {
             defaultMessage: 'Data retention period: {retention}',
-            values: { retention: lifecycle.dsl.data_retention },
+            values: { retention: retentionValue },
           })}
         >
-          {duration.toLowerCase()}
+          {retentionValue}
         </span>
       );
     }

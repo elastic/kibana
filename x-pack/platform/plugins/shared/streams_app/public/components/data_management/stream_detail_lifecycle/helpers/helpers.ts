@@ -6,7 +6,6 @@
  */
 
 import type { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
-import { timeUnits } from '../../../../common/time_units';
 
 export const parseDuration = (duration: string = '') => {
   const result = /^(\d+)([d|m|s|h])$/.exec(duration);
@@ -33,14 +32,6 @@ export function parseDurationInSeconds(duration: string = ''): number {
 
   throw new Error(`Invalid duration unit [${unit}]`);
 }
-
-export const formatDuration = (duration: string | undefined) => {
-  const parsed = parseDuration(duration);
-  const retention = parsed
-    ? `${parsed.value} ${timeUnits.find((timeUnit) => timeUnit.value === parsed.unit)?.name || ''}`
-    : undefined;
-  return retention;
-};
 
 export function orderIlmPhases(phases: IlmPolicyPhases) {
   const isPhase = (
