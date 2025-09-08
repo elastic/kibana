@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
+  BasicPrettyPrinter,
   esqlCommandRegistry,
   isSource,
   mutate,
@@ -145,9 +146,14 @@ export async function getCurrentQueryAvailableColumns(
     return Promise.resolve([]);
   };
 
+  const getFromFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    return fetchFields(BasicPrettyPrinter.command(command));
+  };
+
   const additionalFields: IAdditionalFields = {
     fromJoin: getJoinFields,
     fromEnrich: getEnrichFields,
+    fromFrom: getFromFields,
   };
 
   if (commandDef?.methods.columnsAfter) {

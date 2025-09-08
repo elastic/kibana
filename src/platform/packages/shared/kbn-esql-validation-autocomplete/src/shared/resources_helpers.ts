@@ -60,20 +60,21 @@ async function cacheColumnsForQuery(
     return;
   }
 
-  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(
-    BasicPrettyPrinter.print({ ...query, commands: query.commands.slice(0, -1) })
+  const queryBeforeCurrentCommand = BasicPrettyPrinter.print({
+    ...query,
+    commands: query.commands.slice(0, -1),
+  });
+  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(queryBeforeCurrentCommand) ?? [];
+
+  const availableFields = await getCurrentQueryAvailableColumns(
+    query.commands,
+    fieldsAvailableAfterPreviousCommand,
+    fetchFields,
+    policies,
+    originalQueryText
   );
 
-  if (fieldsAvailableAfterPreviousCommand && fieldsAvailableAfterPreviousCommand?.length) {
-    const availableFields = await getCurrentQueryAvailableColumns(
-      query.commands,
-      fieldsAvailableAfterPreviousCommand,
-      fetchFields,
-      policies,
-      originalQueryText
-    );
-    cache.set(cacheKey, availableFields);
-  }
+  cache.set(cacheKey, availableFields);
 }
 
 /**
@@ -94,8 +95,6 @@ export function getColumnsByTypeHelper(
   const root = EsqlQuery.fromSrc(queryForFields).ast;
 
   const cacheColumns = async () => {
-    // in some cases (as in the case of ROW or SHOW) the query is not set
-    // TODO consider having source commands including ROW use columnsAfter methods like any other command
     if (!queryForFields) {
       return;
     }
@@ -115,14 +114,11 @@ export function getColumnsByTypeHelper(
       subqueries.push(Builder.expression.query(root.commands.slice(0, i + 1)));
     }
 
-    // source command
-    getFields(BasicPrettyPrinter.print(subqueries[0]));
-
     const policies = (await resourceRetriever?.getPolicies?.()) ?? [];
     const policyMap = new Map(policies.map((p) => [p.name, p]));
 
     // build fields cache for every partial query
-    for (const subquery of subqueries.slice(1)) {
+    for (const subquery of subqueries) {
       await cacheColumnsForQuery(subquery, getFields, policyMap, originalQueryText);
     }
   };
@@ -231,11 +227,7 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
     }
   }
 
-  // If there is only one source command and it does not require fields, do not
-  // fetch fields, hence return an empty string.
-  return commands.length === 1 && ['row', 'show'].includes(commands[0].name)
-    ? ''
-    : buildQueryUntilPreviousCommand(root);
+  return buildQueryUntilPreviousCommand(root);
 }
 
 function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
