@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,
   KibanaRequest,
@@ -27,11 +28,12 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type { estypes } from '@elastic/elasticsearch';
 import { parseDocument } from 'yaml';
+import { WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -44,6 +46,7 @@ import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './lib/index_mappings';
+import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
@@ -53,7 +56,6 @@ import type {
   GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
-import { searchStepExecutions } from './lib/search_step_executions';
 
 const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
 const WORKFLOW_EXECUTION_STATUS_STATS_BUCKET = 50;
@@ -323,6 +325,17 @@ export class WorkflowsService {
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
+
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
+    }
+
     // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
@@ -407,6 +420,16 @@ export class WorkflowsService {
           enabled: false,
         };
       } else {
+        // Validate step name uniqueness
+        const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+        if (!stepValidation.isValid) {
+          const errorMessages = stepValidation.errors.map((error) => error.message);
+          throw new WorkflowValidationError(
+            'Workflow validation failed: Step names must be unique throughout the workflow.',
+            errorMessages
+          );
+        }
+
         // parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
         const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(
           parsedYaml.data as WorkflowYaml
