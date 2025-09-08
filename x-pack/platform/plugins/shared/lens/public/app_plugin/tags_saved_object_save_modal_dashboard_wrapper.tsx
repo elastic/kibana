@@ -27,7 +27,7 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
 > & {
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: DashboardSaveProps) => void;
+  onSave: (props: DashboardSaveProps) => Promise<void>;
   getOriginatingPath?: (dashboardId: string) => string;
 };
 
@@ -52,9 +52,9 @@ export const TagEnhancedSavedObjectSaveModalDashboard: FC<
 
   const tagEnhancedOptions = <>{tagSelectorOption}</>;
 
-  const tagEnhancedOnSave: SaveModalDashboardProps['onSave'] = useCallback(
-    (saveOptions) => {
-      onSave({
+  const tagEnhancedOnSave = useCallback<SaveModalDashboardProps['onSave']>(
+    async (saveOptions) => {
+      await onSave({
         ...saveOptions,
         returnToOrigin: false,
         newTags: selectedTags,
