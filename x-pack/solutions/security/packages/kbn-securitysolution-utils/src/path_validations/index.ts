@@ -68,12 +68,12 @@ export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 export const TRUSTED_DEVICE_OS_FIELD_AVAILABILITY = {
   /** Fields available for all supported operating systems */
   ALL_OS: [
-    TrustedDeviceConditionEntryField.HOST,
     TrustedDeviceConditionEntryField.DEVICE_ID,
+    TrustedDeviceConditionEntryField.DEVICE_TYPE,
+    TrustedDeviceConditionEntryField.HOST,
     TrustedDeviceConditionEntryField.MANUFACTURER,
     TrustedDeviceConditionEntryField.MANUFACTURER_ID,
     TrustedDeviceConditionEntryField.PRODUCT_ID,
-    TrustedDeviceConditionEntryField.DEVICE_TYPE,
   ] as const,
 
   /** Fields available only for Windows OS exclusively */
