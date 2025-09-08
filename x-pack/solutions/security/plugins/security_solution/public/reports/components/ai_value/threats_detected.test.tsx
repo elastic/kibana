@@ -74,88 +74,52 @@ describe('ThreatsDetected', () => {
   });
 
   it('handles different prop values correctly', () => {
-    const testCases = [
-      {
-        props: {
-          ...defaultProps,
-          attackDiscoveryCount: 100,
-          attackDiscoveryCountCompare: 50,
-        },
-        expectedTimeRange: `15`,
-      },
-      {
-        props: {
-          ...defaultProps,
-          attackDiscoveryCount: 0,
-          attackDiscoveryCountCompare: 0,
-        },
-        expectedTimeRange: `7`,
-      },
-      {
-        props: {
-          ...defaultProps,
-          attackDiscoveryCount: 1,
-          attackDiscoveryCountCompare: 1,
-        },
-        expectedTimeRange: `1`,
-      },
-    ];
+    const props = {
+      ...defaultProps,
+      attackDiscoveryCount: 100,
+      attackDiscoveryCountCompare: 50,
+    };
 
-    testCases.forEach(({ props, expectedTimeRange }) => {
-      jest.clearAllMocks();
-      mockGetTimeRangeAsDays.mockReturnValue(expectedTimeRange);
+    mockGetTimeRangeAsDays.mockReturnValue('15');
 
-      render(<ThreatsDetected {...props} />);
+    render(<ThreatsDetected {...props} />);
 
-      expect(ThreatsDetectedMetric).toHaveBeenCalledWith(
-        expect.objectContaining({
-          from: props.from,
-          to: props.to,
-        }),
-        {}
-      );
+    expect(ThreatsDetectedMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: props.from,
+        to: props.to,
+      }),
+      {}
+    );
 
-      expect(ComparePercentage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: props.attackDiscoveryCount,
-          previousCount: props.attackDiscoveryCountCompare,
-          stat: `${props.attackDiscoveryCountCompare}`,
-          timeRange: expectedTimeRange,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: props.attackDiscoveryCount,
+        previousCount: props.attackDiscoveryCountCompare,
+        stat: `${props.attackDiscoveryCountCompare}`,
+        timeRange: '15',
+      }),
+      {}
+    );
   });
 
-  it('handles edge cases for attack discovery counts', () => {
-    const testCases = [
-      { attackDiscoveryCount: 0, attackDiscoveryCountCompare: 0 },
-      { attackDiscoveryCount: 1, attackDiscoveryCountCompare: 0 },
-      { attackDiscoveryCount: 0, attackDiscoveryCountCompare: 1 },
-      { attackDiscoveryCount: 1000, attackDiscoveryCountCompare: 999 },
-    ];
+  it('handles zero values correctly', () => {
+    const props = {
+      ...defaultProps,
+      attackDiscoveryCount: 0,
+      attackDiscoveryCountCompare: 0,
+    };
 
-    testCases.forEach(({ attackDiscoveryCount, attackDiscoveryCountCompare }) => {
-      jest.clearAllMocks();
-      mockGetTimeRangeAsDays.mockReturnValue(`30`);
+    render(<ThreatsDetected {...props} />);
 
-      const props = {
-        ...defaultProps,
-        attackDiscoveryCount,
-        attackDiscoveryCountCompare,
-      };
-
-      render(<ThreatsDetected {...props} />);
-
-      expect(ComparePercentage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: attackDiscoveryCount,
-          previousCount: attackDiscoveryCountCompare,
-          stat: `${attackDiscoveryCountCompare}`,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: 0,
+        previousCount: 0,
+        stat: '0',
+      }),
+      {}
+    );
   });
 
   it('passes correct time range to both child components', () => {

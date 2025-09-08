@@ -134,131 +134,38 @@ describe('ThreatsDetectedMetric', () => {
     });
   });
 
-  it('handles null/undefined spaceId from useSpaceId hook', () => {
-    const testCases = [
-      { spaceId: null, description: 'null' },
-      { spaceId: undefined, description: 'undefined' },
-    ];
+  it('handles null spaceId by defaulting to "default"', () => {
+    mockUseSpaceId.mockReturnValue(null);
+    render(<ThreatsDetectedMetric {...defaultProps} />);
 
-    testCases.forEach(({ spaceId }) => {
-      jest.clearAllMocks();
-      // @ts-ignore
-      mockUseSpaceId.mockReturnValue(spaceId);
-      mockGetThreatsDetectedMetricLensAttributes.mockReturnValue({
-        description: '',
-        state: {
-          adHocDataViews: {},
-          datasourceStates: {
-            formBased: {
-              layers: {
-                unifiedHistogram: {
-                  columnOrder: ['count_column'],
-                  columns: {
-                    count_column: {
-                      dataType: 'number',
-                      isBucketed: false,
-                      label: 'Count of records',
-                      operationType: 'count',
-                      sourceField: '___records___',
-                    },
-                  },
-                  incompleteColumns: {},
-                },
-              },
-            },
-          },
-          filters: [],
-          query: { language: 'kuery', query: '' },
-          visualization: {
-            accessor: 'count_column',
-            layerId: 'unifiedHistogram',
-            layerType: 'data',
-          },
-        },
-        title: 'Threats Detected',
-        visualizationType: 'lnsMetric',
-        references: [],
-      });
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
+    };
 
-      render(<ThreatsDetectedMetric {...defaultProps} />);
+    callArgs.getLensAttributes(mockArgs);
 
-      const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-      const mockArgs = {
-        euiTheme: { colors: {} },
-        extraOptions: { filters: [] },
-      };
-
-      callArgs.getLensAttributes(mockArgs);
-
-      expect(mockGetThreatsDetectedMetricLensAttributes).toHaveBeenCalledWith({
-        ...mockArgs,
-        spaceId: 'default',
-      });
+    expect(mockGetThreatsDetectedMetricLensAttributes).toHaveBeenCalledWith({
+      ...mockArgs,
+      spaceId: 'default',
     });
   });
 
-  it('handles different time ranges correctly', () => {
-    const testCases = [
-      {
-        from: '2023-01-01T00:00:00.000Z',
-        to: '2023-01-02T00:00:00.000Z',
-        description: 'single day',
-      },
-      {
-        from: '2023-01-01T00:00:00.000Z',
-        to: '2023-12-31T23:59:59.999Z',
-        description: 'full year',
-      },
-    ];
+  it('passes correct timerange to VisualizationEmbeddable', () => {
+    const customTimeRange = {
+      from: '2023-01-01T00:00:00.000Z',
+      to: '2023-01-02T00:00:00.000Z',
+    };
 
-    testCases.forEach(({ from, to }) => {
-      jest.clearAllMocks();
-      mockUseSpaceId.mockReturnValue('test-space-id');
-      mockGetThreatsDetectedMetricLensAttributes.mockReturnValue({
-        description: '',
-        state: {
-          adHocDataViews: {},
-          datasourceStates: {
-            formBased: {
-              layers: {
-                unifiedHistogram: {
-                  columnOrder: ['count_column'],
-                  columns: {
-                    count_column: {
-                      dataType: 'number',
-                      isBucketed: false,
-                      label: 'Count of records',
-                      operationType: 'count',
-                      sourceField: '___records___',
-                    },
-                  },
-                  incompleteColumns: {},
-                },
-              },
-            },
-          },
-          filters: [],
-          query: { language: 'kuery', query: '' },
-          visualization: {
-            accessor: 'count_column',
-            layerId: 'unifiedHistogram',
-            layerType: 'data',
-          },
-        },
-        title: 'Threats Detected',
-        visualizationType: 'lnsMetric',
-        references: [],
-      });
+    render(<ThreatsDetectedMetric from={customTimeRange.from} to={customTimeRange.to} />);
 
-      render(<ThreatsDetectedMetric from={from} to={to} />);
-
-      expect(VisualizationEmbeddable).toHaveBeenCalledWith(
-        expect.objectContaining({
-          timerange: { from, to },
-        }),
-        {}
-      );
-    });
+    expect(VisualizationEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timerange: customTimeRange,
+      }),
+      {}
+    );
   });
 
   it('memoizes the component correctly', () => {

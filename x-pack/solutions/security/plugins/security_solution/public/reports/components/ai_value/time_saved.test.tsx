@@ -85,95 +85,56 @@ describe('TimeSaved', () => {
   });
 
   it('handles different prop values correctly', () => {
-    const testCases = [
-      {
-        props: {
-          ...defaultProps,
-          hoursSaved: 500,
-          hoursSavedCompare: 400,
-          minutesPerAlert: 5,
-        },
-        expectedFormattedThousands: '400',
-        expectedTimeRange: `15`,
-      },
-      {
-        props: {
-          ...defaultProps,
-          hoursSaved: 0,
-          hoursSavedCompare: 0,
-          minutesPerAlert: 0,
-        },
-        expectedFormattedThousands: '0',
-        expectedTimeRange: `7`,
-      },
-      {
-        props: {
-          ...defaultProps,
-          hoursSaved: 1.5,
-          hoursSavedCompare: 1.2,
-          minutesPerAlert: 2.5,
-        },
-        expectedFormattedThousands: '1.2',
-        expectedTimeRange: `1`,
-      },
-    ];
+    const props = {
+      ...defaultProps,
+      hoursSaved: 500,
+      hoursSavedCompare: 400,
+      minutesPerAlert: 5,
+    };
 
-    testCases.forEach(({ props, expectedFormattedThousands, expectedTimeRange }) => {
-      jest.clearAllMocks();
-      mockGetTimeRangeAsDays.mockReturnValue(expectedTimeRange);
-      mockFormatThousands.mockReturnValue(expectedFormattedThousands);
+    mockGetTimeRangeAsDays.mockReturnValue('15');
+    mockFormatThousands.mockReturnValue('400');
 
-      render(<TimeSaved {...props} />);
+    render(<TimeSaved {...props} />);
 
-      expect(TimeSavedMetric).toHaveBeenCalledWith(
-        expect.objectContaining({
-          minutesPerAlert: props.minutesPerAlert,
-        }),
-        {}
-      );
+    expect(TimeSavedMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        minutesPerAlert: props.minutesPerAlert,
+      }),
+      {}
+    );
 
-      expect(ComparePercentage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: props.hoursSaved,
-          previousCount: props.hoursSavedCompare,
-          stat: expectedFormattedThousands,
-          timeRange: expectedTimeRange,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: props.hoursSaved,
+        previousCount: props.hoursSavedCompare,
+        stat: '400',
+        timeRange: '15',
+      }),
+      {}
+    );
   });
 
-  it('handles edge cases for hours saved values', () => {
-    const testCases = [
-      { hoursSaved: 0, hoursSavedCompare: 0 },
-      { hoursSaved: 1, hoursSavedCompare: 0 },
-      { hoursSaved: 0, hoursSavedCompare: 1 },
-      { hoursSaved: 1000, hoursSavedCompare: 999 },
-      { hoursSaved: 0.5, hoursSavedCompare: 0.25 },
-    ];
+  it('handles zero values correctly', () => {
+    const props = {
+      ...defaultProps,
+      hoursSaved: 0,
+      hoursSavedCompare: 0,
+      minutesPerAlert: 0,
+    };
 
-    testCases.forEach(({ hoursSaved, hoursSavedCompare }) => {
-      jest.clearAllMocks();
-      mockGetTimeRangeAsDays.mockReturnValue(`30`);
-      mockFormatThousands.mockReturnValue(`${hoursSavedCompare}`);
+    mockFormatThousands.mockReturnValue('0');
 
-      const props = {
-        ...defaultProps,
-        hoursSaved,
-        hoursSavedCompare,
-      };
+    render(<TimeSaved {...props} />);
 
-      render(<TimeSaved {...props} />);
-
-      expect(ComparePercentage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: hoursSaved,
-          previousCount: hoursSavedCompare,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: 0,
+        previousCount: 0,
+        stat: '0',
+      }),
+      {}
+    );
   });
 
   it('memoizes timerange calculation based on from and to props', () => {

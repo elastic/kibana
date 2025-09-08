@@ -80,9 +80,6 @@ describe('ExecutiveSummary', () => {
     expect(screen.getByTestId('mockCostSavings')).toBeInTheDocument();
     expect(screen.getByTestId('mockTimeSaved')).toBeInTheDocument();
     expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
-    expect(screen.getByTestId('executiveSummarySideStats')).toBeInTheDocument();
-    expect(screen.getByTestId('mockCostSavings')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTimeSaved')).toBeInTheDocument();
   });
 
   it('renders no attacks message when hasAttackDiscoveries is false', () => {

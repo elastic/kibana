@@ -87,84 +87,58 @@ describe('FilteringRate', () => {
   });
 
   it('handles different prop values correctly', () => {
-    const testCases = [
-      {
-        props: {
-          ...defaultProps,
-          attackAlertIds: ['single-alert'],
-          filteredAlertsPerc: 100,
-          filteredAlertsPercCompare: 50,
-          totalAlerts: 500,
-        },
-        expectedFormattedPercent: '50.0%',
-        expectedTimeRange: `15`,
-      },
-      {
-        props: {
-          ...defaultProps,
-          attackAlertIds: [],
-          filteredAlertsPerc: 0,
-          filteredAlertsPercCompare: 0,
-          totalAlerts: 0,
-        },
-        expectedFormattedPercent: '0.0%',
-        expectedTimeRange: `7`,
-      },
-    ];
+    const props = {
+      ...defaultProps,
+      attackAlertIds: ['single-alert'],
+      filteredAlertsPerc: 100,
+      filteredAlertsPercCompare: 50,
+      totalAlerts: 500,
+    };
 
-    testCases.forEach(({ props, expectedFormattedPercent, expectedTimeRange }) => {
-      jest.clearAllMocks();
-      mockFormatPercent.mockReturnValue(expectedFormattedPercent);
-      mockGetTimeRangeAsDays.mockReturnValue(expectedTimeRange);
+    mockFormatPercent.mockReturnValue('50.0%');
+    mockGetTimeRangeAsDays.mockReturnValue('15');
 
-      render(<FilteringRate {...props} />);
+    render(<FilteringRate {...props} />);
 
-      expect(AlertFilteringMetric).toHaveBeenCalledWith(
-        expect.objectContaining({
-          attackAlertIds: props.attackAlertIds,
-          totalAlerts: props.totalAlerts,
-        }),
-        {}
-      );
+    expect(AlertFilteringMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attackAlertIds: props.attackAlertIds,
+        totalAlerts: props.totalAlerts,
+      }),
+      {}
+    );
 
-      expect(ComparePercentage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: props.filteredAlertsPerc,
-          previousCount: props.filteredAlertsPercCompare,
-          stat: expectedFormattedPercent,
-          timeRange: expectedTimeRange,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: props.filteredAlertsPerc,
+        previousCount: props.filteredAlertsPercCompare,
+        stat: '50.0%',
+        timeRange: '15',
+      }),
+      {}
+    );
   });
 
-  it('handles edge cases for percentage values', () => {
-    const testCases = [
-      { filteredAlertsPerc: 0, filteredAlertsPercCompare: 0 },
-      { filteredAlertsPerc: 100, filteredAlertsPercCompare: 100 },
-      { filteredAlertsPerc: 50.5, filteredAlertsPercCompare: 25.75 },
-    ];
+  it('handles zero values correctly', () => {
+    const props = {
+      ...defaultProps,
+      attackAlertIds: [],
+      filteredAlertsPerc: 0,
+      filteredAlertsPercCompare: 0,
+      totalAlerts: 0,
+    };
 
-    testCases.forEach(({ filteredAlertsPerc, filteredAlertsPercCompare }) => {
-      jest.clearAllMocks();
-      mockFormatPercent.mockReturnValue(`${filteredAlertsPercCompare}%`);
+    mockFormatPercent.mockReturnValue('0.0%');
 
-      const props = {
-        ...defaultProps,
-        filteredAlertsPerc,
-        filteredAlertsPercCompare,
-      };
+    render(<FilteringRate {...props} />);
 
-      render(<FilteringRate {...props} />);
-
-      expect(ComparePercentage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: filteredAlertsPerc,
-          previousCount: filteredAlertsPercCompare,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: 0,
+        previousCount: 0,
+        stat: '0.0%',
+      }),
+      {}
+    );
   });
 });

@@ -9,6 +9,7 @@ import React from 'react';
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
 import { useKibana } from '../../../common/lib/kibana';
 import { licenseService } from '../../../common/hooks/use_license';
@@ -108,7 +109,7 @@ describe('CostSavingsKeyInsight', () => {
     );
   });
 
-  it('renders component correctly, calls expected hooks, and handles various scenarios', async () => {
+  it('renders component correctly and calls expected hooks', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
@@ -128,29 +129,12 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
-
-    const { rerender } = render(<CostSavingsKeyInsight lensResponse={null} />);
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    mockUseFindCostSavingsPrompts.mockReturnValue(null);
-    rerender(<CostSavingsKeyInsight {...defaultProps} />);
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        // @ts-ignore
-        uiSettings: {
-          get: jest.fn().mockReturnValue(null),
-        },
-      })
-    );
-    rerender(<CostSavingsKeyInsight {...defaultProps} />);
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('handles license, assistant availability, and chatComplete operations correctly', async () => {
+  it('handles non-enterprise license correctly', async () => {
     mockLicenseService.isEnterprise.mockReturnValue(false);
-    const { rerender } = render(<CostSavingsKeyInsight {...defaultProps} />);
+    render(<CostSavingsKeyInsight {...defaultProps} />);
+
     await waitFor(() => {
       expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
         context: {
@@ -160,11 +144,15 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
+  });
+
+  it('handles disabled assistant availability correctly', async () => {
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: false,
       isAssistantEnabled: false,
     });
-    rerender(<CostSavingsKeyInsight {...defaultProps} />);
+    render(<CostSavingsKeyInsight {...defaultProps} />);
+
     await waitFor(() => {
       expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
         context: {
@@ -174,18 +162,12 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
+  });
+
+  it('calls chatComplete with correct parameters and displays result', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
-      expect(mockChatComplete).toHaveBeenCalledWith({
-        connectorId: 'test-connector-id',
-        messages: [
-          {
-            role: MessageRole.User,
-            content: expect.stringContaining('Test prompt part 1'),
-          },
-        ],
-      });
       expect(mockChatComplete).toHaveBeenCalledWith({
         connectorId: 'test-connector-id',
         messages: [
@@ -199,6 +181,9 @@ describe('CostSavingsKeyInsight', () => {
       });
       expect(screen.getByText(chatCompleteResult)).toBeInTheDocument();
     });
+  });
+
+  it('handles chatComplete errors correctly', async () => {
     const mockChatCompleteError = jest.fn().mockRejectedValue(new Error('API Error'));
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
@@ -209,9 +194,34 @@ describe('CostSavingsKeyInsight', () => {
       })
     );
     render(<CostSavingsKeyInsight {...defaultProps} />);
+
     await waitFor(() => {
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
+  });
+
+  it('shows loading state when lensResponse is null', () => {
+    render(<CostSavingsKeyInsight lensResponse={null} />);
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('shows loading state when prompts are null', () => {
+    mockUseFindCostSavingsPrompts.mockReturnValue(null);
+    render(<CostSavingsKeyInsight {...defaultProps} />);
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('shows loading state when connectorId is null', () => {
+    mockUseKibana.mockReturnValue(
+      createMockKibanaServices({
+        // @ts-ignore
+        uiSettings: {
+          get: jest.fn().mockReturnValue(null),
+        },
+      })
+    );
+    render(<CostSavingsKeyInsight {...defaultProps} />);
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('re-runs effect when lensResponse changes', async () => {

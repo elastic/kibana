@@ -38,12 +38,6 @@ describe('ValueReportSettings', () => {
     expect(settingsElement).toBeInTheDocument();
   });
 
-  it('displays correct cost calculation information', () => {
-    const { container } = render(<ValueReportSettings {...defaultProps} />);
-    const settingsElement = container.querySelector('.valueReportSettings');
-    expect(settingsElement).toBeInTheDocument();
-  });
-
   it('handles navigation to Kibana settings when link is clicked', () => {
     const { container } = render(<ValueReportSettings {...defaultProps} />);
 
@@ -90,25 +84,6 @@ describe('ValueReportSettings', () => {
       const settingsElement = container.querySelector('.valueReportSettings');
       expect(settingsElement).toBeInTheDocument();
     });
-  });
-
-  it('memoizes the component correctly', () => {
-    const { rerender } = render(<ValueReportSettings {...defaultProps} />);
-    const initialRender = render(<ValueReportSettings {...defaultProps} />);
-    rerender(<ValueReportSettings {...defaultProps} />);
-    const settingsElement = initialRender.container.querySelector('.valueReportSettings');
-    expect(settingsElement).toBeInTheDocument();
-    rerender(<ValueReportSettings minutesPerAlert={5} analystHourlyRate={75} />);
-    const settingsElementAfterRerender =
-      initialRender.container.querySelector('.valueReportSettings');
-    expect(settingsElementAfterRerender).toBeInTheDocument();
-  });
-
-  it('renders with correct className for styling', () => {
-    const { container } = render(<ValueReportSettings {...defaultProps} />);
-
-    const settingsElement = container.querySelector('.valueReportSettings');
-    expect(settingsElement).toBeInTheDocument();
   });
 
   it('handles navigation callback correctly', () => {

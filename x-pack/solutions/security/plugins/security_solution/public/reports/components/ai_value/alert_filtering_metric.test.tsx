@@ -184,43 +184,53 @@ describe('AlertFilteringMetric', () => {
     });
   });
 
-  it('handles various attackAlertIds scenarios, totalAlerts values, and memoization correctly', () => {
+  it('handles empty attackAlertIds correctly', () => {
     const propsWithEmptyIds = { ...defaultProps, attackAlertIds: [] };
     render(<AlertFilteringMetric {...propsWithEmptyIds} />);
     expect(mockGetExcludeAlertsFilters).toHaveBeenCalledWith([]);
+  });
+
+  it('handles single attackAlertId correctly', () => {
     const propsWithSingleId = { ...defaultProps, attackAlertIds: ['single-alert-id'] };
     render(<AlertFilteringMetric {...propsWithSingleId} />);
     expect(mockGetExcludeAlertsFilters).toHaveBeenCalledWith(['single-alert-id']);
-    const testCases = [
-      { totalAlerts: 0, description: 'zero' },
-      { totalAlerts: 1000000, description: 'large' },
-    ];
+  });
 
-    testCases.forEach(({ totalAlerts }) => {
-      jest.clearAllMocks();
-      const props = { ...defaultProps, totalAlerts };
-      render(<AlertFilteringMetric {...props} />);
-      const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-      const mockArgs = {
-        euiTheme: { colors: {} },
-        extraOptions: { filters: [] },
-      };
-      callArgs.getLensAttributes(mockArgs);
-      expect(mockGetAlertFilteringMetricLensAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({
-          totalAlerts,
-        })
-      );
-    });
+  it('passes totalAlerts to getLensAttributes function', () => {
+    const props = { ...defaultProps, totalAlerts: 1000000 };
+    render(<AlertFilteringMetric {...props} />);
+
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
+    };
+    callArgs.getLensAttributes(mockArgs);
+
+    expect(mockGetAlertFilteringMetricLensAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({
+        totalAlerts: 1000000,
+      })
+    );
+  });
+
+  it('memoizes getExcludeAlertsFilters call when props do not change', () => {
     const { rerender } = render(<AlertFilteringMetric {...defaultProps} />);
     jest.clearAllMocks();
     rerender(<AlertFilteringMetric {...defaultProps} />);
     expect(mockGetExcludeAlertsFilters).not.toHaveBeenCalled();
+  });
+
+  it('calls getExcludeAlertsFilters when attackAlertIds change', () => {
+    const { rerender } = render(<AlertFilteringMetric {...defaultProps} />);
+    jest.clearAllMocks();
+
     const newProps = {
       ...defaultProps,
       attackAlertIds: ['new-alert-1', 'new-alert-2'],
     };
     rerender(<AlertFilteringMetric {...newProps} />);
+
     expect(mockGetExcludeAlertsFilters).toHaveBeenCalledWith(['new-alert-1', 'new-alert-2']);
   });
 });

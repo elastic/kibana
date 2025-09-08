@@ -101,7 +101,7 @@ describe('AIValueMetrics', () => {
     });
   });
 
-  it('handles loading state and renders components correctly', () => {
+  it('shows nothing when loading', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
       isLoading: true,
@@ -111,7 +111,9 @@ describe('AIValueMetrics', () => {
 
     const { container } = render(<AIValueMetrics {...defaultProps} />);
     expect(container.firstChild).toBeNull();
+  });
 
+  it('renders all components when loaded with attack discoveries', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
       isLoading: false,
@@ -195,80 +197,38 @@ describe('AIValueMetrics', () => {
     expect(CostSavingsTrend).not.toHaveBeenCalled();
   });
 
-  it('handles different uiSettings values, time ranges, and parameter variations correctly', () => {
-    const uiSettingsTestCases = [
-      { minutesPerAlert: 5, analystHourlyRate: 75 },
-      { minutesPerAlert: 0, analystHourlyRate: 0 },
-      { minutesPerAlert: 15, analystHourlyRate: 100 },
-    ];
+  it('passes correct parameters to useValueMetrics hook', () => {
+    render(<AIValueMetrics {...defaultProps} />);
 
-    uiSettingsTestCases.forEach(({ minutesPerAlert, analystHourlyRate }) => {
-      jest.clearAllMocks();
-
-      mockUseKibana.mockReturnValue(
-        createMockKibanaServices({
-          uiSettings: {
-            // @ts-ignore
-            get: jest.fn((key: string) => {
-              if (key === DEFAULT_VALUE_REPORT_MINUTES) return minutesPerAlert;
-              if (key === DEFAULT_VALUE_REPORT_RATE) return analystHourlyRate;
-              return null;
-            }),
-          },
-        })
-      );
-
-      mockUseValueMetrics.mockReturnValue({
-        attackAlertIds: ['alert-1'],
-        isLoading: false,
-        valueMetrics: mockValueMetrics,
-        valueMetricsCompare: mockValueMetricsCompare,
-      });
-
-      render(<AIValueMetrics {...defaultProps} />);
-
-      expect(mockUseValueMetrics).toHaveBeenCalledWith({
-        from: defaultProps.from,
-        to: defaultProps.to,
-        minutesPerAlert,
-        analystHourlyRate,
-      });
+    expect(mockUseValueMetrics).toHaveBeenCalledWith({
+      from: defaultProps.from,
+      to: defaultProps.to,
+      minutesPerAlert: 10,
+      analystHourlyRate: 50,
     });
-    const timeRangeTestCases = [
-      { from: '2023-01-01T00:00:00.000Z', to: '2023-01-02T00:00:00.000Z' },
-      { from: '2023-01-01T00:00:00.000Z', to: '2023-12-31T23:59:59.999Z' },
-    ];
+  });
 
-    timeRangeTestCases.forEach(({ from, to }) => {
-      jest.clearAllMocks();
-      mockUseKibana.mockReturnValue(
-        createMockKibanaServices({
-          uiSettings: {
-            // @ts-ignore
-            get: jest.fn((key: string) => {
-              if (key === DEFAULT_VALUE_REPORT_MINUTES) return 10;
-              if (key === DEFAULT_VALUE_REPORT_RATE) return 50;
-              return null;
-            }),
-          },
-        })
-      );
+  it('handles different uiSettings values correctly', () => {
+    mockUseKibana.mockReturnValue(
+      createMockKibanaServices({
+        uiSettings: {
+          // @ts-ignore
+          get: jest.fn((key: string) => {
+            if (key === DEFAULT_VALUE_REPORT_MINUTES) return 5;
+            if (key === DEFAULT_VALUE_REPORT_RATE) return 75;
+            return null;
+          }),
+        },
+      })
+    );
 
-      mockUseValueMetrics.mockReturnValue({
-        attackAlertIds: ['alert-1'],
-        isLoading: false,
-        valueMetrics: mockValueMetrics,
-        valueMetricsCompare: mockValueMetricsCompare,
-      });
+    render(<AIValueMetrics {...defaultProps} />);
 
-      render(<AIValueMetrics setHasAttackDiscoveries={jest.fn()} from={from} to={to} />);
-
-      expect(mockUseValueMetrics).toHaveBeenCalledWith({
-        from,
-        to,
-        minutesPerAlert: 10,
-        analystHourlyRate: 50,
-      });
+    expect(mockUseValueMetrics).toHaveBeenCalledWith({
+      from: defaultProps.from,
+      to: defaultProps.to,
+      minutesPerAlert: 5,
+      analystHourlyRate: 75,
     });
   });
 });

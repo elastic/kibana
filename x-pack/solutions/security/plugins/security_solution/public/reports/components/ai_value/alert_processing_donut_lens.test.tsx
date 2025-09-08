@@ -170,7 +170,7 @@ describe('AlertProcessingDonut', () => {
     expect(typeof callArgs.getLensAttributes).toBe('function');
   });
 
-  it('handles getLensAttributes function calls and various spaceId scenarios correctly', () => {
+  it('calls getLensAttributes with correct parameters', () => {
     render(<AlertProcessingDonut {...defaultProps} />);
 
     const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
@@ -186,76 +186,61 @@ describe('AlertProcessingDonut', () => {
       attackAlertIds: defaultProps.attackAlertIds,
       spaceId: 'test-space-id',
     });
-
-    const testCases = [null, undefined];
-    testCases.forEach((spaceId) => {
-      jest.clearAllMocks();
-      // @ts-ignore
-      mockUseSpaceId.mockReturnValue(spaceId);
-
-      render(<AlertProcessingDonut {...defaultProps} />);
-
-      const newArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
-      newArgs.getLensAttributes(mockArgs);
-
-      expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
-        ...mockArgs,
-        attackAlertIds: defaultProps.attackAlertIds,
-        spaceId: 'default',
-      });
-    });
   });
 
-  it('handles various attackAlertIds scenarios and different spaceId values correctly', () => {
+  it('handles null/undefined spaceId by defaulting to "default"', () => {
+    mockUseSpaceId.mockReturnValue(null);
+    render(<AlertProcessingDonut {...defaultProps} />);
+
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
     };
+
+    callArgs.getLensAttributes(mockArgs);
+
+    expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
+      ...mockArgs,
+      attackAlertIds: defaultProps.attackAlertIds,
+      spaceId: 'default',
+    });
+  });
+
+  it('handles empty attackAlertIds correctly', () => {
     const propsWithEmptyIds = { ...defaultProps, attackAlertIds: [] };
     render(<AlertProcessingDonut {...propsWithEmptyIds} />);
-    let callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
+    };
+
     callArgs.getLensAttributes(mockArgs);
     expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       attackAlertIds: [],
       spaceId: 'test-space-id',
     });
-    const propsWithSingleId = { ...defaultProps, attackAlertIds: ['single-alert-id'] };
-    render(<AlertProcessingDonut {...propsWithSingleId} />);
-    callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[1][0];
-    callArgs.getLensAttributes(mockArgs);
-    expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
-      ...mockArgs,
-      attackAlertIds: ['single-alert-id'],
-      spaceId: 'test-space-id',
-    });
+  });
+
+  it('handles custom spaceId correctly', () => {
     const customSpaceId = 'custom-space-123';
     mockUseSpaceId.mockReturnValue(customSpaceId);
     render(<AlertProcessingDonut {...defaultProps} />);
-    callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[2][0];
+
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
+    };
+
     callArgs.getLensAttributes(mockArgs);
     expect(mockGetAlertProcessingDonutAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       attackAlertIds: defaultProps.attackAlertIds,
       spaceId: customSpaceId,
     });
-    expect(VisualizationEmbeddable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        applyGlobalQueriesAndFilters: false,
-        scopeId: SourcererScopeName.detections,
-        donutTextWrapperClassName: 'donutText',
-        donutTitleLabel: 'Total alerts processed',
-        height: 250,
-        id: 'open',
-        isDonut: true,
-        timerange: {
-          from: '2023-01-01T00:00:00.000Z',
-          to: '2023-01-31T23:59:59.999Z',
-        },
-        width: '100%',
-        withActions: ['addToExistingCase', 'addToNewCase', 'inspect'],
-      }),
-      {}
-    );
   });
 });

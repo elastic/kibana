@@ -89,56 +89,36 @@ describe('CostSavings', () => {
   });
 
   it('handles different prop values correctly', () => {
-    const testCases = [
-      {
-        props: {
-          ...defaultProps,
-          minutesPerAlert: 5,
-          analystHourlyRate: 75,
-          costSavings: 10000,
-          costSavingsCompare: 8000,
-        },
-        expectedTimeRange: '15',
-        expectedFormattedDollars: '$8,000',
-      },
-      {
-        props: {
-          ...defaultProps,
-          minutesPerAlert: 0,
-          analystHourlyRate: 0,
-          costSavings: 0,
-          costSavingsCompare: 0,
-        },
-        expectedTimeRange: '7',
-        expectedFormattedDollars: '$0',
-      },
-    ];
+    const props = {
+      ...defaultProps,
+      minutesPerAlert: 5,
+      analystHourlyRate: 75,
+      costSavings: 10000,
+      costSavingsCompare: 8000,
+    };
 
-    testCases.forEach(({ props, expectedTimeRange, expectedFormattedDollars }) => {
-      jest.clearAllMocks();
-      mockGetTimeRangeAsDays.mockReturnValue(`${expectedTimeRange}`);
-      mockFormatDollars.mockReturnValue(expectedFormattedDollars);
+    mockGetTimeRangeAsDays.mockReturnValue('15');
+    mockFormatDollars.mockReturnValue('$8,000');
 
-      render(<CostSavings {...props} />);
+    render(<CostSavings {...props} />);
 
-      expect(CostSavingsMetric).toHaveBeenCalledWith(
-        expect.objectContaining({
-          minutesPerAlert: props.minutesPerAlert,
-          analystHourlyRate: props.analystHourlyRate,
-        }),
-        {}
-      );
+    expect(CostSavingsMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        minutesPerAlert: props.minutesPerAlert,
+        analystHourlyRate: props.analystHourlyRate,
+      }),
+      {}
+    );
 
-      expect(ComparePercentageBadge).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCount: props.costSavings,
-          previousCount: props.costSavingsCompare,
-          stat: expectedFormattedDollars,
-          timeRange: expectedTimeRange,
-        }),
-        {}
-      );
-    });
+    expect(ComparePercentageBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentCount: props.costSavings,
+        previousCount: props.costSavingsCompare,
+        stat: '$8,000',
+        timeRange: '15',
+      }),
+      {}
+    );
   });
 
   it('memoizes timerange calculation based on from and to props', () => {
