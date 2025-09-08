@@ -37,7 +37,7 @@ export const PlaygroundsListEmptyStateBody = ({
           >
             <FormattedMessage
               id="xpack.searchPlayground.playgroundsList.emptyPrompt.cta.text"
-              defaultMessage="New RAG Playground"
+              defaultMessage="New Playground"
             />
           </EuiButton>
         </span>
