@@ -89,6 +89,7 @@ describe('renderApp', () => {
       alertDetails: {
         uptime: { enabled: false },
       },
+      managedOtlpServiceUrl: '',
     },
   };
 

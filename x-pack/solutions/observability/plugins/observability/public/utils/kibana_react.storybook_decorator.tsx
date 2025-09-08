@@ -32,6 +32,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         uptime: { enabled: false },
         observability: { enabled: false },
       },
+      managedOtlpServiceUrl: '',
     },
   };
 

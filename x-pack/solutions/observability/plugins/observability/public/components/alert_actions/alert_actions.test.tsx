@@ -66,6 +66,7 @@ const config: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
+    managedOtlpServiceUrl: '',
   },
 };
 
