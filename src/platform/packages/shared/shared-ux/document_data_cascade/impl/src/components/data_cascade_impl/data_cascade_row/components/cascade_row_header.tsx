@@ -109,6 +109,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         direction="row"
         alignItems="center"
         justifyContent="spaceBetween"
+        css={{ minWidth: 0, maxWidth: '100%' }}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -155,17 +156,26 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={6} css={{ justifyContent: 'center' }}>
+        <EuiFlexItem css={{ minWidth: 0, maxWidth: '100%' }}>
+          <EuiFlexGroup justifyContent="spaceBetween" direction="row">
+            <EuiFlexItem
+              grow={4}
+              css={{
+                minWidth: 0,
+                maxWidth: '35%',
+                overflow: 'hidden',
+                justifyContent: 'center',
+              }}
+            >
               <RowTitleSlot row={rowInstance} />
             </EuiFlexItem>
-            <EuiFlexItem grow={4}>
+            <EuiFlexItem grow={6} css={{ minWidth: 0, maxWidth: '60%', overflow: 'hidden' }}>
               <EuiFlexGroup
                 direction="row"
                 gutterSize={size}
                 alignItems="center"
                 justifyContent="flexEnd"
+                style={{ overflow: 'scroll' }}
               >
                 <React.Fragment>
                   {rowHeaderMetaSlots?.({ row: rowInstance }).map((metaSlot, index) => (
