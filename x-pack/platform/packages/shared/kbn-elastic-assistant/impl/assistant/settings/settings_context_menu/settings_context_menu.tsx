@@ -135,8 +135,8 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
       ],
       [
-        handleNavigateToKnowledgeBase,
         handleNavigateToAnonymization,
+        handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
