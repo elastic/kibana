@@ -1,3 +1,14 @@
+# TODO
+- [ ] convert scripts to packages to comform to conventions in scripts, for example:
+```js
+require('../src/setup_node_env');
+require('@kbn/analyze_packages_readmes')
+```
+- [ ] Move documentation_analysis.md to packages
+- [ ] Test
+- [ ] open PR to commit the work
+- [ ] Consider adding to CI as a quality check
+
 # Kibana Documentation Analysis Scripts
 
 This directory contains three different approaches to analyze the state and quality of README documentation across the Kibana codebase.
