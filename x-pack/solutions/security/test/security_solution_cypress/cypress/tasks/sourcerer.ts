@@ -11,6 +11,12 @@ import { hostsUrl } from '../urls/navigation';
 import { openTimelineUsingToggle } from './security_main';
 import { visitWithTimeRange } from './navigation';
 
+export const openTimelineDataViewPicker = () => {
+  cy.get('[data-test-subj="new-data-view-picker"]').within(() => {
+    cy.get('button').click();
+  });
+};
+
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
     return openTimelineSourcerer();

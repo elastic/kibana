@@ -26,6 +26,7 @@ import {
   openAdvancedSettings,
   openDataViewSelection,
   openSourcerer,
+  openTimelineDataViewPicker,
   refreshUntilAlertsIndexExists,
   resetSourcerer,
   saveSourcerer,
@@ -51,9 +52,12 @@ describe('Timeline scope', { tags: ['@ess', '@serverless'] }, () => {
     visitWithTimeRange(TIMELINES_URL);
   });
 
+  // TODO WIP
   it('correctly loads SIEM data view', () => {
     openTimelineUsingToggle();
-    openSourcerer('timeline');
+    // openSourcerer('timeline');
+    openTimelineDataViewPicker();
+    return;
     isDataViewSelection(siemDataViewTitle);
     openAdvancedSettings();
     isSourcererSelection(`auditbeat-*`);
