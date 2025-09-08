@@ -6,7 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  AWS_PROVIDER_TEST_SUBJ,
+  AWS_SINGLE_ACCOUNT_TEST_SUBJ,
+  AWS_INPUT_TEST_SUBJECTS,
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
@@ -16,10 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'cisAddIntegration',
   ]);
-
-  const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
-
-  const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   // This test suite is only running in the Serverless Quality Gates environment
   describe('Agentless API Serverless MKI only', function () {
@@ -35,8 +37,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmPage();
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
@@ -47,12 +49,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       if (process.env.CSPM_AWS_ACCOUNT_ID && process.env.CSPM_AWS_SECRET_KEY) {
         await cisIntegration.fillInTextField(
-          cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
           process.env.CSPM_AWS_ACCOUNT_ID
         );
 
         await cisIntegration.fillInTextField(
-          cisIntegration.testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY,
           process.env.CSPM_AWS_SECRET_KEY
         );
       }
@@ -77,8 +79,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.navigateToAddIntegrationCspmPage();
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
