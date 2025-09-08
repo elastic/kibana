@@ -69,12 +69,13 @@ export const convertGraphEvents = ({
         }
 
         // emit tool calls or full message on each agent step
-  if (matchEvent(event, 'on_chain_end') && (matchName(event, 'agent') || matchName(event, 'finalize'))) {
+        if (matchEvent(event, 'on_chain_end') && (matchName(event, 'agent') || matchName(event, 'finalize'))) {
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
           const toolCalls = extractToolCalls(lastMessage);
-          if (toolCalls.length > 0) {
+          // If this is a finalize step we intentionally ignore any tool calls (should have been stripped)
+          if (toolCalls.length > 0 && matchName(event, 'agent')) {
             const toolCallEvents: ToolCallEvent[] = [];
 
             for (const toolCall of toolCalls) {

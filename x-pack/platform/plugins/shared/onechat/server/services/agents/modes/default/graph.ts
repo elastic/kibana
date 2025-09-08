@@ -7,6 +7,7 @@
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
@@ -54,12 +55,16 @@ export const createAgentGraph = ({
   });
 
   const callModel = async (state: StateType) => {
+    const used = state.toolCallCount;
+    const max = state.maxToolCalls ?? maxToolCalls;
+    const remaining = Math.max(0, max - used);
     const response = await model.invoke(
       noPrompt
         ? [...state.initialMessages, ...state.addedMessages]
         : getActPrompt({
             customInstructions,
             messages: [...state.initialMessages, ...state.addedMessages],
+            toolBudget: { used, max, remaining },
           })
     );
     return {
@@ -95,23 +100,25 @@ export const createAgentGraph = ({
   };
 
   const finalizeAnswer = async (state: StateType) => {
-    // Ask model to produce final grounded answer without further tool calls
-    const budget = state.maxToolCalls ?? maxToolCalls;
-    const directive: BaseMessageLike = [
-      'system',
-      `Tool call budget exhausted (max ${budget}). Provide the best final grounded answer using ONLY existing tool outputs and conversation so far. DO NOT call any tools.`,
-    ];
+    // Safety: strip any pending tool_calls (should be unlikely now with budget-aware prompt)
+    const added = [...state.addedMessages];
+    const last = added[added.length - 1] as AIMessage | undefined;
+    if (last && last.tool_calls?.length) {
+      const textOnly = extractTextContent(last);
+      added[added.length - 1] = { ...last, tool_calls: [], content: textOnly } as any;
+    }
+    const used = state.toolCallCount;
+    const max = state.maxToolCalls ?? maxToolCalls;
     const response = await model.invoke(
       noPrompt
-        ? [...state.initialMessages, ...state.addedMessages, directive]
+        ? [...state.initialMessages, ...added]
         : getActPrompt({
             customInstructions,
-            messages: [...state.initialMessages, ...state.addedMessages, directive],
+            messages: [...state.initialMessages, ...added],
+            toolBudget: { used, max, remaining: 0 },
           })
     );
-    return {
-      addedMessages: [response],
-    };
+    return { addedMessages: [response] };
   };
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
