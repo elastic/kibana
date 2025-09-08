@@ -69,7 +69,7 @@ export const convertGraphEvents = ({
         }
 
         // emit tool calls or full message on each agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+  if (matchEvent(event, 'on_chain_end') && (matchName(event, 'agent') || matchName(event, 'finalize'))) {
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
@@ -101,7 +101,7 @@ export const convertGraphEvents = ({
         }
 
         // emit tool result events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
+  if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
           const toolMessages = ((event.data.output as StateType).addedMessages ?? []).filter(
             isToolMessage
           );

@@ -26,6 +26,12 @@ export const progressMessages = {
       defaultMessage: 'Thinking about the search strategy to use',
     });
   },
+  searchAttempt: ({ attempt, max }: { attempt: number; max: number }) => {
+    return i18n.translate('xpack.onechat.tools.search.progress.searchAttempt', {
+      defaultMessage: 'Executing search attempt {attempt} of {max}',
+      values: { attempt, max },
+    });
+  },
   performingRelevanceSearch: ({ term }: { term: string }) => {
     return i18n.translate('xpack.onechat.tools.search.progress.performingRelevanceSearch', {
       defaultMessage: 'Searching documents for "{term}"',
@@ -40,6 +46,11 @@ export const progressMessages = {
       values: {
         query,
       },
+    });
+  },
+  exhaustedAttempts: () => {
+    return i18n.translate('xpack.onechat.tools.search.progress.exhaustedAttempts', {
+      defaultMessage: 'Maximum search attempts reached without results',
     });
   },
 };

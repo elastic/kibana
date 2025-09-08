@@ -20,8 +20,16 @@ export const getSearchPrompt = ({
   nlQuery: string;
   searchTarget: SearchTarget;
 }): BaseMessageLike[] => {
-  const systemPrompt = `You are an expert search dispatcher. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it.
-You **must** call **one** of the available tools. Do not answer the user directly or ask clarifying questions.
+  const systemPrompt = `You are an expert iterative search strategist.
+On each attempt you MUST call exactly ONE of the available tools (never both in the same attempt) and then stop to let the runtime execute it.
+You operate in a loop (max 3 attempts unless fewer are explicitly configured externally). After each tool result you may be re-invoked with the prior conversation messages (including tool output) to decide the next step.
+
+Rules:
+1. ONLY call a tool – never answer the user directly.
+2. Use previous tool outputs (if any) to refine the next attempt: avoid repeating identical parameters that yielded empty or error results unless you intentionally adjust them.
+3. If you judge that the last tool output already contains adequate structured results that answer the query, do NOT call another tool (the orchestrator will terminate after your last successful tool call). In that case still call a tool but only if more evidence is required – otherwise emit NO tool call (not allowed) so instead pick the best single tool with refined params.
+4. If all prior attempts were empty/error you must try an alternative strategy (switch tool or change terms, filters, sizes, time ranges if derivable from the NL query) until attempts are exhausted.
+5. If you have reached the final allowed attempt AND still have no meaningful results, call the tool you believe has the highest probability of success with your BEST refined parameters; if you previously tried both strategies unsuccessfully you may deliberately narrow or broaden the query terms. The outer agent will then ask the user for more guidance.
 
 ## Available Tools
 
@@ -42,7 +50,12 @@ You **must** call **one** of the available tools. Do not answer the user directl
 
 ## Additional instructions
 
-- The search will be performed against the \`${searchTarget.name}\` ${searchTarget.type}, so you should use that value for the \`index\` parameters of the tool you will call.`;
+- The search target is \`${searchTarget.name}\` (${searchTarget.type}). Always set the 'index' parameter to this exact value.
+- Prefer natural language analytic tool when the request implies aggregations / sorting / counting / filtering or temporal analysis; otherwise prefer relevance search.
+- Track (implicitly) what you have already attempted. Modify parameters if repeating a tool after a previous failed/empty attempt.
+- Do NOT hallucinate fields: only reference generic terms (e.g. timestamp, message) unless prior tool output revealed concrete field names.
+- Keep tool argument values concise.
+`;
 
   const userPrompt = `Execute the following user query: "${nlQuery}"`;
 

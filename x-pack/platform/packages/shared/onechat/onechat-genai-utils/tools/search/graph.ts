@@ -25,6 +25,7 @@ const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   targetPattern: Annotation<string | undefined>(),
+  maxAttempts: Annotation<number>({ value: (_, b) => b, default: () => 3 }),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -32,12 +33,15 @@ const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  attempt: Annotation<number>({ value: (_, b) => b, default: () => 0 }),
+  hadAnyResult: Annotation<boolean>({ value: (_, b) => b, default: () => false }),
   // outputs
   error: Annotation<string>(),
   results: Annotation<ToolResult[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
   }),
+  failureSummary: Annotation<string>(),
 });
 
 export type StateType = typeof StateAnnotation.State;
@@ -97,28 +101,81 @@ export const createSearchToolGraph = ({
   });
 
   const callSearchAgent = async (state: StateType) => {
+    const nextAttempt = state.attempt + 1;
+    events?.reportProgress(
+      progressMessages.searchAttempt({ attempt: nextAttempt, max: state.maxAttempts })
+    );
     events?.reportProgress(progressMessages.resolvingSearchStrategy());
     const response = await searchModel.invoke(
       getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
     );
     return {
       messages: [response],
+      attempt: nextAttempt,
     };
   };
 
   const decideContinueOrEnd = async (state: StateType) => {
-    // only one call for now
+    // Continue if: we haven't exceeded attempts AND last tool call produced no results/errors
+    if (state.attempt < state.maxAttempts) {
+      // we loop until we have at least one non-error result
+      const hasUseful = state.results.some((r) => r.type !== ToolResultType.error);
+      if (!hasUseful) {
+        return 'agent';
+      }
+    }
+    if (state.attempt >= state.maxAttempts) {
+      const hasUseful = state.results.some((r) => r.type !== ToolResultType.error);
+      if (!hasUseful) {
+        events?.reportProgress(progressMessages.exhaustedAttempts());
+        return 'summarize_failure';
+      }
+    }
     return '__end__';
   };
 
   const executeTool = async (state: StateType) => {
-    const toolNodeResult = await toolNode.invoke(state.messages);
-    const toolResults = extractToolResults(toolNodeResult[toolNodeResult.length - 1]);
+    try {
+      const toolNodeResult = await toolNode.invoke(state.messages);
+      const toolResults = extractToolResults(toolNodeResult[toolNodeResult.length - 1]);
 
-    return {
-      messages: [...toolNodeResult],
-      results: [...toolResults],
-    };
+      const hadAnyResult =
+        state.hadAnyResult || toolResults.some((r) => r.type !== ToolResultType.error);
+
+      return {
+        messages: [...toolNodeResult],
+        results: [...toolResults],
+        hadAnyResult,
+      };
+    } catch (e) {
+      // treat invocation failure as error result but keep looping if attempts remain
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: e instanceof Error ? e.message : String(e) },
+          },
+        ],
+        hadAnyResult: state.hadAnyResult,
+      };
+    }
+  };
+
+  const summarizeFailure = async (state: StateType) => {
+    if (state.results.length === 0) {
+      return {
+        failureSummary: `No results returned after ${state.attempt} attempts.`,
+      };
+    }
+    const attempts = state.attempt;
+    const errorMessages = state.results
+      .filter((r) => r.type === ToolResultType.error)
+      .map((r) => (r as any).data?.message)
+      .slice(-5);
+    const summary = `Exhausted ${attempts} attempts without usable results. Last errors: ${errorMessages.join(
+      ' | '
+    )}`;
+    return { failureSummary: summary };
   };
 
   const graph = new StateGraph(StateAnnotation)
@@ -126,6 +183,7 @@ export const createSearchToolGraph = ({
     .addNode('check_index', selectAndValidateIndex)
     .addNode('agent', callSearchAgent)
     .addNode('execute_tool', executeTool)
+    .addNode('summarize_failure', summarizeFailure)
     // edges
     .addEdge('__start__', 'check_index')
     .addConditionalEdges('check_index', terminateIfInvalidIndex, {
@@ -135,8 +193,10 @@ export const createSearchToolGraph = ({
     .addEdge('agent', 'execute_tool')
     .addConditionalEdges('execute_tool', decideContinueOrEnd, {
       agent: 'agent',
+      summarize_failure: 'summarize_failure',
       __end__: '__end__',
     })
+    .addEdge('summarize_failure', '__end__')
     .compile();
 
   return graph;

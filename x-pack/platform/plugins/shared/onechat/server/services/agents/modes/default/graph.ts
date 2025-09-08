@@ -7,6 +7,7 @@
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
@@ -20,11 +21,13 @@ const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  maxToolCalls: Annotation<number>({ value: (_, b) => b, default: () => 3 }),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  toolCallCount: Annotation<number>({ value: (_, b) => b, default: () => 0 }),
 });
 
 export type StateType = typeof StateAnnotation.State;
@@ -35,12 +38,14 @@ export const createAgentGraph = ({
   customInstructions,
   noPrompt,
   logger,
+  maxToolCalls = 3,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   customInstructions?: string;
   noPrompt?: boolean;
   logger: Logger;
+  maxToolCalls?: number;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
@@ -66,6 +71,13 @@ export const createAgentGraph = ({
     const messages = state.addedMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
+      const pendingCalls = lastMessage.tool_calls.length;
+      const current = state.toolCallCount;
+      const budget = state.maxToolCalls ?? maxToolCalls;
+      if (current + pendingCalls > budget) {
+        // budget exhausted -> finalize without executing these calls
+        return 'finalize';
+      }
       return 'tools';
     }
     return '__end__';
@@ -73,9 +85,32 @@ export const createAgentGraph = ({
 
   const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
+    const executedToolMessages = toolNodeResult.filter((m) => isToolMessage(m));
+    const increment = executedToolMessages.length;
 
     return {
       addedMessages: [...toolNodeResult],
+      toolCallCount: state.toolCallCount + increment,
+    };
+  };
+
+  const finalizeAnswer = async (state: StateType) => {
+    // Ask model to produce final grounded answer without further tool calls
+    const budget = state.maxToolCalls ?? maxToolCalls;
+    const directive: BaseMessageLike = [
+      'system',
+      `Tool call budget exhausted (max ${budget}). Provide the best final grounded answer using ONLY existing tool outputs and conversation so far. DO NOT call any tools.`,
+    ];
+    const response = await model.invoke(
+      noPrompt
+        ? [...state.initialMessages, ...state.addedMessages, directive]
+        : getActPrompt({
+            customInstructions,
+            messages: [...state.initialMessages, ...state.addedMessages, directive],
+          })
+    );
+    return {
+      addedMessages: [response],
     };
   };
 
@@ -83,12 +118,15 @@ export const createAgentGraph = ({
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
+    .addNode('finalize', finalizeAnswer)
     .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue, {
       tools: 'tools',
+      finalize: 'finalize',
       __end__: '__end__',
     })
+    .addEdge('finalize', '__end__')
     .compile();
 
   return graph;
