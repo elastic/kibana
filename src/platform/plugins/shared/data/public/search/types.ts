@@ -76,6 +76,10 @@ export interface ISearchStart {
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => void;
   /**
+   * Feature flag value to make it easier to use in different plugins
+   */
+  isBackgroundSearchEnabled: boolean;
+  /**
    * high level search
    * {@link ISearchStartSearchSource}
    */

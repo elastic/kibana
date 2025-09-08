@@ -531,6 +531,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
   public render() {
     const { theme, query } = this.props;
+    const { isBackgroundSearchEnabled, session } = this.services.data.search;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme, isESQLQuery);
@@ -650,7 +651,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
-        <BackgroundSearchRestoredCallout />
+        {isBackgroundSearchEnabled && <BackgroundSearchRestoredCallout state$={session.state$} />}
         <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
