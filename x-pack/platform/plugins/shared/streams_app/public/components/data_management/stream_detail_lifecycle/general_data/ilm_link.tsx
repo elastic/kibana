@@ -10,8 +10,7 @@ import { EuiLink } from '@elastic/eui';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export function IlmLink({ lifecycle }: { lifecycle: IngestStreamLifecycleILM }) {
   const {
@@ -30,10 +29,7 @@ export function IlmLink({ lifecycle }: { lifecycle: IngestStreamLifecycleILM }) 
         policyName: lifecycle.ilm.policy,
       })}
     >
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
-        defaultMessage: 'ILM Policy: {name}',
-        values: { name: lifecycle.ilm.policy },
-      })}
+      {lifecycle.ilm.policy}
     </EuiLink>
   );
 }
