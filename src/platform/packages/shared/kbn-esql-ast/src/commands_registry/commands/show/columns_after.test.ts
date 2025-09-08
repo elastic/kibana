@@ -7,22 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '../../types';
-import { columnsAfter } from './columns_after';
+import { SHOW_INFO_FIELDS, columnsAfter } from './columns_after';
 
-describe('FROM columnsAfter', () => {
-  it('returns fields from the source', async () => {
-    const sourceFields: ESQLFieldWithMetadata[] = [
-      { name: 'field1', type: 'double', userDefined: false },
-      { name: 'field2', type: 'keyword', userDefined: false },
-    ];
+describe('SHOW columnsAfter', () => {
+  it('returns info', async () => {
+    const result = await columnsAfter();
 
-    const result = await columnsAfter({} as any, [], '', {
-      fromFrom: () => Promise.resolve(sourceFields),
-      fromJoin: () => Promise.resolve([]),
-      fromEnrich: () => Promise.resolve([]),
-    });
-
-    expect(result).toEqual(sourceFields);
+    expect(result).toEqual(SHOW_INFO_FIELDS);
   });
 });
