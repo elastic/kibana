@@ -678,6 +678,9 @@ export class StreamsClient {
    * Also verifies whether the user has access to the stream.
    */
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
+    // attempting to delete a classic stream that was not previously stored
+    // results in a noop so we make sure to persist a definition first
+    await this.ensureStream(name);
     const definition = await this.getStream(name);
 
     if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {

@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
-import _, { cloneDeep } from 'lodash';
+import _, { cloneDeep, isEmpty } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
@@ -169,6 +169,23 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+
+    if (!isEmpty(this._definition.ingest.settings)) {
+      actions.push({
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: {
+            'index.number_of_replicas':
+              this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
+            'index.number_of_shards':
+              this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
+            'index.refresh_interval':
+              this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
+          },
         },
       });
     }
