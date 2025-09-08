@@ -5,144 +5,26 @@
  * 2.0.
  */
 
-import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
+import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import { conditionToESQL, literalFromAny } from './condition_to_esql';
+
+import type { ESQLTranspilationOptions } from '.';
 import { type CommonDatePreset } from '../../../types/formats';
+import type {
+  AppendProcessor,
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  RenameProcessor,
+  SetProcessor,
+} from '../../../types/processors';
 import {
   isProcessWithOverrideOption,
   type StreamlangProcessorDefinition,
 } from '../../../types/processors';
-import type {
-  RenameProcessor,
-  SetProcessor,
-  GrokProcessor,
-  DateProcessor,
-  DissectProcessor,
-  AppendProcessor,
-} from '../../../types/processors';
-
-import type { Condition } from '../../../types/conditions';
-import {
-  isFilterCondition,
-  isAndCondition,
-  isOrCondition,
-  isNotCondition,
-  isAlwaysCondition,
-} from '../../../types/conditions';
-
-import type { ESQLTranspilationOptions } from '.';
-function literalFromAny(value: any): ESQLAstItem {
-  if (Array.isArray(value)) {
-    // Let the Builder handle nested structures properly
-    return Builder.expression.list.literal({
-      values: value.map((item) => literalFromAny(item)) as any,
-    });
-  }
-
-  if (typeof value === 'string') {
-    return Builder.expression.literal.string(value);
-  }
-  if (typeof value === 'number') {
-    return Number.isInteger(value)
-      ? Builder.expression.literal.integer(value)
-      : Builder.expression.literal.decimal(value);
-  }
-  if (typeof value === 'boolean') {
-    return Builder.expression.literal.boolean(value);
-  }
-  if (value === null || value === undefined) {
-    return Builder.expression.literal.nil();
-  }
-  // Fallback to string representation for complex objects
-  return Builder.expression.literal.string(JSON.stringify(value));
-}
-
-function conditionToESQL(condition: Condition, isNested = false): ESQLAstItem {
-  if (isFilterCondition(condition)) {
-    const field = Builder.expression.column(condition.field);
-
-    if ('eq' in condition) {
-      return Builder.expression.func.binary('==', [field, literalFromAny(condition.eq)]);
-    }
-    if ('neq' in condition) {
-      return Builder.expression.func.binary('!=', [field, literalFromAny(condition.neq)]);
-    }
-    if ('gt' in condition) {
-      return Builder.expression.func.binary('>', [field, literalFromAny(condition.gt)]);
-    }
-    if ('gte' in condition) {
-      return Builder.expression.func.binary('>=', [field, literalFromAny(condition.gte)]);
-    }
-    if ('lt' in condition) {
-      return Builder.expression.func.binary('<', [field, literalFromAny(condition.lt)]);
-    }
-    if ('lte' in condition) {
-      return Builder.expression.func.binary('<=', [field, literalFromAny(condition.lte)]);
-    }
-    if ('exists' in condition) {
-      if (condition.exists === true) {
-        return Builder.expression.func.call('NOT', [
-          Builder.expression.func.postfix('IS NULL', field),
-        ]);
-      } else {
-        return Builder.expression.func.postfix('IS NULL', field);
-      }
-    }
-    if ('range' in condition && condition.range) {
-      const parts: ESQLAstItem[] = [];
-      if (condition.range.gt !== undefined)
-        parts.push(
-          Builder.expression.func.binary('>', [field, literalFromAny(condition.range.gt)])
-        );
-      if (condition.range.gte !== undefined)
-        parts.push(
-          Builder.expression.func.binary('>=', [field, literalFromAny(condition.range.gte)])
-        );
-      if (condition.range.lt !== undefined)
-        parts.push(
-          Builder.expression.func.binary('<', [field, literalFromAny(condition.range.lt)])
-        );
-      if (condition.range.lte !== undefined)
-        parts.push(
-          Builder.expression.func.binary('<=', [field, literalFromAny(condition.range.lte)])
-        );
-
-      if (parts.length === 1) return parts[0];
-      return parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
-    }
-    if ('contains' in condition) {
-      return Builder.expression.func.call('LIKE', [
-        field,
-        Builder.expression.literal.string(`%${condition.contains}%`),
-      ]);
-    }
-    if ('startsWith' in condition) {
-      return Builder.expression.func.call('LIKE', [
-        field,
-        Builder.expression.literal.string(`${condition.startsWith}%`),
-      ]);
-    }
-    if ('endsWith' in condition) {
-      return Builder.expression.func.call('LIKE', [
-        field,
-        Builder.expression.literal.string(`%${condition.endsWith}`),
-      ]);
-    }
-  } else if (isAndCondition(condition)) {
-    const andConditions = condition.and.map((c) => conditionToESQL(c, true));
-    return andConditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]));
-  } else if (isOrCondition(condition)) {
-    const orConditions = condition.or.map((c) => conditionToESQL(c, true));
-    return orConditions.reduce((acc, cond) => Builder.expression.func.binary('or', [acc, cond]));
-  } else if (isNotCondition(condition)) {
-    const notCondition = conditionToESQL(condition.not, true);
-    return Builder.expression.func.unary('NOT', notCondition);
-  } else if (isAlwaysCondition(condition)) {
-    return Builder.expression.literal.boolean(true);
-  }
-
-  return Builder.expression.literal.boolean(false);
-}
+import { convertDissectProcessorToESQL } from './processors/dissect';
+import { convertGrokProcessorToESQL } from './processors/grok';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -251,145 +133,11 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
       ];
 
     case 'grok': {
-      const {
-        from,
-        patterns, // eslint-disable-next-line @typescript-eslint/naming-convention
-        ignore_missing = false, // default same as Grok Ingest Processor
-        where,
-      } = processor as GrokProcessor;
-      const fromColumn = Builder.expression.column(from);
-
-      const conditions = [];
-      if (where) {
-        conditions.push(conditionToESQL(where));
-      }
-      if (ignore_missing) {
-        conditions.push(conditionToESQL({ field: from, exists: true }));
-      }
-
-      const finalCondition =
-        conditions.length > 1
-          ? conditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]))
-          : conditions.length === 1
-          ? conditions[0]
-          : null;
-
-      const commands = [];
-
-      // Handle ignore_missing: true workaround by converting nulls to empty strings
-      // So that GROK does not fail
-      if (ignore_missing) {
-        commands.push(
-          Builder.command({
-            name: 'eval',
-            args: [
-              Builder.expression.func.binary('=', [
-                fromColumn,
-                Builder.expression.func.call('CASE', [
-                  conditionToESQL({ field: from, exists: true }),
-                  fromColumn,
-                  Builder.expression.literal.string(''),
-                ]),
-              ]),
-            ],
-          })
-        );
-      }
-
-      // The GROK command
-      // We only support the first pattern, as ES|QL GROK does not support multiple patterns.
-      const grokCommand = Builder.command({
-        name: 'grok',
-        args: [fromColumn, Builder.expression.literal.string(patterns[0])],
-      });
-      commands.push(grokCommand);
-
-      // Cleanup any temporary fields (created for where or ignore_missing)
-      if (finalCondition) {
-        // -- NOT POSSIBLE -- Same as with dissect
-      }
-
-      return commands;
+      return convertGrokProcessorToESQL(processor as GrokProcessor, conditionToESQL);
     }
 
-    case 'dissect': {
-      const {
-        from,
-        pattern, // eslint-disable-next-line @typescript-eslint/naming-convention
-        append_separator, // eslint-disable-next-line @typescript-eslint/naming-convention
-        ignore_missing = false, // default same as Dissect Ingest Processor
-        where,
-      } = processor as DissectProcessor;
-      const fromColumn = Builder.expression.column(from);
-
-      const conditions = [];
-      if (where) {
-        conditions.push(conditionToESQL(where));
-      }
-      if (ignore_missing) {
-        conditions.push(conditionToESQL({ field: from, exists: true }));
-      }
-
-      const finalCondition =
-        conditions.length > 1
-          ? conditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]))
-          : conditions.length === 1
-          ? conditions[0]
-          : null;
-
-      // If there are any conditions, we need to wrap the DISSECT command in a way that it only executes when the condition is met.
-      // Since we cannot do this directly, we will have to accept that the fields will be created with null values when the condition is false.
-      // This is a known limitation.
-
-      const commands = [];
-
-      // Handle ignore_missing: true workaround by converting nulls to empty strings
-      // So that DISSECT does not fail
-      if (ignore_missing) {
-        commands.push(
-          Builder.command({
-            name: 'eval',
-            args: [
-              Builder.expression.func.binary('=', [
-                fromColumn,
-                Builder.expression.func.call('CASE', [
-                  conditionToESQL({ field: from, exists: true }),
-                  fromColumn,
-                  Builder.expression.literal.string(''),
-                ]),
-              ]),
-            ],
-          })
-        );
-      }
-
-      // The DISSECT command
-      const dissectArgs = [fromColumn, Builder.expression.literal.string(pattern)];
-      const dissectCommand = Builder.command({
-        name: 'dissect',
-        args: dissectArgs,
-      });
-
-      if (append_separator) {
-        const option = Builder.option({
-          name: 'append_separator',
-          args: [Builder.expression.literal.string(append_separator)],
-        });
-        dissectCommand.args.push(option);
-      }
-
-      commands.push(dissectCommand);
-
-      // Drop temporary fields (created for where or ignore_missing)
-      if (finalCondition) {
-        // -- NOT POSSIBLE -- Due to ES|QL limitation that we can't safely check if a column exists
-        // This is not a perfect simulation, but it is the best we can do with the current ES|QL capabilities.
-        // We are essentially applying the dissect to all rows, and the ones that don't match the condition will have null values for the dissected fields.
-        // This is different from the ingest processor, which would not create the fields at all.
-      }
-
-      return commands;
-    }
+    case 'dissect':
+      return convertDissectProcessorToESQL(processor as DissectProcessor, conditionToESQL);
 
     case 'date': {
       const {

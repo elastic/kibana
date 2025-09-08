@@ -170,18 +170,6 @@ async function ensureIndexCreated(indexName: string, esClient: Client) {
     index: indexName,
     mappings: {
       dynamic: 'true',
-      dynamic_templates: [
-        {
-          all_strings_as_is: {
-            match: '*',
-            match_mapping_type: 'string', // Do not ingest keywords for string fields
-            mapping: {
-              type: 'text',
-              index: false,
-            },
-          },
-        },
-      ],
     },
   });
 }

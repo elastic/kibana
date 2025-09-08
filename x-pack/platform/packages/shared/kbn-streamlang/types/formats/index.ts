@@ -6,4 +6,4 @@
  */
 
 export * from './date_formats';
-export * from './dissect_modifiers';
+export * from './dissect';

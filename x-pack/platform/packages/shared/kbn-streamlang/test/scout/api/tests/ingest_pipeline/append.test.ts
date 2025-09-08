@@ -136,5 +136,28 @@ streamlangApiTest.describe(
       expect(ingestedDocs.length).toBe(1);
       expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'new_tag']);
     });
+
+    streamlangApiTest('should append a with a {{{ template', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-append-triple-templated';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'append',
+            to: 'tags',
+            value: ['{{{templated_field}}}'],
+          } as AppendProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+
+      const docs = [{ tags: ['existing_tag'], templated_field: 'new_tag' }];
+      await testBed.ingest(indexName, docs, processors);
+
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'new_tag']);
+    });
   }
 );
