@@ -23,7 +23,7 @@ describe('postAttackDiscoveryGenerationsDismissRoute', () => {
       name: 'my_realm_name',
       type: 'my_realm_type',
     },
-    username: 'my_username',
+    username: 'elastic',
   } as AuthenticatedUser;
 
   const mockDataClient = attackDiscoveryDataClientMock.create();

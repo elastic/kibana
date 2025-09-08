@@ -13,11 +13,8 @@ import React, { memo, useMemo } from 'react';
 import { RUNTIME_FIELD_MAP } from '../../../detections/components/alert_summary/wrapper';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { Table } from './table';
 
 const DATAVIEW_ERROR = i18n.translate(
@@ -52,8 +49,6 @@ interface AiForSOCAlertsTableProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlertsTableProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const spaceId = useSpaceId();
   const dataViewSpec = useMemo(
     () => ({
@@ -63,14 +58,7 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
     [spaceId]
   );
 
-  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec,
-    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
-  });
-
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView, loading: dataViewLoading } = useCreateDataView({ dataViewSpec });
 
   // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();

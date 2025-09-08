@@ -16,6 +16,7 @@ import type { AssistantStateAnnotation } from './state';
 export interface GraphInputs {
   connectorId: string;
   conversationId?: string;
+  threadId: string;
   llmType?: string;
   isStream?: boolean;
   isOssModel?: boolean;

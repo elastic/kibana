@@ -43,6 +43,7 @@ export {
 } from './v1';
 
 export type {
+  GraphNode,
   AtomicGraphNode,
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,
@@ -54,8 +55,16 @@ export type {
   ExitForeachNode,
   ExitIfNode,
   ExitRetryNode,
+  EnterContinueNode,
+  ExitContinueNode,
+  WaitGraphNodeSchema,
+  WaitGraphNode,
   HttpGraphNode,
   HttpGraphNodeSchema,
-  WaitGraphNode,
-  WaitGraphNodeSchema,
+  EnterTryBlockNode,
+  ExitTryBlockNode,
+  EnterNormalPathNode,
+  ExitNormalPathNode,
+  EnterFallbackPathNode,
+  ExitFallbackPathNode,
 } from './execution';

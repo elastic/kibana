@@ -130,6 +130,7 @@ export const item: GetInfoResponse['item'] = {
       index_template: [],
       transform: [],
       ml_model: [],
+      knowledge_base: [],
     },
   },
   policy_templates: [

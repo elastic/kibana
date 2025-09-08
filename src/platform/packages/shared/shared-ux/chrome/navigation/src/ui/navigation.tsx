@@ -17,6 +17,7 @@ import type {
 import type { FC } from 'react';
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import classnames from 'classnames';
 import type { Observable } from 'rxjs';
 import { EMPTY } from 'rxjs';
 import { useNavigation as useNavigationService } from '../services';
@@ -93,7 +94,9 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
     <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
-        <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
+        <EuiCollapsibleNavBeta.Body
+          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV1')}
+        >
           <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
           </EuiFlexGroup>

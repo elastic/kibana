@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 import { registerRoutes } from './register_routes';
 import { serverMock } from '../__mocks__/server';
@@ -52,7 +53,7 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { suggestUsersRoute } from './users/suggest';
 
 jest.mock('./alert_summary/find_route');
 const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
@@ -133,6 +134,8 @@ jest.mock('./attack_discovery/schedules/disable');
 const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedulesRoute as jest.Mock;
 jest.mock('./attack_discovery/schedules/enable');
 const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as jest.Mock;
+jest.mock('./users/suggest');
+const suggestUsersRouteMock = suggestUsersRoute as jest.Mock;
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
@@ -304,5 +307,9 @@ describe('registerRoutes', () => {
 
   it('should call `enableAttackDiscoverySchedulesRouteMock`', () => {
     expect(enableAttackDiscoverySchedulesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `suggestUsersRouteMock`', () => {
+    expect(suggestUsersRouteMock).toHaveBeenCalledWith(server.router, loggerMock);
   });
 });
