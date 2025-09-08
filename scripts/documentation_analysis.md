@@ -16,7 +16,14 @@ This directory contains three different approaches to analyze the state and qual
 
 **Run with:**
 ```bash
+# Basic analysis
 node scripts/analyze_documentation.js
+
+# Show help
+node scripts/analyze_documentation.js --help
+
+# Verbose output with more details
+node scripts/analyze_documentation.js --verbose
 ```
 
 ### Approach 2: Shell-Based Analysis with Pattern Matching
@@ -34,7 +41,14 @@ node scripts/analyze_documentation.js
 
 **Run with:**
 ```bash
+# Basic analysis
 ./scripts/doc_analysis.sh
+
+# Show help
+./scripts/doc_analysis.sh --help
+
+# Verbose output with more examples
+./scripts/doc_analysis.sh --verbose
 ```
 
 ### Approach 3: AST-Based Analysis with Content Categorization
@@ -50,7 +64,30 @@ node scripts/analyze_documentation.js
 
 **Run with:**
 ```bash
+# Full analysis
 node scripts/advanced_doc_analysis.js
+
+# Show help
+node scripts/advanced_doc_analysis.js --help
+
+# Verbose output with debug information
+node scripts/advanced_doc_analysis.js --verbose
+```
+
+### Interactive Runner
+**File:** `run_doc_analysis.sh`
+**Description:** Interactive script to choose and run any of the above approaches.
+
+**Run with:**
+```bash
+# Interactive menu
+./scripts/run_doc_analysis.sh
+
+# Show help
+./scripts/run_doc_analysis.sh --help
+
+# Interactive menu with verbose output
+./scripts/run_doc_analysis.sh --verbose
 ```
 
 ## Output Examples
@@ -124,11 +161,42 @@ CORE (150 packages):
 
 ## Performance Comparison
 
-| Approach | Speed | Detail Level | Use Case |
-|----------|-------|--------------|----------|
-| Shell Script | Fastest (~5-10s) | Basic | Quick overview |
-| JavaScript Basic | Medium (~30-60s) | Detailed | Regular analysis |
-| JavaScript Advanced | Slower (~1-2min) | Comprehensive | Deep analysis |
+| Approach | Speed | Detail Level | Use Case | Help Available |
+|----------|-------|--------------|----------|----------------|
+| Shell Script | Fastest (~5-10s) | Basic | Quick overview | `./scripts/doc_analysis.sh --help` |
+| JavaScript Basic | Medium (~30-60s) | Detailed | Regular analysis | `node scripts/analyze_documentation.js --help` |
+| JavaScript Advanced | Slower (~1-2min) | Comprehensive | Deep analysis | `node scripts/advanced_doc_analysis.js --help` |
+| Interactive Runner | Variable | User Choice | Guided analysis | `./scripts/run_doc_analysis.sh --help` |
+
+## Help System
+
+All scripts now include comprehensive help functionality:
+
+### Getting Help
+```bash
+# Show help for any script
+./scripts/run_doc_analysis.sh --help
+node scripts/analyze_documentation.js --help
+node scripts/advanced_doc_analysis.js --help
+./scripts/doc_analysis.sh --help
+```
+
+### Verbose Output
+All scripts support a `--verbose` flag for additional detail:
+```bash
+# Get more detailed output
+node scripts/analyze_documentation.js --verbose
+node scripts/advanced_doc_analysis.js --verbose
+./scripts/doc_analysis.sh --verbose
+./scripts/run_doc_analysis.sh --verbose
+```
+
+### Help Features
+- **Usage examples** with common command patterns
+- **Feature descriptions** explaining what each script analyzes
+- **Quality explanations** describing scoring systems and categories
+- **Performance guidance** to help choose the right tool
+- **Cross-references** to related scripts and approaches
 
 ## Analysis Scope
 

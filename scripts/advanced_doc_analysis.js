@@ -16,6 +16,74 @@ var path = require('path');
 var util = require('util');
 var exec = require('child_process').exec;
 
+// Help functionality
+function showHelp() {
+  console.log(`
+Kibana Documentation Analysis - Advanced Approach
+
+DESCRIPTION:
+  Sophisticated analysis with detailed content parsing and categorization.
+  Most comprehensive analysis with AST-based content examination.
+
+USAGE:
+  node scripts/advanced_doc_analysis.js [options]
+
+OPTIONS:
+  -h, --help     Show this help message
+  -v, --verbose  Show additional detailed output and debug information
+
+FEATURES:
+  • Most comprehensive analysis
+  • Categorizes packages by type (core, platform, solution, x-pack)
+  • Detailed content feature analysis
+  • Quality tier classification
+  • Feature breakdown (installation, usage, API, testing, contributing)
+
+QUALITY TIERS:
+  • none: No README file
+  • placeholder: Generated/placeholder content or very minimal
+  • basic: Basic documentation with limited structure
+  • good: Well-structured documentation with usage examples
+  • excellent: Comprehensive documentation with API docs, examples, and testing info
+
+PACKAGE CATEGORIES:
+  • core: Core Kibana platform packages (src/)
+  • platform: Platform-level components
+  • solution: Solution-specific packages (Security, Observability, etc.)
+  • x-pack: X-Pack commercial features
+
+EXAMPLES:
+  # Full advanced analysis
+  node scripts/advanced_doc_analysis.js
+
+  # Verbose output with debug information
+  node scripts/advanced_doc_analysis.js --verbose
+
+SEE ALSO:
+  • scripts/analyze_documentation.js - Faster basic analysis
+  • scripts/doc_analysis.sh - Shell-based quick analysis
+  • scripts/run_doc_analysis.sh - Interactive runner for all approaches
+`);
+}
+
+// Parse command line arguments
+var args = process.argv.slice(2);
+var verbose = false;
+
+for (var i = 0; i < args.length; i++) {
+  var arg = args[i];
+  if (arg === '-h' || arg === '--help') {
+    showHelp();
+    process.exit(0);
+  } else if (arg === '-v' || arg === '--verbose') {
+    verbose = true;
+  } else {
+    console.error('Unknown option: ' + arg);
+    console.error('Use --help for usage information');
+    process.exit(1);
+  }
+}
+
 var execAsync = util.promisify(exec);
 
 function categorizePackage(pkgPath) {
@@ -265,7 +333,7 @@ function runDetailedAnalysis() {
       .filter(function (r) {
         return r.analysis.qualityTier === 'excellent';
       })
-      .slice(0, 5);
+      .slice(0, verbose ? 10 : 5);
 
     if (excellent.length > 0) {
       excellent.forEach(function (r) {
@@ -290,7 +358,7 @@ function runDetailedAnalysis() {
       .filter(function (r) {
         return r.analysis.qualityTier === 'none' || r.analysis.qualityTier === 'placeholder';
       })
-      .slice(0, 10);
+      .slice(0, verbose ? 20 : 10);
 
     needsImprovement.forEach(function (r) {
       var reason = !r.hasReadme ? 'No README' : 'Placeholder/Generated content';
@@ -301,9 +369,44 @@ function runDetailedAnalysis() {
       return r.analysis.qualityTier === 'none' || r.analysis.qualityTier === 'placeholder';
     }).length;
 
-    if (needsImprovementTotal > 10) {
-      var remaining = needsImprovementTotal - 10;
+    if (needsImprovementTotal > (verbose ? 20 : 10)) {
+      var remaining = needsImprovementTotal - (verbose ? 20 : 10);
       console.log('  ... and ' + remaining + ' more packages needing improvement');
+    }
+
+    // Show additional verbose information
+    if (verbose) {
+      console.log('\n=== Verbose Debug Information ===');
+      console.log('Good quality documentation examples:');
+      results
+        .filter(function (r) {
+          return r.analysis.qualityTier === 'good';
+        })
+        .slice(0, 10)
+        .forEach(function (r) {
+          console.log(
+            '- ' +
+              r.packagePath +
+              ' (' +
+              r.analysis.wordCount +
+              ' words, features: ' +
+              [
+                r.analysis.hasInstallation && 'install',
+                r.analysis.hasUsage && 'usage',
+                r.analysis.hasApi && 'api',
+                r.analysis.hasTesting && 'testing',
+                r.analysis.hasContributing && 'contributing',
+              ]
+                .filter(Boolean)
+                .join(', ') +
+              ')'
+          );
+        });
+
+      console.log('\nPackage type distribution:');
+      Object.keys(byType).forEach(function (type) {
+        console.log(type + ': ' + byType[type].length + ' packages');
+      });
     }
 
     return results;

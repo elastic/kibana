@@ -16,6 +16,66 @@ var path = require('path');
 var util = require('util');
 var exec = require('child_process').exec;
 
+// Help functionality
+function showHelp() {
+  console.log(`
+Kibana Documentation Analysis - Basic Approach
+
+DESCRIPTION:
+  Analyzes README files across all Kibana packages and plugins.
+  Provides balanced detail and performance with quality scoring.
+
+USAGE:
+  node scripts/analyze_documentation.js [options]
+
+OPTIONS:
+  -h, --help     Show this help message
+  -v, --verbose  Show additional detailed output
+
+FEATURES:
+  • Analyzes README files across all package directories
+  • Generates quality scores based on content indicators
+  • Identifies generated/placeholder content
+  • Provides detailed statistics and examples
+  • Categorizes documentation by quality levels
+
+QUALITY SCORING:
+  • Low Quality (≤3): Minimal content, few sections
+  • Medium Quality (4-6): Adequate documentation with some structure
+  • High Quality (>6): Comprehensive with multiple sections and examples
+
+EXAMPLES:
+  # Basic analysis
+  node scripts/analyze_documentation.js
+  
+  # Verbose output with more details
+  node scripts/analyze_documentation.js --verbose
+
+SEE ALSO:
+  • scripts/advanced_doc_analysis.js - More comprehensive analysis
+  • scripts/doc_analysis.sh - Faster shell-based analysis
+  • scripts/run_doc_analysis.sh - Interactive runner for all approaches
+`);
+}
+
+// Parse command line arguments
+var args = process.argv.slice(2);
+var verbose = false;
+
+for (var i = 0; i < args.length; i++) {
+  var arg = args[i];
+  if (arg === '-h' || arg === '--help') {
+    showHelp();
+    process.exit(0);
+  } else if (arg === '-v' || arg === '--verbose') {
+    verbose = true;
+  } else {
+    console.error('Unknown option: ' + arg);
+    console.error('Use --help for usage information');
+    process.exit(1);
+  }
+}
+
 var execAsync = util.promisify(exec);
 
 // Define patterns that indicate generated/placeholder content
@@ -196,14 +256,14 @@ analyzeDocumentation()
         '%)'
     );
 
-    // Additional detailed output
+    // Additional detailed output (always show basic breakdown)
     console.log('\n=== Detailed Breakdown ===');
     console.log('Packages without README:');
     results
       .filter(function (r) {
         return !r.hasReadme;
       })
-      .slice(0, 10)
+      .slice(0, verbose ? 20 : 10)
       .forEach(function (r) {
         console.log('  - ' + r.packagePath);
       });
@@ -211,8 +271,8 @@ analyzeDocumentation()
     var noReadmeCount = results.filter(function (r) {
       return !r.hasReadme;
     }).length;
-    if (noReadmeCount > 10) {
-      console.log('  ... and ' + (noReadmeCount - 10) + ' more');
+    if (noReadmeCount > (verbose ? 20 : 10)) {
+      console.log('  ... and ' + (noReadmeCount - (verbose ? 20 : 10)) + ' more');
     }
 
     console.log('\nHigh quality documentation examples:');
@@ -220,12 +280,54 @@ analyzeDocumentation()
       .filter(function (r) {
         return r.qualityScore > 6;
       })
-      .slice(0, 5)
+      .slice(0, verbose ? 10 : 5)
       .forEach(function (r) {
         console.log(
           '  - ' + r.packagePath + ' (score: ' + r.qualityScore + ', ' + r.wordCount + ' words)'
         );
       });
+
+    // Show additional verbose information
+    if (verbose) {
+      console.log('\n=== Verbose Output ===');
+      console.log('Generated/Placeholder content examples:');
+      results
+        .filter(function (r) {
+          return r.isGenerated || r.isPlaceholder;
+        })
+        .slice(0, 10)
+        .forEach(function (r) {
+          console.log(
+            '  - ' +
+              r.packagePath +
+              ' (placeholder: ' +
+              r.isPlaceholder +
+              ', generated: ' +
+              r.isGenerated +
+              ')'
+          );
+        });
+
+      console.log('\nMedium quality documentation examples:');
+      results
+        .filter(function (r) {
+          return r.qualityScore > 3 && r.qualityScore <= 6;
+        })
+        .slice(0, 10)
+        .forEach(function (r) {
+          console.log(
+            '  - ' +
+              r.packagePath +
+              ' (score: ' +
+              r.qualityScore +
+              ', ' +
+              r.wordCount +
+              ' words, ' +
+              r.sections.length +
+              ' sections)'
+          );
+        });
+    }
   })
   .catch(function (error) {
     console.error('Error running documentation analysis:', error);
