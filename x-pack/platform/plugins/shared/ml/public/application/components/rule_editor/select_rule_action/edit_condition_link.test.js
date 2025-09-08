@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../services/job_service', () => 'mlJobService');
+jest.mock('@kbn/ml-services/job_service', () => 'mlJobService');
 
 import React from 'react';
 
