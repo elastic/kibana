@@ -14,6 +14,7 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
+          metadata: {},
           tags: [],
           members: [],
         },
@@ -55,6 +56,7 @@ describe('GroupStream', () => {
           name: 'group-stream',
           description: '',
           group: {
+            metadata: {},
             tags: [],
             members: [],
           },
@@ -111,6 +113,7 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
+            metadata: {},
             tags: [],
             members: [],
           },
