@@ -7,17 +7,17 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { UpdateSingleEntityResponse } from '../../../../../../common/api/entity_analytics';
+import type { UpsertEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import {
-  UpdateSingleEntityRequestBody,
-  UpdateSingleEntityRequestParams,
-  UpdateSingleEntityRequestQuery,
-} from '../../../../../../common/api/entity_analytics';
+  UpsertEntityRequestBody,
+  UpsertEntityRequestParams,
+  UpsertEntityRequestQuery,
+} from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from '../../errors';
 
-export const updateSingleEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .put({
       access: 'public',
@@ -33,13 +33,13 @@ export const updateSingleEntity = (router: EntityAnalyticsRoutesDeps['router'], 
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(UpdateSingleEntityRequestQuery),
-            params: buildRouteValidationWithZod(UpdateSingleEntityRequestParams),
-            body: buildRouteValidationWithZod(UpdateSingleEntityRequestBody),
+            query: buildRouteValidationWithZod(UpsertEntityRequestQuery),
+            params: buildRouteValidationWithZod(UpsertEntityRequestParams),
+            body: buildRouteValidationWithZod(UpsertEntityRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<UpdateSingleEntityResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<UpsertEntityResponse>> => {
         const secSol = await context.securitySolution;
         // todo implement force
         try {

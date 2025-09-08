@@ -17,7 +17,7 @@ import { startEntityEngineRoute } from './start';
 import { stopEntityEngineRoute } from './stop';
 import { getEntityStoreStatusRoute } from './status';
 import { enableEntityStoreRoute } from './enablement';
-import { updateSingleEntity } from './entity_crud/update_single';
+import { upsertEntity } from './entity_crud/upsert_entity';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -36,5 +36,5 @@ export const registerEntityStoreRoutes = ({
   listEntitiesRoute(router, logger);
   applyDataViewIndicesEntityEngineRoute(router, logger);
   entityStoreInternalPrivilegesRoute(router, logger, getStartServices);
-  updateSingleEntity(router, logger);
+  upsertEntity(router, logger);
 };

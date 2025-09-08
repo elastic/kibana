@@ -5,58 +5,42 @@
  * 2.0.
  */
 
-import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities';
+import type { FlattenProps } from '../utils/flatten_props';
 
-const nestedFields = ['attributes', 'lifecycle', 'behavior'];
-const immutableFields = ['id'];
+const immutableFields = [`['entity']['id']`];
 
-export const buildUpdateEntityPainlessScript = (doc: Entity) => {
+export const buildUpdateEntityPainlessScript = (props: FlattenProps[]) => {
   let script = ``;
-  // all defined attributes that are not nested
-  const attributes = Object.keys(doc.entity).filter(
-    (attr) =>
-      immutableFields.indexOf(attr) < 0 &&
-      nestedFields.indexOf(attr) < 0 &&
-      notNullOrUndefined(getEntityVal(doc, attr))
-  );
 
-  const attrAccess = (attr: string) => `ctx._source.entity['${attr}']`;
+  const initializedProperties: Record<string, boolean> = {};
 
-  // Add non nested fields
-  attributes.forEach((attr) => {
-    script += `${attrAccess(attr)} = ${convertToPainlessValue(getEntityVal(doc, attr))};`;
-  });
+  for (let i = 0; i < props.length; i++) {
+    const { path, value } = props[i];
 
-  // Add nested fields
-  nestedFields
-    .filter((attr) => notNullOrUndefined(getEntityVal(doc, attr)))
-    .forEach((attr) => {
-      // init nested fields if not yet defined
-      script += `${attrAccess(attr)} = ${attrAccess(attr)} == null ? [:] : ${attrAccess(attr)};`;
+    const fullPathAccess = convertToPainlessObjectAccess(path);
+    if (immutableFields.indexOf(fullPathAccess) >= 0) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
-      Object.keys(getEntityVal(doc, attr) as object)
-        .filter((subAttr) => notNullOrUndefined(getNestedEntityVal(doc, attr, subAttr)))
-        .forEach((subAttr) => {
-          script += `${attrAccess(attr)}['${subAttr}'] = ${convertToPainlessValue(
-            getNestedEntityVal(doc, attr, subAttr)
-          )};`;
-        });
-    });
+    // init objects in painless
+    for (let sliceSize = 1; sliceSize < path.length; sliceSize++) {
+      const subPath = convertToPainlessObjectAccess(path.slice(0, sliceSize));
+      if (!initializedProperties[subPath as keyof typeof initializedProperties]) {
+        const subPathAccess = `ctx._source${subPath}`;
+        script += `${subPathAccess} = ${subPathAccess} == null ? [:] : ${subPathAccess};`;
+        initializedProperties[subPath as keyof typeof initializedProperties] = true;
+      }
+    }
+
+    script += `ctx._source${fullPathAccess} = ${convertToPainlessValue(value)};`;
+  }
 
   return script;
 };
 
-function getEntityVal(doc: Entity, key: string) {
-  return doc.entity[key as keyof typeof doc.entity];
-}
-
-function getNestedEntityVal(doc: Entity, key: string, nestedKey: string) {
-  const nested = getEntityVal(doc, key);
-  if (!(nested instanceof Object)) {
-    return;
-  }
-
-  return nested[nestedKey as keyof typeof nested];
+function convertToPainlessObjectAccess(path: string[]) {
+  return path.map((s) => `['${s}']`).join('');
 }
 
 function convertToPainlessValue(value: unknown): string {
@@ -68,11 +52,9 @@ function convertToPainlessValue(value: unknown): string {
     case 'boolean':
       return `${value}`;
     default:
+      if (Array.isArray(value)) {
+        return `[${value.map((item) => convertToPainlessValue(item)).join(', ')}]`;
+      }
       throw new Error(`Can't convert ${typeof value} to a painless expression`);
   }
-}
-
-// used to guarantee that a value exists, false being part of it
-function notNullOrUndefined(val: unknown) {
-  return val !== undefined && val !== null;
 }
