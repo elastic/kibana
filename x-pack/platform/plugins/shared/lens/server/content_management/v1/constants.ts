@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const PUBLIC_API_VERSION = '1';
-export const PUBLIC_API_CONTENT_MANAGEMENT_VERSION = 1;
-export const PUBLIC_API_PATH = '/api/lens';
-export const PUBLIC_API_ACCESS = 'internal';
+import { LENS_ITEM_VERSION_V1 } from '../../../common/content_management/constants';
+
+/**
+ * Lens CM Item Version `v1`
+ */
+export const LENS_ITEM_VERSION = LENS_ITEM_VERSION_V1;
