@@ -13,7 +13,7 @@ import type { EntityStoreDataClient } from './entity_store_data_client';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
-import { getEntityPriorityUpdateIndexName } from './elasticsearch_assets/priority_update_entity_index';
+import { getEntityUpdatesIndexName } from './elasticsearch_assets/updates_entity_index';
 import type { FlattenProps } from './utils/flatten_props';
 import { flattenProps } from './utils/flatten_props';
 
@@ -79,16 +79,13 @@ export class EntityStoreCrudClient {
 
     await this.esClient.create({
       id: uuidv4(),
-      index: getEntityPriorityUpdateIndexName(type, this.namespace),
+      index: getEntityUpdatesIndexName(type, this.namespace),
       document: {
         '@timestamp': new Date().toISOString(),
         [type]: {
           name: entityId,
           entity: {
             ...doc.entity,
-            Metadata: {
-              priority: 1,
-            },
           },
         },
       },

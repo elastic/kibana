@@ -12,7 +12,7 @@ import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-sch
 import type { Logger } from '@kbn/logging';
 import {
   generateLatestIndexTemplateId,
-  generatePriorityUpdateIndexTemplateId,
+  generateUpdatesIndexTemplateId,
 } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
@@ -82,7 +82,7 @@ export async function installEntityDefinition({
     await deleteTemplate({
       esClient,
       logger,
-      name: generatePriorityUpdateIndexTemplateId(definition),
+      name: generateUpdatesIndexTemplateId(definition),
     });
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {

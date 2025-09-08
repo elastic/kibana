@@ -22,7 +22,7 @@ import {
   generateLatestIndexTemplateId,
   generateLatestIngestPipelineId,
   generateLatestTransformId,
-  generatePriorityUpdateIndexTemplateId,
+  generateUpdatesIndexTemplateId,
 } from './helpers/generate_component_id';
 import { generateLatestTransform } from './transform/generate_latest_transform';
 import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
@@ -32,7 +32,7 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
-    { type: 'template', id: generatePriorityUpdateIndexTemplateId(definition) },
+    { type: 'template', id: generateUpdatesIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
   ];
@@ -73,7 +73,7 @@ const assertHasCreatedDefinition = (
 
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
-      name: `entities_v1_priority_updates_${definition.id}_index_template`,
+      name: `entities_v1_updates_${definition.id}_index_template`,
     })
   );
 
@@ -116,7 +116,7 @@ const assertHasUpgradedDefinition = (
   );
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
-      name: `entities_v1_priority_updates_${definition.id}_index_template`,
+      name: `entities_v1_updates_${definition.id}_index_template`,
     })
   );
 
@@ -159,7 +159,7 @@ const assertHasDeletedDefinition = (
 
   expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
     {
-      name: generatePriorityUpdateIndexTemplateId(definition),
+      name: generateUpdatesIndexTemplateId(definition),
     },
     { ignore: [404] }
   );
