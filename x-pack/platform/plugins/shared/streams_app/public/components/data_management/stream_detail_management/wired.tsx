@@ -22,9 +22,9 @@ const wiredStreamManagementSubTabs = [
   'enrich',
   'schemaEditor',
   'lifecycle',
+  'advanced',
   'significantEvents',
   'references',
-  'advanced',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
