@@ -400,6 +400,9 @@ import type {
   GetAllDashboardMigrationsStatsResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationDashboardsRequestQueryInput,
+  GetDashboardMigrationDashboardsRequestParamsInput,
+  GetDashboardMigrationDashboardsResponse,
   GetDashboardMigrationResourcesRequestQueryInput,
   GetDashboardMigrationResourcesRequestParamsInput,
   GetDashboardMigrationResourcesResponse,
@@ -1516,6 +1519,26 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboards added to an existing dashboard migration
+   */
+  async getDashboardMigrationDashboards(props: GetDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request<GetDashboardMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3145,6 +3168,10 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationDashboardsProps {
+  query: GetDashboardMigrationDashboardsRequestQueryInput;
+  params: GetDashboardMigrationDashboardsRequestParamsInput;
 }
 export interface GetDashboardMigrationResourcesProps {
   query: GetDashboardMigrationResourcesRequestQueryInput;
