@@ -7,7 +7,7 @@
 
 import html2canvas from 'html2canvas';
 import { canvasToBlob, scrollAndLoadFully, wait } from './utils';
-import { CaptureResult } from '../types';
+import type { CaptureResult } from '../types';
 
 export const takeScreenshot = async (): Promise<CaptureResult | null> => {
   try {

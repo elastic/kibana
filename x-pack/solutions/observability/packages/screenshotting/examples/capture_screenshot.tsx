@@ -9,7 +9,7 @@ import { EuiButton, EuiFieldText, EuiFlexGroup, EuiImage, EuiSpacer } from '@ela
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { captureScreenshot, saveScreenshot } from '..';
-import { SaveScreenshotOptions } from '../src/types';
+import type { SaveScreenshotOptions } from '../src/types';
 
 export const CaptureScreenshotExample = ({ options }: { options: SaveScreenshotOptions }) => {
   const [screenshot, setScreenshot] = useState<string | null>(null);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FILE_KIND_DELIMITER, SaveScreenshotOptions } from '../types';
+import type { SaveScreenshotOptions } from '../types';
+import { FILE_KIND_DELIMITER } from '../types';
 import { getFileName } from './utils';
 
 export const saveScreenshot = async (

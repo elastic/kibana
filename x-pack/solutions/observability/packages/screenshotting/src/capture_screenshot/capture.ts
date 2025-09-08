@@ -6,7 +6,7 @@
  */
 
 import html2canvas from 'html2canvas';
-import { CaptureResult, CaptureScreenshotOptions } from '../types';
+import type { CaptureResult, CaptureScreenshotOptions } from '../types';
 import {
   getSelectorForUrl,
   waitForSelector,
