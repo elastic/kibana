@@ -19,13 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
-
-import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { CONTENT_ID } from '../../../common/content_management';
 import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
-
 import {
   coreServices,
   savedObjectsTaggingService,
@@ -43,7 +42,7 @@ interface DashboardSaveModalProps {
     newAccessMode,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: DashboardSaveOptions) => void;
+  }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
   description: string;
@@ -172,7 +171,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   ]);
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
       onSave={saveDashboard}
       onClose={onClose}
       title={title}
