@@ -36,7 +36,7 @@ export const INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER = getDataTestSubjectSelect
 export const INDICATORS_TABLE_INDICATOR_LAST_SEEN_CELL =
   '[data-gridcell-column-id="threat.indicator.last_seen"]';
 export const TABLE_CONTROLS = getDataTestSubjectSelector('dataGridControls');
-export const INDICATOR_TYPE_CELL = `[role="gridcell"][data-gridcell-column-id="threat.indicator.type"]`;
+export const INDICATOR_TYPE_CELL = `[role="gridcell"][data-gridcell-column-id^="threat"]`;
 export const INDICATORS_TABLE_CELL_FILTER_IN_BUTTON = `${getDataTestSubjectSelector(
   'tiIndicatorsTableCellFilterInButton'
 )} button`;
@@ -56,19 +56,19 @@ export const FLYOUT_TABS = getDataTestSubjectSelector('tiIndicatorFlyoutTabs');
 export const FLYOUT_TABLE = getDataTestSubjectSelector('tiFlyoutTable');
 export const FLYOUT_JSON = getDataTestSubjectSelector('indicators-flyoutjsonView');
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM = getDataTestSubjectSelector(
   'tiFlyoutOverviewHighLevelBlocksItem'
 );
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 export const FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE = getDataTestSubjectSelector(
   'tiFlyoutOverviewTableRow'
@@ -80,10 +80,10 @@ export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
   'tiFlyoutOverviewHighLevelBlocksPopoverButton'
 )} button`;
 export const FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutTableFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutTableFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 
 export const FLYOUT_TAKE_ACTION_BUTTON = getDataTestSubjectSelector(
