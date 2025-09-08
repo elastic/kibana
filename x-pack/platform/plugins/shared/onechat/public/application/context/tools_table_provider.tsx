@@ -7,7 +7,6 @@
 
 import React, { createContext, useCallback, useContext } from 'react';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
-import { noop } from 'lodash';
 import type { ToolType } from '@kbn/onechat-common';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
@@ -129,7 +128,9 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
         editTool,
         viewTool,
         cloneTool,
-        testTool: noop, // TODO: integrate with tool testing modal
+        testTool: (toolId: string) => {
+          navigateToOnechatUrl(appPaths.tools.details({ toolId }), { openTestFlyout: 'true' });
+        },
         getCreateToolUrl,
         getEditToolUrl,
         getViewToolUrl,

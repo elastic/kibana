@@ -80,38 +80,25 @@ export type ToolProps = ToolCreateProps | ToolEditProps | ToolViewProps;
 export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
-  const [searchParams] = useSearchParams();
-  const { toolType: toolTypeParam } = useParams<{ toolType?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { toolType: toolTypeParam } = useParams<{ toolType?: ToolType }>();
 
-  const toolTypeFromParams = useMemo(() => {
-    switch (toolTypeParam) {
-      case ToolType.esql:
-        return ToolType.esql;
-      case ToolType.index_search:
-        return ToolType.index_search;
-      default:
-        return undefined;
-    }
-  }, [toolTypeParam]);
-
-  const initialToolTypeFromUrl = useMemo(() => {
-    const queryParam = searchParams.get('toolType');
-    switch (queryParam) {
-      case ToolType.esql:
-        return ToolType.esql;
-      case ToolType.index_search:
-        return ToolType.index_search;
-      default:
-        return undefined;
-    }
-  }, [searchParams]);
-
-  const form = useToolForm(tool, toolTypeFromParams ?? initialToolTypeFromUrl);
+  const form = useToolForm(tool, toolTypeParam);
   const { reset, formState, watch, handleSubmit } = form;
   const { errors } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
 
   const currentToolId = watch('toolId');
+
+  useEffect(() => {
+    const shouldOpen = searchParams.get('openTestFlyout') === 'true';
+    if (shouldOpen && currentToolId && !showTestFlyout) {
+      setShowTestFlyout(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('openTestFlyout');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, currentToolId, showTestFlyout, setSearchParams]);
 
   const handleCancel = useCallback(() => {
     navigateToOnechatUrl(appPaths.tools.list);

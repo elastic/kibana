@@ -22,7 +22,7 @@ interface PatternFormContext {
   pattern: string;
 }
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 5;
 
 export const IndexSearchPattern: React.FC = () => {
   const { control, setValue, setError, clearErrors } = useFormContext<PatternFormContext>();
