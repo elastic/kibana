@@ -29,10 +29,7 @@ test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPa
    * For second run retries in the same environment, we click the link to allow for new agent policy creation.
    */
 
-  await Promise.race([
-    await fleetAgentsOverviewPage.waitForCreatePolicyButton(),
-    await fleetAgentsOverviewPage.clickCreateNewAgentPolicyLink(),
-  ]);
+  await fleetAgentsOverviewPage.maybeClickCreateNewAgentPolicyLink();
 
   await fleetAgentsOverviewPage.clickCreatePolicyButton();
 

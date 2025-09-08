@@ -38,12 +38,12 @@ export class FleetAgentsOverviewPage {
     await this.addAgentCTA.click();
   }
 
-  public async clickCreateNewAgentPolicyLink() {
-    await this.createNewAgentPolicyLink.click();
-  }
+  public async maybeClickCreateNewAgentPolicyLink() {
+    await this.createNewAgentPolicyLink.or(this.createPolicyButton).click({ trial: true });
 
-  public async waitForCreatePolicyButton() {
-    await this.createPolicyButton.waitFor({ state: 'visible' });
+    if (await this.createNewAgentPolicyLink.isVisible()) {
+      await this.createNewAgentPolicyLink.click();
+    }
   }
 
   public async clickCreatePolicyButton() {
