@@ -38,6 +38,8 @@ export interface InternalConnectorContract extends ConnectorContract {
   patterns?: string[];
   /** Whether this is an internal connector with hardcoded endpoint details */
   isInternal?: boolean;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
   /** Parameter type metadata for proper request building */
   parameterTypes?: {
     pathParams?: string[];

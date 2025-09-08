@@ -95,6 +95,92 @@ function generateApiClient() {
 }
 
 /**
+ * Extract tag documentation URLs from OpenAPI spec (simplified for fallback only)
+ */
+function extractTagDocumentation() {
+  const tagDocs = new Map();
+  
+  try {
+    const specPath = path.resolve(__dirname, '../../../../../../oas_docs/output/kibana.yaml');
+    if (!fs.existsSync(specPath)) {
+      return tagDocs;
+    }
+
+    const specContent = fs.readFileSync(specPath, 'utf8');
+    
+    // Extract tag documentation for fallback purposes only
+    const externalDocsRegex = /externalDocs:\s*\n\s*description: ([^\n\r]+)\s*\n\s*url: ([^\s\n\r]+)/g;
+    let match;
+    
+    while ((match = externalDocsRegex.exec(specContent)) !== null) {
+      const [fullMatch, description, url] = match;
+      const beforeMatch = specContent.substring(0, match.index);
+      
+      // Look backwards for the most recent tag name
+      const tagNameMatch = beforeMatch.match(/name: ([^\n\r]+)(?=[\s\S]*?$)/);
+      
+      if (tagNameMatch) {
+        const cleanTagName = tagNameMatch[1].trim();
+        const cleanUrl = url.trim();
+        
+        if (!tagDocs.has(cleanTagName)) {
+          tagDocs.set(cleanTagName, {
+            description: description.trim(),
+            url: cleanUrl
+          });
+        }
+      }
+    }
+    
+    console.log(`📚 Extracted ${tagDocs.size} tag fallback URLs`);
+  } catch (error) {
+    console.warn('⚠️ Error extracting tag documentation:', error.message);
+  }
+  
+  return tagDocs;
+}
+
+/**
+ * Generate documentation URL for a Kibana API endpoint
+ */
+function generateDocumentationUrl(method, path, operationId, tagDocs) {
+  // Use the official Kibana API documentation pattern with operationId
+  if (operationId && operationId.trim()) {
+    const lowerOperationId = operationId.toLowerCase();
+    const docUrl = `https://www.elastic.co/docs/api/doc/kibana/operation/operation-${lowerOperationId}`;
+    return docUrl;
+  }
+  
+  // Fallback: Try to find a matching tag for this API if no operationId
+  const apiPatterns = [
+    { pattern: /^\/api\/actions/, tag: 'connectors' },
+    { pattern: /^\/api\/alerting/, tag: 'alerting' },
+    { pattern: /^\/api\/cases/, tag: 'cases' },
+    { pattern: /^\/api\/fleet/, tag: 'Data streams' },
+    { pattern: /^\/api\/logstash/, tag: 'Fleet Server hosts' },
+    { pattern: /^\/api\/observability/, tag: 'Message Signing Service' },
+    { pattern: /^\/api\/security/, tag: 'roles' },
+    { pattern: /^\/api\/saved_objects/, tag: 'saved objects' },
+    { pattern: /^\/api\/task_manager/, tag: 'system' },
+    { pattern: /^\/api\/internal\/session/, tag: 'user session' },
+    { pattern: /^\/api\/maintenance_window/, tag: 'maintenance-window' },
+  ];
+  
+  for (const { pattern, tag } of apiPatterns) {
+    if (pattern.test(path)) {
+      const tagDoc = tagDocs.get(tag);
+      if (tagDoc) {
+        return tagDoc.url;
+      }
+    }
+  }
+  
+  // Final fallback to general Kibana API documentation
+  console.log(`⚠️ No pattern matched for ${path} (operationId: ${operationId}) → fallback to generic`);
+  return 'https://www.elastic.co/guide/en/kibana/current/api.html';
+}
+
+/**
  * Extract examples from OpenAPI spec for a specific endpoint
  */
 function extractExamplesFromSpec(method, path) {
@@ -102,7 +188,7 @@ function extractExamplesFromSpec(method, path) {
     request: null,
     response: null,
     requestParams: {},
-    responseData: null,
+    responseData: null
   };
 
   try {
@@ -112,35 +198,27 @@ function extractExamplesFromSpec(method, path) {
     }
 
     const specContent = fs.readFileSync(specPath, 'utf8');
-
+    
     // Convert OpenAPI path format to match our extraction
     // From /api/spaces/space/{id} to /api/spaces/space/:id
     const specPathPattern = path.replace(/\{([^}]+)\}/g, '{$1}');
-
+    
     // Look for the specific endpoint in the YAML
-    const pathRegex = new RegExp(
-      `${escapeRegex(specPathPattern)}['"]?:\\s*\\n([\\s\\S]*?)(?=\\n\\s*['\\/]|\\n[a-z]|$)`,
-      'i'
-    );
+    const pathRegex = new RegExp(`${escapeRegex(specPathPattern)}['"]?:\\s*\\n([\\s\\S]*?)(?=\\n\\s*['\\/]|\\n[a-z]|$)`, 'i');
     const pathMatch = specContent.match(pathRegex);
-
+    
     if (pathMatch) {
       const endpointContent = pathMatch[1];
-
+      
       // Look for the specific method within this path
-      const methodRegex = new RegExp(
-        `${method.toLowerCase()}:\\s*\\n([\\s\\S]*?)(?=\\n\\s*[a-z]|$)`,
-        'i'
-      );
+      const methodRegex = new RegExp(`${method.toLowerCase()}:\\s*\\n([\\s\\S]*?)(?=\\n\\s*[a-z]|$)`, 'i');
       const methodMatch = endpointContent.match(methodRegex);
-
+      
       if (methodMatch) {
         const operationContent = methodMatch[1];
-
+        
         // Extract request examples
-        const requestBodyMatch = operationContent.match(
-          /requestBody:[\\s\\S]*?examples:\\s*\\n([\\s\\S]*?)(?=\\n\\s*responses:|\\n\\s*[a-z]|$)/
-        );
+        const requestBodyMatch = operationContent.match(/requestBody:[\\s\\S]*?examples:\\s*\\n([\\s\\S]*?)(?=\\n\\s*responses:|\\n\\s*[a-z]|$)/);
         if (requestBodyMatch) {
           const requestExamples = extractYamlExamples(requestBodyMatch[1]);
           if (requestExamples.length > 0) {
@@ -148,11 +226,9 @@ function extractExamplesFromSpec(method, path) {
             examples.requestParams = parseExampleForParams(requestExamples[0], method);
           }
         }
-
+        
         // Extract response examples
-        const responseMatch = operationContent.match(
-          /responses:[\\s\\S]*?200:[\\s\\S]*?examples:\\s*\\n([\\s\\S]*?)(?=\\n\\s*[1-5]\\d\\d:|\\n\\s*[a-z]|$)/
-        );
+        const responseMatch = operationContent.match(/responses:[\\s\\S]*?200:[\\s\\S]*?examples:\\s*\\n([\\s\\S]*?)(?=\\n\\s*[1-5]\\d\\d:|\\n\\s*[a-z]|$)/);
         if (responseMatch) {
           const responseExamples = extractYamlExamples(responseMatch[1]);
           if (responseExamples.length > 0) {
@@ -174,15 +250,15 @@ function extractExamplesFromSpec(method, path) {
  */
 function extractYamlExamples(examplesContent) {
   const examples = [];
-
+  
   // Look for $ref patterns pointing to example files
   const refMatches = examplesContent.match(/\$ref:\s*['"](\.\.\/examples\/[^'"]+)['"]/g);
-
+  
   if (refMatches) {
     for (const refMatch of refMatches) {
       const refPath = refMatch.match(/\$ref:\s*['"](\.\.\/examples\/[^'"]+)['"]/)[1];
       const examplePath = path.resolve(__dirname, '../../../../../../oas_docs', refPath);
-
+      
       try {
         if (fs.existsSync(examplePath)) {
           const exampleContent = fs.readFileSync(examplePath, 'utf8');
@@ -193,7 +269,7 @@ function extractYamlExamples(examplesContent) {
       }
     }
   }
-
+  
   // Also look for inline examples
   const inlineMatches = examplesContent.match(/value:\\s*\\n([\\s\\S]*?)(?=\\n\\s*[a-zA-Z]|$)/g);
   if (inlineMatches) {
@@ -201,7 +277,7 @@ function extractYamlExamples(examplesContent) {
       examples.push(inlineMatch.replace(/value:\s*\n/, ''));
     }
   }
-
+  
   return examples;
 }
 
@@ -210,41 +286,41 @@ function extractYamlExamples(examplesContent) {
  */
 function parseExampleForParams(exampleContent, method) {
   const params = {};
-
+  
   try {
     // Parse YAML content to extract parameter values
     const valueMatch = exampleContent.match(/value:\\s*\\n([\\s\\S]*)/);
     if (valueMatch) {
       const yamlContent = valueMatch[1];
-
+      
       // Simple YAML parsing for common patterns
       const lines = yamlContent.split('\\n');
       let currentIndent = 0;
-      const currentPath = [];
-
+      let currentPath = [];
+      
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;
-
+        
         const indent = line.length - line.trimLeft().length;
         const colonIndex = line.indexOf(':');
-
+        
         if (colonIndex > 0) {
           const key = line.substring(indent, colonIndex).trim();
           const value = line.substring(colonIndex + 1).trim();
-
+          
           // Adjust path based on indentation
           while (currentPath.length > 0 && indent <= currentIndent) {
             currentPath.pop();
             currentIndent -= 2;
           }
-
+          
           if (value && !value.startsWith('-')) {
             // Store the parameter value
             const fullKey = currentPath.length > 0 ? currentPath.join('.') + '.' + key : key;
             params[fullKey] = value.replace(/['"]/g, '');
           }
-
+          
           if (value === '' || value.startsWith('-')) {
             currentPath.push(key);
             currentIndent = indent;
@@ -255,7 +331,7 @@ function parseExampleForParams(exampleContent, method) {
   } catch (error) {
     // Continue - examples are optional
   }
-
+  
   return params;
 }
 
@@ -579,7 +655,7 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
 /**
  * Convert Kibana API endpoint to connector definition
  */
-function convertToConnectorDefinition(endpoint, index) {
+function convertToConnectorDefinition(endpoint, index, tagDocs) {
   const { method, path, operationId, parameters = [], examples = {} } = endpoint;
 
   // Categorize parameters by type
@@ -706,25 +782,24 @@ function convertToConnectorDefinition(endpoint, index) {
   // Create description
   const description = `${method} ${path} - Kibana API endpoint`;
 
+  // Extract documentation URL
+  const documentation = generateDocumentationUrl(method, path, operationId, tagDocs);
+
   // Convert Zodios path format (:param) to our pattern format ({param})
   const pattern = path.replace(/:([^\/]+)/g, '{$1}');
 
   // Create examples object if we have examples
-  const examplesSection =
-    Object.keys(examples.requestParams || {}).length > 0
-      ? `,
+  const examplesSection = Object.keys(examples.requestParams || {}).length > 0 
+    ? `,
     examples: {
       params: ${JSON.stringify(examples.requestParams, null, 6)},
       snippet: \`- name: ${operationId.replace(/[^a-zA-Z0-9]/g, '_')}
   type: ${type}
-  with:${Object.entries(examples.requestParams)
-    .map(
-      ([key, value]) =>
-        `\n    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
-    )
-    .join('')}\`
+  with:${Object.entries(examples.requestParams).map(([key, value]) => 
+    `\n    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
+  ).join('')}\`
     }`
-      : '';
+    : '';
 
   return `  {
     type: '${type}',
@@ -733,6 +808,7 @@ function convertToConnectorDefinition(endpoint, index) {
     methods: ["${method}"],
     patterns: ["${pattern}"],
     isInternal: true,
+    documentation: ${documentation ? `'${documentation}'` : 'null'},
     parameterTypes: {
       pathParams: ${JSON.stringify(pathParams)},
       urlParams: ${JSON.stringify([...queryParams, ...headerParams])},
@@ -900,6 +976,9 @@ function generateKibanaConnectors() {
     // Copy schemas FIRST so they're available during endpoint processing
     copyClientAsSchemas();
 
+    // Extract tag documentation
+    const tagDocs = extractTagDocumentation();
+
     // Extract endpoint information
     const endpoints = extractEndpointInfo(content);
     console.log(`📊 Found ${endpoints.length} Kibana API endpoints`);
@@ -916,7 +995,7 @@ function generateKibanaConnectors() {
 
     for (const endpoint of endpoints) {
       try {
-        const connectorDef = convertToConnectorDefinition(endpoint, successCount);
+        const connectorDef = convertToConnectorDefinition(endpoint, successCount, tagDocs);
         connectorDefinitions.push(connectorDef);
         successCount++;
       } catch (error) {

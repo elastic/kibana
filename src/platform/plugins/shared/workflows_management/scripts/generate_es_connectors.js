@@ -269,6 +269,7 @@ function generateConnectorDefinition(endpointName, definition) {
   const urlParams = definition.url_params || {};
   const patterns = definition.patterns || [];
   const methods = definition.methods || ['GET'];
+  const documentation = definition.documentation || null;
   const description = `${methods.join('/')} ${patterns.join(' | ') || type} - ${
     Object.keys(urlParams).length
   } parameters`;
@@ -323,6 +324,7 @@ function generateConnectorDefinition(endpointName, definition) {
     methods: ${JSON.stringify(methods)},
     patterns: ${JSON.stringify(patterns)},
     isInternal: true,
+    documentation: ${documentation ? `'${documentation}'` : 'null'},
     parameterTypes: {
       pathParams: ${JSON.stringify(pathParams)},
       urlParams: ${JSON.stringify(urlParamNames)},
