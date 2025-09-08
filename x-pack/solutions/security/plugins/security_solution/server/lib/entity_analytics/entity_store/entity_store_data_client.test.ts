@@ -76,6 +76,7 @@ const defaultIndexPatterns = [
   stubSecurityDataView.getIndexPattern(),
   '.asset-criticality.asset-criticality-default',
   'risk-score.risk-score-latest-default',
+  '.entities.v1.reset.security_user_default',
 ];
 
 const dataviewService = {
