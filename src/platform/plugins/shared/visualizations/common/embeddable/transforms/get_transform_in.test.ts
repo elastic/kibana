@@ -68,7 +68,7 @@ describe('getTransformIn', () => {
   });
 
   describe('by value', () => {
-    test('should extract references from search source', () => {
+    test('should extract references', () => {
       expect(
         transformIn({
           enhancements: {
@@ -76,6 +76,7 @@ describe('getTransformIn', () => {
           } as unknown as DynamicActionsSerializedState['enhancements'],
           savedVis: {
             data: {
+              savedSearchId: 'abcd',
               searchSource: {
                 index: '1234',
               },
@@ -94,6 +95,11 @@ describe('getTransformIn', () => {
               "type": "index-pattern",
             },
             Object {
+              "id": "abcd",
+              "name": "search_0",
+              "type": "search",
+            },
+            Object {
               "id": "5678",
               "name": "someRef",
               "type": "testType",
@@ -105,6 +111,7 @@ describe('getTransformIn', () => {
             },
             "savedVis": Object {
               "data": Object {
+                "savedSearchRefName": "search_0",
                 "searchSource": Object {
                   "index": undefined,
                   "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",

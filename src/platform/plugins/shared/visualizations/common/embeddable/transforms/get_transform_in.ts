@@ -47,6 +47,10 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       const { savedVis, ...rest } = state as VisualizeByValueState;
       const { references, serializedSearchSource } = extractEmbeddableReferences(savedVis);
 
+      const savedSearchRefName = savedVis.data.savedSearchId
+        ? references.find((r) => r.id === savedVis.data.savedSearchId)?.name
+        : undefined;
+
       return {
         state: {
           ...rest,
@@ -56,6 +60,11 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
             data: {
               ...omit(savedVis.data, 'savedSearchId'),
               searchSource: serializedSearchSource,
+              ...(savedSearchRefName
+                ? {
+                    savedSearchRefName,
+                  }
+                : {}),
             },
           },
         },
