@@ -36,7 +36,7 @@ import type {
   ElasticsearchClient,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -305,7 +305,9 @@ export const getExceptions = async ({
   lists: ListArray;
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
-    const filteredLists = lists.filter(({ list_id: listId }) => listId !== ENDPOINT_LIST_ID);
+    const filteredLists = lists.filter(
+      ({ list_id: listId }) => !ENDPOINT_ARTIFACT_LIST_IDS.includes(listId)
+    );
     if (filteredLists.length > 0) {
       try {
         const listIds = filteredLists.map(({ list_id: listId }) => listId);
