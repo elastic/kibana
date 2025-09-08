@@ -30,6 +30,7 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
@@ -250,6 +251,26 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
+    ...(experimentalFeatures.siemReadinessDashboard && {
+      [ENABLE_SIEM_READINESS_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+          defaultMessage: 'Enable SIEM Readiness Dashboard',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+          {
+            defaultMessage: `Enable the SIEM Readiness Dashboard within Security Solution. When enabled, you can access the new SIEM Readiness page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Cloud Connector',

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { Observable } from 'rxjs';
-import { of, from, shareReplay, startWith } from 'rxjs';
+import { of } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
 import type {
@@ -42,7 +46,7 @@ export class Plugin implements StreamsPluginClass {
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(core, this.repositoryClient, this.logger),
+      status$: createStreamsStatusObservable(pluginsStart, core.application),
       config$: of(this.config),
     };
   }
@@ -52,38 +56,28 @@ export class Plugin implements StreamsPluginClass {
 
 const ENABLED_STATUS: StreamsStatus = { status: 'enabled' };
 const DISABLED_STATUS: StreamsStatus = { status: 'disabled' };
-const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
 
 const createStreamsStatusObservable = once(
   (
-    core: CoreStart,
-    repositoryClient: StreamsRepositoryClient,
-    logger: Logger
+    deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
+    application: ApplicationStart
   ): Observable<StreamsStatus> => {
-    const { application, uiSettings } = core;
     const hasCapabilities = application.capabilities?.streams?.show;
-    const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
+    const isServerless = deps.cloud?.isServerlessEnabled;
+    const isObservability = deps.cloud?.serverless.projectType === 'observability';
 
     if (!hasCapabilities) {
       return of(DISABLED_STATUS);
     }
 
-    if (isUIEnabled) {
+    if (!isServerless) {
       return of(ENABLED_STATUS);
     }
 
-    return from(
-      repositoryClient
-        .fetch('GET /api/streams/_status', {
-          signal: new AbortController().signal,
-        })
-        .then(
-          (response) => (response.enabled ? ENABLED_STATUS : DISABLED_STATUS),
-          (error) => {
-            logger.error(error);
-            return UNKNOWN_STATUS;
-          }
-        )
-    ).pipe(startWith(UNKNOWN_STATUS), shareReplay(1));
+    if (isServerless && isObservability) {
+      return of(ENABLED_STATUS);
+    }
+
+    return of(DISABLED_STATUS);
   }
 );
