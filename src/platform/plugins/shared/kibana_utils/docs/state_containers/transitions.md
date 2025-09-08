@@ -17,7 +17,7 @@ const setUiMode: PureTransition = state => uiMode => ({ ...state, uiMode });
 You provide transitions as a second argument when you create your state container.
 
 ```ts
-import { createStateContainer } from 'src/platform/plugins/shared/kibana_utils';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 
 const container = createStateContainer(0, {
   increment: (cnt: number) => (by: number) => cnt + by,

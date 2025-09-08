@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateContainer } from '@kbn/kibana-utils-plugin/common/state_containers';
-import { createStateContainer } from '@kbn/kibana-utils-plugin/common/state_containers';
+import type { StateContainer } from '@kbn/shared-ux-state-container';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import type { ExpressionFunction } from '../expression_functions';
 import type { ExpressionType } from '../expression_types';
 

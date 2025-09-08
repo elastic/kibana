@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStateContainer, createStateContainerReactHelpers } from '.';
-
-test('exports store methods', () => {
-  expect(typeof createStateContainer).toBe('function');
-  expect(typeof createStateContainerReactHelpers).toBe('function');
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/state_container'],
+};

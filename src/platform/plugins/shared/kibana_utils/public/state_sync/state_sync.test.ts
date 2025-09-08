@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseState, BaseStateContainer } from '../../common/state_containers';
-import { createStateContainer } from '../../common/state_containers';
+import type { BaseState, BaseStateContainer } from '@kbn/shared-ux-state-container';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import type { TodoActions, TodoState } from '../../demos/state_containers/todomvc';
 import { defaultState, pureTransitions } from '../../demos/state_containers/todomvc';
 import { syncState, syncStates } from './state_sync';
