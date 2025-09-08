@@ -201,6 +201,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
         scopeId={scopeId}
         isPreviewMode={isPreviewMode ?? false}
         entityId={entity.id}
+        entitySource={source}
       />
     </>
   );
