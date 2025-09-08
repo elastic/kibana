@@ -16,20 +16,36 @@ import {
 export const getSearchPrompt = ({
   nlQuery,
   searchTarget,
+  attemptBudget,
+  attemptSummaries,
 }: {
   nlQuery: string;
   searchTarget: SearchTarget;
+  attemptBudget: { used: number; max: number; remaining: number };
+  attemptSummaries: string[];
 }): BaseMessageLike[] => {
+  const budgetLine = `ATTEMPT STATUS: used ${attemptBudget.used} / ${attemptBudget.max} (remaining ${attemptBudget.remaining}).`;
+  const historyBlock = attemptSummaries.length
+    ? `PRIOR ATTEMPTS (most recent last):\n${attemptSummaries.join('\n')}`
+    : 'PRIOR ATTEMPTS: (none yet)';
+
+  const refinementRule = `You MUST NOT issue a tool call with exactly the same tool name AND identical argument values (after JSON normalization) as any prior attempt above unless you change at least one meaningful parameter (e.g. different tool, adjusted term/query, changed size, added/changed a filter or temporal constraint).`;
+
   const systemPrompt = `You are an expert iterative search strategist.
 On each attempt you MUST call exactly ONE of the available tools (never both in the same attempt) and then stop to let the runtime execute it.
-You operate in a loop (max 3 attempts unless fewer are explicitly configured externally). After each tool result you may be re-invoked with the prior conversation messages (including tool output) to decide the next step.
+You operate in a loop. After each tool result you may be re-invoked with the prior conversation messages (including tool output) to decide the next step.
+
+${budgetLine}
+${historyBlock}
 
 Rules:
 1. ONLY call a tool – never answer the user directly.
-2. Use previous tool outputs (if any) to refine the next attempt: avoid repeating identical parameters that yielded empty or error results unless you intentionally adjust them.
-3. If you judge that the last tool output already contains adequate structured results that answer the query, do NOT call another tool (the orchestrator will terminate after your last successful tool call). In that case still call a tool but only if more evidence is required – otherwise emit NO tool call (not allowed) so instead pick the best single tool with refined params.
-4. If all prior attempts were empty/error you must try an alternative strategy (switch tool or change terms, filters, sizes, time ranges if derivable from the NL query) until attempts are exhausted.
-5. If you have reached the final allowed attempt AND still have no meaningful results, call the tool you believe has the highest probability of success with your BEST refined parameters; if you previously tried both strategies unsuccessfully you may deliberately narrow or broaden the query terms. The outer agent will then ask the user for more guidance.
+2. ${refinementRule}
+3. Prefer switching tool OR refining parameters when prior output produced zero usable results.
+4. If you already obtained meaningful results that answer the user request, focus on the most informative single follow-up call ONLY if it can materially improve coverage; otherwise choose the most direct tool configuration to finalize.
+5. On your final remaining attempt (remaining = 1) choose the highest-probability strategy (switch tool if previous tool failed, otherwise refine parameters). If remaining = 0 you would not be called again.
+6. Avoid hallucinating field names; only use generic names unless prior results revealed concrete fields.
+7. Keep arguments minimal and deterministic (no prose in parameters).
 
 ## Available Tools
 
@@ -50,11 +66,10 @@ Rules:
 
 ## Additional instructions
 
-- The search target is \`${searchTarget.name}\` (${searchTarget.type}). Always set the 'index' parameter to this exact value.
-- Prefer natural language analytic tool when the request implies aggregations / sorting / counting / filtering or temporal analysis; otherwise prefer relevance search.
-- Track (implicitly) what you have already attempted. Modify parameters if repeating a tool after a previous failed/empty attempt.
-- Do NOT hallucinate fields: only reference generic terms (e.g. timestamp, message) unless prior tool output revealed concrete field names.
-- Keep tool argument values concise.
+- Target: \`${searchTarget.name}\` (${searchTarget.type}). Always set the 'index' argument to this exact value.
+- Natural language analytic tool for aggregations / counts / filtering / temporal logic; relevance tool for unstructured topical / keyword retrieval.
+- Change something meaningful each time prior attempt produced 0 results or only errors (term broadening/narrowing, switching tool, adjusting size, introducing/relaxing a time constraint if implied).
+- Never reuse an identical parameter set.
 `;
 
   const userPrompt = `Execute the following user query: "${nlQuery}"`;

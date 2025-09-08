@@ -35,6 +35,10 @@ const StateAnnotation = Annotation.Root({
   }),
   attempt: Annotation<number>({ value: (_, b) => b, default: () => 0 }),
   hadAnyResult: Annotation<boolean>({ value: (_, b) => b, default: () => false }),
+  attemptSummaries: Annotation<string[]>({
+    reducer: (a, b) => [...a, ...b],
+    default: () => [],
+  }),
   // outputs
   error: Annotation<string>(),
   results: Annotation<ToolResult[]>({
@@ -100,18 +104,50 @@ export const createSearchToolGraph = ({
     tags: ['onechat-search-tool'],
   });
 
+  const formatLastAttempt = (state: StateType): string | undefined => {
+    if (state.messages.length === 0) return undefined;
+    const last = state.messages[state.messages.length - 1];
+    if (!isToolMessage(last)) return undefined;
+    // attempt number equals current state.attempt (already executed)
+    const attemptNum = state.attempt;
+    try {
+      let toolName = last.name ?? 'unknown_tool';
+      const results = extractToolResults(last);
+      const nonError = results.filter((r) => r.type !== ToolResultType.error);
+      const status =
+        nonError.length === 0 ? 'empty_or_error' : `results:${nonError.length} types:${[...new Set(nonError.map(r=>r.type))].join(',')}`;
+      return `#${attemptNum} tool=${toolName} status=${status}`;
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   const callSearchAgent = async (state: StateType) => {
     const nextAttempt = state.attempt + 1;
     events?.reportProgress(
       progressMessages.searchAttempt({ attempt: nextAttempt, max: state.maxAttempts })
     );
     events?.reportProgress(progressMessages.resolvingSearchStrategy());
+    const lastSummary = formatLastAttempt(state);
+    const attemptSummaries = lastSummary
+      ? [...state.attemptSummaries, lastSummary]
+      : [...state.attemptSummaries];
     const response = await searchModel.invoke(
-      getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
+      getSearchPrompt({
+        nlQuery: state.nlQuery,
+        searchTarget: state.searchTarget,
+        attemptBudget: {
+          used: state.attempt,
+            max: state.maxAttempts,
+            remaining: Math.max(0, state.maxAttempts - state.attempt),
+        },
+        attemptSummaries,
+      })
     );
     return {
       messages: [response],
       attempt: nextAttempt,
+      attemptSummaries,
     };
   };
 

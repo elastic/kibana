@@ -100,12 +100,21 @@ export const createAgentGraph = ({
   };
 
   const finalizeAnswer = async (state: StateType) => {
-    // Safety: strip any pending tool_calls (should be unlikely now with budget-aware prompt)
-    const added = [...state.addedMessages];
+    // Safety: handle last AI message if it attempted new tool calls we didn't execute.
+    const added: BaseMessage[] = [...state.addedMessages];
     const last = added[added.length - 1] as AIMessage | undefined;
-    if (last && last.tool_calls?.length) {
-      const textOnly = extractTextContent(last);
-      added[added.length - 1] = { ...last, tool_calls: [], content: textOnly } as any;
+    if (last && last.tool_calls && last.tool_calls.length > 0) {
+      const textOnly = extractTextContent(last).trim();
+      // If there is no meaningful textual content besides tool calls, drop the message entirely.
+      if (!textOnly) {
+        added.pop();
+      } else {
+        const sanitized: any = { ...last, tool_calls: [], content: textOnly };
+        // remove provider-specific transient fields that might reference pending tool calls
+        delete sanitized.tool_call_chunks;
+        delete sanitized.invalid_tool_calls;
+        added[added.length - 1] = sanitized;
+      }
     }
     const used = state.toolCallCount;
     const max = state.maxToolCalls ?? maxToolCalls;
