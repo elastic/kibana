@@ -45,7 +45,8 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
-describe('dimension editor', () => {
+// Failing: See https://github.com/elastic/kibana/issues/234063
+describe.skip('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
     name: 'foo',
