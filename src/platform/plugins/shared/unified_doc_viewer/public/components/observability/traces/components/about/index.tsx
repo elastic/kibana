@@ -12,6 +12,7 @@ import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/di
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
   AT_TIMESTAMP,
+  DURATION,
   HTTP_RESPONSE_STATUS_CODE,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -84,7 +85,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
     [flattenedHit, isSpan]
   );
 
-  const durationField = isSpan ? SPAN_DURATION : TRANSACTION_DURATION;
+  const durationField = isSpan ? SPAN_DURATION ?? DURATION : TRANSACTION_DURATION;
 
   aboutFieldConfigurations[durationField] = {
     ...aboutFieldConfigurations[durationField],
