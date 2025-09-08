@@ -565,7 +565,7 @@ If asset criticality records already exist for the specified entities, those rec
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Cancel a running or pending response action.
+   * Cancel a running or pending response action (Applies only to some agent types).
    */
   async cancelAction(props: CancelActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API CancelAction`);

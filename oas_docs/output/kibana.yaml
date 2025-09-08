@@ -13984,7 +13984,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Cancel a running or pending response action.
+        Cancel a running or pending response action (Applies only to some agent types).
       operationId: CancelAction
       requestBody:
         content:

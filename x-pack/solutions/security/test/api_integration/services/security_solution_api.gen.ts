@@ -287,7 +287,7 @@ If asset criticality records already exist for the specified entities, those rec
         .send(props.body as object);
     },
     /**
-     * Cancel a running or pending response action.
+     * Cancel a running or pending response action (Applies only to some agent types).
      */
     cancelAction(props: CancelActionProps, kibanaSpace: string = 'default') {
       return supertest
