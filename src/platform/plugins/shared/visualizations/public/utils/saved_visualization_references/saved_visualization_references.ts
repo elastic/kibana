@@ -24,31 +24,14 @@ import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './times
 const isValidSavedVis = (savedVis: unknown): savedVis is SavedVisState =>
   isObject(savedVis) && 'type' in savedVis && 'params' in savedVis;
 
-// Data plugin's `isSerializedSearchSource` does not actually rule out objects that aren't serialized search source fields
-function isSerializedSearchSource(
-  maybeSerializedSearchSource: unknown
-): maybeSerializedSearchSource is SerializedSearchSourceFields {
-  return (
-    typeof maybeSerializedSearchSource === 'object' &&
-    maybeSerializedSearchSource !== null &&
-    !Object.hasOwn(maybeSerializedSearchSource, 'dependencies') &&
-    !Object.hasOwn(maybeSerializedSearchSource, 'fields')
-  );
-}
-
 export function serializeReferences(savedVis: SerializedVis) {
   const { searchSource, savedSearchId } = savedVis.data;
   const references: Reference[] = [];
+
   let serializedSearchSource = searchSource;
-
-  // TSVB uses legacy visualization state, which doesn't serialize search source properly
-  /* if (!isSerializedSearchSource(searchSource)) {
-    serializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
-  }*/
-
   if (searchSource) {
     const [extractedSearchSource, searchSourceReferences] =
-      extractSearchSourceReferences(serializedSearchSource);
+      extractSearchSourceReferences(searchSource);
     serializedSearchSource = extractedSearchSource;
     searchSourceReferences.forEach((r) => references.push(r));
   }
@@ -80,13 +63,9 @@ export function deserializeReferences(
   const updatedReferences: Reference[] = [...references];
   let deserializedSearchSource = searchSource;
   if (searchSource) {
-    // TSVB uses legacy visualization state, which doesn't serialize search source properly
-    /* if (!isSerializedSearchSource(searchSource)) {
-      deserializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
-    }*/
     try {
       deserializedSearchSource = injectSearchSourceReferences(
-        deserializedSearchSource as any,
+        searchSource,
         updatedReferences
       );
     } catch (e) {
