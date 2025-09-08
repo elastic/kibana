@@ -11,7 +11,7 @@ import type {
   RuleCreateProps,
   RuleResponse,
   RuleUpdateProps,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../common/api/detection_engine/model/rule_schema';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these
