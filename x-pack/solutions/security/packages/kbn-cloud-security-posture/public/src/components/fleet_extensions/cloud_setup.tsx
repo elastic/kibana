@@ -90,8 +90,11 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       config,
       defaultProviderType,
       getCloudSetupProviderByInputType,
-      showSelectedProviderCloudConnectors,
+      azureCloudConnectors,
+      gcpCloudConnectors,
+      awsCloudConnectors,
     } = useCloudSetup();
+
     const {
       input,
       setEnabledPolicyInput,
@@ -133,7 +136,15 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {/* Defines the single enabled input of the active policy template */}
         <ProviderSelector
           selectedProvider={selectedProvider}
-          setInput={setEnabledPolicyInput}
+          setSelectedProvider={(provider) => {
+            const showCloudConnectors =
+              provider === AWS_PROVIDER
+                ? awsCloudConnectors
+                : provider === AZURE_PROVIDER
+                ? azureCloudConnectors
+                : gcpCloudConnectors;
+            setEnabledPolicyInput(provider, showCloudConnectors);
+          }}
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
@@ -230,6 +241,12 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
               useDescribedFormGroup={false}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
+                const showCloudConnectors =
+                  selectedProvider === AWS_PROVIDER
+                    ? awsCloudConnectors
+                    : selectedProvider === AZURE_PROVIDER
+                    ? azureCloudConnectors
+                    : gcpCloudConnectors;
                 updatePolicy({
                   updatedPolicy: updatePolicyWithInputs(
                     newPolicy,
@@ -238,7 +255,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                       value === SetupTechnology.AGENTLESS,
                       selectedProvider,
                       packageInfo,
-                      showSelectedProviderCloudConnectors,
+                      showCloudConnectors,
                       templateName
                     )
                   ),
@@ -299,6 +316,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            setupTechnology={setupTechnology}
           />
         )}
         {selectedProvider === AZURE_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (

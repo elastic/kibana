@@ -16,16 +16,21 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import { ARM_TEMPLATE_EXTERNAL_DOC_URL, AZURE_CREDENTIALS_TYPE } from '../constants';
-import { updatePolicyWithInputs } from '../utils';
+import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import { ARM_TEMPLATE_EXTERNAL_DOC_URL, AZURE_PROVIDER } from '../constants';
+import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
+import type { AzureOptions } from './get_azure_credentials_form_options';
 import {
-  getAzureCredentialsFormOptions,
+  getAgentlessCredentialsType,
+  getAzureAgentlessCredentialFormOptions,
+  getAzureCloudConnectorsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
 import type { UpdatePolicy } from '../types';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
@@ -33,7 +38,23 @@ interface AzureCredentialsFormProps {
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   hasInvalidRequiredVars: boolean;
+  setupTechnology: SetupTechnology;
 }
+
+const getCloudConnectorCredentialOptions = (
+  options: Partial<Pick<AzureOptions, 'cloud_connectors' | 'service_principal_with_client_secret'>>
+): Array<{
+  value: string;
+  text: string;
+}> => {
+  return Object.entries(options).map(([key, value]) => ({
+    value: key as keyof Pick<
+      AzureOptions,
+      'cloud_connectors' | 'service_principal_with_client_secret'
+    >,
+    text: value.label,
+  }));
+};
 
 export const AzureCredentialsFormAgentless = ({
   input,
@@ -41,17 +62,46 @@ export const AzureCredentialsFormAgentless = ({
   updatePolicy,
   packageInfo,
   hasInvalidRequiredVars,
+  setupTechnology,
 }: AzureCredentialsFormProps) => {
-  const { azureOverviewPath, azurePolicyType } = useCloudSetup();
+  const { azureOverviewPath, azurePolicyType, azureCloudConnectors } = useCloudSetup();
 
-  const options = getAzureCredentialsFormOptions();
-  const group = options[AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET];
+  const azureCredentialsType = getAgentlessCredentialsType(input, azureCloudConnectors);
+
+  const agentlessOptions = azureCloudConnectors
+    ? getAzureCloudConnectorsCredentialsFormOptions()
+    : getAzureAgentlessCredentialFormOptions();
+
+  const group = agentlessOptions[azureCredentialsType as keyof typeof agentlessOptions];
   const fields = getInputVarsFields(input, group.fields);
 
   return (
     <>
       <AzureSetupInfoContent documentationLink={azureOverviewPath} />
       <EuiSpacer size="l" />
+      {azureCloudConnectors && (
+        <>
+          <AzureCredentialTypeSelector
+            options={getCloudConnectorCredentialOptions(agentlessOptions)}
+            type={azureCredentialsType}
+            onChange={(optionId) => {
+              updatePolicy({
+                updatedPolicy: updatePolicyWithInputs(
+                  newPolicy,
+                  azurePolicyType,
+                  getCloudCredentialVarsConfig({
+                    setupTechnology,
+                    optionId,
+                    showCloudConnectors: azureCloudConnectors,
+                    provider: AZURE_PROVIDER,
+                  })
+                ),
+              });
+            }}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <AzureInputVarFields
         packageInfo={packageInfo}
         fields={fields}

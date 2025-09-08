@@ -71,7 +71,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     integrationToEnable,
     setIntegrationToEnable,
   }) => {
-    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
+    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS_AWS = '2.0.0-preview01';
     const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
     const GCP_MINIMUM_ORGANIZATION_VERSION = '1.6.0';
     const GCP_MINIMUM_PACKAGE_VERSION = '1.5.2';
@@ -106,13 +106,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       }),
       overviewPath: `https://ela.st/cspm-overview`,
       getStartedPath: `https://ela.st/cspm-get-started`,
-      cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
       showCloudTemplates,
       providers: {
         aws: {
           type: CLOUDBEAT_AWS,
           enableOrganization: enableAwsOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+          cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS_AWS,
         },
         gcp: {
           type: CLOUDBEAT_GCP,

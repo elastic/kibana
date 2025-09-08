@@ -20,6 +20,7 @@ import type {
   AWS_PROVIDER,
   GCP_PROVIDER,
   AZURE_PROVIDER,
+  CLOUD_CONNECTOR_TYPE,
 } from './constants';
 
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
@@ -87,7 +88,7 @@ export interface GetAwsCredentialTypeConfigParams {
   provider: CloudProviders;
 }
 
-export type CloudConnectorType = 'cloud_connectors';
+export type CloudConnectorType = typeof CLOUD_CONNECTOR_TYPE;
 
 export type CredentialsType = Extract<
   AwsCredentialsType,
@@ -131,6 +132,7 @@ export type AzureSetupFormat =
   | typeof AZURE_SETUP_FORMAT.MANUAL;
 
 export type AzureCredentialsType =
+  | 'cloud_connectors'
   | 'arm_template'
   | 'manual' // TODO: remove for stack version 8.13
   | 'service_principal_with_client_secret'
