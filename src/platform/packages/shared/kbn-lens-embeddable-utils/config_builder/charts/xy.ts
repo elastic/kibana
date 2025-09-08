@@ -132,7 +132,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
             xAccessor: `x_${ACCESSOR}${i}`,
             ...(layer.breakdown
               ? {
-                  splitAccessor: `y_${ACCESSOR}${i}`,
+                  splitAccessor: `${ACCESSOR}${i}_breakdown`,
                 }
               : {}),
             accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
@@ -152,7 +152,9 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
     throw new Error('`breakdown` must be a field name when not using index source');
   }
   return [
-    ...(layer.breakdown ? [getValueColumn(`y_${ACCESSOR}${i}`, layer.breakdown as string)] : []),
+    ...(layer.breakdown
+      ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
+      : []),
     getXValueColumn(layer.xAxis, i),
     ...layer.yAxis.map((yAxis, index) =>
       getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number')
@@ -215,7 +217,7 @@ function buildFormulaLayer(
     }
 
     if (layer.breakdown) {
-      const columnName = `y_${ACCESSOR}${i}`;
+      const columnName = `${ACCESSOR}${i}_breakdown`;
       const breakdownColumn = getBreakdownColumn({
         options: layer.breakdown,
         dataView,
