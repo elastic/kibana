@@ -8,7 +8,7 @@
 import { services as svlPlatformServices } from '@kbn/test-suites-xpack-platform/serverless/functional/services';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
-import { SecuritySolutionApiProvider } from '../../../api_integration/services/security_solution_api.gen';
+import { SecuritySolutionApiProvider } from '../../../functional/services/security_solution_api.gen';
 
 export const services = {
   ...svlPlatformServices,
