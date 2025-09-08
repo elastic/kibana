@@ -109,6 +109,8 @@ export class NavigationPublicPlugin
       if (cloud) {
         chrome.project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
         cloud.getPrivilegedUrls().then((privilegedUrls) => {
+          if (Object.keys(privilegedUrls).length === 0) return;
+
           chrome.project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
         });
       }

@@ -97,8 +97,13 @@ export class CloudUrlsService {
       throw new Error('Core setup is not available');
     }
 
-    const userRoles = (await coreStart.security.authc.getCurrentUser()).roles;
+    let userRoles: readonly string[] = [];
+    try {
+      userRoles = (await coreStart.security.authc.getCurrentUser()).roles;
+    } catch (e) {
+      // If if no user is available, we just return an empty array of roles
+    }
 
-    return userRoles || [];
+    return userRoles;
   }
 }
