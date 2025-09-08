@@ -56,7 +56,7 @@ export const IndexSearchPattern: React.FC = () => {
       if (patternValue && total === 0) {
         setError('pattern', {
           type: 'noMatches',
-          message: i18n.translate('xpack.onechat.tools.indexPattern.noMatchesError', {
+          message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.noMatchesError', {
             defaultMessage: 'No matches found for this pattern.',
           }),
         });
@@ -69,7 +69,7 @@ export const IndexSearchPattern: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<{ type: string; name: string }>> = [
     {
       field: 'type',
-      name: i18n.translate('xpack.onechat.tools.indexPattern.typeCol', {
+      name: i18n.translate('xpack.onechat.tools.indexPattern.pattern.typeCol', {
         defaultMessage: 'Target',
       }),
       width: '120px',
@@ -89,7 +89,9 @@ export const IndexSearchPattern: React.FC = () => {
     },
     {
       field: 'name',
-      name: i18n.translate('xpack.onechat.tools.indexPattern.nameCol', { defaultMessage: 'Name' }),
+      name: i18n.translate('xpack.onechat.tools.indexPattern.pattern.nameCol', {
+        defaultMessage: 'Name',
+      }),
       truncateText: true,
     },
     {
@@ -97,10 +99,10 @@ export const IndexSearchPattern: React.FC = () => {
       width: '80px',
       actions: [
         {
-          name: i18n.translate('xpack.onechat.tools.indexPattern.useAction', {
+          name: i18n.translate('xpack.onechat.tools.indexPattern.pattern.useAction', {
             defaultMessage: 'Use',
           }),
-          description: i18n.translate('xpack.onechat.tools.indexPattern.useActionDesc', {
+          description: i18n.translate('xpack.onechat.tools.indexPattern.pattern.useActionDesc', {
             defaultMessage: 'Use this value as the pattern',
           }),
           icon: 'plusInCircle',
@@ -121,6 +123,9 @@ export const IndexSearchPattern: React.FC = () => {
         onBlur={onBlur}
         inputRef={ref}
         isInvalid={fieldState.invalid}
+        aria-label={i18n.translate('xpack.onechat.tools.indexPattern.pattern.inputAriaLabel', {
+          defaultMessage: 'Index pattern',
+        })}
         data-test-subj="onechatIndexPatternInput"
       />
 
@@ -129,7 +134,7 @@ export const IndexSearchPattern: React.FC = () => {
           <EuiSpacer size="m" />
           <EuiCallOut
             size="s"
-            title={i18n.translate('xpack.onechat.tools.indexPattern.matchSuccess', {
+            title={i18n.translate('xpack.onechat.tools.indexPattern.pattern.matchSuccess', {
               defaultMessage:
                 'Your index pattern matches {count, plural, one {# source} other {# sources}}.',
               values: { count: total },
@@ -149,10 +154,10 @@ export const IndexSearchPattern: React.FC = () => {
         rowHeader="name"
         noItemsMessage={
           hasQuery
-            ? i18n.translate('xpack.onechat.tools.indexPattern.noResultsTable', {
+            ? i18n.translate('xpack.onechat.tools.indexPattern.pattern.noResultsTable', {
                 defaultMessage: 'No results',
               })
-            : i18n.translate('xpack.onechat.tools.indexPattern.typeToSearch', {
+            : i18n.translate('xpack.onechat.tools.indexPattern.pattern.typeToSearch', {
                 defaultMessage: 'Start typing to see matching sources',
               })
         }

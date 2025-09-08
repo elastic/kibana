@@ -7,12 +7,12 @@
 
 import { ToolType } from '@kbn/onechat-common';
 import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
-import type { ToolTypeDefinition } from '../types';
+import type { PersistedToolTypeDefinition } from '../types';
 import { toToolDefinition } from './to_tool_definition';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-export const createIndexSearchToolType = (): ToolTypeDefinition<IndexSearchToolConfig> => {
+export const createIndexSearchToolType = (): PersistedToolTypeDefinition<IndexSearchToolConfig> => {
   return {
     toolType: ToolType.index_search,
     toToolDefinition,

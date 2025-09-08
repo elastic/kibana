@@ -6,7 +6,7 @@
  */
 
 export type {
-  ToolTypeDefinition,
+  PersistedToolTypeDefinition,
   ToolTypeValidatorContext,
   ToolDefinitionConverter,
   ToolTypeCreateValidator,

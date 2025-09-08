@@ -56,11 +56,8 @@ export interface ExecuteToolResponse {
   result: ToolResult[];
 }
 
-// Index pattern resolve API
 export interface ResolveSearchSourcesRequest {
   pattern: string;
-  page?: number;
-  per_page?: number;
 }
 
 export interface ResolveSearchSourceItem {

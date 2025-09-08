@@ -7,13 +7,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useOnechatServices } from '../use_onechat_service';
+import { queryKeys } from '../../query_keys';
 
 export const useIndexSearchSources = ({ pattern }: { pattern: string }) => {
   const { toolsService } = useOnechatServices();
   const enabled = !!pattern && pattern.trim().length > 0;
   const result = useQuery({
     enabled,
-    queryKey: ['tools', 'resolve', 'targets', pattern],
+    queryKey: queryKeys.tools.indexSearch.resolveTargets(pattern),
     queryFn: () => toolsService.resolveSearchSources({ pattern }),
   });
   return result;
