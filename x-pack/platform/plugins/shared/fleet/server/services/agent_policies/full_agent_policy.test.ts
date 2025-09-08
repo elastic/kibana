@@ -2533,11 +2533,14 @@ describe('generateOtelcolConfig', () => {
           ],
         },
         "transform/test-1-stream-id-1-routing": {
-          metric_statements: [
-            'set(attributes["data_stream.type"], "metrics")',
-            'set(attributes["data_stream.dataset"], "somedataset")',
-            'set(attributes["data_stream.namespace"], "default")',
-          ],
+          metric_statements: [{
+            context: "datapoint",
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "somedataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          }],
         },
       },
       connectors: {
@@ -2583,11 +2586,14 @@ describe('generateOtelcolConfig', () => {
           ],
         },
         "transform/test-1-stream-id-1-routing": {
-          metric_statements: [
-            'set(attributes["data_stream.type"], "metrics")',
-            'set(attributes["data_stream.dataset"], "somedataset")',
-            'set(attributes["data_stream.namespace"], "default")',
-          ],
+          metric_statements: [{
+            context: "datapoint",
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "somedataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          }],
         },
       },
       connectors: {
@@ -2645,18 +2651,24 @@ describe('generateOtelcolConfig', () => {
           ],
         },
         "transform/test-1-stream-id-1-routing": {
-          metric_statements: [
-            'set(attributes["data_stream.type"], "metrics")',
-            'set(attributes["data_stream.dataset"], "somedataset")',
-            'set(attributes["data_stream.namespace"], "default")',
-          ],
+          metric_statements: [{
+            context: "datapoint",
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "somedataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          }],
         },
         "transform/test-2-stream-id-1-routing": {
-          metric_statements: [
-            'set(attributes["data_stream.type"], "metrics")',
-            'set(attributes["data_stream.dataset"], "otherdataset")',
-            'set(attributes["data_stream.namespace"], "default")',
-          ],
+          metric_statements: [{
+            context: "datapoint",
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "otherdataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          }],
         },
       },
       connectors: {
@@ -2719,11 +2731,14 @@ describe('generateOtelcolConfig', () => {
           ],
         },
         "transform/test-3-stream-id-1-routing": {
-          metric_statements: [
-            'set(attributes["data_stream.type"], "metrics")',
-            'set(attributes["data_stream.dataset"], "somedataset")',
-            'set(attributes["data_stream.namespace"], "default")',
-          ],
+          metric_statements: [{
+            context: "datapoint",
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "somedataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          }],
         },
       },
       connectors: {

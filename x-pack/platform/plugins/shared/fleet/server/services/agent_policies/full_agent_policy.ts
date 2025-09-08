@@ -934,14 +934,35 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput
 }
 
 function generateOTelAttributesTransform(type: string, dataset: string, namespace: string, suffix: string) {
-  // We want the singular of logs/metrics/traces.
-  const signalType = type.substring(0, type.length-1);
+  let signalType : string;
+  let context : string;
+  switch (type) {
+    case "logs":
+      signalType = "log"
+      context = "log"
+      break;
+    case "metrics":
+      signalType = "metric"
+      context = "datapoint"
+      break;
+    case "traces":
+      signalType = "trace"
+      context = "span"
+      break;
+    default:
+      throw new Error(`unexpected data stream type ${type}`);
+  };
   return {
     [`transform/${suffix}-routing`]: {
       [`${signalType}_statements`]: [
-        `set(attributes["data_stream.type"], "${type}")`,
-        `set(attributes["data_stream.dataset"], "${dataset}")`,
-        `set(attributes["data_stream.namespace"], "${namespace}")`,
+        {
+          context: context,
+          statements: [
+            `set(attributes["data_stream.type"], "${type}")`,
+            `set(attributes["data_stream.dataset"], "${dataset}")`,
+            `set(attributes["data_stream.namespace"], "${namespace}")`,
+          ],
+        },
       ],
     },
   }
