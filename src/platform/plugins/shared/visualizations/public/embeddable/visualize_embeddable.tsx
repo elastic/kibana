@@ -39,6 +39,7 @@ import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
+import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
@@ -55,7 +56,7 @@ import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
   embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
-}) => EmbeddableFactory<VisualizeSerializedState, VisualizeApi> = ({
+}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({
   embeddableStart,
   embeddableEnhancedStart,
 }) => ({

@@ -15,7 +15,6 @@ import {
 } from '@kbn/data-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { isObject } from 'lodash';
-import type { VisualizeSavedVisInputState } from '../../embeddable/types';
 import type { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 import {
@@ -75,45 +74,6 @@ export function serializeReferences(savedVis: SerializedVis) {
   }
 
   return { references, serializedSearchSource };
-}
-
-export function deserializeReferences(
-  state: VisualizeSavedVisInputState,
-  references: Reference[] = []
-) {
-  const { savedVis } = state;
-  const { searchSource, savedSearchRefName } = savedVis.data;
-  const updatedReferences: Reference[] = [...references];
-  let deserializedSearchSource = searchSource;
-  if (searchSource) {
-    // TSVB uses legacy visualization state, which doesn't serialize search source properly
-    if (!isSerializedSearchSource(searchSource)) {
-      deserializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
-    }
-    try {
-      deserializedSearchSource = injectSearchSourceReferences(
-        deserializedSearchSource as any,
-        updatedReferences
-      );
-    } catch (e) {
-      // Allow missing index pattern error to surface in vis
-    }
-  }
-  if (savedSearchRefName) {
-    const savedSearchReference = updatedReferences.find(
-      (reference) => reference.name === savedSearchRefName
-    );
-
-    if (!savedSearchReference) {
-      throw new Error(`Could not find saved search reference "${savedSearchRefName}"`);
-    }
-  }
-
-  if (isValidSavedVis(savedVis)) {
-    injectControlsReferences(savedVis.type, savedVis.params, updatedReferences);
-    injectTimeSeriesReferences(savedVis.type, savedVis.params, updatedReferences);
-  }
-  return { references: updatedReferences, deserializedSearchSource };
 }
 
 export function convertSavedObjectAttributesToReferences(attributes: {

@@ -8,12 +8,15 @@
  */
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import type { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
-import { findSavedObjectRef, SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
-import { cloneDeep, isEmpty, omit } from 'lodash';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
+import { isEmpty, omit } from 'lodash';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { Reference } from '@kbn/content-management-utils';
+import type {
+  VisualizeByReferenceState,
+  VisualizeByValueState,
+  VisualizeEmbeddableState,
+} from '../../common/embeddable/types';
 import {
   getAnalytics,
   getDataViews,
@@ -25,10 +28,7 @@ import {
   getTheme,
   getUserProfile,
 } from '../services';
-import {
-  deserializeReferences,
-  serializeReferences,
-} from '../utils/saved_visualization_references';
+import { serializeReferences } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import type {
@@ -41,7 +41,7 @@ import type {
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../legacy/embeddable';
 
 export const deserializeState = async (
-  state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
+  state: SerializedPanelState<VisualizeEmbeddableState> | { rawState: undefined }
 ) => {
   if (!state.rawState)
     return {
@@ -49,74 +49,15 @@ export const deserializeState = async (
         data: {},
       },
     } as VisualizeRuntimeState;
-  let serializedState = cloneDeep(state.rawState);
-  const savedObjectRef = findSavedObjectRef(VISUALIZE_EMBEDDABLE_TYPE, state.references);
-  if (savedObjectRef)
-    (serializedState as VisualizeSavedObjectInputState).savedObjectId = savedObjectRef.id;
-  if ((serializedState as VisualizeSavedObjectInputState).savedObjectId) {
-    serializedState = await deserializeSavedObjectState(
-      serializedState as VisualizeSavedObjectInputState
-    );
-  } else if ((serializedState as VisualizeRuntimeState).serializedVis) {
-    // TODO remove once embeddable only exposes SerializedState
-    // Canvas passes incoming embeddable state in getSerializedStateForChild
-    // without this early return, serializedVis gets replaced in deserializeSavedVisState
-    // and breaks adding a new by-value embeddable in Canvas
-    return serializedState as VisualizeRuntimeState;
+
+  if ((state.rawState as VisualizeByReferenceState).savedObjectId) {
+    return await deserializeSavedObjectState(state.rawState as VisualizeByReferenceState);
   }
 
-  const references: Reference[] = state.references ?? [];
-
-  const deserializedSavedVis = deserializeSavedVisState(
-    serializedState as VisualizeSavedVisInputState,
-    references
-  );
-
+  const { savedVis, ...rest } = state.rawState as VisualizeByValueState;
   return {
-    ...serializedState,
-    serializedVis: deserializedSavedVis,
-  } as VisualizeRuntimeState;
-};
-
-export const deserializeSavedVisState = (
-  serializedState: VisualizeSavedVisInputState,
-  references: Reference[]
-) => {
-  const { data } = serializedState.savedVis ?? { data: {} };
-  let serializedSearchSource = data.searchSource as SerializedSearchSourceFields & {
-    indexRefName: string;
-  };
-  let serializedReferences = [...references];
-  if (data.searchSource && !('indexRefName' in data.searchSource)) {
-    // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
-    const [extractedSearchSource, extractedReferences] =
-      extractSearchSourceReferences(serializedSearchSource);
-
-    serializedSearchSource = extractedSearchSource as SerializedSearchSourceFields & {
-      indexRefName: string;
-    };
-    serializedReferences = [...references, ...extractedReferences];
-  }
-
-  const { references: deserializedReferences, deserializedSearchSource } = deserializeReferences(
-    {
-      ...serializedState,
-      savedVis: {
-        ...serializedState.savedVis,
-        data: { ...data, searchSource: serializedSearchSource },
-      },
-    },
-    serializedReferences
-  );
-
-  return {
-    ...serializedState.savedVis,
-    data: {
-      ...data,
-      searchSource: deserializedSearchSource,
-      savedSearchId:
-        deserializedReferences.find((r) => r.name === 'search_0')?.id ?? data.savedSearchId,
-    },
+    serializedVis: savedVis,
+    ...rest,
   };
 };
 
@@ -154,10 +95,14 @@ export const deserializeSavedObjectState = async ({
     },
     savedObjectId
   );
+
+  console.log('searchSource', searchSource);
+  console.log('searchSourceFields', searchSourceFields);
+
   const panelTitle = embeddableTitle ?? title;
   const panelDescription = embeddableDescription ?? description;
   return {
-    savedVis: {
+    serializedVis: {
       title,
       type: visState.type,
       params: visState.params,
@@ -176,7 +121,7 @@ export const deserializeSavedObjectState = async ({
     linkedToLibrary: true,
     ...(timeRange ? { timeRange } : {}),
     ...(enhancements ? { enhancements } : {}),
-  } as VisualizeSavedVisInputState;
+  } as VisualizeRuntimeState;
 };
 
 export const serializeState: (props: {
