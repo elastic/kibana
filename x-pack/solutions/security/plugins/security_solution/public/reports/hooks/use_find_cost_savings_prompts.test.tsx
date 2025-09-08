@@ -19,15 +19,13 @@ describe('useFindCostSavingsPrompts', () => {
     context: {
       isAssistantEnabled: true,
       httpFetch: jest.fn(),
+      // @ts-ignore
       toasts: {
         addError: jest.fn(),
         addSuccess: jest.fn(),
         addWarning: jest.fn(),
         remove: jest.fn(),
       },
-    },
-    params: {
-      prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
     },
   };
 
@@ -113,7 +111,7 @@ describe('useFindCostSavingsPrompts', () => {
   it('returns null when prompts array is empty', () => {
     mockUseFindPrompts.mockReturnValue({
       data: { prompts: [] },
-    } as ReturnType<typeof useFindPrompts>);
+    } as unknown as ReturnType<typeof useFindPrompts>);
 
     const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
 
@@ -123,32 +121,11 @@ describe('useFindCostSavingsPrompts', () => {
   it('returns null when prompts array is undefined', () => {
     mockUseFindPrompts.mockReturnValue({
       data: { prompts: undefined },
-    } as ReturnType<typeof useFindPrompts>);
+    } as unknown as ReturnType<typeof useFindPrompts>);
 
     const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
 
     expect(result.current).toBeNull();
-  });
-
-  it('calls useFindPrompts with the correct parameters', () => {
-    const mockPrompts = [
-      {
-        promptId: 'costSavingsInsightPart1',
-        prompt: 'Part 1',
-      },
-      {
-        promptId: 'costSavingsInsightPart2',
-        prompt: 'Part 2',
-      },
-    ];
-
-    mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
-    } as ReturnType<typeof useFindPrompts>);
-
-    renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(mockUseFindPrompts).toHaveBeenCalledWith(defaultParams);
   });
 
   it('handles prompts with empty string values', () => {
@@ -189,7 +166,7 @@ describe('useFindCostSavingsPrompts', () => {
 
     mockUseFindPrompts.mockReturnValue({
       data: { prompts: mockPrompts },
-    } as ReturnType<typeof useFindPrompts>);
+    } as unknown as ReturnType<typeof useFindPrompts>);
 
     const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
 

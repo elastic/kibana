@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
 import { useKibana } from '../../../common/lib/kibana';
@@ -16,7 +18,6 @@ import { MessageRole } from '@kbn/inference-common';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import type { StartServices } from '../../../types';
 
-// Mock dependencies
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
@@ -78,7 +79,11 @@ describe('CostSavingsKeyInsight', () => {
         ...overrides,
       },
     } as Partial<StartServices>);
+  const chatCompleteResult = 'Test result';
 
+  const mockChatComplete = jest.fn().mockResolvedValue({
+    content: chatCompleteResult,
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue(createMockKibanaServices());
@@ -93,69 +98,48 @@ describe('CostSavingsKeyInsight', () => {
       part1: 'Test prompt part 1',
       part2: 'Test prompt part 2',
     });
+
+    mockUseKibana.mockReturnValue(
+      createMockKibanaServices({
+        inference: {
+          chatComplete: mockChatComplete,
+        } as unknown as InferencePublicStart,
+      })
+    );
   });
 
-  it('renders the component with correct data-test-subj', () => {
+  it('renders the component with correct components', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
+      expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
+      expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
   });
 
-  it('renders the greeting group with correct data-test-subj', () => {
+  it('calls expected hooks', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
-    expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockUseKibana).toHaveBeenCalled();
+      expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
+      expect(mockUseAssistantAvailability).toHaveBeenCalled();
+    });
   });
 
-  it('renders the Elastic logo with correct data-test-subj', () => {
+  it('calls useFindCostSavingsPrompts with correct parameters', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
-    expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
-  });
-
-  it('renders the greeting text with correct data-test-subj', () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
-  });
-
-  it('shows skeleton loading state initially', () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('calls useKibana hook', () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(mockUseKibana).toHaveBeenCalled();
-  });
-
-  it('calls licenseService.isEnterprise', () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
-  });
-
-  it('calls useAssistantAvailability hook', () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(mockUseAssistantAvailability).toHaveBeenCalled();
-  });
-
-  it('calls useFindCostSavingsPrompts with correct parameters', () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
-      context: {
-        isAssistantEnabled: true,
-        httpFetch: expect.any(Function),
-        toasts: expect.any(Object),
-      },
-      params: {
-        prompt_group_id: 'aiForSoc',
-        prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
-      },
+    await waitFor(() => {
+      expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
+        context: {
+          isAssistantEnabled: true,
+          httpFetch: expect.any(Function),
+          toasts: expect.any(Object),
+        },
+      });
     });
   });
 
@@ -192,25 +176,23 @@ describe('CostSavingsKeyInsight', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('handles non-enterprise license', () => {
+  it('handles non-enterprise license', async () => {
     mockLicenseService.isEnterprise.mockReturnValue(false);
 
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
-    expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
-      context: {
-        isAssistantEnabled: false,
-        httpFetch: expect.any(Function),
-        toasts: expect.any(Object),
-      },
-      params: {
-        prompt_group_id: 'aiForSoc',
-        prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
-      },
+    await waitFor(() => {
+      expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
+        context: {
+          isAssistantEnabled: false,
+          httpFetch: expect.any(Function),
+          toasts: expect.any(Object),
+        },
+      });
     });
   });
 
-  it('handles disabled assistant', () => {
+  it('handles disabled assistant', async () => {
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: false,
       isAssistantEnabled: false,
@@ -218,32 +200,18 @@ describe('CostSavingsKeyInsight', () => {
 
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
-    expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
-      context: {
-        isAssistantEnabled: false,
-        httpFetch: expect.any(Function),
-        toasts: expect.any(Object),
-      },
-      params: {
-        prompt_group_id: 'aiForSoc',
-        prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
-      },
+    await waitFor(() => {
+      expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
+        context: {
+          isAssistantEnabled: false,
+          httpFetch: expect.any(Function),
+          toasts: expect.any(Object),
+        },
+      });
     });
   });
 
   it('calls inference.chatComplete with correct parameters when all conditions are met', async () => {
-    const mockChatComplete = jest.fn().mockResolvedValue({
-      content: 'Test insight result',
-    });
-
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        inference: {
-          chatComplete: mockChatComplete,
-        },
-      })
-    );
-
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
@@ -260,32 +228,21 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('displays insight result when chatComplete succeeds', async () => {
-    const mockChatComplete = jest.fn().mockResolvedValue({
-      content: '<p>Test insight result</p>',
-    });
-
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        inference: {
-          chatComplete: mockChatComplete,
-        },
-      })
-    );
-
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Test insight result')).toBeInTheDocument();
+      expect(screen.getByText(chatCompleteResult)).toBeInTheDocument();
     });
   });
 
   it('handles chatComplete error gracefully', async () => {
-    const mockChatComplete = jest.fn().mockRejectedValue(new Error('API Error'));
+    const mockChatCompleteError = jest.fn().mockRejectedValue(new Error('API Error'));
 
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
+        // @ts-ignore
         inference: {
-          chatComplete: mockChatComplete,
+          chatComplete: mockChatCompleteError,
         },
       })
     );
@@ -297,18 +254,6 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('constructs prompt correctly with lensResponse data', async () => {
-    const mockChatComplete = jest.fn().mockResolvedValue({
-      content: 'Test result',
-    });
-
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        inference: {
-          chatComplete: mockChatComplete,
-        },
-      })
-    );
-
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
@@ -327,18 +272,6 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('re-runs effect when lensResponse changes', async () => {
-    const mockChatComplete = jest.fn().mockResolvedValue({
-      content: 'Test result',
-    });
-
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        inference: {
-          chatComplete: mockChatComplete,
-        },
-      })
-    );
-
     const { rerender } = render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {

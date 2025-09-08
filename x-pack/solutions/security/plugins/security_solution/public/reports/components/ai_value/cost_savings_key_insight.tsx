@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,30 +48,27 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ lensResponse }) => {
       httpFetch: http.fetch,
       toasts: notifications.toasts,
     },
-    params: {
-      prompt_group_id: 'aiForSoc',
-      prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
-    },
   });
+  const fetchInsight = useCallback(async () => {
+    if (lensResponse && connectorId && prompts !== null) {
+      try {
+        const prompt = getPrompt(JSON.stringify(lensResponse), prompts);
+        const result = await inference.chatComplete({
+          connectorId,
+          messages: [{ role: MessageRole.User, content: prompt }],
+        });
+        setInsightResult(result.content);
+      } catch (error) {
+        setInsightResult(
+          `${i18n.INSIGHTS_ERROR} ${error.body?.message ?? error.message ?? error.toString()}`
+        );
+      }
+    }
+  }, [connectorId, lensResponse, inference, prompts]);
 
   useEffect(() => {
-    const fetchInsight = async () => {
-      if (lensResponse && connectorId && prompts !== null) {
-        try {
-          const prompt = getPrompt(JSON.stringify(lensResponse), prompts);
-          const result = await inference.chatComplete({
-            connectorId,
-            messages: [{ role: MessageRole.User, content: prompt }],
-          });
-          setInsightResult(result.content);
-        } catch (error) {
-          // Silently handle error - could add proper error state handling here
-        }
-      }
-    };
-
     fetchInsight();
-  }, [connectorId, lensResponse, inference, prompts]);
+  }, [fetchInsight]);
   return (
     <div
       data-test-subj="alertProcessingKeyInsightsContainer"

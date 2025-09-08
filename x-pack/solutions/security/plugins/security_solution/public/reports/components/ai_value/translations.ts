@@ -28,10 +28,10 @@ export const COST_SAVINGS_TREND = i18n.translate(
   }
 );
 
-export const COST_SAVINGS_SOC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.costSavingsSoc',
+export const INSIGHTS_ERROR = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.insightsError',
   {
-    defaultMessage: 'Cumulative savings from AI-driven SOC operations',
+    defaultMessage: 'Failed to fetch insight data due to an error:',
   }
 );
 

@@ -8,7 +8,7 @@
 import { useFindPrompts } from '@kbn/elastic-assistant';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { FindSecurityAIPromptsRequestQuery } from '@kbn/elastic-assistant-common';
+import { useMemo } from 'react';
 export interface UseFindPromptContextsParams {
   context: {
     isAssistantEnabled: boolean;
@@ -16,7 +16,6 @@ export interface UseFindPromptContextsParams {
     toasts: IToasts;
   };
   signal?: AbortSignal | undefined;
-  params: FindSecurityAIPromptsRequestQuery;
 }
 
 export const useFindCostSavingsPrompts = (
@@ -24,8 +23,17 @@ export const useFindCostSavingsPrompts = (
 ): { part1: string; part2: string } | null => {
   const {
     data: { prompts = [] },
-  } = useFindPrompts(payload);
-  const part1 = prompts.find((p) => p.promptId === 'costSavingsInsightPart1')?.prompt;
-  const part2 = prompts.find((p) => p.promptId === 'costSavingsInsightPart2')?.prompt;
-  return part1 != null && part2 != null ? { part1, part2 } : null;
+  } = useFindPrompts({
+    ...payload,
+    params: {
+      prompt_group_id: 'aiForSoc',
+      prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
+    },
+  });
+
+  return useMemo(() => {
+    const part1 = prompts.find((p) => p.promptId === 'costSavingsInsightPart1')?.prompt;
+    const part2 = prompts.find((p) => p.promptId === 'costSavingsInsightPart2')?.prompt;
+    return part1 != null && part2 != null ? { part1, part2 } : null;
+  }, [prompts]);
 };
