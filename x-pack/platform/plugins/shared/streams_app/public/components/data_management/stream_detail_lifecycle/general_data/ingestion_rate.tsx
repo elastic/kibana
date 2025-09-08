@@ -8,13 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import type { TimeState, TimeRange } from '@kbn/es-query';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import React, { useState, useMemo } from 'react';
+import React from 'react';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
 export function IngestionRate({
   definition,
@@ -26,28 +25,7 @@ export function IngestionRate({
   isLoadingStats: boolean;
 }) {
   const { isServerless } = useKibana();
-
-  // Create independent time state for general data chart
-  const [timeRange, setTimeRange] = useState<TimeRange>(() => ({
-    from: 'now-15m',
-    to: 'now',
-  }));
-
-  const timeState: TimeState = useMemo(() => {
-    const asAbsolute = getAbsoluteTimeRange(timeRange, { forceNow: new Date() });
-    const start = new Date(asAbsolute.from);
-    const end = new Date(asAbsolute.to);
-
-    return {
-      timeRange,
-      start: start.getTime(),
-      end: end.getTime(),
-      asAbsoluteTimeRange: {
-        ...asAbsolute,
-        mode: 'absolute' as const,
-      },
-    };
-  }, [timeRange]);
+  const { timeState } = useTimefilter();
 
   return (
     <>
@@ -66,16 +44,7 @@ export function IngestionRate({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <UncontrolledStreamsAppSearchBar
-              showDatePicker
-              dateRangeFrom={timeRange.from}
-              dateRangeTo={timeRange.to}
-              onQuerySubmit={({ dateRange }) => {
-                if (dateRange) {
-                  setTimeRange(dateRange);
-                }
-              }}
-            />
+            <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

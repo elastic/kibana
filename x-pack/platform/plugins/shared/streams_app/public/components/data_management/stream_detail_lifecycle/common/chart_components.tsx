@@ -33,7 +33,7 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 interface BaseChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
-  timeState?: TimeState;
+  timeState: TimeState;
   isLoadingStats: boolean;
 }
 
@@ -57,20 +57,17 @@ export function ChartBarSeries({
   isLoadingStats,
   isFailureStore = false,
 }: ChartComponentProps) {
-  const { timeState: defaultTimeState } = useTimefilter();
-  const currentTimeState = timeState || defaultTimeState;
-
   // Use the appropriate hook based on isFailureStore flag
   const mainStreamResult = useIngestionRate({
     definition,
     stats: !isFailureStore ? (stats as DataStreamStats) : undefined,
-    timeState: currentTimeState,
+    timeState,
   });
 
   const failureStoreResult = useIngestionRate({
     definition,
     stats: isFailureStore ? (stats as FailureStoreStats) : undefined,
-    timeState: currentTimeState,
+    timeState,
     isFailureStore: true,
   });
 

@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import type { TimeState, TimeRange } from '@kbn/es-query';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
-import { ChartBarPhasesSeries, ChartBarSeries } from '../common/chart_components';
 import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import { ChartBarPhasesSeries, ChartBarSeries } from '../common/chart_components';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
 export function FailureStoreIngestionRate({
   definition,
@@ -25,27 +24,7 @@ export function FailureStoreIngestionRate({
   isLoadingStats: boolean;
 }) {
   const { isServerless } = useKibana();
-
-  const [timeRange, setTimeRange] = useState<TimeRange>(() => ({
-    from: 'now-15m',
-    to: 'now',
-  }));
-
-  const timeState: TimeState = useMemo(() => {
-    const asAbsolute = getAbsoluteTimeRange(timeRange, { forceNow: new Date() });
-    const start = new Date(asAbsolute.from);
-    const end = new Date(asAbsolute.to);
-
-    return {
-      timeRange,
-      start: start.getTime(),
-      end: end.getTime(),
-      asAbsoluteTimeRange: {
-        ...asAbsolute,
-        mode: 'absolute' as const,
-      },
-    };
-  }, [timeRange]);
+  const { timeState } = useTimefilter();
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
@@ -62,16 +41,7 @@ export function FailureStoreIngestionRate({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <UncontrolledStreamsAppSearchBar
-              showDatePicker
-              dateRangeFrom={timeRange.from}
-              dateRangeTo={timeRange.to}
-              onQuerySubmit={({ dateRange }) => {
-                if (dateRange) {
-                  setTimeRange(dateRange);
-                }
-              }}
-            />
+            <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
