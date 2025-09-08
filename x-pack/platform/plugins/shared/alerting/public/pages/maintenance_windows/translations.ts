@@ -445,21 +445,6 @@ export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
   }
 );
 
-export const EXPERIMENTAL_LABEL = i18n.translate(
-  'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.badge.experimentalDescription',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  }
-);
-
 export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcoming', {
   defaultMessage: 'Upcoming',
 });
