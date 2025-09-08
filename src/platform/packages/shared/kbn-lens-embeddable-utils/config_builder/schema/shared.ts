@@ -8,14 +8,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  LENS_SAMPLING_MIN_VALUE,
+  LENS_SAMPLING_MAX_VALUE,
+  LENS_SAMPLING_DEFAULT_VALUE,
+  LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+} from './constants';
 
-// @TODO: move these into the shared type/values package
-const LENS_SAMPLING_MIN_VALUE = 0;
-const LENS_SAMPLING_MAX_VALUE = 1;
-const LENS_SAMPLING_DEFAULT_VALUE = 1;
-const LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE = false;
-
-export const sharedPanelInfoSchema = schema.object({
+export const sharedPanelInfoSchema = {
   /**
    * The title of the chart displayed in the panel.
    *
@@ -45,9 +45,9 @@ export const sharedPanelInfoSchema = schema.object({
       },
     })
   ),
-});
+};
 
-export const layerSettingsSchema = schema.object({
+export const layerSettingsSchema = {
   /**
    * The sampling factor for the dataset.
    *
@@ -83,7 +83,7 @@ export const layerSettingsSchema = schema.object({
         'If true, ignore global filters when fetching data for this layer. Default is false.',
     },
   }),
-});
+};
 
 export const collapseBySchema = schema.oneOf(
   [

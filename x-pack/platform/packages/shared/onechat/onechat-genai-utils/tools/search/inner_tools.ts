@@ -8,13 +8,15 @@
 import { z } from '@kbn/zod';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { ResourceResult, ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getToolResultId } from '@kbn/onechat-server/src/tools';
 import type { RelevanceSearchResult } from '../relevance_search';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
+import { progressMessages } from './i18n';
 
 const convertMatchResult = (result: RelevanceSearchResult): ResourceResult => {
   return {
@@ -35,9 +37,11 @@ export const relevanceSearchToolName = 'relevance_search';
 export const createRelevanceSearchTool = ({
   model,
   esClient,
+  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  events?: ToolEventEmitter;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -45,6 +49,7 @@ export const createRelevanceSearchTool = ({
         relevanceSearchToolName,
         { tool: { input: { term, index, size } } },
         async () => {
+          events?.reportProgress(progressMessages.performingRelevanceSearch({ term }));
           const { results: rawResults } = await relevanceSearch({
             target: index,
             term,
@@ -84,9 +89,11 @@ export const naturalLanguageSearchToolName = 'natural_language_search';
 export const createNaturalLanguageSearchTool = ({
   model,
   esClient,
+  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  events?: ToolEventEmitter;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -94,6 +101,7 @@ export const createNaturalLanguageSearchTool = ({
         naturalLanguageSearchToolName,
         { tool: { input: { query, index } } },
         async () => {
+          events?.reportProgress(progressMessages.performingNlSearch({ query }));
           const response = await naturalLanguageSearch({
             nlQuery: query,
             target: index,
@@ -109,8 +117,14 @@ export const createNaturalLanguageSearchTool = ({
               },
             },
             {
+              tool_result_id: getToolResultId(),
               type: ToolResultType.tabularData,
-              data: response.esqlData,
+              data: {
+                source: 'esql',
+                query: response.generatedQuery,
+                columns: response.esqlData.columns,
+                values: response.esqlData.values,
+              },
             },
           ];
 
