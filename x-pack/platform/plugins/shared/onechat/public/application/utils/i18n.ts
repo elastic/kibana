@@ -24,8 +24,8 @@ export const labels = {
     newToolTitle: i18n.translate('xpack.onechat.tools.newToolTitle', {
       defaultMessage: 'Create a new tool',
     }),
-    readOnlyBadge: i18n.translate('xpack.onechat.tools.readOnlyBadge', {
-      defaultMessage: 'Read only',
+    readOnly: i18n.translate('xpack.onechat.tools.readOnly', {
+      defaultMessage: 'Read-only',
     }),
 
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
