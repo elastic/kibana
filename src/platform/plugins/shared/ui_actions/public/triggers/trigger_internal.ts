@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import { TriggerContract } from './trigger_contract';
 import type { UiActionsService } from '../service';
 

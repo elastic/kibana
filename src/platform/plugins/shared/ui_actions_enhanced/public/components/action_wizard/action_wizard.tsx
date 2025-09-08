@@ -26,7 +26,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import { css } from '@emotion/react';
 import {
   txtBetaActionFactoryLabel,

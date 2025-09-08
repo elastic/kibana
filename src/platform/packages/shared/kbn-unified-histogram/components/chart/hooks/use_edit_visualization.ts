@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { VISUALIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { VISUALIZE_FIELD_TRIGGER } from '@kbn/ui-actions-triggers';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UnifiedHistogramServices } from '../../..';
 

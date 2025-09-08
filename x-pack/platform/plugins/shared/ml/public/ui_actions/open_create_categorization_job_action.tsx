@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,

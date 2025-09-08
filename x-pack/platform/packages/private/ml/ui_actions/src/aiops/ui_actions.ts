@@ -8,7 +8,7 @@
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 export interface CategorizeFieldContext {
   field: DataViewField;
