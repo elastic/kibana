@@ -39,7 +39,6 @@ describe('When using cancel action from response actions console', () => {
   let consoleManagerMockAccess: ReturnType<
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
-  let consoleMockUtils: ReturnType<typeof getConsoleSelectorsAndActionMock>;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -89,7 +88,6 @@ describe('When using cancel action from response actions console', () => {
         user,
         renderResult
       );
-      consoleMockUtils = getConsoleSelectorsAndActionMock(renderResult, user);
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
