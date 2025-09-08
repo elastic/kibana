@@ -16,17 +16,29 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { OWNERS } from '../../common/constants';
-import type { Owner } from '../../common/constants/types';
 import type { CasesServerStartDependencies } from '../types';
 import { registerCAIBackfillTask } from './tasks/backfill_task';
 import { registerCAISynchronizationTask } from './tasks/synchronization_task';
 import {
   createAttachmentsAnalyticsIndex,
+  getAttachmentsDestinationIndexName,
   scheduleAttachmentsAnalyticsSyncTask,
 } from './attachments_index';
-import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cases_index';
-import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
-import { createActivityAnalyticsIndex, scheduleActivityAnalyticsSyncTask } from './activity_index';
+import {
+  createCasesAnalyticsIndex,
+  getCasesDestinationIndexName,
+  scheduleCasesAnalyticsSyncTask,
+} from './cases_index';
+import {
+  createCommentsAnalyticsIndex,
+  getCommentsDestinationIndexName,
+  scheduleCommentsAnalyticsSyncTask,
+} from './comments_index';
+import {
+  createActivityAnalyticsIndex,
+  getActivityDestinationIndexName,
+  scheduleActivityAnalyticsSyncTask,
+} from './activity_index';
 import type { ConfigType } from '../config';
 import { getAllSpacesWithCases } from './utils';
 import { registerCAISchedulerTask } from './tasks/scheduler_task';
@@ -46,81 +58,76 @@ export const createCasesAnalyticsIndexes = async ({
 }) => {
   const spaces: string[] = await getAllSpacesWithCases(savedObjectsClient);
   for (const spaceId of spaces) {
-    for (const owner of OWNERS)
-      try {
-        await createCasesAnalyticsIndexesForSpaceId({
-          spaceId,
-          owner,
-          esClient,
-          logger,
-          isServerless,
-          taskManager,
-        });
-        logger.info(
-          `Successfully created cases analytics indexes for space ${spaceId} and owner ${owner}`
-        );
-      } catch (error) {
-        logger.error(
-          `Error creating cases analytics indexes for space ${spaceId} and owner ${owner}: ${error}`
-        );
-      }
+    try {
+      await createCasesAnalyticsIndexesForSpaceId({
+        spaceId,
+        esClient,
+        logger,
+        isServerless,
+        taskManager,
+      });
+      logger.info(`Successfully created cases analytics indexes for space ${spaceId}`);
+    } catch (error) {
+      logger.error(`Error creating cases analytics indexes for space ${spaceId}: ${error}`);
+    }
   }
 };
 
-async function createCasesAnalyticsIndexesForSpaceId({
+export async function createCasesAnalyticsIndexesForSpaceId({
   esClient,
   logger,
   isServerless,
   taskManager,
   spaceId,
-  owner,
 }: {
   spaceId: string;
-  owner: Owner;
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
 }) {
-  const casesIndex = createCasesAnalyticsIndex({
-    logger,
-    esClient,
-    isServerless,
-    taskManager,
-    spaceId,
-    owner,
-  });
-  const casesAttachmentsIndex = createCommentsAnalyticsIndex({
-    logger,
-    esClient,
-    isServerless,
-    taskManager,
-    spaceId,
-    owner,
-  });
-  const casesCommentsIndex = createAttachmentsAnalyticsIndex({
-    logger,
-    esClient,
-    isServerless,
-    taskManager,
-    spaceId,
-    owner,
-  });
-  const casesActivityIndex = createActivityAnalyticsIndex({
-    logger,
-    esClient,
-    isServerless,
-    taskManager,
-    spaceId,
-    owner,
-  });
-
-  return Promise.all([
-    casesIndex.upsertIndex(),
-    casesAttachmentsIndex.upsertIndex(),
-    casesCommentsIndex.upsertIndex(),
-    casesActivityIndex.upsertIndex(),
-  ]);
+  return Promise.all(
+    OWNERS.reduce<Promise<unknown>[]>((operations, owner) => {
+      const casesIndex = createCasesAnalyticsIndex({
+        logger,
+        esClient,
+        isServerless,
+        taskManager,
+        spaceId,
+        owner,
+      });
+      const casesAttachmentsIndex = createCommentsAnalyticsIndex({
+        logger,
+        esClient,
+        isServerless,
+        taskManager,
+        spaceId,
+        owner,
+      });
+      const casesCommentsIndex = createAttachmentsAnalyticsIndex({
+        logger,
+        esClient,
+        isServerless,
+        taskManager,
+        spaceId,
+        owner,
+      });
+      const casesActivityIndex = createActivityAnalyticsIndex({
+        logger,
+        esClient,
+        isServerless,
+        taskManager,
+        spaceId,
+        owner,
+      });
+      return operations.concat([
+        casesIndex.upsertIndex(),
+        casesAttachmentsIndex.upsertIndex(),
+        casesCommentsIndex.upsertIndex(),
+        casesActivityIndex.upsertIndex(),
+      ]);
+    }, [])
+  );
 }
 
 export const registerCasesAnalyticsIndexesTasks = ({
@@ -143,20 +150,26 @@ export const scheduleCasesAnalyticsSyncTasks = ({
   taskManager,
   logger,
   spaceId,
-  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   spaceId: string;
-  owner: Owner;
 }) => {
-  scheduleActivityAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
-  scheduleCasesAnalyticsSyncTask({
-    taskManager,
-    logger,
-    spaceId,
-    owner,
-  });
-  scheduleCommentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
-  scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+  for (const owner of OWNERS) {
+    scheduleActivityAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+    scheduleCasesAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+    scheduleCommentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+    scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+  }
+};
+
+export const getIndicesForSpaceId = (spaceId: string) => {
+  return OWNERS.reduce<string[]>((curr, owner) => {
+    return curr.concat([
+      getActivityDestinationIndexName(spaceId, owner),
+      getAttachmentsDestinationIndexName(spaceId, owner),
+      getCasesDestinationIndexName(spaceId, owner),
+      getCommentsDestinationIndexName(spaceId, owner),
+    ]);
+  }, []);
 };

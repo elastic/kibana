@@ -6,18 +6,22 @@
  */
 
 import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { CancellableTask } from '@kbn/task-manager-plugin/server/task';
-import { OWNERS } from '../../../../common/constants';
 import type { ConfigType } from '../../../config';
 import { getAllSpacesWithCases } from '../../utils';
-import { scheduleCasesAnalyticsSyncTasks } from '../..';
+import {
+  createCasesAnalyticsIndexesForSpaceId,
+  getIndicesForSpaceId,
+  scheduleCasesAnalyticsSyncTasks,
+} from '../..';
 
 interface SchedulerTaskRunnerFactoryConstructorParams {
   getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   logger: Logger;
   analyticsConfig: ConfigType['analytics'];
   getTaskManager: () => Promise<TaskManagerStartContract>;
+  getESClient: () => Promise<ElasticsearchClient>;
 }
 
 export class SchedulerTaskRunner implements CancellableTask {
@@ -25,17 +29,20 @@ export class SchedulerTaskRunner implements CancellableTask {
   private readonly logger: Logger;
   private readonly analyticsConfig: ConfigType['analytics'];
   private readonly getTaskManager: () => Promise<TaskManagerStartContract>;
+  private readonly getESClient: () => Promise<ElasticsearchClient>;
 
   constructor({
     getUnsecureSavedObjectsClient,
     logger,
     analyticsConfig,
     getTaskManager,
+    getESClient,
   }: SchedulerTaskRunnerFactoryConstructorParams) {
     this.getUnsecureSavedObjectsClient = getUnsecureSavedObjectsClient;
     this.logger = logger;
     this.analyticsConfig = analyticsConfig;
     this.getTaskManager = getTaskManager;
+    this.getESClient = getESClient;
   }
 
   public async run() {
@@ -49,10 +56,22 @@ export class SchedulerTaskRunner implements CancellableTask {
       const taskManager = await this.getTaskManager();
 
       for (const spaceId of spaces) {
-        for (const owner of OWNERS) {
+        const indices = getIndicesForSpaceId(spaceId);
+        const destIndicesExist = (await this.getESClient()).indices.exists({ index: indices });
+
+        if (!destIndicesExist) {
+          // Create the necessary analytics indexes without scheduling the sync tasks
+          createCasesAnalyticsIndexesForSpaceId({
+            spaceId,
+            esClient: await this.getESClient(),
+            logger: this.logger,
+            isServerless: false,
+            taskManager,
+          });
+          return;
+        } else {
           scheduleCasesAnalyticsSyncTasks({
             spaceId,
-            owner,
             taskManager,
             logger: this.logger,
           });
