@@ -14,7 +14,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
 import type {
@@ -32,6 +32,7 @@ export class Plugin implements StreamsPluginClass {
   public logger: Logger;
 
   private repositoryClient!: StreamsRepositoryClient;
+  private wiredStatusSubject = new BehaviorSubject<StreamsStatus>(UNKNOWN_STATUS);
 
   constructor(context: PluginInitializerContext<{}>) {
     this.config = context.config.get();
@@ -44,11 +45,41 @@ export class Plugin implements StreamsPluginClass {
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
+    this.refreshWiredStatus(pluginsStart);
+
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(pluginsStart, core.application),
+      navigationStatus$: createStreamsNavigationStatusObservable(pluginsStart, core.application),
+      wiredStatus$: this.wiredStatusSubject.asObservable(),
+      enableWiredMode: async (signal: AbortSignal) => {
+        const response = await this.repositoryClient.fetch('POST /api/streams/_enable 2023-10-31', {
+          signal,
+        });
+        this.wiredStatusSubject.next(ENABLED_STATUS);
+        return response;
+      },
+      disableWiredMode: async (signal: AbortSignal) => {
+        const response = await this.repositoryClient.fetch(
+          'POST /api/streams/_disable 2023-10-31',
+          { signal }
+        );
+        this.wiredStatusSubject.next(DISABLED_STATUS);
+        return response;
+      },
       config$: of(this.config),
     };
+  }
+
+  private async refreshWiredStatus(deps: StreamsPluginStartDependencies) {
+    try {
+      const response = await this.repositoryClient.fetch('GET /api/streams/_status', {
+        signal: new AbortController().signal,
+      });
+      this.wiredStatusSubject.next(response.enabled ? ENABLED_STATUS : DISABLED_STATUS);
+    } catch (error) {
+      this.logger.error(error);
+      this.wiredStatusSubject.next(UNKNOWN_STATUS);
+    }
   }
 
   stop() {}
@@ -56,8 +87,9 @@ export class Plugin implements StreamsPluginClass {
 
 const ENABLED_STATUS: StreamsStatus = { status: 'enabled' };
 const DISABLED_STATUS: StreamsStatus = { status: 'disabled' };
+const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
 
-const createStreamsStatusObservable = once(
+const createStreamsNavigationStatusObservable = once(
   (
     deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
     application: ApplicationStart

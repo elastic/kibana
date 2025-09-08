@@ -17,13 +17,14 @@ import {
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import type { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
+import type { OverlayRef } from '@kbn/core/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -34,6 +35,7 @@ import { GroupStreamModificationFlyout } from '../group_stream_modification_flyo
 import { GroupStreamsCards } from './group_streams_cards';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { StreamsSettingsFlyout } from './streams_settings_flyout';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -46,6 +48,7 @@ export function StreamListView() {
       },
     },
     core,
+    isServerless,
   } = context;
   const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -72,10 +75,15 @@ export function StreamListView() {
   );
 
   const {
+    ui: { manage },
     features: { groupStreams },
   } = useStreamsPrivileges();
 
+  // TODO: Also enable for serverless
+  const showEnableStreamsButton = isServerless === false && manage;
   const overlayRef = React.useRef<OverlayRef | null>(null);
+
+  const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   function openGroupStreamModificationFlyout() {
     overlayRef.current?.close();
@@ -130,11 +138,20 @@ export function StreamListView() {
             </EuiFlexItem>
             {groupStreams?.enabled && (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => openGroupStreamModificationFlyout()}>
+                <EuiButton onClick={openGroupStreamModificationFlyout}>
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
                     defaultMessage: 'Create Group stream',
                   })}
                 </EuiButton>
+              </EuiFlexItem>
+            )}
+            {showEnableStreamsButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                  {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                    defaultMessage: 'Settings',
+                  })}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -179,6 +196,12 @@ export function StreamListView() {
           </>
         )}
       </StreamsAppPageTemplate.Body>
+      {isSettingsFlyoutOpen && (
+        <StreamsSettingsFlyout
+          onClose={() => setIsSettingsFlyoutOpen(false)}
+          refreshStreams={streamsListFetch.refresh}
+        />
+      )}
     </>
   );
 }

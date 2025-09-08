@@ -19,7 +19,7 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
     url,
     plugins: { streams },
   } = useAppContext();
-  const streamsEnabled = useObservable(streams?.status$ || EMPTY)?.status === 'enabled';
+  const streamsEnabled = useObservable(streams?.navigationStatus$ || EMPTY)?.status === 'enabled';
   const streamsLocator = url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
 
   if (!streamsEnabled || !streamsLocator) {
