@@ -123,10 +123,12 @@ export function Overview({
               />
             </EuiFlexItem>
           ) : null}
-          <EuiFlexItem>
-            <EuiSpacer size="m" />
-            <SpanLinks traceId={traceId} docId={docId || ''} />
-          </EuiFlexItem>
+          {docId ? (
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <SpanLinks traceId={traceId} docId={docId} />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
             <EuiSpacer size="m" />
             <TraceContextLogEvents
