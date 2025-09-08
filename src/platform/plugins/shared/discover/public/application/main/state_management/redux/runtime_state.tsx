@@ -97,23 +97,18 @@ export const selectTabRuntimeAppState = (
   return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
 };
 
-export const selectTabRuntimeGlobalState = (
+export const selectTabRuntimeInternalState = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
-): TabState['lastPersistedGlobalState'] | undefined => {
+): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const globalState = tabRuntimeState?.stateContainer$.getValue()?.globalState?.get();
+  const savedSearch = tabRuntimeState?.stateContainer$.getValue()?.savedSearchState.getState();
 
-  if (!globalState) {
+  if (!savedSearch) {
     return undefined;
   }
 
-  const { time: timeRange, refreshInterval, filters } = globalState;
-  return {
-    timeRange,
-    refreshInterval,
-    filters,
-  };
+  return { serializedSearchSource: savedSearch.searchSource.getSerializedFields() };
 };
 
 export const selectRestorableTabRuntimeHistogramLayoutProps = (

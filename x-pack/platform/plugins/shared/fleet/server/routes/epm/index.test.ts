@@ -170,6 +170,7 @@ describe('schema validation', () => {
         started_at: 'now',
         error: 'error',
       },
+      previous_version: '0.0.1',
     };
     savedObject = {
       type: 'type',
