@@ -71370,10 +71370,14 @@ components:
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
-        - type
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       enum:
