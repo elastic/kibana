@@ -254,32 +254,36 @@ export class IndexActionsContextMenu extends Component {
       const indexName = indexNames[0];
       const isConvertable = this.isConvertableToLookupIndex(indexName);
 
-      items.push({
-        'data-test-subj': 'convertToLookupIndexButton',
-        name: (
-          <>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton"
-                defaultMessage="Convert to lookup index"
-              />
-            </EuiText>
-            {!isConvertable && (
-              <EuiText size="xs">
+      const indexMode = indices.find((index) => index.name === indexName)?.mode;
+
+      if (indexMode !== 'lookup') {
+        items.push({
+          'data-test-subj': 'convertToLookupIndexButton',
+          name: (
+            <>
+              <EuiText size="s">
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
-                  defaultMessage="Index too large to be converted."
+                  id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton"
+                  defaultMessage="Convert to lookup index"
                 />
               </EuiText>
-            )}
-          </>
-        ),
-        disabled: !isConvertable,
-        onClick: () => {
-          this.closePopover();
-          this.setState({ renderConfirmModal: this.renderConvertToLookupIndexModal });
-        },
-      });
+              {!isConvertable && (
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
+                    defaultMessage="Index too large to be converted."
+                  />
+                </EuiText>
+              )}
+            </>
+          ),
+          disabled: !isConvertable,
+          onClick: () => {
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderConvertToLookupIndexModal });
+          },
+        });
+      }
     }
     const panelTree = {
       id: 0,
