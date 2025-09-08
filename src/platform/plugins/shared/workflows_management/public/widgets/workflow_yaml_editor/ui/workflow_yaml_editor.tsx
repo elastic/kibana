@@ -21,21 +21,17 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import YAML, { isPair, isScalar, visit } from 'yaml';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
-import {
-  getMonacoRangeFromYamlNode,
-  navigateToErrorPosition,
-} from '../lib/utils';
+import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { 
+import {
   registerUnifiedHoverProvider,
-  createUnifiedActionsProvider
+  createUnifiedActionsProvider,
 } from '../lib/monaco_providers';
 import { createStepExecutionProvider } from '../lib/monaco_providers/step_execution_provider';
 import { ElasticsearchMonacoConnectorHandler } from '../lib/monaco_connectors';
@@ -251,7 +247,9 @@ export const WorkflowYAMLEditor = ({
 
   // Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({ display: 'none' });
+  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({
+    display: 'none',
+  });
 
   const {
     error: errorValidating,
@@ -345,7 +343,7 @@ export const WorkflowYAMLEditor = ({
         },
       });
 
-      // Store provider references  
+      // Store provider references
       unifiedProvidersRef.current = {
         hover: null, // hover provider is managed by Monaco directly
         actions: actionsProvider,
@@ -355,7 +353,7 @@ export const WorkflowYAMLEditor = ({
       console.log('🚀 WorkflowYAMLEditor: Unified providers registered', {
         hoverDisposable: !!hoverDisposable,
         actionsProvider: !!actionsProvider,
-        elasticsearchHandler: !!elasticsearchHandler
+        elasticsearchHandler: !!elasticsearchHandler,
       });
     } else {
       console.log('WorkflowYAMLEditor: Missing http or notifications services');
@@ -385,17 +383,12 @@ export const WorkflowYAMLEditor = ({
 
   // Update providers when YAML document changes
   useEffect(() => {
-    if (
-      isEditorMounted &&
-      editorRef.current &&
-      yamlDocument &&
-      unifiedProvidersRef.current
-    ) {
+    if (isEditorMounted && editorRef.current && yamlDocument && unifiedProvidersRef.current) {
       console.log('WorkflowYAMLEditor: Updating providers with YAML document');
-      
+
       // Step execution provider updates will be handled separately when needed
-      
-      // The unified actions provider is already created, it will automatically 
+
+      // The unified actions provider is already created, it will automatically
       // respond to YAML document changes through the getYamlDocument callback
     }
   }, [isEditorMounted, yamlDocument]);
@@ -413,7 +406,12 @@ export const WorkflowYAMLEditor = ({
 
     // Create step execution provider if needed and we're in readonly mode
     try {
-      if (readOnly && stepExecutions && stepExecutions.length > 0 && !unifiedProvidersRef.current?.stepExecution) {
+      if (
+        readOnly &&
+        stepExecutions &&
+        stepExecutions.length > 0 &&
+        !unifiedProvidersRef.current?.stepExecution
+      ) {
         console.log('🎯 Creating StepExecutionProvider');
         const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
           getYamlDocument: () => yamlDocument,
@@ -429,14 +427,17 @@ export const WorkflowYAMLEditor = ({
     } catch (error) {
       console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
     }
-    
+
     // Update decorations when dependencies change
     try {
       if (unifiedProvidersRef.current?.stepExecution) {
         unifiedProvidersRef.current.stepExecution.updateDecorations();
       }
     } catch (error) {
-      console.error('🎯 WorkflowYAMLEditor: Error updating StepExecutionProvider decorations:', error);
+      console.error(
+        '🎯 WorkflowYAMLEditor: Error updating StepExecutionProvider decorations:',
+        error
+      );
     }
 
     // Dispose step execution provider when switching out of readonly mode
@@ -453,7 +454,7 @@ export const WorkflowYAMLEditor = ({
       // clear existing decorations
       alertTriggerDecorationCollectionRef.current.clear();
     }
-    
+
     // Don't show alert dots when in executions view
     if (!model || !yamlDocument || !isEditorMounted || readOnly) {
       return;
