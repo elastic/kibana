@@ -35,6 +35,7 @@ import {
   catchError,
   exhaustMap,
   asyncScheduler,
+  first,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
@@ -958,7 +959,15 @@ export class IndexUpdateService {
       await this.data.dataViews.refreshFields(dataView, false, true);
       this.refresh();
       this.addAction('recalculate-column-placeholders');
-      this._isSaving$.next(false);
+      // Only set isSaving to false when fetching is done to avoid flickering
+      this.isFetching$
+        .pipe(
+          filter((isFetching) => !isFetching),
+          first()
+        )
+        .subscribe(() => {
+          this._isSaving$.next(false);
+        });
     } else {
       this.setIndexName(indexName);
       this.setIndexCreated(true);
