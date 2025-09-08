@@ -12,11 +12,11 @@ import {
   EuiIcon,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { MessageRole } from '@kbn/inference-common';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import { DEFAULT_AI_CONNECTOR } from '../../../../common/constants';
@@ -102,21 +102,11 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ lensResponse }) => {
 
         <EuiSpacer size="m" />
 
-        <EuiText
-          size="s"
-          css={css`
-            line-height: 1.6em;
-          `}
-        >
-          {insightResult ? (
-            <div
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{ __html: insightResult }}
-            />
-          ) : (
-            <EuiSkeletonText lines={3} size="s" isLoading={true} />
-          )}
-        </EuiText>
+        {insightResult ? (
+          <Markdown markdown={insightResult} />
+        ) : (
+          <EuiSkeletonText lines={3} size="s" isLoading={true} />
+        )}
       </span>
     </div>
   );
