@@ -53,21 +53,21 @@ export class EnhancementsRegistry {
   /**
    * extracts references from enhancements state
    */
-  public transformIn = (incomingState: { [key: string]: unknown }) => {
-    const outputState: { [key: string]: unknown } = {};
+  public transformIn = (enhancementsState: { [key: string]: unknown }) => {
+    const outputEnhancementsState: { [key: string]: unknown } = {};
     const extractedReferences: Reference[] = [];
-    Object.keys(incomingState).forEach((key) => {
-      if (!incomingState[key]) return;
+    Object.keys(enhancementsState).forEach((key) => {
+      if (!enhancementsState[key]) return;
       const enhancementStateManger = this.getEnhancement(key);
       const { state, references } = enhancementStateManger
-        ? enhancementStateManger.extract(incomingState[key] as SerializableRecord)
-        : { state: incomingState[key], references: [] };
-      outputState[key] = state;
+        ? enhancementStateManger.extract(enhancementsState[key] as SerializableRecord)
+        : { state: enhancementsState[key], references: [] };
+        outputEnhancementsState[key] = state;
       extractedReferences.push(...references);
     });
 
     return {
-      enhancementsState: outputState,
+      enhancementsState: outputEnhancementsState,
       enhancementsReferences: extractedReferences,
     };
   };
@@ -75,16 +75,16 @@ export class EnhancementsRegistry {
   /**
    * Injects enhancements state with references
    */
-  public transformOut = (incomingState: { [key: string]: unknown }, references: Reference[]) => {
-    const outputState: { [key: string]: unknown } = {};
-    Object.keys(incomingState).forEach((key) => {
-      if (!incomingState[key]) return;
+  public transformOut = (enhancementsState: { [key: string]: unknown }, references: Reference[]) => {
+    const outputEnhancementsState: { [key: string]: unknown } = {};
+    Object.keys(enhancementsState).forEach((key) => {
+      if (!enhancementsState[key]) return;
       const enhancementStateManger = this.getEnhancement(key);
-      outputState[key] = enhancementStateManger
-        ? enhancementStateManger.inject(incomingState[key] as SerializableRecord, references)
-        : incomingState[key];
+      outputEnhancementsState[key] = enhancementStateManger
+        ? enhancementStateManger.inject(enhancementsState[key] as SerializableRecord, references)
+        : enhancementsState[key];
     });
 
-    return outputState;
+    return outputEnhancementsState;
   };
 }
