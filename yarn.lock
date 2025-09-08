@@ -25556,7 +25556,7 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.11.0:
+msw@~2.11.1:
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.11.1.tgz#77f7c5c60ffd08e4bc351cca4608418db15e5ac2"
   integrity sha512-dGSRx0AJmQVQfpGXTsAAq4JFdwdhOBdJ6sJS/jnN0ac3s0NZB6daacHF1z5Pefx+IejmvuiLWw260RlyQOf3sQ==
