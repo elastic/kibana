@@ -90,7 +90,12 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     iconType: props.iconType,
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
-    className: props.className,
+    className: [
+      props.className,
+      props.emphasize ? 'kbnTopNavPrimary' : 'kbnTopNavSecondary',
+    ]
+      .filter(Boolean)
+      .join(' '),
     color: (props.color ?? 'text') as EuiButtonColor,
     ...routerLinkProps,
   };

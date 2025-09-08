@@ -17,6 +17,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { EuiBreakpointSize, EuiHeaderLinksProps } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
 import { type TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
@@ -73,6 +74,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
 export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   props: TopNavMenuProps<QT>
 ): ReactElement | null {
+  const { euiTheme } = useEuiTheme();
   const { config, badges, showSearchBar, gutterSize, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.unifiedSearch)) {
@@ -93,22 +95,25 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
           button:last-child {
             margin-right: 0;
           }
+          /* Allow primary header buttons to shrink fully */
+          .kbnTopNavPrimary {
+            min-inline-size: 0 !important;
+
+            .euiIcon {
+              color: ${euiTheme.colors.primary};
+            }
+          }
           /* Split button styling: Save + Save-more flush */
           .dscSplitSaveLeft {
             border-top-right-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
-            margin-right: 0 !important;
+            margin-right: -8px !important;
+            min-width: 0 !important;
           }
           .dscSplitSaveRight {
             border-left: none !important;
             border-top-left-radius: 0 !important;
             border-bottom-left-radius: 0 !important;
-            /* Overlap the EuiHeaderLinks gutter (xxs) */
-            margin-left: -4px !important;
-          }
-          /* When unsaved changes are present, leave a 1px visual gap */
-          .dscSplitSaveRight.dscSplitSaveRight--hasChanges {
-            margin-left: -3px !important;
           }
         `}
         popoverBreakpoints={props.popoverBreakpoints}

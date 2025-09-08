@@ -279,10 +279,10 @@ export const useTopNavLinks = ({
         }),
         className: `dscSplitSaveLeft${hasUnsavedChanges ? ' dscSplitSaveLeft--hasChanges' : ''}`,
         testId: 'discoverSaveButton',
-        fill: Boolean(hasUnsavedChanges),
-        color: hasUnsavedChanges ? 'primary' : 'text',
-        // iconType: hasUnsavedChanges ? 'dot' : undefined,
-        // iconSide: hasUnsavedChanges ? 'right' : undefined,
+        fill: false,
+        color: 'text',
+        iconType: hasUnsavedChanges ? 'dot' : undefined,
+        iconSide: hasUnsavedChanges ? 'left' : undefined,
         emphasize: true,
         run: (anchorElement: HTMLElement) => {
           onSaveDiscoverSession({
@@ -307,11 +307,11 @@ export const useTopNavLinks = ({
         testId: 'discoverSaveMoreButton',
         className: `dscSplitSaveRight${hasUnsavedChanges ? ' dscSplitSaveRight--hasChanges' : ''}`,
         emphasize: true,
-        fill: Boolean(hasUnsavedChanges),
-        color: hasUnsavedChanges ? 'primary' : 'text',
+        fill: false,
+        color: 'text',
         iconOnly: true,
         iconType: 'arrowDown',
-        iconDisplay: hasUnsavedChanges ? 'fill' : 'base',
+        iconDisplay: 'base',
         run: (anchorElement: HTMLElement) => {
           runAppMenuPopoverAction({
             appMenuItem: {

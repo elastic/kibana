@@ -181,7 +181,8 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
-      gutterSize: 'xxs' as EuiHeaderLinksProps['gutterSize'],
+      gutterSize: 'xs' as EuiHeaderLinksProps['gutterSize'],
+      className: 'discoverTopNav',
     }),
     [setHeaderActionMenu, topNavBadges, topNavMenu]
   );
