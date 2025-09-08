@@ -162,11 +162,6 @@ export async function runTask({
     log('running task');
 
     const entityType = context.taskInstance.params.entityType as EntityType;
-    if (entityType === '') {
-      const err = `Task ${taskId} expected vaild entityType in params, got ""`;
-      log(err);
-      throw err;
-    }
     const namespace = context.taskInstance.params.namespace as string;
     if (namespace === '') {
       const err = `Task ${taskId} expected vaild namespace in params, got ""`;
