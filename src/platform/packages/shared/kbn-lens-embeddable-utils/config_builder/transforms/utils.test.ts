@@ -8,7 +8,6 @@
  */
 
 import {
-  getAdhocDataviews,
   buildDatasourceStates,
   buildReferences,
   getDatasetIndex,
@@ -28,29 +27,12 @@ import type {
 import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { LensApiState } from '../schema';
 
-const dataView = {
-  id: 'test-dataview',
-  fields: {
-    getByName: (name: string) => {
-      switch (name) {
-        case '@timestamp':
-          return 'datetime';
-        case 'category':
-          return 'string';
-        case 'price':
-          return 'number';
-        default:
-          return 'string';
-      }
-    },
-  },
-  toSpec: () => ({}),
-};
+const dataView = 'test-dataview';
 
 test('build references correctly builds references', () => {
   const results = buildReferences({
-    layer1: dataView as unknown as DataView,
-    layer2: dataView as unknown as DataView,
+    layer1: dataView,
+    layer2: dataView,
   });
   expect(results).toMatchInlineSnapshot(`
     Array [
@@ -65,18 +47,6 @@ test('build references correctly builds references', () => {
         "type": "index-pattern",
       },
     ]
-  `);
-});
-
-test('getAdhocDataviews', () => {
-  const results = getAdhocDataviews({
-    layer1: dataView as unknown as DataView,
-    layer2: dataView as unknown as DataView,
-  });
-  expect(results).toMatchInlineSnapshot(`
-    Object {
-      "test-dataview": Object {},
-    }
   `);
 });
 
