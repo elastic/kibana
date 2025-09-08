@@ -14308,19 +14308,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.2":
-  version "12.8.2"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.2.tgz#3e0818699c8d29407bd6f77d88570d38ef513b46"
-  integrity sha512-VifLpxOy74ck283NQOtBn1e8igmB7xo7ADDKxyBHkKd8IKpyr16TgaYOhzqVwNMdB4NT+m++zfkic530L+gEXw==
+"@xyflow/react@^12.8.3":
+  version "12.8.4"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.4.tgz#db0eabd9e356c25f5ebf427413a8c5dd46113394"
+  integrity sha512-bqUu4T5QSHiCFPkoH+b+LROKwQJdLvcjhGbNW9c1dLafCBRjmH1IYz0zPE+lRDXCtQ9kRyFxz3tG19+8VORJ1w==
   dependencies:
-    "@xyflow/system" "0.0.66"
+    "@xyflow/system" "0.0.68"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.66":
-  version "0.0.66"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.66.tgz#94eec3962e65b8686b314629911b51a7db057059"
-  integrity sha512-TTxESDwPsATnuDMUeYYtKe4wt9v8bRO29dgYBhR8HyhSCzipnAdIL/1CDfFd+WqS1srVreo24u6zZeVIDk4r3Q==
+"@xyflow/system@0.0.68":
+  version "0.0.68"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.68.tgz#980b8185743147a454bfb24a98f6bddc55a703e6"
+  integrity sha512-QDG2wxIG4qX+uF8yzm1ULVZrcXX3MxPBoxv7O52FWsX87qIImOqifUhfa/TwsvLdzn7ic2DDBH1uI8TKbdNTYA==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
