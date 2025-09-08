@@ -290,12 +290,20 @@ export class RenderingService {
     };
 
     const negotiateLocale = (candidates: string[], fallback: string) => {
+      // Try exact/canonicalized first candidate
       for (const candidate of candidates) {
         if (!candidate) {
           continue;
         }
-
-        return canonicalize(candidate);
+        const canon = canonicalize(candidate);
+        if (canon) {
+          return canon;
+        }
+      }
+      // Try base language fallback (e.g. fr-CA -> fr)
+      for (const candidate of candidates) {
+        const base = candidate?.split('-')[0];
+        if (base) return canonicalize(base);
       }
       return canonicalize(fallback);
     };

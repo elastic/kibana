@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
 import { createHash } from 'crypto';
 import { getKibanaTranslationFiles } from '../get_kibana_translation_files';
+import { supportedLocale } from '../constants';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
@@ -46,14 +47,32 @@ export const registerTranslationsRoute = ({
   };
 
   const resolveAvailableLocale = async (requested: string): Promise<string> => {
-    const candidates = [canonicalize(requested), requested, defaultLocale];
-    for (const candidate of candidates) {
-      const files = await getKibanaTranslationFiles(candidate, pluginPaths);
+    const canonicalRequested = canonicalize(requested);
+    // 1) Try exact requested (canonicalized)
+    if ((await getKibanaTranslationFiles(canonicalRequested, pluginPaths)).length) {
+      return canonicalRequested;
+    }
 
-      if (files.length) {
-        return candidate;
+    // 2) If base language only (e.g. fr), try a supported region variant (e.g. fr-FR)
+    const base = canonicalRequested.split('-')[0];
+    const supportedVariant = supportedLocale.find((loc) => {
+      const lower = loc.toLowerCase();
+      return lower === base || lower.startsWith(`${base}-`);
+    });
+
+    if (supportedVariant) {
+      const variantCanonical = canonicalize(supportedVariant);
+      if ((await getKibanaTranslationFiles(variantCanonical, pluginPaths)).length) {
+        return variantCanonical;
       }
     }
+
+    // 3) Try raw requested as-is (in case file names already match unusual casing)
+    if ((await getKibanaTranslationFiles(requested, pluginPaths)).length) {
+      return requested;
+    }
+
+    // 4) Fallback to default
     return defaultLocale;
   };
 
