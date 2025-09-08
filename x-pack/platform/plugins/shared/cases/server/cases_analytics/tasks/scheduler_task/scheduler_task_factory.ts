@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ConfigType } from '../../../config';
 import { SchedulerTaskRunner } from './scheduler_task_runner';
@@ -15,6 +15,7 @@ interface AnalyticsIndexSchedulerTaskFactoryParams {
   logger: Logger;
   analyticsConfig: ConfigType['analytics'];
   getTaskManager: () => Promise<TaskManagerStartContract>;
+  getESClient: () => Promise<ElasticsearchClient>;
 }
 
 export class AnalyticsIndexSchedulerTaskFactory {
@@ -22,17 +23,20 @@ export class AnalyticsIndexSchedulerTaskFactory {
   private readonly logger: Logger;
   private readonly getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private readonly getTaskManager: () => Promise<TaskManagerStartContract>;
+  private readonly getESClient: () => Promise<ElasticsearchClient>;
 
   constructor({
     logger,
     getUnsecureSavedObjectsClient,
     analyticsConfig,
     getTaskManager,
+    getESClient,
   }: AnalyticsIndexSchedulerTaskFactoryParams) {
     this.analyticsConfig = analyticsConfig;
     this.logger = logger;
     this.getUnsecureSavedObjectsClient = getUnsecureSavedObjectsClient;
     this.getTaskManager = getTaskManager;
+    this.getESClient = getESClient;
   }
 
   public create() {
@@ -41,6 +45,7 @@ export class AnalyticsIndexSchedulerTaskFactory {
       logger: this.logger,
       getUnsecureSavedObjectsClient: this.getUnsecureSavedObjectsClient,
       getTaskManager: this.getTaskManager,
+      getESClient: this.getESClient,
     });
   }
 }

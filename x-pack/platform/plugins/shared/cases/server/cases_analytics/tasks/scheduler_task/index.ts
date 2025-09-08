@@ -10,11 +10,8 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
-  SavedObjectsClient,
-  type SavedObjectsClientContract,
-  type CoreSetup,
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { ConfigType } from '../../../config';
 import { ANALYTICS_SCHEDULER_TASK_TYPE, CASE_SAVED_OBJECT } from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
@@ -48,6 +45,10 @@ export function registerCAISchedulerTask({
     }
     throw new Error('Could not get taskManager start contract');
   };
+  const getESClient = async (): Promise<ElasticsearchClient> => {
+    const [{ elasticsearch }] = await core.getStartServices();
+    return elasticsearch.client.asInternalUser;
+  };
 
   taskManager.registerTaskDefinitions({
     [ANALYTICS_SCHEDULER_TASK_TYPE]: {
@@ -59,6 +60,7 @@ export function registerCAISchedulerTask({
           getTaskManager,
           logger,
           analyticsConfig,
+          getESClient,
         }).create();
       },
     },
