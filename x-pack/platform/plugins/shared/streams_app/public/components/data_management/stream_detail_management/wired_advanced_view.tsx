@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import { Streams, isRoot } from '@kbn/streams-schema';
@@ -118,9 +118,7 @@ export function Settings({
     () => Streams.ClassicStream.GetResponse.is(definition),
     [definition]
   );
-  const [settings, setSettings] = useState<Record<string, Setting>>(
-    toStringValues(definition.stream.ingest.settings, definition.effective_settings)
-  );
+  const [settings, setSettings] = useState<Record<string, Setting>>({});
   const hasChanges = useMemo(
     () => !isEqual(originalSettings, settings),
     [originalSettings, settings]
@@ -137,7 +135,7 @@ export function Settings({
         setSettings((prev) => ({ ...prev, [name]: setting }));
       }
     },
-    [isClassicStream, definition.stream.name, setSettings]
+    [isClassicStream, definition, setSettings]
   );
   const abortController = useAbortController();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -192,6 +190,11 @@ export function Settings({
       setIsUpdating(false);
     }
   }, [definition, settings]);
+
+  useEffect(() => {
+    if (!definition) return;
+    setSettings(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
+  }, [definition, setSettings]);
 
   return (
     <>
