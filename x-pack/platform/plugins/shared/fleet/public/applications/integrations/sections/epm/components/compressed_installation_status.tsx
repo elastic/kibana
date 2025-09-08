@@ -42,11 +42,14 @@ export const CompressedInstallationStatus: React.FC<{
         />
       ) : (
         <EuiIconTip
-          data-test-subj="compressed-installed-tooltip compressed-installed-icon"
+          data-test-subj="compressed-installed-tooltip"
           position="bottom"
           content={installStatus === 'installed' ? installedTooltip : installFailedTooltip}
           anchorClassName={styles.compressedInstalledStatusIcon}
           type="warningFilled"
+          iconProps={{
+            'data-test-subj': 'compressed-installed-icon',
+          }}
         />
       )}
     </div>

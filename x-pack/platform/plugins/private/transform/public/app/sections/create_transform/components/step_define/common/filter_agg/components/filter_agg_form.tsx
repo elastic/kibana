@@ -94,7 +94,9 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
                 type="question"
                 size="s"
                 color="subdued"
-                className="eui-alignTop"
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
               />
             </>
           }
