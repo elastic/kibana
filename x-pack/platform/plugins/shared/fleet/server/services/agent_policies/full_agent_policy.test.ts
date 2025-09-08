@@ -30,7 +30,6 @@ import {
   generateOtelcolConfig,
 } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
-import { skip } from 'node:test';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
 jest.mock('../epm/packages');

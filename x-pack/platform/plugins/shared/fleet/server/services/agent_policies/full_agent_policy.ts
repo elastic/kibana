@@ -27,7 +27,6 @@ import {
   type FleetServerHost,
   type AgentPolicy,
   type TemplateAgentPolicyInput,
-  OutputType,
 } from '../../types';
 import type {
   DownloadSource,
@@ -36,8 +35,6 @@ import type {
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
   OTelCollectorConfig,
-  OTelCollectorPipeline,
-  OTelCollectorPipelineID,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
@@ -1035,15 +1032,12 @@ function attachExporter(config: OTelCollectorConfig, dataOutput: Output) {
 
 function generateExporter(dataOutput: Output) {
   switch (dataOutput.type) {
-  case "elasticsearch":
-  case "remote_elasticsearch":
+  case outputType.Elasticsearch:
     return {
       [`elasticsearch/${dataOutput.id}`]: {
         "endpoints": dataOutput.hosts,
-        // TODO: Add secrets.
       },
     };
-    break;
   default:
     throw new Error(`output type ${dataOutput.type} not supported when policy contains OTel inputs`)
   }
@@ -1052,4 +1046,3 @@ function generateExporter(dataOutput: Output) {
 function signalType(id : string) : string {
   return id.substring(0, id.indexOf('/'));
 }
-
