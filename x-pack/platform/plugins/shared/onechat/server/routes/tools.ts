@@ -149,7 +149,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       })
     );
 
-  // create tool
+  // create connector tool
   router.versioned
     .post({
       path: '/api/chat/tools/connector',

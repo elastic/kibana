@@ -12,6 +12,10 @@ import {
   SimpleConnectorForm,
   SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import https from 'https';
+import { EuiButton } from '@elastic/eui';
+import { OAuthGoogleDriveConnector } from '@kbn/stack-connectors-plugin/server/connector_types/oauth_google_drive';
+import axios from 'axios';
 
 const configFormSchema: ConfigFieldSchema[] = [];
 
@@ -29,9 +33,15 @@ const OAuthGoogleDriveConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         configFormSchema={configFormSchema}
         secretsFormSchema={secretsFormSchema}
       />
+      <EuiButton onClick={handleAuthenticate} fill> Authenticate </EuiButton>
     </>
   );
 };
+
+const handleAuthenticate = async () => {
+
+  
+}
 
 // eslint-disable-next-line import/no-default-export
 export { OAuthGoogleDriveConnectorFields as default };
