@@ -30,7 +30,6 @@ import {
   EuiCodeBlock,
   useGeneratedHtmlId,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
