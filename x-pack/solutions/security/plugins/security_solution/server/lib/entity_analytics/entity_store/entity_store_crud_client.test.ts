@@ -10,7 +10,7 @@ import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import type {
-  CRUDEntity,
+  Entity,
   EngineDescriptor,
   EntityType,
 } from '../../../../common/api/entity_analytics/entity_store';
@@ -42,7 +42,7 @@ describe('EntityStoreCrudClient', () => {
       );
 
       expect(async () =>
-        client.singleUpdateEntity('host', 'host-id', {
+        client.upsertEntity('host', 'host-id', {
           entity: {
             id: 'host-id',
           },
@@ -64,7 +64,7 @@ describe('EntityStoreCrudClient', () => {
       );
 
       expect(async () =>
-        client.singleUpdateEntity('user', 'user-id', {
+        client.upsertEntity('user', 'user-id', {
           entity: {
             id: 'user-id',
           },
@@ -82,7 +82,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.singleUpdateEntity('generic', 'db-2', entity)).rejects.toThrow(
+      expect(async () => client.upsertEntity('generic', 'db-2', entity)).rejects.toThrow(
         new BadCRUDRequestError(
           `The id provided in the path, and the id provided in the body doesn't match`
         )
@@ -91,7 +91,7 @@ describe('EntityStoreCrudClient', () => {
 
     it('when not allowed attributes are updated, throw error', async () => {
       mockStatusRunning(dataClientMock, 'host');
-      const doc: CRUDEntity = {
+      const doc: Entity = {
         entity: {
           id: 'host-1',
           type: 'update',
@@ -102,7 +102,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.singleUpdateEntity('host', 'host-1', doc)).rejects.toThrow(
+      expect(async () => client.upsertEntity('host', 'host-1', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
             `updated without forcing it (?force=true): type, sub_type`
@@ -114,7 +114,7 @@ describe('EntityStoreCrudClient', () => {
       mockStatusRunning(dataClientMock, 'host');
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
 
-      const doc: CRUDEntity = {
+      const doc: Entity = {
         entity: {
           id: 'host-1',
           attributes: {
@@ -127,7 +127,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.singleUpdateEntity('host', 'host-1', doc)).rejects.toThrow(
+      expect(async () => client.upsertEntity('host', 'host-1', doc)).rejects.toThrow(
         new DocumentNotFoundError()
       );
     });
@@ -144,7 +144,7 @@ describe('EntityStoreCrudClient', () => {
       // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
       const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
 
-      const doc: CRUDEntity = {
+      const doc: Entity = {
         entity: {
           id: 'host-1',
           attributes: {
@@ -157,7 +157,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      await client.singleUpdateEntity('host', 'host-1', doc);
+      await client.upsertEntity('host', 'host-1', doc);
 
       expect(dataClientMock.status).toBeCalledWith({ include_components: true });
       expect(esClientMock.updateByQuery).toBeCalledWith({

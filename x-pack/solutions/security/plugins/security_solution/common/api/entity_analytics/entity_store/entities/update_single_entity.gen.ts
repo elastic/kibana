@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { EntityType } from '../common.gen';
-import { CRUDEntity } from './common.gen';
+import { Entity } from './common.gen';
 
 export type UpdateSingleEntityRequestQuery = z.infer<typeof UpdateSingleEntityRequestQuery>;
 export const UpdateSingleEntityRequestQuery = z.object({
@@ -34,8 +34,8 @@ export const UpdateSingleEntityRequestParams = z.object({
 export type UpdateSingleEntityRequestParamsInput = z.input<typeof UpdateSingleEntityRequestParams>;
 
 export type UpdateSingleEntityRequestBody = z.infer<typeof UpdateSingleEntityRequestBody>;
-export const UpdateSingleEntityRequestBody = CRUDEntity;
+export const UpdateSingleEntityRequestBody = Entity;
 export type UpdateSingleEntityRequestBodyInput = z.input<typeof UpdateSingleEntityRequestBody>;
 
 export type UpdateSingleEntityResponse = z.infer<typeof UpdateSingleEntityResponse>;
-export const UpdateSingleEntityResponse = CRUDEntity;
+export const UpdateSingleEntityResponse = Entity;

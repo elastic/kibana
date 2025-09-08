@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-import type { CRUDEntity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import { getEntitiesIndexName } from './utils';
@@ -37,7 +37,7 @@ export class EntityStoreCrudClient {
     this.dataClient = dataClient;
   }
 
-  public async singleUpdateEntity(type: EntityType, entityId: string, doc: CRUDEntity) {
+  public async upsertEntity(type: EntityType, entityId: string, doc: Entity) {
     await this.assertEngineIsRunning(type);
     this.validEntityUpdate(doc, entityId);
 
@@ -83,7 +83,7 @@ export class EntityStoreCrudClient {
     });
   }
 
-  private validEntityUpdate(doc: CRUDEntity, entityId: string) {
+  private validEntityUpdate(doc: Entity, entityId: string) {
     if (entityId !== doc.entity.id) {
       throw new BadCRUDRequestError(
         `The id provided in the path, and the id provided in the body doesn't match`
