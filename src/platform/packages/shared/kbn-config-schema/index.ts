@@ -70,6 +70,7 @@ import {
   StreamType,
   Lazy,
 } from './src/types';
+import type { DurationValueType } from './src/types/duration_type';
 import type { ByteSizeValueType } from './src/types/byte_size_type';
 
 export type {
@@ -139,9 +140,9 @@ function byteSize<D extends ByteSizeValueType = never>(
   return new ByteSizeType(options);
 }
 
-function duration<D extends DefaultValue<Duration> = never>(
+function duration<D extends DefaultValue<DurationValueType> = never>(
   options?: DurationOptions<D>
-): Type<Duration, D> {
+): Type<Duration, [D] extends [never] ? never : Duration> {
   return new DurationType(options);
 }
 
@@ -540,8 +541,8 @@ function conditional<A extends ConditionalTypeValue, B, C, DV extends DefaultVal
 /**
  * Useful for creating recursive schemas.
  */
-function lazy<T>(id: string) {
-  return new Lazy<T>(id);
+function lazy<T, D extends DefaultValue<T> = never>(id: string): Type<T, D> {
+  return new Lazy<T, D>(id);
 }
 
 export const schema = {
