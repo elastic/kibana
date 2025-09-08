@@ -67,6 +67,8 @@ export class SchedulerTaskRunner implements CancellableTask {
             logger: this.logger,
             isServerless: false,
             taskManager,
+          }).catch(() => {
+            this.logger.error(`Failed to create analytics indexes for space ${spaceId}`);
           });
           return;
         } else {
