@@ -11,7 +11,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
+import {
+  getCurrentConversationOwner,
+  ConversationSharedState,
+} from '@kbn/elastic-assistant-common';
+import { ShareSelect } from '../../share_conversation/share_select';
 import type { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -30,6 +35,7 @@ export interface ConversationSettingsEditorProps {
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
+  isAssistantSharingEnabled?: boolean;
   isDisabled?: boolean;
   selectedConversation: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -46,6 +52,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     allSystemPrompts,
     conversationsSettingsBulkActions,
     http,
+    isAssistantSharingEnabled = false,
     isDisabled = false,
     selectedConversation,
     setConversationsSettingsBulkActions,
@@ -94,6 +101,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                   ).apiConfig ?? {}),
                   defaultSystemPromptId: newSystemPromptId,
                 },
+                id: updatedConversation.id,
               },
             },
           });
@@ -150,6 +158,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                   provider: config?.apiProvider,
                   model: config?.defaultModel,
                 },
+                id: updatedConversation.id,
               },
             },
           });
@@ -191,6 +200,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                   ).apiConfig ?? {}),
                   model,
                 },
+                id: updatedConversation.id,
               },
             },
           });
@@ -198,6 +208,49 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
       },
       [conversationsSettingsBulkActions, conversationUpdates, setConversationsSettingsBulkActions]
     );
+    const handleOnSharedSelectionChange = useCallback(
+      (conversationSharedState: ConversationSharedState, nextUsers?: User[]) => {
+        if (conversationUpdates != null) {
+          let users: User[] = [];
+          if (conversationSharedState === ConversationSharedState.PRIVATE) {
+            users = [getCurrentConversationOwner(selectedConversation)];
+          } else if (conversationSharedState === ConversationSharedState.RESTRICTED) {
+            users = nextUsers ?? [];
+          }
+          // For ConversationSharedState.SHARED (globally), users remains []
+          const updatedConversation = {
+            ...conversationUpdates,
+            users,
+          };
+          setConversationUpdates(updatedConversation);
+          setConversationsSettingsBulkActions({
+            ...conversationsSettingsBulkActions,
+            update: {
+              ...(conversationsSettingsBulkActions.update ?? {}),
+              [updatedConversation.id]: {
+                ...(conversationsSettingsBulkActions.update
+                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  : {}),
+                users,
+                id: updatedConversation.id,
+              },
+            },
+          });
+        }
+      },
+      [
+        conversationUpdates,
+        selectedConversation,
+        conversationsSettingsBulkActions,
+        setConversationsSettingsBulkActions,
+      ]
+    );
+
+    const handleUsersUpdate = useCallback(
+      (users: User[]) => handleOnSharedSelectionChange(ConversationSharedState.RESTRICTED, users),
+      [handleOnSharedSelectionChange]
+    );
+
     return (
       <>
         <EuiFormRow
@@ -220,6 +273,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         <EuiFormRow
           data-test-subj="connector-field"
           display="rowCompressed"
+          fullWidth
           label={i18n.CONNECTOR_TITLE}
           helpText={
             <EuiLink
@@ -236,25 +290,41 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         >
           <ConnectorSelector
             isDisabled={isDisabled}
+            fullWidth
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
           />
         </EuiFormRow>
 
-        {selectedConnector?.isPreconfigured === false &&
-          selectedProvider === OpenAiProviderType.OpenAi && (
-            <EuiFormRow
-              data-test-subj="model-field"
-              display="rowCompressed"
-              label={i18nModel.MODEL_TITLE}
-              helpText={i18nModel.HELP_LABEL}
-            >
-              <ModelSelector
-                onModelSelectionChange={handleOnModelSelectionChange}
-                selectedModel={selectedModel}
-              />
-            </EuiFormRow>
-          )}
+        {!selectedConnector?.isPreconfigured && selectedProvider === OpenAiProviderType.OpenAi && (
+          <EuiFormRow
+            data-test-subj="model-field"
+            display="rowCompressed"
+            fullWidth
+            label={i18nModel.MODEL_TITLE}
+            helpText={i18nModel.HELP_LABEL}
+          >
+            <ModelSelector
+              onModelSelectionChange={handleOnModelSelectionChange}
+              selectedModel={selectedModel}
+            />
+          </EuiFormRow>
+        )}
+
+        {isAssistantSharingEnabled && (
+          <EuiFormRow
+            data-test-subj="shared-field"
+            display="rowCompressed"
+            fullWidth
+            label={i18n.SHARING_OPTIONS}
+          >
+            <ShareSelect
+              selectedConversation={selectedConversation}
+              onSharedSelectionChange={handleOnSharedSelectionChange}
+              onUsersUpdate={handleUsersUpdate}
+            />
+          </EuiFormRow>
+        )}
       </>
     );
   }
