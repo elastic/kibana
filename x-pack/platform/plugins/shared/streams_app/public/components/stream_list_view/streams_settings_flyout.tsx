@@ -34,6 +34,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 export function StreamsSettingsFlyout({
   onClose,
@@ -53,6 +54,13 @@ export function StreamsSettingsFlyout({
     core,
   } = context;
 
+  const {
+    ui: { manage: canManageWiredKibana },
+  } = useStreamsPrivileges();
+
+  const [canManageWiredElasticsearch, setCanManageWiredElasticsearch] =
+    React.useState<boolean>(true);
+
   const [wiredChecked, setWiredChecked] = React.useState<boolean | undefined>(undefined);
   const [loading, setLoading] = React.useState(true);
   const [showDisableModal, setShowDisableModal] = React.useState(false);
@@ -60,12 +68,15 @@ export function StreamsSettingsFlyout({
   const [isDisabling, setIsDisabling] = React.useState(false);
 
   React.useEffect(() => {
-    const sub = wiredStatus$.subscribe(({ status }) => {
-      setWiredChecked(status === 'enabled');
+    const sub = wiredStatus$.subscribe((status) => {
+      setWiredChecked(status.enabled === true);
+      setCanManageWiredElasticsearch(Boolean(status.can_manage));
       setLoading(false);
     });
     return () => sub.unsubscribe();
   }, [wiredStatus$]);
+
+  console.log(['canManageWiredKibana', canManageWiredKibana, 'canManageWiredElasticsearch', canManageWiredElasticsearch]);
 
   const handleSwitchChange = async () => {
     if (wiredChecked) {
@@ -233,6 +244,7 @@ output {
                   checked={Boolean(wiredChecked)}
                   onChange={handleSwitchChange}
                   data-test-subj="streamsWiredSwitch"
+                  disabled={!(canManageWiredKibana && canManageWiredElasticsearch)}
                 />
               )}
             </EuiFormRow>

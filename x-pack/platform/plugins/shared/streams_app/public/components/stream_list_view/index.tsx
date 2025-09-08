@@ -25,6 +25,7 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -43,7 +44,7 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        streams: { streamsRepositoryClient, wiredStatus$ },
         share,
       },
     },
@@ -58,6 +59,8 @@ export function StreamListView() {
         onboardingLocator.navigate({});
       }
     : undefined;
+
+  const wiredStatus = useObservable(wiredStatus$);
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -75,12 +78,11 @@ export function StreamListView() {
   );
 
   const {
-    ui: { manage },
     features: { groupStreams },
   } = useStreamsPrivileges();
 
-  // TODO: Also enable for serverless
-  const showEnableStreamsButton = isServerless === false && manage;
+  // Always show settings flyout button if not serverless
+  const showSettingsFlyoutButton = isServerless === false;
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
@@ -145,7 +147,7 @@ export function StreamListView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {showEnableStreamsButton && (
+            {showSettingsFlyoutButton && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
                   {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {

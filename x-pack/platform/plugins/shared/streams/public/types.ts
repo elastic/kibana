@@ -12,8 +12,13 @@ import type { StreamsRepositoryClient } from './api';
 import type { StreamsPublicConfig } from '../common/config';
 import type { EnableStreamsResponse, DisableStreamsResponse } from '../server/lib/streams/client';
 
-export interface StreamsStatus {
-  status: 'unknown' | 'enabled' | 'disabled';
+export interface StreamsNavigationStatus {
+  status: 'enabled' | 'disabled';
+}
+
+export interface WiredStreamsStatus {
+  enabled: boolean | 'conflict' | 'unknown';
+  can_manage: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -21,8 +26,8 @@ export interface StreamsPluginSetup {}
 
 export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
-  navigationStatus$: Observable<StreamsStatus>;
-  wiredStatus$: Observable<StreamsStatus>;
+  navigationStatus$: Observable<StreamsNavigationStatus>;
+  wiredStatus$: Observable<WiredStreamsStatus>;
   enableWiredMode: (signal: AbortSignal) => Promise<EnableStreamsResponse>;
   disableWiredMode: (signal: AbortSignal) => Promise<DisableStreamsResponse>;
   config$: Observable<StreamsPublicConfig>;
