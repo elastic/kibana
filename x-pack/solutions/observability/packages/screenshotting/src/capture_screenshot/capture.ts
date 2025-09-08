@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import html2canvas from 'html2canvas';
+// @ts-expect-error - this module has no exported types
+import domtoimage from 'dom-to-image-more';
 import type { CaptureResult, CaptureScreenshotOptions } from '../types';
 import {
   getSelectorForUrl,
@@ -49,7 +50,7 @@ export const captureScreenshot = async (
       await waitForNoLoadingCharts(iframe, timeout, stableFor);
 
       try {
-        const canvas = await html2canvas(element);
+        const canvas = await domtoimage.toCanvas(element);
         const image = canvas.toDataURL('image/png');
         const blob = await canvasToBlob(canvas);
         cleanup();

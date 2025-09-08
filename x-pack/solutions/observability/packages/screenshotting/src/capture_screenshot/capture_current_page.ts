@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import html2canvas from 'html2canvas';
+// @ts-expect-error - this module has no exported types
+import domtoimage from 'dom-to-image-more';
 import { canvasToBlob, scrollAndLoadFully, wait } from './utils';
 import type { CaptureResult } from '../types';
 
@@ -18,7 +19,7 @@ export const takeScreenshot = async (): Promise<CaptureResult | null> => {
     await scrollAndLoadFully();
     await wait(5000);
 
-    const canvas = await html2canvas(element as HTMLElement);
+    const canvas = await domtoimage.toCanvas(element as HTMLElement);
     const image = canvas.toDataURL('image/png');
     const blob = await canvasToBlob(canvas);
 
