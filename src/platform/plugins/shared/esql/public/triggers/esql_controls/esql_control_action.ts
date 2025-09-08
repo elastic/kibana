@@ -23,7 +23,7 @@ import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
-import { openESQLControlFlyout } from './esql_control_helpers';
+import { openESQLControlFlyout } from '../../flyout';
 
 function isESQLVariableType(value: string): value is ESQLVariableType {
   return Object.values(ESQLVariableType).includes(value as ESQLVariableType);
