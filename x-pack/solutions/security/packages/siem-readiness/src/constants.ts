@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export type LensContentType = 'lens';
+export const SIEM_READINESS_PACKAGE_NAME = '@kbn/siem-readiness';
+export const POST_SIEM_READINESS_TASK_API_PATH = '/api/siem_readiness/post_task';

@@ -1143,6 +1143,7 @@ x-pack/solutions/security/packages/index-adapter @elastic/security-threat-huntin
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/siem_readiness @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -2469,6 +2470,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - Cloud Security Posture
 
 x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/kibana-cloud-security-posture
 
 ## Security Solution sub teams - Security Entity Store
 x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/entity-store
@@ -2823,6 +2825,7 @@ x-pack/solutions/security/plugins/security_solution/public/common/components/ses
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/kibana-cloud-security-posture
 /x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/kibana-cloud-security-posture
 
