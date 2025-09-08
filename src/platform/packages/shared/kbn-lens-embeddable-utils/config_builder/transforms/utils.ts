@@ -151,7 +151,10 @@ function buildDatasourceStatesLayer(
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
-  function buildValueLayer(config: LensApiState, ds: NarrowByType<LensApiState['dataset'], 'table'>): TextBasedPersistedState['layers'][0] {
+  function buildValueLayer(
+    config: LensApiState,
+    ds: NarrowByType<LensApiState['dataset'], 'table'>
+  ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
     const newLayer = {
       table,
@@ -171,7 +174,10 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  function buildESQLLayer(config: LensApiState, ds:  NarrowByType<LensApiState['dataset'], 'esql'>): TextBasedPersistedState['layers'][0] {
+  function buildESQLLayer(
+    config: LensApiState,
+    ds: NarrowByType<LensApiState['dataset'], 'esql'>
+  ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i) as TextBasedLayerColumn[];
 
     const newLayer = {

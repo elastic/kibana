@@ -73,7 +73,6 @@ export function fromBucketLensApiToLensState(
   throw new Error(`Unsupported bucket operation`);
 }
 
-
 export function fromBucketLensStateToAPI(
   column: FiltersIndexPatternColumn,
   columns: { column: AnyLensStateColumn; id: string }[]
