@@ -44,8 +44,8 @@ describe('Controls integration with Graph', () => {
     useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: false });
   });
 
-  describe('center graph to nodes with hasOriginEvents flag', () => {
-    it('should render center button when all nodes have hasOriginEvents set to true', async () => {
+  describe('center graph on nodes with isOrigin or isOriginAlert flags', () => {
+    it('should render center button when some nodes have isOrigin set to true', async () => {
       renderGraphPreview({
         nodes: [
           {
@@ -53,21 +53,19 @@ describe('Controls integration with Graph', () => {
             label: 'Node 1',
             color: 'primary',
             shape: 'hexagon',
-            hasOriginEvents: true,
           },
           {
             id: 'node2',
-            label: 'Node 2',
+            label: 'Label Node',
             color: 'primary',
-            shape: 'rectangle',
-            hasOriginEvents: true,
+            shape: 'label',
+            isOrigin: true,
           },
           {
             id: 'node3',
             label: 'Node 3',
             color: 'primary',
             shape: 'ellipse',
-            hasOriginEvents: true,
           },
         ],
         edges: [],
@@ -79,7 +77,7 @@ describe('Controls integration with Graph', () => {
       });
     });
 
-    it('should render center button when some nodes have hasOriginEvents set to true', async () => {
+    it('should render center button when some nodes have isOriginAlert set to true', async () => {
       renderGraphPreview({
         nodes: [
           {
@@ -87,21 +85,19 @@ describe('Controls integration with Graph', () => {
             label: 'Node 1',
             color: 'primary',
             shape: 'hexagon',
-            hasOriginEvents: true,
           },
           {
             id: 'node2',
-            label: 'Node 2',
-            color: 'primary',
-            shape: 'rectangle',
-            hasOriginEvents: false,
+            label: 'Label Node',
+            color: 'danger',
+            shape: 'label',
+            isOriginAlert: true,
           },
           {
             id: 'node3',
             label: 'Node 3',
             color: 'primary',
             shape: 'ellipse',
-            // hasOriginEvents undefined (should be treated as false)
           },
         ],
         edges: [],
@@ -113,7 +109,7 @@ describe('Controls integration with Graph', () => {
       });
     });
 
-    it('should not render center button when no nodes have hasOriginEvents set to true', async () => {
+    it('should not render center button when no nodes have isOrigin or isOriginAlert set to true', async () => {
       renderGraphPreview({
         nodes: [
           {
@@ -121,21 +117,19 @@ describe('Controls integration with Graph', () => {
             label: 'Node 1',
             color: 'primary',
             shape: 'hexagon',
-            hasOriginEvents: false,
           },
           {
             id: 'node2',
             label: 'Node 2',
-            color: 'primary',
-            shape: 'rectangle',
-            hasOriginEvents: false,
+            color: 'danger',
+            shape: 'label',
+            // undefined isOrigin and isOriginAlert should be treated as false
           },
           {
             id: 'node3',
             label: 'Node 3',
             color: 'primary',
             shape: 'ellipse',
-            // hasOriginEvents undefined (should be treated as false)
           },
         ],
         edges: [],
@@ -159,49 +153,58 @@ describe('Controls integration with Graph', () => {
       });
     });
 
-    it('should center graph to only nodes with hasOriginEvents=true regardless of edge connections when center button is clicked', async () => {
+    it('should center graph on only nodes with isOrigin=true or isOriginAlert=true regardless of edge connections when center button is clicked', async () => {
       renderGraphPreview({
         nodes: [
           {
-            id: 'origin1',
-            label: 'Origin Node 1',
+            id: 'actor',
+            label: 'Actor Node',
             color: 'primary',
             shape: 'hexagon',
-            hasOriginEvents: true,
           },
           {
-            id: 'regular1',
-            label: 'Regular Node 1',
+            id: 'originEvent',
+            label: 'Origin Event',
             color: 'primary',
-            shape: 'rectangle',
-            hasOriginEvents: false,
+            shape: 'label',
+            isOrigin: true,
           },
           {
-            id: 'origin2',
-            label: 'Origin Node 2',
+            id: 'originAlert',
+            label: 'Origin Alert',
+            color: 'danger',
+            shape: 'label',
+            isOriginAlert: true,
+          },
+          {
+            id: 'noOriginEvent',
+            label: 'No Origin Event',
+            color: 'primary',
+            shape: 'label',
+          },
+          {
+            id: 'noOriginAlert',
+            label: 'No Origin Alert',
+            color: 'danger',
+            shape: 'label',
+          },
+          {
+            id: 'target',
+            label: 'Target Node',
             color: 'primary',
             shape: 'ellipse',
-            hasOriginEvents: true,
-          },
-          {
-            id: 'regular2',
-            label: 'Regular Node 2',
-            color: 'primary',
-            shape: 'diamond',
-            // hasOriginEvents undefined
-          },
-          {
-            id: 'origin3-isolated',
-            label: 'Regular Node 2',
-            color: 'primary',
-            shape: 'diamond',
-            hasOriginEvents: true,
           },
         ],
         edges: [
-          { id: 'edge1', color: 'primary', source: 'origin1', target: 'regular1' },
-          { id: 'edge2', color: 'primary', source: 'origin1', target: 'origin2' },
-          { id: 'edge1', color: 'primary', source: 'regular1', target: 'regular2' },
+          { id: 'actorToLabel1', color: 'primary', source: 'actor', target: 'originEvent' },
+          { id: 'actorToLabel2', color: 'primary', source: 'actor', target: 'originAlert' },
+          { id: 'actorToLabel3', color: 'primary', source: 'actor', target: 'noOriginEvent' },
+          { id: 'actorToLabel4', color: 'primary', source: 'actor', target: 'noOriginAlert' },
+
+          { id: 'labelToTarget1', color: 'primary', source: 'originEvent', target: 'target' },
+          { id: 'labelToTarget2', color: 'primary', source: 'originAlert', target: 'target' },
+          { id: 'labelToTarget3', color: 'primary', source: 'noOriginEvent', target: 'target' },
+          { id: 'labelToTarget4', color: 'primary', source: 'noOriginAlert', target: 'target' },
         ],
         interactive: true,
       });
@@ -215,10 +218,9 @@ describe('Controls integration with Graph', () => {
       });
 
       await waitFor(() => {
-        // Should only center on nodes with hasOriginEvents=true
         expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
           duration: 200,
-          nodes: [{ id: 'origin1' }, { id: 'origin2' }, { id: 'origin3-isolated' }],
+          nodes: [{ id: 'originEvent' }, { id: 'originAlert' }],
         });
       });
     });
@@ -228,10 +230,10 @@ describe('Controls integration with Graph', () => {
         nodes: [
           {
             id: 'node1',
-            label: 'Node 1',
+            label: 'Label Node 1',
             color: 'primary',
-            shape: 'hexagon',
-            hasOriginEvents: false,
+            shape: 'label',
+            isOrigin: false,
           },
         ],
         edges: [],
@@ -243,17 +245,16 @@ describe('Controls integration with Graph', () => {
         expect(screen.queryByTestId(GRAPH_CONTROLS_CENTER_ID)).not.toBeInTheDocument();
       });
 
-      // Update node to have hasOriginEvents=true
       rerender(
         <TestProviders>
           <Graph
             nodes={[
               {
                 id: 'node1',
-                label: 'Node 1',
+                label: 'Label Node 1',
                 color: 'primary',
-                shape: 'hexagon',
-                hasOriginEvents: true,
+                shape: 'label',
+                isOrigin: true,
               },
             ]}
             edges={[]}
@@ -275,10 +276,10 @@ describe('Controls integration with Graph', () => {
         nodes: [
           {
             id: 'node1',
-            label: 'Node 1',
+            label: 'Label Node 1',
             color: 'primary',
-            shape: 'hexagon',
-            hasOriginEvents: true,
+            shape: 'label',
+            isOrigin: true,
           },
         ],
         edges: [],
@@ -298,10 +299,10 @@ describe('Controls integration with Graph', () => {
         nodes: [
           {
             id: 'node1',
-            label: 'Node 1',
+            label: 'Label Node 1',
             color: 'primary',
-            shape: 'hexagon',
-            hasOriginEvents: true,
+            shape: 'label',
+            isOrigin: true,
           },
         ],
         edges: [],
