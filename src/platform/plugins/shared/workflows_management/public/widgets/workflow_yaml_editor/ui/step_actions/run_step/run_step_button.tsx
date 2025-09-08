@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 export interface RunStepButtonProps {
-  stepId: string;
+  onClick: () => void;
 }
 
-export const RunStepButton: React.FC<RunStepButtonProps> = ({ stepId }) => {
-  function onClick() {
-    console.log('Run step action clicked for stepId:', stepId);
-  }
-
+export const RunStepButton: React.FC<RunStepButtonProps> = ({ onClick }) => {
   return (
     <EuiButtonIcon
       iconType="play"

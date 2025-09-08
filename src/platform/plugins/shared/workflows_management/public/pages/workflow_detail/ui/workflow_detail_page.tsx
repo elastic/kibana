@@ -46,7 +46,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     error: workflowError,
   } = useWorkflowDetail(id);
 
-  const { activeTab, selectedExecutionId, selectedStepId, setActiveTab } = useWorkflowUrlState();
+  const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
+    useWorkflowUrlState();
+  const [individualStepExecutionId, setIndividualStepExecutionId] = useState<string | null>(null);
 
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
@@ -69,7 +71,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
   ]);
 
-  const { updateWorkflow, runWorkflow } = useWorkflowActions();
+  const { updateWorkflow, runWorkflow, runIndividualStep } = useWorkflowActions();
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow =
     Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
@@ -199,6 +201,17 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(originalWorkflowYaml !== wfString);
   };
 
+  const handleStepRun = async (params: { stepId: string; actionType: string }) => {
+    if (params.actionType === 'run') {
+      const response = await runIndividualStep.mutateAsync({
+        stepId: params.stepId,
+        workflowYaml,
+        stepInputs: {},
+      });
+      setIndividualStepExecutionId(response.workflowExecutionId);
+    }
+  };
+
   if (workflowError) {
     const error = workflowError as Error;
     return (
@@ -250,6 +263,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
                   readOnly={activeTab === 'executions'}
+                  onStepActionClicked={handleStepRun}
                 />
               </React.Suspense>
             </EuiFlexItem>
@@ -263,6 +277,17 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 </React.Suspense>
               </EuiFlexItem>
             )}
+            {workflow && individualStepExecutionId && (
+              <EuiFlexItem css={styles.stepExecutionListColumn}>
+                {workflow && (
+                  <WorkflowExecutionDetail
+                    workflowExecutionId={individualStepExecutionId}
+                    workflowYaml={yamlValue}
+                    onClose={() => setIndividualStepExecutionId(null)}
+                  />
+                )}
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         {selectedExecutionId && (
@@ -271,6 +296,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
                 workflowYaml={yamlValue}
+                onClose={() => setSelectedExecution(null)}
               />
             )}
           </EuiFlexItem>

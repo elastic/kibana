@@ -100,6 +100,7 @@ export interface WorkflowYAMLEditorProps {
   onChange?: (value: string | undefined) => void;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
   onSave?: (value: string) => void;
+  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -114,6 +115,7 @@ export const WorkflowYAMLEditor = ({
   onChange,
   onSave,
   onValidationErrors,
+  onStepActionClicked,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -498,7 +500,10 @@ export const WorkflowYAMLEditor = ({
           alignItems="center"
         >
           <EuiFlexItem grow={false}>
-            <StepActions provider={stepActionsProviderRef.current} />
+            <StepActions
+              provider={stepActionsProviderRef.current}
+              onStepActionClicked={onStepActionClicked}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

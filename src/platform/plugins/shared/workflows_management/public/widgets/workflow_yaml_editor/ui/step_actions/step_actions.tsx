@@ -14,13 +14,21 @@ import { RunStepButton } from './run_step/run_step_button';
 
 interface StepActionsProps {
   provider: StepActionsProvider;
+  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
-export const StepActions: React.FC<StepActionsProps> = (props) => {
+export const StepActions: React.FC<StepActionsProps> = ({ provider, onStepActionClicked }) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <RunStepButton stepId={props.provider.getCurrentElasticsearchStep()?.name as string} />
+        <RunStepButton
+          onClick={() =>
+            onStepActionClicked?.({
+              stepId: provider.getCurrentElasticsearchStep()?.name as string,
+              actionType: 'run',
+            })
+          }
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

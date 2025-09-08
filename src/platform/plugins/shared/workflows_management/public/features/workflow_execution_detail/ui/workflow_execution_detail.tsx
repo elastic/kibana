@@ -20,10 +20,12 @@ export interface WorkflowExecutionProps {
   workflowExecutionId: string;
   workflowYaml: string;
   fields?: Array<keyof EsWorkflowStepExecution>;
+  onClose: () => void;
 }
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
   workflowExecutionId,
+  onClose,
 }) => {
   const {
     data: workflowExecution,
@@ -32,8 +34,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
-  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedExecution } =
-    useWorkflowUrlState();
+  const { setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
 
   const closeFlyout = useCallback(() => {
     setSelectedStepExecution(null);
@@ -116,10 +117,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     closeFlyout,
   ]);
 
-  const closeSidePanel = useCallback(() => {
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
-
   return (
     <>
       {renderSelectedStepExecutionFlyout()}
@@ -130,7 +127,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
         onStepExecutionClick={(stepExecutionId) => {
           setSelectedStepExecution(stepExecutionId);
         }}
-        onClose={closeSidePanel}
+        onClose={onClose}
         selectedId={selectedStepExecutionId ?? null}
       />
     </>
