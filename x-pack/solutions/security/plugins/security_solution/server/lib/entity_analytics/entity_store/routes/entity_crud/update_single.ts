@@ -45,7 +45,7 @@ export const updateSingleEntity = (router: EntityAnalyticsRoutesDeps['router'], 
         try {
           await secSol
             .getEntityStoreCrudClient()
-            .singleUpdateEntity(request.params.entityType, request.params.entityId, request.body);
+            .upsertEntity(request.params.entityType, request.params.entityId, request.body);
 
           return response.ok();
         } catch (error) {
