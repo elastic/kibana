@@ -32,13 +32,13 @@ import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors'
 import {
   registerUnifiedHoverProvider,
   createUnifiedActionsProvider,
+  createStepExecutionProvider,
+  registerMonacoConnectorHandler,
 } from '../lib/monaco_providers';
-import { createStepExecutionProvider } from '../lib/monaco_providers/step_execution_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
-import { registerMonacoConnectorHandler } from '../lib/monaco_providers';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
 
 const getTriggerNodes = (
@@ -282,6 +282,12 @@ export const WorkflowYAMLEditor = ({
 
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
+  const stepExecutionsRef = useRef<EsWorkflowStepExecution[] | undefined>(stepExecutions);
+  
+  // Keep stepExecutionsRef in sync
+  useEffect(() => {
+    stepExecutionsRef.current = stepExecutions;
+  }, [stepExecutions]);
   // REMOVED: highlightStepDecorationCollectionRef - now handled by UnifiedActionsProvider
   // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
@@ -314,6 +320,31 @@ export const WorkflowYAMLEditor = ({
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
+  // Helper function to clear all decorations
+  const clearAllDecorations = useCallback(() => {
+    console.log('🧹 Clearing all decorations to prevent misalignment');
+    if (alertTriggerDecorationCollectionRef.current) {
+      alertTriggerDecorationCollectionRef.current.clear();
+    }
+    if (elasticsearchStepDecorationCollectionRef.current) {
+      elasticsearchStepDecorationCollectionRef.current.clear();
+    }
+    if (connectorTypeDecorationCollectionRef.current) {
+      connectorTypeDecorationCollectionRef.current.clear();
+    }
+    // Also clear step execution decorations
+    if (unifiedProvidersRef.current?.stepExecution) {
+      console.log('🧹 Clearing step execution decorations');
+      unifiedProvidersRef.current.stepExecution.dispose();
+      unifiedProvidersRef.current.stepExecution = null;
+    }
+    // Clear unified actions provider highlighting
+    if (unifiedProvidersRef.current?.actions) {
+      // The actions provider will clear its own decorations on next update
+      console.log('🧹 Actions provider will clear on next update');
+    }
+  }, []);
+
   const changeSideEffects = useCallback(() => {
     if (editorRef.current) {
       const model = editorRef.current.getModel();
@@ -324,14 +355,22 @@ export const WorkflowYAMLEditor = ({
       try {
         const value = model.getValue();
         const parsedDocument = YAML.parseDocument(value ?? '');
+        
+        console.log('🔄 YAML document changing, clearing all decorations first');
+        clearAllDecorations();
+        
         setYamlDocument(parsedDocument);
         yamlDocumentRef.current = parsedDocument;
+        
+        console.log('✅ YAML document updated, decorations will be recreated');
       } catch (error) {
+        console.error('❌ Error parsing YAML document:', error);
+        clearAllDecorations();
         setYamlDocument(null);
         yamlDocumentRef.current = null;
       }
     }
-  }, [validateVariables]);
+  }, [validateVariables, clearAllDecorations]);
 
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -440,6 +479,55 @@ export const WorkflowYAMLEditor = ({
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
+  // Force refresh of decorations when props.value changes externally (e.g., switching executions)
+  useEffect(() => {
+    if (isEditorMounted && editorRef.current && props.value !== undefined) {
+      console.log('🔄 Props.value changed - execution revision switch detected', {
+        propValueLength: props.value.length,
+        propValueStart: props.value.substring(0, 50) + '...',
+      });
+      
+      // Always clear decorations first when switching executions/revisions
+      clearAllDecorations();
+      
+      // Check if Monaco editor content matches props.value
+      const model = editorRef.current.getModel();
+      if (model) {
+        const currentContent = model.getValue();
+        if (currentContent !== props.value) {
+          console.log('🔄 Monaco content differs from props.value, waiting for editor update', {
+            currentLength: currentContent.length,
+            propsLength: props.value.length,
+            match: currentContent === props.value
+          });
+          
+          // Wait a bit longer for Monaco to update its content, then force re-parse
+          setTimeout(() => {
+            console.log('🔄 Re-parsing YAML document for new execution revision');
+            changeSideEffects();
+          }, 50); // Longer delay to ensure Monaco editor content is updated
+        } else {
+          // Content matches, just force re-parse to be safe
+          setTimeout(() => {
+            console.log('🔄 Content matches, but forcing re-parse for execution switch');
+            changeSideEffects();
+          }, 10);
+        }
+      }
+    }
+  }, [props.value, isEditorMounted, changeSideEffects, clearAllDecorations]);
+
+  // Force decoration refresh specifically when switching to readonly mode (executions view)
+  useEffect(() => {
+    if (isEditorMounted && readOnly) {
+      console.log('🔄 Switched to readonly mode, forcing complete decoration refresh');
+      // Small delay to ensure all state is settled
+      setTimeout(() => {
+        changeSideEffects();
+      }, 50);
+    }
+  }, [readOnly, isEditorMounted, changeSideEffects]);
+
   // Update providers when YAML document changes
   useEffect(() => {
     if (isEditorMounted && editorRef.current && yamlDocument && unifiedProvidersRef.current) {
@@ -463,58 +551,62 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    // Create step execution provider if needed and we're in readonly mode
-    try {
-      if (readOnly && !unifiedProvidersRef.current?.stepExecution) {
-        console.log('🎯 Creating StepExecutionProvider (readOnly mode detected)', {
-          hasStepExecutions: !!stepExecutions,
-          stepExecutionsLength: stepExecutions?.length || 0,
-          hasYamlDocument: !!yamlDocument
-        });
-        const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
-          getYamlDocument: () => {
-            console.log('🎯 StepExecutionProvider getYamlDocument called, returning:', !!yamlDocumentRef.current);
-            return yamlDocumentRef.current;
-          },
-          getStepExecutions: () => stepExecutions || [],
-          getHighlightStep: () => highlightStep || null,
-          isReadOnly: () => readOnly,
-        });
-
-        if (unifiedProvidersRef.current) {
-          unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
-        }
-      }
-    } catch (error) {
-      console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
-    }
-
-    // Update decorations when dependencies change
-    try {
-      if (unifiedProvidersRef.current?.stepExecution) {
-        console.log('🎯 Updating StepExecutionProvider decorations', {
-          hasStepExecutions: !!stepExecutions,
-          stepExecutionsLength: stepExecutions?.length || 0,
-          hasYamlDocument: !!yamlDocument,
-          readOnly
-        });
-        unifiedProvidersRef.current.stepExecution.updateDecorations();
-      } else {
-        console.log('🎯 No StepExecutionProvider to update');
-      }
-    } catch (error) {
-      console.error(
-        '🎯 WorkflowYAMLEditor: Error updating StepExecutionProvider decorations:',
-        error
-      );
-    }
-
-    // Dispose step execution provider when switching out of readonly mode
-    if (!readOnly && unifiedProvidersRef.current?.stepExecution) {
-      console.log('🎯 Disposing StepExecutionProvider (no longer readonly)');
+    // Always dispose existing provider when dependencies change to prevent stale decorations
+    if (unifiedProvidersRef.current?.stepExecution) {
+      console.log('🎯 Disposing existing StepExecutionProvider for refresh');
       unifiedProvidersRef.current.stepExecution.dispose();
       unifiedProvidersRef.current.stepExecution = null;
     }
+
+    // Create step execution provider if needed and we're in readonly mode
+    // Add a small delay to ensure YAML document is fully updated when switching executions
+    const timeoutId = setTimeout(() => {
+      try {
+        if (readOnly) {
+          console.log('🎯 Creating StepExecutionProvider (readOnly mode detected)', {
+            hasStepExecutions: !!stepExecutions,
+            stepExecutionsLength: stepExecutions?.length || 0,
+            hasYamlDocument: !!yamlDocument,
+            hasYamlDocumentRef: !!yamlDocumentRef.current,
+            readOnly,
+            transition: 'execution-navigation'
+          });
+          
+          // Ensure yamlDocumentRef is synchronized
+          if (yamlDocument && !yamlDocumentRef.current) {
+            yamlDocumentRef.current = yamlDocument;
+          }
+          
+          // Additional check: if we have stepExecutions but no yamlDocument, 
+          // the document might not be parsed yet - skip and let next update handle it
+          if (stepExecutions?.length > 0 && !yamlDocumentRef.current) {
+            console.warn('🎯 StepExecutions present but no YAML document - waiting for document parse');
+            return;
+          }
+          
+          const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
+            getYamlDocument: () => {
+              console.log('🎯 StepExecutionProvider getYamlDocument called, returning:', !!yamlDocumentRef.current);
+              return yamlDocumentRef.current;
+            },
+            getStepExecutions: () => {
+              console.log('🎯 StepExecutionProvider getStepExecutions called, returning:', stepExecutionsRef.current?.length || 0, 'executions');
+              return stepExecutionsRef.current || [];
+            },
+            getHighlightStep: () => highlightStep || null,
+            isReadOnly: () => readOnly,
+          });
+
+          if (unifiedProvidersRef.current) {
+            unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
+          }
+        }
+      } catch (error) {
+        console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
+      }
+    }, 20); // Small delay to ensure YAML document is ready
+
+    return () => clearTimeout(timeoutId);
   }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument, readOnly]);
 
   useEffect(() => {
@@ -848,8 +940,8 @@ export const WorkflowYAMLEditor = ({
 
     // Add global CSS for Monaco hover widgets - avoid interfering with internal widgets
     const styleId = 'workflow-monaco-hover-styles';
-    const existingStyle = document.getElementById(styleId);
-
+    let existingStyle = document.getElementById(styleId);
+    
     if (!existingStyle) {
       const style = document.createElement('style');
       style.id = styleId;
@@ -1201,37 +1293,28 @@ const componentStyles = {
           borderRadius: '50%',
         },
       },
-      // Enhanced Monaco hover styling for better readability
-      // Target multiple possible hover widget classes
-      '&, & .monaco-editor, & .monaco-hover, & .monaco-editor-hover, & .editor-hover-widget, & [class*="hover"]':
-        {
-          '--hover-width': '600px',
-          '--hover-min-width': '500px',
-          '--hover-max-width': '800px',
-          '--hover-max-height': '600px',
-        },
-      '.monaco-editor .monaco-editor-hover, .monaco-hover, .editor-hover-widget, [class*="monaco-hover"], [class*="editor-hover"]':
-        {
-          width: '600px !important',
-          minWidth: '500px !important',
-          maxWidth: '800px !important',
-          maxHeight: '400px !important',
-          fontSize: '13px !important',
-          zIndex: 1000,
-          overflowY: 'auto !important',
-          overflowX: 'hidden !important',
-          display: 'flex !important',
-          flexDirection: 'column !important',
-        },
-      '.monaco-editor .monaco-editor-hover .monaco-hover-content': {
-        width: '100% !important',
-        minWidth: '500px !important',
-        maxWidth: '800px !important',
-        padding: '12px 16px !important',
-        flex: '1 !important',
-        overflowY: 'auto !important',
-        overflowX: 'hidden !important',
-      },
+       // Enhanced Monaco hover styling for better readability - EXCLUDE glyph and contrib widgets
+       // Only target our custom hover widgets, not Monaco's internal ones (especially glyph hovers)
+       '&, & .monaco-editor, & .monaco-hover:not([class*="contrib"]):not([class*="glyph"]), & .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"])': {
+         '--hover-width': '600px',
+         '--hover-min-width': '500px',
+         '--hover-max-width': '800px',
+         '--hover-max-height': '600px',
+       },
+       '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]), .monaco-hover:not([class*="contrib"]):not([class*="glyph"])': {
+         width: '600px',
+         minWidth: '500px',
+         maxWidth: '800px',
+         maxHeight: '400px',
+         fontSize: '13px',
+         zIndex: 999, // Lower than Monaco's internal widgets
+       },
+       '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .monaco-hover-content': {
+         width: '100%',
+         minWidth: '500px',
+         maxWidth: '800px',
+         padding: '12px 16px',
+       },
       '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents': {
         width: '100%',
         minWidth: '500px',
@@ -1481,3 +1564,4 @@ const componentStyles = {
     overflow: 'hidden',
   }),
 };
+

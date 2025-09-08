@@ -85,22 +85,46 @@ export class StepExecutionProvider {
 
       console.log('🎯 StepExecutionProvider: Processing', stepExecutions.length, 'step executions');
 
+      // Validate that YAML document has the expected structure
+      if (!yamlDocument.contents) {
+        console.warn('🎯 StepExecutionProvider: YAML document has no contents');
+        return;
+      }
+
+      // Additional validation: ensure model content matches document
+      const modelValue = model.getValue();
+      if (!modelValue || modelValue.trim().length === 0) {
+        console.warn('🎯 StepExecutionProvider: Model has no content');
+        return;
+      }
+
       const decorations = stepExecutions
         .map((stepExecution, index) => {
-          const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
-          if (!stepNode) {
-            console.warn(`❌ No stepNode found for stepId: ${stepExecution.stepId}`);
-            return null;
-          }
+          try {
+            const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
+            if (!stepNode) {
+              console.warn(`❌ No stepNode found for stepId: ${stepExecution.stepId}`);
+              return null;
+            }
 
-          const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
-          if (!stepRange) {
-            console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
-            return null;
-          }
+            const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
+            if (!stepRange) {
+              console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
+              return null;
+            }
 
-          // Find the line with the YAML list marker (-) that precedes this step
-          let dashLineNumber = stepRange.startLineNumber;
+            // Validate that range positions are valid for current model
+            const lineCount = model.getLineCount();
+            if (stepRange.startLineNumber < 1 || stepRange.endLineNumber > lineCount) {
+              console.warn(`❌ Invalid stepRange for stepId: ${stepExecution.stepId}`, {
+                stepRange: `${stepRange.startLineNumber}-${stepRange.endLineNumber}`,
+                modelLineCount: lineCount
+              });
+              return null;
+            }
+
+            // Find the line with the YAML list marker (-) that precedes this step
+            let dashLineNumber = stepRange.startLineNumber;
           
           // Search backwards from the step start to find the line with the dash
           for (let lineNum = stepRange.startLineNumber; lineNum >= 1; lineNum--) {
@@ -155,7 +179,11 @@ export class StepExecutionProvider {
             },
           };
 
-          return [glyphDecoration, backgroundDecoration];
+            return [glyphDecoration, backgroundDecoration];
+          } catch (error) {
+            console.warn(`❌ Error processing stepExecution: ${stepExecution.stepId}`, error);
+            return null;
+          }
         })
         .flat()
         .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
