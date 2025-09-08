@@ -33,6 +33,7 @@ export const CONTEXTUAL_PROFILE_ID = 'profileId';
  */
 export const TABS_EVENT_TYPE = 'discover_tabs';
 export const TABS_EVENT_NAME = 'eventName';
+export const REMAINING_TABS_COUNT = 'remainingTabsCount';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -115,6 +116,12 @@ export const registerDiscoverEBTManagerAnalytics = (
         _meta: {
           description:
             'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
+        },
+      },
+      [REMAINING_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of remaining tabs after the event',
         },
       },
     },

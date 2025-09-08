@@ -86,9 +86,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       const editedItem = { ...item, label: newLabel };
       tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
-      onEvent('tabRenamed');
+
+      // TODO label sometimes not editable
+      // onEvent('tabRenamed');
     },
-    [changeState, onEvent]
+    [changeState]
   );
 
   const onSelect = useCallback(
@@ -112,10 +114,13 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         if (nextState.selectedItem) {
           tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
         }
+
+        onEvent('tabClosed', { remainingTabsCount: nextState.items.length });
+
         return nextState;
       });
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onReorder = useCallback(
