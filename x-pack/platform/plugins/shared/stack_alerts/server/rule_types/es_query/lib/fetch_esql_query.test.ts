@@ -100,6 +100,7 @@ describe('fetchEsqlQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (e) {
         expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
@@ -163,6 +164,7 @@ describe('fetchEsqlQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       const warning =
@@ -218,6 +220,7 @@ describe('fetchEsqlQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       const warning =
@@ -270,6 +273,7 @@ describe('fetchEsqlQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(result).toEqual({
@@ -434,6 +438,7 @@ describe('fetchEsqlQuery', () => {
       spacePrefix: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
+      sourceFields: [],
     });
 
     expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
