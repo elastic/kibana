@@ -42,12 +42,15 @@ export const useChartLayers = ({
         signal: abortController?.signal,
       }),
 
-    [query, services!.expressions, timeRange]
+    [query, services.expressions, timeRange]
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
     const xAxisColumn = columns.find((col) => col.meta.type === 'date');
-    const xAxis = xAxisColumn?.name ?? '@timestamp';
+    const xAxis: LensSeriesLayer['xAxis'] = {
+      type: 'dateHistogram',
+      field: xAxisColumn?.name ?? '@timestamp',
+    };
 
     const yAxis: LensBaseLayer[] = columns
       .filter(
