@@ -19,10 +19,10 @@ import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
+  DashboardMigrationTaskStats,
   DashboardMigration,
   DashboardMigrationTaskExecutionSettings,
   DashboardMigrationRetryFilter,
-  DashboardMigrationTaskStats,
 } from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
 import {
@@ -71,6 +71,11 @@ export const CreateDashboardMigrationDashboardsRequestBody = z.array(SplunkOrigi
 export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
+
+export type GetAllDashboardMigrationsStatsResponse = z.infer<
+  typeof GetAllDashboardMigrationsStatsResponse
+>;
+export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
 
 export type GetDashboardMigrationRequestParams = z.infer<typeof GetDashboardMigrationRequestParams>;
 export const GetDashboardMigrationRequestParams = z.object({

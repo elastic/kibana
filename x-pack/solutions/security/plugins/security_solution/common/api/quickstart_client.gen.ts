@@ -397,6 +397,7 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
+  GetAllDashboardMigrationsStatsResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
   GetDashboardMigrationResourcesRequestQueryInput,
@@ -1439,6 +1440,21 @@ finalize it.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migrations stats for all migrations stored in the system
+   */
+  async getAllDashboardMigrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetAllDashboardMigrationsStats`);
+    return this.kbnClient
+      .request<GetAllDashboardMigrationsStatsResponse>({
+        path: '/internal/siem_migrations/dashboards/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }

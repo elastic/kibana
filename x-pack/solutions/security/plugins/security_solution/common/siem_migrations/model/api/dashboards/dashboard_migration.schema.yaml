@@ -38,6 +38,25 @@ paths:
                     description: The migration id created.
                     $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
+  /internal/siem_migrations/dashboards/stats:
+    get:
+      summary: Retrieves the stats for all dashboard migrations
+      operationId: GetAllDashboardMigrationsStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the dashboard migrations stats for all migrations stored in the system
+      tags:
+        - SIEM Dashboard Migrations
+      responses:
+        200:
+          description: Indicates dashboard migrations stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskStats'
+
   ## Specific dashboard migration APIs
   /internal/siem_migrations/dashboards/{migration_id}:
     get:

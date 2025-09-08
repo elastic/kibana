@@ -993,6 +993,16 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Retrieves the dashboard migrations stats for all migrations stored in the system
+     */
+    getAllDashboardMigrationsStats(kibanaSpace: string = 'default') {
+      return supertest
+        .get(getRouteUrlForSpace('/internal/siem_migrations/dashboards/stats', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves the rule migrations stats for all migrations stored in the system
      */
     getAllStatsRuleMigration(kibanaSpace: string = 'default') {
