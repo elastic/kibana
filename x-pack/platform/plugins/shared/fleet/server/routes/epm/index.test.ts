@@ -213,7 +213,6 @@ describe('schema validation', () => {
         ingest_pipeline: [],
         data_stream_ilm_policy: [],
         ml_model: [],
-        knowledge_base: [],
       },
     };
     packageInfo = {

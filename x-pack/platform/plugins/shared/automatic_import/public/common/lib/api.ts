@@ -39,10 +39,6 @@ import {
 
 export interface EpmPackageResponse {
   items: [{ id: string; type: string }];
-  _meta?: {
-    install_source: string;
-    name: string;
-  };
 }
 
 const defaultHeaders = {
