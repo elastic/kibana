@@ -37,7 +37,7 @@ import {
   defaultDataControlComparators,
   initializeDataControlManager,
 } from '../data_control_manager';
-import type { DataOrESQLControlFactory } from '../types';
+import type { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
@@ -55,7 +55,7 @@ import type { EditorState } from './editor_state_manager';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 import { initializeESQLStateManager } from './esql_state_manager';
 
-export const getOptionsListControlFactory = (): DataOrESQLControlFactory<
+export const getOptionsListControlFactory = (): DataControlFactory<
   OptionsListControlState,
   OptionsListControlApi
 > => {

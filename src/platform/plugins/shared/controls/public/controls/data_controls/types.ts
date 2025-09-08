@@ -16,7 +16,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import type { DefaultControlState, DefaultDataControlState } from '../../../common';
+import type { DefaultControlState } from '../../../common';
 import type { ControlGroupApi } from '../../control_group/types';
 import type { ControlFactory, DefaultControlApi } from '../types';
 import type { PublishesAsyncFilters } from './publishes_async_filters';
@@ -46,18 +46,10 @@ export interface CustomOptionsComponentProps<
 }
 
 export interface DataControlFactory<
-  State extends DefaultDataControlState = DefaultDataControlState,
+  State extends DefaultControlState = DefaultControlState,
   Api extends DataControlApi = DataControlApi
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
-  CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
-}
-
-export interface DataOrESQLControlFactory<
-  State extends DefaultControlState,
-  Api extends DefaultControlApi
-> extends ControlFactory<State, Api> {
-  isFieldCompatible?: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
 }
 
