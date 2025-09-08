@@ -278,27 +278,29 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             </EuiFormRow>
             <EuiSpacer size="m" />
 
-            {agents.length === 1 && (<EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
-                          defaultMessage="Replace token"
-                        />
-                      }
-                      fullWidth
-                    >
-                      <EuiFieldText
-                        fullWidth
-                        onChange={(e) =>
-                          setFormContent({
-                            ...formContent,
-                            settings: { ...formContent.settings, replace_token: e.target.value },
-                          })
-                        }
-                      />
-                    </EuiFormRow>)}
-             
-            {agents.length === 1 && (<EuiSpacer size="m" />)}
+            {agents.length === 1 && (
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                    defaultMessage="Replace token"
+                  />
+                }
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  onChange={(e) =>
+                    setFormContent({
+                      ...formContent,
+                      settings: { ...formContent.settings, replace_token: e.target.value },
+                    })
+                  }
+                />
+              </EuiFormRow>
+            )}
+
+            {agents.length === 1 && <EuiSpacer size="m" />}
 
             {/* Additional Settings Section */}
             <EuiFormRow fullWidth>
