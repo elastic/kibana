@@ -259,6 +259,5 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
-    "@kbn/content-management-utils",
   ]
 }
