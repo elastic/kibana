@@ -238,7 +238,7 @@ output {
             </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiText>
+            <EuiText size="xs">
               <h3>
                 {i18n.translate('xpack.streams.streamsListView.shipperConfigTitle', {
                   defaultMessage: 'Configure your shippers',
