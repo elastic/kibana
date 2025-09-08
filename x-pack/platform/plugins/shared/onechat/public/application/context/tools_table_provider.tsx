@@ -17,14 +17,14 @@ import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/create_tool';
 
 export interface ToolsActionsContextType {
   createTool: (toolType: ToolType) => void;
-  editTool: (toolId: string, toolType: ToolType) => void;
+  editTool: (toolId: string) => void;
   viewTool: (toolId: string) => void;
   deleteTool: (toolId: string) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
   cloneTool: (toolId: string, toolType: ToolType) => void;
   testTool: (toolId: string) => void;
   getCreateToolUrl: (toolType: ToolType) => string;
-  getEditToolUrl: (toolId: string, toolType: ToolType) => string;
+  getEditToolUrl: (toolId: string) => string;
   getCloneToolUrl: (toolId: string, toolType: ToolType) => string;
   getViewToolUrl: (toolId: string) => string;
 }
@@ -51,8 +51,8 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
   );
 
   const editTool = useCallback(
-    (toolId: string, toolType: ToolType) => {
-      navigateToOnechatUrl(appPaths.tools.edit({ toolId, toolType }));
+    (toolId: string) => {
+      navigateToOnechatUrl(appPaths.tools.edit({ toolId }));
     },
     [navigateToOnechatUrl]
   );
@@ -65,8 +65,8 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
   );
 
   const getEditToolUrl = useCallback(
-    (toolId: string, toolType: ToolType) => {
-      return createOnechatUrl(appPaths.tools.edit({ toolId, toolType }));
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.edit({ toolId }));
     },
     [createOnechatUrl]
   );

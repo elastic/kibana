@@ -27,9 +27,7 @@ export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiLink
-        href={isPersistedTool(tool) ? getEditToolUrl(tool.id, tool.type) : getViewToolUrl(tool.id)}
-      >
+      <EuiLink href={isPersistedTool(tool) ? getEditToolUrl(tool.id) : getViewToolUrl(tool.id)}>
         <EuiText size="s" css={toolIdStyle}>
           {tool.id}
         </EuiText>

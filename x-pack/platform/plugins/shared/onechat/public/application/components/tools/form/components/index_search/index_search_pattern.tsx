@@ -8,7 +8,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiFormRow,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiSpacer,
@@ -16,28 +15,33 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { labels } from '../../../../../utils/i18n';
 import { useIndexSearchSources } from '../../../../../hooks/tools/use_resolve_search_sources';
-import type { OnechatIndexSearchToolFormData } from '../types/index_search_tool_form_types';
+interface PatternFormContext {
+  pattern: string;
+}
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export const OnechatIndexPatternField: React.FC = () => {
-  const { control, watch, setValue, setError, clearErrors, formState } =
-    useFormContext<OnechatIndexSearchToolFormData>();
-  const { errors } = formState;
-  const pattern = watch('pattern');
-  const hasQuery = (pattern?.trim().length ?? 0) > 0;
+export const IndexSearchPattern: React.FC = () => {
+  const { control, setValue, setError, clearErrors } = useFormContext<PatternFormContext>();
+  const {
+    field: { ref, value, onChange, onBlur, name },
+    fieldState,
+  } = useController({ name: 'pattern', control });
+
+  const patternValue = (value as string) ?? '';
+  const hasQuery = (patternValue.trim().length ?? 0) > 0;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     setPageIndex(0);
-  }, [pattern]);
+  }, [patternValue]);
 
   const { data, isLoading } = useIndexSearchSources({
-    pattern,
+    pattern: patternValue,
     page: pageIndex + 1,
     perPage: pageSize,
   });
@@ -47,7 +51,7 @@ export const OnechatIndexPatternField: React.FC = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      if (pattern && total === 0) {
+      if (patternValue && total === 0) {
         setError('pattern', {
           type: 'noMatches',
           message: i18n.translate('xpack.onechat.tools.indexPattern.noMatchesError', {
@@ -58,7 +62,7 @@ export const OnechatIndexPatternField: React.FC = () => {
         clearErrors('pattern');
       }
     }
-  }, [pattern, total, isLoading, setError, clearErrors]);
+  }, [patternValue, total, isLoading, setError, clearErrors]);
 
   const columns: Array<EuiBasicTableColumn<{ type: string; name: string }>> = [
     {
@@ -108,26 +112,15 @@ export const OnechatIndexPatternField: React.FC = () => {
 
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.onechat.tools.newTool.indexPatternLabel', {
-          defaultMessage: 'Target pattern',
-        })}
-        isInvalid={!!errors.pattern}
-        error={errors.pattern?.message}
-      >
-        <Controller
-          control={control}
-          name="pattern"
-          render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
-            <EuiFieldText
-              {...field}
-              inputRef={ref}
-              isInvalid={invalid}
-              data-test-subj="onechatIndexPatternInput"
-            />
-          )}
-        />
-      </EuiFormRow>
+      <EuiFieldText
+        name={name}
+        value={patternValue}
+        onChange={onChange}
+        onBlur={onBlur}
+        inputRef={ref}
+        isInvalid={fieldState.invalid}
+        data-test-subj="onechatIndexPatternInput"
+      />
 
       {hasQuery && total > 0 && (
         <>
@@ -168,7 +161,7 @@ export const OnechatIndexPatternField: React.FC = () => {
           pageSizeOptions: [5, 10, 25, 50],
           showPerPageOptions: true,
         }}
-        onChange={({ page }) => {
+        onChange={({ page }: { page?: { index: number; size: number } }) => {
           if (page) {
             setPageIndex(page.index);
             setPageSize(page.size);

@@ -9,41 +9,42 @@ import type { IndexSearchToolDefinition } from '@kbn/onechat-common/tools';
 import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
-import type { OnechatIndexSearchToolFormData } from '../components/tools/index_search/form/types/index_search_tool_form_types';
+import type { IndexSearchToolFormData } from '../components/tools/form/types/tool_form_types';
 
 export const transformIndexSearchToolToFormData = (
   tool: IndexSearchToolDefinition
-): OnechatIndexSearchToolFormData => {
+): IndexSearchToolFormData => {
   return {
-    name: tool.id,
+    toolId: tool.id,
     description: tool.description,
     pattern: tool.configuration.pattern,
-    tags: tool.tags,
+    labels: tool.tags,
+    type: ToolType.index_search,
   };
 };
 
 export const transformFormDataToIndexSearchTool = (
-  data: OnechatIndexSearchToolFormData
+  data: IndexSearchToolFormData
 ): IndexSearchToolDefinition => {
   return {
-    id: data.name,
+    id: data.toolId,
     description: data.description,
     configuration: {
       pattern: data.pattern,
     },
     type: ToolType.index_search,
-    tags: data.tags,
+    tags: data.labels,
   };
 };
 
 export const transformIndexSearchFormDataForCreate = (
-  data: OnechatIndexSearchToolFormData
+  data: IndexSearchToolFormData
 ): CreateToolPayload => {
   return transformFormDataToIndexSearchTool(data);
 };
 
 export const transformIndexSearchFormDataForUpdate = (
-  data: OnechatIndexSearchToolFormData
+  data: IndexSearchToolFormData
 ): UpdateToolPayload => {
   return omit(transformFormDataToIndexSearchTool(data), ['id', 'type']);
 };

@@ -39,6 +39,11 @@ import {
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
 } from '../../utils/transform_esql_form_data';
+import {
+  transformIndexSearchFormDataForCreate,
+  transformIndexSearchFormDataForUpdate,
+  transformIndexSearchToolToFormData,
+} from '../../utils/transform_index_search_form_data';
 import { OnechatTestFlyout } from './execute/test_tools';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
@@ -91,6 +96,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           case ToolType.esql:
             await saveTool(transformEsqlFormDataForUpdate(data));
             break;
+          case ToolType.index_search:
+            await saveTool(transformIndexSearchFormDataForUpdate(data));
+            break;
           default:
             break;
         }
@@ -98,6 +106,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         switch (data.type) {
           case ToolType.esql:
             await saveTool(transformEsqlFormDataForCreate(data));
+            break;
+          case ToolType.index_search:
+            await saveTool(transformIndexSearchFormDataForCreate(data));
             break;
           default:
             break;
@@ -126,8 +137,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     if (tool) {
       if (isEsqlTool(tool)) {
         reset(transformEsqlToolToFormData(tool));
-      }
-      if (tool.type === ToolType.builtin) {
+      } else if (tool.type === ToolType.index_search) {
+        reset(transformIndexSearchToolToFormData(tool as any));
+      } else if (tool.type === ToolType.builtin) {
         reset(transformBuiltInToolToFormData(tool));
       }
     }

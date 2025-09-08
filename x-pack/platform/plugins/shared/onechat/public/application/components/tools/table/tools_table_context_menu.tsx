@@ -34,7 +34,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       key="edit"
       size="s"
       onClick={() => {
-        editTool(tool.id, tool.type);
+        editTool(tool.id);
         setIsOpen(false);
       }}
     >

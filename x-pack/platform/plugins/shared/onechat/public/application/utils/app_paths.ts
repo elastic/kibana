@@ -29,13 +29,11 @@ export const appPaths = {
   tools: {
     list: '/tools',
     new: ({ toolType }: { toolType: ToolType }) => {
-      return `/tools/${toolType}/new`;
+      return `/tools/new/${toolType}`;
     },
-    edit: ({ toolId, toolType }: { toolId: string; toolType: ToolType }) => {
-      return `/tools/${toolType}/${toolId}`;
-    },
-    details: ({ toolId }: { toolId: string }) => {
+    edit: ({ toolId }: { toolId: string }) => {
       return `/tools/${toolId}`;
     },
+    details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
   },
 };

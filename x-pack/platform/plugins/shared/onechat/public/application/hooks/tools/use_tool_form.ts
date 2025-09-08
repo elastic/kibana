@@ -23,6 +23,14 @@ const getDefaultValues = (toolType: ToolType): ToolFormData => {
         params: [],
         type: ToolType.esql,
       };
+    case ToolType.index_search:
+      return {
+        toolId: '',
+        description: '',
+        labels: [],
+        type: ToolType.index_search,
+        pattern: '',
+      };
     default:
       return {
         toolId: '',
