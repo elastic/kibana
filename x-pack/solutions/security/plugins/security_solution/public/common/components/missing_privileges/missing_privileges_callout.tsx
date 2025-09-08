@@ -10,7 +10,7 @@ import hash from 'object-hash';
 import type { CallOutMessage } from '../callouts';
 import { CallOutSwitcher } from '../callouts';
 import * as i18n from './translations';
-import { useMissingPrivileges } from './use_missing_privileges';
+import { useMissingPrivileges } from '../../hooks/use_missing_privileges';
 
 /**
  * Callout that displays a Callout when the user has missing privileges.

@@ -16,7 +16,7 @@ import { USER_UNAUTHENTICATED_TEST_ID } from '../../components/alerts/empty_page
 import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_empty_page';
 import { NO_INTEGRATION_CALLOUT_TEST_ID } from '../../components/callouts/no_api_integration_key_callout';
 import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { useMissingPrivileges } from '../../../common/components/missing_privileges';
+import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
 
 jest.mock('../../components/user_info');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');

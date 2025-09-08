@@ -12,8 +12,3 @@ export { MissingPrivilegesDescription } from './missing_privileges_description';
 export { MissingPrivilegesTooltip } from './missing_privileges_tooltip';
 
 export { missingPrivilegesCallOutBody } from './translations';
-
-export { useMissingPrivileges } from './use_missing_privileges';
-
-export { type MissingIndexPrivileges } from './use_missing_privileges';
-export { type MissingPrivileges } from './use_missing_privileges';

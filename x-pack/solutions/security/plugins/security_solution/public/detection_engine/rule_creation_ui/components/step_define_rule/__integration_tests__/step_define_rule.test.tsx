@@ -208,7 +208,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
+jest.mock('../../../../../detections/hooks/use_rule_from_timeline');
 
 jest.mock('../../../../../common/hooks/esql/use_esql_availability');
 jest.mock('../../../../../common/components/ml/hooks/use_ml_rule_config');

@@ -16,7 +16,7 @@ import {
   SECURITY_FEATURE_ID,
 } from '../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
-import type { MissingPrivileges } from './use_missing_privileges';
+import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
 import { DetectionsRequirementsLink, SecuritySolutionRequirementsLink } from '../links_to_docs';
 
 export const PRIVILEGES_MISSING_TITLE = i18n.translate(

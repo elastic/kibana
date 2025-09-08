@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react';
 import { useMissingPrivileges } from './use_missing_privileges';
-import { useUserPrivileges } from '../user_privileges';
-import { useUserData } from '../../../detections/components/user_info';
-import { SECURITY_FEATURE_ID } from '../../../../common';
+import { useUserPrivileges } from '../components/user_privileges';
+import { useUserData } from '../../detections/components/user_info';
+import { SECURITY_FEATURE_ID } from '../../../common';
 
-jest.mock('../user_privileges');
-jest.mock('../../../detections/components/user_info');
+jest.mock('../components/user_privileges');
+jest.mock('../../detections/components/user_info');
 
 const detectionEnginePrivileges = {
   username: 'elastic',
