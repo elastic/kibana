@@ -210,12 +210,18 @@ export async function putDataStreamsSettings({
     'index.refresh_interval'?: string | -1 | null;
   };
 }) {
-  await retryTransientEsErrors(() =>
+  const response = await retryTransientEsErrors(() =>
     esClient.indices.putDataStreamSettings({
       name: names,
       settings,
     })
   );
+  const errors = response.data_streams
+    .filter(({ error }) => Boolean(error))
+    .map(({ error }) => error);
+  if (errors.length) {
+    throw new Error(errors.join('\n'));
+  }
 }
 
 export function getTemplateLifecycle(

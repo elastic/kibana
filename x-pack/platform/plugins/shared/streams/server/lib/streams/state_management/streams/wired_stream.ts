@@ -512,7 +512,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
-    const settings = getInheritedSettings([...ancestors, this._definition]);
+    const settings = getInheritedSettings(ancestors);
 
     return [
       {

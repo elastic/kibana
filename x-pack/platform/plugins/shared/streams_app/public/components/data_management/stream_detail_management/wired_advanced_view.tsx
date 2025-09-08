@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEqual, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Streams } from '@kbn/streams-schema';
+import { isRoot, type Streams } from '@kbn/streams-schema';
 import {
   copyToClipboard,
   EuiButton,
@@ -33,6 +35,8 @@ import {
 import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
+import { LinkToStream } from '../stream_detail_lifecycle/modal';
+import { getFormattedError } from '../../../util/errors';
 
 export function WiredAdvancedView({
   definition,
@@ -43,171 +47,314 @@ export function WiredAdvancedView({
 }) {
   const { isServerless } = useKibana();
 
-  const [settings, setSettings] = useState<IngestStreamSettings>(definition.effective_settings);
-
   return (
     <>
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
-            <h3>
-              {i18n.translate('xpack.streams.streamDetailView.indexConfiguration', {
-                defaultMessage: 'Index Configuration',
-              })}
-            </h3>
-          </EuiText>
-        </EuiPanel>
-
-        <EuiPanel hasShadow={false} hasBorder={false}>
-          <SettingRow
-            label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.shardsLabel', {
-              defaultMessage: 'Shards',
-            })}
-            inputLabel={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.shardsInputLabel',
-              {
-                defaultMessage: 'Number of shards',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.shardsDescription',
-              {
-                defaultMessage:
-                  'Control how the index is split across nodes. More shards can improve parallelism but may increase overhead.',
-              }
-            )}
-            value={settings['index.number_of_shards']?.value}
-            onChange={(value) => {
-              if (value) {
-                setSettings((prev) => ({
-                  ...prev,
-                  'index.number_of_shards': { value: Number(value) },
-                }));
-              }
-            }}
-          />
-
-          <EuiHorizontalRule margin="m" />
-
-          <SettingRow
-            label={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.replicasLabel',
-              {
-                defaultMessage: 'Replicas',
-              }
-            )}
-            inputLabel={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.replicasInputLabel',
-              {
-                defaultMessage: 'Number of replicas',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.replicasDescription',
-              {
-                defaultMessage:
-                  'Define how many copies of the data exist. More replicas improve resilience and read performance but increase storage usage.',
-              }
-            )}
-            value={settings['index.number_of_replicas']?.value}
-            onChange={(value) => {
-              if (value) {
-                setSettings((prev) => ({
-                  ...prev,
-                  'index.number_of_replicas': { value: Number(value) },
-                }));
-              }
-            }}
-          />
-
-          <EuiHorizontalRule />
-
-          <SettingRow
-            label={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalLabel',
-              {
-                defaultMessage: 'Refresh Interval',
-              }
-            )}
-            inputLabel={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalInputLabel',
-              {
-                defaultMessage: 'Refresh interval',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalDescription',
-              {
-                defaultMessage:
-                  'Control how frequently new data becomes visible for search. A longer interval reduces resource usage; a short one makes data searchable sooner.',
-              }
-            )}
-            value={settings['index.refresh_interval']?.value}
-            onChange={(value) => {
-              if (value) {
-                setSettings((prev) => ({
-                  ...prev,
-                  'index.refresh_interval': { value: String(value) },
-                }));
-              }
-            }}
-          />
-        </EuiPanel>
-      </EuiPanel>
+      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition} />
 
       <EuiSpacer />
 
-      <DeleteStreamPanel definition={definition} />
+      {!isRoot(definition.stream.name) && <DeleteStreamPanel definition={definition} />}
     </>
   );
 }
 
+function toStringValues(settings: IngestStreamSettings) {
+  return Object.entries(settings).reduce<Record<string, { value: string; from?: string }>>(
+    (acc, [key, setting]) => {
+      acc[key] = { ...setting, value: String(setting.value) };
+      return acc;
+    },
+    {}
+  );
+}
+
+export function Settings({
+  definition,
+  refreshDefinition,
+  children,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+  refreshDefinition: () => void;
+  children?: React.ReactNode;
+}) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const [settings, setSettings] = useState<Record<string, { value: string; from?: string }>>(
+    toStringValues(definition.effective_settings)
+  );
+  const hasChanges = useMemo(() => {
+    return !isEqual(toStringValues(definition.effective_settings), settings);
+  }, [settings]);
+  const abortController = useAbortController();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const updateSettings = useCallback(async () => {
+    setIsUpdating(true);
+    try {
+      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+        params: {
+          path: { name: definition.stream.name },
+          body: {
+            ingest: {
+              ...definition.stream.ingest,
+              settings: prepareSettings(settings),
+            },
+          },
+        },
+        signal: abortController.signal,
+      });
+
+      refreshDefinition();
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.streams.failedToUpdateSettings', {
+          defaultMessage: 'Failed to update settings',
+        }),
+        toastMessage: getFormattedError(error).message,
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [definition, settings]);
+
+  return (
+    <>
+      {children}
+
+      <SettingRow
+        definition={definition}
+        label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.shardsLabel', {
+          defaultMessage: 'Shards',
+        })}
+        inputLabel={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.shardsInputLabel',
+          {
+            defaultMessage: 'Number of shards',
+          }
+        )}
+        description={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.shardsDescription',
+          {
+            defaultMessage:
+              'Control how the index is split across nodes. More shards can improve parallelism but may increase overhead.',
+          }
+        )}
+        setting={settings['index.number_of_shards']}
+        isInvalid={
+          settings['index.number_of_shards'] &&
+          isInvalidInteger(settings['index.number_of_shards'].value)
+        }
+        onChange={(value) => {
+          if (value.length === 0) {
+            setSettings((prev) => omit(prev, 'index.number_of_shards'));
+          } else {
+            setSettings((prev) => ({
+              ...prev,
+              'index.number_of_shards': { value, from: definition.stream.name },
+            }));
+          }
+        }}
+      />
+
+      <EuiHorizontalRule margin="m" />
+
+      <SettingRow
+        definition={definition}
+        label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.replicasLabel', {
+          defaultMessage: 'Replicas',
+        })}
+        inputLabel={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.replicasInputLabel',
+          {
+            defaultMessage: 'Number of replicas',
+          }
+        )}
+        description={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.replicasDescription',
+          {
+            defaultMessage:
+              'Define how many copies of the data exist. More replicas improve resilience and read performance but increase storage usage.',
+          }
+        )}
+        setting={settings['index.number_of_replicas']}
+        isInvalid={
+          settings['index.number_of_replicas'] &&
+          isInvalidInteger(settings['index.number_of_replicas'].value)
+        }
+        onChange={(value) => {
+          if (value.length === 0) {
+            setSettings((prev) => omit(prev, 'index.number_of_replicas'));
+          } else {
+            setSettings((prev) => ({
+              ...prev,
+              'index.number_of_replicas': { value, from: definition.stream.name },
+            }));
+          }
+        }}
+      />
+
+      <EuiHorizontalRule />
+
+      <SettingRow
+        definition={definition}
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalLabel',
+          {
+            defaultMessage: 'Refresh Interval',
+          }
+        )}
+        inputLabel={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalInputLabel',
+          {
+            defaultMessage: 'Refresh interval',
+          }
+        )}
+        description={i18n.translate(
+          'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalDescription',
+          {
+            defaultMessage:
+              'Control how frequently new data becomes visible for search. A longer interval reduces resource usage; a short one makes data searchable sooner.',
+          }
+        )}
+        setting={settings['index.refresh_interval']}
+        isInvalid={false}
+        valueDescription="Accepts time values like 5s, 30s, 1m. Set to -1 to disable."
+        onChange={(value) => {
+          if (value.length === 0) {
+            setSettings((prev) => omit(prev, 'index.refresh_interval'));
+          } else {
+            setSettings((prev) => ({
+              ...prev,
+              'index.refresh_interval': { value, from: definition.stream.name },
+            }));
+          }
+        }}
+      />
+
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            isLoading={isUpdating}
+            isDisabled={!hasChanges}
+            color="primary"
+            fill
+            onClick={updateSettings}
+          >
+            {i18n.translate('xpack.streams.streamDetailView.saveChangesButton', {
+              defaultMessage: 'Save changes',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+}
+
+const prepareSettings = (input: Record<string, { value: string }>): IngestStreamSettings => {
+  const settings: IngestStreamSettings = {};
+  if (input['index.number_of_shards']) {
+    settings['index.number_of_shards'] = { value: Number(input['index.number_of_shards'].value) };
+  }
+
+  if (input['index.number_of_replicas']) {
+    settings['index.number_of_replicas'] = {
+      value: Number(input['index.number_of_replicas'].value),
+    };
+  }
+
+  if (input['index.refresh_interval']) {
+    const value = input['index.refresh_interval'].value;
+    if (Number(value) === -1) {
+      settings['index.refresh_interval'] = { value: -1 };
+    } else {
+      settings['index.refresh_interval'] = { value: input['index.refresh_interval'].value };
+    }
+  }
+
+  return settings;
+};
+
 function SettingRow({
+  definition,
   label,
   inputLabel,
   description,
-  value,
+  setting,
+  valueDescription,
+  isInvalid,
   onChange,
 }: {
+  definition: Streams.ingest.all.GetResponse;
   label: string;
   inputLabel: string;
   description: string;
-  value?: number | string;
-  onChange: (value: number | string) => void;
+  setting?: { value: string; from?: string };
+  valueDescription?: string;
+  isInvalid: boolean;
+  onChange: (value: string) => void;
 }) {
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={2}>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiText size="m">
-              <h4>{label}</h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {description}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={5}>
-        <EuiFlexGroup>
+    <Row
+      left={<RowMetadata label={label} description={description} />}
+      right={
+        <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiFormRow label={inputLabel}>
-              <EuiFieldText name={label} />
+              <EuiFieldText
+                name={label}
+                isInvalid={isInvalid}
+                value={setting?.value ?? ''}
+                onChange={(e) => onChange(e.target.value)}
+              />
             </EuiFormRow>
           </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="xs">
+              {!setting?.from ? null : setting.from === definition.stream.name ? (
+                <>
+                  Local override. <EuiLink onClick={() => onChange('')}>Reset to default</EuiLink>
+                </>
+              ) : (
+                <>
+                  Inherited from <LinkToStream name={setting.from} />
+                </>
+              )}
+              {valueDescription}
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
+      }
+    />
+  );
+}
+
+export function RowMetadata({ label, description }: { label: string; description: string }) {
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem>
+        <EuiText size="m">
+          <h4>{label}</h4>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="subdued" size="s">
+          {description}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const {
-    appParams: { history },
     core: {
       application: { navigateToApp },
     },
@@ -269,7 +416,7 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
               }
             />
 
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
 
             <EuiFormRow
               fullWidth
@@ -328,8 +475,8 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
         </EuiPanel>
 
         <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={2}>
+          <Row
+            left={
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
                   <EuiText size="s">
@@ -340,9 +487,8 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={5}>
+            }
+            right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButton color="danger" fill onClick={() => setShowModal((prev) => !prev)}>
@@ -352,10 +498,54 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            }
+          />
         </EuiPanel>
       </EuiPanel>
     </>
+  );
+}
+
+export function Row({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={2}>{left}</EuiFlexItem>
+      <EuiFlexItem grow={5}>{right}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+const isInvalidInteger = (value: string) => {
+  const num = Number(value);
+  return isNaN(num) || num < 1 || num % 1 > 0;
+};
+
+export function IndexConfiguration({
+  definition,
+  refreshDefinition,
+  children,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+  refreshDefinition: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+      <EuiPanel hasShadow={false} color="subdued">
+        <EuiText size="s">
+          <h3>
+            {i18n.translate('xpack.streams.streamDetailView.indexConfiguration', {
+              defaultMessage: 'Index Configuration',
+            })}
+          </h3>
+        </EuiText>
+      </EuiPanel>
+
+      <EuiPanel hasShadow={false} hasBorder={false}>
+        <Settings definition={definition} refreshDefinition={refreshDefinition}>
+          {children}
+        </Settings>
+      </EuiPanel>
+    </EuiPanel>
   );
 }
