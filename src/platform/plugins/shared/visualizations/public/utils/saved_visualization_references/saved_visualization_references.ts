@@ -64,10 +64,7 @@ export function deserializeReferences(
   let deserializedSearchSource = searchSource;
   if (searchSource) {
     try {
-      deserializedSearchSource = injectSearchSourceReferences(
-        searchSource,
-        updatedReferences
-      );
+      deserializedSearchSource = injectSearchSourceReferences(searchSource, updatedReferences);
     } catch (e) {
       // Allow missing index pattern error to surface in vis
     }
