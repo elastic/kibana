@@ -19,6 +19,7 @@ import { mockBranch } from '../../__mocks__/mocks';
 jest.mock('../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
   isKeyboardShortcut: jest.fn(),
   isMac: jest.fn(),
+  isEscapeKey: jest.fn(),
 }));
 
 const mockedIsKeyboardShortcut = jest.mocked(isKeyboardShortcut);

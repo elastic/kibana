@@ -73,8 +73,11 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         <EuiSplitPanel.Inner grow={true}>
           <DocumentTrends
             lastReloadTime={lastReloadTime}
-            displayCreateRuleButton={selectedQualityCard === 'degraded'}
             openAlertFlyout={openAlertFlyout}
+            displayActions={{
+              displayCreateRuleButton: selectedQualityCard === 'degraded',
+              displayEditFailureStore: selectedQualityCard === 'failed',
+            }}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
