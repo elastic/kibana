@@ -8,8 +8,14 @@
  */
 
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { VisualizeByReferenceState, VisualizeEmbeddableState } from '../types';
+import { omit } from 'lodash';
+import type {
+  VisualizeByReferenceState,
+  VisualizeByValueState,
+  VisualizeEmbeddableState,
+} from '../types';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
+import { extractEmbeddableReferences } from '../../references/extract_embeddable_references';
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
   function transformIn(state: VisualizeEmbeddableState) {
@@ -17,6 +23,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       ? transformEnhancementsIn(state.enhancements)
       : { enhancementsState: undefined, enhancementsReferences: [] };
 
+    // by ref
     if ((state as VisualizeByReferenceState).savedObjectId) {
       const { savedObjectId, ...rest } = state as VisualizeByReferenceState;
       return {
@@ -34,6 +41,29 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
         ],
       };
     }
+
+    // by value
+    if ((state as VisualizeByValueState).savedVis) {
+      const { savedVis, ...rest } = state as VisualizeByValueState;
+      const { references, serializedSearchSource } = extractEmbeddableReferences(savedVis);
+
+      return {
+        state: {
+          ...rest,
+          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          savedVis: {
+            ...savedVis,
+            data: {
+              ...omit(savedVis.data, 'savedSearchId'),
+              searchSource: serializedSearchSource,
+            },
+          },
+        },
+        references: [...references, ...enhancementsReferences],
+      };
+    }
+
+    throw new Error('Unable to extract references from Visualization state, unexpected state');
   }
   return transformIn;
 }
