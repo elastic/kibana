@@ -206,6 +206,15 @@ export const configSchema = schema.object({
       publicKey: schema.maybe(schema.string()),
     })
   ),
+  telemetry: schema.maybe(
+    schema.object({
+      queryConfig: schema.object({
+        pageSize: schema.maybe(schema.number()),
+        maxResponseSize: schema.maybe(schema.number()),
+        maxCompressedResponseSize: schema.maybe(schema.number()),
+      }),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
