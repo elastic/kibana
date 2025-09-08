@@ -30,7 +30,7 @@ function isSerializedSearchSource(
   );
 }
 
-export function extractEmbeddableReferences(savedVis: SerializedVis) {
+export function extractVisReferences(savedVis: SerializedVis) {
   const { searchSource, savedSearchId } = savedVis.data;
   const references: Reference[] = [];
   let serializedSearchSource = searchSource;

@@ -15,7 +15,7 @@ import type {
   VisualizeEmbeddableState,
 } from '../types';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
-import { extractEmbeddableReferences } from '../../references/extract_embeddable_references';
+import { extractVisReferences } from '../../references/extract_vis_references';
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
   function transformIn(state: VisualizeEmbeddableState) {
@@ -45,7 +45,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     // by value
     if ((state as VisualizeByValueState).savedVis) {
       const { savedVis, ...rest } = state as VisualizeByValueState;
-      const { references, serializedSearchSource } = extractEmbeddableReferences(savedVis);
+      const { references, serializedSearchSource } = extractVisReferences(savedVis);
 
       const savedSearchRefName = savedVis.data.savedSearchId
         ? references.find((r) => r.id === savedVis.data.savedSearchId)?.name

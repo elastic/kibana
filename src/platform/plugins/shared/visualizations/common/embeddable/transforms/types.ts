@@ -7,13 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SerializedVis, SerializedVisData } from '../../types';
 import type {
   VisualizeByReferenceState,
-  VisualizeByValueState,
   VisualizeEmbeddableBaseState,
 } from '../types';
 
 export type StoredVisualizeByReferenceState = Omit<VisualizeByReferenceState, 'savedObjectId'>;
 
+export type StoredVis = Omit<SerializedVis, 'data'> & {
+  data: Omit<SerializedVisData, 'savedSearchId' | 'searchSource'> & {
+    savedSearchRefName?: string;
+    searchSource: SerializedSearchSourceFields & { indexRefName?: string };
+  }
+};
+
+export interface StoredVisualizeByValueState {
+  savedVis: StoredVis;
+};
+
 export type StoredVisualizeEmbeddableState = VisualizeEmbeddableBaseState &
-  (StoredVisualizeByReferenceState | VisualizeByValueState);
+  (StoredVisualizeByReferenceState | StoredVisualizeByValueState);

@@ -38,9 +38,8 @@ export type {
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigSerialized[];
-  searchSource: SerializedSearchSourceFields & { indexRefName?: string };
+  searchSource: SerializedSearchSourceFields;
   savedSearchId?: string;
-  savedSearchRefName?: string | Reference;
 }
 
 export interface SerializedVis<T = VisParams> {
