@@ -2448,6 +2448,63 @@ describe('generateOtelcolConfig', () => {
     ],
   };
 
+  const otelInputMultipleComponentsSameType : FullAgentPolicyInput = {
+    type: OTEL_COLLECTOR_INPUT_TYPE,
+    id: 'test-3',
+    name: 'test-3',
+    revision: 0,
+    data_stream: {
+      namespace: 'default'
+    },
+    use_output: 'default',
+    package_policy_id: 'otherpolicy',
+    streams: [
+      {
+        id: 'stream-id-1',
+        data_stream: {
+          dataset: 'somedataset',
+          type: 'metrics',
+        },
+        receivers: {
+          "httpcheck/1": {
+            targets: [
+              {
+                endpoints: ['https://epr.elastic.co'],
+              },
+            ],
+          },
+          "httpcheck/2": {
+            targets: [
+              {
+                endpoints: ['https://epr.elastic.co'],
+              },
+            ],
+          },
+        },
+        processors: {
+          "transform/1": {
+            metrics_statements: [
+              'set(metric.description, "Sum") where metric.type == "Sum"',
+            ],
+          },
+          "transform/2": {
+            metrics_statements: [
+              'set(metric.description, "Sum") where metric.type == "Sum"',
+            ],
+          },
+        },
+        service: {
+          pipelines: {
+            metrics: {
+              receivers: ["httpcheck/1", "httpcheck/2"],
+              processors: ["transform/1", "transform/2"],
+            },
+          },
+        },
+      },
+    ],
+  };
+
   it('should be empty if there is no input', () => {
     const inputs : FullAgentPolicyInput[] = [];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({});
@@ -2602,5 +2659,60 @@ describe('generateOtelcolConfig', () => {
         },
       },
     });
-  })
+  });
+
+  it('should keep components with the same type', () => {
+    const inputs : FullAgentPolicyInput[] = [otelInputMultipleComponentsSameType];
+    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      receivers: {
+        "httpcheck/1/test-3.stream-id-1": {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
+            },
+          ],
+        },
+        "httpcheck/2/test-3.stream-id-1": {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
+            },
+          ],
+        },
+      },
+      processors: {
+        "transform/1/test-3.stream-id-1": {
+          metrics_statements: [
+            'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+        "transform/2/test-3.stream-id-1": {
+          metrics_statements: [
+            'set(metric.description, "Sum") where metric.type == "Sum"',
+          ],
+        },
+      },
+      connectors: {
+        "forward": {},
+      },
+      exporters: {
+        "elasticsearch/default": {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          "metrics/test-3": {
+            receivers: ["httpcheck/1/test-3.stream-id-1", "httpcheck/2/test-3.stream-id-1"],
+            processors: ["transform/1/test-3.stream-id-1", "transform/2/test-3.stream-id-1"],
+            exporters: ["forward"],
+          },
+          metrics: {
+            receivers: ["forward"],
+            exporters: ["elasticsearch/default"],
+          },
+        },
+      },
+    });
+  });
 });
