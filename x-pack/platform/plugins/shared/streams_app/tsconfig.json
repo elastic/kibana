@@ -12,7 +12,10 @@
     ".storybook/**/*",
     "test/scout/**/*"
   ],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -26,9 +29,7 @@
     "@kbn/streams-schema",
     "@kbn/es-query",
     "@kbn/zod",
-    "@kbn/utility-types",
     "@kbn/share-plugin",
-    "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
@@ -41,6 +42,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/unsaved-changes-prompt",
     "@kbn/grok-ui",
+    "@kbn/grok-heuristics",
     "@kbn/streams-plugin",
     "@kbn/search-types",
     "@kbn/xstate-utils",
@@ -76,5 +78,8 @@
     "@kbn/unified-doc-viewer",
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
+    "@kbn/utility-types",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/streamlang"
   ]
 }

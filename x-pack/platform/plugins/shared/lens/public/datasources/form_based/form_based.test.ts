@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
-import { SavedObjectReference } from '@kbn/core/public';
-import { isFragment } from 'react-is';
+import type { ReactElement } from 'react';
+import React from 'react';
+
+import type { Reference } from '@kbn/content-management-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FormBasedPersistedState, FormBasedPrivateState } from './types';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { TinymathAST } from '@kbn/tinymath';
-import { getFormBasedDatasource, GenericIndexPatternColumn } from './form_based';
-import {
+import type { TinymathAST } from '@kbn/tinymath';
+import type { GenericIndexPatternColumn } from './form_based';
+import { getFormBasedDatasource } from './form_based';
+import type {
   DatasourcePublicAPI,
   Datasource,
   FramePublicAPI,
@@ -29,9 +31,7 @@ import {
   UserMessage,
 } from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
-import {
-  operationDefinitionMap,
-  getErrorMessages,
+import type {
   TermsIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   MovingAverageIndexPatternColumn,
@@ -45,12 +45,13 @@ import {
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
 } from './operations';
+import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -193,6 +194,10 @@ const dateRange = {
   toDate: '2022-04-17T08:25:00.000Z',
 };
 
+function isFragment(element: unknown): element is ReactElement {
+  return React.isValidElement(element) && element.type === React.Fragment;
+}
+
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
   let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query>;
@@ -317,7 +322,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-        savedObjectReferences: [
+        references: [
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -4167,7 +4172,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const references1: SavedObjectReference[] = [
+    const references1: Reference[] = [
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -4175,7 +4180,7 @@ describe('IndexPattern Data Source', () => {
       },
     ];
 
-    const references2: SavedObjectReference[] = [
+    const references2: Reference[] = [
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

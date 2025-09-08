@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { encode } from '@kbn/rison';
-import { useNavigation } from '../../../../../common/lib/kibana';
+import * as E from 'fp-ts/Either';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
@@ -34,44 +34,22 @@ import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql
 import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
 import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
 
-export const useDiscoverUrl = ({
-  generateTableQuery,
-}: {
-  generateTableQuery?: (
-    sortField: string | number | symbol,
-    sortDirection: string,
-    currentPage: number
-  ) => string;
-}) => {
-  const { getAppUrl } = useNavigation();
+export const useDiscoverPath = (query: string) => {
   const { addWarning } = useAppToasts();
 
   const discoverUrl = useMemo(() => {
-    if (!generateTableQuery) return { discoverUrl: '' };
-
-    const query = generateTableQuery('@timestamp', 'DESC', 100);
-    const appState = {
-      query: {
-        esql: query,
-      },
-    };
-
-    let discoverAppPath;
     try {
-      const encodedAppState = encode(appState);
-      discoverAppPath = `#/?_a=${encodedAppState}`;
+      const encodedAppState = encode({
+        query: {
+          esql: query,
+        },
+      });
+      return `#/?_a=${encodedAppState}`;
     } catch (error) {
       addWarning(error, { title: ERROR_ENCODING_ESQL_QUERY });
-      discoverAppPath = '#/';
+      return '#/'; // Fallback to root if encoding fails
     }
-
-    return {
-      discoverUrl: getAppUrl({
-        appId: 'discover',
-        path: discoverAppPath,
-      }),
-    };
-  }, [generateTableQuery, getAppUrl, addWarning]);
+  }, [query, addWarning]);
 
   return discoverUrl;
 };
@@ -111,16 +89,15 @@ export const usePrivilegedUserActivityParams = (
             indexPattern,
             fields
           )
-        : undefined,
+        : E.left({
+            error: 'GenerateEsqlSource requires spaceId, indexPattern, fields to be defined',
+          }),
     [selectedToggleOption, spaceId, indexPattern, fields]
   );
 
-  const generateTableQuery = useMemo(
-    () => (esqlSource ? generateListESQLQuery(esqlSource) : undefined),
-    [esqlSource]
-  );
+  const generateTableQuery = useMemo(() => generateListESQLQuery(esqlSource), [esqlSource]);
   const generateVisualizationQuery = useMemo(
-    () => (esqlSource ? generateVisualizationESQLQuery(esqlSource) : undefined),
+    () => generateVisualizationESQLQuery(esqlSource),
     [esqlSource]
   );
 
@@ -131,17 +108,11 @@ export const usePrivilegedUserActivityParams = (
     [selectedToggleOption, openRightPanel]
   );
 
-  const hasLoadedDependencies = useMemo(
-    () => Boolean(spaceId && indexPattern && fields),
-    [spaceId, indexPattern, fields]
-  );
-
   return {
     getLensAttributes,
     generateVisualizationQuery,
     generateTableQuery,
     columns,
-    hasLoadedDependencies,
   };
 };
 

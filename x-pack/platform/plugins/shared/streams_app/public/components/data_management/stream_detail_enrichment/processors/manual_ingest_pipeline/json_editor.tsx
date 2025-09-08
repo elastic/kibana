@@ -10,16 +10,19 @@ import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchProcessorType, elasticsearchProcessorTypes } from '@kbn/streams-schema';
+import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
+import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useResizeChecker } from '@kbn/react-hooks';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 import { deserializeJson, serializeXJson } from '../../helpers';
 
 export const JsonEditor = () => {
   const {
     core: { docLinks },
   } = useKibana();
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
     rules: {
@@ -95,16 +98,20 @@ export const JsonEditor = () => {
       isInvalid={fieldState.invalid}
       fullWidth
     >
-      <CodeEditor
-        value={serializeXJson(field.value, '[]')}
-        onChange={(value) => field.onChange(deserializeJson(value))}
-        languageId="xjson"
-        height={200}
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsAriaLabel',
-          { defaultMessage: 'Ingest pipeline processors editor' }
-        )}
-      />
+      <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
+        <CodeEditor
+          value={serializeXJson(field.value, '[]')}
+          onChange={(value) => field.onChange(deserializeJson(value))}
+          languageId="xjson"
+          height={200}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsAriaLabel',
+            { defaultMessage: 'Ingest pipeline processors editor' }
+          )}
+          editorDidMount={setupResizeChecker}
+          editorWillUnmount={destroyResizeChecker}
+        />
+      </div>
     </EuiFormRow>
   );
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { sumBy } from 'lodash';
-import { StreamLogGenerator } from './types';
+import type { StreamLogGenerator } from './types';
 import { readLoghubSystemFiles } from '../src/read_loghub_system_files';
 import { ensureLoghubRepo } from '../src/ensure_loghub_repo';
 import { validateParser } from '../src/validate_parser';

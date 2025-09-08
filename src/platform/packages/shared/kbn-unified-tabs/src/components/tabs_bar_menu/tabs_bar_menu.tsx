@@ -10,16 +10,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
   useGeneratedHtmlId,
-  EuiSelectableOption,
   EuiSelectable,
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiSelectableOptionsListProps,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
 

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../services';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');
@@ -191,11 +191,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           // To not be dependent on these, we only confirm the pipeline we created as part of the test exists
           const testPipeline = body.find(({ name }: { name: string }) => name === pipelineName);
 
-          expect(testPipeline).to.eql({
-            ...pipeline,
-            isManaged: false,
-            name: pipelineName,
-          });
+          expect(testPipeline.name).to.eql(pipelineName);
+          expect(testPipeline.isManaged).to.eql(false);
+          expect(testPipeline.processors).to.eql(pipeline.processors);
         });
       });
 
@@ -204,11 +202,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
           const { body } = await supertestWithAdminScope.get(uri).expect(200);
 
-          expect(body).to.eql({
-            ...pipeline,
-            isManaged: false,
-            name: pipelineName,
-          });
+          expect(body.name).to.eql(pipelineName);
+          expect(body.isManaged).to.eql(false);
+          expect(body.processors).to.eql(pipeline.processors);
         });
       });
     });

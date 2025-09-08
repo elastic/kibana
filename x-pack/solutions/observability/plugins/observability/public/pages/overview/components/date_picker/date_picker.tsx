@@ -76,6 +76,7 @@ export function DatePicker({
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
       width={width}
+      updateButtonProps={{ fill: false }}
     />
   );
 }

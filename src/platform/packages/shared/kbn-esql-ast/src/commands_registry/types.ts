@@ -11,7 +11,10 @@ import type {
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -124,6 +127,7 @@ export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }
 
 export interface ICommandContext {
@@ -138,6 +142,7 @@ export interface ICommandContext {
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
+  activeProduct?: PricingProduct | undefined;
 }
 
 /**
@@ -183,7 +188,7 @@ export enum Location {
   STATS_WHERE = 'stats_where',
 
   /**
-   * WHEN TS is used as a source command, inner STATS functions
+   * WHEN TS is used as a source command, and we are within an aggregation function
    */
   STATS_TIMESERIES = 'stats_timeseries',
 
@@ -209,6 +214,11 @@ export enum Location {
   RENAME = 'rename',
 
   /**
+   * In the RERANK command
+   */
+  RERANK = 'rerank',
+
+  /**
    * In the JOIN command (used only for AS)
    */
   JOIN = 'join',
@@ -224,20 +234,13 @@ export enum Location {
   COMPLETION = 'completion',
 }
 
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
-}
-
 const commandOptionNameToLocation: Record<string, Location> = {
   eval: Location.EVAL,
   where: Location.WHERE,
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
+  inlinestats: Location.STATS,
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
@@ -246,6 +249,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  rerank: Location.RERANK,
 };
 
 /**

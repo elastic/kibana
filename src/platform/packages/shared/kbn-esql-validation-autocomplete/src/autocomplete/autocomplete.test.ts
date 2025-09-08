@@ -19,6 +19,7 @@ import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generat
 import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
   attachTriggerCommand,
   createCustomCallbackMocks,
@@ -26,10 +27,8 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getPolicyFields,
-  PartialSuggestionWithText,
   policies,
   setup,
-  SuggestOptions,
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
@@ -425,7 +424,18 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['WHERE ', 'BY ', ', ', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(doubleField) B/', [
+      'WHERE ',
+      'BY ',
+      ', ',
+      '| ',
+      ...getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        { operators: true, skipAssign: true },
+        ['double']
+      ),
+    ]);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
@@ -519,7 +529,7 @@ describe('autocomplete', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
         scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
-          .params?.[0].literalSuggestions ?? [];
+          .params?.[0].suggestedValues ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)
@@ -811,11 +821,20 @@ describe('autocomplete', () => {
     );
 
     // STATS argument BY
-    testSuggestions('FROM a | STATS AVG(numberField) /', [
+    testSuggestions('FROM a | STATS AVG(integerField) /', [
       ', ',
       attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
+      ...getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        {
+          operators: true,
+          skipAssign: true,
+        },
+        ['integer']
+      ),
     ]);
 
     // STATS argument BY field

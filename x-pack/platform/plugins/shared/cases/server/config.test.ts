@@ -14,7 +14,7 @@ describe('config validation', () => {
         Object {
           "analytics": Object {
             "index": Object {
-              "enabled": true,
+              "enabled": false,
             },
           },
           "enabled": true,

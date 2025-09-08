@@ -10,9 +10,9 @@ import { METADATA_FIELDS, fieldTypes } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { camelCase } from 'lodash';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import { ESQLCallbacks } from '../shared/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLCallbacks } from '../shared/types';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
   name: field,

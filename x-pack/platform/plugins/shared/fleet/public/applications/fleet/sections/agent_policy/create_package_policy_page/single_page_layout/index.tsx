@@ -74,6 +74,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
+import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
+
 import {
   AddIntegrationFlyoutConfigureHeader,
   CreatePackagePolicySinglePageLayout,
@@ -84,7 +86,6 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { SetupTechnologySelector } from './components/setup_technology_selector';
 import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
@@ -118,7 +119,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
+  const isServerless = !!cloud?.isServerlessEnabled;
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -177,7 +179,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageInfo &&
     packageHasAtLeastOneSecret({ packageInfo });
 
-  const hideAgentlessSelector = !!addIntegrationFlyoutProps;
+  const isAddIntegrationFlyout = !!addIntegrationFlyoutProps;
   // Save package policy
   const {
     onSubmit,
@@ -210,7 +212,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
-    hideAgentlessSelector,
+    isAddIntegrationFlyout,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -323,12 +325,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
       setIsFleetExtensionLoaded(isExtensionLoaded);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+
+      if (isValid !== undefined) {
+        setFormState(isValid ? 'VALID' : 'INVALID');
+      }
     },
     [updatePackagePolicy, setFormState]
   );
@@ -456,18 +456,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
           />
 
-          {/* TODO move SetupTechnologySelector out of extensionView */}
-          {!extensionView && !hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
+          {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
+          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
-              onSetupTechnologyChange={(value) => {
+              onSetupTechnologyChange={(value: SetupTechnology) => {
                 handleSetupTechnologyChange(value);
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
-              isAgentlessDefault={isAgentlessDefault}
+              showBetaBadge={isAgentlessDefault}
             />
           )}
 
@@ -516,7 +517,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
-      hideAgentlessSelector,
+      isAddIntegrationFlyout,
+      isServerless,
     ]
   );
 

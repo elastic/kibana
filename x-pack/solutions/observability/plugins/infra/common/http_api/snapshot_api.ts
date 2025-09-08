@@ -9,6 +9,7 @@ import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAPISeriesRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from './shared/data_schema_format';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({
@@ -113,9 +114,10 @@ export const SnapshotRequestRT = rt.intersection([
   rt.partial({
     accountId: rt.string,
     region: rt.string,
-    filterQuery: rt.union([rt.string, rt.null]),
+    kuery: rt.string,
     overrideCompositeSize: rt.number,
     dropPartialBuckets: rt.boolean,
+    schema: DataSchemaFormatRT,
   }),
 ]);
 

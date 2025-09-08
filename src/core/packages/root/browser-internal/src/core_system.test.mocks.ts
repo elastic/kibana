@@ -29,6 +29,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-moc
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
@@ -179,4 +180,11 @@ export const MockPricingService = pricingServiceMock.create();
 export const PricingServiceConstructor = jest.fn().mockImplementation(() => MockPricingService);
 jest.doMock('@kbn/core-pricing-browser-internal', () => ({
   PricingService: PricingServiceConstructor,
+}));
+
+export const MockCoreInjectionService = injectionServiceMock.create();
+export const CoreInjectionServiceConstructor = jest.fn(() => MockCoreInjectionService);
+jest.doMock('@kbn/core-di-internal', () => ({
+  ...jest.requireActual('@kbn/core-di-internal'),
+  CoreInjectionService: CoreInjectionServiceConstructor,
 }));

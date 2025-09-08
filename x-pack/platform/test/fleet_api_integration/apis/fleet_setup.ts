@@ -9,9 +9,8 @@ import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
 import { SpaceTestApiClient } from './space_awareness/api_helper';
 
@@ -27,12 +26,12 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
     beforeEach(async () => {
       try {
@@ -111,6 +110,7 @@ export default function (providerContext: FtrProviderContext) {
                   name: 'synthetics',
                   version: '1.2.1',
                 },
+                latest_revision: true,
               },
             },
           ]),
@@ -143,18 +143,17 @@ export default function (providerContext: FtrProviderContext) {
                 },
               },
             });
-            if ((res.hits.total as SearchTotalHits).value > 0) {
-              throw new Error(
-                `Managed package policies not upgraded ${
-                  (res.hits.total as SearchTotalHits).value
-                }.`
-              );
+            const packagePolicies = res.hits.hits.filter(
+              (so) => so._id && !so._id.includes(':prev')
+            );
+            if (packagePolicies.length > 0) {
+              throw new Error(`Managed package policies not upgraded ${packagePolicies.length}.`);
             }
           },
           {
-            retryCount: 15,
-            retryDelay: 5000,
-            timeout: 30_000,
+            retryCount: 25,
+            retryDelay: 10000,
+            timeout: 60_000,
           }
         );
       });

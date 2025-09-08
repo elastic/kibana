@@ -11,6 +11,8 @@ export enum QueryKeys {
   FetchOnboardingToken = 'fetchOnboardingToken',
   FetchSearchIndicesStatus = 'fetchSearchIndicesStatus',
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
+  FetchSampleDataStatus = 'fetchSampleDataStatus',
+  IngestSampleData = 'ingestSampleData',
   SearchDocuments = 'searchDocuments',
   ApiKey = 'apiKey',
 }

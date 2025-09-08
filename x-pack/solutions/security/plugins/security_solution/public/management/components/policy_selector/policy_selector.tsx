@@ -297,6 +297,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
       };
     }, [useCheckbox]);
 
+    // The full list of items (options) that will be displayed in the EuiSelectable. This includes both
+    // items from the API results as well as any "additionalListItems" passed in to the component
     const selectableOptions: Array<EuiSelectableOption<OptionPolicyData>> = useMemo(() => {
       if (!policyListResponse) {
         return [];
@@ -366,24 +368,27 @@ export const PolicySelector = memo<PolicySelectorProps>(
         .concat(
           ...additionalListItems
             .filter(
-              (additionalItem) => !(view === 'selected-list' && additionalItem.checked !== 'on')
+              (additionalItem) =>
+                additionalItem.isGroupLabel ||
+                !(view === 'selected-list' && additionalItem.checked !== 'on')
             )
             .map((additionalItem) => {
               return {
                 disabled: isDisabled,
                 ...additionalItem,
                 'data-type': 'customItem',
-                prepend: useCheckbox ? (
-                  <EuiCheckbox
-                    id={htmlIdGenerator()()}
-                    onChange={NOOP}
-                    checked={additionalItem.checked === 'on'}
-                    disabled={additionalItem.disabled ?? isDisabled}
-                    data-test-subj={getTestId(
-                      `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
-                    )}
-                  />
-                ) : null,
+                prepend:
+                  useCheckbox && !additionalItem.isGroupLabel ? (
+                    <EuiCheckbox
+                      id={htmlIdGenerator()()}
+                      onChange={NOOP}
+                      checked={additionalItem.checked === 'on'}
+                      disabled={additionalItem.disabled ?? isDisabled}
+                      data-test-subj={getTestId(
+                        `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
+                      )}
+                    />
+                  ) : null,
               } as unknown as EuiSelectableOption<OptionPolicyData>;
             })
         );
@@ -527,26 +532,29 @@ export const PolicySelector = memo<PolicySelectorProps>(
         let updatedAdditionalItems = additionalListItems;
 
         for (const option of selectableOptions) {
-          if (isSelectAll) {
-            if (!isCustomOption(option)) {
-              policiesToSelect.push(option.policy.id);
+          // only select/unselect items that are not disabled and not a group label item
+          if (!option.disabled && !option.isGroupLabel) {
+            if (isSelectAll) {
+              if (!isCustomOption(option)) {
+                policiesToSelect.push(option.policy.id);
+              } else {
+                updatedAdditionalItems = getUpdatedAdditionalListItems(
+                  { ...option, checked: 'on' },
+                  updatedAdditionalItems
+                );
+              }
             } else {
-              updatedAdditionalItems = getUpdatedAdditionalListItems(
-                { ...option, checked: 'on' },
-                updatedAdditionalItems
-              );
-            }
-          } else {
-            if (!isCustomOption(option)) {
-              policiesToUnSelect.push(option.policy.id);
-            } else {
-              updatedAdditionalItems = getUpdatedAdditionalListItems(
-                {
-                  ...option,
-                  checked: undefined,
-                },
-                updatedAdditionalItems
-              );
+              if (!isCustomOption(option)) {
+                policiesToUnSelect.push(option.policy.id);
+              } else {
+                updatedAdditionalItems = getUpdatedAdditionalListItems(
+                  {
+                    ...option,
+                    checked: undefined,
+                  },
+                  updatedAdditionalItems
+                );
+              }
             }
           }
         }

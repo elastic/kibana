@@ -29,6 +29,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -41,8 +42,8 @@ import type {
   FieldFormatParams,
 } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
-import {
+import type { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
+import type {
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
@@ -62,7 +63,7 @@ import {
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
-import { IndexPatternManagmentContextValue } from '../../types';
+import type { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
@@ -654,12 +655,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   renderDeleteModal = () => {
     const { spec } = this.state;
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return this.state.showDeleteModal ? (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
           defaultMessage: "Delete field ''{fieldName}''",
           values: { fieldName: spec.name },
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.hideDeleteModal}
         onConfirm={() => {
           this.hideDeleteModal();

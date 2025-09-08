@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentMode, AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import type { AgentHandlerFn } from '@kbn/onechat-server';
 import { runAgent } from './run_agent';
 
@@ -13,16 +13,13 @@ import { runAgent } from './run_agent';
  * Create the handler function for the default onechat agent.
  */
 export const createAgentHandler = ({ agent }: { agent: AgentDefinition }): AgentHandlerFn => {
-  return async (
-    { agentParams: { nextInput, conversation = [], agentMode = AgentMode.normal }, runId },
-    context
-  ) => {
+  return async ({ agentParams: { nextInput, conversation = [] }, runId, abortSignal }, context) => {
     const { round } = await runAgent(
       {
-        mode: agentMode,
         nextInput,
         conversation,
         runId,
+        abortSignal,
         agentId: agent.id,
         toolSelection: agent.configuration.tools,
         customInstructions: agent.configuration.instructions,

@@ -19,7 +19,7 @@ export const links: LinkItem = {
   id: SecurityPageName.timelines,
   title: TIMELINES,
   path: TIMELINES_PATH,
-  globalNavPosition: 7,
+  globalNavPosition: 9,
   // It only makes sense to show this link when the user is also granted access to security solution
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${TIMELINE_FEATURE_ID}.read`]],
   globalSearchKeywords: [

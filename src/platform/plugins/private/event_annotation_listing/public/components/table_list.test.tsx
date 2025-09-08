@@ -16,21 +16,20 @@ import {
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-components/types';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { shallow, ShallowWrapper } from 'enzyme';
-import {
-  EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
 import { act } from 'react-dom/test-utils';
 import { GroupEditorFlyout } from './group_editor_flyout';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { QueryInputServices } from '@kbn/visualization-ui-components';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { ISessionService } from '@kbn/data-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { ISessionService } from '@kbn/data-plugin/public';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';

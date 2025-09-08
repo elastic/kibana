@@ -104,6 +104,12 @@ paths:
                 - 'acknowledged'
                 - 'closed'
                 - 'open'
+        - name: 'include_unique_alert_ids'
+          description: whether to include attack alert IDs in the response
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         200:
           description: Successful response
@@ -128,6 +134,10 @@ paths:
                     type: integer
                   unique_alert_ids_count:
                     type: integer
+                  unique_alert_ids:
+                    type: array
+                    items:
+                      type: string
                 required:
                   - connector_names
                   - data

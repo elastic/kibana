@@ -16,10 +16,28 @@ import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { SearchEmbeddableSerializedState } from '../types';
 import { deserializeState, serializeState } from './serialization_utils';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/server';
 
 describe('Serialization utils', () => {
   const uuid = 'mySearchEmbeddable';
 
+  const tabs: DiscoverSessionTab[] = [
+    {
+      id: 'tab-1',
+      label: 'Tab 1',
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+        },
+        sort: [['order_date', 'desc']],
+        columns: ['_source'],
+        grid: {},
+        hideChart: false,
+        sampleSize: 100,
+        isTextBasedQuery: false,
+      },
+    },
+  ];
   const mockedSavedSearchAttributes: SearchEmbeddableSerializedState['attributes'] = {
     kibanaSavedObjectMeta: {
       searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
@@ -32,6 +50,7 @@ describe('Serialization utils', () => {
     hideChart: false,
     sampleSize: 100,
     isTextBasedQuery: false,
+    tabs,
     references: [
       {
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
@@ -129,11 +148,22 @@ describe('Serialization utils', () => {
         serializeDynamicActions: jest.fn(),
       });
 
+      const attributes = toSavedSearchAttributes(
+        savedSearch,
+        searchSource.serialize().searchSourceJSON
+      );
+
       expect(serializedState).toEqual({
         rawState: {
           type: 'search',
           attributes: {
-            ...toSavedSearchAttributes(savedSearch, searchSource.serialize().searchSourceJSON),
+            ...attributes,
+            tabs: [
+              {
+                ...attributes.tabs![0]!,
+                id: expect.any(String),
+              },
+            ],
             references: mockedSavedSearchAttributes.references,
           },
         },

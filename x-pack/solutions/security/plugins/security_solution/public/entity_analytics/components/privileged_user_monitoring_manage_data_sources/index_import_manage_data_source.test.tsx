@@ -39,9 +39,7 @@ describe('IndexImportManageDataSource', () => {
       wrapper: TestProviders,
     });
 
-    expect(
-      screen.getByText(/One or more indices containing the user\.name field/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Select one or more indices containing the/i)).toBeInTheDocument();
   });
 
   it('shows "No indices added" when there are no indices', () => {
@@ -100,7 +98,7 @@ describe('IndexImportManageDataSource', () => {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText(/Select index/i));
-    fireEvent.click(screen.getByText('Add privileged users'));
+    fireEvent.click(screen.getByText('Update privileged users'));
     await waitFor(() => {
       expect(setAddDataSourceResult).toHaveBeenCalledWith({ successful: true, userCount: 0 });
       expect(refetch).toHaveBeenCalled();

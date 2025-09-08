@@ -12,12 +12,12 @@ import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { Reason, type IReason } from './reason';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { Legacy } from '../../legacy_shims';
 import { ExternalConfigContext } from '../../application/contexts/external_config_context';
-import { MonitoringStartServices } from '../../types';
+import type { MonitoringStartServices } from '../../types';
 
 interface LogsProps {
   logs: {

@@ -28,6 +28,7 @@ import {
   EuiSwitch,
   EuiFlexItem,
   EuiIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -74,6 +75,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
     enrollment_token: '',
     settings: {},
   });
+
+  const flyoutTitleId = useGeneratedHtmlId();
+
   useEffect(() => {
     const validateForm = () => {
       if (formContent.uri && formContent.enrollment_token && validClusterURL) {
@@ -137,10 +141,14 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlyout data-test-subj="migrateAgentFlyout" onClose={onClose}>
+      <EuiFlyout
+        data-test-subj="migrateAgentFlyout"
+        onClose={onClose}
+        aria-labelledby={flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="l">
-            <h1>
+            <h1 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.title"
                 defaultMessage="Migrate {agentCount, plural, one {agent} other {agents}}"
@@ -273,7 +281,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             {/* Additional Settings Section */}
             <EuiFormRow fullWidth>
               <EuiAccordion
-                arrowDisplay="right"
+                arrowDisplay="left"
                 id="migrateAgentFlyoutAdditionalOptions"
                 initialIsOpen={false}
                 buttonContent={

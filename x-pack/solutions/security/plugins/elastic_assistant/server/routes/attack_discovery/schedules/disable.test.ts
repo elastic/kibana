@@ -11,7 +11,7 @@ import { disableAttackDiscoverySchedulesRoute } from './disable';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { disableAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -34,7 +34,6 @@ describe('disableAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     disableAttackDiscoverySchedulesRoute(server.router);
   });
 
@@ -74,17 +73,6 @@ describe('disableAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('Disabled feature flag', () => {
-    it('should return a 404 if scheduling feature is not registered', async () => {
-      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const response = await server.inject(
-        disableAttackDiscoverySchedulesRequest('schedule-4'),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(404);
     });
   });
 });

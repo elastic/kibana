@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlADJobTable } from './job_table';
-import { MlJobAnnotations } from './job_annotations_table';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlADJobTable } from './job_table';
+import type { MlJobAnnotations } from './job_annotations_table';
 
 export function MachineLearningJobExpandedDetailsProvider(
   { getService, getPageObject }: FtrProviderContext,

@@ -522,7 +522,7 @@ paths:
               schema:
                 type: array
                 items:
-                  - $ref: "#/components/schemas/getParameterResponse"
+                  $ref: "#/components/schemas/getParameterResponse"
               examples:
                 getParametersResponseExample1:
                   summary: Read access
@@ -1098,6 +1098,7 @@ paths:
         The response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.
       tags:
         - synthetics
+      x-state: Generally available; added in 9.2.0
       parameters:
         - in: path
           name: monitorId
@@ -1310,7 +1311,7 @@ components:
           additionalproperties: true
           properties:
             check:
-              type: objects
+              type: object
               description: The check request settings.
               properties:
                 request:

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
 const flyoutOpenCloseAnimation = keyframes`

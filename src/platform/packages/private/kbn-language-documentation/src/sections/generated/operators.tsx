@@ -27,6 +27,7 @@ export const functions = {
         defaultMessage: 'ADD (+)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -53,6 +54,7 @@ export const functions = {
         defaultMessage: 'CAST (::)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -83,6 +85,7 @@ export const functions = {
         defaultMessage: 'DIVIDE (/)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -111,6 +114,7 @@ export const functions = {
         defaultMessage: 'EQUALS (==)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -139,6 +143,7 @@ export const functions = {
         defaultMessage: 'GREATER_THAN (>)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -167,6 +172,7 @@ export const functions = {
         defaultMessage: 'GREATER_THAN_OR_EQUAL (>=)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -195,6 +201,7 @@ export const functions = {
         defaultMessage: 'IN (IN)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -226,6 +233,7 @@ export const functions = {
         defaultMessage: 'IS_NOT_NULL (IS NOT NULL)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -260,6 +268,7 @@ export const functions = {
         defaultMessage: 'IS_NULL (IS NULL)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -293,6 +302,7 @@ export const functions = {
         defaultMessage: 'LESS_THAN (<)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -321,6 +331,7 @@ export const functions = {
         defaultMessage: 'LESS_THAN_OR_EQUAL (<=)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -349,6 +360,7 @@ export const functions = {
         defaultMessage: 'LIKE (LIKE)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -389,6 +401,7 @@ export const functions = {
         defaultMessage: 'MATCH_OPERATOR (:)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -428,6 +441,7 @@ export const functions = {
         defaultMessage: 'MODULO (%)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -454,6 +468,7 @@ export const functions = {
         defaultMessage: 'MULTIPLY (*)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -480,6 +495,7 @@ export const functions = {
         defaultMessage: 'NEGATE (-)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -506,6 +522,7 @@ export const functions = {
         defaultMessage: 'NOT_EQUALS (!=)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -534,6 +551,7 @@ export const functions = {
         defaultMessage: 'RLIKE (RLIKE)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -569,6 +587,7 @@ export const functions = {
         defaultMessage: 'SUBTRACT (-)',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab

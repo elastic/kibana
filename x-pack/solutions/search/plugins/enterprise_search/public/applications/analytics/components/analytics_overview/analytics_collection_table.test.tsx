@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 import { AnalyticsCollectionNotFound } from './analytics_collection_not_found';

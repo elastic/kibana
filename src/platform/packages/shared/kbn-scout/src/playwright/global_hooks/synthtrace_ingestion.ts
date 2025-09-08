@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FullConfig } from 'playwright/test';
+import type { FullConfig } from 'playwright/test';
 import { Readable } from 'node:stream';
 import type {
   ApmFields,
@@ -17,9 +17,10 @@ import type {
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
-import { getLogger, createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
-import { ScoutTestOptions } from '../types';
+import type { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
+import { createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
+import { ScoutLogger } from '../../common/services/logger';
+import type { ScoutTestOptions } from '../types';
 import { getSynthtraceClient } from '../../common/services/synthtrace';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
@@ -38,7 +39,7 @@ const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
  * @deprecated Use `globalSetupHook` and synthtrace fixtures instead
  */
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
-  const log = getLogger();
+  const log = new ScoutLogger('scout: global hook');
 
   const { apm, infra } = data;
   const hasApmData = apm.length > 0;

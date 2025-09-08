@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PathConfigType } from '@kbn/utils';
+import type { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';

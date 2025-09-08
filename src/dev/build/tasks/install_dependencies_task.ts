@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Task, exec } from '../lib';
+import type { Task } from '../lib';
+import { exec } from '../lib';
 
 const YARN_EXEC = process.env.npm_execpath || 'yarn';
 

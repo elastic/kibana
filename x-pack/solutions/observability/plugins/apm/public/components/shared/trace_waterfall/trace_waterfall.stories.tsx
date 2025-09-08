@@ -218,7 +218,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           errorCount: 0,
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
-          spanType: 'http',
+          type: 'http',
         },
         {
           id: '41b39c13ec0166a8',
@@ -229,7 +229,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           errorCount: 0,
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
-          spanType: 'http',
+          type: 'http',
         },
         {
           id: '255547a7b6b19871',
@@ -240,7 +240,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           errorCount: 0,
           parentId: '41b39c13ec0166a8',
           serviceName: 'frontend',
-          spanType: 'css',
+          type: 'css',
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"

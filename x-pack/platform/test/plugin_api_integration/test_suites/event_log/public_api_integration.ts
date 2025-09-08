@@ -9,9 +9,9 @@ import { merge, omit, chunk, isEmpty } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { IEvent } from '@kbn/event-log-plugin/server';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { IEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -164,7 +164,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`Index Lifecycle`, () => {
       it('should query across indices matching the Event Log data view', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+        await esArchiver.load(
+          'x-pack/platform/test/fixtures/es_archives/event_log_multiple_indicies'
+        );
 
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
@@ -184,16 +186,18 @@ export default function ({ getService }: FtrProviderContext) {
           'test 2020-10-28T15:19:55.962Z',
         ]);
 
-        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/event_log_multiple_indicies'
+        );
       });
     });
 
     describe(`Legacy Ids`, () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/event_log_legacy_ids');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids');
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_legacy_ids');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids');
       });
       it('should support search event by ids and legacyIds', async () => {
         const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;

@@ -9,13 +9,11 @@ import type { ScopedRunnerRunAgentParams } from '@kbn/onechat-server';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';
+import type { CreateScopedRunnerDepsMock, MockedAgent, AgentClientMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedAgent,
   createMockedAgentClient,
-  CreateScopedRunnerDepsMock,
-  MockedAgent,
-  AgentClientMock,
 } from '../../test_utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 
@@ -86,6 +84,29 @@ describe('runAgent', () => {
         runId: runnerManager.context.runId,
         agentParams: params.agentParams,
       },
+      expect.any(Object)
+    );
+  });
+
+  it('propagates the abort signal when provided', async () => {
+    const abortCtrl = new AbortController();
+
+    const params: ScopedRunnerRunAgentParams = {
+      agentId: 'test-agent',
+      agentParams: { nextInput: { message: 'dolly' } },
+      abortSignal: abortCtrl.signal,
+    };
+
+    await runAgent({
+      agentExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(agentHandler).toHaveBeenCalledTimes(1);
+    expect(agentHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        abortSignal: abortCtrl.signal,
+      }),
       expect.any(Object)
     );
   });

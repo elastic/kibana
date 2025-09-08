@@ -6,7 +6,7 @@
  */
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceConnector } from '@kbn/inference-common';
 
 /**
  * Represents a model that can be used within the onechat framework (e.g. tools).
@@ -14,6 +14,10 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
  * It exposes different interfaces to models.
  */
 export interface ScopedModel {
+  /**
+   * The connector bound to this scoped model.
+   */
+  connector: InferenceConnector;
   /**
    * langchain chat model.
    */

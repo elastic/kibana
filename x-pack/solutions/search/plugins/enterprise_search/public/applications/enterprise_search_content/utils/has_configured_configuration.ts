@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorConfiguration } from '@kbn/search-connectors';
+import type { ConnectorConfiguration } from '@kbn/search-connectors';
 
 import { isConfigEntry } from '../../../../common/connectors/is_category_entry';
 

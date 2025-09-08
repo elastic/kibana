@@ -18,8 +18,9 @@ import {
   type EuiSwitchEvent,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   EsqlControlType,
@@ -36,6 +37,7 @@ interface IdentifierControlFormProps {
   variableType: ESQLVariableType;
   variableName: string;
   queryString: string;
+  esqlVariables: ESQLControlVariable[];
   setControlState: (state: ESQLControlState) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
@@ -47,6 +49,7 @@ export function IdentifierControlForm({
   initialState,
   queryString,
   cursorPosition,
+  esqlVariables,
   setControlState,
   search,
 }: IdentifierControlFormProps) {
@@ -57,7 +60,7 @@ export function IdentifierControlForm({
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -78,6 +81,7 @@ export function IdentifierControlForm({
         const queryForFields = getQueryForFields(queryString, cursorPosition);
         getESQLQueryColumnsRaw({
           esqlQuery: queryForFields,
+          variables: esqlVariables,
           search,
         }).then((columns) => {
           if (isMounted()) {
@@ -109,6 +113,7 @@ export function IdentifierControlForm({
       cursorPosition,
       isMounted,
       queryString,
+      esqlVariables,
       search,
       variableType,
     ]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
+import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import { type UseEuiTheme } from '@elastic/eui';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -52,20 +52,18 @@ export const mountInlinePanel = async ({
     flyoutProps: {
       ...lensFlyoutProps,
       'data-test-subj': dataTestSubj ?? 'customizeLens',
+      focusedPanelId: uuid,
     },
-    uuid,
   });
 };
 
 // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
 const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
-  clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+  clip-path: none;
   max-inline-size: 640px;
   min-inline-size: 256px;
   background:${euiTheme.colors.backgroundBaseSubdued};
-  @include euiBreakpoint('xs', 's', 'm') {
-    clip-path: none;
-  }
+
   .kbnOverlayMountWrapper {
     padding-left: 400px;
     margin-left: -400px;

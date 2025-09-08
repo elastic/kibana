@@ -8,7 +8,6 @@
  */
 import {
   isLiteral,
-  isTimeInterval,
   isInlineCast,
   isColumn,
   isParamLiteral,
@@ -29,15 +28,20 @@ export function getSignaturesWithMatchingArity(
   fnDef: FunctionDefinition,
   astFunction: ESQLFunction
 ) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
+  return fnDef.signatures.filter((sig) => matchesArity(sig, astFunction.args.length));
+}
+
+export function matchesArity(
+  signature: FunctionDefinition['signatures'][number],
+  arity: number
+): boolean {
+  if (signature.minParams) {
+    return arity >= signature.minParams;
+  }
+  return (
+    arity >= signature.params.filter(({ optional }) => !optional).length &&
+    arity <= signature.params.length
+  );
 }
 
 /**
@@ -89,11 +93,11 @@ export function buildPartialMatcher(str: string) {
   }
 
   // Return the final regex pattern
-  return new RegExp(pattern + '$', 'i');
+  return pattern;
 }
 
-const isNullMatcher = buildPartialMatcher('is nul');
-const isNotNullMatcher = buildPartialMatcher('is not nul');
+const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
+const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
 
 // --- Expression types helpers ---
 
@@ -141,10 +145,6 @@ export function getExpressionType(
     return root.literalType;
   }
 
-  if (isTimeInterval(root)) {
-    return 'time_duration';
-  }
-
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
   if (isInlineCast(root)) {
     switch (root.castType) {
@@ -172,6 +172,9 @@ export function getExpressionType(
       return lastArg.literalType;
     }
     if (!column) {
+      return 'unknown';
+    }
+    if ('hasConflict' in column && column.hasConflict) {
       return 'unknown';
     }
     return column.type;

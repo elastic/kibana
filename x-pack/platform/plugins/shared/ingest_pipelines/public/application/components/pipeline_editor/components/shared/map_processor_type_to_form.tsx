@@ -6,14 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../services';
 import { stringifyValueDescription } from './stringify_value_description';
-import { LicenseType } from '../../../../../types';
+import type { LicenseType } from '../../../../../types';
 
+import type { FormFieldsComponent } from '../processor_form/processors';
 import {
   Append,
   Attachment,
@@ -57,7 +59,6 @@ import {
   Uppercase,
   UrlDecode,
   UserAgent,
-  FormFieldsComponent,
   UriParts,
   Reroute,
 } from '../processor_form/processors';

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { processorConverter } from '../../utils';
-import {
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { isValidProcessor } from '../../utils';
+import type {
   SimulationInput,
   SimulationContext,
   SimulationEvent,
@@ -19,26 +20,24 @@ import {
   SimulationMachineDeps,
   SampleDocumentWithUIAttributes,
 } from './types';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
   createSimulationRunnerActor,
-  createSimulationRunFailureNofitier,
+  createSimulationRunFailureNotifier,
 } from './simulation_runner_actor';
 import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
-import { MappedSchemaField } from '../../../schema_editor/types';
+import type { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
 export interface ProcessorEventParams {
-  processors: ProcessorDefinitionWithUIAttributes[];
+  processors: StreamlangProcessorDefinition[];
 }
 
 const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
-const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
-  isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
-const hasValidProcessors = (processors: ProcessorDefinitionWithUIAttributes[]) =>
-  processors.every(isValidProcessor);
+const hasAnyValidProcessors = (processors: StreamlangProcessorDefinition[]) =>
+  processors.some(isValidProcessor);
 
 export const simulationMachine = setup({
   types: {
@@ -50,7 +49,7 @@ export const simulationMachine = setup({
     runSimulation: getPlaceholderFor(createSimulationRunnerActor),
   },
   actions: {
-    notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNofitier),
+    notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNotifier),
     storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
       previewDocsFilter: params.filter,
     })),
@@ -75,7 +74,7 @@ export const simulationMachine = setup({
         (col) => !params.columns.includes(col)
       ),
     })),
-    storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
+    storePreviewColumnsOrder: assign((_, params: { columns: string[] }) => ({
       previewColumnsOrder: params.columns,
     })),
     storePreviewColumnsSorting: assign(
@@ -99,7 +98,6 @@ export const simulationMachine = setup({
       detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
     })),
     resetSimulationOutcome: assign({
-      processors: [],
       detectedSchemaFields: [],
       explicitlyEnabledPreviewColumns: [],
       explicitlyDisabledPreviewColumns: [],
@@ -111,11 +109,11 @@ export const simulationMachine = setup({
     resetSamples: assign({ samples: [] }),
   },
   delays: {
-    processorChangeDebounceTime: 800,
+    processorChangeDebounceTime: 300,
   },
   guards: {
     canSimulate: ({ context }) =>
-      hasSamples(context.samples) && hasValidProcessors(context.processors),
+      hasSamples(context.samples) && hasAnyValidProcessors(context.processors),
     hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
@@ -208,6 +206,14 @@ export const simulationMachine = setup({
       target: '.assertingRequirements',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
+    'processor.edit': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+    },
+    'processor.save': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+    },
     'processor.change': {
       target: '.debouncingChanges',
       reenter: true,
@@ -250,7 +256,10 @@ export const simulationMachine = setup({
     },
 
     assertingRequirements: {
-      always: [{ guard: 'canSimulate', target: 'runningSimulation' }, { target: 'idle' }],
+      always: [
+        { guard: 'canSimulate', target: 'runningSimulation' },
+        { target: 'idle', actions: [{ type: 'resetSimulationOutcome' }] },
+      ],
     },
 
     runningSimulation: {
@@ -262,7 +271,9 @@ export const simulationMachine = setup({
           documents: context.samples
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
-          processors: context.processors,
+          processors: context.processors.filter((proc) => {
+            return isValidProcessor(proc);
+          }),
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
@@ -289,6 +300,6 @@ export const createSimulationMachineImplementations = ({
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
   },
   actions: {
-    notifySimulationRunFailure: createSimulationRunFailureNofitier({ toasts }),
+    notifySimulationRunFailure: createSimulationRunFailureNotifier({ toasts }),
   },
 });

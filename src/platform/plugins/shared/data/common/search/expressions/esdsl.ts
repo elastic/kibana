@@ -9,16 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { lastValueFrom } from 'rxjs';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { EsRawResponse } from './es_raw_response';
+import type { RequestStatistics } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { EsRawResponse } from './es_raw_response';
 
-import { KibanaContext } from '..';
+import type { KibanaContext } from '..';
 import { getEsQueryConfig } from '../../es_query';
-import { UiSettingsCommon } from '../..';
+import type { UiSettingsCommon } from '../..';
 
 const name = 'esdsl';
 

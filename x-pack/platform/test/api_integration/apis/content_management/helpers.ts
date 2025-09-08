@@ -6,7 +6,7 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export const sampleDashboard = {
   contentTypeId: 'dashboard',

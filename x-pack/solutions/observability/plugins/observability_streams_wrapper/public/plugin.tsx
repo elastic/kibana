@@ -7,22 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
-import {
-  AppUpdater,
-  CoreSetup,
-  DEFAULT_APP_CATEGORIES,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import type { AppUpdater, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/css';
-import { StreamsApplicationComponentType } from '@kbn/streams-app-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import type { StreamsApplicationComponentType } from '@kbn/streams-app-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import type {
   ConfigSchema,
   ObservabilityStreamsWrapperPublicSetup,

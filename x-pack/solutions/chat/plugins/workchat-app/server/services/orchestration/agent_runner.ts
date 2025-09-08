@@ -6,7 +6,7 @@
  */
 
 import { from, filter, shareReplay } from 'rxjs';
-import { StreamEvent } from '@langchain/core/tracers/log_stream';
+import type { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Agent } from '../../../common/agents';

@@ -6,13 +6,15 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { FindPromptsResponse, PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
-import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { getRandomEuiColor } from '../../quick_prompts/quick_prompt_settings/helpers';
-import { bulkUpdatePrompts, PromptContextTemplate } from '../../../..';
+import type { PromptContextTemplate } from '../../../..';
+import { bulkUpdatePrompts } from '../../../..';
 
 interface Params {
   allPrompts: FindPromptsResponse;

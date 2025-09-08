@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';

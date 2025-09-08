@@ -6,13 +6,13 @@
  */
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation, console } = getPageObjects([
+  const { common, solutionNavigation } = getPageObjects([
     'common',
     'solutionNavigation',
     'console',
@@ -46,16 +46,14 @@ export default function searchSolutionNavigation({
 
     it('renders expected side nav items', async () => {
       // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Home' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
     });
 
@@ -75,7 +73,6 @@ export default function searchSolutionNavigation({
         deepLinkId: AppDeepLinkId;
         breadcrumbs: string[];
         pageTestSubject: string;
-        extraChecks?: Array<() => Promise<void>>;
       }> = [
         {
           deepLinkId: 'discover',
@@ -95,12 +92,7 @@ export default function searchSolutionNavigation({
         {
           deepLinkId: 'searchPlayground',
           breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'svlPlaygroundPage',
-        },
-        {
-          deepLinkId: 'enterpriseSearchContent:connectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'searchCreateConnectorPage',
+          pageTestSubject: 'playgroundsListPage',
         },
         {
           deepLinkId: 'enterpriseSearchApplications:searchApplications',
@@ -114,22 +106,13 @@ export default function searchSolutionNavigation({
         },
         {
           deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          breadcrumbs: ['Relevance', 'Inference endpoints'],
           pageTestSubject: 'inferenceEndpointsPage',
         },
         {
           deepLinkId: 'dev_tools',
           breadcrumbs: ['Dev Tools'],
           pageTestSubject: 'console',
-          extraChecks: [
-            async () => {
-              if (await console.isTourPopoverOpen()) {
-                // Skip the tour if it's open. This will prevent the tour popover from staying on the page
-                // and blocking breadcrumbs for other tests.
-                await console.clickSkipTour();
-              }
-            },
-          ],
         },
       ];
 
@@ -144,11 +127,6 @@ export default function searchSolutionNavigation({
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
-        if (testCase.extraChecks !== undefined) {
-          for (const check of testCase.extraChecks) {
-            await check();
-          }
-        }
       }
 
       await expectNoPageReload();
@@ -161,27 +139,60 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectSectionOpen(
         'search_project_nav_footer.project_settings_project_nav'
       );
-      await solutionNavigation.sidenav.expectOnlyDefinedLinks([
-        'search_project_nav',
-        'searchHomepage',
-        'discover',
-        'dashboards',
-        'build',
-        'elasticsearchIndexManagement',
-        'searchPlayground',
-        'enterpriseSearchContent:connectors',
-        'enterpriseSearchApplications:searchApplications',
-        'relevance',
-        'searchSynonyms:synonyms',
-        'searchQueryRules',
-        'searchInferenceEndpoints:inferenceEndpoints',
-        'search_project_nav_footer',
-        'dev_tools',
-        'project_settings_project_nav',
-        'management:trained_models',
-        'stack_management',
-        'monitoring',
-      ]);
+      const isV2 = await solutionNavigation.sidenav.isV2();
+
+      if (isV2) {
+        // in v2 we don't have "sections" and order is different because items under "more" are in the end
+        await solutionNavigation.sidenav.expectOnlyDefinedLinks(
+          [
+            // home:
+            'searchHomepage',
+
+            // main;
+            'discover',
+            'dashboards',
+            'elasticsearchIndexManagement',
+            'searchPlayground',
+            'enterpriseSearchApplications:searchApplications',
+
+            // more:
+            'searchSynonyms:synonyms',
+            'searchQueryRules',
+            'searchInferenceEndpoints:inferenceEndpoints',
+
+            // footer:
+            'dev_tools',
+            'management:trained_models',
+            'stack_management',
+            'monitoring',
+          ],
+          {
+            // don't check order because of "more" menu
+            checkOrder: false,
+          }
+        );
+      } else {
+        await solutionNavigation.sidenav.expectOnlyDefinedLinks([
+          'search_project_nav',
+          'searchHomepage',
+          'discover',
+          'dashboards',
+          'build',
+          'elasticsearchIndexManagement',
+          'searchPlayground',
+          'enterpriseSearchApplications:searchApplications',
+          'relevance',
+          'searchSynonyms:synonyms',
+          'searchQueryRules',
+          'searchInferenceEndpoints:inferenceEndpoints',
+          'search_project_nav_footer',
+          'dev_tools',
+          'project_settings_project_nav',
+          'management:trained_models',
+          'stack_management',
+          'monitoring',
+        ]);
+      }
     });
   });
 }

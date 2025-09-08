@@ -17,4 +17,3 @@ require('@kbn/babel-register').install();
 require('./polyfill');
 
 require('@kbn/security-hardening');
-require('reflect-metadata');

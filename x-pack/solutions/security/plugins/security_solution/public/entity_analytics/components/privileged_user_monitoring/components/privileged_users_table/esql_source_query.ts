@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privilege_monitoring/utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { getPrivilegedMonitorUsersJoin } from '../../queries/helpers';
 
-export const getPrivilegedUsersQuery = (namespace: string) => {
+export const getPrivilegedUsersQuery = (namespace: string, limit: number) => {
   return `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
   ${getPrivilegedMonitorUsersJoin(namespace)}
   | EVAL
@@ -16,5 +16,6 @@ export const getPrivilegedUsersQuery = (namespace: string) => {
       labels.sources = labels.sources,
       eaLabels = entity_analytics_monitoring.labels.value
   | KEEP user.is_privileged, labels.sources, eaLabels, user.name
+  | LIMIT ${limit}
   `;
 };

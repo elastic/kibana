@@ -233,6 +233,48 @@ describe('Transform attack discoveries to alert documents', () => {
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
     });
+
+    it('returns undefined for replacements when replacements is undefined', () => {
+      const params = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        replacements: undefined,
+      };
+
+      const result = transformToAlertDocuments({
+        ...defaultProps,
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
+    });
+
+    it('returns undefined for entitySummaryMarkdown_with_replacements when entitySummaryMarkdown is an empty string', () => {
+      const params = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        attackDiscoveries: [
+          {
+            ...mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0],
+            entitySummaryMarkdown: '',
+          },
+        ],
+      };
+
+      const result = transformToAlertDocuments({
+        ...defaultProps,
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]).toEqual(
+        replaceAnonymizedValuesWithOriginalValues({
+          messageContent: '',
+          replacements: params.replacements ?? {},
+        })
+      );
+    });
   });
 
   describe('transformToBaseAlertDocument', () => {

@@ -244,6 +244,7 @@ export interface LLMModel {
   icon: string;
   disabled: boolean;
   promptTokenLimit?: number;
+  isElasticConnector?: boolean;
 }
 
 export type { ActionConnector, UserConfiguredActionConnector };
@@ -275,4 +276,9 @@ export interface SavedPlaygroundRouterParameters {
   playgroundId: string;
   pageMode?: PlaygroundPageMode;
   viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundLoadErrors {
+  missingIndices: string[];
+  missingModel?: string;
 }

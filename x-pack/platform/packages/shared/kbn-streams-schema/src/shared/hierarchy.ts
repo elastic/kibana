@@ -6,12 +6,7 @@
  */
 
 export function isDescendantOf(parent: string, child: string) {
-  const parentSegments = parent.split('.');
-  const childSegments = child.split('.');
-  return (
-    parentSegments.length < childSegments.length &&
-    parentSegments.every((segment, index) => segment === childSegments[index])
-  );
+  return child.startsWith(parent + '.');
 }
 
 export function isChildOf(parent: string, child: string) {
@@ -33,6 +28,10 @@ export function isRoot(id: string) {
 export function getAncestors(id: string) {
   const parts = id.split('.');
   return parts.slice(0, parts.length - 1).map((_, index) => parts.slice(0, index + 1).join('.'));
+}
+
+export function getRoot(id: string) {
+  return id.split('.')[0];
 }
 
 export function getAncestorsAndSelf(id: string) {

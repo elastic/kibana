@@ -12,7 +12,7 @@ import type {
   TableSuggestionColumn,
   VisualizationSuggestion,
 } from '../../types';
-import { PieVisualizationState } from '../../../common/types';
+import type { PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,

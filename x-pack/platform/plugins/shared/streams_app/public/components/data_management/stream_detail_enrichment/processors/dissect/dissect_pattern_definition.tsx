@@ -11,12 +11,14 @@ import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useResizeChecker } from '@kbn/react-hooks';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 
 export const DissectPatternDefinition = () => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.ingest.dissectKeyModifiers;
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const { field, fieldState } = useController<ProcessorFormState, 'pattern'>({
     name: 'pattern',
@@ -61,17 +63,21 @@ export const DissectPatternDefinition = () => {
       error={error?.message}
       fullWidth
     >
-      <CodeEditor
-        value={serialize(field.value)}
-        onChange={(value) => field.onChange(deserialize(value))}
-        languageId="text"
-        height={75}
-        options={{ minimap: { enabled: false } }}
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsAriaLabel',
-          { defaultMessage: 'Pattern editor' }
-        )}
-      />
+      <div ref={containerRef} style={{ width: '100%', height: 75, overflow: 'hidden' }}>
+        <CodeEditor
+          value={serialize(field.value)}
+          onChange={(value) => field.onChange(deserialize(value))}
+          languageId="text"
+          height={75}
+          options={{ minimap: { enabled: false } }}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsAriaLabel',
+            { defaultMessage: 'Pattern editor' }
+          )}
+          editorDidMount={setupResizeChecker}
+          editorWillUnmount={destroyResizeChecker}
+        />
+      </div>
     </EuiFormRow>
   );
 };

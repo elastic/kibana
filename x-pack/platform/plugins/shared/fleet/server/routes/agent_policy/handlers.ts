@@ -370,6 +370,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     const agentPolicy = await createAgentPolicyWithPackages({
       soClient,
       esClient,
+      agentPolicyService,
       newPolicy,
       hasFleetServer,
       withSysMonitoring,
@@ -539,6 +540,8 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
+    const authzFleetAgentsAll = fleetContext.authz.fleet.allAgents;
+
     const requestSpaceId = spaceId;
 
     if (spaceIds?.length) {
@@ -566,7 +569,14 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, bumpRevision, user, spaceId, requestSpaceId }
+      {
+        force,
+        bumpRevision,
+        user,
+        spaceId,
+        requestSpaceId,
+        isRequiredVersionsAuthorized: authzFleetAgentsAll,
+      }
     );
 
     let item: any = agentPolicy;

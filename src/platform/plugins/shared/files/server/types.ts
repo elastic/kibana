@@ -9,8 +9,8 @@
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { FileKind } from '../common';
-import { FileServiceFactory } from './file_service/file_service_factory';
+import type { FileKind } from '../common';
+import type { FileServiceFactory } from './file_service/file_service_factory';
 
 /**
  * Files plugin setup contract

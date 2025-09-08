@@ -23,14 +23,15 @@ import { errors } from '@elastic/elasticsearch';
 import type { DiscoveryDataset } from '../../common/types';
 
 import type { PackageClient } from '../services';
-import { appContextService } from '../services';
+import { appContextService, dataStreamService } from '../services';
 import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
 import { getInstalledPackages } from '../services/epm/packages';
+import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -61,10 +62,10 @@ interface DiscoveryMap {
 export class AutoInstallContentPackagesTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController?: AbortController;
   private taskInterval: string;
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
+  private lastPrerelease: boolean = false;
 
   constructor(setupContract: AutoInstallContentPackagesTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -78,12 +79,9 @@ export class AutoInstallContentPackagesTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              this.abortController = new AbortController();
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              this.abortController?.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -154,16 +152,22 @@ export class AutoInstallContentPackagesTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
+    const prerelease = await getPrereleaseFromSettings(soClient);
+
     try {
       if (
         !this.discoveryMap ||
-        this.discoveryMapLastFetched < Date.now() - CONTENT_PACKAGES_CACHE_TTL
+        this.discoveryMapLastFetched < Date.now() - CONTENT_PACKAGES_CACHE_TTL ||
+        this.lastPrerelease !== prerelease
       ) {
+        this.lastPrerelease = prerelease;
         this.discoveryMapLastFetched = Date.now();
-        this.logger.debug(
-          `[AutoInstallContentPackagesTask] Fetching content packages to get discovery fields`
+        this.discoveryMap = await this.getContentPackagesDiscoveryMap(prerelease);
+        this.logger.info(
+          `[AutoInstallContentPackagesTask] Fetched content packages discovery map: ${JSON.stringify(
+            this.discoveryMap
+          )}`
         );
-        this.discoveryMap = await this.getContentPackagesDiscoveryMap();
       }
 
       const installedPackages = await getInstalledPackages({
@@ -182,7 +186,7 @@ export class AutoInstallContentPackagesTask {
 
       const packagesToInstall = await this.getPackagesToInstall(esClient, installedPackagesMap);
       if (packagesToInstall.length > 0) {
-        this.logger.debug(
+        this.logger.info(
           `[AutoInstallContentPackagesTask] Content packages to install: ${packagesToInstall
             .map((pkg) => `${pkg.name}@${pkg.version}`)
             .join(', ')}`
@@ -289,35 +293,18 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const whereClause =
-      datasetsOfInstalledContentPackages.length > 0
-        ? `| WHERE data_stream.dataset NOT IN (${datasetsOfInstalledContentPackages
-            .map((dataset) => `"${dataset}"`)
-            .join(',')})`
-        : '';
-    const response = await esClient.esql.query({
-      query: `FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - ${this.intervalToEsql(
-        this.taskInterval
-      )} | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ${whereClause}`,
-    });
-    this.logger.debug(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
-
-    const datasetsWithData: string[] = response.values.map((value: any[]) => value[1]);
-    this.logger.debug(
+    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
+    const datasetsWithData: string[] = allFleetDataStreams
+      .map((dataStream: any) => dataStream.name.split('-')[1])
+      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
+    this.logger.info(
       `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
     );
     return datasetsWithData;
   }
 
-  private intervalToEsql(interval: string): string {
-    const value = parseInt(interval, 10);
-    const unit = interval.includes('h') ? 'hours' : 'minutes';
-    return `${value} ${unit}`;
-  }
-
-  private async getContentPackagesDiscoveryMap(): Promise<DiscoveryMap> {
+  private async getContentPackagesDiscoveryMap(prerelease: boolean): Promise<DiscoveryMap> {
     const type = 'content';
-    const prerelease = false;
     const discoveryMap: DiscoveryMap = {};
     const registryItems = await Registry.fetchList({ prerelease, type });
 

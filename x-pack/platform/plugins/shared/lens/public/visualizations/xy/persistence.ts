@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
-import {
+import type { AnnotationGroups } from '../../types';
+import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -23,15 +23,10 @@ import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualizati
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
 
-export const isPersistedByReferenceAnnotationsLayer = (
+const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
 ): layer is XYPersistedByReferenceAnnotationLayerConfig =>
   isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 /**
  * This is the type of hybrid layer we get after the user has made a change to
@@ -84,14 +79,14 @@ export type XYPersistedState = Omit<XYState, 'layers'> & {
 export function convertPersistedState(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
   return structuredClone(injectReferences(state, annotationGroups, references));
 }
 
 export function convertToPersistable(state: XYState) {
   const persistableState: XYPersistedState = state;
-  const savedObjectReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
   persistableState.layers.forEach((layer) => {
@@ -103,7 +98,7 @@ export function convertToPersistable(state: XYState) {
     // a by value annotation layer can be persisted with some config tweak
     if (!isByReferenceAnnotationsLayer(layer)) {
       const { indexPatternId, ...persistableLayer } = layer;
-      savedObjectReferences.push({
+      references.push({
         type: 'index-pattern',
         id: indexPatternId,
         name: getLayerReferenceName(layer.layerId),
@@ -111,13 +106,14 @@ export function convertToPersistable(state: XYState) {
       persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
       return;
     }
-    /**
+
+    /*
      * by reference annotation layer needs to be handled carefully
-     **/
+     */
 
     // make this id stable so that it won't retrigger all the time a change diff
     const referenceName = `ref-${layer.layerId}`;
-    savedObjectReferences.push({
+    references.push({
       type: EVENT_ANNOTATION_GROUP_TYPE,
       id: layer.annotationGroupId,
       name: referenceName,
@@ -152,13 +148,17 @@ export function convertToPersistable(state: XYState) {
     };
     persistableLayers.push(persistableLayer);
 
-    savedObjectReferences.push({
+    references.push({
       type: 'index-pattern',
       id: layer.indexPatternId,
       name: getLayerReferenceName(layer.layerId),
     });
   });
-  return { savedObjectReferences, state: { ...persistableState, layers: persistableLayers } };
+
+  return {
+    references,
+    state: { ...persistableState, layers: persistableLayers },
+  };
 }
 
 export const isPersistedAnnotationsLayer = (
@@ -183,7 +183,7 @@ function needsInjectReferences(state: XYPersistedState | XYState): state is XYPe
 function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;

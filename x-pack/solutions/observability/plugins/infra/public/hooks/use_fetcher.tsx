@@ -20,6 +20,7 @@ export enum FETCH_STATUS {
   SUCCESS = 'success',
   FAILURE = 'failure',
   NOT_INITIATED = 'not_initiated',
+  PENDING = 'pending',
 }
 
 export interface FetcherOptions {
@@ -27,6 +28,7 @@ export interface FetcherOptions {
   showToastOnError?: boolean;
   requestObservable$?: BehaviorSubject<(() => any) | undefined>;
   autoFetch?: boolean;
+  reloadRequestTimeUpdateEnabled?: boolean;
 }
 
 type InferApiCallReturnType<Fn> = Fn extends (callApi: ApiCallClient) => Promise<infer R>
@@ -45,7 +47,9 @@ interface FetcherResult<TReturn> {
 }
 
 export const isPending = (fetchStatus: FETCH_STATUS) =>
-  fetchStatus === FETCH_STATUS.LOADING || fetchStatus === FETCH_STATUS.NOT_INITIATED;
+  fetchStatus === FETCH_STATUS.LOADING ||
+  fetchStatus === FETCH_STATUS.NOT_INITIATED ||
+  fetchStatus === FETCH_STATUS.PENDING;
 export const isFailure = (fetchStatus: FETCH_STATUS) => fetchStatus === FETCH_STATUS.FAILURE;
 export const isSuccess = (fetchStatus: FETCH_STATUS) => fetchStatus === FETCH_STATUS.SUCCESS;
 
@@ -102,6 +106,7 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     autoFetch = true,
     preservePreviousData = true,
     showToastOnError = true,
+    reloadRequestTimeUpdateEnabled = true,
     requestObservable$,
   } = options;
 
@@ -198,11 +203,11 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
 
   useEffect(() => {
     // Allows the caller of useFetcher to control when the fetch can be triggered
-    if (autoFetch) {
+    if (autoFetch && reloadRequestTimeUpdateEnabled) {
       setCachedReloadRequestTime(reloadRequestTime);
     }
     autoFetchRef.current = autoFetch;
-  }, [autoFetch, reloadRequestTime]);
+  }, [autoFetch, reloadRequestTime, reloadRequestTimeUpdateEnabled]);
 
   useEffect(() => {
     return () => {

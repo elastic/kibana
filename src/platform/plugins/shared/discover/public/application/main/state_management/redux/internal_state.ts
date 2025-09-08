@@ -27,6 +27,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
 import {
   LoadingStatus,
+  TabsBarVisibility,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
   type TabState,
@@ -78,6 +79,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
+  tabsBarVisibility: TabsBarVisibility.default,
   tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
 };
 
@@ -146,6 +148,10 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
+      state.tabsBarVisibility = action.payload;
     },
 
     setExpandedDoc: (
@@ -222,6 +228,14 @@ export const internalStateSlice = createSlice({
         state.expandedDoc = undefined;
       }),
 
+    setESQLEditorUiState: (
+      state,
+      action: TabAction<{ esqlEditorUiState: Partial<TabState['uiState']['esqlEditor']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.esqlEditor = action.payload.esqlEditorUiState;
+      }),
+
     setDataGridUiState: (
       state,
       action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
@@ -244,6 +258,14 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action, (tab) => {
         tab.uiState.layout = action.payload.layoutUiState;
+      }),
+
+    setSearchDraftUiState: (
+      state,
+      action: TabAction<{ searchDraftUiState: Partial<TabState['uiState']['searchDraft']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
   },
   extraReducers: (builder) => {

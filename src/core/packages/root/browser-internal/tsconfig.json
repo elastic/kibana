@@ -68,9 +68,12 @@
     "@kbn/core-user-profile-browser-internal",
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/core-feature-flags-browser-internal",
+    "@kbn/core-http-rate-limiter-browser-internal",
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/core-pricing-browser-internal",
     "@kbn/core-pricing-browser-mocks",
+    "@kbn/core-di-browser-internal",
+    "@kbn/core-di-mocks",
   ],
   "exclude": [
     "target/**/*",

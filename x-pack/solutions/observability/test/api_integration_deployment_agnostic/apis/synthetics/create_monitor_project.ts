@@ -7,29 +7,29 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import rawExpect from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
-  ProjectMonitorsRequest,
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   PrivateLocation,
+  ProjectMonitorsRequest,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import {
-  syntheticsMonitorSavedObjectType,
   legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('AddProjectMonitors', function () {
+  describe('CreateProjectMonitors', function () {
     this.tags(['skipCloud', 'skipMKI']);
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');

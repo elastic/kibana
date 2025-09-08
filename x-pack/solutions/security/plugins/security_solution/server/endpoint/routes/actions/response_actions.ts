@@ -10,7 +10,6 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
@@ -29,6 +28,7 @@ import {
   type UploadActionApiRequestBody,
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
+  type RunScriptActionRequestBody,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -356,7 +356,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
-    if (isThirdPartyFeatureDisabled(req.body.agent_type, experimentalFeatures)) {
+    if (isThirdPartyFeatureDisabled(req.body.agent_type, command, experimentalFeatures)) {
       return errorHandler(
         logger,
         res,
@@ -409,15 +409,28 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
 function isThirdPartyFeatureDisabled(
   agentType: ResponseActionAgentType | undefined,
+  command: ResponseActionsApiCommandNames,
   experimentalFeatures: EndpointAppContext['experimentalFeatures']
 ): boolean {
-  return (
+  if (
+    agentType === 'sentinel_one' &&
+    command === 'runscript' &&
+    !experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
+  ) {
+    return true;
+  }
+
+  if (
     (agentType === 'sentinel_one' && !experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
     (agentType === 'crowdstrike' &&
       !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled) ||
     (agentType === 'microsoft_defender_endpoint' &&
       !experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
-  );
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 async function handleActionCreation(

@@ -8,11 +8,11 @@
  */
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import {
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -24,7 +24,7 @@ import {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisParams, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';

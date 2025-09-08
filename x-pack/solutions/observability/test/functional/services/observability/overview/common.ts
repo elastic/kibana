@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-// Based on the x-pack/test/functional/es_archives/observability/alerts archive.
+// Based on the x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
   rangeFrom: '2021-10-18T13:36:22.109Z',
   rangeTo: '2021-10-20T13:36:22.109Z',
@@ -94,6 +94,11 @@ export function ObservabilityOverviewCommonProvider({
     });
   };
 
+  const clickAddDataButton = async () => {
+    await testSubjects.click('o11yOverviewPageAddDataButton');
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const getAlertsTableNoDataOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_TABLE_NO_DATA_SELECTOR);
   };
@@ -105,5 +110,6 @@ export function ObservabilityOverviewCommonProvider({
     navigateToOverviewPage,
     openAlertsSectionAndWaitToAppear,
     waitForOverviewNoDataPrompt,
+    clickAddDataButton,
   };
 }

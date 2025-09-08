@@ -20,11 +20,12 @@ import {
   Subject,
 } from 'rxjs';
 
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OPTIONS_LIST_CONTROL } from '../../../../common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   OptionsListControlState,
   OptionsListSortingType,
@@ -49,11 +50,8 @@ import { initializeSelectionsManager, selectionComparators } from './selections_
 import { OptionsListStrings } from './options_list_strings';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 import { initializeTemporayStateManager } from './temporay_state_manager';
-import {
-  editorComparators,
-  EditorState,
-  initializeEditorStateManager,
-} from './editor_state_manager';
+import type { EditorState } from './editor_state_manager';
+import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 
 export const getOptionsListControlFactory = (): DataControlFactory<
   OptionsListControlState,

@@ -9,15 +9,15 @@
 
 import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
-import { FileServiceStart } from '../../file_service';
+import type { FileServiceStart } from '../../file_service';
 
 import { handler } from './upload';
 import { createFileKindsRequestHandlerContextMock } from '../test_utils';
-import { FileKindsRequestHandlerContext } from './types';
-import { File } from '../../file';
+import type { FileKindsRequestHandlerContext } from './types';
+import type { File } from '../../file';
 import { AbortedUploadError } from '../../file/errors';
 
 const createRequest = httpServerMock.createKibanaRequest;

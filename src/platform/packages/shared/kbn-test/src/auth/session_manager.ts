@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
-import {
-  createCloudSAMLSession,
-  createLocalSAMLSession,
-  getSecurityProfile,
-  Session,
-} from './saml_auth';
-import { GetSessionByRole, Role, User } from './types';
+import type { Session } from './saml_auth';
+import { createCloudSAMLSession, createLocalSAMLSession, getSecurityProfile } from './saml_auth';
+import type { GetSessionByRole, Role, User } from './types';
 
 export interface HostOptions {
   protocol: 'http' | 'https';

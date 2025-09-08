@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryRulesPutRulesetResponse,
   QueryRulesQueryRuleset,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const putRuleset = async (
   client: ElasticsearchClient,

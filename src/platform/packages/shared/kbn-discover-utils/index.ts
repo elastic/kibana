@@ -33,6 +33,7 @@ export {
   createLogsContextService,
   createTracesContextService,
   createApmErrorsContextService,
+  createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -40,8 +41,8 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
-  getTransactionDocumentOverview,
-  getSpanDocumentOverview,
+  getTraceDocumentOverview,
+  getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
@@ -66,12 +67,14 @@ export {
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
+  severityOrder,
 } from './src';
 
 export type {
   LogsContextService,
   TracesContextService,
   ApmErrorsContextService,
+  MetricsContextService,
   SortOrder,
   SortInput,
   SortPair,

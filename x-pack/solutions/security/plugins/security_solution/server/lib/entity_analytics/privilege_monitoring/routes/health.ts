@@ -8,25 +8,25 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { PrivMonHealthResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/health.gen';
+import type { PrivMonHealthResponse } from '../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  PRIVMON_HEALTH_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { createEngineStatusService } from '../engine/status_service';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/privileges/health',
+      path: PRIVMON_HEALTH_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -47,18 +47,16 @@ export const healthCheckPrivilegeMonitoringRoute = (
           await context.core,
           ENABLE_PRIVILEGED_USER_MONITORING_SETTING
         );
+        const dataClient = secSol.getPrivilegeMonitoringDataClient();
+        const soClient = dataClient.getScopedSoClient(request);
+
+        const statusService = createEngineStatusService(dataClient, soClient);
 
         try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().getEngineStatus();
+          const body = await statusService.get();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
-
-          if (error?.statusCode === 404) {
-            return response.ok({
-              body: { status: 'not_found' },
-            });
-          }
 
           logger.error(`Error checking privilege monitoring health: ${error.message}`);
           return siemResponse.error({

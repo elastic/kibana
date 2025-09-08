@@ -20,7 +20,6 @@ import {
   EuiWindowEvent,
   keys,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -322,7 +321,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isSaveable={isSaveable}
-        isScrollable={false}
+        isScrollable
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
@@ -341,19 +340,22 @@ export function LensEditConfigurationFlyout({
               flex: 1;
               flex-direction: column;
             }
+            .euiAccordion-isOpen {
+              .euiAccordion__childWrapper {
+                // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
+                block-size: auto ${textBasedMode ? '!important' : ''};
+                flex: 1;
+              }
+            }
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
               pointer-events: none;
-              padding-left: ${euiThemeVars.euiFormMaxWidth};
-              margin-left: -${euiThemeVars.euiFormMaxWidth};
+
+              padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
+              margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
               > * {
                 pointer-events: auto;
-              }
-
-              .euiAccordion-isOpen & {
-                block-size: auto !important;
-                flex: 1;
               }
             }
             .lnsIndexPatternDimensionEditor-advancedOptions {
@@ -366,14 +368,25 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              css={css`
+                > * {
+                  flex-grow: 0;
+                }
+              `}
+              gutterSize="none"
+              direction="column"
+              ref={editorContainer}
+            />
+          </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
               .euiAccordion__childWrapper {
                 flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
-              padding: 0 ${euiThemeVars.euiSize};
+              padding: 0 ${euiTheme.euiTheme.size.base};
             `}
           >
             <EuiAccordion
@@ -382,9 +395,8 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
@@ -438,10 +450,10 @@ export function LensEditConfigurationFlyout({
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
             css={css`
-              border-top: ${euiThemeVars.euiBorderThin};
-              border-bottom: ${euiThemeVars.euiBorderThin};
-              padding-left: ${euiThemeVars.euiSize};
-              padding-right: ${euiThemeVars.euiSize};
+              border-top: ${euiTheme.euiTheme.border.thin};
+              border-bottom: ${euiTheme.euiTheme.border.thin};
+              padding-left: ${euiTheme.euiTheme.size.base};
+              padding-right: ${euiTheme.euiTheme.size.base};
               .euiAccordion__childWrapper {
                 flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
               }

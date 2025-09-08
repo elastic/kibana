@@ -20,7 +20,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type {
   KibanaAssetReference,
@@ -99,6 +99,7 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -717,6 +718,22 @@ export async function installPackageWithStateMachine(options: {
       return { error: err, installType, installSource, pkgName };
     }
 
+    const excludeDataStreamTypes =
+      appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+    if (!shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)) {
+      logger.error(
+        `Installation package: ${pkgName} is not allowed due to data stream type exclusions`
+      );
+      const err = new FleetError(
+        `Installation package: ${pkgName} is not allowed due to data stream type exclusions`
+      );
+      sendEvent({
+        ...telemetryEvent,
+        errorMessage: err.message,
+      });
+      return { error: err, installType, installSource, pkgName };
+    }
+
     // Saved object client need to be scopped with the package space for saved object tagging
     const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
 
@@ -1155,7 +1172,7 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
-  previousVersion?: string;
+  previousVersion?: string | null;
 }) {
   const {
     savedObjectsClient,
@@ -1171,6 +1188,7 @@ export async function restartInstallation(options: {
     install_status: 'installing',
     install_started_at: new Date().toISOString(),
     install_source: installSource,
+    previous_version: previousVersion,
   };
 
   if (verificationResult) {
@@ -1179,10 +1197,6 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
-  }
-
-  if (previousVersion) {
-    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({

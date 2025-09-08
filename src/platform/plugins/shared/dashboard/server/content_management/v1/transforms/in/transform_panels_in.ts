@@ -9,14 +9,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../../common';
-import {
+import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
-import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../../kibana_services';
 
 export function transformPanelsIn(

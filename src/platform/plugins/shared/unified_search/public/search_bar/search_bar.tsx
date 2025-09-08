@@ -8,11 +8,13 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
-import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiIconProps, WithEuiThemeProps } from '@elastic/eui';
+import { withEuiTheme } from '@elastic/eui';
+import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
@@ -25,23 +27,27 @@ import {
   isOfQueryType,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   TimeHistoryContract,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
-import type { IUnifiedSearchPluginServices } from '../types';
-import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
+import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
+import type { SavedQueryMeta } from '../saved_query_form';
+import { SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
-import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
+import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
+import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import { QueryBarTopRow, QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type {
   SuggestionsAbstraction,
@@ -96,6 +102,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
     payload: { dateRange: TimeRange; query?: QT | Query },
     isUpdate?: boolean
   ) => void;
+  // To initialize with a predefined query which has not been submitted yet (in dirty state)
+  draft?: UnifiedSearchDraft;
+  onDraftChange?: QueryBarTopRowProps<QT>['onDraftChange'];
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
@@ -142,6 +151,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   renderQueryInputAppend?: () => React.ReactNode;
   onESQLDocsFlyoutVisibilityChanged?: QueryBarTopRowProps['onESQLDocsFlyoutVisibilityChanged'];
+
+  esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
+  onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -251,6 +263,30 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     return nextState;
   }
 
+  private prefillWithInitialDraftState = (state: SearchBarState<QT>): SearchBarState<QT> => {
+    const { draft, query } = this.props;
+
+    if (!draft) {
+      return state;
+    }
+
+    if (
+      query &&
+      draft.query &&
+      isOfAggregateQueryType(query) !== isOfAggregateQueryType(draft.query)
+    ) {
+      // safeguard against query type mismatch
+      return state;
+    }
+
+    return {
+      ...state,
+      query: draft.query ? ({ ...draft.query } as SearchBarState<QT>['query']) : state.query,
+      dateRangeFrom: draft.dateRangeFrom || state.dateRangeFrom,
+      dateRangeTo: draft.dateRangeTo || state.dateRangeTo,
+    };
+  };
+
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
 
@@ -258,7 +294,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
    until the user manually submits their changes. Some apps have watches on the query value in app state so we don't
    want to trigger those on every keypress.
   */
-  public state = {
+  public state = this.prefillWithInitialDraftState({
     isFiltersVisible: true,
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
@@ -266,7 +302,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
-  } as SearchBarState<QT>;
+  } as SearchBarState<QT>);
 
   public isDirty = () => {
     if (!this.props.showDatePicker && this.state.query && this.props.query) {
@@ -503,7 +539,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       isScreenshotMode && styles.hidden,
     ];
 
-    const classes = classNames('uniSearchBar', {
+    const classes = classNames('uniSearchBar', 'hide-for-sharing', {
       [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
@@ -636,6 +672,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
+          onDraftChange={this.props.onDraftChange}
           isDirty={this.isDirty()}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
@@ -668,6 +705,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
           onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
+          esqlEditorInitialState={this.props.esqlEditorInitialState}
+          onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
         />
       </div>
     );

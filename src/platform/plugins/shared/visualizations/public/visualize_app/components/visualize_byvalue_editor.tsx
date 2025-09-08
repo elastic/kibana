@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisualizeInput } from '../..';
+import type { VisualizeInput } from '../..';
 import {
   useChromeVisibility,
   useVisByValue,
@@ -20,9 +20,9 @@ import {
   useLinkedSearchUpdates,
   useDataViewUpdates,
 } from '../utils';
-import { VisualizeServices } from '../types';
+import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
+import type { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {

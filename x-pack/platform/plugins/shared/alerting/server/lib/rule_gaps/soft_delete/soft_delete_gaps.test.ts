@@ -13,6 +13,7 @@ import { Gap } from '../gap';
 import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { softDeleteGaps } from './soft_delete_gaps';
+import { gapStatus } from '../../../../common/constants';
 
 jest.mock('../process_all_rule_gaps');
 jest.mock('./soft_delete_gaps_batch');
@@ -25,8 +26,10 @@ describe('softDeleteGaps', () => {
   const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
   const softDeleteGapsBatchMock = softDeleteGapsBatch as jest.Mock;
 
+  const ruleId = 'test-rule-id';
   const gaps = [
     new Gap({
+      ruleId,
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -34,16 +37,20 @@ describe('softDeleteGaps', () => {
     }),
   ];
 
-  const ruleId = 'test-rule-id';
+  let processGapsBatchResult = {};
+
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
+    processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch }) => {
+      processGapsBatchResult = await processGapsBatch(gaps);
+      return processGapsBatchResult;
+    });
   });
 
   describe('softDeleteGaps', () => {
     it('should orchestrate the gap disable process', async () => {
       await softDeleteGaps({
-        ruleId,
+        ruleIds: [ruleId],
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
@@ -52,14 +59,15 @@ describe('softDeleteGaps', () => {
       expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        ruleId: 'test-rule-id',
+        ruleIds: ['test-rule-id'],
         processGapsBatch: expect.any(Function),
+        statuses: Object.values(gapStatus),
       });
     });
 
     it('should pass a function that calls softDeleteGapsBatch when gaps are fetched', async () => {
       await softDeleteGaps({
-        ruleId,
+        ruleIds: [ruleId],
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
@@ -76,15 +84,23 @@ describe('softDeleteGaps', () => {
     it('should log an error when disable gaps is not successful', async () => {
       softDeleteGapsBatchMock.mockResolvedValue(false);
       await softDeleteGaps({
-        ruleId,
+        ruleIds: [ruleId],
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `Failed to soft delete gaps for rule test-rule-id: Some gaps failed to soft delete`
+        `Failed to soft delete gaps for rules test-rule-id: Some gaps failed to soft delete`
       );
+    });
+
+    describe('processGapsBatch function', () => {
+      it('should return a record with the count of processed gaps per rule', () => {
+        expect(processGapsBatchResult).toEqual({
+          [ruleId]: 1,
+        });
+      });
     });
   });
 });

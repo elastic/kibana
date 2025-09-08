@@ -10,10 +10,13 @@
     "postbuild:antlr4:esql": "./scripts/postbuild.sh",
     "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/antlr/parser src/antlr/esql_parser.g4",
     "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4",
-    "make:defs": "ts-node --transpileOnly ./scripts/generate_function_definitions.ts",
+    "make:defs": "./scripts/make_defs.sh",
     "postmake:defs": "yarn run lint:fix:generated",
     "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-ast/src/definitions/generated",
     "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-ast/src/validation/validation.test.ts"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
 }

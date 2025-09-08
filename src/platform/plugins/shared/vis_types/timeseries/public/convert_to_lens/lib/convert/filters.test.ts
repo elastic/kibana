@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { createSeries } from '../__mocks__';
 import { convertToFiltersColumn, convertToFiltersParams } from './filters';
-import { FiltersColumn } from './types';
+import type { FiltersColumn } from './types';
 
 describe('convertToFiltersParams', () => {
   const filter = { language: 'lucene', query: 'some query' };

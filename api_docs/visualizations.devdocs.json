@@ -3524,7 +3524,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/types.ts",
@@ -6199,6 +6205,55 @@
           "\"AGG_BASED_VISUALIZATION_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.BasicVisualizationClient",
+        "type": "Type",
+        "tags": [],
+        "label": "BasicVisualizationClient",
+        "description": [
+          "\nA slim visualization client used but the vis plugin to save basic attributes\n\nTODO cleanup the vis-type client code.\nAll viz pass this client require type overrides to adopt VisualizationClient"
+        ],
+        "signature": [
+          "{ update: (visualization: Omit<",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.UpdateIn",
+            "text": "UpdateIn"
+          },
+          "<ContentType, Partial<Attr>, Pick<",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.SavedObjectUpdateOptions",
+            "text": "SavedObjectUpdateOptions"
+          },
+          "<unknown>, \"references\">>, \"contentTypeId\">) => Promise<{ item: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.SOWithMetadataPartial",
+            "text": "SOWithMetadataPartial"
+          },
+          "<Attr>; meta?: undefined; }>; get: (id: string) => Promise<{ item: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.SOWithMetadata",
+            "text": "SOWithMetadata"
+          },
+          "<Attr>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11085,10 +11140,10 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.MetricVisConfiguration.secondaryPrefix",
+            "id": "def-common.MetricVisConfiguration.secondaryLabel",
             "type": "string",
             "tags": [],
-            "label": "secondaryPrefix",
+            "label": "secondaryLabel",
             "description": [],
             "signature": [
               "string | undefined"
@@ -12233,7 +12288,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/types.ts",
@@ -12956,7 +13017,7 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; typeName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
@@ -12970,7 +13031,13 @@
             "label": "references",
             "description": [],
             "signature": [
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
@@ -15949,7 +16016,7 @@
         "label": "VisualizationSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; typeName?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
         "deprecated": false,

@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { Writable } from '@kbn/utility-types';
-import { ISavedObjectsRepository } from '@kbn/core/server';
-import { ApplicationUsageReport } from './schema';
+import type { Writable } from '@kbn/utility-types';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { ApplicationUsageReport } from './schema';
 import { getDailyId } from '../../common/application_usage';
 
 type WritableApplicationUsageReport = Writable<ApplicationUsageReport>;

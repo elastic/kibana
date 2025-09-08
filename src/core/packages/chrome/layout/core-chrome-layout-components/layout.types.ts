@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 
 /**
  * Dimensions for each layout section in the Chrome UI.
@@ -20,7 +20,6 @@ export interface LayoutDimensions {
   footerHeight: number;
   headerHeight: number;
   navigationWidth: number;
-  navigationPanelWidth: number;
   sidebarWidth: number;
   sidebarPanelWidth: number;
   applicationTopBarHeight: number;
@@ -37,7 +36,6 @@ export interface LayoutState extends LayoutDimensions {
   hasSidebarPanel: boolean;
   hasHeader: boolean;
   hasNavigation: boolean;
-  hasNavigationPanel: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
 }
@@ -58,7 +56,6 @@ export type Slot = React.ReactNode | ((props: SlotProps) => React.ReactNode);
 export interface ChromeLayoutSlots {
   header?: Slot | null;
   navigation?: Slot | null;
-  navigationPanel?: Slot | null;
   banner?: Slot | null;
   footer?: Slot | null;
   sidebarPanel?: Slot | null;

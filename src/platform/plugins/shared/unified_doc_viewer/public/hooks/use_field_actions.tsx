@@ -9,10 +9,11 @@
 
 import { useMemo } from 'react';
 import createContainer from 'constate';
-import { copyToClipboard, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
 
 interface WithFieldParam {
   field: string;

@@ -70,6 +70,7 @@ export const EsAssetReferenceSchema = schema.object({
     schema.literal('data_stream_ilm_policy'),
     schema.literal('transform'),
     schema.literal('ml_model'),
+    schema.literal('knowledge_base'),
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
@@ -200,6 +201,7 @@ export const PackageInfoSchema = schema
     discovery: schema.maybe(
       schema.object({
         fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+        datasets: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
       })
     ),
   })
@@ -255,6 +257,7 @@ export const GetLimitedPackagesResponseSchema = schema.object({
 export const GetStatsResponseSchema = schema.object({
   response: schema.object({
     agent_policy_count: schema.number(),
+    package_policy_count: schema.number(),
   }),
 });
 
@@ -322,6 +325,20 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
 export const GetInfoResponseSchema = schema.object({
   item: GetPackageInfoSchema,
   metadata: schema.maybe(PackageMetadataSchema),
+});
+export const GetKnowledgeBaseResponseSchema = schema.object({
+  package: schema.object({
+    name: schema.string(),
+  }),
+  items: schema.arrayOf(
+    schema.object({
+      fileName: schema.string(),
+      content: schema.string(),
+      path: schema.string(),
+      installed_at: schema.string(),
+      version: schema.string(),
+    })
+  ),
 });
 
 export const UpdatePackageResponseSchema = schema.object({
@@ -430,6 +447,11 @@ export const ReauthorizeTransformResponseSchema = schema.arrayOf(
   })
 );
 
+export const RollbackPackageResponseSchema = schema.object({
+  version: schema.string(),
+  success: schema.boolean(),
+});
+
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
     dataStreamType: schema.maybe(
@@ -494,6 +516,11 @@ export const GetInfoRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
     withMetadata: schema.boolean({ defaultValue: false }),
+  }),
+};
+export const GetKnowledgeBaseRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };
 
@@ -690,5 +717,11 @@ export const GetInputsRequestSchema = {
     }),
     prerelease: schema.maybe(schema.boolean()),
     ignoreUnverified: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const RollbackPackageRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as serverTypes from './server_types';
+import type * as serverTypes from './server_types';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.

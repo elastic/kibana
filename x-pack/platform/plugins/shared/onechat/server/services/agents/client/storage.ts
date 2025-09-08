@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AgentType, ToolSelection } from '@kbn/onechat-common';
+import { chatSystemIndex } from '@kbn/onechat-server';
 
-export const agentProfilesIndexName = '.kibana_onechat_agents';
+export const agentsIndexName = chatSystemIndex('agents');
 
 const storageSettings = {
-  name: agentProfilesIndexName,
+  name: agentsIndexName,
   schema: {
     properties: {
       name: types.keyword({}),
       type: types.keyword({}),
       description: types.text({}),
+      labels: types.keyword({}),
+      avatar_color: types.keyword({}),
+      avatar_symbol: types.keyword({}),
       configuration: types.object({ dynamic: true }),
       created_at: types.date({}),
       updated_at: types.date({}),
@@ -29,6 +34,9 @@ export interface AgentProperties {
   name: string;
   type: AgentType;
   description: string;
+  labels?: string[];
+  avatar_color?: string;
+  avatar_symbol?: string;
   configuration: {
     instructions?: string;
     tools: ToolSelection[];
@@ -39,6 +47,7 @@ export interface AgentProperties {
 
 export type AgentProfileStorageSettings = typeof storageSettings;
 
+// @ts-expect-error type mismatch for labels type
 export type AgentProfileStorage = StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>;
 
 export const createStorage = ({
@@ -48,6 +57,7 @@ export const createStorage = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): AgentProfileStorage => {
+  // @ts-expect-error type mismatch for labels type
   return new StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>(
     esClient,
     logger,

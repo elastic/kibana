@@ -33,7 +33,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { css } from '@emotion/react';
@@ -47,7 +47,7 @@ import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_me
 import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
-import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
+import { HeaderPageAnnouncer } from './header_page_announcer';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -76,7 +76,6 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   isFixed: boolean;
-  as?: 'div' | 'header';
 }
 
 export function Header({
@@ -91,7 +90,6 @@ export function Header({
   customBranding$,
   isServerless,
   isFixed,
-  as = 'header',
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -102,19 +100,11 @@ export function Header({
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
   const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
-  const HeaderElement = as === 'header' ? 'header' : 'div';
 
   return (
     <>
-      <ScreenReaderRouteAnnouncements
-        breadcrumbs$={observables.breadcrumbs$}
-        customBranding$={customBranding$}
-        appId$={application.currentAppId$}
-      />
-      <SkipToMainContent />
-
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
-      <HeaderElement className={className} data-test-subj="headerGlobalNav">
+      <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
@@ -123,6 +113,10 @@ export function Header({
             sections={[
               {
                 items: [
+                  <HeaderPageAnnouncer
+                    breadcrumbs$={observables.breadcrumbs$}
+                    customBranding$={customBranding$}
+                  />,
                   <HeaderLogo
                     href={homeHref}
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
@@ -227,7 +221,7 @@ export function Header({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-      </HeaderElement>
+      </header>
     </>
   );
 }

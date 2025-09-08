@@ -44,15 +44,13 @@ export interface UsageStats {
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
-  'observability:apmEnableServiceMapApiV2': boolean;
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'onechat:mcp:enabled': boolean;
-  'onechat:ui:enabled': boolean;
-  'onechat:api:enabled': boolean;
+  'agentBuilder:enabled': boolean;
+  'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -75,6 +73,7 @@ export interface UsageStats {
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enablePrivilegedUserMonitoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
+  'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -173,6 +172,9 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
-  'observability:enableStreamsUI': boolean;
+  'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
+  'genAiSettings:defaultAIConnector': string;
+  'genAiSettings:defaultAIConnectorOnly': boolean;
+  'observability:streamsEnableGroupStreams': boolean;
 }

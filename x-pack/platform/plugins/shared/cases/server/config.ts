@@ -27,11 +27,16 @@ export const ConfigSchema = schema.object({
     index: schema.object({
       enabled: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  unsafe: schema.maybe(
+    schema.object({
+      enableCaseSummary: schema.boolean({ defaultValue: false }),
+    })
+  ),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

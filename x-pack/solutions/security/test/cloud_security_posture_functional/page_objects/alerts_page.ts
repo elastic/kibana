@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrService } from '@kbn/test-suites-xpack/functional/ftr_provider_context';
+import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
   ALERT_TABLE_ROW_CSS_SELECTOR,
-  EVENT_PREVIEW_SECTION_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
+  PREVIEW_SECTION_HEADER_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
@@ -114,8 +115,11 @@ export class AlertsPageObject extends FtrService {
       await this.testSubjects.missingOrFail(GRAPH_PREVIEW_LOADING_TEST_ID, { timeout: 10000 });
     },
 
-    assertEventPreviewPanelIsOpen: async () => {
-      await this.testSubjects.existOrFail(EVENT_PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+    assertPreviewPanelIsOpen: async (type: 'alert' | 'event') => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      expect(await this.testSubjects.getVisibleText(PREVIEW_SECTION_HEADER_TEST_ID)).to.be(
+        type === 'alert' ? 'Preview alert details' : 'Preview event details'
+      );
     },
   };
 }

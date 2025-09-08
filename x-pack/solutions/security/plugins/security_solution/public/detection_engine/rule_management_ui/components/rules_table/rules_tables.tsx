@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiProgress,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -72,6 +73,8 @@ const NO_ITEMS_MESSAGE = (
  */
 // eslint-disable-next-line complexity
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -289,6 +292,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {isTableEmpty && <PrePackagedRulesPrompt />}
       {isDeleteConfirmationVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           title={
             rulesToDeleteCount === 1
               ? i18n.SINGLE_DELETE_CONFIRMATION_TITLE
