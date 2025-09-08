@@ -369,7 +369,7 @@ describe('convertToWorkflowGraph', () => {
         const enterThenBranchNode = executionGraph.node('enterThen(testIfStep)');
         expect(enterThenBranchNode).toEqual({
           id: 'enterThen(testIfStep)',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'true',
         } as EnterConditionBranchNode);
       });
@@ -379,7 +379,7 @@ describe('convertToWorkflowGraph', () => {
         const exitThenBranchNode = executionGraph.node('exitThen(testIfStep)');
         expect(exitThenBranchNode).toEqual({
           id: 'exitThen(testIfStep)',
-          type: 'exit-condition-branch',
+          type: 'exit-then-branch',
           startNodeId: 'enterThen(testIfStep)',
         } as ExitConditionBranchNode);
       });
@@ -389,7 +389,7 @@ describe('convertToWorkflowGraph', () => {
         const enterElseBranchNode = executionGraph.node('enterElse(testIfStep)');
         expect(enterElseBranchNode).toEqual({
           id: 'enterElse(testIfStep)',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
           condition: undefined,
         } as EnterConditionBranchNode);
       });
@@ -399,7 +399,7 @@ describe('convertToWorkflowGraph', () => {
         const exitElseBranchNode = executionGraph.node('exitElse(testIfStep)');
         expect(exitElseBranchNode).toEqual({
           id: 'exitElse(testIfStep)',
-          type: 'exit-condition-branch',
+          type: 'exit-else-branch',
           startNodeId: 'enterElse(testIfStep)',
         } as ExitConditionBranchNode);
       });
@@ -537,7 +537,7 @@ describe('convertToWorkflowGraph', () => {
         const enterThenBranchNode = executionGraph.node('enterThen(if_firstThenTestConnectorStep)');
         expect(enterThenBranchNode).toEqual({
           id: 'enterThen(if_firstThenTestConnectorStep)',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'false',
         } as EnterConditionBranchNode);
       });
@@ -555,7 +555,7 @@ describe('convertToWorkflowGraph', () => {
         const exitThenBranchNode = executionGraph.node('exitThen(if_firstThenTestConnectorStep)');
         expect(exitThenBranchNode).toEqual({
           id: 'exitThen(if_firstThenTestConnectorStep)',
-          type: 'exit-condition-branch',
+          type: 'exit-then-branch',
           startNodeId: 'enterThen(if_firstThenTestConnectorStep)',
         } as ExitConditionBranchNode);
       });
