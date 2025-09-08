@@ -26,7 +26,7 @@ import { DocumentationManager } from './services/doc_manager';
 const PackageInstallMock = PackageInstaller as jest.Mock;
 const DocumentationManagerMock = DocumentationManager as jest.Mock;
 
-describe.only('ProductDocBasePlugin', () => {
+describe('ProductDocBasePlugin', () => {
   let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let plugin: ProductDocBasePlugin;
   let pluginSetupDeps: ProductDocBaseSetupDependencies;
@@ -100,7 +100,7 @@ describe.only('ProductDocBasePlugin', () => {
 
     it('schedules the update task', () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
-      const startContract = plugin.start(coreMock.createStart(), pluginStartDeps);
+      plugin.start(coreMock.createStart(), pluginStartDeps);
       expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
     });
   });
