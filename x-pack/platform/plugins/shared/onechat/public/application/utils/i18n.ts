@@ -24,8 +24,8 @@ export const labels = {
     newToolTitle: i18n.translate('xpack.onechat.tools.newToolTitle', {
       defaultMessage: 'Create a new tool',
     }),
-    readOnlyBadge: i18n.translate('xpack.onechat.tools.readOnlyBadge', {
-      defaultMessage: 'Read only',
+    readOnly: i18n.translate('xpack.onechat.tools.readOnly', {
+      defaultMessage: 'Read-only',
     }),
 
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
@@ -40,14 +40,8 @@ export const labels = {
 
     // Table columns and labels
     toolIdLabel: i18n.translate('xpack.onechat.tools.idLabel', { defaultMessage: 'ID' }),
-    typeLabel: i18n.translate('xpack.onechat.tools.typeLabel', { defaultMessage: 'Type' }),
     tagsLabel: i18n.translate('xpack.onechat.tools.tagsLabel', { defaultMessage: 'Labels' }),
     toolsLabel: i18n.translate('xpack.onechat.tools.toolsLabel', { defaultMessage: 'Tools' }),
-
-    // Tool types
-    esqlLabel: i18n.translate('xpack.onechat.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
-    builtinLabel: i18n.translate('xpack.onechat.tools.builtinLabel', { defaultMessage: 'System' }),
-    searchLabel: i18n.translate('xpack.onechat.tools.searchLabel', { defaultMessage: 'Search' }),
 
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
@@ -162,19 +156,19 @@ export const labels = {
     // Delete modals
     deleteEsqlToolTitle: (toolId: string) =>
       i18n.translate('xpack.onechat.tools.deleteEsqlToolTitle', {
-        defaultMessage: 'Delete tool "{toolId}"?',
+        defaultMessage: 'Delete {toolId}?',
         values: { toolId },
       }),
     deleteEsqlToolCancelButton: i18n.translate('xpack.onechat.tools.deleteEsqlToolCancelButton', {
       defaultMessage: 'Cancel',
     }),
     deleteEsqlToolConfirmButton: i18n.translate('xpack.onechat.tools.deleteEsqlToolConfirmButton', {
-      defaultMessage: 'Delete',
+      defaultMessage: 'Delete tool',
     }),
     deleteEsqlToolConfirmationText: i18n.translate(
       'xpack.onechat.tools.deleteEsqlToolConfirmationText',
       {
-        defaultMessage: "You can't recover deleted data.",
+        defaultMessage: 'This action will permanently remove the tool. This cannot be undone.',
       }
     ),
 

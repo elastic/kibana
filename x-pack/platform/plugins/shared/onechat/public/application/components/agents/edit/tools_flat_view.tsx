@@ -18,7 +18,6 @@ import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../../tools/tags/tool_tags';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { isToolSelected } from '../../../utils/tool_selection_utils';
-import { toolTypeDisplays } from '../../../utils/constants';
 
 interface ToolsFlatViewProps {
   tools: ToolDefinition[];
@@ -82,13 +81,6 @@ const createToolDetailsColumn = () => ({
   render: (item: ToolDefinition) => <ToolDetailsColumn tool={item} />,
 });
 
-const createTypeColumn = () => ({
-  field: 'type',
-  name: labels.tools.typeLabel,
-  width: '80px',
-  render: (type: ToolType) => <EuiText size="s">{toolTypeDisplays[type].label}</EuiText>,
-});
-
 const createTagsColumn = () => ({
   field: 'tags',
   name: labels.tools.tagsLabel,
@@ -109,7 +101,6 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
     () => [
       createCheckboxColumn(selectedTools, onToggleTool, disabled),
       createToolDetailsColumn(),
-      createTypeColumn(),
       createTagsColumn(),
     ],
     [selectedTools, onToggleTool, disabled]

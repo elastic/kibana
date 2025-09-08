@@ -203,7 +203,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               {tool?.readonly && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" iconType="lock">
-                    {labels.tools.readOnlyBadge}
+                    {labels.tools.readOnly}
                   </EuiBadge>
                 </EuiFlexItem>
               )}
