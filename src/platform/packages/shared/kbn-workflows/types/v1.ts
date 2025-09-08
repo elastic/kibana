@@ -127,7 +127,10 @@ export interface WorkflowExecutionDto {
   yaml: string;
 }
 
-export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions' | 'yaml'>;
+export type WorkflowExecutionListItemDto = Omit<
+  WorkflowExecutionDto,
+  'stepExecutions' | 'yaml' | 'workflowDefinition'
+>;
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];

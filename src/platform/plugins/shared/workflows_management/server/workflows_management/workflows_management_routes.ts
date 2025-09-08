@@ -24,6 +24,7 @@ import type {
 } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
+import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 export function defineRoutes(
   router: IRouter,

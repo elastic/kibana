@@ -27,17 +27,14 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  isDangerousStatus,
-  type WorkflowExecutionDto,
-  type StepExecutionTreeItem,
-} from '@kbn/workflows';
+import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icon';
+import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 
 // handle special nodes like foreachstep:0, foreachstep:1, if:true, if:false
