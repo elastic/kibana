@@ -85,7 +85,11 @@ describe('When using useEndpointPrivileges hook', () => {
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
     rerender();
 
-    expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
+    expect(result.current).toEqual({
+      ...getEndpointPrivilegesInitialStateMock(),
+      // canCancelResponseActions is always false, as it's privileges are being checked dynamically
+      canCancelResponseActions: false,
+    });
   });
 
   it('should return initial state when no user authz', async () => {
