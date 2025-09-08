@@ -10,7 +10,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ImportedEvents } from './imported_events';
 
-jest.mock('../../../../capabilities/check_capabilities');
+jest.mock('@kbn/ml-services/capabilities/check_capabilities');
 
 const testProps = {
   events: [

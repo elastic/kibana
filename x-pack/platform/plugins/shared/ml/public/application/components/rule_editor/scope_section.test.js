@@ -6,13 +6,13 @@
  */
 
 // Mock the mlJobService that is imported for saving rules.
-jest.mock('../../services/job_service', () => 'mlJobService');
+jest.mock('@kbn/ml-services/job_service', () => 'mlJobService');
 
 // Create a mock for the canGetFilters privilege check.
 // The mock is hoisted to the top, so need to prefix the mock function
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
-jest.mock('../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
