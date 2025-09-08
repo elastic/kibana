@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
-import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+
+import React, { useCallback } from 'react';
+import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
-import { generateRandomIndexName } from '../utils/indices';
 import { SampleDataActionButton } from './sample_data_action_button';
+import { useIsSampleDataAvailable } from '../hooks/use_sample_data_is_available';
 
 export const ConnectToElasticsearchSidePanel = () => {
-  const { application, sampleDataIngest } = useKibana().services;
+  const { application } = useKibana().services;
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
-
-  const indexName = useMemo(() => generateRandomIndexName(), []);
-  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
+  const { isAvailable: isSampleDataAvailable, hasRequiredLicense } = useIsSampleDataAvailable();
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -54,7 +52,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
         />
 
-        {sampleDataIngest && userPrivileges?.privileges?.canManageIndex === true && (
+        {isSampleDataAvailable && (
           <EuiCard
             display="plain"
             hasBorder
@@ -74,6 +72,16 @@ export const ConnectToElasticsearchSidePanel = () => {
               />
             }
             footer={<SampleDataActionButton />}
+          />
+        )}
+        {!isSampleDataAvailable && !hasRequiredLicense && (
+          <EuiCallOut
+            data-test-subj="sampleDataLicenseUpgrade"
+            size="s"
+            color={'warning'}
+            title={i18n.translate('xpack.searchHomepage.connectToElasticsearch.licenseRequired', {
+              defaultMessage: 'You need upgrade license to standard',
+            })}
           />
         )}
 

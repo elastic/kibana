@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,7 @@ import { SampleDataPanel } from './sample_data_panel';
 import { useIngestSampleData } from '../../hooks/use_ingest_data';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { useKibana } from '../../hooks/use_kibana';
+import { useIsSampleDataAvailable } from '../../hooks/use_is_sample_data_available';
 
 export interface CreateIndexFormProps {
   indexName: string;
@@ -52,9 +53,9 @@ export const CreateIndexForm = ({
   showAPIKeyCreateLabel,
   userPrivileges,
 }: CreateIndexFormProps) => {
-  const { sampleDataIngest } = useKibana().services;
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
+  const { isAvailable: isSampleDataAvailable, hasRequiredLicense } = useIsSampleDataAvailable();
   const onIngestSampleData = useCallback(() => {
     usageTracker.click(AnalyticsEvents.createIndexIngestSampleDataClick);
     ingestSampleData();
@@ -180,10 +181,23 @@ export const CreateIndexForm = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {sampleDataIngest && (
+            {isSampleDataAvailable && (
               <SampleDataPanel
                 isLoading={isIngestingSampleData}
                 onIngestSampleData={onIngestSampleData}
+              />
+            )}
+            {!isSampleDataAvailable && !hasRequiredLicense && (
+              <EuiCallOut
+                data-test-subj="sampleDataLicenseUpgrade"
+                size="s"
+                color={'warning'}
+                title={i18n.translate(
+                  'xpack.searchIndices.shared.createIndex.sampleData.licenseRequired',
+                  {
+                    defaultMessage: 'You need upgrade license to standard',
+                  }
+                )}
               />
             )}
           </EuiFlexItem>
