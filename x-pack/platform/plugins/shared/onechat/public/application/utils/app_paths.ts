@@ -28,7 +28,6 @@ export const appPaths = {
   tools: {
     list: '/tools',
     new: '/tools/new',
-    newWithType: ({ toolType }: { toolType: string }) => `/tools/new/${toolType}`,
     details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
   },
 };

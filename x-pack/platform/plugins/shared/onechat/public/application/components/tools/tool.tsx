@@ -25,7 +25,6 @@ import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import { useParams } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
 import type {
   CreateToolPayload,
@@ -51,6 +50,7 @@ import { ToolTestFlyout } from './execute/test_tools';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
 import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
+import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
 
 interface ToolBaseProps {
   tool?: ToolDefinitionWithSchema;
@@ -81,9 +81,19 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { toolType: toolTypeParam } = useParams<{ toolType?: ToolType }>();
 
-  const form = useToolForm(tool, toolTypeParam);
+  const initialToolType = useMemo(() => {
+    const value = searchParams.get(TOOL_TYPE_QUERY_PARAM);
+    switch (value) {
+      case ToolType.esql:
+      case ToolType.index_search:
+        return value as ToolType;
+      default:
+        return undefined;
+    }
+  }, [searchParams]);
+
+  const form = useToolForm(tool, initialToolType);
   const { reset, formState, watch, handleSubmit } = form;
   const { errors } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
@@ -91,11 +101,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const currentToolId = watch('toolId');
 
   useEffect(() => {
-    const shouldOpen = searchParams.get('openTestFlyout') === 'true';
+    const shouldOpen = searchParams.get(OPEN_TEST_FLYOUT_QUERY_PARAM) === 'true';
     if (shouldOpen && currentToolId && !showTestFlyout) {
       setShowTestFlyout(true);
       const next = new URLSearchParams(searchParams);
-      next.delete('openTestFlyout');
+      next.delete(OPEN_TEST_FLYOUT_QUERY_PARAM);
       setSearchParams(next, { replace: true });
     }
   }, [searchParams, currentToolId, showTestFlyout, setSearchParams]);

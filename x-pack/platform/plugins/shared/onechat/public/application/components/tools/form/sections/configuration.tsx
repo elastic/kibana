@@ -9,14 +9,13 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ToolType } from '@kbn/onechat-common/tools/definition';
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import { useHistory, useParams } from 'react-router-dom';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { appPaths } from '../../../../utils/app_paths';
 import { ToolFormSection } from '../components/esql/tool_form_section';
 import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
 import { EsqlConfiguration } from './configuration_fields/esql_configuration_fields';
 import { IndexSearchConfiguration } from './configuration_fields/index_search_configuration_fields';
+import { TOOL_TYPE_QUERY_PARAM } from '../../create_tool';
 
 export const Configuration = () => {
   const {
@@ -25,25 +24,14 @@ export const Configuration = () => {
   } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
   const [searchParams, setSearchParams] = useSearchParams();
-  const history = useHistory();
-  const { toolType: toolTypeInPath } = useParams<{ toolType?: string }>();
 
-  // Keep URL search param in sync when selection changes
+  // Keep select tool type in sync with URL query param
   useEffect(() => {
     if (!type) return;
-    const current = searchParams.get('toolType');
-    if (current !== type) {
-      const next = new URLSearchParams(searchParams.toString());
-      next.set('toolType', type);
-      setSearchParams(next, { replace: true });
-    }
-
-    // If we're on the create route with a path param, keep it in sync too
-    if (toolTypeInPath && toolTypeInPath !== type) {
-      const nextPath = appPaths.tools.newWithType({ toolType: type });
-      history.replace({ pathname: nextPath, search: searchParams.toString() });
-    }
-  }, [type, searchParams, setSearchParams, toolTypeInPath, history]);
+    const next = new URLSearchParams(searchParams.toString());
+    next.set(TOOL_TYPE_QUERY_PARAM, type);
+    setSearchParams(next, { replace: true });
+  }, [type, searchParams, setSearchParams]);
 
   const configurationFields =
     type === ToolType.esql ? (
