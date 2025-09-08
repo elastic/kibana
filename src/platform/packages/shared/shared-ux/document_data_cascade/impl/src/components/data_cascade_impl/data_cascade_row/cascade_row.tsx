@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
-import { flexRender, useAdaptedTableRows } from '../../../lib/core/table';
+import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import {
   type LeafNode,
   type GroupNode,
@@ -69,7 +69,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     rowIsSelected,
     rowVisibleCells,
     rowCanSelect,
-  } = useAdaptedTableRows<G>({ rowInstance });
+  } = useAdaptedTableRows<G, L>({ rowInstance });
   const treeGridRowARIAAttributes = useTreeGridRowARIAAttributes<G>({
     rowInstance,
     virtualRowIndex: virtualRow.index,
@@ -246,9 +246,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
               {rowVisibleCells.map((cell) => (
-                <React.Fragment key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </React.Fragment>
+                <TableCellRender key={cell.id} cell={cell} />
               ))}
             </EuiFlexItem>
           )}
