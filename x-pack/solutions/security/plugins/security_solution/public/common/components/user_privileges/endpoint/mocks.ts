@@ -16,7 +16,7 @@ export const getEndpointPrivilegesInitialStateMock = ({
     ...getEndpointAuthzInitialStateMock({
       // canCancelResponseActions should remain false as it requires dynamic validation
       canCancelResponseActions: false,
-      ...overrides
+      ...overrides,
     }),
     loading,
   };
