@@ -41,7 +41,7 @@ export function literalFromAny(value: any): ESQLAstItem {
   return Builder.expression.literal.string(JSON.stringify(value));
 }
 
-export function conditionToESQL(condition: Condition, isNested = false): ESQLAstItem {
+export function conditionToESQL(condition: Condition): ESQLAstItem {
   if (isFilterCondition(condition)) {
     const field = Builder.expression.column(condition.field);
 
@@ -113,13 +113,13 @@ export function conditionToESQL(condition: Condition, isNested = false): ESQLAst
       ]);
     }
   } else if (isAndCondition(condition)) {
-    const andConditions = condition.and.map((c) => conditionToESQL(c, true));
+    const andConditions = condition.and.map((c) => conditionToESQL(c));
     return andConditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]));
   } else if (isOrCondition(condition)) {
-    const orConditions = condition.or.map((c) => conditionToESQL(c, true));
+    const orConditions = condition.or.map((c) => conditionToESQL(c));
     return orConditions.reduce((acc, cond) => Builder.expression.func.binary('or', [acc, cond]));
   } else if (isNotCondition(condition)) {
-    const notCondition = conditionToESQL(condition.not, true);
+    const notCondition = conditionToESQL(condition.not);
     return Builder.expression.func.unary('NOT', notCondition);
   } else if (isAlwaysCondition(condition)) {
     return Builder.expression.literal.boolean(true);
