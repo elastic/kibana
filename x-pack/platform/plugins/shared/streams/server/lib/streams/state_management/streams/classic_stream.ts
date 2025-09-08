@@ -172,22 +172,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       });
     }
-    if (this._changes.settings) {
-      actions.push({
-        type: 'update_ingest_settings',
-        request: {
-          name: this._definition.name,
-          settings: {
-            'index.number_of_replicas':
-              this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
-            'index.number_of_shards':
-              this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
-            'index.refresh_interval':
-              this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
-          },
-        },
-      });
-    }
+
     actions.push({
       type: 'upsert_dot_streams_document',
       request: this._definition,
@@ -242,6 +227,23 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+
+    if (this._changes.settings) {
+      actions.push({
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: {
+            'index.number_of_replicas':
+              this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
+            'index.number_of_shards':
+              this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
+            'index.refresh_interval':
+              this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
+          },
         },
       });
     }

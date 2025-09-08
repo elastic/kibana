@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { isRoot, type Streams } from '@kbn/streams-schema';
+import { Streams, isRoot } from '@kbn/streams-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -69,18 +69,26 @@ export function WiredAdvancedView({
   );
 }
 
+interface Setting {
+  default: boolean;
+  invalid: boolean;
+  value: string;
+  from?: string;
+}
+
 function toStringValues(settings: IngestStreamSettings, effectiveSettings: IngestStreamSettings) {
-  return Object.entries(effectiveSettings).reduce<
-    Record<string, { invalid: boolean; default: boolean; value: string; from?: string }>
-  >((acc, [key, setting]) => {
-    acc[key] = {
-      ...setting,
-      value: String(setting.value),
-      invalid: false,
-      default: !settings[key as keyof IngestStreamSettings] && !('from' in setting),
-    };
-    return acc;
-  }, {});
+  return Object.entries(effectiveSettings).reduce<Record<string, Setting>>(
+    (acc, [key, setting]) => {
+      acc[key] = {
+        ...setting,
+        value: String(setting.value),
+        invalid: false,
+        default: !settings[key as keyof IngestStreamSettings] && !('from' in setting),
+      };
+      return acc;
+    },
+    {}
+  );
 }
 
 export function Settings({
@@ -106,17 +114,40 @@ export function Settings({
     () => toStringValues(definition.stream.ingest.settings, definition.effective_settings),
     [definition]
   );
-  const [settings, setSettings] = useState<
-    Record<string, { default: boolean; invalid: boolean; value: string; from?: string }>
-  >(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
+  const isClassicStream = useMemo(
+    () => Streams.ClassicStream.GetResponse.is(definition),
+    [definition]
+  );
+  const [settings, setSettings] = useState<Record<string, Setting>>(
+    toStringValues(definition.stream.ingest.settings, definition.effective_settings)
+  );
   const hasChanges = useMemo(
     () => !isEqual(originalSettings, settings),
     [originalSettings, settings]
+  );
+  const updateSetting = useCallback(
+    (name: string, value: string, invalid: boolean) => {
+      if (value.length === 0) {
+        setSettings((prev) => omit(prev, name));
+      } else {
+        const setting: Setting = { value, invalid, default: false };
+        if (!isClassicStream) {
+          setting.from = definition.stream.name;
+        }
+        setSettings((prev) => ({ ...prev, [name]: setting }));
+      }
+    },
+    [isClassicStream, definition.stream.name, setSettings]
   );
   const abortController = useAbortController();
   const [isUpdating, setIsUpdating] = useState(false);
   const onReset = useCallback(
     (name: string) => {
+      if (isClassicStream) {
+        setSettings((prev) => omit(prev, name));
+        return;
+      }
+
       const original = originalSettings[name];
       if (!original || original.from === definition.stream.name) {
         setSettings((prev) => omit(prev, name));
@@ -124,7 +155,7 @@ export function Settings({
         setSettings((prev) => ({ ...prev, [name]: original }));
       }
     },
-    [originalSettings]
+    [originalSettings, isClassicStream]
   );
 
   const updateSettings = useCallback(async () => {
@@ -188,22 +219,9 @@ export function Settings({
             )}
             setting={settings['index.number_of_shards']}
             isInvalid={settings['index.number_of_shards']?.invalid}
-            onChange={(value) => {
-              if (value.length === 0) {
-                setSettings((prev) => omit(prev, 'index.number_of_shards'));
-              } else {
-                const invalid = !!value && isInvalidInteger(value);
-                setSettings((prev) => ({
-                  ...prev,
-                  'index.number_of_shards': {
-                    value,
-                    invalid,
-                    default: false,
-                    from: definition.stream.name,
-                  },
-                }));
-              }
-            }}
+            onChange={(value) =>
+              updateSetting('index.number_of_shards', value, !!value && isInvalidInteger(value))
+            }
             onReset={() => onReset('index.number_of_shards')}
           />
 
@@ -232,22 +250,9 @@ export function Settings({
             )}
             setting={settings['index.number_of_replicas']}
             isInvalid={settings['index.number_of_replicas']?.invalid}
-            onChange={(value) => {
-              if (value.length === 0) {
-                setSettings((prev) => omit(prev, 'index.number_of_replicas'));
-              } else {
-                const invalid = !!value && isInvalidInteger(value);
-                setSettings((prev) => ({
-                  ...prev,
-                  'index.number_of_replicas': {
-                    value,
-                    invalid,
-                    default: false,
-                    from: definition.stream.name,
-                  },
-                }));
-              }
-            }}
+            onChange={(value) =>
+              updateSetting('index.number_of_replicas', value, !!value && isInvalidInteger(value))
+            }
             onReset={() => onReset('index.number_of_replicas')}
           />
 
@@ -279,22 +284,13 @@ export function Settings({
         setting={settings['index.refresh_interval']}
         isInvalid={settings['index.refresh_interval']?.invalid}
         valueDescription="Accepts time values like 5s, 30s, 1m. Set to -1 to disable."
-        onChange={(value) => {
-          if (value.length === 0) {
-            setSettings((prev) => omit(prev, 'index.refresh_interval'));
-          } else {
-            const invalid = !!value && !parseDuration(value) && Number(value) !== -1;
-            setSettings((prev) => ({
-              ...prev,
-              'index.refresh_interval': {
-                value,
-                invalid,
-                default: false,
-                from: definition.stream.name,
-              },
-            }));
-          }
-        }}
+        onChange={(value) =>
+          updateSetting(
+            'index.refresh_interval',
+            value,
+            !!value && !parseDuration(value) && Number(value) !== -1
+          )
+        }
         onReset={() => onReset('index.refresh_interval')}
       />
 
@@ -319,7 +315,11 @@ export function Settings({
         <EuiFlexItem grow={false}>
           <EuiButton
             isLoading={isUpdating || isLoadingDefinition}
-            isDisabled={!hasChanges || isLoadingDefinition}
+            isDisabled={
+              !hasChanges ||
+              isLoadingDefinition ||
+              Object.values(settings).some(({ invalid }) => invalid)
+            }
             color="primary"
             fill
             onClick={updateSettings}
@@ -387,6 +387,9 @@ function SettingRow({
   onChange: (value: string) => void;
   onReset: () => void;
 }) {
+  const isOverride =
+    (!!setting?.value && Streams.ClassicStream.GetResponse.is(definition)) ||
+    setting?.from === definition.stream.name;
   return (
     <Row
       left={<RowMetadata label={label} description={description} />}
@@ -413,7 +416,7 @@ function SettingRow({
 
             <EuiFlexItem>
               <EuiText color="subdued" size="xs">
-                {!setting?.from ? null : setting.from === definition.stream.name ? (
+                {isOverride ? (
                   <p>
                     {i18n.translate('xpack.streams.streamDetailView.localOverride', {
                       defaultMessage: 'Local override. ',
@@ -424,14 +427,14 @@ function SettingRow({
                       })}
                     </EuiLink>
                   </p>
-                ) : (
+                ) : setting?.from ? (
                   <p>
                     {i18n.translate('xpack.streams.streamDetailView.inheritedFrom', {
                       defaultMessage: 'Inherited from ',
                     })}
                     <LinkToStream name={setting.from} />
                   </p>
-                )}
+                ) : null}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
