@@ -29,7 +29,13 @@ const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.t
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
-export function AssistantProvider({ children }: { children: React.ReactElement }) {
+export function AssistantProvider({
+  children,
+  isServerless,
+}: {
+  children: React.ReactElement;
+  isServerless?: boolean;
+}) {
   const {
     application: { navigateToApp, currentAppId$, getUrlForApp },
     http,
@@ -44,7 +50,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
   const inferenceEnabled = useInferenceEnabled();
 
   const basePath = useBasePath();
-  const { isVisible } = useIsNavControlVisible();
+  const { isVisible } = useIsNavControlVisible(isServerless);
   const assistantAvailability = useAssistantAvailability();
 
   const assistantTelemetry = useAssistantTelemetry();

@@ -42,7 +42,12 @@ interface GenAiSettingsAppProps {
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
   const { application, http, docLinks, notifications } = services;
-  const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
+  const {
+    showSpacesIntegration,
+    isPermissionsBased,
+    showAiBreadcrumb,
+    showAiAssistantsVisibilitySetting,
+  } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
@@ -327,9 +332,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 </EuiFormRow>
               </EuiDescribedFormGroup>
             )}
-            <EuiFlexItem>
-              <AIAssistantVisibility />
-            </EuiFlexItem>
+            {showAiAssistantsVisibilitySetting && (
+              <EuiFlexItem>
+                <AIAssistantVisibility />
+              </EuiFlexItem>
+            )}
           </EuiPanel>
         </EuiPageSection>
       </div>
