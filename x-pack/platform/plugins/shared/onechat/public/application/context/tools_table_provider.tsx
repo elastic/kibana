@@ -104,6 +104,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     (toolId: string, toolType: ToolType) => {
       return createOnechatUrl(appPaths.tools.new, {
         [TOOL_SOURCE_QUERY_PARAM]: toolId,
+        [TOOL_TYPE_QUERY_PARAM]: toolType,
       });
     },
     [createOnechatUrl]
