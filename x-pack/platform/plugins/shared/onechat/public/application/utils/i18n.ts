@@ -156,19 +156,19 @@ export const labels = {
     // Delete modals
     deleteEsqlToolTitle: (toolId: string) =>
       i18n.translate('xpack.onechat.tools.deleteEsqlToolTitle', {
-        defaultMessage: 'Delete tool "{toolId}"?',
+        defaultMessage: 'Delete {toolId}?',
         values: { toolId },
       }),
     deleteEsqlToolCancelButton: i18n.translate('xpack.onechat.tools.deleteEsqlToolCancelButton', {
       defaultMessage: 'Cancel',
     }),
     deleteEsqlToolConfirmButton: i18n.translate('xpack.onechat.tools.deleteEsqlToolConfirmButton', {
-      defaultMessage: 'Delete',
+      defaultMessage: 'Delete tool',
     }),
     deleteEsqlToolConfirmationText: i18n.translate(
       'xpack.onechat.tools.deleteEsqlToolConfirmationText',
       {
-        defaultMessage: "You can't recover deleted data.",
+        defaultMessage: 'This action will permanently remove the tool. This cannot be undone.',
       }
     ),
 
