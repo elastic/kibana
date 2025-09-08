@@ -12,5 +12,6 @@ export { getNewSearchAppMenuItem } from './get_new_search';
 export { getOpenSearchAppMenuItem } from './get_open_search';
 export { getShareAppMenuItem } from './get_share';
 export { getInspectAppMenuItem } from './get_inspect';
+export { getBackgroundSearchFlyout } from './get_background_search_flyout';
 export { convertAppMenuItemToTopNavItem } from './convert_to_top_nav_item';
 export type * from './types';
