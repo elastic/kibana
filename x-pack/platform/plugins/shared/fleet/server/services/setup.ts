@@ -290,7 +290,7 @@ async function createSetupSideEffects(
   ];
 
   logger.info('Scheduling async setup tasks');
-  scheduleSetupTask(appContextService.getTaskManagerStart()!);
+  await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
