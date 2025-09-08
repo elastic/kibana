@@ -12,6 +12,7 @@ import type {
   InputTextInterruptResumeValue,
 } from '@kbn/elastic-assistant-common';
 import { InputText } from './input_text';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('InputText', () => {
   const mockResumeGraph = jest.fn();
@@ -28,30 +29,36 @@ describe('InputText', () => {
     isLastInConversation: true,
   };
 
+  const renderWithProviders = (component: React.ReactElement) => {
+    return render(component, {
+      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders with interrupt description', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
 
     expect(screen.getByText('Please enter some text')).toBeInTheDocument();
   });
 
   it('renders input field with placeholder text', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
 
     expect(screen.getByPlaceholderText('Type here...')).toBeInTheDocument();
   });
 
   it('renders submit button', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
 
     expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
   });
 
   it('updates input value when user types', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
     const input = screen.getByPlaceholderText('Type here...');
 
     fireEvent.change(input, { target: { value: 'test input' } });
@@ -60,7 +67,7 @@ describe('InputText', () => {
   });
 
   it('calls resumeGraph with correct parameters when submit is clicked', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
     const input = screen.getByPlaceholderText('Type here...');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
@@ -78,7 +85,9 @@ describe('InputText', () => {
       ...defaultInterruptValue,
       placeholder: undefined,
     };
-    render(<InputText {...defaultProps} interruptValue={interruptWithoutPlaceholder} />);
+    renderWithProviders(
+      <InputText {...defaultProps} interruptValue={interruptWithoutPlaceholder} />
+    );
 
     expect(screen.getByPlaceholderText('Enter text to continue...')).toBeInTheDocument();
   });
@@ -88,7 +97,7 @@ describe('InputText', () => {
       type: 'INPUT_TEXT',
       value: 'initial value',
     };
-    render(<InputText {...defaultProps} resumeValue={resumeValue} />);
+    renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
     const input = screen.getByDisplayValue('initial value');
 
     expect(input).toBeInTheDocument();
@@ -99,7 +108,7 @@ describe('InputText', () => {
       ...defaultInterruptValue,
       expired: true,
     };
-    render(<InputText {...defaultProps} interruptValue={expiredInterrupt} />);
+    renderWithProviders(<InputText {...defaultProps} interruptValue={expiredInterrupt} />);
     const input = screen.getByPlaceholderText('Type here...');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
@@ -108,7 +117,7 @@ describe('InputText', () => {
   });
 
   it('disables input and button when not last in conversation', () => {
-    render(<InputText {...defaultProps} isLastInConversation={false} />);
+    renderWithProviders(<InputText {...defaultProps} isLastInConversation={false} />);
     const input = screen.getByPlaceholderText('Type here...');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
@@ -121,7 +130,7 @@ describe('InputText', () => {
       type: 'INPUT_TEXT',
       value: 'submitted value',
     };
-    render(<InputText {...defaultProps} resumeValue={resumeValue} />);
+    renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
     const input = screen.getByDisplayValue('submitted value');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
@@ -134,13 +143,13 @@ describe('InputText', () => {
       ...defaultInterruptValue,
       expired: true,
     };
-    render(<InputText {...defaultProps} interruptValue={expiredInterrupt} />);
+    renderWithProviders(<InputText {...defaultProps} interruptValue={expiredInterrupt} />);
 
     expect(screen.getByText('Expired')).toBeInTheDocument();
   });
 
   it('shows "Expired" badge when not last in conversation and no resume value', () => {
-    render(<InputText {...defaultProps} isLastInConversation={false} />);
+    renderWithProviders(<InputText {...defaultProps} isLastInConversation={false} />);
 
     expect(screen.getByText('Expired')).toBeInTheDocument();
   });
@@ -150,7 +159,7 @@ describe('InputText', () => {
       type: 'INPUT_TEXT',
       value: 'my response',
     };
-    render(<InputText {...defaultProps} resumeValue={resumeValue} />);
+    renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
 
     expect(screen.getByText('my response')).toBeInTheDocument();
   });
@@ -160,7 +169,7 @@ describe('InputText', () => {
       type: 'INPUT_TEXT',
       value: '',
     };
-    render(<InputText {...defaultProps} resumeValue={resumeValue} />);
+    renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
 
     expect(screen.queryByRole('generic', { name: /badge/i })).not.toBeInTheDocument();
   });
@@ -171,19 +180,19 @@ describe('InputText', () => {
       type: 'INPUT_TEXT',
       value: undefined,
     } as unknown as InputTextInterruptResumeValue;
-    render(<InputText {...defaultProps} resumeValue={resumeValue} />);
+    renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
 
     expect(screen.getByText('Actioned')).toBeInTheDocument();
   });
 
   it('renders with data-test-subj attribute', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
 
     expect(screen.getByTestId('input-text-interrupt')).toBeInTheDocument();
   });
 
   it('does not show any badge when interrupt is active and no resume value', () => {
-    render(<InputText {...defaultProps} />);
+    renderWithProviders(<InputText {...defaultProps} />);
 
     expect(screen.queryByText('Expired')).not.toBeInTheDocument();
     expect(screen.queryByText('Actioned')).not.toBeInTheDocument();

@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const mockSetComplete = jest.fn();
 
@@ -159,7 +160,8 @@ describe('StreamComment', () => {
             description: 'Select an option',
           },
         }}
-      />
+      />,
+      { wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider> }
     );
 
     expect(screen.queryByText('Approved')).toBeInTheDocument();
@@ -183,7 +185,8 @@ describe('StreamComment', () => {
             description: 'Input text',
           },
         }}
-      />
+      />,
+      { wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider> }
     );
 
     expect(screen.queryByText('Input text')).toBeInTheDocument();
