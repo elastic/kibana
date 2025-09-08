@@ -54,23 +54,22 @@ export class SchedulerTaskRunner implements CancellableTask {
       const unsecureSavedObjectsClient = await this.getUnsecureSavedObjectsClient();
       const spaces = await getAllSpacesWithCases(unsecureSavedObjectsClient);
       const taskManager = await this.getTaskManager();
+      const esClient = await this.getESClient();
 
       for (const spaceId of spaces) {
         const indices = getIndicesForSpaceId(spaceId);
-        const destIndicesExist = (await this.getESClient()).indices.exists({ index: indices });
-
+        const destIndicesExist = await esClient.indices.exists({ index: indices });
         if (!destIndicesExist) {
           // Create the necessary analytics indexes without scheduling the sync tasks
           createCasesAnalyticsIndexesForSpaceId({
             spaceId,
-            esClient: await this.getESClient(),
+            esClient,
             logger: this.logger,
             isServerless: false,
             taskManager,
           }).catch(() => {
             this.logger.error(`Failed to create analytics indexes for space ${spaceId}`);
           });
-          return;
         } else {
           scheduleCasesAnalyticsSyncTasks({
             spaceId,
