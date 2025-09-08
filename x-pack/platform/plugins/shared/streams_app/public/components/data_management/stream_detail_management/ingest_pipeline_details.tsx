@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
-import { css } from '@emotion/css';
 import { ManagedBadge } from './managed_badge';
 
 interface IngestPipelineDetailsProps {

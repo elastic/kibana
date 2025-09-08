@@ -14,7 +14,8 @@ import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
-import { IngestStreamSettings, ingestStreamSettingsSchema } from './settings';
+import type { IngestStreamSettings } from './settings';
+import { ingestStreamSettingsSchema } from './settings';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream

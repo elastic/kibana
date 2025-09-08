@@ -20,7 +20,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
+import type { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';

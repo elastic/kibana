@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 
-export type IngestStreamSettings = {
+export interface IngestStreamSettings {
   'index.number_of_replicas'?: { value: number };
   'index.number_of_shards'?: { value: number };
   'index.refresh_interval'?: { value: string | -1 };
-};
+}
 
 export type WiredIngestStreamEffectiveSettings = {
   [K in keyof IngestStreamSettings]: IngestStreamSettings[K] & { from: string };

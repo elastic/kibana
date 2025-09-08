@@ -17,10 +17,8 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
-import {
-  WiredIngestStreamEffectiveSettings,
-  wiredIngestStreamEffectiveSettingsSchema,
-} from './settings';
+import type { WiredIngestStreamEffectiveSettings } from './settings';
+import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 

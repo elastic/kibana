@@ -13,8 +13,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
-import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
