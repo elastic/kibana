@@ -23,7 +23,17 @@ export interface EsqlResponse {
   columns: EsqlEsqlColumnInfo[];
   columnNames: string[];
   values: FieldValue[][];
+
+  /**
+   * Represents documents returned by the ES|QL query, with each column mapped to its corresponding value.
+   */
   documents: Record<string, unknown>[];
+
+  /**
+   * ES|QL returns an explicit accompanying `.keyword` field. This collection drops those fields
+   * for easier comparison with ingest pipeline results.
+   */
+  documentsWithoutKeywords: Record<string, unknown>[];
 }
 
 export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>({
@@ -39,6 +49,7 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           query,
           drop_null_columns: esqlDropNullColumns,
         });
+
         const documents = response.values.map((valueRow: FieldValue[]) => {
           const doc: Record<string, unknown> = {};
           response.columns.forEach((col: EsqlEsqlColumnInfo, idx: number) => {
@@ -46,11 +57,23 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           });
           return doc;
         });
+
+        const documentsWithoutKeywords = documents.map((doc) => {
+          const docCopy = { ...doc };
+          Object.keys(docCopy).forEach((key) => {
+            if (key.endsWith('.keyword')) {
+              delete docCopy[key];
+            }
+          });
+          return docCopy;
+        });
+
         return {
           columns: response.columns,
           columnNames: response.columns.map((col) => col.name),
           values: response.values,
           documents,
+          documentsWithoutKeywords,
         };
       };
 
