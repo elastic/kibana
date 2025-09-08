@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedLayer,
   FormBasedPersistedState,
@@ -52,16 +51,16 @@ export const getDefaultReferences = (
  * @param layer
  * @returns
  */
-export const operationFromColumn = (
-  columnId: string,
-  layer: FormBasedLayer,
-) => {
+export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => {
   const column = layer.columns[columnId];
   if (!column) {
     return undefined;
   }
   // map columns to array of { column, id }
-  const columnMap = Object.entries(layer.columns).map(([id, column]) => ({ column: column as AnyLensStateColumn, id }));
+  const columnMap = Object.entries(layer.columns).map(([id, column]) => ({
+    column: column as AnyLensStateColumn,
+    id,
+  }));
   if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
     return fromBucketLensStateToAPI(column, columnMap);
   }
@@ -74,9 +73,7 @@ export const operationFromColumn = (
  * @param layer
  * @returns
  */
-export const buildDatasetState = (
-  layer: FormBasedLayer | TextBasedLayer,
-) => {
+export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
   if ('index' in layer) {
     return {
       type: 'esql',
@@ -116,9 +113,7 @@ export function isSingleLayer(
  * @param dataViewsAPI
  * @returns
  */
-export function getDatasetIndex(
-  dataset: LensApiState['dataset'],
-) {
+export function getDatasetIndex(dataset: LensApiState['dataset']) {
   let index: string;
   let timeFieldName: string = '@timestamp';
 
@@ -210,7 +205,7 @@ export const buildDatasourceStates = async (
     i: number,
     index: { index: string; timeFieldName: string }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
+  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
