@@ -1847,10 +1847,14 @@ components:
     MonitoringEngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
         status:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
-        - type
         - status
     PrivilegeMonitoringEngineStatus:
       enum:
