@@ -19,19 +19,21 @@ export class ConditionalType<
   A extends ConditionalTypeValue,
   B,
   C,
+  BDV extends DefaultValue<B>,
+  CDV extends DefaultValue<C>,
   DV extends DefaultValue<B | C>
 > extends Type<B | C, DV> {
   private readonly leftOperand: Reference<A>;
   private readonly rightOperand: Reference<A> | A | Type<unknown>;
-  private readonly equalType: Type<B>;
-  private readonly notEqualType: Type<C>;
+  private readonly equalType: Type<B, BDV>;
+  private readonly notEqualType: Type<C, CDV>;
   private readonly options?: TypeOptions<B | C, DV>;
 
   constructor(
     leftOperand: Reference<A>,
     rightOperand: Reference<A> | A | Type<unknown>,
-    equalType: Type<B>,
-    notEqualType: Type<C>,
+    equalType: Type<B, BDV>,
+    notEqualType: Type<C, CDV>,
     options?: TypeOptions<B | C, DV>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
