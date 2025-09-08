@@ -48,13 +48,12 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
                 throw new Error(`Unknown setup operation: ${taskParams.type}`);
               }
             } catch (error) {
-              logger.error(`Packages setup operation: ${taskParams.type} failed`, { error });
+              logger.error(`Fleet setup operation: ${taskParams.type} failed`, { error });
               throw error;
             }
           },
           cancel: async () => {
-            logger.debug(`Bulk package operations timed out: ${taskInstance.params.type}`);
-            abortController.abort('task timed out');
+            logger.debug(`Fleet setup operations timed out: ${taskInstance.params.type}`);
           },
         };
       },

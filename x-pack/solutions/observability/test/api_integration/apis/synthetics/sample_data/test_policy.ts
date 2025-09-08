@@ -363,6 +363,7 @@ export const getBrowserInput = ({ id, params, projectId }: PolicyProps) => {
     type: 'synthetics/browser',
     policy_template: 'synthetics',
     enabled: false,
+    id: 'synthetics/http-synthetics-44fba4a3-5b09-47f9-898b-6e1f3f5e5f97-fc23a565-352e-475d-b2e3-694144fdea58-test-space-599e8759-e19e-4c60-a2a7-894044c3008e',
     streams: [
       {
         enabled: true,
