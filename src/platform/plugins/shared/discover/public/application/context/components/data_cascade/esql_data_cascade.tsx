@@ -8,7 +8,16 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiText, EuiBadge, EuiButtonEmpty, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiPanel,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextTruncate,
+} from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -273,7 +282,14 @@ export const ESQLDataCascade = ({
 
             return (
               <EuiText size="s">
-                <h4>{row.original[cascadeGroups[row.depth]] as string}</h4>
+                <EuiTextTruncate
+                  text={row.original[cascadeGroups[row.depth]] as string}
+                  width={400}
+                >
+                  {(truncatedText) => {
+                    return <h4>{truncatedText}</h4>;
+                  }}
+                </EuiTextTruncate>
               </EuiText>
             );
           }}
@@ -281,20 +297,30 @@ export const ESQLDataCascade = ({
             queryMeta.appliedFunctions.map(({ identifier, operator }) => {
               // maybe use operator to determine what meta component to render
               return (
-                <EuiText size="s" textAlign="right">
-                  <p css={styles.textBadge}>
-                    <FormattedMessage
-                      id="discover.esql_data_cascade.grouping.function"
-                      defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
-                      values={{
-                        identifier,
-                        identifierValue: row.original[identifier] as string,
-                        bold: (chunks) => <b>{chunks}</b>,
-                        badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
-                      }}
-                    />
-                  </p>
-                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <FormattedMessage
+                    id="discover.esql_data_cascade.grouping.function"
+                    defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
+                    values={{
+                      identifier,
+                      identifierValue: Number.isFinite(Number(row.original[identifier]))
+                        ? Math.round(Number(row.original[identifier])).toLocaleString()
+                        : (row.original[identifier] as string),
+                      bold: (chunks) => (
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" textAlign="right">
+                            <p>{chunks}</p>
+                          </EuiText>
+                        </EuiFlexItem>
+                      ),
+                      badge: (chunks) => (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow">{chunks}</EuiBadge>
+                        </EuiFlexItem>
+                      ),
+                    }}
+                  />
+                </EuiFlexGroup>
               );
             })
           }
@@ -308,7 +334,7 @@ export const ESQLDataCascade = ({
             >
               <FormattedMessage
                 id="discover.esql_data_cascade.row.action.take_action"
-                defaultMessage="Take Action"
+                defaultMessage="Take action"
               />
             </EuiButtonEmpty>,
           ]}
