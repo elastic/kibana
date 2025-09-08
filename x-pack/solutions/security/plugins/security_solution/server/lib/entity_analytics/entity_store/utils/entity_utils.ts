@@ -80,8 +80,15 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
 
-export function getEntitiesSnapshotIndexName(entityType: EntityTypeOpenAPI, snapshotDate: Date, namespace: string) {
-  const snapshotId = `${snapshotDate.toISOString().split('T')[0]}.${buildEntityDefinitionId(entityType, namespace)}`;
+export function getEntitiesSnapshotIndexName(
+  entityType: EntityTypeOpenAPI,
+  snapshotDate: Date,
+  namespace: string
+) {
+  const snapshotId = `${snapshotDate.toISOString().split('T')[0]}.${buildEntityDefinitionId(
+    entityType,
+    namespace
+  )}`;
   return entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
     dataset: ENTITY_HISTORY,

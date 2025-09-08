@@ -33,10 +33,9 @@ export async function createAndInstallILMPolicies(
 
 export async function deleteILMPolicy(esClient: ElasticsearchClient, name: string, logger: Logger) {
   try {
-    await retryTransientEsErrors(
-        () => esClient.ilm.deleteLifecycle({ name }, { ignore: [404] }),
-        { logger },
-    );
+    await retryTransientEsErrors(() => esClient.ilm.deleteLifecycle({ name }, { ignore: [404] }), {
+      logger,
+    });
   } catch (error: any) {
     logger.error(`Error deleting entity manager index ilm policy: ${error.message}`);
     throw error;
