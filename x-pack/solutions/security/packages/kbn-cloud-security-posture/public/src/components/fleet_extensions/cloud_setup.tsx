@@ -94,7 +94,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       gcpCloudConnectors,
       awsCloudConnectors,
     } = useCloudSetup();
-
     const {
       input,
       setEnabledPolicyInput,
