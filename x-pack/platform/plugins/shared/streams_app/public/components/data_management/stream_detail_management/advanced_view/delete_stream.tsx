@@ -35,7 +35,7 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
       signal: abortController.signal,
     });
     navigateToApp('/streams');
-  }, [definition]);
+  }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
 
   return (
     <>

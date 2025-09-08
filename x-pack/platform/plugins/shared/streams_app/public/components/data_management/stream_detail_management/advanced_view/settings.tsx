@@ -95,7 +95,7 @@ export function Settings({
         setSettings((prev) => ({ ...prev, [name]: setting }));
       }
     },
-    [isClassicStream, definition, setSettings]
+    [isClassicStream, definition.stream.name, setSettings]
   );
   const abortController = useAbortController();
   const [isUpdating, setIsUpdating] = useState(false);
