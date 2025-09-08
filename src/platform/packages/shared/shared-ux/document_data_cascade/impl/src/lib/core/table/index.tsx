@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type FC, useRef, useMemo } from 'react';
+import React, { type FC, useRef, useMemo } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
   getExpandedRowModel,
+  flexRender,
   useReactTable,
   type Table,
   type TableOptions,
   type CellContext,
   type Row,
+  type Cell,
 } from '@tanstack/react-table';
-export { flexRender } from '@tanstack/react-table';
 export type { Row, Table, CellContext } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
 import {
@@ -141,7 +142,9 @@ interface TableRowAdapterArgs<G extends GroupNode> {
   rowInstance: Row<G>;
 }
 
-export function getAdaptedTableRows<G extends GroupNode>({ rowInstance }: TableRowAdapterArgs<G>) {
+export function getAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
+  rowInstance,
+}: TableRowAdapterArgs<G>) {
   const toggleSelectedHandler = rowInstance.getToggleSelectedHandler();
   const toggleExpandedHandler = rowInstance.getToggleExpandedHandler();
 
@@ -164,7 +167,7 @@ export function getAdaptedTableRows<G extends GroupNode>({ rowInstance }: TableR
       return this.rowChildren.length;
     },
     get rowVisibleCells() {
-      return rowInstance.getVisibleCells();
+      return rowInstance.getVisibleCells() as Cell<G, L>[];
     },
     get rowIsSelected() {
       return rowInstance.getIsSelected();
@@ -185,6 +188,37 @@ export function getAdaptedTableRows<G extends GroupNode>({ rowInstance }: TableR
   };
 }
 
-export function useAdaptedTableRows<G extends GroupNode>({ rowInstance }: TableRowAdapterArgs<G>) {
-  return useMemo(() => getAdaptedTableRows({ rowInstance }), [rowInstance]);
+export function useAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
+  rowInstance,
+}: TableRowAdapterArgs<G>) {
+  return useMemo(() => getAdaptedTableRows<G, L>({ rowInstance }), [rowInstance]);
+}
+
+/**
+ * Container component that will render the configured table headers
+ */
+export function TableHeader<G extends GroupNode, L extends LeafNode>({
+  headerColumns,
+}: Pick<ReturnType<typeof useTableHelper<G, L>>, 'headerColumns'>) {
+  return (
+    <React.Fragment>
+      {headerColumns.map((header) => {
+        return (
+          <React.Fragment key={header.id}>
+            {flexRender(header.column.columnDef.header, header.getContext())}
+          </React.Fragment>
+        );
+      })}
+    </React.Fragment>
+  );
+}
+
+export function TableCellRender<G extends GroupNode, L extends LeafNode>({
+  cell,
+}: {
+  cell: Cell<G, L>;
+}) {
+  return (
+    <React.Fragment>{flexRender(cell.column.columnDef.cell, cell.getContext())}</React.Fragment>
+  );
 }
