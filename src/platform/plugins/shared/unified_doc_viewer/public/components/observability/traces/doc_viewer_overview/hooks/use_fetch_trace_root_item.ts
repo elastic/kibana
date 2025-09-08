@@ -36,7 +36,7 @@ async function getTraceRootSpan({ data, signal, traceId, indexPattern }: GetRoot
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_DURATION, DURATION],
+            fields: [TRANSACTION_DURATION, SPAN_DURATION, DURATION],
             query: {
               bool: {
                 should: [
@@ -91,7 +91,7 @@ const useFetchTraceRootItem = ({ traceId }: UseRootTransactionParams) => {
 
         const fields = result?.rawResponse.hits.hits[0]?.fields;
         const itemDuration =
-          fields?.[TRANSACTION_DURATION] || fields?.[SPAN_DURATION] || fields?.[DURATION];
+          fields?.[TRANSACTION_DURATION] ?? fields?.[SPAN_DURATION] ?? fields?.[DURATION]! * 0.001;
 
         setItem({
           duration: itemDuration,

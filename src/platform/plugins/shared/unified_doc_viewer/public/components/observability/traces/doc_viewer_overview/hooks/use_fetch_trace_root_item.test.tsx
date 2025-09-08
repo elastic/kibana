@@ -121,14 +121,14 @@ describe('useFetchTraceRootItem hook', () => {
   });
 
   it('should update item when span data is fetched successfully OTel', async () => {
-    const traceRootItemDuration = 1;
+    const itemDuration = 1;
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
           hits: [
             {
               fields: {
-                [DURATION]: traceRootItemDuration,
+                [DURATION]: itemDuration,
               },
             },
           ],
@@ -141,7 +141,7 @@ describe('useFetchTraceRootItem hook', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.item?.duration).toBe(traceRootItemDuration);
+    expect(result.current.item?.duration).toBe(itemDuration * 0.001);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 

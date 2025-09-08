@@ -61,7 +61,7 @@ export function Overview({
   const isSpan = !isTransaction(hit);
   const apmDurationField = flattenedHit[TRANSACTION_DURATION] ?? flattenedHit[SPAN_DURATION];
   const isOtelSpan = apmDurationField == null && flattenedHit[DURATION] != null;
-  const duration = isOtelSpan ? flattenedHit[DURATION]! * 0.001 : apmDurationField;
+  const duration = apmDurationField ?? flattenedHit[DURATION]! * 0.001;
 
   const traceId = flattenedHit[TRACE_ID];
   const transactionId = flattenedHit[TRANSACTION_ID];
