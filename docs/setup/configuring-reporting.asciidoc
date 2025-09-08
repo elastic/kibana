@@ -38,6 +38,8 @@ to enable the {kib} server to have screenshotting capabilities.
 === Grant users access to reporting
 When security is enabled, the preferred method to grant users access to {report-features} is with <<kibana-privileges, {kib} application privileges>>. This will allow you to create custom roles that control the spaces and applications where users may generate reports.
 
+NOTE: To generate reports in a cross-cluster search environment, your role requires different privileges, based on whether you are using an API key for authentication or directly authenticating as the user. For more information, refer to {ref}/remote-clusters-cert.html#remote-clusters-privileges-ccr[Configure privileges for cross-cluster replication].
+
 . We recommend you explicitly opt-out of the default access control model, which will enable application privileges in Reporting. To do this, change a setting that controls the Reporting access control model in `kibana.yml`:
 +
 [source,yaml]
