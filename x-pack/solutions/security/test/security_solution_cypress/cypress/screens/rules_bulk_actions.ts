@@ -10,6 +10,11 @@ export const RULES_BULK_EDIT_FORM_TITLE = '[data-test-subj="rulesBulkEditFormTit
 
 export const RULES_BULK_EDIT_FORM_CONFIRM_BTN = '[data-test-subj="rulesBulkEditFormSaveBtn"]';
 
+export const RULES_BULK_ACTION_CONFIRMATION_MODAL =
+  '[data-test-subj="bulkActionConfirmationModal"]';
+
+export const RULES_BULK_ACTION_REJECT_MODAL = '[data-test-subj="bulkActionRejectModal"]';
+
 // INDEX PATTERNS
 export const INDEX_PATTERNS_RULE_BULK_MENU_ITEM = '[data-test-subj="indexPatternsBulkEditRule"]';
 

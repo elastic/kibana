@@ -371,11 +371,20 @@ export class AssetClient {
       Promise.all(
         idsByType.rule.map((ruleId) => {
           return limiter(() =>
-            this.clients.rulesClient.get({ id: ruleId }).then((rule) => {
-              return ruleToAsset(ruleId, rule);
-            })
+            this.clients.rulesClient
+              .get({ id: ruleId })
+              .then((rule) => {
+                return ruleToAsset(ruleId, rule);
+              })
+              .catch((error) => {
+                // Handle missing rules gracefully (404, etc.)
+                // Return null for missing/inaccessible rules, filter them out later
+                return null;
+              })
           );
         })
+      ).then((results) =>
+        results.filter((rule): rule is NonNullable<typeof rule> => rule !== null)
       ),
       idsByType.slo.length
         ? this.clients.soClient

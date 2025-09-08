@@ -15,13 +15,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { WorkflowsRoutes } from './routes';
-import type { WorkflowsPluginStartDependencies } from './types';
+import type {
+  WorkflowsPluginStartAdditionalServices,
+  WorkflowsPluginStartDependencies,
+} from './types';
 
 const queryClient = new QueryClient();
 
 export const renderApp = (
   coreStart: CoreStart,
   pluginsStart: WorkflowsPluginStartDependencies,
+  additionalServices: WorkflowsPluginStartAdditionalServices,
   { history, element }: AppMountParameters
 ) => {
   const { chrome, theme } = coreStart;
@@ -38,6 +42,7 @@ export const renderApp = (
         services={{
           ...coreStart,
           ...pluginsStart,
+          ...additionalServices,
         }}
       >
         <QueryClientProvider client={queryClient}>
