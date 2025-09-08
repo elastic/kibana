@@ -131,7 +131,6 @@ paths-ignore:
   - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
   - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/solutions/*/test
-  - x-pack/test
 query-filters:
   - exclude:
       paths:

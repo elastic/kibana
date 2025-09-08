@@ -24,9 +24,10 @@ import {
   staticOperationDefinitionSchema,
   uniqueCountMetricOperationSchema,
   sumMetricOperationSchema,
+  esqlColumnSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
-import { datasetSchema } from '../dataset';
+import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
@@ -168,7 +169,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const metricStateSchema = schema.object({
+export const metricStateSchemaNoESQL = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -240,5 +241,28 @@ export const metricStateSchema = schema.object({
     ])
   ),
 });
+
+const esqlMetricState = schema.object({
+  type: schema.literal('metric'),
+  ...sharedPanelInfoSchema,
+  ...layerSettingsSchema,
+  ...datasetEsqlTableSchema,
+  /**
+   * Primary value configuration, must define operation.
+   */
+  metric: schema.allOf([metricStatePrimaryMetricOptionsSchema, esqlColumnSchema]),
+  /**
+   * Secondary value configuration, must define operation.
+   */
+  secondary_metric: schema.maybe(
+    schema.allOf([metricStateSecondaryMetricOptionsSchema, esqlColumnSchema])
+  ),
+  /**
+   * Configure how to break down the metric (e.g. show one metric per term).
+   */
+  breakdown_by: schema.maybe(schema.allOf([metricStateBreakdownByOptionsSchema, esqlColumnSchema])),
+});
+
+export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState]);
 
 export type MetricState = TypeOf<typeof metricStateSchema>;
