@@ -26,6 +26,7 @@
     "@kbn/data-views-plugin",
     "@kbn/lens-plugin",
     "@kbn/esql-composer",
-    "@kbn/shared-ux-toolbar-selector"
+    "@kbn/shared-ux-toolbar-selector",
+    "@kbn/esql-editor"
   ]
 }
