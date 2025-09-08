@@ -26,6 +26,8 @@ import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 
+const mockSave = jest.fn();
+
 describe('annotation group save action', () => {
   describe('save modal', () => {
     const modalSaveArgs = {
@@ -94,7 +96,7 @@ describe('annotation group save action', () => {
       const wrapper = shallowWithIntl(
         <SaveModal
           domElement={document.createElement('div')}
-          onSave={() => {}}
+          onSave={mockSave}
           savedObjectsTagging={savedObjectsTagging}
           title={title}
           description={description}
