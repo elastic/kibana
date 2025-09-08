@@ -1531,7 +1531,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/serverless/api_integration/services/default_fleet_setup.ts @elastic/fleet
 
 # APM
-/x-pack/test/common/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
