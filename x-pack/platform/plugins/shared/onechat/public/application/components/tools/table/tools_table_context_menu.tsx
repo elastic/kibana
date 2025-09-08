@@ -25,7 +25,7 @@ export interface ToolContextMenuProps {
 
 export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   const { euiTheme } = useEuiTheme();
-  const { editTool, deleteTool, testTool, cloneTool } = useToolsActions();
+  const { editTool, deleteTool, testTool, cloneTool, viewTool } = useToolsActions();
   const [isOpen, setIsOpen] = useState(false);
 
   const editMenuItem = (
@@ -88,9 +88,23 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     </EuiContextMenuItem>
   );
 
+  const viewMenuItem = (
+    <EuiContextMenuItem
+      icon="eye"
+      key="view"
+      size="s"
+      onClick={() => {
+        viewTool(tool.id);
+        setIsOpen(false);
+      }}
+    >
+      {labels.tools.viewToolButtonLabel}
+    </EuiContextMenuItem>
+  );
+
   const menuItems = isEsqlTool(tool)
     ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
-    : [testMenuItem];
+    : [viewMenuItem];
 
   return (
     <EuiPopover

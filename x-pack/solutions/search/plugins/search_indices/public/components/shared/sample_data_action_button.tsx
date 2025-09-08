@@ -95,7 +95,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
               <EuiContextMenuItem key="playground" onClick={navigateToPlayground} icon="comment">
                 <FormattedMessage
                   id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToPlayground"
-                  defaultMessage="RAG Playground"
+                  defaultMessage="Playground"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem
