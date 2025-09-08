@@ -21,7 +21,6 @@ export function extractControlGroupState(state: {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
     // return serializeRuntimeState(state.controlGroupState).rawState;
   }
-  // console.log(' extractControlGroupState');
   if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') return;
 
   const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };

@@ -67,12 +67,8 @@ function transformPanelIn(panel: DashboardPanel): {
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn({ state: panelConfig });
-      if (panel.type === 'optionsListControl')
-        console.log('TRANSFORMED IN - BEFORE', { panelConfig });
       transformedPanelConfig = transformed.state;
       references = transformed.references;
-      if (panel.type === 'optionsListControl')
-        console.log('TRANSFORMED IN - AFTER', { transformedPanelConfig, references });
     }
   } catch (transformInError) {
     // do not prevent save if transformIn throws

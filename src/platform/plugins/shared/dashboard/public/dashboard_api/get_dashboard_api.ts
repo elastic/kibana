@@ -93,7 +93,7 @@ export function getDashboardApi({
     getReferences,
     filtersManager,
   });
-  console.log({ initialState });
+
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
@@ -182,7 +182,6 @@ export function getDashboardApi({
 
       if (saveResult?.error) return;
       references$.next(saveResult.references);
-      console.log({ dashboardState });
       unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow, omit } from 'lodash';
+import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
@@ -61,7 +61,6 @@ function injectControlReferences(
     const transforms = embeddableService.getTransforms(control.type);
     try {
       if (transforms?.transformOut) {
-        console.log({ control, references });
         transformedControls.push(
           transforms.transformOut({
             id: control.id,
@@ -70,7 +69,7 @@ function injectControlReferences(
           }) as ControlsGroupState['controls'][number]
         );
       } else {
-        transformedControls.push(control);
+        transformedControls.push(control); // TODO: Fix this type
       }
     } catch (transformOutError) {
       // do not prevent read on transformOutError
@@ -79,8 +78,6 @@ function injectControlReferences(
       );
     }
   });
-
-  console.log({ transformedControls });
 
   return transformedControls;
 }
