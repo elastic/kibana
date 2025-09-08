@@ -146,6 +146,7 @@ export const MetricsExperienceGrid = ({
         dispatch(toggleFullscreen());
       },
       'data-test-subj': 'metricsExperienceToolbarFullScreen',
+      className: showSearchInput ? "nextToSearchInput" : undefined,
     },
   ];
 

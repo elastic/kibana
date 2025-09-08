@@ -33,6 +33,8 @@ export interface IconButton {
   'aria-expanded'?: boolean;
   /** A11y for button */
   'aria-controls'?: string;
+  /** Class name for the button */
+  className?: string;
 }
 
 /**
@@ -64,7 +66,7 @@ export const IconButtonGroup = ({
   const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
-    const { label, title = label, ...rest } = button;
+    const { label, title = label, className, ...rest } = button;
     return {
       ...rest,
       'aria-label': title ?? label,
@@ -72,6 +74,7 @@ export const IconButtonGroup = ({
       label,
       title,
       css: [iconButtonGroupStyles.button],
+      className,
     };
   });
 

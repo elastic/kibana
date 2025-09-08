@@ -64,6 +64,8 @@ export const MetricsGridSearchControl: React.FC<MetricsGridSearchControlProps> =
       })}
       data-test-subj={`${dataTestSubj}Input`}
       css={css`
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
         min-width: 200px;
       `}
     />

@@ -60,7 +60,7 @@ export const ChartSectionTemplate = ({
           </EuiFlexItem>
           {rightSide.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexGroup direction="row" gutterSize="none" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>{toolbar?.rightSideAppend}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <IconButtonGroup
