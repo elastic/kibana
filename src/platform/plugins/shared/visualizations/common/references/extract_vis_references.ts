@@ -8,45 +8,29 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { extractReferences as extractSearchSourceReferences } from '@kbn/data-plugin/common';
 import type { SerializedVis } from '../types';
 import { extractControlsReferences } from './controls_references';
 import { extractTimeSeriesReferences } from './timeseries_references';
+import type { StoredVis } from '../embeddable/transforms/types';
 
-// Data plugin's `isSerializedSearchSource` does not actually rule out objects that aren't serialized search source fields
-function isSerializedSearchSource(
-  maybeSerializedSearchSource: unknown
-): maybeSerializedSearchSource is SerializedSearchSourceFields {
-  return (
-    typeof maybeSerializedSearchSource === 'object' &&
-    maybeSerializedSearchSource !== null &&
-    !Object.hasOwn(maybeSerializedSearchSource, 'dependencies') &&
-    !Object.hasOwn(maybeSerializedSearchSource, 'fields')
-  );
-}
+const DISCOVER_SESSION_REF_NAME = 'discoverSessionRef';
 
 export function extractVisReferences(savedVis: SerializedVis) {
-  const { searchSource, savedSearchId } = savedVis.data;
+  const { searchSource, savedSearchId, ...restOfData } = savedVis.data;
   const references: Reference[] = [];
-  let serializedSearchSource = searchSource;
 
-  // TSVB uses legacy visualization state, which doesn't serialize search source properly
-  if (!isSerializedSearchSource(searchSource)) {
-    serializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
+  let extractedSearchSource = searchSource;
+  if (extractedSearchSource) {
+    const results = extractSearchSourceReferences(extractedSearchSource);
+    extractedSearchSource = results[0];
+    references.push(...results[1]);
   }
 
-  if (searchSource) {
-    const [extractedSearchSource, searchSourceReferences] =
-      extractSearchSourceReferences(serializedSearchSource);
-    serializedSearchSource = extractedSearchSource;
-    searchSourceReferences.forEach((r) => references.push(r));
-  }
-
-  // Extract saved search
+  // Extract discover session
   if (savedSearchId) {
     references.push({
-      name: 'search_0',
+      name: DISCOVER_SESSION_REF_NAME,
       type: 'search',
       id: String(savedSearchId),
     });
@@ -54,9 +38,25 @@ export function extractVisReferences(savedVis: SerializedVis) {
 
   // Extract index patterns from controls
   if (savedVis.params) {
+    // side effect mutates savedVis.params and references
     extractControlsReferences(savedVis.type, savedVis.params, references);
+    // side effect mutates savedVis.params and references
     extractTimeSeriesReferences(savedVis.type, savedVis.params, references);
   }
 
-  return { references, serializedSearchSource };
+  return {
+    savedVis: {
+      ...savedVis,
+      data: {
+        ...restOfData,
+        searchSource: extractedSearchSource,
+        ...(savedSearchId
+          ? {
+              savedSearchRefName: DISCOVER_SESSION_REF_NAME,
+            }
+          : {}),
+      },
+    } as StoredVis,
+    references,
+  };
 }

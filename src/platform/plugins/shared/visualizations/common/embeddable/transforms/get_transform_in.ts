@@ -8,7 +8,6 @@
  */
 
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import { omit } from 'lodash';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -45,29 +44,15 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
 
     // by value
     if ((state as VisualizeByValueState).savedVis) {
-      const { savedVis, ...rest } = state as VisualizeByValueState;
-      const { references, serializedSearchSource } = extractVisReferences(savedVis);
-
-      const savedSearchRefName = savedVis.data.savedSearchId
-        ? references.find((r) => r.id === savedVis.data.savedSearchId)?.name
-        : undefined;
+      const { references, savedVis } = extractVisReferences(
+        (state as VisualizeByValueState).savedVis
+      );
 
       return {
         state: {
-          ...rest,
+          ...state,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-          savedVis: {
-            ...savedVis,
-            data: {
-              ...omit(savedVis.data, 'savedSearchId'),
-              searchSource: serializedSearchSource,
-              ...(savedSearchRefName
-                ? {
-                    savedSearchRefName,
-                  }
-                : {}),
-            },
-          },
+          savedVis,
         },
         references: [...references, ...enhancementsReferences],
       };
