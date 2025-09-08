@@ -7257,6 +7257,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/run.ts"
               },
@@ -15292,6 +15296,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/dashboards/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/status.ts"
               },
               {
@@ -16975,6 +16983,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/install_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/post_readiness_task.ts"
               },
               {
                 "plugin": "securitySolution",

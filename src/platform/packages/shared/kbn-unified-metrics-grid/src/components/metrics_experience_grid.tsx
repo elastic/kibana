@@ -111,6 +111,14 @@ export const MetricsExperienceGrid = ({
     [dispatch]
   );
 
+  // Clear both dimensions and filters because if there are no dimensions selected the values should also be cleared
+  const onClearAllDimensions = useCallback(() => {
+    dispatch(setDimensions([]));
+    dispatch(setValueFilters([]));
+  }, [dispatch]);
+
+  const onClearValues = useCallback(() => onValuesChange([]), [onValuesChange]);
+
   const pageSize = columns === 4 ? 20 : 15;
   const actions: IconButtonGroupProps['buttons'] = [
     ...(!showSearchInput
@@ -148,6 +156,7 @@ export const MetricsExperienceGrid = ({
         fields={fields}
         onChange={onDimensionsChange}
         selectedDimensions={dimensions}
+        onClear={onClearAllDimensions}
       />,
       dimensions.length > 0 ? (
         <ValuesSelector
@@ -157,18 +166,21 @@ export const MetricsExperienceGrid = ({
           disabled={dimensions.length === 0}
           indices={[indexPattern]}
           timeRange={timeRange}
+          onClear={onClearValues}
         />
       ) : null,
     ],
     [
-      dimensions,
-      fields,
-      timeRange,
-      indexPattern,
-      onDimensionsChange,
-      onValuesChange,
       renderToggleActions,
+      fields,
+      onDimensionsChange,
+      dimensions,
+      onClearAllDimensions,
       valueFilters,
+      onValuesChange,
+      indexPattern,
+      timeRange,
+      onClearValues,
     ]
   );
 
