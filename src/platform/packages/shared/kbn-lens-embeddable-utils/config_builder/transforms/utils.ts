@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedLayer,
   FormBasedPersistedState,
@@ -23,13 +22,11 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DataViewsCommon } from '../config_builder';
-import type { LensAttributes, LensDataset, LensDatatableDataset } from '../types';
+import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
-import { AnyBucketLensStateColumn, AnyLensStateColumn, AnyMetricLensStateColumn } from './columns/types';
-import { LensConfig } from '../types';
+import { AnyLensStateColumn } from './columns/types';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -66,9 +63,9 @@ export const operationFromColumn = (
   // map columns to array of { column, id }
   const columnMap = Object.entries(layer.columns).map(([id, column]) => ({ column: column as AnyLensStateColumn, id }));
   if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
-    return fromBucketLensStateToAPI(column as AnyBucketLensStateColumn, columnMap);
+    return fromBucketLensStateToAPI(column, columnMap);
   }
-  return getMetricApiColumnFromLensState(column as AnyMetricLensStateColumn, layer.columns as Record<string, AnyMetricLensStateColumn>);
+  return getMetricApiColumnFromLensState(column, layer.columns);
 };
 
 /**
@@ -96,36 +93,15 @@ export const buildDatasetState = (
 };
 
 // builds Lens State references from list of dataviews
-export function buildReferences(dataviews: Record<string, DataView>) {
+export function buildReferences(dataviews: Record<string, string>) {
   const references = [];
   for (const layerid in dataviews) {
     if (dataviews[layerid]) {
-      references.push(...getDefaultReferences(dataviews[layerid].id!, layerid));
+      references.push(...getDefaultReferences(dataviews[layerid], layerid));
     }
   }
   return references.flat();
 }
-
-const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
-  return {
-    [dataView.id ?? uuidv4()]: {
-      ...dataView.toSpec(false),
-    },
-  };
-};
-
-// builds Lens State ad-hoc dataviews from list of dataviews
-export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
-  let adHocDataViews = {};
-  [...new Set(Object.values(dataviews))].forEach((d) => {
-    adHocDataViews = {
-      ...adHocDataViews,
-      ...getAdhocDataView(d),
-    };
-  });
-
-  return adHocDataViews;
-};
 
 export function isSingleLayer(
   layer: DataSourceStateLayer
@@ -153,7 +129,6 @@ export function getDatasetIndex(
     index = getIndexPatternFromESQLQuery(dataset.query); // parseIndexFromQuery(config.dataset.query);
   } else if (dataset.type === 'dataView') {
     index = dataset.name;
-    timeFieldName = '@timestamp';
   } else {
     return undefined;
   }
@@ -161,6 +136,7 @@ export function getDatasetIndex(
   return { index, timeFieldName };
 }
 
+// internal function used to build datasource states layer
 function buildDatasourceStatesLayer(
   layer: LensApiState,
   i: number,
@@ -286,6 +262,7 @@ export const buildDatasourceStates = async (
   return layers;
 };
 
+// adds new column to existing layer
 export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
@@ -295,21 +272,22 @@ export const addLayerColumn = (
 ) => {
   const column = Array.isArray(config) ? config[0] : config;
   const referenceColumn = Array.isArray(config) ? config[1] : undefined;
+  const name = columnName + postfix;
 
   layer.columns = {
     ...layer.columns,
-    [columnName]: column,
-    ...(referenceColumn ? { [`${columnName}_reference`]: referenceColumn } : {}),
+    [name]: column,
+    ...(referenceColumn ? { [`${name}_reference`]: referenceColumn } : {}),
   };
   if (first) {
-    layer.columnOrder.unshift(columnName);
+    layer.columnOrder.unshift(name);
     if (referenceColumn) {
-      layer.columnOrder.unshift(`${columnName}_reference`);
+      layer.columnOrder.unshift(`${name}_reference`);
     }
   } else {
-    layer.columnOrder.push(columnName);
+    layer.columnOrder.push(name);
     if (referenceColumn) {
-      layer.columnOrder.push(`${columnName}_reference`);
+      layer.columnOrder.push(`${name}_reference`);
     }
   }
 };
