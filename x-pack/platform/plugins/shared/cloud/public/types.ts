@@ -122,6 +122,10 @@ export interface CloudStart extends CloudBasicUrls {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: KibanaSolution;
+    /**
+     * Whether the serverless project belongs to an organization currently in trial.
+     */
+    organizationInTrial?: boolean;
   };
 }
 
@@ -235,6 +239,10 @@ export interface CloudSetup extends CloudBasicUrls {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     orchestratorTarget?: string;
+    /**
+     * Whether the serverless project belongs to an organization currently in trial.
+     */
+    organizationInTrial?: boolean;
   };
 }
 

@@ -137,6 +137,7 @@ export const streamRoutingMachine = setup({
         src: 'routingSamplesMachine',
         input: ({ context }) => ({
           definition: context.definition,
+          documentMatchFilter: 'matched',
         }),
       },
       states: {
@@ -168,6 +169,10 @@ export const streamRoutingMachine = setup({
               type: 'routingSamples.updateCondition',
               condition: undefined,
             }),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
           ],
           initial: 'changing',
           states: {
@@ -198,6 +203,14 @@ export const streamRoutingMachine = setup({
                 'routingRule.fork': {
                   guard: 'canForkStream',
                   target: 'forking',
+                },
+                'routingSamples.setDocumentMatchFilter': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: event.filter,
+                    });
+                  }),
                 },
               },
             },
