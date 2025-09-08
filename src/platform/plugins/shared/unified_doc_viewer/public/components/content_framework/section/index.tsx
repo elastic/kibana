@@ -104,7 +104,7 @@ export function ContentFrameworkSection({
       extraAction={
         actions?.length ? (
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>{' '}
+            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
           </EuiFlexGroup>
         ) : null
       }
