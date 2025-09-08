@@ -93,6 +93,13 @@ Here's an example of how to register `recommendedQueries`:
           ],
             solutionId
         );
+
+        // --- Unsetting Recommended Queries ---
+        esqlExtensionsRegistry.unsetRecommendedQueries('logs*', solutionId);
+    
+        // Unsetting queries is currently supported only by index pattern and solution ID
+        // It's especially useful when controlling queries availability via Feature flag service
+
         return {};
     }
 

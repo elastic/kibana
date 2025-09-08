@@ -151,6 +151,7 @@ export class ESQLExtensionsRegistry {
   }
 
   unsetRecommendedQueries(indexPattern: string, activeSolutionId: SolutionId): void {
+    // Unsetting queries is currently supported only by index pattern and solution ID
     this.unsetRecommendedItems(this.recommendedQueries, indexPattern, activeSolutionId);
   }
 

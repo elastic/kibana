@@ -250,17 +250,82 @@ describe('ESQLExtensionsRegistry', () => {
       const queries: RecommendedQuery[] = [
         { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
         { name: 'Metrics Query', query: `FROM ${METRICS_INDEX_PATTERN} | STATS max(bytes)` },
+        { name: 'Other Query', query: 'FROM other_index | LIMIT 10' },
       ];
 
       registry.setRecommendedQueries(queries, solutionId);
       registry.unsetRecommendedQueries(METRICS_INDEX_PATTERN, solutionId);
 
-      const retrievedQueries = registry.getRecommendedQueries(
+      // Metrics query should be removed
+      const metricsQueries = registry.getRecommendedQueries(
         `FROM ${METRICS_INDEX_PATTERN}`,
         availableDatasources,
         solutionId
       );
-      expect(retrievedQueries).toEqual([]);
+      expect(metricsQueries).toEqual([]);
+
+      // Other queries should still exist
+      const logsQueries = registry.getRecommendedQueries(
+        `FROM logs-2023`,
+        availableDatasources,
+        solutionId
+      );
+      expect(logsQueries).toEqual([queries[0]]);
+
+      const otherQueries = registry.getRecommendedQueries(
+        'FROM other_index',
+        availableDatasources,
+        solutionId
+      );
+      expect(otherQueries).toEqual([queries[2]]);
+    });
+
+    it('should only remove queries for the specified solution ID', () => {
+      const obltSolutionId: SolutionId = 'oblt';
+      const securitySolutionId: SolutionId = 'security';
+      const metricsQuery = {
+        name: 'Metrics Query',
+        query: `FROM ${METRICS_INDEX_PATTERN} | STATS max(bytes)`,
+      };
+
+      // Register the same query for two different solutions
+      registry.setRecommendedQueries([metricsQuery], obltSolutionId);
+      registry.setRecommendedQueries([metricsQuery], securitySolutionId);
+      registry.unsetRecommendedQueries(METRICS_INDEX_PATTERN, obltSolutionId);
+
+      // Should be removed from oblt
+      const obltQueries = registry.getRecommendedQueries(
+        `FROM ${METRICS_INDEX_PATTERN}`,
+        availableDatasources,
+        obltSolutionId
+      );
+      expect(obltQueries).toEqual([]);
+
+      // Should still exist for security
+      const securityQueries = registry.getRecommendedQueries(
+        `FROM ${METRICS_INDEX_PATTERN}`,
+        availableDatasources,
+        securitySolutionId
+      );
+      expect(securityQueries).toEqual([metricsQuery]);
+    });
+
+    it('should handle unset for non-existent index pattern gracefully', () => {
+      const solutionId: SolutionId = 'oblt';
+      const logsQuery = { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' };
+
+      registry.setRecommendedQueries([logsQuery], solutionId);
+
+      // This should not throw an error
+      registry.unsetRecommendedQueries('non-existent-pattern', solutionId);
+
+      // Original query should still be available
+      const retrievedQueries = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedQueries).toEqual([logsQuery]);
     });
   });
 
