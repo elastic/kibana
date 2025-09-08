@@ -4006,7 +4006,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string) => Promise<Readonly<{} & { meta: Readonly<{ aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; } & { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; }>; item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", id: string) => Promise<Readonly<{} & { meta: Readonly<{ aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; } & { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; }>; item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4085,7 +4085,7 @@
               },
               ", data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4163,7 +4163,7 @@
               },
               ", id: string, data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4471,7 +4471,7 @@
                   },
                   ", savedObject: ",
                   "SavedObject",
-                  "<Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>>) => ",
+                  "<Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>>) => ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4517,7 +4517,7 @@
                     "description": [],
                     "signature": [
                       "SavedObject",
-                      "<Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>>"
+                      "<Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>>"
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                     "deprecated": false,
