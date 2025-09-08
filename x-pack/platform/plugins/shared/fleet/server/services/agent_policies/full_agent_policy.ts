@@ -899,7 +899,8 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput
     filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE).
     flatMap((input) => {
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
-        const suffix = input.id + "." + stream.id;
+        // Avoid dots in keys, as they can create subobjects in agent config.
+        const suffix = (input.id + "-" + stream.id).replaceAll(".", "-");
         const attributesTransform = generateOTelAttributesTransform(
           stream.data_stream.type? stream.data_stream.type: 'logs',
           stream.data_stream.dataset,
@@ -936,7 +937,7 @@ function generateOTelAttributesTransform(type: string, dataset: string, namespac
   // We want the singular of logs/metrics/traces.
   const signalType = type.substring(0, type.length-1);
   return {
-    [`transform/${suffix}.routing`]: {
+    [`transform/${suffix}-routing`]: {
       [`${signalType}_statements`]: [
         `set(attributes["data_stream.type"], "${type}")`,
         `set(attributes["data_stream.dataset"], "${dataset}")`,
