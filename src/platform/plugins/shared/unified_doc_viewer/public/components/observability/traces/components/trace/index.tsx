@@ -72,7 +72,7 @@ export const Trace = ({ traceId, serviceName, docId, dataView }: TraceProps) => 
   return (
     <>
       <ContentFrameworkSection
-        id={'traceSection'}
+        id="traceSection"
         title={sectionTitle}
         description={sectionTip}
         actions={sectionActions}
