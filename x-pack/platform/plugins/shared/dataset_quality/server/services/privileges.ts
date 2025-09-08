@@ -13,7 +13,11 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { streamPartsToIndexPattern } from '../../common/utils';
-import { DEFAULT_DATASET_TYPE, FAILURE_STORE_PRIVILEGE } from '../../common/constants';
+import {
+  DEFAULT_DATASET_TYPE,
+  FAILURE_STORE_PRIVILEGE,
+  MANAGE_FAILURE_STORE_PRIVILEGE,
+} from '../../common/constants';
 
 class DatasetQualityPrivileges {
   public async getHasIndexPrivileges(
@@ -55,7 +59,12 @@ class DatasetQualityPrivileges {
   ): Promise<{
     datasetsPrivilages: Record<
       string,
-      { canRead: boolean; canMonitor: boolean; canReadFailureStore: boolean }
+      {
+        canRead: boolean;
+        canMonitor: boolean;
+        canReadFailureStore: boolean;
+        canManageFailureStore: boolean;
+      }
     >;
     canViewIntegrations: boolean;
   }> {
@@ -64,6 +73,7 @@ class DatasetQualityPrivileges {
       'monitor',
       'view_index_metadata',
       FAILURE_STORE_PRIVILEGE,
+      MANAGE_FAILURE_STORE_PRIVILEGE,
     ]);
 
     const datasetsPrivilages = Object.fromEntries(
@@ -73,6 +83,7 @@ class DatasetQualityPrivileges {
           canRead: privileges.read,
           canMonitor: privileges.view_index_metadata,
           canReadFailureStore: privileges[FAILURE_STORE_PRIVILEGE],
+          canManageFailureStore: privileges[MANAGE_FAILURE_STORE_PRIVILEGE],
         },
       ])
     );
