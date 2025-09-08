@@ -20,7 +20,8 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
-import { EntityType, EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { APP_UI_ID } from '../../../../common';
 import { createGetAlertsById } from './get_alert_by_id';
 
@@ -29,11 +30,7 @@ export type EntityRiskScoreToolParams = Require<
   'alertsIndexPattern' | 'size' | 'assistantContext'
 >;
 
-const ENTITY_TYPES_AND_FIELDS = Object.values(EntityType)
-  .map((entityType) => `${entityType} (${EntityTypeToIdentifierField[entityType]})`)
-  .join(', ');
-
-export const ENTITY_RISK_SCORE_TOOL_DESCRIPTION = `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation, or when answering questions about how critical or risky an entity is. Know entities are: ${ENTITY_TYPES_AND_FIELDS}. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm' and don't mention the non-normalized value.`;
+export const ENTITY_RISK_SCORE_TOOL_DESCRIPTION = `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.`;
 
 export const ENTITY_RISK_SCORE_TOOL_ID = 'entity-risk-score-tool';
 
