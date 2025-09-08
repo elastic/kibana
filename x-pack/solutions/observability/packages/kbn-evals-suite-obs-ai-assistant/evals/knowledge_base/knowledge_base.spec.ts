@@ -110,7 +110,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       },
     ];
 
-    // Ported from the original `before` block
     evaluate.beforeAll(async ({ knowledgeBaseClient, esClient }) => {
       await knowledgeBaseClient.importEntries({ entries: testDocs });
     });
@@ -131,7 +130,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     evaluate(
       'retrieves and describes DevOps teams and on-call info',
       async ({ evaluateKnowledgeBase }) => {
-        // This combines the original two "DevOps" tests into a single, comprehensive evaluation.
         await evaluateKnowledgeBase({
           dataset: {
             name: 'kb_retrieval_devops',
