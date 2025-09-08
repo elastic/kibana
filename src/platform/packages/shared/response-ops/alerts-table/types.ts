@@ -41,7 +41,6 @@ import type {
 import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
-  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
@@ -148,6 +147,12 @@ export interface AlertsTableOnLoadedProps {
   totalAlertsCount: number;
 }
 
+export interface AlertsTableSortCombinations {
+  [field: string]: {
+    order: 'asc' | 'desc';
+  };
+}
+
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
   /**
@@ -160,13 +165,31 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   columns?: EuiDataGridProps['columns'];
   /**
+   * Columns change callback
+   *
+   * This is a controllable state: provide a non-undefined value and this onChange
+   * callback to control it, otherwise the table will manage it internally.
+   */
+  onColumnsChange?: (newColumns: EuiDataGridProps['columns']) => void;
+  /**
+   * An array of column ids to show in the table
+   */
+  visibleColumns?: string[];
+  /**
+   * Visible columns change callback.
+   *
+   * This is a controllable state: provide a non-undefined value and this onChange
+   * callback to control it, otherwise the table will manage it internally.
+   */
+  onVisibleColumnsChange?: (newVisibleColumns: string[]) => void;
+  /**
    * A boolean expression or list of ids to refine the alerts search query
    */
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   /**
    * The initial sort configuration
    */
-  initialSort?: SortCombinations[];
+  initialSort?: AlertsTableSortCombinations[];
   /**
    * The initial page size. Allowed values are 10, 20, 50, 100
    */
@@ -297,7 +320,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * A storage provider where to persist the table configuration
    * @default new Storage(window.localStorage)
    */
-  configurationStorage?: IStorageWrapper;
+  configurationStorage?: IStorageWrapper | null;
   /**
    * Dependencies
    */
@@ -476,17 +499,16 @@ export interface PublicAlertsDataGridProps
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
-  extends PublicAlertsDataGridProps {
+  extends PublicAlertsDataGridProps,
+    Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];
   trailingControlColumns?: EuiDataGridControlColumn[];
-  visibleColumns: string[];
   'data-test-subj': string;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  onChangeVisibleColumns: (newColumns: string[]) => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   showInspectButton?: boolean;
@@ -499,7 +521,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  sort: SortCombinations[];
+  sort: AlertsTableSortCombinations[];
   alertsQuerySnapshot?: EsQuerySnapshot;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   flyoutAlertIndex: number;
