@@ -63,6 +63,17 @@ export const calculateRuleFieldsDiff = ({
   return fieldsDiff as RuleDiffOutcome<TwoWayDiffRule>;
 };
 
+/**
+ * Field Comparators
+ *
+ * This is an exhaustive list of comparators based on the `RuleDiffField` types which is, aside from minor
+ * omittances for non-diffable fields, a 1-to-1 extension of the `RuleResponse` schema. Every field we diff on
+ * is listed here with its corresponding comparison logic. If a rule field is not listed here, it will not be
+ * used in the diffing logic and will not be returned in the final outcome object.
+ *
+ * NOTE: When adding a new field to these comparators, also add a test for diff synchronization in `./calculate_rule_diff_synchronization.test.ts`
+ */
+
 const commonFieldComparators: FieldsComparatorsFor<RuleDiffCommonFields> = {
   version: areFieldsEqual,
   name: areFieldsEqual,
