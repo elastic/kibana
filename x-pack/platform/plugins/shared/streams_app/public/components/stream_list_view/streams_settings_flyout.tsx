@@ -22,6 +22,15 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiBetaBadge,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiButtonGroup,
+  EuiCodeBlock,
+  useGeneratedHtmlId,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
@@ -104,9 +113,69 @@ export function StreamsSettingsFlyout({
     }
   };
 
+  // Shipper button group state
+  const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
+  const shipperOptions = [
+    {
+      id: `${shipperButtonGroupPrefix}__otel`,
+      label: 'OTel',
+    },
+    {
+      id: `${shipperButtonGroupPrefix}__filebeat`,
+      label: 'Filebeat',
+    },
+    {
+      id: `${shipperButtonGroupPrefix}__logstash`,
+      label: 'Logstash',
+    },
+  ];
+  const [selectedShipperId, setSelectedShipperId] = React.useState(
+    `${shipperButtonGroupPrefix}__otel`
+  );
+
+  // Example config blocks
+  const shipperConfigExamples: Record<string, string> = {
+    [`${shipperButtonGroupPrefix}__otel`]: `exporters:
+  elastic:
+    endpoint: https://<kibana-host>:443
+    api_key: <your-api-key>
+processors:
+    transform/logs-streams:
+        logs:
+            actions:
+              - key: attributes.index
+                value: logs
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+        processors: [transform/logs-streams]
+      exporters: [elastic]`,
+    [`${shipperButtonGroupPrefix}__filebeat`]: `filebeat.inputs:
+  - type: log
+    paths:
+      - /var/log/*.log
+output.elasticsearch:
+  hosts: ["https://<kibana-host>:443"]
+  index: logs
+  api_key: "<your-api-key>"`,
+    [`${shipperButtonGroupPrefix}__logstash`]: `input {
+  beats {
+    port => 5044
+  }
+}
+output {
+  elasticsearch {
+    hosts => ["https://<es-host>:443"]
+    index => "logs"
+    api_key => "<your-api-key>"
+  }
+}`,
+  };
+
   return (
     <>
-      <EuiFlyout onClose={onClose} size="s" aria-labelledby="streamsSettingsFlyoutTitle">
+      <EuiFlyout onClose={onClose} size="m" aria-labelledby="streamsSettingsFlyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="streamsSettingsFlyoutTitle">
@@ -117,18 +186,93 @@ export function StreamsSettingsFlyout({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {loading ? (
-            <EuiLoadingSpinner size="l" />
-          ) : (
-            <EuiSwitch
-              label={i18n.translate('xpack.streams.streamsListView.enableWiredStreamsSwitchLabel', {
-                defaultMessage: 'Enable wired streams',
+          <EuiDescribedFormGroup
+            descriptionFlexItemProps={{ grow: 2 }}
+            title={
+              <h3>
+                <EuiFlexGroup gutterSize="s">
+                  {i18n.translate('xpack.streams.streamsListView.wiredStreamsTitle', {
+                    defaultMessage: 'Wired Streams',
+                  })}
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                      defaultMessage: 'Technical Preview',
+                    })}
+                    tooltipContent={i18n.translate(
+                      'xpack.streams.streamsListView.betaBadgeDescription',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    )}
+                    alignment="middle"
+                    size="s"
+                  />
+                </EuiFlexGroup>
+              </h3>
+            }
+            description={
+              <p>
+                {i18n.translate('xpack.streams.streamsListView.wiredStreamsDescription', {
+                  defaultMessage:
+                    'Send data to Elasticsearch and process it with a clear hierarchy, with inherited settings and managed components. If disabled, some features won’t work as expected.',
+                })}
+              </p>
+            }
+          >
+            <EuiFormRow fullWidth>
+              {loading ? (
+                <EuiLoadingSpinner size="l" />
+              ) : (
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.streams.streamsListView.enableWiredStreamsSwitchLabel',
+                    {
+                      defaultMessage: 'Enable wired streams',
+                    }
+                  )}
+                  checked={Boolean(wiredChecked)}
+                  onChange={handleSwitchChange}
+                  data-test-subj="streamsWiredSwitch"
+                />
+              )}
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiText>
+              <h3>
+                {i18n.translate('xpack.streams.streamsListView.shipperConfigTitle', {
+                  defaultMessage: 'Configure your shippers',
+                })}
+              </h3>
+            </EuiText>
+            <EuiText color="subdued" size="s">
+              <p>
+                {i18n.translate('xpack.streams.streamsListView.shipperConfigDescription', {
+                  defaultMessage: 'Send data into wired streams',
+                })}
+              </p>
+            </EuiText>
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.streams.streamsListView.shipperButtonGroupLegend', {
+                defaultMessage: 'Select shipper type',
               })}
-              checked={Boolean(wiredChecked)}
-              onChange={handleSwitchChange}
-              data-test-subj="streamsWiredSwitch"
+              options={shipperOptions}
+              idSelected={selectedShipperId}
+              onChange={setSelectedShipperId}
+              buttonSize="m"
+              isFullWidth={false}
+              data-test-subj="streamsShipperButtonGroup"
             />
-          )}
+            <EuiCodeBlock
+              language="yaml"
+              isCopyable
+              paddingSize="m"
+              data-test-subj="streamsShipperConfigExample"
+            >
+              {shipperConfigExamples[selectedShipperId]}
+            </EuiCodeBlock>
+          </EuiFlexGroup>
         </EuiFlyoutBody>
       </EuiFlyout>
       {showDisableModal && (
