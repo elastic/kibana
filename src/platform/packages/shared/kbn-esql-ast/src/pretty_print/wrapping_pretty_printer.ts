@@ -9,7 +9,7 @@
 
 import { BinaryExpressionGroup } from '../ast/grouping';
 import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
-import { isBinaryExpression } from '../ast/is';
+import { isBinaryExpression, isParamLiteral } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
 import type {
   CommandOptionVisitorContext,
@@ -601,7 +601,10 @@ export class WrappingPrettyPrinter {
       let operator = ctx.operator();
       let txt: string = '';
 
-      if (this.opts.lowercaseFunctions ?? this.opts.lowercase) {
+      // Check if function name is a parameter stored in node.operator
+      if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+        operator = LeafPrinter.param(ctx.node.operator);
+      } else if (this.opts.lowercaseFunctions ?? this.opts.lowercase) {
         operator = operator.toLowerCase();
       }
 
