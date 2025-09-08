@@ -6,19 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../../../../../common/constants/synthetics_alerts';
+import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
@@ -64,14 +63,10 @@ export const OverviewAlerts = () => {
   } = useKibana<ClientPluginsStart>().services;
 
   const theme = useTheme();
-
-  const { status } = useSelector(selectOverviewStatus);
+  const filters = useMonitorFilters({ forAlerts: true });
 
   const { locations } = useGetUrlParams();
-
-  const loading = !status?.allIds || status?.allIds.length === 0;
-
-  const monitorIds = useMonitorQueryIds();
+  const queryFilters = useMonitorQueryFilters();
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
@@ -79,68 +74,70 @@ export const OverviewAlerts = () => {
         <h3>{headingText}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {loading ? (
-        <EuiSkeletonText lines={3} />
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <ExploratoryViewEmbeddable
-              id="monitorActiveAlertsCount"
-              dataTestSubj="monitorActiveAlertsCount"
-              reportType="single-metric"
-              customHeight="70px"
-              attributes={[
-                {
-                  dataType: 'alerts',
-                  time: {
-                    from,
-                    to,
-                  },
-                  name: ALERTS_LABEL,
-                  selectedMetricField: RECORDS_FIELD,
-                  reportDefinitions: {
-                    'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': monitorIds,
-                    ...(locations?.length ? { 'observer.geo.name': locations } : {}),
-                  },
-                  filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
-                  color: theme.eui.euiColorVis1,
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <ExploratoryViewEmbeddable
+            id="monitorActiveAlertsCount"
+            dataTestSubj="monitorActiveAlertsCount"
+            reportType="single-metric"
+            customHeight="70px"
+            dslFilters={queryFilters}
+            attributes={[
+              {
+                dataType: 'alerts',
+                time: {
+                  from,
+                  to,
                 },
-              ]}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ExploratoryViewEmbeddable
-              id="monitorActiveAlertsOverTime"
-              sparklineMode
-              customHeight="70px"
-              reportType="kpi-over-time"
-              attributes={[
-                {
-                  seriesType: 'area',
-                  time: {
-                    from,
-                    to,
-                  },
-                  reportDefinitions: {
-                    'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': monitorIds,
-                    ...(locations?.length ? { 'observer.geo.name': locations } : {}),
-                  },
-                  dataType: 'alerts',
-                  selectedMetricField: RECORDS_FIELD,
-                  name: ALERTS_LABEL,
-                  filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
-                  color: theme.eui.euiColorVis1_behindText,
+                name: ALERTS_LABEL,
+                selectedMetricField: RECORDS_FIELD,
+                reportDefinitions: {
+                  'kibana.alert.rule.rule_type_id': [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE],
+                  ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                 },
-              ]}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
-            <AlertsLink />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+                filters: [
+                  { field: 'kibana.alert.status', values: ['active', 'recovered'] },
+                  ...filters,
+                ],
+                color: theme.eui.euiColorVis1,
+              },
+            ]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ExploratoryViewEmbeddable
+            id="monitorActiveAlertsOverTime"
+            sparklineMode
+            customHeight="70px"
+            reportType="kpi-over-time"
+            dslFilters={queryFilters}
+            attributes={[
+              {
+                seriesType: 'area',
+                time: {
+                  from,
+                  to,
+                },
+                reportDefinitions: {
+                  'kibana.alert.rule.rule_type_id': [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE],
+                  ...(locations?.length ? { 'observer.geo.name': locations } : {}),
+                },
+                dataType: 'alerts',
+                selectedMetricField: RECORDS_FIELD,
+                name: ALERTS_LABEL,
+                filters: [
+                  { field: 'kibana.alert.status', values: ['active', 'recovered'] },
+                  ...filters,
+                ],
+                color: theme.eui.euiColorVis1_behindText,
+              },
+            ]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
+          <AlertsLink />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
