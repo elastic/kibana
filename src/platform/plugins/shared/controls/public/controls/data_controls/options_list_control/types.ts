@@ -18,6 +18,7 @@ import type {
 } from '../../../../common/options_list';
 import type { DataControlApi, PublishesField } from '../types';
 import type { SelectionsState } from './selections_manager';
+import type { DefaultDataControlState } from '../../../../common';
 import type { TemporaryState } from './temporay_state_manager';
 import type { EditorState } from './editor_state_manager';
 
@@ -36,7 +37,8 @@ interface PublishesOptions {
  * and then passes to the UI component. Excludes any managed state properties that don't end up being used
  * by the component
  */
-export type OptionsListComponentState = SelectionsState &
+export type OptionsListComponentState = Pick<DefaultDataControlState, 'fieldName'> &
+  SelectionsState &
   EditorState &
   TemporaryState & {
     sort: OptionsListSortingType | undefined;

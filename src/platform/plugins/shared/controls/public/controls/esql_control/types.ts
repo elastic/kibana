@@ -36,4 +36,5 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   HideSortUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableMultiSelectUnusedState &
-  DisableInvalidSelectionsUnusedState;
+  DisableInvalidSelectionsUnusedState &
+  Pick<OptionsListComponentState, 'fieldName'>;
