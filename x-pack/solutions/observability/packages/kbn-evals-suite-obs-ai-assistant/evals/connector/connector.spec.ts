@@ -157,8 +157,7 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
     evaluate.afterAll(async ({ fetch }) => {
       // Delete the email connector
       await fetch(`/api/actions/connector/${emailConnectorId}`, { method: 'DELETE' });
-      // Also delete the user instructions used in this suite to avoid leaking into other tests
-
+      // Delete the user instructions
       await fetch('/internal/observability_ai_assistant/kb/entries/send_email', {
         method: 'DELETE',
       });
