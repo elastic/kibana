@@ -17,6 +17,7 @@ export {
   LazyExpressionInput,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,

@@ -29,6 +29,7 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_STOP_PATH,
+  SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -48,6 +49,7 @@ import type {
   UpdateRuleMigrationRulesResponse,
   UpdateRuleMigrationRequestBody,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationIndexPatternResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
@@ -249,6 +251,7 @@ export const getMigrationRules = async ({
         is_partially_translated: filters?.partiallyTranslated,
         is_untranslatable: filters?.untranslatable,
         is_failed: filters?.failed,
+        is_missing_index: filters?.missingIndex,
       },
       signal,
     }
@@ -405,5 +408,30 @@ export const deleteMigration = async ({ migrationId, signal }: DeleteMigrationPa
   return KibanaServices.get().http.delete<unknown>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
     { version: '1', signal }
+  );
+};
+
+export interface UpdateIndexPatternParams {
+  /** `id` of the migration to update the index pattern for */
+  migrationId: string;
+  /** The index pattern to update */
+  indexPattern: string;
+  /** The ids of the rules to update */
+  ids?: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+export const updateIndexPattern = async ({
+  migrationId,
+  indexPattern,
+  ids,
+  signal,
+}: UpdateIndexPatternParams): Promise<UpdateRuleMigrationIndexPatternResponse> => {
+  const payload = ids?.length
+    ? { index_pattern: indexPattern, ids }
+    : { index_pattern: indexPattern };
+  return KibanaServices.get().http.post<UpdateRuleMigrationIndexPatternResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify(payload), signal }
   );
 };
