@@ -8,10 +8,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isRoot, type Streams } from '@kbn/streams-schema';
 import {
-  copyToClipboard,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -20,13 +18,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
   EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -37,6 +29,9 @@ import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { LinkToStream } from '../stream_detail_lifecycle/modal';
 import { getFormattedError } from '../../../util/errors';
+import { StreamDeleteModal } from '../../stream_delete_modal';
+import { parseDuration } from '../stream_detail_lifecycle/helpers';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 
 export function WiredAdvancedView({
   definition,
@@ -45,27 +40,42 @@ export function WiredAdvancedView({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
-  const { isServerless } = useKibana();
-
   return (
     <>
-      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition} />
+      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+        <EuiCallOut
+          iconType="warning"
+          color="primary"
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
+            {
+              defaultMessage:
+                'Changes will be inherited by child streams unless they override them explicitly.',
+            }
+          )}
+        />
+        <EuiSpacer size="l" />
+      </IndexConfiguration>
+
+      {!isRoot(definition.stream.name) && (
+        <>
+          <EuiSpacer />
+          <DeleteStreamPanel definition={definition} />
+        </>
+      )}
 
       <EuiSpacer />
-
-      {!isRoot(definition.stream.name) && <DeleteStreamPanel definition={definition} />}
     </>
   );
 }
 
 function toStringValues(settings: IngestStreamSettings) {
-  return Object.entries(settings).reduce<Record<string, { value: string; from?: string }>>(
-    (acc, [key, setting]) => {
-      acc[key] = { ...setting, value: String(setting.value) };
-      return acc;
-    },
-    {}
-  );
+  return Object.entries(settings).reduce<
+    Record<string, { invalid: boolean; value: string; from?: string }>
+  >((acc, [key, setting]) => {
+    acc[key] = { ...setting, value: String(setting.value), invalid: false };
+    return acc;
+  }, {});
 }
 
 export function Settings({
@@ -77,7 +87,9 @@ export function Settings({
   refreshDefinition: () => void;
   children?: React.ReactNode;
 }) {
+  const { loading: isLoadingDefinition } = useStreamDetail();
   const {
+    isServerless,
     core: { notifications },
     dependencies: {
       start: {
@@ -85,14 +97,30 @@ export function Settings({
       },
     },
   } = useKibana();
-  const [settings, setSettings] = useState<Record<string, { value: string; from?: string }>>(
-    toStringValues(definition.effective_settings)
+  const originalSettings = useMemo(
+    () => toStringValues(definition.effective_settings),
+    [definition]
   );
-  const hasChanges = useMemo(() => {
-    return !isEqual(toStringValues(definition.effective_settings), settings);
-  }, [settings]);
+  const [settings, setSettings] = useState<
+    Record<string, { invalid: boolean; value: string; from?: string }>
+  >(toStringValues(definition.effective_settings));
+  const hasChanges = useMemo(
+    () => !isEqual(originalSettings, settings),
+    [originalSettings, settings]
+  );
   const abortController = useAbortController();
   const [isUpdating, setIsUpdating] = useState(false);
+  const onReset = useCallback(
+    (name: string) => {
+      const original = originalSettings[name];
+      if (!original || original.from === definition.stream.name) {
+        setSettings((prev) => omit(prev, name));
+      } else {
+        setSettings((prev) => ({ ...prev, [name]: original }));
+      }
+    },
+    [originalSettings]
+  );
 
   const updateSettings = useCallback(async () => {
     setIsUpdating(true);
@@ -103,11 +131,17 @@ export function Settings({
           body: {
             ingest: {
               ...definition.stream.ingest,
-              settings: prepareSettings(settings),
+              settings: prepareSettings(definition, settings),
             },
           },
         },
         signal: abortController.signal,
+      });
+
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.successfullyUpdatedSettings', {
+          defaultMessage: 'Settings updated',
+        }),
       });
 
       refreshDefinition();
@@ -127,79 +161,84 @@ export function Settings({
     <>
       {children}
 
-      <SettingRow
-        definition={definition}
-        label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.shardsLabel', {
-          defaultMessage: 'Shards',
-        })}
-        inputLabel={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.shardsInputLabel',
-          {
-            defaultMessage: 'Number of shards',
-          }
-        )}
-        description={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.shardsDescription',
-          {
-            defaultMessage:
-              'Control how the index is split across nodes. More shards can improve parallelism but may increase overhead.',
-          }
-        )}
-        setting={settings['index.number_of_shards']}
-        isInvalid={
-          settings['index.number_of_shards'] &&
-          isInvalidInteger(settings['index.number_of_shards'].value)
-        }
-        onChange={(value) => {
-          if (value.length === 0) {
-            setSettings((prev) => omit(prev, 'index.number_of_shards'));
-          } else {
-            setSettings((prev) => ({
-              ...prev,
-              'index.number_of_shards': { value, from: definition.stream.name },
-            }));
-          }
-        }}
-      />
+      {isServerless ? null : (
+        <>
+          <SettingRow
+            definition={definition}
+            label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.shardsLabel', {
+              defaultMessage: 'Shards',
+            })}
+            inputLabel={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.shardsInputLabel',
+              {
+                defaultMessage: 'Number of shards',
+              }
+            )}
+            description={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.shardsDescription',
+              {
+                defaultMessage:
+                  'Control how the index is split across nodes. More shards can improve parallelism but may increase overhead.',
+              }
+            )}
+            setting={settings['index.number_of_shards']}
+            isInvalid={settings['index.number_of_shards']?.invalid}
+            onChange={(value) => {
+              if (value.length === 0) {
+                setSettings((prev) => omit(prev, 'index.number_of_shards'));
+              } else {
+                const invalid = !!value && isInvalidInteger(value);
+                setSettings((prev) => ({
+                  ...prev,
+                  'index.number_of_shards': { value, invalid, from: definition.stream.name },
+                }));
+              }
+            }}
+            onReset={() => onReset('index.number_of_shards')}
+          />
 
-      <EuiHorizontalRule margin="m" />
+          <EuiHorizontalRule margin="m" />
 
-      <SettingRow
-        definition={definition}
-        label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.replicasLabel', {
-          defaultMessage: 'Replicas',
-        })}
-        inputLabel={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.replicasInputLabel',
-          {
-            defaultMessage: 'Number of replicas',
-          }
-        )}
-        description={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.replicasDescription',
-          {
-            defaultMessage:
-              'Define how many copies of the data exist. More replicas improve resilience and read performance but increase storage usage.',
-          }
-        )}
-        setting={settings['index.number_of_replicas']}
-        isInvalid={
-          settings['index.number_of_replicas'] &&
-          isInvalidInteger(settings['index.number_of_replicas'].value)
-        }
-        onChange={(value) => {
-          if (value.length === 0) {
-            setSettings((prev) => omit(prev, 'index.number_of_replicas'));
-          } else {
-            setSettings((prev) => ({
-              ...prev,
-              'index.number_of_replicas': { value, from: definition.stream.name },
-            }));
-          }
-        }}
-      />
+          <SettingRow
+            definition={definition}
+            label={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.replicasLabel',
+              {
+                defaultMessage: 'Replicas',
+              }
+            )}
+            inputLabel={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.replicasInputLabel',
+              {
+                defaultMessage: 'Number of replicas',
+              }
+            )}
+            description={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.replicasDescription',
+              {
+                defaultMessage:
+                  'Define how many copies of the data exist. More replicas improve resilience and read performance but increase storage usage.',
+              }
+            )}
+            setting={settings['index.number_of_replicas']}
+            isInvalid={settings['index.number_of_replicas']?.invalid}
+            onChange={(value) => {
+              if (value.length === 0) {
+                setSettings((prev) => omit(prev, 'index.number_of_replicas'));
+              } else {
+                const invalid = !!value && isInvalidInteger(value);
+                setSettings((prev) => ({
+                  ...prev,
+                  'index.number_of_replicas': { value, invalid, from: definition.stream.name },
+                }));
+              }
+            }}
+            onReset={() => onReset('index.number_of_replicas')}
+          />
 
-      <EuiHorizontalRule />
+          <EuiHorizontalRule />
+        </>
+      )}
 
       <SettingRow
         definition={definition}
@@ -223,27 +262,40 @@ export function Settings({
           }
         )}
         setting={settings['index.refresh_interval']}
-        isInvalid={false}
+        isInvalid={settings['index.refresh_interval']?.invalid}
         valueDescription="Accepts time values like 5s, 30s, 1m. Set to -1 to disable."
         onChange={(value) => {
           if (value.length === 0) {
             setSettings((prev) => omit(prev, 'index.refresh_interval'));
           } else {
+            const invalid = !!value && !parseDuration(value) && Number(value) !== -1;
             setSettings((prev) => ({
               ...prev,
-              'index.refresh_interval': { value, from: definition.stream.name },
+              'index.refresh_interval': { value, invalid, from: definition.stream.name },
             }));
           }
         }}
+        onReset={() => onReset('index.refresh_interval')}
       />
 
       <EuiHorizontalRule />
 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            isDisabled={!hasChanges || isUpdating}
+            onClick={() => setSettings(toStringValues(definition.effective_settings))}
+          >
+            {i18n.translate('xpack.streams.streamDetailView.cancelChangesButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiButton
-            isLoading={isUpdating}
-            isDisabled={!hasChanges}
+            isLoading={isUpdating || isLoadingDefinition}
+            isDisabled={!hasChanges || isLoadingDefinition}
             color="primary"
             fill
             onClick={updateSettings}
@@ -258,19 +310,27 @@ export function Settings({
   );
 }
 
-const prepareSettings = (input: Record<string, { value: string }>): IngestStreamSettings => {
+const prepareSettings = (
+  definition: Streams.ingest.all.GetResponse,
+  input: Record<string, { value: string; from?: string }>
+): IngestStreamSettings => {
+  const isInherited = (name: string) => {
+    const val = input[name];
+    return val && val.from && val.from !== definition.stream.name;
+  };
+
   const settings: IngestStreamSettings = {};
-  if (input['index.number_of_shards']) {
+  if (input['index.number_of_shards'] && !isInherited('index.number_of_shards')) {
     settings['index.number_of_shards'] = { value: Number(input['index.number_of_shards'].value) };
   }
 
-  if (input['index.number_of_replicas']) {
+  if (input['index.number_of_replicas'] && !isInherited('index.number_of_replicas')) {
     settings['index.number_of_replicas'] = {
       value: Number(input['index.number_of_replicas'].value),
     };
   }
 
-  if (input['index.refresh_interval']) {
+  if (input['index.refresh_interval'] && !isInherited('index.refresh_interval')) {
     const value = input['index.refresh_interval'].value;
     if (Number(value) === -1) {
       settings['index.refresh_interval'] = { value: -1 };
@@ -291,15 +351,18 @@ function SettingRow({
   valueDescription,
   isInvalid,
   onChange,
+  onReset,
 }: {
   definition: Streams.ingest.all.GetResponse;
   label: string;
   inputLabel: string;
   description: string;
+  originalSetting?: { value: string; from?: string };
   setting?: { value: string; from?: string };
   valueDescription?: string;
   isInvalid: boolean;
   onChange: (value: string) => void;
+  onReset: () => void;
 }) {
   return (
     <Row
@@ -316,20 +379,38 @@ function SettingRow({
               />
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="xs">
-              {!setting?.from ? null : setting.from === definition.stream.name ? (
-                <>
-                  Local override. <EuiLink onClick={() => onChange('')}>Reset to default</EuiLink>
-                </>
-              ) : (
-                <>
-                  Inherited from <LinkToStream name={setting.from} />
-                </>
-              )}
-              {valueDescription}
-            </EuiText>
-          </EuiFlexItem>
+
+          <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexItem>
+              <EuiText color="subdued" size="xs">
+                {valueDescription}
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiText color="subdued" size="xs">
+                {!setting?.from ? null : setting.from === definition.stream.name ? (
+                  <p>
+                    {i18n.translate('xpack.streams.streamDetailView.localOverride', {
+                      defaultMessage: 'Local override. ',
+                    })}
+                    <EuiLink onClick={() => onReset()}>
+                      {i18n.translate('xpack.streams.streamDetailView.resetToDefault', {
+                        defaultMessage: 'Reset to default',
+                      })}
+                    </EuiLink>
+                  </p>
+                ) : (
+                  <p>
+                    {i18n.translate('xpack.streams.streamDetailView.inheritedFrom', {
+                      defaultMessage: 'Inherited from ',
+                    })}
+                    <LinkToStream name={setting.from} />
+                  </p>
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       }
     />
@@ -366,12 +447,9 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
   } = useKibana();
   const { euiTheme } = useEuiTheme();
   const [showModal, setShowModal] = useState(false);
-  const [streamName, setStreamName] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const abortController = useAbortController();
   const deleteStream = useCallback(async () => {
-    setIsDeleting(true);
     await streamsRepositoryClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
@@ -382,79 +460,12 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
   return (
     <>
       {showModal ? (
-        <EuiModal onClose={() => setShowModal(false)}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
-                defaultMessage: 'Delete {stream} ?',
-                values: { stream: definition.stream.name },
-              })}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
-                  defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents."
-                  values={{
-                    stream: (
-                      <EuiLink
-                        onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                          e.currentTarget.blur();
-                          copyToClipboard(definition.stream.name);
-                        }}
-                      >
-                        {definition.stream.name} <EuiIcon type="copy" />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-            />
-
-            <EuiSpacer size="m" />
-
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
-                'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel',
-                {
-                  defaultMessage: 'Type the stream name to confirm',
-                }
-              )}
-            >
-              <EuiFieldText
-                onChange={(e) => setStreamName(e.target.value)}
-                fullWidth
-                name={'stream-name-deletion'}
-              />
-            </EuiFormRow>
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => setShowModal(false)}>
-              {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-
-            <EuiButton
-              isDisabled={streamName !== definition.stream.name}
-              isLoading={isDeleting}
-              color="danger"
-              onClick={() => deleteStream()}
-              fill
-            >
-              {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
-                defaultMessage: 'Delete',
-              })}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+        <StreamDeleteModal
+          name={definition.stream.name}
+          onClose={() => setShowModal(false)}
+          onCancel={() => setShowModal(false)}
+          onDelete={deleteStream}
+        />
       ) : null}
 
       <EuiPanel

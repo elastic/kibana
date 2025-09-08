@@ -140,14 +140,7 @@ export function RoutingStreamEntry({
             onConditionChange={(cond) => onChange({ where: cond })}
             onStatusChange={(status) => onChange({ status })}
           />
-          <EditRoutingRuleControls
-            relatedStreams={availableStreams.filter(
-              (streamName) =>
-                streamName === routingRule.destination ||
-                isDescendantOf(routingRule.destination, streamName)
-            )}
-            routingRule={routingRule}
-          />
+          <EditRoutingRuleControls routingRule={routingRule} />
         </EuiFlexGroup>
       )}
     </EuiPanel>
