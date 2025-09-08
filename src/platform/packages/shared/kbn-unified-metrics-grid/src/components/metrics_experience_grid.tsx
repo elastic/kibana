@@ -57,6 +57,8 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange,
     onValuesChange,
     onPageChange,
+    onClearValues,
+    onClearAllDimensions,
   } = useMetricsGridState();
 
   const { getTimeRange, updateTimeRange } = requestParams;
@@ -133,6 +135,7 @@ export const MetricsExperienceGrid = ({
         fields={fields}
         onChange={onDimensionsChange}
         selectedDimensions={dimensions}
+        onClear={onClearAllDimensions}
       />,
       dimensions.length > 0 ? (
         <ValuesSelector
@@ -142,6 +145,7 @@ export const MetricsExperienceGrid = ({
           disabled={dimensions.length === 0}
           indices={[indexPattern]}
           timeRange={getTimeRange()}
+          onClear={onClearValues}
         />
       ) : null,
     ],
@@ -150,6 +154,8 @@ export const MetricsExperienceGrid = ({
       fields,
       getTimeRange,
       indexPattern,
+      onClearAllDimensions,
+      onClearValues,
       onDimensionsChange,
       onValuesChange,
       renderToggleActions,
