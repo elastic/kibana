@@ -40,8 +40,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
 
   it('returns lens attributes with correct basic structure, datasource, column, and visualization configurations', () => {
     const result = getAlertFilteringMetricLensAttributes(defaultArgs);
-
-    // Basic structure
     expect(result).toEqual(
       expect.objectContaining({
         description: '',
@@ -51,8 +49,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         updated_at: '2025-07-21T15:51:38.660Z',
       })
     );
-
-    // State structure
     expect(result.state).toEqual(
       expect.objectContaining({
         adHocDataViews: {},
@@ -77,8 +73,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
 
   it('handles column configurations, visualization, references, filters, and parameter variations correctly', () => {
     const result = getAlertFilteringMetricLensAttributes(defaultArgs);
-
-    // Column configurations
     const layer = result.state.datasourceStates.formBased?.layers.unifiedHistogram;
     expect(layer?.columns).toEqual(
       expect.objectContaining({
@@ -123,8 +117,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         }),
       })
     );
-
-    // Visualization configuration
     expect(result.state.visualization).toEqual(
       expect.objectContaining({
         icon: 'visLine',
@@ -137,8 +129,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         showBar: false,
       })
     );
-
-    // References
     expect(result.references).toEqual([
       {
         id: '{dataViewId}',
@@ -151,13 +141,9 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         type: 'index-pattern',
       },
     ]);
-
-    // Test filters and parameter variations
     const mockFilters = [
       { meta: { alias: 'test filter', disabled: false, negate: false } },
     ] as ExtraOptions['filters'];
-
-    // Test different filter scenarios
     expect(getAlertFilteringMetricLensAttributes(defaultArgs).state.filters).toEqual([]);
     expect(
       getAlertFilteringMetricLensAttributes({ ...defaultArgs, extraOptions: {} }).state.filters
@@ -168,8 +154,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         extraOptions: { filters: mockFilters },
       }).state.filters
     ).toEqual(mockFilters);
-
-    // Test various totalAlerts values
     const testCases = [500, 0, 1000000];
     testCases.forEach((totalAlerts) => {
       const testResult = getAlertFilteringMetricLensAttributes({ ...defaultArgs, totalAlerts });
@@ -184,8 +168,6 @@ describe('getAlertFilteringMetricLensAttributes', () => {
       expect(testMathColumn?.params.tinymathAst.args).toEqual(['countColumnX0', totalAlerts]);
       expect(testMathColumn?.params.tinymathAst.text).toBe(`count()/${totalAlerts}`);
     });
-
-    // Test extraOptions with multiple properties
     const extraOptions: ExtraOptions = {
       breakdownField: 'test.field',
       dnsIsPtrIncluded: true,

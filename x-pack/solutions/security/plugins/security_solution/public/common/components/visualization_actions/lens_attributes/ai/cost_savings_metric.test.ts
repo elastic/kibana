@@ -21,7 +21,6 @@ describe('getCostSavingsMetricLensAttributes', () => {
   };
 
   it('returns correct lens attributes with formula and filter handling', () => {
-    // Test formula calculation
     const result = getCostSavingsMetricLensAttributes({
       ...defaultParams,
       minutesPerAlert: 10,
@@ -32,14 +31,10 @@ describe('getCostSavingsMetricLensAttributes', () => {
     expect(countColumn?.operationType).toBe('formula');
     // @ts-ignore
     expect(countColumn?.params.formula).toBe('count() * ((10/60)*100)');
-
-    // Test basic properties
     expect(result).toHaveProperty('title', 'Cost Savings Metric');
     expect(result).toHaveProperty('visualizationType', 'lnsMetric');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');
-
-    // Test filter handling
     const filters = [{ query: { match_all: {} }, meta: {} }];
     const resultWithFilters = getCostSavingsMetricLensAttributes({
       ...defaultParams,

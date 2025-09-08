@@ -32,8 +32,6 @@ describe('getAlertProcessingDonutAttributes', () => {
 
   it('returns lens attributes with correct basic structure, visualization, and layer configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    // Basic structure
     expect(result).toEqual(
       expect.objectContaining({
         title: 'Alerts',
@@ -42,8 +40,6 @@ describe('getAlertProcessingDonutAttributes', () => {
         references: [],
       })
     );
-
-    // State structure
     expect(result.state).toEqual(
       expect.objectContaining({
         visualization: expect.any(Object),
@@ -54,8 +50,6 @@ describe('getAlertProcessingDonutAttributes', () => {
         adHocDataViews: expect.any(Object),
       })
     );
-
-    // Visualization and layer configuration
     const visualization = result.state.visualization as unknown as WithLayers;
     expect(visualization).toEqual(
       expect.objectContaining({
@@ -82,8 +76,6 @@ describe('getAlertProcessingDonutAttributes', () => {
 
   it('returns lens attributes with correct color mapping, datasource, column, and data view configurations', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    // Color mapping configuration
     const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
       .colorMapping as Record<string, unknown>;
     expect(colorMapping).toEqual(
@@ -111,8 +103,6 @@ describe('getAlertProcessingDonutAttributes', () => {
         ]),
       })
     );
-
-    // Datasource states and column configurations
     const datasourceStates = result.state.datasourceStates;
     expect(datasourceStates).toEqual(
       expect.objectContaining({
@@ -155,8 +145,6 @@ describe('getAlertProcessingDonutAttributes', () => {
         }),
       })
     );
-
-    // Internal references and data view configuration
     expect(result.state.internalReferences).toEqual([
       {
         id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
@@ -185,8 +173,6 @@ describe('getAlertProcessingDonutAttributes', () => {
 
   it('handles runtime field configuration, parameter variations, and extraOptions correctly', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    // Runtime field configuration
     const runtimeFieldMap = (
       result.state.adHocDataViews?.[
         'db828b69-bb21-4b92-bc33-56e3b01da790'
@@ -201,8 +187,6 @@ describe('getAlertProcessingDonutAttributes', () => {
     expect(script?.source).toContain(JSON.stringify(defaultAttackAlertIds));
     expect(script?.source).toContain('emit("Escalated")');
     expect(script?.source).toContain('emit("AI Filtered")');
-
-    // Test various attackAlertIds and spaceId configurations
     const testCases = [
       { attackAlertIds: ['different-alert-1', 'different-alert-2'], spaceId: 'custom-space' },
       { attackAlertIds: [], spaceId: 'space-with-special-chars-123' },
@@ -228,8 +212,6 @@ describe('getAlertProcessingDonutAttributes', () => {
       expect(dataView?.name).toBe(`.alerts-security.alerts-${spaceId}`);
       expect(dataView?.title).toBe(`.alerts-security.alerts-${spaceId}`);
     });
-
-    // Test extraOptions (function doesn't use it, so filters should remain empty)
     const extraOptions: ExtraOptions = {
       breakdownField: 'test.field',
       dnsIsPtrIncluded: true,

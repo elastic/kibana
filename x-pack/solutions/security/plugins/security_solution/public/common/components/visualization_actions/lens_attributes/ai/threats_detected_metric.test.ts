@@ -20,8 +20,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
 
   it('returns lens attributes with correct basic structure, state, and query configuration', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
-
-    // Basic structure
     expect(result).toEqual(
       expect.objectContaining({
         description: '',
@@ -32,8 +30,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
         references: [],
       })
     );
-
-    // State structure
     expect(result.state).toEqual(
       expect.objectContaining({
         adHocDataViews: expect.any(Object),
@@ -48,8 +44,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
 
   it('handles visualization, datasource, column configurations, and parameter variations correctly', () => {
     const result = getThreatsDetectedMetricLensAttributes(defaultArgs);
-
-    // Visualization configuration
     expect(result.state.visualization).toEqual(
       expect.objectContaining({
         icon: 'crosshairs',
@@ -62,8 +56,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
         showBar: false,
       })
     );
-
-    // Datasource states and column configuration
     const datasourceStates = result.state.datasourceStates;
     expect(datasourceStates).toEqual(
       expect.objectContaining({
@@ -91,8 +83,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
         }),
       })
     );
-
-    // Internal references and data view configuration
     expect(result.state.internalReferences).toEqual([
       {
         id: '99d292f8-524f-4aad-9e37-81c17f8331fb',
@@ -121,8 +111,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
         }),
       })
     );
-
-    // Test various spaceId configurations and unused parameters
     const spaceIdTestCases = [
       defaultSpaceId,
       'custom-space',
@@ -142,8 +130,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
       expect(testDataView?.name).toBe(expectedName);
       expect(testDataView?.title).toBe(expectedName);
     });
-
-    // Test unused parameters don't affect the result
     const extraOptions: ExtraOptions = {
       breakdownField: 'test.field',
       dnsIsPtrIncluded: true,
@@ -170,8 +156,6 @@ describe('getThreatsDetectedMetricLensAttributes', () => {
     expect(getThreatsDetectedMetricLensAttributes({ ...defaultArgs, euiTheme }).title).toBe(
       'Real threats detected'
     );
-
-    // Test with all parameters provided
     const resultWithAllParams = getThreatsDetectedMetricLensAttributes({
       euiTheme,
       spaceId: 'test-space',
