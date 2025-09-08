@@ -21,12 +21,10 @@
     "@kbn/chart-icons",
     "@kbn/esql-utils",
     "@kbn/data-plugin",
-    "@kbn/expressions-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/data-views-plugin",
     "@kbn/lens-plugin",
     "@kbn/esql-composer",
     "@kbn/shared-ux-toolbar-selector",
-    "@kbn/esql-editor"
   ]
 }
