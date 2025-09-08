@@ -59,7 +59,7 @@ export async function deleteAllEntitySnapshotIndices({
     expand_wildcards: 'all',
   });
   const indexNames = Object.keys(response);
-  indexNames.forEach((name) => {
+  const promises = indexNames.map((name) =>
     esClient.indices.delete(
       {
         index: name,
@@ -68,6 +68,7 @@ export async function deleteAllEntitySnapshotIndices({
       {
         ignore: [404],
       }
-    );
-  });
+    )
+  );
+  await Promise.all(promises);
 }

@@ -62,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
         await dataView.delete('security-solution');
       });
 
-      it('KUBA Should perform snapshot task', async () => {
+      it('Should perform snapshot task', async () => {
         const hostName: string = 'create-a-daily-snapshot';
         const testDocs = [
           { name: hostName, ip: '1.1.1.1' },

@@ -34,7 +34,7 @@ function getTaskId(namespace: string, entityType: EntityType): string {
   return `${TYPE}:${entityType}:${namespace}:${VERSION}`;
 }
 
-export async function registerEntityStoreSnapshotTask({
+export function registerEntityStoreSnapshotTask({
   getStartServices,
   logger,
   telemetry,
@@ -44,15 +44,18 @@ export async function registerEntityStoreSnapshotTask({
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
-}): Promise<void> {
+}): void {
   if (!taskManager) {
     logger.warn(
       '[Entity Store]  Task Manager is unavailable; skipping Entity Store snapshot task registration'
     );
     return;
   }
-  const [coreStart, _] = await getStartServices();
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+  const esClientGetter = async (): Promise<ElasticsearchClient> => {
+    const [coreStart, _] = await getStartServices();
+    return coreStart.elasticsearch.client.asInternalUser;
+  };
 
   taskManager.registerTaskDefinitions({
     [TYPE]: {
@@ -68,7 +71,7 @@ export async function registerEntityStoreSnapshotTask({
               logger,
               telemetry,
               context,
-              esClient,
+              esClientGetter,
             });
           },
           async cancel() {},
@@ -139,12 +142,12 @@ export async function runTask({
   logger,
   telemetry,
   context,
-  esClient,
+  esClientGetter,
 }: {
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   context: RunContext;
-  esClient: ElasticsearchClient;
+  esClientGetter: () => Promise<ElasticsearchClient>;
 }): Promise<{
   state: EntityStoreFieldRetentionTaskState;
 }> {
@@ -152,6 +155,7 @@ export async function runTask({
   const taskId = context.taskInstance.id;
   const log = entityStoreTaskLogFactory(logger, taskId);
   const debugLog = entityStoreTaskDebugLogFactory(logger, taskId);
+  const esClient = await esClientGetter();
   try {
     const taskStartTime = moment().utc();
     const snapshotDate = rewindToYesterday(taskStartTime.toDate());
