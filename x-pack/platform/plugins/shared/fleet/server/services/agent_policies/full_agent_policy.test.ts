@@ -2481,7 +2481,7 @@ describe('generateOtelcolConfig', () => {
         "forward": {},
       },
       exporters: {
-        elasticsearch: {
+        "elasticsearch/default": {
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -2494,7 +2494,7 @@ describe('generateOtelcolConfig', () => {
           },
           metrics: {
             receivers: ["forward"],
-            exporters: ["elasticsearch"],
+            exporters: ["elasticsearch/default"],
           },
         },
       },
@@ -2524,7 +2524,7 @@ describe('generateOtelcolConfig', () => {
         "forward": {},
       },
       exporters: {
-        elasticsearch: {
+        "elasticsearch/default": {
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -2537,7 +2537,7 @@ describe('generateOtelcolConfig', () => {
           },
           metrics: {
             receivers: ["forward"],
-            exporters: ["elasticsearch"],
+            exporters: ["elasticsearch/default"],
           },
         },
       },
@@ -2579,7 +2579,7 @@ describe('generateOtelcolConfig', () => {
         "forward": {},
       },
       exporters: {
-        elasticsearch: {
+        "elasticsearch/default": {
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -2597,7 +2597,7 @@ describe('generateOtelcolConfig', () => {
           },
           metrics: {
             receivers: ["forward"],
-            exporters: ["elasticsearch"],
+            exporters: ["elasticsearch/default"],
           },
         },
       },

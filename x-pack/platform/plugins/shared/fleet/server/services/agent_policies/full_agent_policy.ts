@@ -1038,7 +1038,7 @@ function generateExporter(dataOutput: Output) {
   case "elasticsearch":
   case "remote_elasticsearch":
     return {
-      "elasticsearch": {
+      [`elasticsearch/${dataOutput.id}`]: {
         "endpoints": dataOutput.hosts,
         // TODO: Add secrets.
       },
