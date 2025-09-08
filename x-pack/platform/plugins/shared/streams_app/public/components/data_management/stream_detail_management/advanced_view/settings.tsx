@@ -23,11 +23,11 @@ import {
 import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { LinkToStream } from '../../stream_detail_lifecycle/modal';
 import { getFormattedError } from '../../../../util/errors';
-import { parseDuration } from '../../stream_detail_lifecycle/helpers';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { Row, RowMetadata } from './row';
+import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
+import { LinkToStream } from '../../stream_detail_lifecycle/general_data/modal';
 
 interface Setting {
   default: boolean;
