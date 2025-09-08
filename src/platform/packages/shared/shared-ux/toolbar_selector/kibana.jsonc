@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/shared-ux-toolbar-selector",
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "platform",
+  "visibility": "shared"
+}
