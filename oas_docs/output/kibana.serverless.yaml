@@ -10992,7 +10992,7 @@ paths:
           name: product_name
   /api/endpoint/action/cancel:
     post:
-      description: Cancel a running or pending response action.
+      description: Cancel a running or pending response action (Applies only to some agent types).
       operationId: CancelAction
       requestBody:
         content:
