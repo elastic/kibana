@@ -70,7 +70,6 @@ const meta: Meta<GraphCenteringStoryProps> = {
 export default meta;
 type Story = StoryObj<GraphCenteringStoryProps>;
 
-// Helper for regular entity nodes (never origin / origin alert)
 const createEntityNode = ({
   id,
   shape = 'ellipse',
@@ -85,7 +84,6 @@ const createEntityNode = ({
     label: `Entity ${id}`,
     color,
     shape,
-    // entity nodes should NOT have origin flags
     isOrigin: false,
     isOriginAlert: false,
     icon:
@@ -98,7 +96,6 @@ const createEntityNode = ({
         : 'globe',
   } as NodeViewModel);
 
-// Helper for label nodes that can be either origin or origin alert
 const createLabelNode = ({
   id,
   isOrigin = false,
