@@ -29,25 +29,26 @@ const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analys
   return (
     <EuiText
       size="xs"
-      className="valueReportSettings"
       css={css`
         padding: ${size.base};
       `}
     >
-      <h3>{i18n.COST_CALCULATIONS}</h3>
-      <p>
-        {i18n.COST_CALCULATION({ minutesPerAlert, analystHourlyRate })}{' '}
-        <EuiLink onClick={goToKibanaSettings}>
-          {i18n.CHANGE_RATE}
-          <EuiIcon
-            type="popout"
-            size="s"
-            css={css`
-              margin-left: 4px;
-            `}
-          />
-        </EuiLink>
-      </p>
+      <span className="valueReportSettings">
+        <h3>{i18n.COST_CALCULATIONS}</h3>
+        <p>
+          {i18n.COST_CALCULATION({ minutesPerAlert, analystHourlyRate })}{' '}
+          <EuiLink onClick={goToKibanaSettings}>
+            {i18n.CHANGE_RATE}
+            <EuiIcon
+              type="popout"
+              size="s"
+              css={css`
+                margin-left: 4px;
+              `}
+            />
+          </EuiLink>
+        </p>
+      </span>
       <p>{i18n.LEGAL_DISCLAIMER}</p>
     </EuiText>
   );
