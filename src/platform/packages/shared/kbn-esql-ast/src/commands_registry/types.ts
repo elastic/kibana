@@ -188,7 +188,7 @@ export enum Location {
   STATS_WHERE = 'stats_where',
 
   /**
-   * WHEN TS is used as a source command, inner STATS functions
+   * WHEN TS is used as a source command, and we are within an aggregation function
    */
   STATS_TIMESERIES = 'stats_timeseries',
 
@@ -212,6 +212,11 @@ export enum Location {
    * In RENAME (used only for AS)
    */
   RENAME = 'rename',
+
+  /**
+   * In the RERANK command
+   */
+  RERANK = 'rerank',
 
   /**
    * In the JOIN command (used only for AS)
@@ -244,6 +249,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  rerank: Location.RERANK,
 };
 
 /**
