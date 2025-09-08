@@ -1050,7 +1050,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorPrimary);
+        ).toBe(euiThemeVars.euiColorVis2);
 
         expect(
           (
