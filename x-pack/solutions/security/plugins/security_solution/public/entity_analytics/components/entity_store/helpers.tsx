@@ -19,7 +19,7 @@ export const getEntityType = (record: Entity): EntityType => {
   // Looking at `entity.type` to keep backward compatibility
   const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
 
-  if (Object.keys(EntityType).indexOf(entityType) < 0) {
+  if (!entityType || Object.keys(EntityType).indexOf(entityType) < 0) {
     throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
   }
 

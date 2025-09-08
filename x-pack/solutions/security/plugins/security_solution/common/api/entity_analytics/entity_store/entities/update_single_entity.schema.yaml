@@ -42,7 +42,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CRUDEntity'
+              $ref: './common.schema.yaml#/components/schemas/Entity'
       responses:
         '404':
           description: Entity not found
@@ -55,4 +55,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './common.schema.yaml#/components/schemas/CRUDEntity'
+                $ref: './common.schema.yaml#/components/schemas/Entity'

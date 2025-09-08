@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CRUDEntity } from '../../../../../common/api/entity_analytics/entity_store/entities';
+import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities';
 
 const nestedFields = ['attributes', 'lifecycle', 'behavior'];
 const immutableFields = ['id'];
 
-export const buildUpdateEntityPainlessScript = (doc: CRUDEntity) => {
+export const buildUpdateEntityPainlessScript = (doc: Entity) => {
   let script = ``;
   // all defined attributes that are not nested
   const attributes = Object.keys(doc.entity).filter(
@@ -46,11 +46,11 @@ export const buildUpdateEntityPainlessScript = (doc: CRUDEntity) => {
   return script;
 };
 
-function getEntityVal(doc: CRUDEntity, key: string) {
+function getEntityVal(doc: Entity, key: string) {
   return doc.entity[key as keyof typeof doc.entity];
 }
 
-function getNestedEntityVal(doc: CRUDEntity, key: string, nestedKey: string) {
+function getNestedEntityVal(doc: Entity, key: string, nestedKey: string) {
   const nested = getEntityVal(doc, key);
   if (!(nested instanceof Object)) {
     return;
