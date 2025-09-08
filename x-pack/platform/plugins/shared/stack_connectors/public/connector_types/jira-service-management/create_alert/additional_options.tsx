@@ -12,6 +12,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
+import { OptionalFieldLabel } from '../../../common/optional_field_label';
 import * as i18n from './translations';
 import type { CreateAlertProps } from '.';
 
@@ -37,6 +38,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
             label={i18n.ENTITY_FIELD_LABEL}
             helpText={i18n.JIRA_SERVICE_MANAGEMENT_ENTITY_HELP}
             aria-label={i18n.ENTITY_FIELD_LABEL}
+            labelAppend={OptionalFieldLabel}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -54,6 +56,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
             label={i18n.SOURCE_FIELD_LABEL}
             helpText={i18n.JIRA_SERVICE_MANAGEMENT_SOURCE_HELP}
             aria-label={i18n.SOURCE_FIELD_LABEL}
+            labelAppend={OptionalFieldLabel}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -72,6 +75,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
         label={i18n.USER_FIELD_LABEL}
         helpText={i18n.JIRA_SERVICE_MANAGEMENT_USER_HELP}
         aria-label={i18n.USER_FIELD_LABEL}
+        labelAppend={OptionalFieldLabel}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -88,6 +92,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
         paramsProperty={'note'}
         inputTargetValue={subActionParams?.note}
         label={i18n.NOTE_FIELD_LABEL}
+        isOptionalField
       />
     </>
   );

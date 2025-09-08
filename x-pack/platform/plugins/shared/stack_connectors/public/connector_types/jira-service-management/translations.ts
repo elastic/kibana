@@ -82,13 +82,6 @@ export const MORE_OPTIONS = i18n.translate(
   }
 );
 
-export const HIDE_OPTIONS = i18n.translate(
-  'xpack.stackConnectors.components.jiraServiceManagement.hideOptions',
-  {
-    defaultMessage: 'Hide options',
-  }
-);
-
 export const USER_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.jiraServiceManagement.userLabel',
   {
@@ -142,12 +135,5 @@ export const JIRA_SERVICE_MANAGEMENT_USER_HELP = i18n.translate(
   'xpack.stackConnectors.components.jiraServiceManagement.fieldUserHelpText',
   {
     defaultMessage: 'The display name for the owner.',
-  }
-);
-
-export const REQUIRED_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.jiraServiceManagement.fieldRequiredLabel',
-  {
-    defaultMessage: 'Required',
   }
 );

@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 
 interface DisplayMoreOptionsProps {
@@ -22,12 +23,15 @@ const DisplayMoreOptionsComponent: React.FC<DisplayMoreOptionsProps> = ({
     <EuiButtonEmpty
       color="primary"
       iconSide="right"
-      iconType={showingMoreOptions ? 'arrowUp' : 'arrowDown'}
+      iconType={showingMoreOptions ? 'arrowDown' : 'arrowRight'}
       flush="left"
       onClick={toggleShowingMoreOptions}
       data-test-subj="jsm-display-more-options"
+      css={css`
+        align-self: start;
+      `}
     >
-      {showingMoreOptions ? i18n.HIDE_OPTIONS : i18n.MORE_OPTIONS}
+      {i18n.MORE_OPTIONS}
     </EuiButtonEmpty>
   );
 };

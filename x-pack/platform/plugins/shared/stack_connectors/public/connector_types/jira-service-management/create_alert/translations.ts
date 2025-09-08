@@ -125,10 +125,3 @@ export const RULE_TAGS_DESCRIPTION = i18n.translate(
     defaultMessage: 'The tags of the rule.',
   }
 );
-
-export const REQUIRED_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.jiraServiceManagement.requiredLabel',
-  {
-    defaultMessage: 'Required',
-  }
-);

@@ -12,7 +12,7 @@ import {
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RecursivePartial } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { DisplayMoreOptions } from './display_more_options';
 import type {
   JiraServiceManagementActionParams,
@@ -115,11 +115,6 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         isInvalid={isAliasInvalid}
         label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.JIRA_SERVICE_MANAGEMENT_ALIAS_HELP}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.REQUIRED_LABEL}
-          </EuiText>
-        }
       >
         <TextFieldWithMessageVariables
           index={index}

@@ -193,6 +193,11 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
             subActionParams={subActionParams}
             showSaveError={showSaveError}
           />
+          <EuiSpacer size={'m'} />
+          <DisplayMoreOptions
+            showingMoreOptions={showingMoreOptions}
+            toggleShowingMoreOptions={toggleShowingMoreOptions}
+          />
           {showingMoreOptions ? (
             <AdditionalOptions
               subActionParams={subActionParams}
@@ -201,11 +206,6 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
               index={index}
             />
           ) : null}
-          <EuiSpacer size={'m'} />
-          <DisplayMoreOptions
-            showingMoreOptions={showingMoreOptions}
-            toggleShowingMoreOptions={toggleShowingMoreOptions}
-          />
         </>
       )}
     </>
