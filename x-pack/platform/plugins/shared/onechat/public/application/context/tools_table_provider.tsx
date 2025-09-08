@@ -92,7 +92,10 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
 
   const cloneTool = useCallback(
     (toolId: string, toolType: ToolType) => {
-      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+      navigateToOnechatUrl(appPaths.tools.new, {
+        [TOOL_SOURCE_QUERY_PARAM]: toolId,
+        [TOOL_TYPE_QUERY_PARAM]: toolType,
+      });
     },
     [navigateToOnechatUrl]
   );
