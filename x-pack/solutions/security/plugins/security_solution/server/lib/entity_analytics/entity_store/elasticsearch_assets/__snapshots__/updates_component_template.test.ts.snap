@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildPriorityUpdateComponentTemplate matches snapshot 1`] = `
+exports[`buildUpdatesComponentTemplate matches snapshot 1`] = `
 Object {
-  "name": "security_host_default-priority-update@platform",
+  "name": "security_host_default-updates@platform",
   "template": Object {
     "mappings": Object {
       "properties": Object {
@@ -17,9 +17,6 @@ Object {
         },
         "host.domain": Object {
           "type": "keyword",
-        },
-        "host.entity.Metadata.priority": Object {
-          "type": "integer",
         },
         "host.entity.attributes.Asset": Object {
           "type": "keyword",

@@ -77,7 +77,7 @@ const getDefaultIndexes = (type: string) => {
     stubSecurityDataView.getIndexPattern(),
     '.asset-criticality.asset-criticality-default',
     'risk-score.risk-score-latest-default',
-    `.entities.v1.priority_updates.security_${type}_default`,
+    `.entities.v1.updates.security_${type}_default`,
   ];
 };
 

@@ -7,14 +7,14 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  ENTITY_PRIORITY_UPDATES,
+  ENTITY_UPDATES,
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema/src/schema/v1/patterns';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
 import { createEntityIndex, deleteEntityIndex } from './entity_index';
 
-export const createEntityPriorityUpdateIndex = async (
+export const createEntityUpdatesIndex = async (
   entityType: EntityType,
   esClient: ElasticsearchClient,
   namespace: string,
@@ -25,11 +25,11 @@ export const createEntityPriorityUpdateIndex = async (
     esClient,
     namespace,
     logger,
-    indexName: getEntityPriorityUpdateIndexName(entityType, namespace),
+    indexName: getEntityUpdatesIndexName(entityType, namespace),
   });
 };
 
-export const deleteEntityPriorityUpdateIndex = async (
+export const deleteEntityUpdatesIndex = async (
   entityType: EntityType,
   esClient: ElasticsearchClient,
   namespace: string,
@@ -40,14 +40,14 @@ export const deleteEntityPriorityUpdateIndex = async (
     esClient,
     namespace,
     logger,
-    indexName: getEntityPriorityUpdateIndexName(entityType, namespace),
+    indexName: getEntityUpdatesIndexName(entityType, namespace),
   });
 };
 
-export const getEntityPriorityUpdateIndexName = (type: EntityType, namespace: string): string => {
+export const getEntityUpdatesIndexName = (type: EntityType, namespace: string): string => {
   return entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
-    dataset: ENTITY_PRIORITY_UPDATES,
+    dataset: ENTITY_UPDATES,
     definitionId: `security_${type}_${namespace}`,
   });
 };
