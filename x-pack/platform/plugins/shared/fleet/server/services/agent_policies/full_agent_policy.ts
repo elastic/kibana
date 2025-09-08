@@ -930,12 +930,12 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateA
   return attachExporter(config, dataOutput);
 }
 
-function addSuffixToOtelcolComponentsConfig(type: string, components: {[key:string]:any}, suffix: string) {
+function addSuffixToOtelcolComponentsConfig(type: string, components: Record<string, any>, suffix: string) {
   if (!components) {
     return {}
   }
 
-  let generated : {[key:string]:any} = {};
+  let generated : Record<string, any> = {};
   Object.entries(components).forEach(([id, config]) => {
     generated[id + "/" + suffix] = { ...config};
   })
@@ -944,9 +944,9 @@ function addSuffixToOtelcolComponentsConfig(type: string, components: {[key:stri
 }
 
 function addSuffixToOtelcolPipelinesComponents(pipelines: any, suffix: string) {
-  let result : {[key:string]:any} = {};
-  Object.entries(pipelines as {[key:string]:{[key:string]:string[]}}).forEach(([pipelineID,pipeline]) => {
-    let newPipeline : {[key:string]:string[]} = {};
+  let result : Record<string, any> = {};
+  Object.entries(pipelines as Record<string, Record<string, string[]>>).forEach(([pipelineID,pipeline]) => {
+    let newPipeline : Record<string, any> = {};
     Object.entries(pipeline).forEach(([type,componentIDs]) => {
       newPipeline[type] = componentIDs.map((id) => id + "/" + suffix);
     });
