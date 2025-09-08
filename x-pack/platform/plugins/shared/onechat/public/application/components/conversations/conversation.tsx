@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
+import { EuiButtonIcon, EuiResizableContainer, useEuiScrollBar, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -24,7 +24,10 @@ const conversationContainerStyles = css`
   width: 100%;
 `;
 
-const scrollToMostRecentRound = () => {
+const scrollToMostRecentRound = (
+  position: ScrollLogicalPosition,
+  scrollBehavior: ScrollBehavior = 'smooth'
+) => {
   requestAnimationFrame(() => {
     const conversationRoundsElement = document.querySelector(
       '[id="onechatConversationRoundsContainer"]'
@@ -35,8 +38,8 @@ const scrollToMostRecentRound = () => {
         // Get the last round (the user's last message)
         const lastRound = rounds[rounds.length - 1] as HTMLElement;
         lastRound.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
+          behavior: scrollBehavior,
+          block: position,
         });
       }
     }
@@ -46,6 +49,7 @@ const scrollToMostRecentRound = () => {
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
+  const { euiTheme } = useEuiTheme();
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -64,6 +68,13 @@ export const Conversation: React.FC<{}> = () => {
 
   useSyncAgentId();
 
+  const scrollDownButtonStyles = css`
+    position: absolute;
+    bottom: ${euiTheme.size.xl};
+    left: 50%;
+    transform: translateX(-50%);
+  `;
+
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
       {(EuiResizablePanel, EuiResizableButton) => {
@@ -76,6 +87,14 @@ export const Conversation: React.FC<{}> = () => {
                     <ConversationRounds />
                   </div>
                 </div>
+                <EuiButtonIcon
+                  display="base"
+                  size="s"
+                  css={scrollDownButtonStyles}
+                  iconType="arrowDown"
+                  aria-label="Scroll down"
+                  onClick={() => scrollToMostRecentRound('end')}
+                />
               </EuiResizablePanel>
             ) : (
               <EuiResizablePanel initialSize={80}>
@@ -89,7 +108,7 @@ export const Conversation: React.FC<{}> = () => {
               <ConversationInputForm
                 onSubmit={() => {
                   setStickToBottom(false);
-                  scrollToMostRecentRound();
+                  scrollToMostRecentRound('start');
                 }}
               />
             </EuiResizablePanel>
