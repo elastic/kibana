@@ -38,7 +38,7 @@ import { ManifestManager } from './manifest_manager';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
 import {
   createFetchAllArtifactsIterableMock,
@@ -47,6 +47,7 @@ import {
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -863,7 +864,7 @@ describe('ManifestManager', () => {
         tags: ['policy:all'],
       });
       const context = buildManifestManagerContextMock({}, [
-        ProductFeatureSecurityKey.endpointArtifactManagement,
+        ProductFeatureKey.endpointArtifactManagement,
       ]);
       const manifestManager = new ManifestManager(context);
 
@@ -943,8 +944,8 @@ describe('ManifestManager', () => {
         tags: ['policy:all'],
       });
       const context = buildManifestManagerContextMock({}, [
-        ProductFeatureSecurityKey.endpointArtifactManagement,
-        ProductFeatureSecurityKey.endpointHostIsolationExceptions,
+        ProductFeatureKey.endpointArtifactManagement,
+        ProductFeatureKey.endpointHostIsolationExceptions,
       ]);
       const manifestManager = new ManifestManager(context);
 
@@ -1129,6 +1130,15 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({
         experimentalFeatures: ['trustedDevices'],
       });
+      // Set up licensing to allow trusted devices (both PLI and enterprise)
+      context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        return (
+          key === ProductFeatureKey.endpointTrustedDevices ||
+          key === ProductFeatureKey.endpointArtifactManagement
+        );
+      });
+      context.licenseService = createLicenseServiceMock();
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -1224,6 +1234,14 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({
         experimentalFeatures: ['trustedDevices'],
       });
+      context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+        return (
+          key === ProductFeatureKey.endpointTrustedDevices ||
+          key === ProductFeatureKey.endpointArtifactManagement
+        );
+      });
+      context.licenseService = createLicenseServiceMock();
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -2425,6 +2443,178 @@ describe('ManifestManager', () => {
         context.savedObjectsClient.bulkUpdate = jest.fn();
         await manifestManager.bumpGlobalUnifiedManifestVersion();
         expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(0);
+      });
+    });
+  });
+
+  describe('shouldRetrieveExceptions for trusted devices licensing logic', () => {
+    let manifestManager: ManifestManager;
+    let context: ManifestManagerContext;
+
+    beforeEach(() => {
+      context = buildManifestManagerContextMock({});
+    });
+
+    interface ManifestManagerWithPrivateMethods {
+      shouldRetrieveExceptions: (listId: string) => boolean;
+    }
+
+    describe('when trustedDevices feature flag is disabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: [], // No trustedDevices feature
+        });
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('should return false for trusted devices artifacts when feature flag is disabled', () => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true for other artifact types regardless of feature flag', () => {
+        const shouldRetrieveExceptions = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+        const shouldRetrieveTrustedApps = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
+
+        expect(shouldRetrieveExceptions).toBe(true);
+        expect(shouldRetrieveTrustedApps).toBe(true);
+      });
+    });
+
+    describe('when trustedDevices feature flag is enabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: ['trustedDevices'],
+        });
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return false when only PLI is enabled (enterprise required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+
+      test('should return false when only enterprise license is present (PLI required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true when both PLI and enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+      });
+
+      test('should return false when neither PLI nor enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+    });
+
+    describe('host isolation exceptions licensing logic', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return true for host isolation exceptions when product feature is enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointHostIsolationExceptions;
+        });
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+      });
+
+      test('should return false for host isolation exceptions when product feature is disabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+      });
+    });
+
+    describe('default behavior for non-licensed artifacts', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      const nonLicensedArtifacts = [
+        { name: 'exceptions', id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id },
+        { name: 'trusted apps', id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id },
+        { name: 'event filters', id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id },
+        { name: 'blocklists', id: ENDPOINT_ARTIFACT_LISTS.blocklists.id },
+      ];
+
+      test.each(nonLicensedArtifacts)('should return true for $name artifacts', ({ id }) => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(id);
+        expect(shouldRetrieve).toBe(true);
       });
     });
   });
