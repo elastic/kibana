@@ -22,7 +22,7 @@ import type {
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { LensAttributes, LensDatatableDataset } from '../types';
-import type { LensApiState } from '../schema';
+import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type {
@@ -151,8 +151,8 @@ function buildDatasourceStatesLayer(
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
-  function buildValueLayer(config: LensApiState): TextBasedPersistedState['layers'][0] {
-    const table = dataset as unknown as LensDatatableDataset;
+  function buildValueLayer(config: LensApiState, ds: NarrowByType<LensApiState['dataset'], 'table'>): TextBasedPersistedState['layers'][0] {
+    const table = ds.table as LensDatatableDataset;
     const newLayer = {
       table,
       columns: getValueColumns(layer, i),
@@ -171,12 +171,12 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  function buildESQLLayer(config: LensApiState): TextBasedPersistedState['layers'][0] {
+  function buildESQLLayer(config: LensApiState, ds:  NarrowByType<LensApiState['dataset'], 'esql'>): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i) as TextBasedLayerColumn[];
 
     const newLayer = {
       index: index.index,
-      query: { esql: (dataset as any).query } as AggregateQuery,
+      query: { esql: ds.query } as AggregateQuery,
       timeField: '@timestamp',
       columns,
       allColumns: columns,
@@ -186,9 +186,9 @@ function buildDatasourceStatesLayer(
   }
 
   if (dataset.type === 'esql') {
-    return ['textBased', buildESQLLayer(layer)];
+    return ['textBased', buildESQLLayer(layer, dataset)];
   } else if (dataset.type === 'table') {
-    return ['textBased', buildValueLayer(layer)];
+    return ['textBased', buildValueLayer(layer, dataset)];
   }
   return ['formBased', buildDataLayers(layer, i, index)];
 }
