@@ -110,7 +110,7 @@ export async function getCurrentQueryAvailableColumns(
   commands: ESQLAstCommand[],
   previousPipeFields: ESQLColumnData[],
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
-  policies: Map<string, ESQLPolicy>,
+  getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string
 ) {
   const lastCommand = commands[commands.length - 1];
@@ -129,13 +129,16 @@ export async function getCurrentQueryAvailableColumns(
     return Promise.resolve([]);
   };
 
-  const getEnrichFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+  const getEnrichFields = async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
     if (!isSource(command.args[0])) {
-      return Promise.resolve([]);
+      return [];
     }
 
     const policyName = command.args[0].name;
+
+    const policies = await getPolicies();
     const policy = policies.get(policyName);
+
     if (policy) {
       const fieldsQuery = `FROM ${policy.sourceIndices.join(
         ', '
@@ -143,7 +146,7 @@ export async function getCurrentQueryAvailableColumns(
       return fetchFields(fieldsQuery);
     }
 
-    return Promise.resolve([]);
+    return [];
   };
 
   const getFromFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {

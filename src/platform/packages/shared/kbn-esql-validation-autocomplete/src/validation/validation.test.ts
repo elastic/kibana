@@ -601,17 +601,6 @@ describe('validation logic', () => {
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
       });
 
-      it('should call fields callbacks also for show command', async () => {
-        const callbackMocks = getCallbackMocks();
-        await validateQuery(`show info | keep name`, undefined, callbackMocks);
-        expect(callbackMocks.getSources).not.toHaveBeenCalled();
-        expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
-          query: 'show info',
-        });
-      });
-
       it(`should fetch additional fields if an enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(

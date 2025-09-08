@@ -50,10 +50,20 @@ function getValueInsensitive(keyToCheck: string) {
 async function cacheColumnsForQuery(
   query: ESQLAstQueryExpression,
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
-  policies: Map<string, ESQLPolicy>,
+  getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string
 ) {
-  const cacheKey = BasicPrettyPrinter.print(query);
+  let cacheKey: string;
+  try {
+    cacheKey = BasicPrettyPrinter.print(query);
+  } catch {
+    // for some syntactically incorrect queries
+    // the printer will throw. They're incorrect
+    // anyways, so just move on — ANTLR errors will
+    // be reported.
+    return;
+  }
+
   const existsInCache = checkCacheInsensitive(cacheKey);
   if (existsInCache) {
     // this is already in the cache
@@ -70,7 +80,7 @@ async function cacheColumnsForQuery(
     query.commands,
     fieldsAvailableAfterPreviousCommand,
     fetchFields,
-    policies,
+    getPolicies,
     originalQueryText
   );
 
@@ -114,12 +124,14 @@ export function getColumnsByTypeHelper(
       subqueries.push(Builder.expression.query(root.commands.slice(0, i + 1)));
     }
 
-    const policies = (await resourceRetriever?.getPolicies?.()) ?? [];
-    const policyMap = new Map(policies.map((p) => [p.name, p]));
+    const getPolicies = async () => {
+      const policies = (await resourceRetriever?.getPolicies?.()) ?? [];
+      return new Map(policies.map((p) => [p.name, p]));
+    };
 
     // build fields cache for every partial query
     for (const subquery of subqueries) {
-      await cacheColumnsForQuery(subquery, getFields, policyMap, originalQueryText);
+      await cacheColumnsForQuery(subquery, getFields, getPolicies, originalQueryText);
     }
   };
 

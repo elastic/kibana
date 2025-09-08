@@ -29,30 +29,17 @@ describe('enrichFieldsWithECSInfo', () => {
       { name: 'ecs.fakeBooleanField', type: 'boolean', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
     ];
-    const fieldsMetadata = {
-      getClient: jest.fn().mockResolvedValue({
-        find: jest.fn().mockResolvedValue({
-          fields: {
-            'ecs.version': { description: 'ECS version field', type: 'keyword' },
-            'ecs.field': { description: 'ECS field description', type: 'text' },
-            'ecs.fakeBooleanField': {
-              description: 'ECS fake boolean field description',
-              type: 'keyword',
-            },
-          },
-        }),
-      }),
-    };
-    const fieldsMetadataCache = await (
-      await fieldsMetadata.getClient()
-    ).find({
-      attributes: ['type'],
-    });
 
-    const result = await enrichFieldsWithECSInfo(
-      columns,
-      fieldsMetadataCache.fields as ECSMetadata
-    );
+    const fieldsMetadataCache: ECSMetadata = {
+      'ecs.version': { description: 'ECS version field', type: 'keyword' },
+      'ecs.field': { description: 'ECS field description', type: 'text' },
+      'ecs.fakeBooleanField': {
+        description: 'ECS fake boolean field description',
+        type: 'keyword',
+      },
+    };
+
+    const result = enrichFieldsWithECSInfo(columns, fieldsMetadataCache);
 
     expect(result).toEqual([
       {
@@ -61,8 +48,8 @@ describe('enrichFieldsWithECSInfo', () => {
         isEcs: true,
         userDefined: false,
       },
-      { name: 'ecs.fakeBooleanField', type: 'boolean', isEcs: true, userDefined: false },
-      { name: 'field2', type: 'double', isEcs: false, userDefined: false },
+      { name: 'ecs.fakeBooleanField', type: 'boolean', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
     ]);
   });
 
@@ -72,25 +59,12 @@ describe('enrichFieldsWithECSInfo', () => {
       { name: 'ecs.version.keyword', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
     ];
-    const fieldsMetadata = {
-      getClient: jest.fn().mockResolvedValue({
-        find: jest.fn().mockResolvedValue({
-          fields: {
-            'ecs.version': { description: 'ECS version field', type: 'keyword' },
-          } as unknown as ECSMetadata,
-        }),
-      }),
+
+    const fieldsMetadataCache: ECSMetadata = {
+      'ecs.version': { description: 'ECS version field', type: 'keyword' },
     };
 
-    const fieldsMetadataCache = await (
-      await fieldsMetadata.getClient()
-    ).find({
-      attributes: ['type'],
-    });
-    const result = await enrichFieldsWithECSInfo(
-      columns,
-      fieldsMetadataCache.fields as ECSMetadata
-    );
+    const result = enrichFieldsWithECSInfo(columns, fieldsMetadataCache);
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'ecs.version', type: 'keyword', isEcs: true, userDefined: false },

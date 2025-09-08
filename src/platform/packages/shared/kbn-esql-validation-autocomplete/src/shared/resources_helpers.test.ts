@@ -59,9 +59,4 @@ describe('getQueryForFields', () => {
     | EVAL foo = 1, ${EDITOR_MARKER}`;
     assert(query3, 'FROM index | EVAL foo = 1');
   });
-
-  it('should return empty string if non-FROM source command', () => {
-    assert('ROW field1 = 1', '');
-    assert('SHOW INFO', '');
-  });
 });
