@@ -12,12 +12,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import SpanOverview from '../../../doc_viewer_span_overview';
-import TransactionOverview from '../../../doc_viewer_transaction_overview';
+import Overview from '../../../doc_viewer_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import { useDataSourcesContext } from '../../../hooks/use_data_sources';
-import { isSpanHit } from '../helpers/is_span';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
@@ -58,7 +56,6 @@ export interface SpanFlyoutProps {
 
 export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
-  const isSpan = isSpanHit(hit);
   const { indexes } = useDataSourcesContext();
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
 
@@ -84,23 +81,13 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
           <EuiSkeletonText isLoading={loading}>
             {selectedTabId === tabIds.OVERVIEW && (
               <EuiErrorBoundary>
-                {isSpan ? (
-                  <SpanOverview
-                    hit={hit}
-                    indexes={indexes}
-                    showWaterfall={false}
-                    showActions={false}
-                    dataView={dataView}
-                  />
-                ) : (
-                  <TransactionOverview
-                    hit={hit}
-                    indexes={indexes}
-                    showWaterfall={false}
-                    showActions={false}
-                    dataView={dataView}
-                  />
-                )}
+                <Overview
+                  hit={hit}
+                  indexes={indexes}
+                  showWaterfall={false}
+                  showActions={false}
+                  dataView={dataView}
+                />
               </EuiErrorBoundary>
             )}
 

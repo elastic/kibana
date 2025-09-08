@@ -128,8 +128,8 @@ import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_dril
 import type { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import type { LensDocument } from './persistence';
-import type { LensSavedObjectAttributes } from '../common/content_management';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/constants';
+import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import {
@@ -354,7 +354,7 @@ export class LensPlugin {
 
       return {
         ...plugins,
-        attributeService: getLensAttributeService(plugins),
+        attributeService: getLensAttributeService(coreStart.http),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         coreStart,
@@ -389,7 +389,7 @@ export class LensPlugin {
       });
 
       // Let Dashboard know about the Lens panel type
-      embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
+      embeddable.registerAddFromLibraryType<LensAttributes>({
         onAdd: async (container, savedObject) => {
           const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
           container.addNewPanel(
@@ -451,9 +451,9 @@ export class LensPlugin {
     );
 
     contentManagement.registry.register({
-      id: CONTENT_ID,
+      id: LENS_CONTENT_TYPE,
       version: {
-        latest: LATEST_VERSION,
+        latest: LENS_ITEM_LATEST_VERSION,
       },
       name: i18n.translate('xpack.lens.content.name', {
         defaultMessage: 'Lens Visualization',
@@ -507,7 +507,7 @@ export class LensPlugin {
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
-          attributeService: getLensAttributeService(deps),
+          attributeService: getLensAttributeService(coreStart.http),
           topNavMenuEntryGenerators: this.topNavMenuEntries,
           locator: this.locator,
         });
