@@ -141,6 +141,8 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
     [agentType, ancestorsIndexName, field, scopeId, showPreview]
   );
 
+  if (values === null) return null;
+
   return (
     <div
       css={css`
