@@ -14,7 +14,6 @@ import { KnowledgeBaseClient } from '@kbn/evals-suite-obs-ai-assistant/src/knowl
 interface KnowledgeBaseExample extends Example {
   input: {
     question: string;
-    conversationId: string | undefined;
   };
   output: {
     criteria?: string[];
@@ -66,7 +65,6 @@ export function createEvaluateKnowledgeBase({
         dataset,
         task: async ({ input }) => {
           const response = await chatClient.complete({
-            conversationId: input.conversationId,
             messages: input.question,
           });
 

@@ -45,7 +45,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
               input: {
                 question:
                   'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
-                conversationId: undefined,
               },
               output: {
                 criteria: [
@@ -60,11 +59,15 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
         },
       });
     });
-    evaluate('recalls information', async ({ chatClient, evaluateKnowledgeBase }) => {
-      let conversation = await chatClient.complete({
-        messages:
-          'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
-        persist: true,
+    evaluate('recalls information', async ({ knowledgeBaseClient, evaluateKnowledgeBase }) => {
+      await knowledgeBaseClient.importEntries({
+        entries: [
+          {
+            id: 'cluster_purpose',
+            title: 'Cluster Purpose',
+            text: 'This cluster is used to test the AI Assistant using the Observability AI Evaluation Framework.',
+          },
+        ],
       });
       await evaluateKnowledgeBase({
         dataset: {
@@ -73,7 +76,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
           examples: [
             {
               input: {
-                conversationId: conversation.conversationId! || undefined,
                 question: `What is this cluster used for?`,
               },
               output: {
@@ -138,7 +140,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  conversationId: undefined,
                   question: 'What DevOps teams do we have and how is the on-call rotation managed?',
                 },
                 output: {
@@ -168,7 +169,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  conversationId: undefined,
                   question:
                     'What are our standard alert thresholds for services and what database technologies do we use?',
                 },
