@@ -70,7 +70,10 @@ export async function rollbackInstallation(options: {
   }
   // checking is_managed flag on agent policy, it is not always set on package policy
   const agentPolicyIds = uniq(packagePolicySOs.flatMap((so) => so.attributes.policy_ids ?? []));
-  const agentPolicies = await agentPolicyService.getByIds(savedObjectsClient, agentPolicyIds);
+  const agentPolicies = await agentPolicyService.getByIds(
+    savedObjectsClient,
+    agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
+  );
   if (agentPolicies.some((agentPolicy) => agentPolicy.is_managed)) {
     throw managedRollbackError;
   }

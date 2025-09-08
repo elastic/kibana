@@ -1530,10 +1530,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           semverGt(packagePolicy.package.version, oldPackagePolicy.package.version) &&
           !packagePolicyUpdate.is_managed
         ) {
+          const internalSoClientWithoutSpaceExtension =
+            appContextService.getInternalUserSOClientWithoutSpaceExtension();
           // checking is_managed flag on agent policy, it is not always set on package policy
           const agentPolicies = await agentPolicyService.getByIds(
-            soClient,
-            packagePolicy.policy_ids
+            internalSoClientWithoutSpaceExtension,
+            packagePolicy.policy_ids.map((policyId) => ({ id: policyId, spaceId: '*' }))
           );
           if (!agentPolicies.some((policy) => policy.is_managed)) {
             logger.debug(
