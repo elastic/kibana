@@ -339,15 +339,22 @@ export class StreamsApp {
     columnName,
     rowIndex,
     value,
+    invertCondition = false,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
+    invertCondition?: boolean;
   }) {
     const cellContent = this.page.locator(
       `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
     );
-    await expect(cellContent).toContainText(value);
+
+    if (invertCondition) {
+      await expect(cellContent).not.toContainText(value);
+    } else {
+      await expect(cellContent).toContainText(value);
+    }
   }
 
   /**

@@ -19,6 +19,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   let apiClient: StreamsSupertestRepositoryClient;
+  const existingDataStreamName = 'logs-existing-datastream';
+  const unmanagedStreamName = 'logs-test-unmanaged';
 
   describe('Group streams', () => {
     before(async () => {
@@ -29,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await disableStreams(apiClient);
       await esClient.indices.deleteDataStream({
-        name: 'logs-existing-datastream',
+        name: [existingDataStreamName, unmanagedStreamName],
       });
     });
 
@@ -43,12 +45,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'A Group stream',
                   group: {
+                    metadata: {},
                     tags: [],
                     members: ['logs'],
                   },
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
           })
@@ -62,6 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 group: {
+                  metadata: {},
                   tags: [],
                   members: ['logs'],
                 },
@@ -96,12 +101,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -122,12 +129,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'test-group',
               description: 'A Group stream',
               group: {
+                metadata: {},
                 tags: [],
                 members: ['logs'],
               },
             },
             dashboards: [],
             queries: [],
+            rules: [],
           });
         });
 
@@ -140,12 +149,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs.test'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -164,12 +175,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'test-group',
               description: 'A Group stream',
               group: {
+                metadata: {},
                 tags: [],
                 members: ['logs.test'],
               },
             },
             dashboards: [],
             queries: [],
+            rules: [],
           });
         });
 
@@ -194,12 +207,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs', 'logs.test'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -213,12 +228,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['test-group'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -258,12 +275,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['test-group'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -279,16 +298,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['non-existent-stream'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
             .expect(400);
+        });
+
+        it('promotes unmanaged Classic streams to managed Classic streams when added as a member', async () => {
+          await esClient.indices.createDataStream({
+            name: unmanagedStreamName,
+          });
+
+          await apiClient
+            .fetch('PUT /api/streams/{name} 2023-10-31', {
+              params: {
+                path: { name: 'test-group' },
+                body: {
+                  stream: {
+                    description: 'A Group stream',
+                    group: {
+                      metadata: {},
+                      tags: [],
+                      members: [unmanagedStreamName],
+                    },
+                  },
+                  dashboards: [],
+                  rules: [],
+                  queries: [],
+                },
+              },
+            })
+            .expect(200);
+
+          const { found } = await esClient.get({
+            index: '.kibana_streams',
+            id: unmanagedStreamName,
+          });
+          expect(found).to.be(true);
         });
 
         it('cannot create a Group stream with duplicated relationships', async () => {
@@ -300,12 +354,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs', 'logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -314,23 +370,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('cannot overwrite an existing data stream', async () => {
           await esClient.indices.createDataStream({
-            name: 'logs-existing-datastream',
+            name: existingDataStreamName,
           });
 
           await apiClient
             .fetch('PUT /api/streams/{name} 2023-10-31', {
               params: {
-                path: { name: 'logs-existing-datastream' },
+                path: { name: existingDataStreamName },
                 body: {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -346,12 +404,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -367,6 +427,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 path: { name: 'test-group' },
                 body: {
                   group: {
+                    metadata: {},
                     tags: [],
                     members: ['logs.test2'],
                   },
@@ -387,6 +448,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response.body).to.eql({
             group: {
+              metadata: {},
               tags: [],
               members: ['logs.test2'],
             },
