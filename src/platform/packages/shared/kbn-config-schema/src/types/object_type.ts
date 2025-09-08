@@ -22,6 +22,13 @@ export type ObjectDefaultValue<T extends ObjectProps<Props>> = DefaultValue<
 export type Props = Record<string, Type<any, DefaultValue<any>>>;
 export type NullableProps = Record<string, Type<any> | undefined | null>;
 
+/**
+ * A type used to constrain the object props to preserve the exact type for D
+ */
+export type ObjectProps<P extends Props> = {
+  [K in keyof P]: P[K] extends Type<infer V, infer D> ? D : never;
+};
+
 export type TypeOrLazyType<T = any, D extends DefaultValue<T> = never> =
   | Type<T, D>
   | (() => Type<T, D>);
@@ -53,13 +60,6 @@ type TypeOfInput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> =
     : RT extends TypeOrLazyType<infer V, infer D>
     ? Type<V, D>['_input']
     : never;
-
-/**
- * A type used to constrain the object props to preserve the exact type for D
- */
-export type ObjectProps<P extends Props> = {
-  [K in keyof P]: P[K] extends Type<infer V, infer D> ? D : never;
-};
 
 type UndefinedPropertyKeys<Base extends ObjectProps<Props>> = {
   [Key in keyof Base]: Base[Key] extends Type<infer V, infer D>
