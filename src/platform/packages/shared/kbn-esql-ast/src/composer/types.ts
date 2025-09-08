@@ -10,7 +10,7 @@
 import type * as synth from '../synth';
 import type { ESQLAstCommand, ESQLCommand, ESQLOrderExpression, ESQLSource } from '../types';
 import type { ComposerQuery } from './composer_query';
-import type { ParameterHole } from './parameter_hole';
+import type { ParameterHole, DoubleParameterHole } from './parameter_hole';
 
 /**
  * Holes are expressions that can be used in the `esql` tagged template function.
@@ -94,8 +94,9 @@ type SynthMethods = typeof import('../synth');
  * Methods available of the `esql` tagged template function.
  * These methods are used to construct AST nodes.
  */
-export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par'> {
+export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpar'> {
   par: (value: unknown, name?: string) => ParameterHole;
+  dpar: (value: unknown, name?: string) => DoubleParameterHole;
 
   /**
    * Creates a new {@link ComposerQuery} instance with a `FROM` command with

@@ -9,8 +9,9 @@
 
 import { isBooleanLiteral, isCommand } from '../ast/is';
 import { Builder } from '../builder';
-import { ParameterHole } from './parameter_hole';
-import type { ESQLCommand } from '../types';
+import { ParameterHole, DoubleParameterHole } from './parameter_hole';
+import { Walker } from '../walker';
+import type { ESQLCommand, ESQLNamedParamLiteral } from '../types';
 import type { ComposerQuery } from './composer_query';
 import type { ComposerQueryTagHole, ParameterShorthandHole } from './types';
 
@@ -59,16 +60,37 @@ export const processTemplateHoles = (
   for (let i = 0; i < length; i++) {
     const hole = holes[i];
 
-    if (hole instanceof ParameterHole) {
-      const name = hole.name ?? `p${params.size}`;
+    if (hole instanceof ParameterHole || hole instanceof DoubleParameterHole) {
+      const originalName = hole.name ?? `p${params.size}`;
+      let name = originalName;
 
       validateParamName(name);
 
+      // Handle duplicate parameter names
       if (params.has(name)) {
-        throw new Error(`Duplicate parameter name "${name}" found in the query.`);
+        const existingValue = params.get(name);
+
+        if (existingValue === hole.value) {
+          const param =
+            hole instanceof DoubleParameterHole
+              ? Builder.param.named({ value: name, paramKind: '??' })
+              : Builder.param.named({ value: name });
+
+          holes[i] = param;
+          continue;
+        } else {
+          let counter = 1;
+          do {
+            name = `${originalName}_${counter}`;
+            counter++;
+          } while (params.has(name));
+        }
       }
 
-      const param = Builder.param.named({ value: name });
+      const param =
+        hole instanceof DoubleParameterHole
+          ? Builder.param.named({ value: name, paramKind: '??' })
+          : Builder.param.named({ value: name });
 
       holes[i] = param;
       params.set(name, hole.value);
@@ -93,7 +115,36 @@ export const processTemplateHoles = (
       holes[i] = param;
       params.set(name!, value);
     } else if (isComposerQuery(hole)) {
-      holes[i] = hole.ast;
+      const nestedAst = JSON.parse(JSON.stringify(hole.ast));
+      const nestedParams = hole.getParams();
+
+      for (const [nestedName, nestedValue] of Object.entries(nestedParams)) {
+        let finalName = nestedName;
+
+        // If parameter name already exists, generate a new unique name with suffix
+        if (params.has(nestedName)) {
+          let counter = 2;
+          do {
+            finalName = `${nestedName}_${counter}`;
+            counter++;
+          } while (params.has(finalName));
+
+          // Update all parameter references in the nested AST
+          const paramNodes = Walker.matchAll(nestedAst, {
+            type: 'literal',
+            literalType: 'param',
+            value: nestedName,
+          }) as ESQLNamedParamLiteral[];
+
+          for (const node of paramNodes) {
+            node.value = finalName;
+          }
+        }
+
+        params.set(finalName, nestedValue);
+      }
+
+      holes[i] = nestedAst;
     }
   }
 

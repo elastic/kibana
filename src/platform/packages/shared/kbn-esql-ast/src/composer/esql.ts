@@ -9,7 +9,7 @@
 
 import * as synth from '../synth';
 import { ComposerQuery } from './composer_query';
-import { ParameterHole } from './parameter_hole';
+import { DoubleParameterHole, ParameterHole } from './parameter_hole';
 import { processTemplateHoles, removeNopCommands, validateParamName } from './util';
 import type {
   ComposerQueryGenerator,
@@ -154,6 +154,8 @@ export const esql: ComposerQueryTag &
    */
   {
     par: (value: unknown, name?: string) => new ParameterHole(value, name),
+
+    dpar: (value: unknown, name?: string) => new DoubleParameterHole(value, name),
 
     from: (...sources: ComposerSourceShorthand[]) => {
       const nodes: ESQLSource[] = [];
