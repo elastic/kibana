@@ -42,9 +42,9 @@ export function serializeReferences(savedVis: SerializedVis) {
   let serializedSearchSource = searchSource;
 
   // TSVB uses legacy visualization state, which doesn't serialize search source properly
-  if (!isSerializedSearchSource(searchSource)) {
+  /*if (!isSerializedSearchSource(searchSource)) {
     serializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
-  }
+  }*/
 
   if (searchSource) {
     const [extractedSearchSource, searchSourceReferences] =
@@ -81,9 +81,9 @@ export function deserializeReferences(
   let deserializedSearchSource = searchSource;
   if (searchSource) {
     // TSVB uses legacy visualization state, which doesn't serialize search source properly
-    if (!isSerializedSearchSource(searchSource)) {
+    /*if (!isSerializedSearchSource(searchSource)) {
       deserializedSearchSource = (searchSource as { fields: SerializedSearchSourceFields }).fields;
-    }
+    }*/
     try {
       deserializedSearchSource = injectSearchSourceReferences(
         deserializedSearchSource as any,
