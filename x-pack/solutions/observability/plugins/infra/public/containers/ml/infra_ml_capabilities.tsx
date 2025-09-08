@@ -17,16 +17,12 @@ import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import type { GetMlCapabilitiesResponsePayload } from './api/ml_api_types';
 import { getMlCapabilitiesResponsePayloadRT } from './api/ml_api_types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { usePluginConfig } from '../plugin_config_context';
 
 export const useInfraMLCapabilities = () => {
   const { services } = useKibanaContextForPlugin();
-  const { featureFlags } = usePluginConfig();
   const [mlCapabilities, setMlCapabilities] =
     useState<GetMlCapabilitiesResponsePayload>(initialMlCapabilities);
-  const [isTopbarMenuVisible, { on: showTopbarMenu, off: hideTopbarMenu }] = useBoolean(
-    !featureFlags.hostOtelEnabled
-  );
+  const [isTopbarMenuVisible, { on: showTopbarMenu, off: hideTopbarMenu }] = useBoolean(true);
 
   const [fetchMlCapabilitiesRequest, fetchMlCapabilities] = useTrackedPromise(
     {

@@ -35,7 +35,8 @@
     "@kbn/sample-data-ingest",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui",
-    "@kbn/deeplinks-search"
+    "@kbn/search-code-examples",
+    "@kbn/try-in-console"
   ],
   "exclude": [
     "target/**/*",

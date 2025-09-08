@@ -55,7 +55,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 }) => {
   const {
     actionTypeRegistry,
-    assistantAvailability: { isAssistantEnabled },
+    assistantAvailability: { isAssistantEnabled, isAssistantSharingEnabled },
     http,
     nameSpace,
     toasts,
@@ -117,6 +117,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         { sortField: sorting.sort.field === 'Title' ? 'title' : snakeCase(sorting.sort.field) }
       : {}),
     ...(sorting?.sort?.direction ? { sortOrder: sorting.sort.direction } : {}),
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
 
   const refetchAll = useCallback(() => {
@@ -248,7 +250,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     onCancelClick();
   }, [closeConfirmModal, handleUnselectAll, onCancelClick]);
 
-  const { getConversationsList, getColumns } = useConversationsTable();
+  const { getConversationsList, getColumns } = useConversationsTable(isAssistantSharingEnabled);
 
   const conversationOptions = getConversationsList({
     allSystemPrompts,
@@ -371,6 +373,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
               conversationSettings={conversations}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               http={http}
+              isAssistantSharingEnabled={isAssistantSharingEnabled}
               isDisabled={isDisabled}
               selectedConversation={selectedConversation}
               setConversationSettings={setConversationSettings}

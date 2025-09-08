@@ -61,6 +61,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   } = useFetchCurrentUserConversations({
     http,
     isAssistantEnabled,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
 
   const refetchAll = useCallback(() => {
