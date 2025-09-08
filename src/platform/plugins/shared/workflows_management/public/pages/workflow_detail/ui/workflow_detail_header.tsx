@@ -31,6 +31,7 @@ import { getRunWorkflowTooltipContent } from '../../../shared/ui';
 
 export interface WorkflowDetailHeaderProps {
   name: string | undefined;
+  yaml?: string;
   isLoading: boolean;
   activeTab: WorkflowUrlStateTabType;
   handleTabChange: (tab: WorkflowUrlStateTabType) => void;
@@ -47,6 +48,7 @@ export interface WorkflowDetailHeaderProps {
 
 export const WorkflowDetailHeader = ({
   name,
+  yaml,
   isLoading,
   activeTab,
   canRunWorkflow,

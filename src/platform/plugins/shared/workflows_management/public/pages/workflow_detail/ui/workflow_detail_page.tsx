@@ -13,7 +13,10 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+} from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
@@ -24,6 +27,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -188,6 +192,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
   );
+  const isExecutionGraphEnabled = uiSettings?.get<boolean>(
+    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+    false
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -215,6 +223,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
+        yaml={yamlValue}
         isLoading={isLoadingWorkflow}
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
@@ -260,6 +269,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                     workflowYaml={yamlValue}
                     workflowExecutionId={selectedExecutionId}
                   />
+                </React.Suspense>
+              </EuiFlexItem>
+            )}
+            {isExecutionGraphEnabled && workflow && (
+              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+                <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <ExecutionGraph workflowYaml={yamlValue} />
                 </React.Suspense>
               </EuiFlexItem>
             )}
