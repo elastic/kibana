@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates realistic Apache access and security logs.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { log } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';

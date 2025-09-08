@@ -1,0 +1,181 @@
+{
+  "id": "@kbn/siem-readiness",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.useLogReadinessTask",
+        "type": "Function",
+        "tags": [],
+        "label": "useLogReadinessTask",
+        "description": [
+          "\nHook for logging SIEM readiness tasks via API endpoint"
+        ],
+        "signature": [
+          "(options?: ",
+          "UseMutationOptions",
+          "<void, unknown, ",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.SiemReadinessTask",
+            "text": "SiemReadinessTask"
+          },
+          ", unknown> | undefined) => { logReadinessTask: ",
+          "UseMutateFunction",
+          "<void, unknown, ",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.SiemReadinessTask",
+            "text": "SiemReadinessTask"
+          },
+          ", unknown>; }"
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/use_log_readiness_task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.useLogReadinessTask.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- TanStack mutation options"
+            ],
+            "signature": [
+              "UseMutationOptions",
+              "<void, unknown, ",
+              {
+                "pluginId": "@kbn/siem-readiness",
+                "scope": "public",
+                "docId": "kibKbnSiemReadinessPluginApi",
+                "section": "def-public.SiemReadinessTask",
+                "text": "SiemReadinessTask"
+              },
+              ", unknown> | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/use_log_readiness_task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Mutation hook for logging readiness tasks"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.SiemReadinessTask",
+        "type": "Interface",
+        "tags": [],
+        "label": "SiemReadinessTask",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessTask.task_id",
+            "type": "string",
+            "tags": [],
+            "label": "task_id",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessTask.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"complete\" | \"incomplete\""
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessTask.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.POST_SIEM_READINESS_TASK_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "POST_SIEM_READINESS_TASK_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/siem_readiness/post_task\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.SIEM_READINESS_PACKAGE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SIEM_READINESS_PACKAGE_NAME",
+        "description": [],
+        "signature": [
+          "\"@kbn/siem-readiness\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
