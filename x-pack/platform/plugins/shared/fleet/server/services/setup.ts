@@ -279,7 +279,7 @@ async function createSetupSideEffects(
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
-  
+
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
