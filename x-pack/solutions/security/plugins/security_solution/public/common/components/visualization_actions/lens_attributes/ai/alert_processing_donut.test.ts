@@ -30,48 +30,39 @@ describe('getAlertProcessingDonutAttributes', () => {
     spaceId: defaultSpaceId,
   };
 
-  it('returns lens attributes with correct basic structure', () => {
+  it('returns lens attributes with correct basic structure and configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
+    // Basic structure
     expect(result).toHaveProperty('title', 'Alerts');
     expect(result).toHaveProperty('description', '');
     expect(result).toHaveProperty('visualizationType', 'lnsPie');
     expect(result).toHaveProperty('references', []);
-  });
 
-  it('returns lens attributes with correct state structure', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
+    // State structure
     expect(result.state).toHaveProperty('visualization');
     expect(result.state).toHaveProperty('query');
     expect(result.state).toHaveProperty('filters', []);
     expect(result.state).toHaveProperty('datasourceStates');
     expect(result.state).toHaveProperty('internalReferences');
     expect(result.state).toHaveProperty('adHocDataViews');
-  });
 
-  it('returns lens attributes with correct query configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
+    // Query configuration
     expect(result.state.query).toEqual({
       query: '',
       language: 'kuery',
     });
   });
 
-  it('returns lens attributes with correct visualization configuration', () => {
+  it('returns lens attributes with correct visualization and layer configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     const visualization = result.state.visualization as unknown as WithLayers;
     expect(visualization).toHaveProperty('layers');
     expect(visualization).toHaveProperty('shape', 'donut');
     expect(visualization.layers).toHaveLength(1);
-  });
 
-  it('returns lens attributes with correct layer configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const layer = (result.state.visualization as unknown as WithLayers).layers[0];
+    const layer = visualization.layers[0];
     expect(layer).toHaveProperty('categoryDisplay', 'show');
     expect(layer).toHaveProperty('emptySizeRatio', 0.9);
     expect(layer).toHaveProperty('layerId', 'unifiedHistogram');
@@ -86,180 +77,128 @@ describe('getAlertProcessingDonutAttributes', () => {
     expect(layer).toHaveProperty('primaryGroups', ['breakdown_column']);
   });
 
-  it('returns lens attributes with correct color mapping configuration', () => {
+  it('returns lens attributes with correct color mapping configuration and assignments', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
       .colorMapping as Record<string, unknown>;
+
+    // Color mapping structure
     expect(colorMapping).toHaveProperty('assignments');
     expect(colorMapping).toHaveProperty('colorMode', { type: 'categorical' });
     expect(colorMapping).toHaveProperty('paletteId', 'default');
     expect(colorMapping).toHaveProperty('specialAssignments');
     expect(colorMapping.assignments as unknown[]).toHaveLength(2);
     expect(colorMapping.specialAssignments as unknown[]).toHaveLength(1);
-  });
 
-  it('returns lens attributes with correct AI Filtered color assignment', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
-      .colorMapping as Record<string, unknown>;
-    const assignment = (colorMapping.assignments as unknown[])[0] as Record<string, unknown>;
-    expect(assignment).toHaveProperty('color', {
+    // AI Filtered assignment
+    const aiFilteredAssignment = (colorMapping.assignments as unknown[])[0] as Record<
+      string,
+      unknown
+    >;
+    expect(aiFilteredAssignment).toHaveProperty('color', {
       colorIndex: 0,
       paletteId: 'default',
       type: 'categorical',
     });
-    expect(assignment).toHaveProperty('rules', [
-      {
-        type: 'raw',
-        value: 'AI Filtered',
-      },
-    ]);
-    expect(assignment).toHaveProperty('touched', false);
-  });
+    expect(aiFilteredAssignment).toHaveProperty('rules', [{ type: 'raw', value: 'AI Filtered' }]);
+    expect(aiFilteredAssignment).toHaveProperty('touched', false);
 
-  it('returns lens attributes with correct Escalated color assignment', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
-      .colorMapping as Record<string, unknown>;
-    const assignment = (colorMapping.assignments as unknown[])[1] as Record<string, unknown>;
-    expect(assignment).toHaveProperty('color', {
+    // Escalated assignment
+    const escalatedAssignment = (colorMapping.assignments as unknown[])[1] as Record<
+      string,
+      unknown
+    >;
+    expect(escalatedAssignment).toHaveProperty('color', {
       colorIndex: 9,
       paletteId: 'default',
       type: 'categorical',
     });
-    expect(assignment).toHaveProperty('rules', [
-      {
-        type: 'raw',
-        value: 'Escalated',
-      },
-    ]);
-    expect(assignment).toHaveProperty('touched', false);
+    expect(escalatedAssignment).toHaveProperty('rules', [{ type: 'raw', value: 'Escalated' }]);
+    expect(escalatedAssignment).toHaveProperty('touched', false);
+
+    // Special assignment
+    const specialAssignment = (colorMapping.specialAssignments as unknown[])[0] as Record<
+      string,
+      unknown
+    >;
+    expect(specialAssignment).toHaveProperty('color', { type: 'loop' });
+    expect(specialAssignment).toHaveProperty('rules', [{ type: 'other' }]);
+    expect(specialAssignment).toHaveProperty('touched', false);
   });
 
-  it('returns lens attributes with correct special assignments', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const colorMapping = (result.state.visualization as unknown as WithLayers).layers[0]
-      .colorMapping as Record<string, unknown>;
-    const assignment = (colorMapping.specialAssignments as unknown[])[0] as Record<string, unknown>;
-    expect(assignment).toHaveProperty('color', {
-      type: 'loop',
-    });
-    expect(assignment).toHaveProperty('rules', [
-      {
-        type: 'other',
-      },
-    ]);
-    expect(assignment).toHaveProperty('touched', false);
-  });
-
-  it('returns lens attributes with correct datasource states', () => {
+  it('returns lens attributes with correct datasource states and column configurations', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     const datasourceStates = result.state.datasourceStates;
     expect(datasourceStates).toHaveProperty('formBased');
     expect(datasourceStates.formBased).toHaveProperty('layers');
     expect(datasourceStates.formBased?.layers).toHaveProperty('unifiedHistogram');
-  });
 
-  it('returns lens attributes with correct layer column configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const layer = result.state.datasourceStates.formBased?.layers.unifiedHistogram;
+    const layer = datasourceStates.formBased?.layers.unifiedHistogram;
     expect(layer).toHaveProperty('columnOrder', ['breakdown_column', 'count_column']);
     expect(layer).toHaveProperty('columns');
     expect(layer).toHaveProperty('incompleteColumns', {});
-  });
 
-  it('returns lens attributes with correct breakdown_column configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const breakdownColumn =
-      result.state.datasourceStates.formBased?.layers.unifiedHistogram?.columns.breakdown_column;
+    // Breakdown column configuration
+    const breakdownColumn = layer?.columns.breakdown_column;
     expect(breakdownColumn).toHaveProperty('dataType', 'string');
     expect(breakdownColumn).toHaveProperty('isBucketed', true);
     expect(breakdownColumn).toHaveProperty('label', 'Alert processing category');
     expect(breakdownColumn).toHaveProperty('operationType', 'terms');
     expect(breakdownColumn).toHaveProperty('scale', 'ordinal');
     expect(breakdownColumn).toHaveProperty('sourceField', 'processing_analytics_rtf');
-  });
 
-  it('returns lens attributes with correct breakdown_column parameters', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const breakdownColumn = result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns
-      .breakdown_column as unknown as WithParams;
-    expect(breakdownColumn?.params).toHaveProperty('missingBucket', true);
-    expect(breakdownColumn?.params).toHaveProperty('orderBy', {
+    const breakdownParams = breakdownColumn as unknown as WithParams;
+    expect(breakdownParams?.params).toHaveProperty('missingBucket', true);
+    expect(breakdownParams?.params).toHaveProperty('orderBy', {
       columnId: 'count_column',
       type: 'column',
     });
-    expect(breakdownColumn?.params).toHaveProperty('orderDirection', 'desc');
-    expect(breakdownColumn?.params).toHaveProperty('otherBucket', true);
-    expect(breakdownColumn?.params).toHaveProperty('parentFormat', {
-      id: 'terms',
-    });
-    expect(breakdownColumn?.params).toHaveProperty('size', 3);
-  });
+    expect(breakdownParams?.params).toHaveProperty('orderDirection', 'desc');
+    expect(breakdownParams?.params).toHaveProperty('otherBucket', true);
+    expect(breakdownParams?.params).toHaveProperty('parentFormat', { id: 'terms' });
+    expect(breakdownParams?.params).toHaveProperty('size', 3);
 
-  it('returns lens attributes with correct count_column configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const countColumn =
-      result.state.datasourceStates.formBased?.layers.unifiedHistogram?.columns.count_column;
+    // Count column configuration
+    const countColumn = layer?.columns.count_column;
     expect(countColumn).toHaveProperty('dataType', 'number');
     expect(countColumn).toHaveProperty('isBucketed', false);
     expect(countColumn).toHaveProperty('label', 'Count of records');
     expect(countColumn).toHaveProperty('operationType', 'count');
     expect(countColumn).toHaveProperty('scale', 'ratio');
     expect(countColumn).toHaveProperty('sourceField', '___records___');
-  });
 
-  it('returns lens attributes with correct count_column parameters', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const countColumn = result.state.datasourceStates.formBased?.layers.unifiedHistogram.columns
-      .count_column as unknown as WithParams;
-    expect(countColumn?.params).toHaveProperty('format', {
+    const countParams = countColumn as unknown as WithParams;
+    expect(countParams?.params).toHaveProperty('format', {
       id: 'number',
-      params: {
-        decimals: 0,
-      },
+      params: { decimals: 0 },
     });
   });
 
-  it('returns lens attributes with correct internal references', () => {
+  it('returns lens attributes with correct internal references and data view configuration', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
+    // Internal references
     expect(result.state.internalReferences).toHaveLength(1);
     expect(result.state.internalReferences?.[0]).toEqual({
       id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
       name: 'indexpattern-datasource-layer-unifiedHistogram',
       type: 'index-pattern',
     });
-  });
 
-  it('returns lens attributes with correct adHocDataViews configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
+    // AdHoc data views
     const adHocDataViews = result.state.adHocDataViews;
     expect(adHocDataViews).toHaveProperty('db828b69-bb21-4b92-bc33-56e3b01da790');
-  });
 
-  it('returns lens attributes with correct data view configuration', () => {
-    const result = getAlertProcessingDonutAttributes(defaultArgs);
-
-    const dataView = result.state.adHocDataViews?.[
-      'db828b69-bb21-4b92-bc33-56e3b01da790'
-    ] as unknown as Record<string, unknown>;
+    // Data view configuration
+    const dataView = adHocDataViews?.['db828b69-bb21-4b92-bc33-56e3b01da790'] as unknown as Record<
+      string,
+      unknown
+    >;
     expect(dataView).toHaveProperty('allowHidden', false);
     expect(dataView).toHaveProperty('allowNoIndex', false);
-    expect(dataView).toHaveProperty('fieldAttrs', {
-      processing_analytics_rtf: {},
-    });
+    expect(dataView).toHaveProperty('fieldAttrs', { processing_analytics_rtf: {} });
     expect(dataView).toHaveProperty('fieldFormats', {});
     expect(dataView).toHaveProperty('id', 'db828b69-bb21-4b92-bc33-56e3b01da790');
     expect(dataView).toHaveProperty('name', `.alerts-security.alerts-${defaultSpaceId}`);
@@ -268,7 +207,7 @@ describe('getAlertProcessingDonutAttributes', () => {
     expect(dataView).toHaveProperty('title', `.alerts-security.alerts-${defaultSpaceId}`);
   });
 
-  it('returns lens attributes with correct runtime field configuration', () => {
+  it('returns lens attributes with correct runtime field configuration and various parameter combinations', () => {
     const result = getAlertProcessingDonutAttributes(defaultArgs);
 
     const runtimeFieldMap = (
@@ -277,61 +216,45 @@ describe('getAlertProcessingDonutAttributes', () => {
       ] as unknown as WithRuntimeFieldMap
     )?.runtimeFieldMap;
 
-    // Test runtime field map structure
+    // Runtime field structure
     expect(runtimeFieldMap).toHaveProperty('processing_analytics_rtf');
     expect(runtimeFieldMap?.processing_analytics_rtf).toHaveProperty('type', 'keyword');
     expect(runtimeFieldMap?.processing_analytics_rtf).toHaveProperty('script');
 
-    // Test runtime field script content
+    // Runtime field script content
     const script = runtimeFieldMap?.processing_analytics_rtf.script;
     expect(script).toHaveProperty('source');
     expect(script?.source).toContain(JSON.stringify(defaultAttackAlertIds));
     expect(script?.source).toContain('emit("Escalated")');
     expect(script?.source).toContain('emit("AI Filtered")');
-  });
 
-  it('returns lens attributes with various attackAlertIds configurations', () => {
-    const testCases = [
-      {
-        attackAlertIds: ['different-alert-1', 'different-alert-2'],
-        description: 'multiple alerts',
-      },
-      { attackAlertIds: [], description: 'empty array' },
-      { attackAlertIds: ['single-alert'], description: 'single alert' },
-      {
-        attackAlertIds: Array.from({ length: 100 }, (_, i) => `alert-${i}`),
-        description: 'large number of alerts',
-      },
+    // Test various attackAlertIds configurations
+    const attackAlertTestCases = [
+      { attackAlertIds: ['different-alert-1', 'different-alert-2'] },
+      { attackAlertIds: [] },
+      { attackAlertIds: ['single-alert'] },
+      { attackAlertIds: Array.from({ length: 100 }, (_, i) => `alert-${i}`) },
     ];
 
-    testCases.forEach(({ attackAlertIds, description }) => {
-      const result = getAlertProcessingDonutAttributes({
-        ...defaultArgs,
-        attackAlertIds,
-      });
-
-      const script = (
-        result.state.adHocDataViews?.[
+    attackAlertTestCases.forEach(({ attackAlertIds }) => {
+      const testResult = getAlertProcessingDonutAttributes({ ...defaultArgs, attackAlertIds });
+      const testScript = (
+        testResult.state.adHocDataViews?.[
           'db828b69-bb21-4b92-bc33-56e3b01da790'
         ] as unknown as WithRuntimeFieldMap
       )?.runtimeFieldMap.processing_analytics_rtf.script;
-      expect(script?.source).toContain(JSON.stringify(attackAlertIds));
+      expect(testScript?.source).toContain(JSON.stringify(attackAlertIds));
     });
-  });
 
-  it('returns lens attributes with various spaceId configurations', () => {
-    const testCases = [
-      { spaceId: 'custom-space', description: 'custom space' },
-      { spaceId: 'space-with-special-chars-123', description: 'space with special characters' },
+    // Test various spaceId configurations
+    const spaceIdTestCases = [
+      { spaceId: 'custom-space' },
+      { spaceId: 'space-with-special-chars-123' },
     ];
 
-    testCases.forEach(({ spaceId, description }) => {
-      const result = getAlertProcessingDonutAttributes({
-        ...defaultArgs,
-        spaceId,
-      });
-
-      const dataView = result.state.adHocDataViews?.[
+    spaceIdTestCases.forEach(({ spaceId }) => {
+      const testResult = getAlertProcessingDonutAttributes({ ...defaultArgs, spaceId });
+      const dataView = testResult.state.adHocDataViews?.[
         'db828b69-bb21-4b92-bc33-56e3b01da790'
       ] as unknown as Record<string, unknown>;
       expect(dataView?.name).toBe(`.alerts-security.alerts-${spaceId}`);

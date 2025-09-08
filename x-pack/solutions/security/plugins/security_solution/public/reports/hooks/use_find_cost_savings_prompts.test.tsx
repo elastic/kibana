@@ -33,143 +33,78 @@ describe('useFindCostSavingsPrompts', () => {
     jest.clearAllMocks();
   });
 
-  it('returns both prompts when they are found', () => {
-    const mockPrompts = [
-      {
-        promptId: 'costSavingsInsightPart1',
-        prompt: 'This is the first part of the cost savings insight',
-      },
-      {
-        promptId: 'costSavingsInsightPart2',
-        prompt: 'This is the second part of the cost savings insight',
-      },
+  it('handles various prompt scenarios correctly', () => {
+    // Both prompts found
+    const bothPrompts = [
+      { promptId: 'costSavingsInsightPart1', prompt: 'First part' },
+      { promptId: 'costSavingsInsightPart2', prompt: 'Second part' },
     ];
-
     mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
+      data: { prompts: bothPrompts },
     } as ReturnType<typeof useFindPrompts>);
+    const { result: result1 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result1.current).toEqual({ part1: 'First part', part2: 'Second part' });
 
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toEqual({
-      part1: 'This is the first part of the cost savings insight',
-      part2: 'This is the second part of the cost savings insight',
-    });
-  });
-
-  it('returns null when part1 prompt is missing', () => {
-    const mockPrompts = [
-      {
-        promptId: 'costSavingsInsightPart2',
-        prompt: 'This is the second part of the cost savings insight',
-      },
-    ];
-
+    // Part1 missing
+    const part1Missing = [{ promptId: 'costSavingsInsightPart2', prompt: 'Second part' }];
     mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
+      data: { prompts: part1Missing },
     } as ReturnType<typeof useFindPrompts>);
+    const { result: result2 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result2.current).toBeNull();
 
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toBeNull();
-  });
-
-  it('returns null when part2 prompt is missing', () => {
-    const mockPrompts = [
-      {
-        promptId: 'costSavingsInsightPart1',
-        prompt: 'This is the first part of the cost savings insight',
-      },
-    ];
-
+    // Part2 missing
+    const part2Missing = [{ promptId: 'costSavingsInsightPart1', prompt: 'First part' }];
     mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
+      data: { prompts: part2Missing },
     } as ReturnType<typeof useFindPrompts>);
+    const { result: result3 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result3.current).toBeNull();
 
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toBeNull();
-  });
-
-  it('returns null when both prompts are missing', () => {
-    const mockPrompts = [
-      {
-        promptId: 'someOtherPrompt',
-        prompt: 'This is some other prompt',
-      },
-    ];
-
+    // Both prompts missing
+    const bothMissing = [{ promptId: 'someOtherPrompt', prompt: 'Other prompt' }];
     mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
+      data: { prompts: bothMissing },
     } as ReturnType<typeof useFindPrompts>);
+    const { result: result4 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result4.current).toBeNull();
 
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toBeNull();
-  });
-
-  it('returns null when prompts array is empty', () => {
+    // Empty prompts array
     mockUseFindPrompts.mockReturnValue({
       data: { prompts: [] },
     } as unknown as ReturnType<typeof useFindPrompts>);
+    const { result: result5 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result5.current).toBeNull();
 
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toBeNull();
-  });
-
-  it('returns null when prompts array is undefined', () => {
+    // Undefined prompts
     mockUseFindPrompts.mockReturnValue({
       data: { prompts: undefined },
     } as unknown as ReturnType<typeof useFindPrompts>);
-
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toBeNull();
+    const { result: result6 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result6.current).toBeNull();
   });
 
-  it('handles prompts with empty string values', () => {
-    const mockPrompts = [
-      {
-        promptId: 'costSavingsInsightPart1',
-        prompt: '',
-      },
-      {
-        promptId: 'costSavingsInsightPart2',
-        prompt: '',
-      },
+  it('handles prompts with empty and null values correctly', () => {
+    // Empty string values
+    const emptyPrompts = [
+      { promptId: 'costSavingsInsightPart1', prompt: '' },
+      { promptId: 'costSavingsInsightPart2', prompt: '' },
     ];
-
     mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
+      data: { prompts: emptyPrompts },
     } as ReturnType<typeof useFindPrompts>);
+    const { result: result1 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result1.current).toEqual({ part1: '', part2: '' });
 
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toEqual({
-      part1: '',
-      part2: '',
-    });
-  });
-
-  it('handles prompts with null values', () => {
-    const mockPrompts = [
-      {
-        promptId: 'costSavingsInsightPart1',
-        prompt: null,
-      },
-      {
-        promptId: 'costSavingsInsightPart2',
-        prompt: null,
-      },
+    // Null values
+    const nullPrompts = [
+      { promptId: 'costSavingsInsightPart1', prompt: null },
+      { promptId: 'costSavingsInsightPart2', prompt: null },
     ];
-
     mockUseFindPrompts.mockReturnValue({
-      data: { prompts: mockPrompts },
+      data: { prompts: nullPrompts },
     } as unknown as ReturnType<typeof useFindPrompts>);
-
-    const { result } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
-
-    expect(result.current).toBeNull();
+    const { result: result2 } = renderHook(() => useFindCostSavingsPrompts(defaultParams));
+    expect(result2.current).toBeNull();
   });
 });

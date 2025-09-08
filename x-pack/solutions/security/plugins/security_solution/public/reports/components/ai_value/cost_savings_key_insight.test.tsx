@@ -108,31 +108,21 @@ describe('CostSavingsKeyInsight', () => {
     );
   });
 
-  it('renders the component with correct components', async () => {
+  it('renders component correctly and calls expected hooks', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
+
     await waitFor(() => {
+      // Component rendering
       expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
-  });
 
-  it('calls expected hooks', async () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    await waitFor(() => {
+      // Hook calls
       expect(mockUseKibana).toHaveBeenCalled();
       expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
       expect(mockUseAssistantAvailability).toHaveBeenCalled();
-    });
-  });
-
-  it('calls useFindCostSavingsPrompts with correct parameters', async () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    await waitFor(() => {
       expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
         context: {
           isAssistantEnabled: true,
@@ -143,25 +133,17 @@ describe('CostSavingsKeyInsight', () => {
     });
   });
 
-  it('handles null lensResponse', () => {
-    const propsWithNullResponse = {
-      lensResponse: null,
-    };
-
-    render(<CostSavingsKeyInsight {...propsWithNullResponse} />);
-
+  it('handles various error conditions and edge cases', () => {
+    // Null lensResponse
+    const { rerender } = render(<CostSavingsKeyInsight lensResponse={null} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
 
-  it('handles null prompts from useFindCostSavingsPrompts', () => {
+    // Null prompts
     mockUseFindCostSavingsPrompts.mockReturnValue(null);
-
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
+    rerender(<CostSavingsKeyInsight {...defaultProps} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
 
-  it('handles missing connectorId', () => {
+    // Missing connectorId
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
         // @ts-ignore
@@ -170,17 +152,14 @@ describe('CostSavingsKeyInsight', () => {
         },
       })
     );
-
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
+    rerender(<CostSavingsKeyInsight {...defaultProps} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('handles non-enterprise license', async () => {
+  it('handles license and assistant availability scenarios correctly', async () => {
+    // Non-enterprise license
     mockLicenseService.isEnterprise.mockReturnValue(false);
-
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
+    const { rerender } = render(<CostSavingsKeyInsight {...defaultProps} />);
     await waitFor(() => {
       expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
         context: {
@@ -190,16 +169,13 @@ describe('CostSavingsKeyInsight', () => {
         },
       });
     });
-  });
 
-  it('handles disabled assistant', async () => {
+    // Disabled assistant
     mockUseAssistantAvailability.mockReturnValue({
       hasAssistantPrivilege: false,
       isAssistantEnabled: false,
     });
-
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
+    rerender(<CostSavingsKeyInsight {...defaultProps} />);
     await waitFor(() => {
       expect(mockUseFindCostSavingsPrompts).toHaveBeenCalledWith({
         context: {
@@ -211,10 +187,11 @@ describe('CostSavingsKeyInsight', () => {
     });
   });
 
-  it('calls inference.chatComplete with correct parameters when all conditions are met', async () => {
+  it('handles chatComplete operations and prompt construction correctly', async () => {
     render(<CostSavingsKeyInsight {...defaultProps} />);
 
     await waitFor(() => {
+      // ChatComplete call with correct parameters
       expect(mockChatComplete).toHaveBeenCalledWith({
         connectorId: 'test-connector-id',
         messages: [
@@ -224,39 +201,8 @@ describe('CostSavingsKeyInsight', () => {
           },
         ],
       });
-    });
-  });
 
-  it('displays insight result when chatComplete succeeds', async () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(screen.getByText(chatCompleteResult)).toBeInTheDocument();
-    });
-  });
-
-  it('handles chatComplete error gracefully', async () => {
-    const mockChatCompleteError = jest.fn().mockRejectedValue(new Error('API Error'));
-
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        // @ts-ignore
-        inference: {
-          chatComplete: mockChatCompleteError,
-        },
-      })
-    );
-
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-    await waitFor(() => {
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
-  });
-
-  it('constructs prompt correctly with lensResponse data', async () => {
-    render(<CostSavingsKeyInsight {...defaultProps} />);
-
-    await waitFor(() => {
+      // Prompt construction with lensResponse data
       expect(mockChatComplete).toHaveBeenCalledWith({
         connectorId: 'test-connector-id',
         messages: [
@@ -268,6 +214,24 @@ describe('CostSavingsKeyInsight', () => {
           },
         ],
       });
+
+      // Display insight result
+      expect(screen.getByText(chatCompleteResult)).toBeInTheDocument();
+    });
+
+    // Handle chatComplete error
+    const mockChatCompleteError = jest.fn().mockRejectedValue(new Error('API Error'));
+    mockUseKibana.mockReturnValue(
+      createMockKibanaServices({
+        // @ts-ignore
+        inference: {
+          chatComplete: mockChatCompleteError,
+        },
+      })
+    );
+    const { rerender } = render(<CostSavingsKeyInsight {...defaultProps} />);
+    await waitFor(() => {
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
   });
 
