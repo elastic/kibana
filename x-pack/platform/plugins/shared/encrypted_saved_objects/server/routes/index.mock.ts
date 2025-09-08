@@ -19,6 +19,5 @@ export const routeDefinitionParamsMock = {
     config: ConfigSchema.validate(config) as ConfigType,
     encryptionKeyRotationService: encryptionKeyRotationServiceMock.create(),
     buildFlavor,
-    getClient: jest.fn(),
   }),
 };
