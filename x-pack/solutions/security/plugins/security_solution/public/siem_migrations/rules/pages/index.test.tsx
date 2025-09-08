@@ -15,7 +15,7 @@ import * as useNavigationModule from '@kbn/security-solution-navigation/src/navi
 import * as useGetIntegrationsModule from '../service/hooks/use_get_integrations';
 import * as useGetMigrationRulesModule from '../logic/use_get_migration_rules';
 import * as useGetMigrationTranslationStatsModule from '../logic/use_get_migration_translation_stats';
-import * as useMissingPrivilegesModule from '../../../detections/hooks/alerts/use_missing_privileges';
+import * as useMissingPrivilegesModule from '../../../common/hooks/use_missing_privileges';
 import * as useGetMigrationMissingPrivilegesModule from '../logic/use_get_migration_privileges';
 import * as useCallOutStorageModule from '../../../common/components/callouts/use_callout_storage';
 import { TestProviders } from '../../../common/mock';
