@@ -133,6 +133,7 @@ export const PresentationPanelInternal = <
         {...contentAttrs}
         css={styles.embPanel}
       >
+        <div ref={visibilityTrackerRef} css={styles.embVisibilityTracker} />
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
@@ -160,7 +161,6 @@ export const PresentationPanelInternal = <
         )}
         {!initialLoadComplete && <PanelLoader />}
         <div
-          ref={visibilityTrackerRef}
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
         >
@@ -191,6 +191,11 @@ const styles = {
     height: '100%',
     position: 'relative',
     overflow: 'hidden',
+  }),
+  embVisibilityTracker: css({
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
   }),
   embPanelContent: css({
     '&.embPanel__content': {
