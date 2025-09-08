@@ -58,6 +58,7 @@ interface CompleteFunctionParams {
   conversationId?: string;
   options?: Options;
   scope?: AssistantScope;
+  persist?: boolean;
 }
 
 type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
@@ -160,6 +161,7 @@ export class ObservabilityAIAssistantEvaluationChatClient {
   complete: CompleteFunction = async ({
     messages: messagesArg,
     conversationId,
+    persist = false,
     options = {},
     scope,
   }) => {
@@ -182,7 +184,7 @@ export class ObservabilityAIAssistantEvaluationChatClient {
             conversationId,
             messages,
             connectorId: this.connectorId,
-            persist: false,
+            persist,
             scopes: scope ? [scope] : ['observability'],
           }),
           asResponse: true,

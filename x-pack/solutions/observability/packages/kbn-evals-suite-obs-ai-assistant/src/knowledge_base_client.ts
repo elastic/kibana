@@ -27,16 +27,13 @@ export class KnowledgeBaseClient {
 
     await pRetry(
       async () => {
+        this.log.info('Waiting for knowledge base to be ready...');
         const response = await this.fetch<{}>('/internal/observability_ai_assistant/kb/setup', {
           method: 'POST',
           query: {
             wait_until_complete: true,
+            inference_id: '.elser-2-elasticsearch',
           },
-          body: JSON.stringify({
-            query: {
-              inference_id: '.elser-2-elasticsearch',
-            },
-          }),
         });
 
         this.log.info('Knowledge base is ready');
@@ -46,5 +43,12 @@ export class KnowledgeBaseClient {
     );
 
     this.log.success('Knowledge base installed');
+  }
+
+  async importEntries({ entries }: { entries: unknown[] }): Promise<void> {
+    await this.fetch<{}>('/internal/observability_ai_assistant/kb/entries/import', {
+      method: 'POST',
+      body: JSON.stringify({ entries }),
+    });
   }
 }
