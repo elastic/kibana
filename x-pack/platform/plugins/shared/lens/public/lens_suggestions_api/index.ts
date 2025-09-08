@@ -6,7 +6,7 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChartType } from '@kbn/visualization-utils';
+import { ChartType } from '@kbn/visualization-utils';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
 import type { DataViewsState } from '../state_management';
@@ -119,7 +119,7 @@ export const suggestionsApi = ({
   // if user has requested for a donut, we want to sligthly change the state
   // to return a donut instead of a pie chart
   const pieSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsPie');
-  const isDonut = chartType === 'donut';
+  const isDonut = chartType === ChartType.Donut;
   if (pieSuggestion && chartType && isDonut) {
     const visualizationState = visualizationMap[
       pieSuggestion.visualizationId
