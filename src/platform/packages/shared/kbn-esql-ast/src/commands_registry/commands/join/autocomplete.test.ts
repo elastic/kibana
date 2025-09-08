@@ -111,7 +111,7 @@ describe('JOIN Autocomplete', () => {
         filterText: '',
         kind: 'Issue',
         label: 'Create lookup index',
-        sortText: '0-0',
+        sortText: '1A',
         text: '',
       });
     });
@@ -141,7 +141,7 @@ describe('JOIN Autocomplete', () => {
         filterText: 'new_join_index',
         kind: 'Issue',
         label: 'Create lookup index "new_join_index"',
-        sortText: '0-0',
+        sortText: '1A',
         text: 'new_join_index',
       });
     });

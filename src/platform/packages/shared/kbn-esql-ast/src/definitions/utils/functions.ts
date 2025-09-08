@@ -457,7 +457,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
       }
     ),
 
-    sortText: '0-0',
+    sortText: '1A',
 
     command: {
       id: `esql.lookup_index.create`,
