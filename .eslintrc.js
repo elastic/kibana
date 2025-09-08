@@ -1573,6 +1573,7 @@ module.exports = {
         'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/platform/test/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],

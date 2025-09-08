@@ -14,7 +14,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
 
   describe('/api/console/proxy', () => {
     it('cannot be accessed by an anonymous user', async () => {
-      await supertest
+      supertest
         .post(`/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
         .set('kbn-xsrf', 'xxx')
         .send()

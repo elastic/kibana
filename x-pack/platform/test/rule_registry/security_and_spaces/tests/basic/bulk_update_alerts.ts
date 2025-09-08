@@ -89,9 +89,6 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);
-    });
-
-    before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 

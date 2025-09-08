@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
-    before(async () => {
+    after(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 

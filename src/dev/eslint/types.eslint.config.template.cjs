@@ -27,7 +27,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['server/**/*', '*functional*/**/*', '*api_integration*/**/*'],
+      files: ['server/**/*', 'platform/test/**/*'],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.
         // We'll tackle /public eventually.
@@ -38,7 +38,8 @@ module.exports = {
       files: [
         '*spaces_api_integration/common/services/basic_auth_supertest.ts',
         // TODO: high chances missing awaits cause test flakiness, 37 errors spotted
-        'x-pack/solutions/security/test/security_solution_api_integration/**/*'],
+        'x-pack/solutions/security/test/security_solution_api_integration/**/*',
+      ],
       rules: {
         '@typescript-eslint/no-floating-promises': 'off',
       },
