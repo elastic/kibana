@@ -59,47 +59,76 @@ export class StepExecutionProvider {
       const stepExecutions = this.getStepExecutions();
       const highlightStep = this.getHighlightStep();
 
-      // Clear existing decorations
+      // Clear existing decorations FIRST - important for cleanup
       if (this.decorationsCollection) {
         this.decorationsCollection.clear();
+        this.decorationsCollection = null;
       }
 
       // Only apply step execution decorations in readonly mode (Executions view)
       // This prevents interference with interactive highlighting
-      if (
-        !model ||
-        !yamlDocument ||
-        !stepExecutions ||
-        stepExecutions.length === 0 ||
-        !this.isReadOnly()
-      ) {
+      if (!model || !yamlDocument || !this.isReadOnly()) {
+        console.log('🎯 StepExecutionProvider: Skipping decoration update', {
+          hasModel: !!model,
+          hasYamlDocument: !!yamlDocument,
+          isReadOnly: this.isReadOnly(),
+          stepExecutionsLength: stepExecutions?.length || 0
+        });
         return;
       }
 
-      console.log(
-        '🎯 StepExecutionProvider: Updating decorations for',
-        stepExecutions.length,
-        'executions'
-      );
+      // If no step executions, clear decorations but don't error
+      if (!stepExecutions || stepExecutions.length === 0) {
+        console.log('🎯 StepExecutionProvider: No step executions to decorate');
+        return;
+      }
+
+      console.log('🎯 StepExecutionProvider: Processing', stepExecutions.length, 'step executions');
 
       const decorations = stepExecutions
-        .map((stepExecution) => {
+        .map((stepExecution, index) => {
           const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
           if (!stepNode) {
-            return null;
-          }
-          const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
-          if (!stepRange) {
+            console.warn(`❌ No stepNode found for stepId: ${stepExecution.stepId}`);
             return null;
           }
 
-          // Glyph decoration for status icon
+          const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
+          if (!stepRange) {
+            console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
+            return null;
+          }
+
+          // Find the line with the YAML list marker (-) that precedes this step
+          let dashLineNumber = stepRange.startLineNumber;
+          
+          // Search backwards from the step start to find the line with the dash
+          for (let lineNum = stepRange.startLineNumber; lineNum >= 1; lineNum--) {
+            const lineContent = model.getLineContent(lineNum);
+            const trimmedContent = lineContent.trim();
+            
+            // Check if this line starts with a dash and contains relevant content
+            if (trimmedContent.startsWith('-') && 
+                (trimmedContent.includes('name:') || 
+                 trimmedContent.includes(stepExecution.stepId) ||
+                 lineNum === stepRange.startLineNumber - 1)) {
+              dashLineNumber = lineNum;
+              break;
+            }
+            
+            // Don't search too far back
+            if (stepRange.startLineNumber - lineNum > 3) {
+              break;
+            }
+          }
+
+          // Glyph decoration for status icon - position at the dash line
           const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
             range: new monaco.Range(
-              stepRange.startLineNumber,
-              stepRange.startColumn,
-              stepRange.startLineNumber,
-              stepRange.endColumn
+              dashLineNumber,
+              1, // Start at column 1 for consistent glyph positioning
+              dashLineNumber,
+              1 // End at column 1 for single-point positioning
             ),
             options: {
               glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
@@ -108,15 +137,15 @@ export class StepExecutionProvider {
             },
           };
 
-          // Background decoration for execution status
+          // Background decoration for execution status - from dash line to end of step
           const bgClassName = `step-execution-${stepExecution.status} ${
             !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
           }`;
           const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
             range: new monaco.Range(
-              stepRange.startLineNumber,
-              stepRange.startColumn,
-              stepRange.endLineNumber - 1,
+              dashLineNumber, // Start from the dash line
+              1, // Start at column 1
+              stepRange.endLineNumber,
               stepRange.endColumn
             ),
             options: {
@@ -133,7 +162,7 @@ export class StepExecutionProvider {
 
       this.decorationsCollection = this.editor.createDecorationsCollection(decorations);
 
-      console.log('🎯 StepExecutionProvider: Applied', decorations.length, 'decorations');
+      console.log('✅ StepExecutionProvider: Applied', decorations.length, 'decorations for', stepExecutions.length, 'steps');
     } catch (error) {
       console.error('🎯 StepExecutionProvider: Error in updateDecorations:', error);
     }

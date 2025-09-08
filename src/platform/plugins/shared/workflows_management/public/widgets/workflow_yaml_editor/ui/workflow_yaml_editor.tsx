@@ -465,15 +465,17 @@ export const WorkflowYAMLEditor = ({
 
     // Create step execution provider if needed and we're in readonly mode
     try {
-      if (
-        readOnly &&
-        stepExecutions &&
-        stepExecutions.length > 0 &&
-        !unifiedProvidersRef.current?.stepExecution
-      ) {
-        console.log('🎯 Creating StepExecutionProvider');
+      if (readOnly && !unifiedProvidersRef.current?.stepExecution) {
+        console.log('🎯 Creating StepExecutionProvider (readOnly mode detected)', {
+          hasStepExecutions: !!stepExecutions,
+          stepExecutionsLength: stepExecutions?.length || 0,
+          hasYamlDocument: !!yamlDocument
+        });
         const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
-          getYamlDocument: () => yamlDocument,
+          getYamlDocument: () => {
+            console.log('🎯 StepExecutionProvider getYamlDocument called, returning:', !!yamlDocumentRef.current);
+            return yamlDocumentRef.current;
+          },
           getStepExecutions: () => stepExecutions || [],
           getHighlightStep: () => highlightStep || null,
           isReadOnly: () => readOnly,
@@ -490,7 +492,15 @@ export const WorkflowYAMLEditor = ({
     // Update decorations when dependencies change
     try {
       if (unifiedProvidersRef.current?.stepExecution) {
+        console.log('🎯 Updating StepExecutionProvider decorations', {
+          hasStepExecutions: !!stepExecutions,
+          stepExecutionsLength: stepExecutions?.length || 0,
+          hasYamlDocument: !!yamlDocument,
+          readOnly
+        });
         unifiedProvidersRef.current.stepExecution.updateDecorations();
+      } else {
+        console.log('🎯 No StepExecutionProvider to update');
       }
     } catch (error) {
       console.error(
@@ -634,7 +644,6 @@ export const WorkflowYAMLEditor = ({
 
       console.log('🎯 DECORATION: Starting decoration process');
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-      const processedPositions = new Set<string>(); // Track positions to avoid duplicates
 
       // Find all steps with connector types
       const stepNodes = getStepNodesWithType(yamlDocument);
@@ -837,7 +846,7 @@ export const WorkflowYAMLEditor = ({
       },
     });
 
-    // Add global CSS for Monaco hover widgets
+    // Add global CSS for Monaco hover widgets - avoid interfering with internal widgets
     const styleId = 'workflow-monaco-hover-styles';
     const existingStyle = document.getElementById(styleId);
 
@@ -845,43 +854,36 @@ export const WorkflowYAMLEditor = ({
       const style = document.createElement('style');
       style.id = styleId;
       style.textContent = `
-        /* Enhanced Monaco hover styling for workflow editor */
-        .monaco-editor .monaco-editor-hover,
-        .monaco-hover,
-        .editor-hover-widget,
-        [class*="monaco-hover"],
-        [class*="editor-hover"] {
-          width: 600px !important;
-          min-width: 500px !important;
-          max-width: 800px !important;
-          max-height: 400px !important;
-          font-size: 13px !important;
-          z-index: 1000 !important;
-          overflow-y: auto !important;
-          overflow-x: hidden !important;
-          display: flex !important;
-          flex-direction: column !important;
+        /* Enhanced Monaco hover styling for workflow editor - EXCLUDE glyph and contrib widgets */
+        .monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]),
+        .monaco-hover:not([class*="contrib"]):not([class*="glyph"]) {
+          width: 600px;
+          min-width: 500px;
+          max-width: 800px;
+          max-height: 400px;
+          font-size: 13px;
         }
         
-        .monaco-editor .monaco-editor-hover .monaco-hover-content,
-        .monaco-hover .monaco-hover-content {
-          width: 100% !important;
-          min-width: 500px !important;
-          max-width: 800px !important;
-          padding: 12px 16px !important;
-          flex: 1 !important;
-          overflow-y: auto !important;
-          overflow-x: hidden !important;
+        .monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .monaco-hover-content,
+        .monaco-hover:not([class*="contrib"]):not([class*="glyph"]) .monaco-hover-content {
+          width: 100%;
+          min-width: 500px;
+          max-width: 800px;
+          padding: 12px 16px;
         }
         
-        .monaco-editor .monaco-editor-hover .hover-contents,
-        .monaco-hover .hover-contents {
-          width: 100% !important;
-          min-width: 500px !important;
-          max-width: 800px !important;
-          flex: 1 !important;
-          overflow-y: auto !important;
-          overflow-x: hidden !important;
+        .monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents,
+        .monaco-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents {
+          width: 100%;
+          min-width: 500px;
+          max-width: 800px;
+        }
+        
+        /* Ensure Monaco's internal glyph hover widgets are never hidden */
+        .monaco-editor [class*="modesGlyphHoverWidget"],
+        .monaco-editor [class*="glyph"][class*="hover"] {
+          display: block !important;
+          visibility: visible !important;
         }
         
         /* Connector type decorations - GitLens style inline icons */
@@ -1230,21 +1232,23 @@ const componentStyles = {
         overflowY: 'auto !important',
         overflowX: 'hidden !important',
       },
-      '.monaco-editor .monaco-editor-hover .hover-contents': {
-        width: '100% !important',
-        minWidth: '500px !important',
-        maxWidth: '800px !important',
-        flex: '1 !important',
-        overflowY: 'auto !important',
-        overflowX: 'hidden !important',
+      '.monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents': {
+        width: '100%',
+        minWidth: '500px',
+        maxWidth: '800px',
+      },
+      // Ensure Monaco's internal glyph hover widgets work properly
+      '& [class*="modesGlyphHoverWidget"], & [class*="glyph"][class*="hover"]': {
+        display: 'block',
+        visibility: 'visible',
       },
       '.monaco-editor .monaco-editor-hover .markdown-docs': {
-        width: '100% !important',
-        minWidth: '500px !important',
-        maxWidth: '800px !important',
-        flex: '1 !important',
-        overflowY: 'auto !important',
-        overflowX: 'hidden !important',
+        width: '100%',
+        minWidth: '500px',
+        maxWidth: '800px',
+        flex: '1',
+        overflowY: 'auto',
+        overflowX: 'hidden',
       },
       '.monaco-editor .monaco-editor-hover h2': {
         fontSize: '16px !important',
