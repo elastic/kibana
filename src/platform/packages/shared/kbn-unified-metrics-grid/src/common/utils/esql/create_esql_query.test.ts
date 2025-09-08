@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
 
 describe('createESQLQuery', () => {
@@ -47,7 +48,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z"), host.name
-  | EVAL dimensions = host.name
+  | RENAME host.name AS ${DIMENSIONS_COLUMN}
 `.trim()
     );
   });
@@ -63,7 +64,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IS NOT NULL AND container.id IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z"), host.name, container.id
-  | EVAL dimensions = CONCAT(host.name, " › ", container.id)
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.name, " › ", container.id)
   | DROP host.name, container.id
 `.trim()
     );
