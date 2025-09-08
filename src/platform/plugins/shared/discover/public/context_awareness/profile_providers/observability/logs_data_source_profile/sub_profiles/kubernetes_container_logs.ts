@@ -15,13 +15,14 @@ import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
 export const KUBERNETES_CONTAINER_LOGS_RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
+  'log.level',
+  'message',
   'kubernetes.pod.name',
   'kubernetes.container.name',
   'kubernetes.namespace',
-  'orchestrator.cluster.name',
   'orchestrator.resource.name',
   'container.image.name',
-  'host.name',
+  'kubernetes.node.name',
 ];
 
 export const createKubernetesContainerLogsDataSourceProfileProvider = (
