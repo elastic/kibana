@@ -38,6 +38,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -83,6 +84,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   share?: SharePluginStart;
   contentManagement?: ContentManagementPublicStart;
+  dashboard: DashboardStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
