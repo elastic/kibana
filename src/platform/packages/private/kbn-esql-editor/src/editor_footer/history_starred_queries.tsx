@@ -693,35 +693,6 @@ export function HistoryAndStarredQueriesTabs({
         </EuiTabs>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-<<<<<<< HEAD
-            <EuiText
-              size="xs"
-              color="subdued"
-              data-test-subj="ESQLEditor-history-starred-queries-helpText"
-            >
-              <p>
-                {selectedTabId === 'history-queries-tab'
-                  ? (() => {
-                      const stats = getStorageStats();
-                      return i18n.translate('esqlEditor.history.historyItemsStorage', {
-                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
-                        values: {
-                          queryCount: stats.queryCount,
-                          storageSizeKB: stats.storageSizeKB,
-                        },
-                      });
-                    })()
-                  : i18n.translate('esqlEditor.history.starredItemslimit', {
-                      defaultMessage:
-                        'Showing {starredItemsCount} queries (max {starredItemsLimit})',
-                      values: {
-                        starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
-                        starredItemsCount: starredQueries.length ?? 0,
-                      },
-                    })}
-              </p>
-            </EuiText>
-=======
             {!isSpaceReduced && (
               <EuiText
                 size="xs"
@@ -791,7 +762,6 @@ export function HistoryAndStarredQueriesTabs({
                 />
               </EuiFlexItem>
             )}
->>>>>>> main
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
