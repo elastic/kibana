@@ -6,14 +6,20 @@
  */
 
 import { fetchPipelineStructureTree } from './fetch_pipeline_structure_tree';
-import { MAX_TREE_LEVEL, PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
+import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
+import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('fetchPipelineStructureTree', () => {
-  it('returns undefined if root pipeline is missing', () => {
+  it('returns a leaf node with false isManaged and isDeprecated if root pipeline is missing', () => {
     const allPipelines: Record<string, estypes.IngestPipeline> = {};
     const result = fetchPipelineStructureTree(allPipelines, 'nonexistent');
-    expect(result).toBeUndefined();
+    expect(result).toEqual({
+      pipelineName: 'nonexistent',
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    });
   });
 
   it('fetches a simple root pipeline', () => {

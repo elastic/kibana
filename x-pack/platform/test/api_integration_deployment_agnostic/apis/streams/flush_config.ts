@@ -7,11 +7,9 @@
 
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 import { createStreams } from './helpers/create_streams';
 
@@ -38,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       function getChildNames(stream: Streams.all.Definition): string[] {
         if (
           Streams.GroupStream.Definition.is(stream) ||
-          Streams.UnwiredStream.Definition.is(stream)
+          Streams.ClassicStream.Definition.is(stream)
         )
           return [];
         return stream.ingest.wired.routing.map((r) => r.destination);

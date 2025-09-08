@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server/service/knowledge_base_service/get_inference_id_from_write_index';
-import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { isArray, isObject } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

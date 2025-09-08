@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
-import {
-  ConversationRound,
-  RoundInput,
-  ToolCallWithResult,
-  isToolCallStep,
-} from '@kbn/onechat-common';
+import type { BaseMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import type { ConversationRound, RoundInput, ToolCallWithResult } from '@kbn/onechat-common';
+import { isToolCallStep } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 
 /**
@@ -86,7 +83,7 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
 
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: toolCall.result,
+    content: JSON.stringify({ results: toolCall.results }),
   });
 
   return [toolCallMessage, toolResultMessage];

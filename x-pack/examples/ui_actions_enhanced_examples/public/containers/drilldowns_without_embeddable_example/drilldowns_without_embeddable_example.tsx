@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
@@ -15,10 +16,10 @@ import {
   EuiFlyout,
   EuiPopover,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { useUiActions } from '../../context';
-import { SAMPLE_APP1_CLICK_TRIGGER, SampleMlJob, SampleApp1ClickContext } from '../../triggers';
+import type { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
+import { SAMPLE_APP1_CLICK_TRIGGER } from '../../triggers';
 
 export const job: SampleMlJob = {
   job_id: '123',
@@ -115,7 +116,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
       </EuiFlexGroup>
 
       {showManager && (
-        <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
+        <EuiFlyout onClose={() => setShowManager(false)} aria-label="Drilldown Manager">
           <plugins.uiActionsEnhanced.DrilldownManager
             key={viewRef.current}
             initialRoute={viewRef.current}

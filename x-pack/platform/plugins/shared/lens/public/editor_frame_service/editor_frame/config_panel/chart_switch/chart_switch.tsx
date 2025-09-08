@@ -8,7 +8,7 @@
 import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExperimentalBadge } from '../../../../shared_components';
-import {
+import type {
   Visualization,
   FramePublicAPI,
   VisualizationType,
@@ -19,19 +19,19 @@ import {
 } from '../../../../types';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
+import type { VisualizationState, DatasourceStates } from '../../../../state_management';
 import {
   insertLayer,
   removeLayers,
   useLensDispatch,
   useLensSelector,
-  VisualizationState,
-  DatasourceStates,
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
 } from '../../../../state_management';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ChartSwitchSelectable, SelectableEntry } from './chart_switch_selectable';
+import type { SelectableEntry } from './chart_switch_selectable';
+import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
 
 type VisChartSwitchPosition = VisualizationType & {

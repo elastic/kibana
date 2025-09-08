@@ -7,6 +7,7 @@
 
 import { assertRuleUpgradePreview } from '../../test_utils/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../test_utils/assert_rule_upgrade_after_review';
+import { assertDiffAfterSavingUnchangedValue } from '../../test_utils/assert_diff_after_saving_unchanged_value';
 
 describe('Upgrade diffable rule "threat_indicator_path" (threat_match rule type) after preview in flyout', () => {
   const ruleType = 'threat_match';
@@ -26,6 +27,15 @@ describe('Upgrade diffable rule "threat_indicator_path" (threat_match rule type)
       customized,
       upgrade,
       resolvedValue,
+    },
+  });
+
+  assertDiffAfterSavingUnchangedValue({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      upgrade,
     },
   });
 

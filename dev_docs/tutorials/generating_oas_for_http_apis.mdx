@@ -16,7 +16,7 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture', 'http', 'rest', 'api']
 To get OAS generated for HTTP APIs you must use the following components:
 
 1. Core's `router` or `router.versioned` for defining HTTP APIs provided via the `core.http` service to all plugins
-2. `@kbn/config-schema` request and response schemas, skip to <a href="#what-about-runtime-validation-libary-x">this</a> FAQ for more information
+2. `@kbn/config-schema` or `@kbn/zod` request and response schemas
 
 <DocCallOut title="Beyond runtime validation">
   Kibana's core platform supports `@kbn/config-schema` as a first-class citizen for various schema purposes: configuration, saved objects, and HTTP API request/response bodies.
@@ -133,6 +133,7 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
         },
         response: {
           200: {
+            description: 'Indicates a successful call.',
             body: fooResourceResponse,
           },
         },

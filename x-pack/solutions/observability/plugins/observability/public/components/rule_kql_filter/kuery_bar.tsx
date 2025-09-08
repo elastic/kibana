@@ -7,8 +7,8 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { DataViewBase } from '@kbn/es-query';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
 import { useEuiTheme } from '@elastic/eui';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';

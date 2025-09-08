@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
-import { McpGatewaySession } from './session';
-import { GatewayTool } from './types';
+import type { McpGatewaySession } from './session';
+import type { GatewayTool } from './types';
 import { toLangchainTool } from './utils';
 
 /**

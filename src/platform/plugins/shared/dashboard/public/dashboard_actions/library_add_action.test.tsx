@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { AddPanelToLibraryActionApi, AddToLibraryAction } from './library_add_action';
+import type { AddPanelToLibraryActionApi } from './library_add_action';
+import { AddToLibraryAction } from './library_add_action';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('@kbn/saved-objects-plugin/public', () => {

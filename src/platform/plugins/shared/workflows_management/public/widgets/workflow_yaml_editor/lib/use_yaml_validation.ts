@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
-import { useCallback, useState } from 'react';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
-import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { MUSTACHE_REGEX } from './mustache';
+import { monaco } from '@kbn/monaco';
+import type { z } from '@kbn/zod';
+import { useCallback, useRef, useState } from 'react';
+import { parseDocument } from 'yaml';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { MarkerSeverity, getSeverityString } from './utils';
+import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
+import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 interface UseYamlValidationProps {
+  workflowYamlSchema: z.ZodSchema;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
 }
 
@@ -25,11 +32,10 @@ const SEVERITY_MAP = {
 };
 
 export interface UseYamlValidationResult {
+  error: Error | null;
   validationErrors: YamlValidationError[] | null;
-  validateMustacheExpressions: (
-    model: monaco.editor.ITextModel | null,
-    monaco: typeof import('monaco-editor') | null,
-    secrets: Record<string, string>
+  validateVariables: (
+    editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor
   ) => void;
   handleMarkersChanged: (
     editor: monaco.editor.IStandaloneCodeEditor,
@@ -40,81 +46,42 @@ export interface UseYamlValidationResult {
 }
 
 export function useYamlValidation({
+  workflowYamlSchema,
   onValidationErrors,
 }: UseYamlValidationProps): UseYamlValidationResult {
+  const [error, setError] = useState<Error | null>(null);
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
-
-  // Function to find the current step in the workflow based on the path
-  // const findStepFromPath = useCallback((path: Array<string | number>) => {
-  //   if (!path || path.length < 3) {
-  //     return null;
-  //   }
-
-  //   // Look for 'steps' in the path
-  //   const stepsIdx = path.findIndex((p) => p === 'steps');
-  //   if (stepsIdx === -1) {
-  //     return null;
-  //   }
-
-  //   // Check if there's an index after 'steps'
-  //   if (stepsIdx + 1 >= path.length || typeof path[stepsIdx + 1] !== 'number') {
-  //     return null;
-  //   }
-
-  //   return {
-  //     stepIndex: path[stepsIdx + 1] as number,
-  //     isInStep: true,
-  //   };
-  // }, []);
-
-  // const findActionFromPath = useCallback((path: Array<string | number>) => {
-  //   if (!path || path.length < 3) {
-  //     return null;
-  //   }
-
-  //   // Look for 'actions' in the path
-  //   const actionsIdx = path.findIndex((p) => p === 'actions');
-  //   if (actionsIdx === -1) {
-  //     return null;
-  //   }
-
-  //   // Check if there's an index after 'actions'
-  //   if (actionsIdx + 1 >= path.length || typeof path[actionsIdx + 1] !== 'number') {
-  //     return null;
-  //   }
-
-  //   return {
-  //     actionIndex: path[actionsIdx + 1] as number,
-  //     isInAction: true,
-  //   };
-  // }, []);
+  const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   // Function to validate mustache expressions and apply decorations
-  const validateMustacheExpressions = useCallback(
-    (
-      model: monaco.editor.ITextModel | null,
-      monaco: typeof import('monaco-editor') | null,
-      secrets: Record<string, string> = {}
-    ) => {
-      if (!model || !monaco) {
+  const validateVariables = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor) => {
+      const model = editor.getModel();
+      if (!model) {
         return;
       }
+
+      if ('original' in model) {
+        // TODO: validate diff editor
+        return;
+      }
+
+      editor = editor as monaco.editor.IStandaloneCodeEditor;
+
+      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
       try {
         const text = model.getValue();
 
-        try {
-          // Parse the YAML to JSON to get the workflow definition
-          parseWorkflowYamlToJSON(text);
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
+        // Parse the YAML to JSON to get the workflow definition
+        const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
+        const yamlDocument = parseDocument(text);
+        const workflowGraph = result.success ? getWorkflowGraph(result.data) : null;
 
         // Collect markers to add to the model
         const markers: monaco.editor.IMarkerData[] = [];
 
-        const matches = [...text.matchAll(MUSTACHE_REGEX)];
+        const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
         for (const match of matches) {
           const matchStart = match.index ?? 0;
@@ -124,10 +91,29 @@ export function useYamlValidation({
           const startPos = model.getPositionAt(matchStart);
           const endPos = model.getPositionAt(matchEnd);
 
-          const errorMessage: string | null = null;
+          let errorMessage: string | null = null;
           const severity: YamlValidationErrorSeverity = 'warning';
 
-          // TODO: validate mustache variable for YAML step
+          const path = getCurrentPath(yamlDocument, matchStart);
+          const context = result.success
+            ? getContextSchemaForPath(result.data, workflowGraph!, path)
+            : null;
+
+          if (!match.groups?.key) {
+            errorMessage = `Variable is not defined`;
+          } else {
+            const parsedPath = parseVariablePath(match.groups.key);
+            if (parsedPath?.errors) {
+              errorMessage = parsedPath.errors.join(', ');
+            }
+            if (parsedPath?.propertyPath) {
+              if (!context) {
+                errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
+              } else if (!isValidSchemaPath(context, parsedPath.propertyPath)) {
+                errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+              }
+            }
+          }
 
           // Add marker for validation issues
           if (errorMessage) {
@@ -138,19 +124,50 @@ export function useYamlValidation({
               startColumn: startPos.column,
               endLineNumber: endPos.lineNumber,
               endColumn: endPos.column,
-              source: 'mustache-validation',
+              source: 'variable-validation',
+            });
+
+            decorations.push({
+              range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+              ),
+              options: {
+                inlineClassName: 'template-variable-error',
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              },
+            });
+          } else {
+            decorations.push({
+              range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+              ),
+              options: {
+                inlineClassName: 'template-variable-valid',
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              },
             });
           }
         }
 
+        if (decorationsCollection.current) {
+          decorationsCollection.current.clear();
+        }
+        decorationsCollection.current = editor.createDecorationsCollection(decorations);
+
         // Set markers on the model for the problems panel
-        monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        monaco.editor.setModelMarkers(model, 'variable-validation', markers);
+        setError(null);
+      } catch (e) {
+        setError(e as Error);
       }
     },
-    []
+    [workflowYamlSchema]
   );
 
   const handleMarkersChanged = useCallback(
@@ -186,8 +203,9 @@ export function useYamlValidation({
   );
 
   return {
+    error,
     validationErrors,
-    validateMustacheExpressions,
+    validateVariables,
     handleMarkersChanged,
   };
 }

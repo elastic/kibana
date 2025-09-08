@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { filter, first, map, switchMap, tap, timeout } from 'rxjs';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await spacesService.create({ id, name: id });
       await kibanaServer.importExport.load(
-        `x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space`,
+        `x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce_kibana_non_default_space`,
         { space: id }
       );
       await reportingAPI.initEcommerce();

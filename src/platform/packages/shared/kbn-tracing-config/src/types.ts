@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
+import type { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
 
 /**
  * Allowed configurations for OTLP tracing exporters
@@ -20,7 +20,7 @@ export interface TracingConfig {
   /**
    * Whether OpenTelemetry tracing is enabled.
    */
-  enabled?: boolean;
+  enabled: boolean;
   /**
    * At which rate spans get sampled if a sampling decision
    * needs to be made. Should be between 0-1.
@@ -29,5 +29,5 @@ export interface TracingConfig {
   /**
    * OTLP exporters for tracing data
    */
-  exporters?: TracingExporterConfig | TracingExporterConfig[];
+  exporters: TracingExporterConfig | TracingExporterConfig[];
 }

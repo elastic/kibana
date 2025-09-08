@@ -6,9 +6,11 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
+import { aiValueLinks } from '../../reports/links';
 import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
+import { siemReadinessLinks } from '../../siem_readiness/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
 import { alertsLink, alertSummaryLink } from '../../detections/links';
@@ -25,6 +27,7 @@ import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
+  aiValueLinks,
   alertsLink,
   alertSummaryLink,
   attackDiscoveryLinks,
@@ -39,6 +42,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   rulesLinks,
   onboardingLinks,
   managementLinks,
+  siemReadinessLinks,
 ]);
 
 export const getFilteredLinks = async (
@@ -49,6 +53,7 @@ export const getFilteredLinks = async (
 
   return Object.freeze([
     dashboardsLinks,
+    aiValueLinks,
     alertsLink,
     alertSummaryLink,
     attackDiscoveryLinks,
@@ -63,5 +68,6 @@ export const getFilteredLinks = async (
     rulesLinks,
     onboardingLinks,
     managementFilteredLinks,
+    siemReadinessLinks,
   ]);
 };

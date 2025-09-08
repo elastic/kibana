@@ -7,8 +7,8 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { KVState } from '../../types';
 import { KV_MAIN_PROMPT } from './prompts';
-import { KVProcessor } from '../../processor_types';
-import { HandleKVNodeParams } from './types';
+import type { KVProcessor } from '../../processor_types';
+import type { HandleKVNodeParams } from './types';
 import { KV_EXAMPLE_ANSWER } from './constants';
 import { createKVProcessor } from '../../util/processors';
 

@@ -23,6 +23,7 @@ export const getHosts = async ({
   alertsClient,
   apmDataAccessServices,
   infraMetricsClient,
+  schema,
 }: GetHostParameters): Promise<GetInfraMetricsResponsePayload> => {
   const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
     start: from,
@@ -37,6 +38,7 @@ export const getHosts = async ({
     to,
     limit,
     query,
+    schema,
   });
 
   if (hostNames.length === 0) {
@@ -55,6 +57,7 @@ export const getHosts = async ({
       limit,
       metrics,
       hostNames,
+      schema,
     }),
     getHostsAlertsCount({
       alertsClient,
@@ -92,9 +95,10 @@ const getHostNames = async ({
   to,
   limit,
   query,
+  schema = 'ecs',
 }: Pick<
   GetHostParameters,
-  'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query'
+  'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query' | 'schema'
 > & {
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
@@ -105,6 +109,7 @@ const getHostNames = async ({
     from,
     to,
     query,
+    schema,
   });
 
   const [monitoredHosts, apmHosts] = await Promise.all([
@@ -115,6 +120,7 @@ const getHostNames = async ({
           from,
           to,
           limit,
+          schema,
         })
       : undefined,
     apmDataAccessServices && apmDocumentSources

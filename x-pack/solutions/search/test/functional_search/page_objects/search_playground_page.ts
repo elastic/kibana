@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVE_PLAYGROUND_EXTENDED_TIMEOUT = 15000;
 
@@ -440,6 +440,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
       },
 
+      async runQueryInQueryMode(queryText: string) {
+        await testSubjects.existOrFail('searchPlaygroundChatQuestionFieldText');
+        await testSubjects.setValue('searchPlaygroundChatQuestionFieldText', queryText);
+        await testSubjects.click('RunElasticsearchQueryButton');
+      },
+
       async expectEditContextOpens(
         indexName: string = 'basic_index',
         expectedSelectedFields: string[] = ['baz']
@@ -599,7 +605,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async runQueryInQueryMode(queryText: string) {
         await testSubjects.existOrFail('searchPlaygroundSearchModeFieldText');
-        await testSubjects.setValue('searchPlaygroundSearchModeFieldText', `${queryText}`);
+        await testSubjects.setValue('searchPlaygroundSearchModeFieldText', queryText);
         await testSubjects.click('RunElasticsearchQueryButton');
       },
       async expectFieldToBeSelected(fieldName: string) {
@@ -686,7 +692,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       SaveExtendedTimeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
       async expectAndCloseSavedPlaygroundToast() {
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.equal('Playground saved');
+        expect(toastTitle).to.equal('playground saved');
       },
       async getPlaygroundIdFromUrl() {
         const url = await browser.getCurrentUrl();

@@ -7,8 +7,9 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { ApiService } from '../../../../lib/api';
-import { useMigrationStatus, MigrationState } from './use_migration_state';
+import type { ApiService } from '../../../../lib/api';
+import type { MigrationState } from './use_migration_state';
+import { useMigrationStatus } from './use_migration_state';
 import type { DataStreamResolutionType } from '../../../../../../common/types';
 
 export interface MigrationStateContext {

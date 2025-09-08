@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSelectHandler, HandleChange } from './create_select_handler';
+import type { HandleChange } from './create_select_handler';
+import { createSelectHandler } from './create_select_handler';
 
 describe('createSelectHandler', () => {
   describe('createSelectHandler()', () => {

@@ -11,15 +11,15 @@ import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
-import { TimeBounds } from '../../types';
+import type { TimeBounds } from '../../types';
 import { MetricTimesliceAnnotation } from './metric_timeslice_annotation';
-import { GetPreviewDataResponseResults } from './types';
+import type { GetPreviewDataResponseResults } from './types';
 
 interface Props {
   data: GetPreviewDataResponseResults;

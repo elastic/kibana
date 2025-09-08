@@ -4,18 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  MachineImplementationsFrom,
-  assign,
-  and,
-  enqueueActions,
-  setup,
-  ActorRefFrom,
-} from 'xstate5';
+import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
+import { assign, and, enqueueActions, setup, sendTo } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
-import {
+import type { Streams } from '@kbn/streams-schema';
+import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import type {
   StreamRoutingContext,
   StreamRoutingEvent,
   StreamRoutingInput,
@@ -29,7 +24,7 @@ import {
   createDeleteStreamActor,
 } from './stream_actors';
 import { routingConverter } from '../../utils';
-import { RoutingDefinitionWithUIAttributes } from '../../types';
+import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import { selectCurrentRule } from './selectors';
 import {
   createRoutingSamplesMachineImplementations,
@@ -57,7 +52,8 @@ export const streamRoutingMachine = setup({
     addNewRoutingRule: assign(({ context }) => {
       const newRule = routingConverter.toUIDefinition({
         destination: `${context.definition.stream.name}.child`,
-        if: ALWAYS_CONDITION,
+        where: ALWAYS_CONDITION,
+        status: 'enabled',
         isNew: true,
       });
 
@@ -110,7 +106,7 @@ export const streamRoutingMachine = setup({
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
   },
 }).createMachine({
-  /** @xstate-layout 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-R0K-PMf0T61RRZmvyVAlK2ayZ8LAIrfuObm2ksjQDUqrhm5iruKhTGvRKA+EaICaScYHj1une6cZ9tc1qzuPYQtWqS2-MAb8FQ1QAZvp-loTNoyPFXomppUqsUTQAw1IyTpLQCR5mVAogEeZ3w+C-WAFh3jhSeMQwI1gv6irqiaWRRQLhfkNBiXIIhq1+hbKcISPoCGkNZJnRwi9E7yCYcQHcdCclfApmkkaMDcgnEdHUu4DFGKnxdDOX4IAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGVNkwBDAWwDo9sdSAbbALzygGIBtABgF1FQADqli1sqXPxAAPRACZZATkoA2AIwAWABwL1sgKybZG1bIA0IAJ6IAzKr2V1XLgs3WA7Jq7uFb5QF8-czQsViISCkpwiAs2WGIyKhIAYzBsADdIbj4kECERHHFJGQRVBS5ZSh9y8uU9PWtrPTdzKwRZdWVKTWVZQz0FOx7ZNz0AoIwcfDCEyLJo6gh6MDZgyagAJXQlyiTwzDAsyTzRQpzi9V1KPWUFAe1Pa2UevRbEVVLOrmv39W9DdTGIFWoXiESiFgWSxWE1Ym22kFohxyxwKEjONk09lkQ00vgMei4yk0rxKhK4lDcdzc1gGqlqdkBwKmoMScwh2EWyyZGy2YFmqGQEDAyCRgmEJzRoGKAFpVNYuuo3HYdKpCQplE5iZY3rIuOpKIpugomnpdN0AYEgTDmeFWaR5rsyGsAHJgADucL5SQAFqR8KxoSF8J6dn6UvRRblxaiim8vJouho9HLNJjk8p1CSbhUCXTGj51WprIzrYQWbN7RDHaQXe6Qz6-VAA9z6778AdeEdo2JJdI3o8lNZ1Ap3Lj2t0ta0iRVbCPDO9rJ4TCWg2XbRWHXtWK6Pbydm2m-hA2sQwjMJGUT3YyUMzm9L1hh03PpVCTKaoHNcDI0NNiRyu1mmME2R2Ld8B3VtG2bUsQwAMwFABrC9u1OKU41+FRHBpW5qWUIdM21Uk9QpDV500Ewbn-S1uSAu1Nydbc6z3eDkAQgMIHEPk8DSVAEL5FiENogBBJJMAFZD8ivdEEGpD8enKNxFMcZ8BjfYdKBpJpFEJG4mlUACQXXcFQIY8CmO2ASA2FNBkEoAR6BrFiqAE4TRPEztkRQ3tilVHwHGpLRVBGWx3jMQjtHsJofFqU03EVTQLXGVdaI3CEz1hPcG39I8W0yvYO2yMVJNQvsSkaTolQ8Wd3gSkcSVC-UPF1OpFRcPVi2o0sUuM9Lg0yg9oNXeswzACMPKKiVr0MeVXD1dV3D0lx6tNckOgUXUjC+dp5AMm0Zh6iBRD67YssPdhcpOg8Cq7YrvLeNxnEoPUCWxZQ4sVRd6rehMLmfDQuA8e9Rk65LywOo6eUuqCcpgvczwkybpLsIwHFUWbzX0Wd6pChwCwUh7XCaXa132kDeshr0Bphoa4cO89VEKqNbuvIKOieoldB6X5+n0erfiUfouA0dx3jnNxie6sm6YyqHsvO2HthIchUAyBGYyRoLOkcbp3Cedb1HqPn2hUP8Ae2g2EolsGpYhyC5ePGW+VgUhVfGpnEbQkoPgNXodF6AxdEeerfHJVVuiFgHbhMcWQcA63K0ocmQyVlXHbYDjcC43AeL4yghSWfZXLEkU3cvErikaNwunI-n4rUIKXkIkwLie75hcpf4raMm2Tz3FO0jT6yBTshzMCcvPRrAQuWRE4u1akz2TEUfy6gDnRasnN56i12bCXkWRGkMLvSYTpO93QAQIBrNOM6znO+Qv2BhUwIv3MZsu7oQSuDSCw+LnKRUFxg76EoHYU0Pg6RaHXsfYCp9pbHQfpfa+CC2BD1svZRyAoqCP2fq-Eu78vIs3kAmciGhfB-SGF9IcVxGh6QzN8PUMC6IQhIAKIUyBHawH5IKYUg1e6KzAGw4U89y79h6D7awAMCRaCHAoEkzVyRxV-v0OUdJ9Kx0MifeYrCeEcIQVwnR7C+GO1DLgcMIjP4Eh+joY0NIYqmkbq0XUQUnoAIaLoAGHQmGpW4UY-RvjeHU34U7F211PLMyRl8ckTxhw6BuAlRQyh5ENCrpRcoi40Z4UYRovasDtGCN0ZwygF8r5x1tOnTi1Bs68UQU-ZAL8Z5uXwTdD2pVA5XHXs+A+9Rky-HkUYTopR1ClEeIqL43jjKGMCRTLhJTkEkwoKg5ANkR6YOQNggQdSGm2lnm-Fp6tF6qnJLqDwHclRAMIvIR6AwMkJSVO4AIlpcCoCFPAHINEWT7IXqVWUj07nKmGWqDUr4m4t3oWUDwPhXDWHaN4mgdBGAsHwF80RbQ6RdCeEYIKQVPDDmsMkioSYyg3LRnmYGSUylaNaBNA5Py1AKiVP0QFNxgUkkXFXWcjgfAjHvOMnJCzmGQjACiz++glBqjuG1R4zwSQJQTD0P6DR1TkRjhSzReSqxgSgBBXkIrrxKnJF8LQwx9CeF6CSe8H5yIjluPoYZosJkgWrLWXcsszp6qRv7BwQxKTbVxORWVGgHANB+KmLa6i1W5MFc6xirr+KIVYB6z2IwExGsMM+Aw5RN4IG0PKOoeELiY2-AoR1cDba6vCa04oNwq4G3Ws+fM1I5FN01v5bmdqPH+H5ZLMtwT9zQygEm0qdJ5AaV9QYXwBtxzLRHBpGxdR1QE1VVaUG3de0mP7o7IdxQRgVCqvXOVcU9TY1VJUd6e94wDFLfMM+2w5nBO3YgOK9g60msbTSYOjwVBcExPofQ1JTSaGvSwgpfiZmPoQLpCkcVfC-qFsMfFTd5oGmGcaHl7hhyyGAwEvRMycOJsrbSnyki80UUUC4GkQ4kmXLId6-ouIyjOEkeSldlKNX4f8fe9V5AINxXlEpWDvLo6IacScroZR3AwphZSU0jy-BAA */
   id: 'routingStream',
   context: ({ input }) => ({
     currentRuleId: null,
@@ -136,6 +132,14 @@ export const streamRoutingMachine = setup({
           reenter: true,
         },
       },
+      invoke: {
+        id: 'routingSamplesMachine',
+        src: 'routingSamplesMachine',
+        input: ({ context }) => ({
+          definition: context.definition,
+          documentMatchFilter: 'matched',
+        }),
+      },
       states: {
         idle: {
           id: 'idle',
@@ -159,16 +163,18 @@ export const streamRoutingMachine = setup({
         creatingNewRule: {
           id: 'creatingNewRule',
           entry: [{ type: 'addNewRoutingRule' }],
-          exit: [{ type: 'resetRoutingChanges' }],
-          initial: 'changing',
-          invoke: {
-            id: 'routingSamplesMachine',
-            src: 'routingSamplesMachine',
-            input: ({ context }) => ({
-              definition: context.definition,
-              condition: selectCurrentRule(context).if,
+          exit: [
+            { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: undefined,
             }),
-          },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
+          ],
+          initial: 'changing',
           states: {
             changing: {
               on: {
@@ -181,10 +187,10 @@ export const streamRoutingMachine = setup({
                     enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
 
                     // Trigger samples collection only on condition change
-                    if (event.routingRule.if) {
+                    if (event.routingRule.where) {
                       enqueue.sendTo('routingSamplesMachine', {
                         type: 'routingSamples.updateCondition',
-                        condition: event.routingRule.if,
+                        condition: event.routingRule.where,
                       });
                     }
                   }),
@@ -198,6 +204,14 @@ export const streamRoutingMachine = setup({
                   guard: 'canForkStream',
                   target: 'forking',
                 },
+                'routingSamples.setDocumentMatchFilter': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: event.filter,
+                    });
+                  }),
+                },
               },
             },
             forking: {
@@ -209,8 +223,9 @@ export const streamRoutingMachine = setup({
 
                   return {
                     definition: context.definition,
-                    if: currentRoutingRule.if,
+                    where: currentRoutingRule.where,
                     destination: currentRoutingRule.destination,
+                    status: currentRoutingRule.status,
                   };
                 },
                 onDone: {

@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
+import type { Writable } from '@kbn/utility-types';
 import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
-import {
+import type {
   ColorStylePropertyDescriptor,
   LayerDescriptor,
   VectorStyleDescriptor,
@@ -77,7 +78,7 @@ export function migrateOtherCategoryColor({
         return;
       }
 
-      (layerDescriptor.style as VectorStyleDescriptor)!.properties = {
+      (layerDescriptor.style as Writable<VectorStyleDescriptor>)!.properties = {
         ...(layerDescriptor.style as VectorStyleDescriptor)!.properties,
         [styleName]: migrateColorProperty(
           (layerDescriptor.style as VectorStyleDescriptor)!.properties[

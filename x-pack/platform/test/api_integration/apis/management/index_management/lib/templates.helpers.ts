@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { INDEX_PATTERNS } from '../constants';
 
 const templateMock = {

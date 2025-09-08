@@ -10,7 +10,7 @@
 import { processBucket } from './process_bucket';
 
 import type { Panel, Series } from '../../../../common/types';
-import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import type { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
 
 function createValueObject(key: string | number, value: string | number, seriesId: string) {
   return { key_as_string: `${key}`, doc_count: value, key, [seriesId]: { value } };

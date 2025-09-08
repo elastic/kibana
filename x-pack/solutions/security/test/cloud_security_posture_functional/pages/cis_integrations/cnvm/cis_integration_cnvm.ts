@@ -14,8 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/229263
-  describe.skip('Test adding Cloud Security Posture Integrations CNVM', function () {
+  describe('Test adding Cloud Security Posture Integrations CNVM', function () {
     this.tags(['cloud_security_posture_cis_integration_cnvm']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     const retry = getService('retry');

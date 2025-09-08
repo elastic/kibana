@@ -16,10 +16,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-
 import { i18n } from '@kbn/i18n';
-import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
-import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import {
+  PrivilegeMonitoringEngineStatusEnum,
+  type PrivMonHealthResponse,
+  type InitMonitoringEngineResponse,
+} from '../../../common/api/entity_analytics';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -166,7 +168,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       });
     }
 
-    if (engineStatus.data?.status === 'not_found') {
+    if (engineStatus.data?.status === PrivilegeMonitoringEngineStatusEnum.not_installed) {
       return dispatch({ type: 'SHOW_ONBOARDING' });
     } else {
       return dispatch({ type: 'SHOW_DASHBOARD' });
@@ -202,7 +204,10 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     <>
       {state.type === 'dashboard' && (
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={oldSourcererDataViewSpec} />
+          <SiemSearchBar
+            id={InputsModelId.global}
+            sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
+          />
         </FiltersGlobal>
       )}
 

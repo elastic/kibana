@@ -8,6 +8,8 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { RunscriptActionResult } from '../../runscript_action_result';
+import type { ArgSelectorState, SupportedArguments } from '../../console';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
 import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
@@ -17,6 +19,8 @@ import type {
   ResponseActionRunScriptParameters,
 } from '../../../../../common/endpoint/types';
 import type { ActionRequestComponentProps } from '../types';
+import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
+
 export interface CrowdStrikeRunScriptActionParameters {
   Raw?: string[];
   HostPath?: string[];
@@ -30,9 +34,16 @@ export interface MicrosoftDefenderEndpointRunScriptActionParameters {
   Args?: string[];
 }
 
+export interface SentinelOneRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
+}
+
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
-    CrowdStrikeRunScriptActionParameters | MicrosoftDefenderEndpointRunScriptActionParameters,
+    | CrowdStrikeRunScriptActionParameters
+    | MicrosoftDefenderEndpointRunScriptActionParameters
+    | SentinelOneRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -42,8 +53,9 @@ export const RunScriptActionResult = memo<
     const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
 
     if (!endpointId) {
-      return;
+      return {} as unknown as RunScriptActionRequestBody;
     }
+
     // Note TC: I had much issues moving this outside of useMemo - caused by command type. If you think this is a problem - please try to move it out.
     const getParams = () => {
       const args = command.args.args;
@@ -69,21 +81,28 @@ export const RunScriptActionResult = memo<
         };
       }
 
-      return {};
-    };
+      if (agentType === 'sentinel_one') {
+        const { inputParams } = args as SentinelOneRunScriptActionParameters;
+        const scriptSelectionState: ArgSelectorState<CustomScriptSelectorState>[] | undefined =
+          command.argState?.script;
 
-    const parameters = getParams();
-    // Early return if we have no parameters
-    if (Object.keys(parameters).length === 0) {
-      return;
-    }
+        if (scriptSelectionState && scriptSelectionState?.[0].store?.selectedOption?.id) {
+          return {
+            scriptId: scriptSelectionState[0].store.selectedOption.id,
+            scriptInput: inputParams?.[0],
+          };
+        }
+      }
+
+      return {} as unknown as RunScriptActionRequestBody;
+    };
 
     return {
       agent_type: agentType,
       endpoint_ids: [endpointId],
-      parameters,
+      parameters: getParams(),
       comment: command.args.args?.comment?.[0],
-    };
+    } as unknown as RunScriptActionRequestBody;
   }, [command]);
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
@@ -114,17 +133,25 @@ export const RunScriptActionResult = memo<
         { defaultMessage: 'RunScript was successful.' }
       )}
     >
-      <ExecuteActionHostResponse
-        action={completedActionDetails}
-        canAccessFileDownloadLink={true}
-        agentId={command.commandDefinition?.meta?.endpointId}
-        textSize="s"
-        data-test-subj="console"
-        // Currently file is not supported for CrowdStrike
-        hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
-        showPasscode={false}
-        hideContext={true}
-      />
+      {command.commandDefinition?.meta?.agentType === 'sentinel_one' ? (
+        <RunscriptActionResult
+          action={completedActionDetails}
+          agentId={command.commandDefinition?.meta?.endpointId}
+          data-test-subj="sentinelOneRunscriptResult"
+        />
+      ) : (
+        <ExecuteActionHostResponse
+          action={completedActionDetails}
+          canAccessFileDownloadLink={true}
+          agentId={command.commandDefinition?.meta?.endpointId}
+          textSize="s"
+          data-test-subj="console"
+          // Currently file is not supported for CrowdStrike
+          hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
+          showPasscode={false}
+          hideContext={true}
+        />
+      )}
     </ResultComponent>
   );
 });

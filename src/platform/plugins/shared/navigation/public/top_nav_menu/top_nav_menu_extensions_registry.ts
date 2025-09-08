@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export class TopNavMenuExtensionsRegistry {
   private menuItems: RegisteredTopNavMenuData[];

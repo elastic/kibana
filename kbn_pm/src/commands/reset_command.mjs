@@ -12,22 +12,25 @@ import Path from 'path';
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
-import * as Bazel from '../lib/bazel.mjs';
-import { findPluginCleanPaths, readCleanPatterns } from '../lib/find_clean_paths.mjs';
+import {
+  collectBazelPaths,
+  findPluginCleanPaths,
+  readCleanPatterns,
+} from '../lib/find_clean_paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'reset',
-  description:
-    'Deletes node_modules and output directories, resets internal and disk caches, and stops Bazel server',
+  description: 'Deletes node_modules and output directories, resets internal and disk caches',
   reportTimings: {
     group: 'scripts/kbn reset',
     id: 'total',
   },
   flagsHelp: `
+    --allow-root         Required supplementary flag if you're running this command as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
-  async run({ args, log }) {
+  async run({ log }) {
     log.warning(dedent`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
@@ -39,14 +42,11 @@ export const command = {
       Path.resolve(REPO_ROOT, 'x-pack/node_modules'),
       Path.resolve(REPO_ROOT, 'data'),
       Path.resolve(REPO_ROOT, '.es'),
+      Path.resolve(REPO_ROOT, 'target'),
+      Path.resolve(REPO_ROOT, '.moon', 'cache'),
+      ...collectBazelPaths(),
       ...readCleanPatterns(REPO_ROOT),
       ...(await findPluginCleanPaths(log)),
     ]);
-
-    if (await Bazel.isInstalled(log)) {
-      const quiet = args.getBooleanValue('quiet');
-      await Bazel.expungeCache(log, { quiet });
-      await Bazel.cleanDiskCache(log);
-    }
   },
 };

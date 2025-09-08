@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,

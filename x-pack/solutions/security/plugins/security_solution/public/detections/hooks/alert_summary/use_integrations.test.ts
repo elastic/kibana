@@ -10,8 +10,7 @@ import { useIntegrations } from './use_integrations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import { FILTER_KEY } from '../../components/alert_summary/search_bar/integrations_filter_button';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { RELATED_INTEGRATION } from '../../constants';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -42,25 +41,15 @@ describe('useIntegrations', () => {
         version: '',
       },
     ];
-    const ruleResponse = {
-      rules: [
-        {
-          related_integrations: [{ package: 'splunk' }],
-          rule_id: 'SplunkRuleId',
-        } as RuleResponse,
-      ],
-      isLoading: false,
-    };
 
-    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
+    const { result } = renderHook(() => useIntegrations({ packages }));
 
     expect(result.current).toEqual({
-      isLoading: false,
       integrations: [
         {
           checked: 'on',
           'data-test-subj': 'alert-summary-integration-option-Splunk',
-          key: 'SplunkRuleId',
+          key: 'splunk',
           label: 'Splunk',
         },
       ],
@@ -80,10 +69,10 @@ describe('useIntegrations', () => {
                     negate: true,
                     disabled: false,
                     type: 'phrase',
-                    key: FILTER_KEY,
-                    params: { query: 'SplunkRuleId' },
+                    key: RELATED_INTEGRATION,
+                    params: { query: 'splunk' },
                   },
-                  query: { match_phrase: { [FILTER_KEY]: 'SplunkRuleId' } },
+                  query: { match_phrase: { [RELATED_INTEGRATION]: 'splunk' } },
                 },
               ]),
             },
@@ -101,85 +90,17 @@ describe('useIntegrations', () => {
         version: '',
       },
     ];
-    const ruleResponse = {
-      rules: [
-        {
-          related_integrations: [{ package: 'splunk' }],
-          rule_id: 'SplunkRuleId',
-        } as RuleResponse,
-      ],
-      isLoading: false,
-    };
 
-    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
+    const { result } = renderHook(() => useIntegrations({ packages }));
 
     expect(result.current).toEqual({
-      isLoading: false,
       integrations: [
         {
           'data-test-subj': 'alert-summary-integration-option-Splunk',
-          key: 'SplunkRuleId',
+          key: 'splunk',
           label: 'Splunk',
         },
       ],
-    });
-  });
-
-  it('should not return a integration if no rule match', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
-      },
-    });
-
-    const packages: PackageListItem[] = [
-      {
-        id: 'splunk',
-        name: 'splunk',
-        status: installationStatuses.Installed,
-        title: 'Splunk',
-        version: '',
-      },
-    ];
-    const ruleResponse = {
-      rules: [],
-      isLoading: false,
-    };
-
-    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      integrations: [],
-    });
-  });
-
-  it('should return isLoading true if rules are loading', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
-      },
-    });
-
-    const packages: PackageListItem[] = [
-      {
-        id: 'splunk',
-        name: 'splunk',
-        status: installationStatuses.Installed,
-        title: 'Splunk',
-        version: '',
-      },
-    ];
-    const ruleResponse = {
-      rules: [],
-      isLoading: true,
-    };
-
-    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
-
-    expect(result.current).toEqual({
-      isLoading: true,
-      integrations: [],
     });
   });
 });

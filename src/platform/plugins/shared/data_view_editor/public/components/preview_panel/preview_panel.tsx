@@ -11,13 +11,13 @@ import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import { MatchedIndicesSet } from '../../types';
+import type { MatchedIndicesSet } from '../../types';
 
 enum ViewMode {
   allIndices = 'allIndices',

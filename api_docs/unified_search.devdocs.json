@@ -725,7 +725,23 @@
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
-              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; timeHistory?: ",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; esqlEditorInitialState?: Partial<",
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.ESQLEditorRestorableState",
+                "text": "ESQLEditorRestorableState"
+              },
+              "> | undefined; onEsqlEditorInitialStateChange?: ((initialState: Partial<",
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.ESQLEditorRestorableState",
+                "text": "ESQLEditorRestorableState"
+              },
+              ">) => void) | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1171,6 +1187,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.getDataViewHelpText",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewHelpText",
+            "description": [
+              "\nOptional callback to get help text based on the active data view"
+            ],
+            "signature": [
+              "((dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => React.ReactNode) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.DataViewPickerProps.getDataViewHelpText.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

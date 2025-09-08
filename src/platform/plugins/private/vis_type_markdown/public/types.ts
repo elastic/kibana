@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Style } from '@kbn/expressions-plugin/public';
+import type { Style } from '@kbn/expressions-plugin/public';
 
 export interface Arguments {
   markdown: string;

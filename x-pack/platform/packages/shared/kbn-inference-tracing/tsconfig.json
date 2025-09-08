@@ -18,5 +18,6 @@
     "@kbn/inference-common",
     "@kbn/safer-lodash-set",
     "@kbn/std",
+    "@kbn/tracing-utils",
   ]
 }

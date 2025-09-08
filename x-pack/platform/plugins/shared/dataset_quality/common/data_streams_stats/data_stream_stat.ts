@@ -6,10 +6,10 @@
  */
 
 import { DEFAULT_DATASET_QUALITY, DEFAULT_QUALITY_DOC_STATS } from '../constants';
-import { DataStreamType, QualityIndicators } from '../types';
+import type { DataStreamType, QualityIndicators } from '../types';
 import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
-import { Integration } from './integration';
-import { DataStreamStatType } from './types';
+import type { Integration } from './integration';
+import type { DataStreamStatType } from './types';
 
 interface QualityStat {
   percentage: number;

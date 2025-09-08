@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   InfraMetadata,
   InfraMetadataRequest,
 } from '@kbn/infra-plugin/common/http_api/metadata_api';
@@ -57,8 +57,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('7.0.0', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/7.0.0/hosts'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/7.0.0/hosts'
+        )
+      );
 
       it('hosts', async () => {
         const metadata = await fetchMetadata({
@@ -77,8 +85,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('6.6.0', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/6.6.0/docker'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/6.6.0/docker'
+        )
+      );
 
       it('docker', async () => {
         const metadata = await fetchMetadata({
@@ -99,7 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('8.0.0', () => {
       describe('cloud and host information', () => {
         const archiveName =
-          'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics_with_aws';
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics_with_aws';
         before(() => esArchiver.load(archiveName));
         after(() => esArchiver.unload(archiveName));
 

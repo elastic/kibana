@@ -6,10 +6,12 @@
  */
 
 import type { OnechatEvent } from '../base/events';
+import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
+  toolProgress = 'tool_progress',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
@@ -38,12 +40,27 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
   return event.type === ChatEventType.toolCall;
 };
 
+// Tool progress
+
+export interface ToolProgressEventData {
+  tool_call_id: string;
+  message: string;
+}
+
+export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;
+
+export const isToolProgressEvent = (
+  event: OnechatEvent<string, any>
+): event is ToolProgressEvent => {
+  return event.type === ChatEventType.toolProgress;
+};
+
 // Tool result
 
 export interface ToolResultEventData {
   tool_call_id: string;
   tool_id: string;
-  result: string;
+  results: ToolResult[];
 }
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;
@@ -157,6 +174,7 @@ export const isConversationUpdatedEvent = (
  */
 export type ChatAgentEvent =
   | ToolCallEvent
+  | ToolProgressEvent
   | ToolResultEvent
   | ReasoningEvent
   | MessageChunkEvent

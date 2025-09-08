@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { MachineLearningAnomaliesTableProvider } from './anomalies_table';
 import { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
@@ -49,6 +49,7 @@ import { MachineLearningSettingsProvider } from './settings';
 import { MachineLearningSettingsCalendarProvider } from './settings_calendar';
 import { MachineLearningSettingsFilterListProvider } from './settings_filter_list';
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
+import { MachineLearningRuleEditorFlyoutProvider } from './rule_editor_flyout';
 import { MachineLearningStackManagementJobsProvider } from './stack_management_jobs';
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
@@ -168,6 +169,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
+  const ruleEditorFlyout = MachineLearningRuleEditorFlyoutProvider(context);
   const tableService = MlTableServiceProvider(context);
   const stackManagementJobs = MachineLearningStackManagementJobsProvider(context, {
     jobTable,
@@ -238,6 +240,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settings,
     settingsCalendar,
     settingsFilterList,
+    ruleEditorFlyout,
     singleMetricViewer,
     stackManagementJobs,
     suppliedConfigurations,

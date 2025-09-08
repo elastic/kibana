@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../../registry';
-import { autocomplete } from './autocomplete';
-import { validate } from './validate';
+import { columnsAfter } from './columns_after';
+import { autocomplete } from '../stats/autocomplete';
+import { validate } from '../stats/validate';
 import type { ICommandContext } from '../../types';
+import type { ICommandMethods } from '../../registry';
 
 const inlineStatsCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
+  columnsAfter,
 };
 
 export const inlineStatsCommand = {
@@ -24,9 +26,16 @@ export const inlineStatsCommand = {
     hidden: true,
     description: i18n.translate('kbn-esql-ast.esql.definitions.inlineStatsDoc', {
       defaultMessage:
-        'Calculates an aggregate result and merges that result back into the stream of input data. Without the optional `BY` clause this will produce a single result which is appended to each row. With a `BY` clause this will produce one result per grouping and merge the result into the stream based on matching group keys.',
+        'Unlike STATS, INLINESTATS preserves all columns from the previous pipe and returns them together with the new aggregate columns.',
     }),
-    declaration: '',
-    examples: ['… | EVAL bar = a * b | INLINESTATS m = MAX(bar) BY b'],
+    declaration: `INLINESTATS [column1 =] expression1 [WHERE boolean_expression1][,
+      ...,
+      [columnN =] expressionN [WHERE boolean_expressionN]]
+      [BY grouping_expression1[, ..., grouping_expressionN]]`,
+    examples: [
+      '… | inlinestats avg = avg(a)',
+      '… | inlinestats sum(b) by b',
+      '… | inlinestats sum(b) by b % 2',
+    ],
   },
 };

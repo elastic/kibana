@@ -7,20 +7,20 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
-import { ConfigKey, SyntheticsMonitor } from '../../common/runtime_types';
+import type { SyntheticsMonitor } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import {
-  SavedObjectsClientContract,
-  type SavedObjectsFindOptions,
-} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { type SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
 } from '../../common/types/saved_objects';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -603,11 +603,12 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         ...options,
+        perPage: 10000,
       });
 
       expect(soClient.find).toHaveBeenLastCalledWith({
         type: legacySyntheticsMonitorTypeSingle,
-        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true' },
+        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true', perPage: 10000 },
       });
 
       expect(result).toStrictEqual(mockFindResult);
@@ -632,7 +633,8 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         search: 'test',
-        perPage: 5000,
+        perPage: 10000,
+        page: 1,
       });
     });
   });
@@ -809,6 +811,7 @@ describe('MonitorConfigRepository', () => {
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 
@@ -836,6 +839,7 @@ describe('MonitorConfigRepository', () => {
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 

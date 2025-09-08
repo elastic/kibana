@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getOperator, shouldOperate, Rule, Operator } from './operators_utils';
+import type { Rule } from './operators_utils';
+import { getOperator, shouldOperate, Operator } from './operators_utils';
 
 describe('getOperator(operator)', () => {
   test('should return operator function', () => {

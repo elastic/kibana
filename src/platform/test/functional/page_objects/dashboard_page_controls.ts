@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ControlWidth,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { ControlWidth, ControlsChainingSystem } from '@kbn/controls-schemas';
+import type { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
+import type { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 interface OptionsListAdditionalSettings {
@@ -52,6 +48,7 @@ export class DashboardPageControls extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
 
@@ -155,12 +152,12 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async updateChainingSystem(chainingSystem: ControlGroupChainingSystem) {
+  public async updateChainingSystem(chainingSystem: ControlsChainingSystem) {
     this.log.debug(`Update control group chaining system to ${chainingSystem}`);
     await this.openControlGroupSettingsFlyout();
     await this.testSubjects.existOrFail('control-group-chaining');
     // currently there are only two chaining systems, so a switch is used.
-    const switchStateToChainingSystem: { [key: string]: ControlGroupChainingSystem } = {
+    const switchStateToChainingSystem: { [key: string]: ControlsChainingSystem } = {
       true: 'HIERARCHICAL',
       false: 'NONE',
     };
@@ -406,7 +403,11 @@ export class DashboardPageControls extends FtrService {
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.testSubjects.click(
+        `optionsList-control-${controlId}`,
+        500,
+        await this.panelActions.getContainerTopOffset()
+      );
       await this.retry.waitForWithTimeout('popover to open', 500, async () => {
         return await this.testSubjects.exists(`optionsList-control-popover`);
       });

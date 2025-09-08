@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('calendar creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
 
       await asyncForEach(jobConfigs, async (jobConfig) => {

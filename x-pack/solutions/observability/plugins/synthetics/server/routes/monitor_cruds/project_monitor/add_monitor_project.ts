@@ -14,8 +14,8 @@ import {
   syntheticsMonitorSavedObjectType,
 } from '../../../../common/types/saved_objects';
 import { validateSpaceId } from '../services/validate_space_id';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
-import { ProjectMonitor } from '../../../../common/runtime_types';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
+import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';

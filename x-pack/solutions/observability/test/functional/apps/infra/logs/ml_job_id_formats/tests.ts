@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { assertIdFormats } from './assert_id_formats';
-import { createMlJobHelper, MlJobHelper } from './ml_job_helper';
+import type { MlJobHelper } from './ml_job_helper';
+import { createMlJobHelper } from './ml_job_helper';
 import { createRequestTracker } from './request_tracker';
 import {
   hashedRateJob,
@@ -35,11 +36,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.beforeAll(async () => {
       // Access to ml.api has to happen inside a test or test hook
       mlJobHelper = createMlJobHelper(ml.api);
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      );
     });
 
     this.afterAll(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      );
     });
 
     describe('hashed format', () => {

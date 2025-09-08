@@ -6,15 +6,15 @@
  */
 
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
-import { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
-import { RunContext } from '@kbn/task-manager-plugin/server';
-import { IndicatorTypes } from '../../../domain/models';
-import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
+import type { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { IndicatorTypes } from '../../../domain/models';
+import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
 import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
 import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
 import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
-import { TransformGenerator } from '../../transform_generators';
+import type { TransformGenerator } from '../../transform_generators';
 import { DefaultTransformManager } from '../../transform_manager';
 import { runBulkDelete } from './run_bulk_delete';
 
@@ -35,7 +35,6 @@ interface TaskSetupContract {
 }
 
 export class BulkDeleteTask {
-  private abortController = new AbortController();
   private logger: Logger;
 
   constructor(setupContract: TaskSetupContract) {
@@ -49,7 +48,7 @@ export class BulkDeleteTask {
         title: 'SLO bulk delete',
         timeout: '10m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
@@ -66,7 +65,6 @@ export class BulkDeleteTask {
                 return;
               }
 
-              this.abortController = new AbortController();
               const [coreStart, pluginStart] = await core.getStartServices();
 
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
@@ -78,13 +76,13 @@ export class BulkDeleteTask {
                 {} as Record<IndicatorTypes, TransformGenerator>,
                 scopedClusterClient,
                 this.logger,
-                this.abortController
+                abortController
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
                 new DefaultSummaryTransformGenerator(),
                 scopedClusterClient,
                 this.logger,
-                this.abortController
+                abortController
               );
 
               const deleteSLO = new DeleteSLO(
@@ -93,7 +91,7 @@ export class BulkDeleteTask {
                 summaryTransformManager,
                 scopedClusterClient,
                 rulesClient,
-                this.abortController
+                abortController
               );
 
               try {
@@ -104,7 +102,7 @@ export class BulkDeleteTask {
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,
-                  abortController: this.abortController,
+                  abortController,
                 });
 
                 return {
@@ -125,10 +123,7 @@ export class BulkDeleteTask {
                 };
               }
             },
-
-            cancel: async () => {
-              this.abortController.abort('Timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

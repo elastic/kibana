@@ -6,17 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  AZURE_PROVIDER_TEST_SUBJ,
+  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AZURE_INPUT_FIELDS_TEST_SUBJECTS,
+  AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { testSubjectIds } from '../../../constants/test_subject_ids';
 import { policiesSavedObjects } from '../constants';
-
-const {
-  CIS_AZURE_OPTION_TEST_ID,
-  CIS_AZURE_SINGLE_SUB_TEST_ID,
-  AZURE_CREDENTIAL_SELECTOR,
-  CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
-  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
-} = testSubjectIds;
 
 const clientId = 'clientIdTest';
 const tenantId = 'tenantIdTest';
@@ -32,8 +30,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
-  // Failing: See https://github.com/elastic/kibana/issues/229393
-  describe.skip('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
+  describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_azure']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAzure: typeof pageObjects.cisAddIntegration.cisAzure;
@@ -50,8 +47,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Organization ARM Template', () => {
       it('Azure Organization ARM Template Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
@@ -69,9 +66,12 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Organization Manual Managed Identity', () => {
       it('Azure Organization Manual Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
-        await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.selectValue(
+          AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+          'managed_identity'
+        );
         await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
@@ -84,23 +84,17 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Organization Manual Service Principle with Client Secret', () => {
       it('Azure Organization Manual Service Principle with Client Secret Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(
-          AZURE_CREDENTIAL_SELECTOR,
+          AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
           'service_principal_with_client_secret'
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID, clientId);
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID, tenantId);
         await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-          clientId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-          tenantId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
         await cisIntegration.inputUniqueIntegrationName();
@@ -113,12 +107,12 @@ export default function (providerContext: FtrProviderContext) {
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
             )) === clientId
           ).to.be(true);
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
             )) === tenantId
           ).to.be(true);
           expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
@@ -128,28 +122,22 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Organization Manual Service Principle with Client Certificate', () => {
       it('Azure Organization Manual Service Principle with Client Certificate Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(
-          AZURE_CREDENTIAL_SELECTOR,
+          AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
           'service_principal_with_client_certificate'
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID, clientId);
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID, tenantId);
         await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-          clientId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-          tenantId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
           clientCertificatePath
         );
 
         await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
         await cisIntegration.inputUniqueIntegrationName();
@@ -162,17 +150,17 @@ export default function (providerContext: FtrProviderContext) {
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
             )) === clientId
           ).to.be(true);
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
             )) === tenantId
           ).to.be(true);
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
             )) === clientCertificatePath
           ).to.be(true);
         });
@@ -181,8 +169,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Single ARM Template', () => {
       it('Azure Single ARM Template Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SINGLE_ACCOUNT_TEST_SUBJ);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
@@ -200,10 +188,13 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Single Manual Managed Identity', () => {
       it('Azure Single Manual Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
-        await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SINGLE_ACCOUNT_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.selectValue(
+          AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+          'managed_identity'
+        );
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
@@ -215,23 +206,17 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Single Manual Service Principle with Client Secret', () => {
       it('Azure Single Manual Service Principle with Client Secret Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(
-          AZURE_CREDENTIAL_SELECTOR,
+          AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
           'service_principal_with_client_secret'
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID, clientId);
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID, tenantId);
         await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-          clientId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-          tenantId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
         await cisIntegration.inputUniqueIntegrationName();
@@ -243,12 +228,12 @@ export default function (providerContext: FtrProviderContext) {
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
             )) === clientId
           ).to.be(true);
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
             )) === tenantId
           ).to.be(true);
           expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
@@ -258,28 +243,22 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Azure Single Manual Service Principle with Client Certificate', () => {
       it('Azure Single Manual Service Principle with Client Certificate Workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.clickOptionButton(AZURE_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(
-          AZURE_CREDENTIAL_SELECTOR,
+          AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
           'service_principal_with_client_certificate'
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID, clientId);
+        await cisIntegration.fillInTextField(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID, tenantId);
         await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-          clientId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-          tenantId
-        );
-        await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
           clientCertificatePath
         );
 
         await cisIntegration.fillInTextField(
-          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
         await cisIntegration.inputUniqueIntegrationName();
@@ -291,17 +270,17 @@ export default function (providerContext: FtrProviderContext) {
           await cisIntegration.clickFirstElementOnIntegrationTable();
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
             )) === clientId
           ).to.be(true);
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
             )) === tenantId
           ).to.be(true);
           expect(
             (await cisIntegration.getValueInEditPage(
-              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
+              AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
             )) === clientCertificatePath
           ).to.be(true);
         });

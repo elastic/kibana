@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -34,13 +34,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const from = 'Sep 20, 2015 @ 00:00:00.000';
   const to = 'Sep 21, 2015 @ 00:00:00.000';
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('dashboard feature controls security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kbnServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
       );
       await kbnServer.uiSettings.update({
         defaultIndex: 'logstash-*',
@@ -56,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await security.forceLogout();
 
       await kbnServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     describe('global dashboard all privileges, no embeddable application privileges', () => {

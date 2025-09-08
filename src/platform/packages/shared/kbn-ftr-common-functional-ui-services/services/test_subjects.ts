@@ -8,7 +8,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { WebElementWrapper } from './web_element_wrapper';
+import type { WebElementWrapper } from './web_element_wrapper';
 import type { TimeoutOpt } from '../types';
 import { FtrService } from './ftr_provider_context';
 
@@ -163,10 +163,14 @@ export class TestSubjects extends FtrService {
   public async click(
     selector: string,
     timeout: number = this.FIND_TIME,
-    topOffset?: number
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
   ): Promise<void> {
     this.log.debug(`TestSubjects.click(${selector})`);
-    await this.findService.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
+    await this.findService.clickByCssSelector(
+      testSubjSelector(selector),
+      timeout,
+      topOffsetOrOptions
+    );
   }
 
   public async pressEnter(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
@@ -441,5 +445,26 @@ export class TestSubjects extends FtrService {
         `Container '${selector}' has no 'button' child elements, check for EUI upgrades`
       );
     }
+  }
+
+  /**
+   * Helper function to wait for accordion state to reach expected value
+   * This helps avoid race conditions in tests where UI updates are still in progress
+   */
+  public async waitForAccordionState(
+    selector: string,
+    expectedState: string,
+    timeout: number = 5000
+  ) {
+    await this.existOrFail(selector);
+
+    await this.retry.waitForWithTimeout(
+      `accordion ${selector} to reach state ${expectedState}`,
+      timeout,
+      async () => {
+        const currentState = await this.getAccordionState(selector);
+        return currentState === expectedState;
+      }
+    );
   }
 }

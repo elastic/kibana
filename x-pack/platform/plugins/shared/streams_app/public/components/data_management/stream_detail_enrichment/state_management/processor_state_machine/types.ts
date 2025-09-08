@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import { ActorRef, Snapshot } from 'xstate5';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import type { ActorRef, Snapshot } from 'xstate5';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 
 export type ProcessorToParentEvent =
+  | { type: 'processor.cancel'; id: string }
   | { type: 'processor.change'; id: string }
   | { type: 'processor.delete'; id: string }
-  | { type: 'processor.stage' }
-  | { type: 'processor.update' };
+  | { type: 'processor.edit' }
+  | { type: 'processor.save'; id: string };
 
 export interface ProcessorInput {
   parentRef: ProcessorParentActor;
-  processor: ProcessorDefinitionWithUIAttributes;
+  processor: StreamlangProcessorDefinition;
   isNew?: boolean;
 }
 
@@ -32,8 +32,8 @@ export type ProcessorResources = GrokProcessorResources;
 
 export interface ProcessorContext {
   parentRef: ProcessorParentActor;
-  previousProcessor: ProcessorDefinitionWithUIAttributes;
-  processor: ProcessorDefinitionWithUIAttributes;
+  previousProcessor: StreamlangProcessorDefinition;
+  processor: StreamlangProcessorDefinition;
   // Additional resources to interact with the processor, these aren't persisted but facilitate certain UI functionality.
   resources?: ProcessorResources;
   isNew: boolean;
@@ -44,14 +44,9 @@ export type ProcessorEvent =
   | { type: 'processor.cancel' }
   | {
       type: 'processor.change';
-      processor: ProcessorDefinition;
+      processor: StreamlangProcessorDefinition;
       resources?: ProcessorResources;
     }
   | { type: 'processor.delete' }
   | { type: 'processor.edit' }
-  | { type: 'processor.stage' }
-  | { type: 'processor.update' };
-
-export interface ProcessorEmittedEvent {
-  type: 'processor.changesDiscarded';
-}
+  | { type: 'processor.save' };

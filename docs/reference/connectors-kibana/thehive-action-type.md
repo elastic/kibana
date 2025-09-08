@@ -71,7 +71,7 @@ Severity
 :   The severity of the incident: `LOW`, `MEDIUM`, `HIGH` or `CRITICAL`.
 
     ::::{note}
-    While creating an alert, use the Keep severity from rule toggle to create an alert with the rule's severity. If the rule does not have a defined severity, the alert will have the default MEDIUM severity.
+    {applies_to}`stack: ga 9.1` While creating an alert, use the **Keep severity from rule** toggle to create an alert with the rule's severity. If the rule does not have a defined severity, the alert will have the default MEDIUM severity.
     ::::
 
 TLP
@@ -92,7 +92,7 @@ Source
 Source reference
 :   A source reference for the alert.
 
-Body
+Body {applies_to}`stack: ga 9.1`
 :   A Json payload specifying additional parameter, such as observables and procedures. For example:
 
     ```json

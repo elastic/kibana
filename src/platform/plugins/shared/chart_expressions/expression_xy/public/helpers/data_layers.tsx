@@ -7,40 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   AreaSeriesProps,
   AreaSeriesStyle,
   BarSeriesProps,
-  ColorVariant,
   LineSeriesProps,
-  ScaleType,
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
 } from '@elastic/charts';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ColorVariant, ScaleType } from '@elastic/charts';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalettes } from '@kbn/palettes';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
-import {
+import type {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   XScaleType,
   PointVisibility,
 } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
-import { FormatFactory } from '../types';
+import type { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
-import { ColorAssignments } from './color_assignment';
-import { GroupsConfiguration } from './axes_configuration';
-import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
+import type { ColorAssignments } from './color_assignment';
+import type { GroupsConfiguration } from './axes_configuration';
+import type { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
 
@@ -320,7 +319,7 @@ const getPointConfig: GetPointConfigFn = ({
   pointsRadius,
 }) => {
   return {
-    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'auto'),
+    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'never'),
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };

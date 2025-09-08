@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TraverseDocumentContext } from '../../types/context';
-import { DocumentNode } from '../../types/node';
+import type { TraverseDocumentContext } from '../../types/context';
+import type { DocumentNode } from '../../types/node';
 
 export type TraverseDocumentNodeContext = TraverseDocumentContext & {
   isRootNode: boolean;

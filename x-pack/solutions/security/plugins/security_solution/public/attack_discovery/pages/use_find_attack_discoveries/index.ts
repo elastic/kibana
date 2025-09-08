@@ -18,7 +18,6 @@ import { useCallback, useRef } from 'react';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -27,6 +26,7 @@ interface Props {
   ids?: string[];
   connectorNames?: string[];
   http: HttpSetup;
+  includeUniqueAlertIds?: boolean;
   isAssistantEnabled: boolean;
   end?: string;
   search?: string;
@@ -64,6 +64,7 @@ export const useFindAttackDiscoveries = ({
   ids,
   connectorNames,
   http,
+  includeUniqueAlertIds = false,
   isAssistantEnabled,
   end,
   search,
@@ -77,7 +78,6 @@ export const useFindAttackDiscoveries = ({
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -94,6 +94,7 @@ export const useFindAttackDiscoveries = ({
           alert_ids: alertIds,
           connector_names: connectorNames,
           end,
+          include_unique_alert_ids: includeUniqueAlertIds,
           ids,
           page: pageParam?.page ?? page,
           per_page: pageParam?.perPage ?? perPage,
@@ -112,6 +113,7 @@ export const useFindAttackDiscoveries = ({
       end,
       http,
       ids,
+      includeUniqueAlertIds,
       page,
       perPage,
       search,
@@ -165,7 +167,7 @@ export const useFindAttackDiscoveries = ({
     ],
     queryFn,
     {
-      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
+      enabled: isAssistantEnabled,
       getNextPageParam,
       onError: (e: ServerError) => {
         addError(e.body && e.body.message ? new Error(e.body.message) : e, {

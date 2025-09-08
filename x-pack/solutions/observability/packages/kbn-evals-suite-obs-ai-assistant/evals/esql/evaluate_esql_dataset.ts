@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
-import { EvaluationDataset } from '@kbn/evals/src/types';
-import { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
+import type { EvaluationDataset } from '@kbn/evals/src/types';
+import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
 
 interface EsqlExample extends Example {
   input: {
     question: string;
   };
   output: {
-    expected?: string;
+    expected?: string | string[];
     criteria?: string[];
     execute?: boolean;
   };
@@ -78,16 +78,22 @@ export function createEvaluateEsqlDataset({
               .criteria([
                 ...(expected.expected
                   ? [
-                      `Returns an ES|QL query that is functionally equivalent to:
-      ${expected.expected}. It's OK if the created column names are slightly different, as long as the expected end result is the same.`,
+                      `The generated ES|QL query should be syntactically valid and align with the intent of the user prompt. The query should be functionally equivalent
+                      to the expected query or produce the same results, even if the syntax, structure, or column naming differs. If multiple expected queries are provided,
+                      a match with any one of them is acceptable. Minor differences, such as variations in column names, formatting, or use of equivalent syntax, are acceptable
+                      as long as they do not alter the semantics or outcome of the query.
+
+                      Expected: ${expected.expected}`,
                     ]
                   : []),
                 ...(expected.execute
                   ? [
                       'The query successfully executed without an error, and the agent summarized the results',
                     ]
-                  : ['The query was not executed, it was only explained']),
-                ...[],
+                  : [
+                      'The query execution was never attempted (no execution attempt, including failures), only an explanation was provided',
+                    ]),
+                ...(expected.criteria ?? []),
               ])
               .evaluate({
                 input,

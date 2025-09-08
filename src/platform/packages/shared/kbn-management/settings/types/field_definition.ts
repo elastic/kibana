@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { UiCounterMetricType } from '@kbn/analytics';
-import {
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type {
   DeprecationSettings,
   TechnicalPreviewSettings,
-  UiSettingsSolution,
+  UiSettingsSolutions,
 } from '@kbn/core-ui-settings-common';
 
-import { KnownTypeToValue, SettingType } from './setting_type';
+import type { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
  * A {@link FieldDefinition} adapts a {@link UiSettingMetadata} object to be more
@@ -92,11 +92,11 @@ export interface FieldDefinition<
   type: T;
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
-  /** The solution where this setting is applicable.
-   * If undefined, the setting must be displayed in all solutions.
-   * @see {@link UiSettingsSolution}
+  /** The solutions where this setting is applicable.
+   * If undefined or an empty array, the setting must be displayed in all solutions.
+   * @see {@link UiSettingsSolutions}
    */
-  solution?: UiSettingsSolution;
+  solutionViews?: UiSettingsSolutions;
   /**
    * Technical preview information for the field
    * @see {@link TechnicalPreviewSettings}

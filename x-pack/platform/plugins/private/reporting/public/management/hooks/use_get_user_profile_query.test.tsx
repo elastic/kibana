@@ -8,10 +8,10 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useGetUserProfileQuery } from './use_get_user_profile_query';
-import { UserProfileService } from '@kbn/core/public';
+import type { UserProfileService } from '@kbn/core/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as reactQuery from '@tanstack/react-query';
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import { testQueryClient } from '../test_utils/test_query_client';
 
 const useQuerySpy = jest.spyOn(reactQuery, 'useQuery');

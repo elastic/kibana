@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema } from './config';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { ConfigSchema } from './config';
 import { AutocompleteService } from './autocomplete';
-import { AutocompleteSetup } from './autocomplete/autocomplete_service';
+import type { AutocompleteSetup } from './autocomplete/autocomplete_service';
 
 export interface UnifiedSearchServerPluginSetup {
   autocomplete: AutocompleteSetup;

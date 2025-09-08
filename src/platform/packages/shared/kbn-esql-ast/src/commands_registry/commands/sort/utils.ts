@@ -16,7 +16,7 @@ import {
   isColumn,
 } from '../../../..';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { ISuggestionItem } from '../../types';
+import type { ISuggestionItem } from '../../types';
 
 export type SortPosition =
   | 'empty_expression'

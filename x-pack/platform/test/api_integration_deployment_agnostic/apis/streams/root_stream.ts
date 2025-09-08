@@ -6,20 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { Streams } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
   ingest: {
     lifecycle: { dsl: {} },
-    processing: [],
+    processing: {
+      steps: [],
+    },
     wired: {
       routing: [],
       fields: {
@@ -98,21 +98,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
-            processing: [
-              {
-                grok: {
-                  field: 'body.text',
+            processing: {
+              steps: [
+                {
+                  action: 'grok' as const,
+                  from: 'body.text',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
-                  if: { always: {} },
+                  where: { always: {} },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       };
@@ -127,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
@@ -155,6 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
@@ -164,11 +168,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               routing: [
                 {
                   destination: 'logs.gcpcloud',
-                  if: {
+                  where: {
                     field: 'cloud.provider',
-                    operator: 'eq',
-                    value: 'gcp',
+                    eq: 'gcp',
                   },
+                  status: 'enabled',
                 },
               ],
             },
@@ -184,14 +188,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: 'test',
       };
-      let threw = false;
-      try {
-        await indexDocument(esClient, 'logs.gcpcloud', doc);
-      } catch (e) {
-        threw = true;
-        expect(e.message).to.contain('stream.name is not set properly');
-      }
-      expect(threw).to.be(true);
+      const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
+      // @ts-expect-error failure_store is not in the types, but in the actual response
+      expect(response.failure_store).to.be('used');
     });
   });
 }

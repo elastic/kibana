@@ -8,8 +8,8 @@
 import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { DatasetQualityApiClientKey } from '../../common/config';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DatasetQualityApiClientKey } from '../../common/config';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { cleanLogIndexTemplate, addIntegrationToLogIndexTemplate } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -69,8 +69,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns user authorization as false for noAccessUser', async () => {
         const resp = await callApiAs('noAccessUser');
 
-        expect(resp.body.datasetUserPrivileges.canRead).to.be(false);
-        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canRead).to.be(false);
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).to.be(
+          false
+        );
         expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
         expect(resp.body.dataStreamsStats).to.eql([]);
       });
@@ -79,9 +81,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await callApiAs('adminUser');
 
         expect(resp.body.datasetUserPrivileges).to.eql({
-          canRead: true,
-          canMonitor: true,
-          canReadFailureStore: true,
+          datasetsPrivilages: {
+            'logs-*-*': {
+              canRead: true,
+              canMonitor: true,
+              canReadFailureStore: true,
+              canManageFailureStore: true,
+            },
+          },
           canViewIntegrations: true,
         });
       });
@@ -89,8 +96,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('get empty stats for a readUser', async () => {
         const resp = await callApiAs('readUser');
 
-        expect(resp.body.datasetUserPrivileges.canRead).to.be(true);
-        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canRead).to.be(true);
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).to.be(
+          false
+        );
         expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
         expect(resp.body.dataStreamsStats).to.eql([]);
       });
@@ -110,7 +119,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await ingestDocuments({ dataset: 'test.2' });
         const resp = await callApiAs('datasetQualityMonitorUser');
 
-        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
+        expect(resp.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).to.be(
+          true
+        );
         expect(
           resp.body.dataStreamsStats
             .map(({ name, userPrivileges: { canMonitor: hasPrivilege } }) => ({
@@ -126,7 +137,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await logsSynthtrace.clean();
-        await cleanLogIndexTemplate({ esClient: es });
       });
     });
 

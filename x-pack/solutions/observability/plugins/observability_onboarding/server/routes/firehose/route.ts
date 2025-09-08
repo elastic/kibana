@@ -8,10 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { wildcardQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import type { AWSIndexName } from '../../../common/aws_firehose';
 import {
-  AWSIndexName,
   AWS_INDEX_NAME_LIST,
   FIREHOSE_CLOUDFORMATION_TEMPLATE_URL,
 } from '../../../common/aws_firehose';
@@ -125,7 +125,8 @@ const hasFirehoseDataRoute = createObservabilityOnboardingServerRoute({
         query: {
           bool: {
             should: [
-              ...termQuery('aws.kinesis.name', streamName),
+              ...wildcardQuery('aws.kinesis.name', streamName),
+              ...wildcardQuery('aws.firehose.arn', streamName),
               ...wildcardQuery('aws.exporter.arn', stackName),
             ],
           },

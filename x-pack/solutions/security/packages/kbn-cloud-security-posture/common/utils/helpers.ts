@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
+import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '../constants';
 
 interface BuildEntityAlertsQueryParams {
   field: string;
@@ -194,4 +195,9 @@ export const buildEntityAlertsQuery = ({
       },
     },
   };
+};
+
+// Get the enrich policy ID for a specific space
+export const getEnrichPolicyId = (space: string = 'default'): string => {
+  return GENERIC_ENTITY_INDEX_ENRICH_POLICY.replace('<space>', space);
 };

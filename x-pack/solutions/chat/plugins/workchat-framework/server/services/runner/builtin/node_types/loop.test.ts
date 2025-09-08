@@ -17,14 +17,16 @@ import {
 } from '@kbn/wc-framework-types-server';
 import { getLoopNodeTypeDefinition } from './loop';
 import * as utils from '../../utils';
+import type {
+  MockedNodeFactoryBaseServices,
+  MockedState,
+  NodeEventReporterMock,
+} from '../../test_utils';
 import {
   createMockFactoryServices,
   createMockedState,
   createMockedNodeEventReporter,
   createExecutionState,
-  MockedNodeFactoryBaseServices,
-  MockedState,
-  NodeEventReporterMock,
 } from '../../test_utils';
 
 jest.mock('../../utils', () => ({

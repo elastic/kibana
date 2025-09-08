@@ -9,12 +9,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useOnechatServices } from '../use_onechat_service';
 import { queryKeys } from '../../query_keys';
 
-export const useOnechatAgentById = (agentId: string) => {
+export const useOnechatAgentById = (agentId?: string) => {
   const { agentService } = useOnechatServices();
 
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.agentProfiles.byId(agentId),
-    queryFn: () => agentService.get(agentId),
+    queryFn: () => {
+      if (!agentId) {
+        return Promise.reject(new Error('Agent ID is required'));
+      }
+      return agentService.get(agentId);
+    },
     enabled: !!agentId,
   });
 

@@ -10,13 +10,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesESQLVariables, ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OptionsListSelection } from '../../../common/options_list';
-import { ESQL_CONTROL } from '../../../common';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
-import { ControlFactory } from '../types';
+import type { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
   defaultControlComparators,
@@ -25,7 +26,7 @@ import {
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
-import { OptionsListComponentApi } from '../data_controls/options_list_control/types';
+import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
@@ -41,7 +42,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const defaultControlManager = initializeDefaultControlManager(initialState);
       const selections = initializeESQLControlSelections(
         initialState,
-        controlGroupApi.controlFetch$(uuid)
+        controlGroupApi.controlFetch$(uuid),
+        defaultControlManager.api.setDataLoading
       );
 
       const onSaveControl = (updatedState: ESQLControlState) => {

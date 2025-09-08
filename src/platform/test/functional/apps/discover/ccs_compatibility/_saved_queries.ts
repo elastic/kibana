@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -269,6 +269,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
+      });
+
+      it('checks if the "Save query" button becomes enabled after adding filters, even when the query was saved with "Include filters" unchecked', async () => {
+        await queryBar.setQuery('response:200');
+        await queryBar.submitQuery();
+        await savedQueryManagementComponent.saveNewQuery('filterExcluded', '', false, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail('filterExcluded');
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
+        let isSaveButtonDisabled = await testSubjects.getAttribute(
+          'saved-query-management-save-button',
+          'disabled'
+        );
+        expect(isSaveButtonDisabled).to.equal(
+          'true',
+          'Save button should be disabled directly after saving a query'
+        );
+        await filterBar.addFilter({ field: '@message', operation: 'exists' });
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
+        isSaveButtonDisabled = await testSubjects.getAttribute(
+          'saved-query-management-save-button',
+          'disabled'
+        );
+        expect(isSaveButtonDisabled).to.equal(
+          null,
+          'Save button should be enabled after adding a filter'
+        );
+        const updateQueryButtonExists = await testSubjects.exists(
+          'saved-query-management-save-changes-button'
+        );
+        expect(updateQueryButtonExists).to.equal(true, 'Update query button does not exist');
       });
     });
   });

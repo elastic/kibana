@@ -9,11 +9,11 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
   formatFieldValue,
   getIgnoredReason,
-  IgnoredReason,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';

@@ -8,9 +8,9 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { GetHostParameters } from '../types';
-import { getFilterForEntityType } from '../helpers/query';
 
 export const getFilteredHostNames = async ({
   infraMetricsClient,
@@ -18,16 +18,23 @@ export const getFilteredHostNames = async ({
   to,
   limit,
   query,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit'> & {
+  schema,
+}: Required<Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'schema'>> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
+  const inventoryModel = findInventoryModel('host');
+
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
     size: 0,
     track_total_hits: false,
     query: {
       bool: {
-        filter: [...castArray(query), ...rangeQuery(from, to), getFilterForEntityType('host')],
+        filter: [
+          ...castArray(query),
+          ...rangeQuery(from, to),
+          ...(inventoryModel.nodeFilter?.({ schema }) ?? []),
+        ],
       },
     },
     aggs: {
@@ -52,9 +59,12 @@ export const getHasDataFromSystemIntegration = async ({
   from,
   to,
   query,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to'> & {
+  schema,
+}: Required<Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'schema'>> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
+  const inventoryModel = findInventoryModel('host');
+
   const hitCount = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -63,7 +73,11 @@ export const getHasDataFromSystemIntegration = async ({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [...castArray(query), ...rangeQuery(from, to), getFilterForEntityType('host')],
+        filter: [
+          ...castArray(query),
+          ...rangeQuery(from, to),
+          ...(inventoryModel.nodeFilter?.({ schema }) ?? []),
+        ],
       },
     },
   });

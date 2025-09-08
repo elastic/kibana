@@ -8,10 +8,10 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { PersistedState } from '../persisted_state';
+import type { PersistedState } from '../persisted_state';
 import { getAnalytics, getI18n, getOverlays, getTheme, getUserProfile } from '../services';
 import { saveVisualization } from '../utils/saved_visualize_utils';
-import { VisualizeOutputState } from './types';
+import type { VisualizeOutputState } from './types';
 
 export const saveToLibrary = async ({
   uiState,

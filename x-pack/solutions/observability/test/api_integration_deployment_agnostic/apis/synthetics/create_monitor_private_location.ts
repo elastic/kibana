@@ -7,22 +7,21 @@
 import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import {
-  ConfigKey,
+import type {
   HTTPFields,
   PrivateLocation,
   ServiceLocation,
-  MonitorTypeEnum,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { omit } from 'lodash';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import rawExpect from 'expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
@@ -33,6 +32,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const samlAuth = getService('samlAuth');
     const retry = getService('retry');

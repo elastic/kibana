@@ -9,7 +9,7 @@ import { timerange } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 

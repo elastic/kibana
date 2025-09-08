@@ -21,7 +21,7 @@ import {
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { DashboardRedirect } from '../types';
+import type { DashboardRedirect } from '../types';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;

@@ -38,6 +38,7 @@
     "@kbn/rrule",
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": ["target/**/*"]
 }

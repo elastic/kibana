@@ -8,9 +8,9 @@
  */
 
 import { cluster } from './cluster';
-import { ClusterStatsDocument } from './cluster_stats';
+import type { ClusterStatsDocument } from './cluster_stats';
 import { kibana } from './kibana';
-import { KibanaStatsDocument } from './kibana_stats';
+import type { KibanaStatsDocument } from './kibana_stats';
 
 export type MonitoringDocument = ClusterStatsDocument | KibanaStatsDocument;
 

@@ -22,7 +22,7 @@
         "label": "ControlsChainingSystem",
         "description": [],
         "signature": [
-          "\"NONE\" | \"HIERARCHICAL\""
+          "\"HIERARCHICAL\" | \"NONE\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "deprecated": false,
@@ -37,7 +37,7 @@
         "label": "ControlsGroupState",
         "description": [],
         "signature": [
-          "{ readonly enhancements?: Record<string, any> | undefined; readonly controls: Readonly<{ id?: string | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>[]; readonly chainingSystem: \"NONE\" | \"HIERARCHICAL\"; readonly labelPosition: \"oneLine\" | \"twoLine\"; readonly autoApplySelections: boolean; readonly ignoreParentSettings: Readonly<{} & { ignoreFilters: boolean; ignoreQuery: boolean; ignoreTimerange: boolean; ignoreValidations: boolean; }>; }"
+          "{ readonly enhancements?: Record<string, any> | undefined; readonly ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; readonly controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; readonly labelPosition: \"oneLine\" | \"twoLine\"; readonly chainingSystem: \"HIERARCHICAL\" | \"NONE\"; readonly autoApplySelections: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "deprecated": false,
@@ -52,7 +52,7 @@
         "label": "ControlsIgnoreParentSettings",
         "description": [],
         "signature": [
-          "{ readonly ignoreFilters: boolean; readonly ignoreQuery: boolean; readonly ignoreTimerange: boolean; readonly ignoreValidations: boolean; }"
+          "{ readonly ignoreFilters?: boolean | undefined; readonly ignoreQuery?: boolean | undefined; readonly ignoreTimerange?: boolean | undefined; readonly ignoreValidations?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "deprecated": false,
@@ -68,6 +68,36 @@
         "description": [],
         "signature": [
           "\"oneLine\" | \"twoLine\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.ControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlState",
+        "description": [],
+        "signature": [
+          "{ readonly id?: string | undefined; readonly grow?: boolean | undefined; readonly width?: \"small\" | \"medium\" | \"large\" | undefined; readonly controlConfig?: Readonly<{} & {}> | undefined; readonly type: string; readonly order: number; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.ControlWidth",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlWidth",
+        "description": [],
+        "signature": [
+          "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
         "deprecated": false,
@@ -99,7 +129,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ id?: string | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>[]>; labelPosition: ",
+          "<Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]>; labelPosition: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -115,7 +145,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"NONE\" | \"HIERARCHICAL\">; enhancements: ",
+          "<\"HIERARCHICAL\" | \"NONE\">; enhancements: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -128,42 +158,10 @@
             "pluginId": "@kbn/config-schema",
             "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<{ ignoreFilters: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean>; ignoreQuery: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; ignoreTimerange: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; ignoreValidations: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; }>; autoApplySelections: ",
+          "<Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined>; autoApplySelections: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

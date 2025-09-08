@@ -6,13 +6,17 @@
  */
 
 import { resolve } from 'path';
-import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import {
+  getKibanaCliLoggers,
+  type FtrConfigProviderContext,
+  type GenericFtrProviderContext,
+} from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
-import type { services as inheritedServices } from '@kbn/test-suites-xpack/functional/services';
+import type { services as inheritedServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
@@ -28,7 +32,7 @@ export type SecurityTelemetryFtrProviderContext = GenericFtrProviderContext<
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
@@ -48,6 +52,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
+          {
+            name: 'plugins.cloudSecurityPosture',
+            level: 'all',
+            appenders: ['default'],
+          },
+        ])}`,
         /**
          * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
          *

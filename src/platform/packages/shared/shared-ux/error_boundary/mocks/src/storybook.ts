@@ -10,7 +10,7 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { KibanaErrorService } from '../../src/services/error_service';
-import { KibanaErrorBoundaryServices } from '../../types';
+import type { KibanaErrorBoundaryServices } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Params {}

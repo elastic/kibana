@@ -96,6 +96,7 @@
     "@kbn/scout",
     "@kbn/react-kibana-mount",
     "@kbn/css-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

@@ -1,13 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "exclude": [
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
-    "target/**/*",
-  ],
+  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -30,7 +26,6 @@
     "@kbn/licensing-plugin",
     "@kbn/data-plugin",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/files-plugin",
 
     // optionalPlugins from ./kibana.json
@@ -126,5 +121,7 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-di",
+    "@kbn/licensing-types",
   ]
 }

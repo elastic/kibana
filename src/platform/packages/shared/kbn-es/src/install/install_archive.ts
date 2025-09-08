@@ -14,13 +14,13 @@ import chalk from 'chalk';
 import execa from 'execa';
 import del from 'del';
 import { extract } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog, isFile, copyFileSync } from '../utils';
-import { InstallArchiveOptions } from './types';
+import type { InstallArchiveOptions } from './types';
 
 const isHttpUrl = (str: string) => {
   try {

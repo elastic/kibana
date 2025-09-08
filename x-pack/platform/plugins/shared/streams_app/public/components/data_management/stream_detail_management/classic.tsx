@@ -10,18 +10,22 @@ import { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
-import { ManagementTabs, Wrapper } from './wrapper';
+import type { ManagementTabs } from './wrapper';
+import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 const classicStreamManagementSubTabs = [
   'enrich',
   'advanced',
   'lifecycle',
   'significantEvents',
+  'schemaEditor',
+  'references',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -34,7 +38,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.UnwiredStream.GetResponse;
+  definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -58,7 +62,7 @@ export function ClassicStreamDetailManagement({
                 values: { streamId: key },
               })}
               <EuiBadgeGroup gutterSize="s">
-                {Streams.UnwiredStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
@@ -134,6 +138,14 @@ export function ClassicStreamDetailManagement({
           </span>
         </EuiToolTip>
       ),
+    };
+    tabs.schemaEditor = {
+      content: (
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+        defaultMessage: 'Schema editor',
+      }),
     };
   }
 

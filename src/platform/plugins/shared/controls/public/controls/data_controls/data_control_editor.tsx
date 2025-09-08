@@ -32,7 +32,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -40,12 +40,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 import { asyncMap } from '@kbn/std';
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-  type ControlWidth,
-  type DefaultDataControlState,
-} from '../../../common';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { ControlWidth } from '@kbn/controls-schemas';
+import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import type { ControlGroupApi } from '../../control_group/types';
@@ -57,7 +54,7 @@ import {
   type DataControlFactory,
   type DataControlFieldRegistry,
 } from './types';
-import { ControlFactory } from '../types';
+import type { ControlFactory } from '../types';
 import { confirmDeleteControl } from '../../common';
 
 export interface ControlEditorProps<

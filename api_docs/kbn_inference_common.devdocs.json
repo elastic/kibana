@@ -2113,54 +2113,6 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.AnonymizationRegexWorkerTaskPayload",
-        "type": "Interface",
-        "tags": [],
-        "label": "AnonymizationRegexWorkerTaskPayload",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.AnonymizationRegexWorkerTaskPayload.rule",
-            "type": "Object",
-            "tags": [],
-            "label": "rule",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.RegexAnonymizationRule",
-                "text": "RegexAnonymizationRule"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.AnonymizationRegexWorkerTaskPayload.records",
-            "type": "Array",
-            "tags": [],
-            "label": "records",
-            "description": [],
-            "signature": [
-              "Record<string, string>[]"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.AnonymizationSettings",
         "type": "Interface",
         "tags": [],
@@ -2399,31 +2351,7 @@
                 "section": "def-common.PromptOptions",
                 "text": "PromptOptions"
               },
-              "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.Prompt",
-                "text": "Prompt"
-              },
-              "<any, ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.PromptVersion",
-                "text": "PromptVersion"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>[]>>, keyof ",
+              "<TPrompt>, keyof ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2497,6 +2425,61 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.BoundInferenceClient.bindTo",
+            "type": "Function",
+            "tags": [],
+            "label": "bindTo",
+            "description": [
+              "\nCreate a {@link BoundInferenceClient}."
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundOptions",
+                "text": "BoundOptions"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundInferenceClient",
+                "text": "BoundInferenceClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.BoundInferenceClient.bindTo.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.BoundOptions",
+                    "text": "BoundOptions"
+                  }
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
                 "deprecated": false,
@@ -3285,6 +3268,61 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.InferenceClient.bindTo",
+            "type": "Function",
+            "tags": [],
+            "label": "bindTo",
+            "description": [
+              "\nCreate a {@link BoundInferenceClient}."
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundOptions",
+                "text": "BoundOptions"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundInferenceClient",
+                "text": "BoundInferenceClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.InferenceClient.bindTo.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.BoundOptions",
+                    "text": "BoundOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3612,6 +3650,20 @@
             "tags": [],
             "label": "modelId",
             "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.NamedEntityRecognitionRule.timeoutSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "timeoutSeconds",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4972,31 +5024,7 @@
             "section": "def-common.PromptOptions",
             "text": "PromptOptions"
           },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.Prompt",
-            "text": "Prompt"
-          },
-          "<any, ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.PromptVersion",
-            "text": "PromptVersion"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>>, keyof ",
+          "<TPrompt>, keyof ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6013,16 +6041,16 @@
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageContentText",
-            "text": "MessageContentText"
+            "section": "def-common.MessageContentImage",
+            "text": "MessageContentImage"
           },
           " | ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageContentImage",
-            "text": "MessageContentImage"
+            "section": "def-common.MessageContentText",
+            "text": "MessageContentText"
           },
           ")[]"
         ],
@@ -6558,6 +6586,53 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ToolCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolCallback",
+        "description": [],
+        "signature": [
+          "(toolCall: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<string, Record<string, any> | undefined>) => Promise<unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ToolCallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "toolCall",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolCall",
+                "text": "ToolCall"
+              },
+              "<string, Record<string, any> | undefined>"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.ToolCallbacksOf",
         "type": "Type",
         "tags": [],
@@ -6889,15 +6964,47 @@
           "\nOptions used to call the {@link BoundPromptAPI}"
         ],
         "signature": [
-          "TPromptOptions extends any ? Omit<TPromptOptions, keyof ",
+          "{ abortSignal?: AbortSignal | undefined; input: Zod.input<TPrompt[\"input\"]>; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.BoundOptions",
-            "text": "BoundOptions"
+            "section": "def-common.ChatCompleteMetadata",
+            "text": "ChatCompleteMetadata"
           },
-          "> : never"
+          " | undefined; temperature?: number | undefined; stream?: boolean | undefined; tools?: Record<string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          },
+          "> | undefined; toolChoice?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string> | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteRetryConfiguration",
+            "text": "ChatCompleteRetryConfiguration"
+          },
+          " | undefined; prompt: TPrompt; prevMessages?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/bound_api.ts",
         "deprecated": false,

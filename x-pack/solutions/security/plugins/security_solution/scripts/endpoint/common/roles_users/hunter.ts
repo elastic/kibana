@@ -24,6 +24,7 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
             'policy_management_read',
 
             'trusted_applications_read',
+            'trusted_devices_read',
             'event_filters_read',
             'host_isolation_exceptions_read',
             'blocklist_all',

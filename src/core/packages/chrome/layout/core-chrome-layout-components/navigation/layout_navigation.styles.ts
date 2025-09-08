@@ -9,16 +9,16 @@
 
 import { css } from '@emotion/react';
 
-import { EmotionFn } from '../types';
+import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
-  z-index: ${euiTheme.levels.navigation};
   grid-area: navigation;
   align-self: start;
   height: 100%;
   width: var(--kbn-layout--navigation-width);
   z-index: var(--kbn-layout--aboveFlyoutLevel);
+  display: flex;
 `;
 
 export const styles = {

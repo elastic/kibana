@@ -6,8 +6,8 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();

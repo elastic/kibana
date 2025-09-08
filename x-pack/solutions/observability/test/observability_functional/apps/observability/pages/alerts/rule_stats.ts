@@ -13,7 +13,7 @@ import {
   muteAlert as muteRule,
 } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/lib/alert_api_actions';
 import { generateUniqueKey } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/lib/get_test_data';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -27,7 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
     const observability = getService('observability');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateWithoutFilter();
@@ -36,7 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
     describe('Stat counters', () => {

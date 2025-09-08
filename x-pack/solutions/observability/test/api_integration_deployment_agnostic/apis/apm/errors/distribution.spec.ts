@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { first, last, sumBy } from 'lodash';
-import {
+import type {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';

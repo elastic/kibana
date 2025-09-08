@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { EmotionFn } from '../types';
+import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) =>
   css`
@@ -20,9 +20,13 @@ const root: EmotionFn = ({ euiTheme }) =>
 
     display: flex;
     flex-direction: column;
+
+    &:focus-visible {
+      border: 2px solid ${euiTheme.colors.textParagraph};
+    }
   `;
 
-const content: EmotionFn = ({ euiTheme }) => css`
+const content: EmotionFn = () => css`
   display: flex;
   flex-direction: column;
   flex-grow: 1;

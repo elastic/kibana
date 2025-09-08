@@ -45,22 +45,30 @@ export const chainingSchema = schema.oneOf(
 );
 
 export const ignoreParentSettingsSchema = schema.object({
-  ignoreFilters: schema.boolean({
-    meta: { description: 'Ignore global filters in controls.' },
-    defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
-  }),
-  ignoreQuery: schema.boolean({
-    meta: { description: 'Ignore the global query bar in controls.' },
-    defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
-  }),
-  ignoreTimerange: schema.boolean({
-    meta: { description: 'Ignore the global time range in controls.' },
-    defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
-  }),
-  ignoreValidations: schema.boolean({
-    meta: { description: 'Ignore validations in controls.' },
-    defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
-  }),
+  ignoreFilters: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Ignore global filters in controls.' },
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
+    })
+  ),
+  ignoreQuery: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Ignore the global query bar in controls.' },
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
+    })
+  ),
+  ignoreTimerange: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Ignore the global time range in controls.' },
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
+    })
+  ),
+  ignoreValidations: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Ignore validations in controls.' },
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
+    })
+  ),
 });
 
 export const controlsGroupSchema = schema.object({
@@ -71,7 +79,7 @@ export const controlsGroupSchema = schema.object({
   labelPosition: labelPositionSchema,
   chainingSystem: chainingSchema,
   enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  ignoreParentSettings: ignoreParentSettingsSchema,
+  ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
   autoApplySelections: schema.boolean({
     meta: { description: 'Show apply selections button in controls.' },
     defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,

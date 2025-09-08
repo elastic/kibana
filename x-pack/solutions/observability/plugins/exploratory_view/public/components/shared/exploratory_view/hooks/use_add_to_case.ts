@@ -7,15 +7,16 @@
 
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, MountPoint } from '@kbn/core/public';
-import { CaseUI, AttachmentType } from '@kbn/cases-plugin/common';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { HttpSetup, MountPoint } from '@kbn/core/public';
+import type { CaseUI } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import { ObservabilityAppServices } from '../../../../application/types';
-import { AddToCaseProps } from '../header/add_to_case_action';
+import type { ObservabilityAppServices } from '../../../../application/types';
+import type { AddToCaseProps } from '../header/add_to_case_action';
 
 async function addToCase(
   http: HttpSetup,

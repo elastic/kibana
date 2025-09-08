@@ -22,3 +22,15 @@
 #globalBannerList {
   display: none;
 }
+
+
+/**
+ * Specific for lens editor workspace screenshotting
+ */
+.lnsWorkspacePanelWrapper__contentFlexGroup {
+  display: block  !important;
+}
+.lnsVisualizationWorkspace_container {
+  padding: 0 !important;
+  border: 0 !important;
+}

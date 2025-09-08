@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SyntheticsPluginsSetupDependencies } from '../types';
+import type { SyntheticsPluginsSetupDependencies } from '../types';
 import { commonMonitorStateI18, commonStateTranslations } from './translations';
 
 export const MESSAGE = 'message';
@@ -14,6 +14,7 @@ export const ALERT_REASON_MSG = 'reason';
 export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
 export const RECOVERY_REASON = 'recoveryReason';
+const GROUPING = 'grouping';
 
 export const getActionVariables = ({
   plugins,
@@ -29,6 +30,7 @@ export const getActionVariables = ({
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
       ACTION_VARIABLES[RECOVERY_REASON],
+      ACTION_VARIABLES[GROUPING],
       ...commonMonitorStateI18,
     ],
     state: [...commonStateTranslations],
@@ -80,6 +82,15 @@ export const ACTION_VARIABLES = {
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.recoveryReason.description',
       {
         defaultMessage: 'A concise description of the reason for the recovery',
+      }
+    ),
+  },
+  [GROUPING]: {
+    name: GROUPING,
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.grouping.description',
+      {
+        defaultMessage: 'The object containing groups that are reporting data',
       }
     ),
   },

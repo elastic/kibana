@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -31,16 +31,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('sync colors', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 
     after(async function () {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

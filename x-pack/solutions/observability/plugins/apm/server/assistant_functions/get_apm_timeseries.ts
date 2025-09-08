@@ -6,6 +6,7 @@
  */
 import type { FromSchema } from 'json-schema-to-ts';
 import { omit } from 'lodash';
+import { GET_APM_TIMESERIES_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 import type { ApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
 import { getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
@@ -122,7 +123,7 @@ export function registerGetApmTimeseriesFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      name: 'get_apm_timeseries',
+      name: GET_APM_TIMESERIES_FUNCTION_NAME,
       description: `Visualise and analyse different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions.`,
       parameters,
       // deprecated
