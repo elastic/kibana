@@ -71,7 +71,11 @@ export async function autocomplete(
       const suggestions: ISuggestionItem[] = [];
 
       const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
-      if (canCreate) {
+
+      const indexAlreadyExists = joinSources?.some(
+        (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
+      );
+      if (canCreate && !indexAlreadyExists) {
         const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
         suggestions.push(createIndexCommandSuggestion);
       }

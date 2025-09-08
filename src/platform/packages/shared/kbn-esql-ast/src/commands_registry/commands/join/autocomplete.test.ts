@@ -116,6 +116,20 @@ describe('JOIN Autocomplete', () => {
       });
     });
 
+    test('does not suggest the create index command when the index already exists', async () => {
+      const suggestions = await suggest('FROM index | LEFT JOIN join_index');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).not.toContain('Create lookup index join_index');
+    });
+
+    test('does not suggest the create index command when the index already exists as an alias', async () => {
+      const suggestions = await suggest('FROM index | LEFT JOIN join_index_alias_1');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).not.toContain('Create lookup index join_index_alias_1');
+    });
+
     test('does not suggest the create index command when a user does not have required privileges', async () => {
       (mockCallbacks.canCreateLookupIndex as jest.Mock).mockResolvedValueOnce(false);
       const suggestions = await suggest('FROM index | LEFT JOIN ');
