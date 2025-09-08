@@ -2435,6 +2435,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         policy_ids: packagePolicy.policy_ids,
         inputs: packagePolicy.inputs,
         output_id: packagePolicy.output_id === outputId ? null : packagePolicy.output_id,
+        package: packagePolicy.package,
       });
 
       // Validate that the new cleared/default output is valid for the package policies
