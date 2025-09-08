@@ -53,7 +53,6 @@ import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { EditorState } from './editor_state_manager';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
-import { initializeESQLStateManager } from './esql_state_manager';
 
 export const getOptionsListControlFactory = (): DataControlFactory<
   OptionsListControlState,
@@ -73,6 +72,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
     },
     CustomOptionsComponent: OptionsListEditorOptions,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+      if (isOptionsListESQLControlState(initialState)) {
+        throw new Error('ES|QL control state handling not yet implemented');
+      }
+
       /** Serializable state - i.e. the state that is saved with the control */
       const editorStateManager = initializeEditorStateManager(initialState);
 
@@ -91,7 +94,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const dataControlManager = initializeDataControlManager<EditorState>(
         uuid,
         OPTIONS_LIST_CONTROL,
-        { fieldName: '', dataViewId: '', ...initialState },
+        initialState,
         editorStateManager.getLatestState,
         editorStateManager.reinitializeState,
         controlGroupApi
@@ -101,14 +104,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
-      );
-
-      const esqlStateManager = initializeESQLStateManager(
-        {
-          esqlQuery: '',
-          ...initialState,
-        },
-        selectionsManager.api.selectedOptions$
       );
 
       /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
@@ -307,11 +302,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
-          dataControlManager.reinitializeState({
-            fieldName: '',
-            dataViewId: '',
-            ...lastSaved?.rawState,
-          });
+          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+            throw new Error('ES|QL control state handling not yet implemented');
+          }
+          dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
           sort$.next(lastSaved?.rawState.sort ?? OPTIONS_LIST_DEFAULT_SORT);
@@ -333,7 +327,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...dataControlManager.api,
-        ...esqlStateManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
@@ -350,31 +343,12 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
-      const displayName$ = new BehaviorSubject<string>(
-        (() => {
-          if (initialState.title) return initialState.title;
-          if (isOptionsListESQLControlState(initialState)) return initialState.variableName;
-          return initialState.fieldName;
-        })()
-      );
-      const displayNameSubscription = combineLatest([
-        dataControlManager.api.title$,
-        dataControlManager.api.fieldName$,
-        esqlStateManager.api.esqlVariable$,
-      ])
-        .pipe(debounceTime(0))
-        .subscribe(([title, fieldName, variable]) =>
-          displayName$.next(title ?? variable?.key ?? fieldName)
-        );
-
       const componentApi: OptionsListComponentApi = {
         ...api,
-        ...esqlStateManager.api,
         ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,
-        displayName$,
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
@@ -493,7 +467,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
-              displayNameSubscription.unsubscribe();
             };
           }, []);
 

@@ -45,8 +45,9 @@ export type OptionsListESQLControlState = ESQLControlState & OptionsListBaseCont
 export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
 export const isOptionsListESQLControlState = (
-  state: OptionsListControlState
+  state: OptionsListControlState | undefined
 ): state is OptionsListESQLControlState =>
+  typeof state !== 'undefined' &&
   Object.hasOwn(state, 'esqlQuery') &&
   Object.hasOwn(state, 'controlType') &&
   !Object.hasOwn(state, 'fieldName');
