@@ -87,17 +87,17 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
 
-      // TODO label sometimes not editable
-      // onEvent('tabRenamed');
+      onEvent('tabRenamed');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onSelect = useCallback(
     async (item: TabItem) => {
       changeState((prevState) => selectTab(prevState, item));
+      onEvent('tabSwitched');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onSelectRecentlyClosed = useCallback(
@@ -129,15 +129,19 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         ...prevState,
         items: reorderedItems,
       }));
+
+      onEvent('tabReordered');
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onAdd = useCallback(async () => {
     const newItem = createItem();
     tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
     changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
-  }, [changeState, createItem, maxItemsCount]);
+
+    onEvent('tabCreated');
+  }, [changeState, createItem, maxItemsCount, onEvent]);
 
   const onDuplicate = useCallback(
     (item: TabItem) => {
@@ -158,8 +162,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
       tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
       changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
+
+      onEvent('tabDuplicated');
     },
-    [changeState, createItem, maxItemsCount, state.items]
+    [changeState, createItem, maxItemsCount, state.items, onEvent]
   );
 
   const getTabMenuItems = useMemo(() => {

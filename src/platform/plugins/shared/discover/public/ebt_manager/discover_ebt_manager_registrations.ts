@@ -122,6 +122,7 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'integer',
         _meta: {
           description: 'The number of remaining tabs after the event',
+          optional: true,
         },
       },
     },
