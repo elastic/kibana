@@ -23,13 +23,15 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DataViewsCommon } from '../config_builder';
-import type { LensAttributes, LensDataset, LensDatatableDataset } from '../types';
+import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
-import { AnyBucketLensStateColumn, AnyLensStateColumn, AnyMetricLensStateColumn } from './columns/types';
-import { LensConfig } from '../types';
+import type {
+  AnyBucketLensStateColumn,
+  AnyLensStateColumn,
+  AnyMetricLensStateColumn,
+} from './columns/types';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -55,20 +57,23 @@ export const getDefaultReferences = (
  * @param layer
  * @returns
  */
-export const operationFromColumn = (
-  columnId: string,
-  layer: FormBasedLayer,
-) => {
+export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => {
   const column = layer.columns[columnId];
   if (!column) {
     return undefined;
   }
   // map columns to array of { column, id }
-  const columnMap = Object.entries(layer.columns).map(([id, column]) => ({ column: column as AnyLensStateColumn, id }));
+  const columnMap = Object.entries(layer.columns).map(([id, column]) => ({
+    column: column as AnyLensStateColumn,
+    id,
+  }));
   if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
     return fromBucketLensStateToAPI(column as AnyBucketLensStateColumn, columnMap);
   }
-  return getMetricApiColumnFromLensState(column as AnyMetricLensStateColumn, layer.columns as Record<string, AnyMetricLensStateColumn>);
+  return getMetricApiColumnFromLensState(
+    column as AnyMetricLensStateColumn,
+    layer.columns as Record<string, AnyMetricLensStateColumn>
+  );
 };
 
 /**
@@ -77,9 +82,7 @@ export const operationFromColumn = (
  * @param layer
  * @returns
  */
-export const buildDatasetState = (
-  layer: FormBasedLayer | TextBasedLayer,
-) => {
+export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
   if ('index' in layer) {
     return {
       type: 'esql',
@@ -140,9 +143,7 @@ export function isSingleLayer(
  * @param dataViewsAPI
  * @returns
  */
-export function getDatasetIndex(
-  dataset: LensApiState['dataset'],
-) {
+export function getDatasetIndex(dataset: LensApiState['dataset']) {
   let index: string;
   let timeFieldName: string = '@timestamp';
 
@@ -234,7 +235,7 @@ export const buildDatasourceStates = async (
     i: number,
     index: { index: string; timeFieldName: string }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
+  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
