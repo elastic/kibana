@@ -20,6 +20,7 @@ describe('ENRICH columnsAfter', () => {
     const result = await columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
+      fromFrom: () => Promise.resolve([]),
     });
     expect(result).toEqual(previousColumns);
   });
@@ -36,6 +37,7 @@ describe('ENRICH columnsAfter', () => {
     const result = await columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve(enrichColumns),
+      fromFrom: () => Promise.resolve([]),
     });
     expect(result).toEqual([...enrichColumns, ...previousColumns]);
   });
@@ -56,6 +58,7 @@ describe('ENRICH columnsAfter', () => {
       {
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve(enrichColumns),
+        fromFrom: () => Promise.resolve([]),
       }
     );
     expect(result).toEqual([enrichColumns[1], ...previousColumns]);
@@ -77,6 +80,7 @@ describe('ENRICH columnsAfter', () => {
       {
         fromEnrich: () => Promise.resolve(enrichColumns),
         fromJoin: () => Promise.resolve([]),
+        fromFrom: () => Promise.resolve([]),
       }
     );
     const expected = [
@@ -99,6 +103,7 @@ describe('ENRICH columnsAfter', () => {
     const result = await columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
       fromEnrich: () => Promise.resolve(enrichFields),
       fromJoin: () => Promise.resolve([]),
+      fromFrom: () => Promise.resolve([]),
     });
     expect(result).toEqual([
       { name: 'fieldA', type: 'text', userDefined: false },

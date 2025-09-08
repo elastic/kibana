@@ -26,7 +26,6 @@ import {
 } from '@kbn/esql-ast/src/types';
 import { type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { getColumnsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
-import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '../../../../monaco_imports';
@@ -186,8 +185,7 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForColumns = getQueryForFields(query, root);
-  const { getColumnMap } = getColumnsByTypeRetriever(queryForColumns, resourceRetriever);
+  const { getColumnMap } = getColumnsByTypeRetriever(root, query, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);
   // early exit on no hit

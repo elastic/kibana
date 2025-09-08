@@ -20,6 +20,7 @@ describe('JOIN columnsAfter', () => {
     const result = await columnsAfter({} as any, previousColumns, '', {
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
+      fromFrom: () => Promise.resolve([]),
     });
 
     expect(result).toEqual(previousColumns);
@@ -38,6 +39,7 @@ describe('JOIN columnsAfter', () => {
     const result = await columnsAfter({} as any, previousColumns, '', {
       fromJoin: () => Promise.resolve(joinColumns),
       fromEnrich: () => Promise.resolve([]),
+      fromFrom: () => Promise.resolve([]),
     });
 
     expect(result).toEqual([...joinColumns, ...previousColumns]);
@@ -56,6 +58,7 @@ describe('JOIN columnsAfter', () => {
     const result = await columnsAfter({} as any, previousColumns, '', {
       fromJoin: () => Promise.resolve(joinColumns),
       fromEnrich: () => Promise.resolve([]),
+      fromFrom: () => Promise.resolve([]),
     });
 
     expect(result).toEqual([

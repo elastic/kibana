@@ -24,6 +24,7 @@ describe('FORK', () => {
       {
         fromEnrich: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
+        fromFrom: () => Promise.resolve([]),
       }
     );
 
@@ -51,6 +52,7 @@ describe('FORK', () => {
       {
         fromEnrich: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
+        fromFrom: () => Promise.resolve([]),
       }
     );
 
@@ -94,6 +96,14 @@ describe('FORK', () => {
               userDefined: false,
             },
           ]),
+        fromFrom: () =>
+          Promise.resolve([
+            {
+              name: 'from-from',
+              type: 'keyword',
+              userDefined: false,
+            },
+          ]),
       }
     );
 
@@ -125,6 +135,7 @@ describe('FORK', () => {
       {
         fromEnrich: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
+        fromFrom: () => Promise.resolve([]),
       }
     );
 
@@ -154,6 +165,7 @@ describe('FORK', () => {
         {
           fromEnrich: () => Promise.resolve([]),
           fromJoin: () => Promise.resolve([]),
+          fromFrom: () => Promise.resolve([]),
         }
       );
 
@@ -181,6 +193,7 @@ describe('FORK', () => {
         {
           fromEnrich: () => Promise.resolve([]),
           fromJoin: () => Promise.resolve([]),
+          fromFrom: () => Promise.resolve([]),
         }
       );
 
@@ -207,6 +220,7 @@ describe('FORK', () => {
         {
           fromEnrich: () => Promise.resolve([]),
           fromJoin: () => Promise.resolve([]),
+          fromFrom: () => Promise.resolve([]),
         }
       );
 
