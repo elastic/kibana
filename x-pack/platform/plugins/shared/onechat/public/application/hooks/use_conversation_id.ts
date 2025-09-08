@@ -26,8 +26,6 @@ export const useConversationId = () => {
   const isFlyoutMode = conversationSettings?.isFlyoutMode;
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
 
-  // TODO: Add logic to resume most recent conversation when no conversationId is provided
-  // For now, if no conversationId is provided, we will create a new conversation
   const conversationId = useMemo(() => {
     if (isFlyoutMode && (lastConversation || conversationSettings?.selectedConversationId)) {
       if (conversationSettings?.selectedConversationId) {

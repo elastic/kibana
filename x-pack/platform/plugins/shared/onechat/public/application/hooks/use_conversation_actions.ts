@@ -24,6 +24,8 @@ import type { ConversationSettings } from '../../services/types';
 import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
 import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
 
+const pendingRoundId = '__pending__';
+
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
@@ -104,6 +106,7 @@ export const useConversationActions = () => {
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
+            id: pendingRoundId,
             input: { message: userMessage },
             response: { message: '' },
             steps: [],

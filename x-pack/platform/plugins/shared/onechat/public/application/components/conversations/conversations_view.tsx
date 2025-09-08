@@ -19,7 +19,7 @@ import { OnechatSpaceIdProvider } from '../../hooks/use_space_aware_context';
 import { useSpaceId } from '../../hooks/use_space_id';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
 
@@ -59,8 +59,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  // Prefetch conversations before sidebar is opened
-  const { conversations, isLoading } = useConversationList();
+  const { conversations = [], isLoading } = useConversationList();
 
   return (
     <OnechatSpaceIdProvider spaceId={spaceId}>
