@@ -10,8 +10,12 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
-import { PrivMonUtils, PlainIndexSyncUtils } from './utils';
-
+import {
+  PrivMonUtils,
+  PlainIndexSyncUtils,
+  createIndexEntitySource,
+  createIntegrationEntitySource,
+} from './utils';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const kibanaServer = getService('kibanaServer');
@@ -272,12 +276,41 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('init', () => {
+      const indexName = 'privileged-users-index-pattern';
+      const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
+      const entitySourceIntegration = createIntegrationEntitySource({
+        name: '.entity_analytics.monitoring.sources.okta-default', // if you need that exact name
+      });
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
       });
+
+      it('should not create duplicate monitoring data sources', async () => {
+        const response = await api.createEntitySource({ body: entitySource });
+        const integrationResponse = await api.createEntitySource({ body: entitySourceIntegration });
+        expect(response.status).toBe(200);
+        expect(integrationResponse.status).toBe(200);
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        // confirm sources have been created
+        expect(names).toEqual(
+          expect.arrayContaining([
+            'PrivilegedUsers',
+            '.entity_analytics.monitoring.sources.okta-default',
+          ])
+        );
+        // Try to create the same entity sources again
+        await api.createEntitySource({ body: entitySource });
+        await api.createEntitySource({ body: entitySourceIntegration });
+        const nonDuplicateSources = await api.listEntitySources({ query: {} });
+        const nonDuplicateNames = nonDuplicateSources.body.map((s: any) => s.name);
+        // confirm duplicates have not been created
+        expect(names.length).toBe(nonDuplicateNames.length);
+      });
+
       it('should be able to be called multiple times', async () => {
         log.info(`Initializing Privilege Monitoring engine`);
         const res1 = await api.initMonitoringEngine();
@@ -403,6 +436,23 @@ export default ({ getService }: FtrProviderContext) => {
         expect(user1After?.user?.name).toEqual(user1.name);
         expect(user1After?.labels?.sources).toEqual(['api', 'index']);
         privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
+      });
+    });
+
+    describe('default entity sources', () => {
+      it('should create default entity sources on privileged monitoring engine initialization', async () => {
+        await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
+
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        expect(names).toEqual(
+          expect.arrayContaining([
+            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.ad-default',
+            '.entity_analytics.monitoring.users-default',
+          ])
+        );
       });
     });
   });
