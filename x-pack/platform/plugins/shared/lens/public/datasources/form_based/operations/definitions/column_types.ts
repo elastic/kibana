@@ -6,6 +6,7 @@
  */
 
 import type { Query } from '@kbn/es-query';
+import type { ValueFormatConfig } from '../../../../../common';
 import type { Operation } from '../../../../types';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { OperationType } from '.';
@@ -18,18 +19,6 @@ export interface BaseIndexPatternColumn extends Operation {
   filter?: Query;
   reducedTimeRange?: string;
   timeShift?: string;
-}
-
-export interface ValueFormatConfig {
-  id: string;
-  params?: {
-    decimals: number;
-    suffix?: string;
-    compact?: boolean;
-    pattern?: string;
-    fromUnit?: string;
-    toUnit?: string;
-  };
 }
 
 // Formatting can optionally be added to any column
