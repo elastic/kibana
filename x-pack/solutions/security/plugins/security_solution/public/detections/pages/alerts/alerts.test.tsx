@@ -21,7 +21,7 @@ import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileg
 jest.mock('../../components/user_info');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../sourcerer/containers/use_signal_helpers');
-jest.mock('../../../common/components/missing_privileges');
+jest.mock('../../../common/hooks/use_missing_privileges');
 jest.mock('../../components/alerts/wrapper', () => ({
   Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,
 }));
