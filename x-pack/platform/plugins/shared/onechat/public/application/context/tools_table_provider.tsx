@@ -13,11 +13,12 @@ import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
-import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/esql/create_esql_tool';
+import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/create_tool';
 
 export interface ToolsActionsContextType {
   createTool: (toolType: ToolType) => void;
   editTool: (toolId: string, toolType: ToolType) => void;
+  viewTool: (toolId: string) => void;
   deleteTool: (toolId: string) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
   cloneTool: (toolId: string, toolType: ToolType) => void;
@@ -25,6 +26,7 @@ export interface ToolsActionsContextType {
   getCreateToolUrl: (toolType: ToolType) => string;
   getEditToolUrl: (toolId: string, toolType: ToolType) => string;
   getCloneToolUrl: (toolId: string, toolType: ToolType) => string;
+  getViewToolUrl: (toolId: string) => string;
 }
 
 export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
@@ -55,9 +57,23 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
     [navigateToOnechatUrl]
   );
 
+  const viewTool = useCallback(
+    (toolId: string) => {
+      navigateToOnechatUrl(appPaths.tools.details({ toolId }));
+    },
+    [navigateToOnechatUrl]
+  );
+
   const getEditToolUrl = useCallback(
     (toolId: string, toolType: ToolType) => {
       return createOnechatUrl(appPaths.tools.edit({ toolId, toolType }));
+    },
+    [createOnechatUrl]
+  );
+
+  const getViewToolUrl = useCallback(
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.details({ toolId }));
     },
     [createOnechatUrl]
   );
@@ -111,10 +127,12 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
         bulkDeleteTools,
         createTool,
         editTool,
+        viewTool,
         cloneTool,
         testTool: noop, // TODO: integrate with tool testing modal
         getCreateToolUrl,
         getEditToolUrl,
+        getViewToolUrl,
         getCloneToolUrl,
       }}
     >

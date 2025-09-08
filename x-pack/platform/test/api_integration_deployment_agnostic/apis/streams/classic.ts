@@ -10,7 +10,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { fetchDocument, indexDocument, putStream } from './helpers/requests';
+import { deleteStream, fetchDocument, indexDocument, putStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -25,6 +25,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+    });
+
+    after(async () => {
+      await esClient.indices.deleteDataStream({ name: 'logs-invalid_pipeline-default' });
     });
 
     describe('Classic streams processing', () => {
@@ -206,6 +210,57 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           '@timestamp': (result._source as { [key: string]: unknown })['@timestamp'],
           message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
         });
+      });
+
+      it('reports when it fails to update a stream', async () => {
+        const doc = {
+          // default logs pipeline fills in timestamp with current date if not set
+          message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
+        };
+        const response = await indexDocument(esClient, 'logs-invalid_pipeline-default', doc);
+        expect(response.result).to.eql('created');
+        const body: Streams.ClassicStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          rules: [],
+          stream: {
+            description: 'Should cause a failure due to invalid ingest pipeline',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
+                    processors: [
+                      {
+                        set: {
+                          field: 'fails',
+                          value: 'whatever',
+                          fail: 'because this property is not valid',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              classic: {
+                field_overrides: {},
+              },
+            },
+          },
+        };
+
+        const streamsResponse = await putStream(
+          apiClient,
+          'logs-invalid_pipeline-default',
+          body,
+          500
+        );
+
+        expect((streamsResponse as any).message).to.contain('Failed to change state:');
+        expect((streamsResponse as any).message).to.contain(
+          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
+        );
       });
     });
 
@@ -536,6 +591,124 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
         expect(pipeline.processors).to.eql([]);
+      });
+    });
+
+    describe('Elasticsearch ingest pipeline enrichment', () => {
+      before(async () => {
+        await esClient.indices.createDataStream({
+          name: TEST_STREAM_NAME,
+        });
+        const body: Streams.ClassicStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          rules: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
+                    processors: [
+                      {
+                        // apply custom processor
+                        uppercase: {
+                          field: 'abc',
+                        },
+                      },
+                      {
+                        // apply condition
+                        lowercase: {
+                          field: 'def',
+                          if: "ctx.def == 'yes'",
+                        },
+                      },
+                      {
+                        fail: {
+                          message: 'Failing',
+                          on_failure: [
+                            // execute on failure pipeline
+                            {
+                              set: {
+                                field: 'fail_failed',
+                                value: 'yes',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    where: { always: {} },
+                  },
+                ],
+              },
+              classic: {
+                field_overrides: {},
+              },
+            },
+          },
+        };
+        const response = await putStream(apiClient, TEST_STREAM_NAME, body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, TEST_STREAM_NAME);
+      });
+
+      it('Transforms doc on index', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:11.000Z',
+          abc: 'should become uppercase',
+          def: 'SHOULD NOT BECOME LOWERCASE',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:11.000Z',
+          abc: 'SHOULD BECOME UPPERCASE',
+          def: 'SHOULD NOT BECOME LOWERCASE',
+          fail_failed: 'yes',
+        });
+      });
+
+      it('fails to store non-existing processor', async () => {
+        const body: Streams.ClassicStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          rules: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
+                    processors: [
+                      {
+                        // apply custom processor
+                        non_existing_processor: {
+                          field: 'abc',
+                        },
+                      } as any,
+                    ],
+                    where: { always: {} },
+                  },
+                ],
+              },
+
+              classic: {
+                field_overrides: {},
+              },
+            },
+          },
+        };
+        await putStream(apiClient, TEST_STREAM_NAME, body, 400);
       });
     });
 

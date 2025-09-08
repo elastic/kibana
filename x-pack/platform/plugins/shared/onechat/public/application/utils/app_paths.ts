@@ -34,5 +34,8 @@ export const appPaths = {
     edit: ({ toolId, toolType }: { toolId: string; toolType: ToolType }) => {
       return `/tools/${toolType}/${toolId}`;
     },
+    details: ({ toolId }: { toolId: string }) => {
+      return `/tools/${toolId}`;
+    },
   },
 };

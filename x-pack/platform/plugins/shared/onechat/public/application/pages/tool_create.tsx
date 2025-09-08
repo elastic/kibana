@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/onechat-common';
 import { useParams } from 'react-router-dom';
-import { CreateEsqlTool } from '../components/tools/esql/create_esql_tool';
-import { CreateIndexSearchTool } from '../components/tools/index_search/create_index_search_tool';
+import { CreateTool } from '../components/tools/create_tool';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
@@ -22,16 +21,9 @@ export const OnechatToolCreatePage = () => {
       path: appPaths.tools.list,
     },
     {
-      text: labels.tools.newEsqlToolTitle,
+      text: labels.tools.newToolTitle,
       path: appPaths.tools.new({ toolType }),
     },
   ]);
-  switch (toolType) {
-    case ToolType.index_search:
-      return <CreateIndexSearchTool />;
-    case ToolType.esql:
-      return <CreateEsqlTool />;
-    default:
-      return null;
-  }
+  return <CreateTool />;
 };

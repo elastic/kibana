@@ -102,6 +102,8 @@ export {
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
   type ChatAgentEvent,
+  type ToolProgressEvent,
+  type ToolProgressEventData,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -114,6 +116,7 @@ export {
   type MessageCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
+  type ToolCallProgress,
   isToolCallEvent,
   isToolResultEvent,
   isReasoningEvent,
@@ -122,4 +125,5 @@ export {
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isToolProgressEvent,
 } from './chat';
