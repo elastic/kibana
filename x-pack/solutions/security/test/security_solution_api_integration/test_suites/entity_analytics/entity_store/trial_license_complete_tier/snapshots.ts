@@ -63,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('KUBA Should perform snapshot task', async () => {
-        const hostName: string = 'host-transform-test-ip';
+        const hostName: string = 'create-a-daily-snapshot';
         const testDocs = [
           { name: hostName, ip: '1.1.1.1' },
           { name: hostName, ip: '2.2.2.2' },
