@@ -13,13 +13,13 @@ import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
 
+import { registerDataControlTransforms } from '../common/transforms/data_controls/register_data_control_transforms';
 import { esqlStaticControlPersistableStateServiceFactory } from './esql_control/esql_control_factory';
 import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
 import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
-import { registerDataControlTransforms } from './register_data_control_transforms';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;

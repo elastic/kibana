@@ -12,9 +12,7 @@ import { omit } from 'lodash';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { StoredDataControlState } from '../server/types';
-
-const REFERENCE_NAME_PREFIX = 'controlGroup_';
+import type { StoredDataControlState } from './types';
 
 export function extractReferences(
   state: DataControlState,
@@ -38,18 +36,18 @@ export function extractReferences(
 export function injectReferences(
   id: string | undefined,
   state: StoredDataControlState,
-  referenceNameSuffix: string,
+  refName: string,
   references: Reference[] = []
 ): DataControlState {
   let { dataViewRefName } = state;
   if (!dataViewRefName && id) {
     // backwards compatibility for when we didn't store the ref name with the saved object (<v9.2.0)
-    dataViewRefName = getLegacyReferenceName(id, referenceNameSuffix);
+    dataViewRefName = getLegacyReferenceName(id, refName);
   }
   const dataViewRef = references.find(({ name }) => name === dataViewRefName);
   return { ...omit(state, 'dataViewRefName'), dataViewId: dataViewRef?.id ?? '' };
 }
 
-function getLegacyReferenceName(controlId: string, referenceNameSuffix: string) {
-  return `${REFERENCE_NAME_PREFIX}${controlId}:${referenceNameSuffix}`;
+function getLegacyReferenceName(controlId: string, refName: string) {
+  return `controlGroup_${controlId}:${refName}`;
 }

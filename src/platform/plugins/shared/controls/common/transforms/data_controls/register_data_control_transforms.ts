@@ -8,15 +8,15 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { extractReferences, injectReferences } from '../common/data_control_references';
+import { extractReferences, injectReferences } from './references';
 
 export const registerDataControlTransforms = (
   embeddable: EmbeddableSetup,
   type: string,
-  prefix: string
+  refName: string
 ) => {
   embeddable.registerTransforms(type, {
-    transformIn: ({ state }) => extractReferences(state, prefix),
-    transformOut: ({ id, state, references }) => injectReferences(id, state, prefix, references),
+    transformIn: ({ state }) => extractReferences(state, refName),
+    transformOut: ({ id, state, references }) => injectReferences(id, state, refName, references),
   });
 };
