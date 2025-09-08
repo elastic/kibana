@@ -72,9 +72,16 @@ export const SearchBar = () => {
         <EuiFlexItem>
           <UnifiedSearchBar
             onQuerySubmit={handleRefresh}
-            placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
-              defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
-            })}
+            placeholder={
+              searchCriteria.preferredSchema === 'ecs'
+                ? i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+                    defaultMessage:
+                      'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+                  })
+                : i18n.translate('xpack.infra.hosts.otelSearchPlaceholder', {
+                    defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND os.type:linux)',
+                  })
+            }
             showDatePicker
             showFilterBar
             showSubmitButton
