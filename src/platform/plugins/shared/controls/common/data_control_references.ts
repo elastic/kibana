@@ -18,17 +18,16 @@ const REFERENCE_NAME_PREFIX = 'controlGroup_';
 
 export function extractReferences(
   state: DataControlState,
-  referenceNameSuffix: string
+  referenceName: string
 ): { state: StoredDataControlState; references?: Reference[] } {
-  const refName = `${referenceNameSuffix}:${state.dataViewId}`;
   return {
     state: {
       ...omit(state, 'dataViewId'),
-      dataViewRefName: refName,
+      dataViewRefName: referenceName,
     },
     references: [
       {
-        name: refName,
+        name: referenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: state.dataViewId,
       },
