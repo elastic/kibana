@@ -284,6 +284,11 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: is_missing_index
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         200:
           description: Indicates rule migration have been retrieved correctly.
@@ -531,7 +536,7 @@ paths:
             application/json:
               schema:
                 $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationStats'
-        204:
+        404:
           description: Indicates the migration id was not found.
 
   /internal/siem_migrations/rules/{migration_id}/stop:
