@@ -196,7 +196,6 @@ export function ContentFrameworkTable({
         .euiDataGridRow:last-of-type .euiDataGridRowCell {
           border-bottom: none;
         }
-        margin-top: calc(${euiTheme.base * -1.5}px);
       `}
     >
       <TableGrid
@@ -213,7 +212,6 @@ export function ContentFrameworkTable({
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
         gridStyle={{ stripes: false, rowHover: 'none' }}
-        hideDataGridHeader
       />
     </div>
   );
