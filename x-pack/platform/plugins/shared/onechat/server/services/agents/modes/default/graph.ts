@@ -105,15 +105,11 @@ export const createAgentGraph = ({
     const last = added[added.length - 1] as AIMessage | undefined;
     if (last && last.tool_calls && last.tool_calls.length > 0) {
       const textOnly = extractTextContent(last).trim();
-      // If there is no meaningful textual content besides tool calls, drop the message entirely.
       if (!textOnly) {
         added.pop();
       } else {
-        const sanitized: any = { ...last, tool_calls: [], content: textOnly };
-        // remove provider-specific transient fields that might reference pending tool calls
-        delete sanitized.tool_call_chunks;
-        delete sanitized.invalid_tool_calls;
-        added[added.length - 1] = sanitized;
+        // Replace with a simple assistant tuple to avoid lingering provider metadata/tool_call chunks
+        (added as any)[added.length - 1] = ['assistant', textOnly];
       }
     }
     const used = state.toolCallCount;
