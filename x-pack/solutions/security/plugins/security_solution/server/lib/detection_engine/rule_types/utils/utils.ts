@@ -306,8 +306,7 @@ export const getExceptions = async ({
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
     const filteredLists = lists.filter(
-      ({ list_id: listId }) =>
-        !(ENDPOINT_ARTIFACT_LIST_IDS as readonly string[]).includes<string>(listId)
+      ({ list_id: listId }) => !(ENDPOINT_ARTIFACT_LIST_IDS as readonly string[]).includes(listId)
     );
     if (filteredLists.length > 0) {
       try {
