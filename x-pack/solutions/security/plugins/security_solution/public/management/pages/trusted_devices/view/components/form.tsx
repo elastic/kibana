@@ -311,7 +311,6 @@ const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
     },
   ];
 
-  // Add USERNAME field only if it's available for the selected OS
   if (isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {
     allFields.push({
       value: TrustedDeviceConditionEntryField.USERNAME,
@@ -319,8 +318,7 @@ const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
     });
   }
 
-  // Keep alphabetical order
-  return allFields.sort((a, b) => a.inputDisplay.localeCompare(b.inputDisplay));
+  return allFields;
 };
 
 const OPERATOR_OPTIONS = [
