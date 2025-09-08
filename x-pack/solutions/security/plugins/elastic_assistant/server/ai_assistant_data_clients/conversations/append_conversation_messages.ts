@@ -33,7 +33,7 @@ export const appendConversationMessages = async ({
     ...messages,
   ]);
 
-  const maxRetries = 3;
+  const maxRetries = 8;
   let attempt = 0;
   let response;
   while (attempt < maxRetries) {
@@ -104,12 +104,13 @@ export const appendConversationMessages = async ({
       ) {
         attempt++;
         if (attempt < maxRetries) {
+          const delay = Math.min(50 * 2 ** attempt, 1000); // Exponential backoff, max delay 1 second
           logger.warn(
             `Version conflict detected, retrying appendConversationMessages (attempt ${
               attempt + 1
-            }) for conversation ID: ${existingConversation.id}`
+            }) for conversation ID: ${existingConversation.id}. Trying again in ${delay}ms.`
           );
-          await new Promise((resolve) => setTimeout(resolve, 100 * attempt)); // Exponential backoff
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       } else {
         break;
