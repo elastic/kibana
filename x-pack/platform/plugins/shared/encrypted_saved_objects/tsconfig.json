@@ -24,6 +24,7 @@
     "@kbn/core-root-server-internal",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": [
     "target/**/*",
