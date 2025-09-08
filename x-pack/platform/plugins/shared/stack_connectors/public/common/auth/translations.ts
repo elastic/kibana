@@ -147,6 +147,13 @@ export const SECRET_OPTION = i18n.translate(
   }
 );
 
+export const SECRET_HEADER_MISSING_VALUE_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretHeaderMissingValueError',
+  {
+    defaultMessage: 'Value is required',
+  }
+);
+
 export const ADD_BUTTON = i18n.translate('xpack.stackConnectors.components.auth.addHeaderButton', {
   defaultMessage: 'Add header',
 });

@@ -93,7 +93,15 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
     type: 'config' as const,
   }));
 
-  console.log('deserializer, configHeaders: ', configHeaders);
+  const returnedDeserializedData = {
+    ...(data as any),
+    __internal__: {
+      ...((data as any).__internal__ ?? {}),
+      headers: configHeaders,
+    },
+  };
+
+  console.log('returnedDeserializedData: ', returnedDeserializedData);
 
   return {
     ...(data as any),
@@ -139,18 +147,39 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
       return acc;
     }, {} as Record<string, string>);
 
+  // const secretHeaders = headers
+  //   .filter((header) => header.type === 'secret' && header.key)
+  //   .reduce((acc, { key, value }) => {
+  //     // here if the value is undefined it will be defaulted to "", but the backend doesn t accept value: ""
+  //     // so maybe we should also fetch the decrypted value, but never show it?
+  //     // because value: "" -> error and the changes will not be saved
+  //     acc[key] = value;
+  //     return acc;
+  //   }, {} as Record<string, string>);
   const secretHeaders = headers
-    .filter((header) => header.type === 'secret' && header.key)
+    .filter((h) => h.type === 'secret' && h.key && h.key.trim())
     .reduce((acc, { key, value }) => {
-      // here if the value is undefined it will be defaulted to "", but the backend doesn t accept value: ""
-      // so maybe we should also fetch the decrypted value, but never show it?
-      // because value: "" -> error and the changes will not be saved
       acc[key] = value;
       return acc;
     }, {} as Record<string, string>);
 
-  console.log('serializer', { secretHeaders });
-  console.log('serializer', { configHeaders });
+  const returnedSerializedData = {
+    ...formData,
+    config: {
+      ...formData.config,
+      headers: isEmpty(configHeaders)
+        ? formData.actionTypeId !== '.gen-ai'
+          ? null
+          : undefined
+        : configHeaders,
+    },
+    secrets: {
+      ...formData.secrets,
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+    },
+  };
+
+  console.log('returnedSerializedData: ', returnedSerializedData);
 
   return {
     ...formData,
@@ -179,7 +208,6 @@ const ConnectorFormComponent: React.FC<Props> = ({
 }) => {
   const secretHeaders = useSecretHeaders(connector.id);
   console.log('after fetching secretHeaders: ', secretHeaders);
-  console.log('default connector value: ', connector);
   const { form } = useForm({
     defaultValue: connector,
     serializer: formSerializer,
@@ -214,8 +242,10 @@ const ConnectorFormComponent: React.FC<Props> = ({
   }, [isFormModified, onFormModifiedChange]);
 
   useEffect(() => {
-    if (secretHeaders.length === 0 || hasMergedSecretHeaders) return;
+    if (secretHeaders.length === 0) return;
     const currentFormData = form.getFormData() as InternalConnectorForm;
+
+    const existingKeys = currentFormData.__internal__?.headers?.map((header) => header.key);
 
     const configHeaders = Object.keys(
       (connector.config?.headers ?? {}) as Record<string, string>
@@ -225,11 +255,15 @@ const ConnectorFormComponent: React.FC<Props> = ({
       type: 'config' as const,
     }));
 
-    console.log('in use effect, configHeaders: ', configHeaders);
+    const secretHeadersToMerge = secretHeaders.filter(
+      (header) => !existingKeys?.includes(header.key)
+    );
 
-    const mergedHeaders = [...configHeaders, ...secretHeaders];
+    if (secretHeadersToMerge.length === 0) return;
 
-    console.log('mergedHeaders: ', mergedHeaders);
+    const mergedHeaders = [...configHeaders, ...secretHeadersToMerge];
+
+    console.log('in use effect, mergedHeaders: ', mergedHeaders);
 
     form.updateFieldValues(
       {
@@ -242,8 +276,12 @@ const ConnectorFormComponent: React.FC<Props> = ({
       },
       { runDeserializer: false }
     );
-    setHasMergedSecretHeaders(true);
-  }, [secretHeaders, form, connector, hasMergedSecretHeaders]);
+
+    const updatedFormData = form.getFormData();
+    console.log('updatedFormData: ', updatedFormData);
+
+    // setHasMergedSecretHeaders(true);
+  }, [secretHeaders, form, connector]);
 
   useEffect(() => {
     if (setResetForm) {
