@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x, y, origin: el._webElement }).contextClick().perform();
   }
 
-  describe.only('lens dashboard tests', () => {
+  describe('lens dashboard tests', () => {
     before(async () => {
       await dashboard.navigateToApp();
       await security.testUser.setRoles(

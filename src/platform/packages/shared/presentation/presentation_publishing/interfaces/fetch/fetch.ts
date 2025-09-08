@@ -153,9 +153,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 
   return fetchContext$.pipe(
     combineLatestWith(isFetchPaused$),
-    tap(([context, ispaused]) => {
-      console.log(context, ispaused);
-    }),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
