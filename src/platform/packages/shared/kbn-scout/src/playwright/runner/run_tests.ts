@@ -152,7 +152,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
 
   if (pwTestFiles.length > 0) {
-    log.info(`scout: Running specific Scout test files:\n${pwTestFiles.join('\n')}`);
+    log.info(`scout: Running Scout tests located in:\n${pwTestFiles.join('\n')}`);
   }
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');

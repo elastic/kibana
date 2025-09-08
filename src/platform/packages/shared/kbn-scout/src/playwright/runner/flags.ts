@@ -34,7 +34,7 @@ export const TEST_FLAG_OPTIONS: FlagOptions = {
   default: { headed: false, testTarget: 'local' },
   help: `${SERVER_FLAG_OPTIONS.help}
     --config             Playwright config file path (required if --testFiles not provided)
-    --testFiles          Comma-separated list of test file paths (required if --config not provided)
+    --testFiles          Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed             Run Playwright with browser head
     --testTarget         Run tests against locally started servers or Cloud deployment / MKI project
   `,
