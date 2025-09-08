@@ -33,17 +33,17 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
     case 'set':
       return convertSetProcessorToESQL(processor as SetProcessor);
 
-    case 'grok':
-      return convertGrokProcessorToESQL(processor as GrokProcessor);
-
-    case 'dissect':
-      return convertDissectProcessorToESQL(processor as DissectProcessor);
+    case 'append':
+      return convertAppendProcessorToESQL(processor as AppendProcessor);
 
     case 'date':
       return convertDateProcessorToESQL(processor as DateProcessor);
 
-    case 'append':
-      return convertAppendProcessorToESQL(processor as AppendProcessor);
+    case 'dissect':
+      return convertDissectProcessorToESQL(processor as DissectProcessor);
+
+    case 'grok':
+      return convertGrokProcessorToESQL(processor as GrokProcessor);
 
     case 'manual_ingest_pipeline':
       return [
