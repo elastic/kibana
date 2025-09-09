@@ -645,7 +645,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           setHasFormChanged(true);
         }
       },
-      [hasFormChanged, processChanged]
+      [hasFormChanged, processChanged, item]
     );
 
     // Stabilized memoization with minimal dependencies
