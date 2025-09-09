@@ -26,20 +26,12 @@ import { controlWidthStyles } from './control_panel.styles';
  * the title, because individual controls can be any size, and dragging a wide item
  * can be quite cumbersome.
  */
-export const ControlClone = ({
-  labelPosition,
-  controlApi,
-}: {
-  labelPosition: string;
-  controlApi: DefaultControlApi | undefined;
-}) => {
+export const ControlClone = ({ controlApi }: { controlApi: DefaultControlApi | undefined }) => {
   const [width, panelTitle, defaultPanelTitle] = useBatchedPublishingSubjects(
     controlApi ? controlApi.width$ : new BehaviorSubject(DEFAULT_CONTROL_GROW),
     controlApi?.title$ ? controlApi.title$ : new BehaviorSubject(undefined),
     controlApi?.defaultTitle$ ? controlApi.defaultTitle$ : new BehaviorSubject('')
   );
-  const isTwoLine = labelPosition === 'twoLine';
-
   const styles = useMemoCss(controlCloneStyles);
 
   return (
@@ -51,16 +43,10 @@ export const ControlClone = ({
         'controlFrameWrapper--large': width === 'large',
       })}
     >
-      {isTwoLine && <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>}
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
         </EuiFlexItem>
-        {!isTwoLine && (
-          <EuiFlexItem>
-            <label>{panelTitle ?? defaultPanelTitle}</label>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiFlexItem>
   );
