@@ -53656,7 +53656,11 @@ paths:
                                                   type: object
                                                   properties:
                                                     value:
-                                                      type: string
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
                                                   required:
                                                     - value
                                           required:
@@ -55385,7 +55389,11 @@ paths:
                                               type: object
                                               properties:
                                                 value:
-                                                  type: string
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
                                               required:
                                                 - value
                                       required:
@@ -56912,7 +56920,11 @@ paths:
                                                   type: object
                                                   properties:
                                                     value:
-                                                      type: string
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
                                                   required:
                                                     - value
                                           required:
@@ -58491,7 +58503,11 @@ paths:
                                               type: object
                                               properties:
                                                 value:
-                                                  type: string
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
                                               required:
                                                 - value
                                       required:
@@ -60391,7 +60407,11 @@ paths:
                                   type: object
                                   properties:
                                     value:
-                                      type: string
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
                                   required:
                                     - value
                           required:
@@ -62033,7 +62053,11 @@ paths:
                                   type: object
                                   properties:
                                     value:
-                                      type: string
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
                                   required:
                                     - value
                           required:
