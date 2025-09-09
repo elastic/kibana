@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
-  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../../constants';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
@@ -33,7 +33,7 @@ export const getTranslationResultNode = (): GraphNode => {
       if (query.startsWith('FROM logs-*')) {
         elasticRule.query = query.replace(
           'FROM logs-*',
-          `FROM ${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}`
+          `FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER}`
         );
         translationResult = MigrationTranslationResult.PARTIAL;
       } else if (state.validation_errors?.esql_errors) {
