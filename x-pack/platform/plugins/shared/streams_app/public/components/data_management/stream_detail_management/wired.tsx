@@ -18,10 +18,10 @@ import { useStreamsDetailManagementTabs } from './use_streams_detail_management_
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 
 const wiredStreamManagementSubTabs = [
-  'route',
-  'enrich',
-  'schemaEditor',
-  'lifecycle',
+  'partitioning',
+  'processing',
+  'schema',
+  'retention',
   'significantEvents',
   'dataQuality',
   'references',
@@ -29,6 +29,12 @@ const wiredStreamManagementSubTabs = [
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
 
+const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
+  schemaEditor: { newTab: 'schema' },
+  lifecycle: { newTab: 'retention' },
+  route: { newTab: 'partitioning' },
+  enrich: { newTab: 'processing' },
+};
 function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
@@ -44,13 +50,13 @@ export function WiredStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const { enrich, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { processing, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
 
   const tabs = {
-    lifecycle: {
+    retention: {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
@@ -64,13 +70,13 @@ export function WiredStreamDetailManagement({
         >
           <span>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Data retention',
+              defaultMessage: 'Retention',
             })}
           </span>
         </EuiToolTip>
       ),
     },
-    route: {
+    partitioning: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
       ),
@@ -78,13 +84,13 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    enrich,
-    schemaEditor: {
+    processing,
+    schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
-        defaultMessage: 'Schema editor',
+        defaultMessage: 'Schema',
       }),
     },
     dataQuality: {
@@ -106,8 +112,20 @@ export function WiredStreamDetailManagement({
     ...otherTabs,
   };
 
+  const redirectConfig = tabRedirects[tab];
+  if (redirectConfig) {
+    return (
+      <RedirectTo
+        path="/{key}/management/{tab}"
+        params={{ path: { key, tab: redirectConfig.newTab } }}
+      />
+    );
+  }
+
   if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
+    );
   }
 
   return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
