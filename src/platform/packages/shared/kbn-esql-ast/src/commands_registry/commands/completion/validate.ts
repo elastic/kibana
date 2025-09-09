@@ -22,7 +22,7 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const { prompt, location, targetField, inferenceId } = command as ESQLAstCompletionCommand;
+  const { prompt, location, inferenceId } = command as ESQLAstCompletionCommand;
 
   const promptExpressionType = getExpressionType(prompt, context?.columns);
 
