@@ -60,5 +60,5 @@ export const columnsAfter = (
     return oldColumn; // No rename found, keep the old name
   });
 
-  return uniqBy(newFields, 'name') as ESQLColumnData[];
+  return uniqBy(newFields, 'name');
 };

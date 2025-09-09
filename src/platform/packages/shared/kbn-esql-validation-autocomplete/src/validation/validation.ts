@@ -165,8 +165,6 @@ async function validateAst(
   const parserErrors = parsingResult.errors;
 
   /**
-   * @TODO - move deeper
-   *
    * Some changes to the grammar deleted the literal names for some tokens.
    * This is a workaround to restore the literals that were lost.
    *

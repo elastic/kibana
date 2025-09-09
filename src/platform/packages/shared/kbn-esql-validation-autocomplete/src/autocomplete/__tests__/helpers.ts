@@ -46,20 +46,20 @@ export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
-    userDefined: false as false,
+    userDefined: false as const,
     // suggestedAs is optional and omitted here
   })),
   {
     name: 'any#Char$Field',
     type: 'double',
     suggestedAs: '`any#Char$Field`',
-    userDefined: false as false,
+    userDefined: false as const,
   },
   {
     name: 'kubernetes.something.something',
     type: 'double',
     suggestedAs: undefined,
-    userDefined: false as false,
+    userDefined: false as const,
   },
 ];
 
