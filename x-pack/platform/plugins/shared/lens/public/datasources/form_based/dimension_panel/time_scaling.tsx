@@ -7,7 +7,6 @@
 
 import {
   EuiIconTip,
-  EuiIcon,
   EuiFormRow,
   EuiSelect,
   EuiFlexItem,
