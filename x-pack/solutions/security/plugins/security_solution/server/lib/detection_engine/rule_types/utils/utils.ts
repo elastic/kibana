@@ -90,7 +90,6 @@ import {
   SECURITY_QUERY_SPAN_S,
 } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 export const MAX_RULE_GAP_RATIO = 4;
 
 export const hasReadIndexPrivileges = async (args: {
@@ -300,14 +299,14 @@ export const getNumCatchupIntervals = ({
 export const getExceptions = async ({
   client,
   lists,
-  experimentalFeatures,
+  shouldFilterOutEndpointExceptions,
 }: {
   client: ExceptionListClient;
   lists: ListArray;
-  experimentalFeatures: ExperimentalFeatures;
+  shouldFilterOutEndpointExceptions: boolean;
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
-    const filteredLists = experimentalFeatures.endpointExceptionsMovedUnderManagement
+    const filteredLists = shouldFilterOutEndpointExceptions
       ? lists.filter(
           ({ list_id: listId }) =>
             !(ENDPOINT_ARTIFACT_LIST_IDS as readonly string[]).includes(listId)
