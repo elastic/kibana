@@ -18,7 +18,7 @@ const getUserDefinedColumns = (
   typeOf: (thing: ESQLAstItem) => SupportedDataType | 'unknown',
   query: string
 ): ESQLUserDefinedColumn[] => {
-  const columns = [];
+  const columns: ESQLUserDefinedColumn[] = [];
 
   for (const expression of command.args) {
     if (isAssignment(expression) && isColumn(expression.args[0])) {
@@ -63,6 +63,5 @@ export const columnsAfter = (
 
   const typeOf = (thing: ESQLAstItem) => getExpressionType(thing, columnMap);
 
-  // TODO - is this uniqby helpful? Does it do what we expect?
   return uniqBy([...getUserDefinedColumns(command, typeOf, query)], 'name');
 };
