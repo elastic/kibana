@@ -198,7 +198,7 @@ export interface MigrateSingleAgentRequest {
       proxy_disabled?: boolean;
       proxy_headers?: Record<string, string>;
       proxy_url?: string;
-      staging?: boolean;
+      staging?: string;
       tags?: string;
       replace_token?: string;
     };
@@ -223,7 +223,7 @@ export interface BulkMigrateAgentsRequest {
       proxy_disabled?: boolean;
       proxy_headers?: Record<string, string>;
       proxy_url?: string;
-      staging?: boolean;
+      staging?: string;
       tags?: string;
     };
   };

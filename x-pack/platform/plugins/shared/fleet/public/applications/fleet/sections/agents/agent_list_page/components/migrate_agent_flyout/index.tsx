@@ -278,6 +278,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             </EuiFormRow>
             <EuiSpacer size="m" />
 
+
             {agents.length === 1 && (
               <EuiFormRow
                 label={
@@ -305,6 +306,26 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             )}
              
             {agents.length === 1 && (<EuiSpacer size="m" />)}
+
+            <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
+                    defaultMessage="Staging"
+                  />
+                }
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  onChange={(e) =>
+                    setFormContent({
+                      ...formContent,
+                      settings: { ...formContent.settings, staging: e.target.value },
+                    })
+                  }
+                />
+            </EuiFormRow>
 
             {/* Additional Settings Section */}
             <EuiFormRow fullWidth>
@@ -565,23 +586,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                               setFormContent({
                                 ...formContent,
                                 settings: { ...formContent.settings, insecure: e.target.checked },
-                              })
-                            }
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiSwitch
-                            label={
-                              <FormattedMessage
-                                id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
-                                defaultMessage="Staging"
-                              />
-                            }
-                            checked={formContent.settings?.staging ?? false}
-                            onChange={(e) =>
-                              setFormContent({
-                                ...formContent,
-                                settings: { ...formContent.settings, staging: e.target.checked },
                               })
                             }
                           />
