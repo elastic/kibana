@@ -349,7 +349,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(listRes.body.length).to.be(1);
       });
 
-      it('should not update a user if nothing has changed', async () => {
+      it('should not update timestamps if nothing has changed', async () => {
         log.info(`Uploading a user via CSV`);
         const csv = ['csv_user_1'].join('\n');
         const res = await privmonUtils.bulkUploadUsersCsv(csv);
