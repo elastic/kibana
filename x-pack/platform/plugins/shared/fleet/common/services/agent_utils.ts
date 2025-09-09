@@ -6,7 +6,7 @@
  */
 import semverValid from 'semver/functions/valid';
 
-import type { Agent, AgentTargetVersion } from '../types';
+import type { AgentTargetVersion } from '../types';
 
 export function removeSOAttributes(kuery: string): string {
   return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
