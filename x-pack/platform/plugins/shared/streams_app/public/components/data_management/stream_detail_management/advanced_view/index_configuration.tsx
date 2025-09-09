@@ -25,7 +25,7 @@ export function IndexConfiguration({
       <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
           <h3>
-            {i18n.translate('xpack.streams.streamDetailView.indexConfiguration', {
+            {i18n.translate('xpack.streams.streamAdvancedView.indexConfiguration', {
               defaultMessage: 'Index Configuration',
             })}
           </h3>

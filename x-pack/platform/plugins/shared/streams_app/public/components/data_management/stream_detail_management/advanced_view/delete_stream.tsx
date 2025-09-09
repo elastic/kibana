@@ -58,7 +58,7 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s" color="danger">
             <h3>
-              {i18n.translate('xpack.streams.streamDetailView.indexConfiguration', {
+              {i18n.translate('xpack.streams.streamDeleteModal.title', {
                 defaultMessage: 'Delete stream',
               })}
             </h3>
@@ -71,7 +71,7 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    {i18n.translate('xpack.streams.streamDetailView.deleteStreamText', {
+                    {i18n.translate('xpack.streams.streamDeleteModal.deleteStreamText', {
                       defaultMessage:
                         'Permanently delete your stream and all its contents from Elastic. This action is not reversible, so please proceed with caution.',
                     })}
@@ -83,7 +83,7 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButton color="danger" fill onClick={() => setShowModal((prev) => !prev)}>
-                    {i18n.translate('xpack.streams.streamDetailView.deleteStreamButton', {
+                    {i18n.translate('xpack.streams.streamDeleteModal.deleteStreamButton', {
                       defaultMessage: 'Delete stream',
                     })}
                   </EuiButton>

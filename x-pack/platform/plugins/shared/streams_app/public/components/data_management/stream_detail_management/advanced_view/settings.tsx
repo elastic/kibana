@@ -133,7 +133,7 @@ export function Settings({
       });
 
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.streams.successfullyUpdatedSettings', {
+        title: i18n.translate('xpack.streams.settings.successfullyUpdatedSettings', {
           defaultMessage: 'Settings updated',
         }),
       });
@@ -141,7 +141,7 @@ export function Settings({
       refreshDefinition();
     } catch (error) {
       notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.streams.failedToUpdateSettings', {
+        title: i18n.translate('xpack.streams.settings.failedToUpdateSettings', {
           defaultMessage: 'Failed to update settings',
         }),
         toastMessage: getFormattedError(error).message,
@@ -164,17 +164,17 @@ export function Settings({
         <>
           <SettingRow
             definition={definition}
-            label={i18n.translate('xpack.streams.streamDetailView.indexConfiguration.shardsLabel', {
+            label={i18n.translate('xpack.streams.settings.indexConfiguration.shardsLabel', {
               defaultMessage: 'Shards',
             })}
             inputLabel={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.shardsInputLabel',
+              'xpack.streams.settings.indexConfiguration.shardsInputLabel',
               {
                 defaultMessage: 'Number of shards',
               }
             )}
             description={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.shardsDescription',
+              'xpack.streams.settings.indexConfiguration.shardsDescription',
               {
                 defaultMessage:
                   'Control how the index is split across nodes. More shards can improve parallelism but may increase overhead.',
@@ -192,20 +192,17 @@ export function Settings({
 
           <SettingRow
             definition={definition}
-            label={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.replicasLabel',
-              {
-                defaultMessage: 'Replicas',
-              }
-            )}
+            label={i18n.translate('xpack.streams.settings.indexConfiguration.replicasLabel', {
+              defaultMessage: 'Replicas',
+            })}
             inputLabel={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.replicasInputLabel',
+              'xpack.streams.settings.indexConfiguration.replicasInputLabel',
               {
                 defaultMessage: 'Number of replicas',
               }
             )}
             description={i18n.translate(
-              'xpack.streams.streamDetailView.indexConfiguration.replicasDescription',
+              'xpack.streams.settings.indexConfiguration.replicasDescription',
               {
                 defaultMessage:
                   'Define how many copies of the data exist. More replicas improve resilience and read performance but increase storage usage.',
@@ -225,20 +222,17 @@ export function Settings({
 
       <SettingRow
         definition={definition}
-        label={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalLabel',
-          {
-            defaultMessage: 'Refresh Interval',
-          }
-        )}
+        label={i18n.translate('xpack.streams.settings.indexConfiguration.refreshIntervalLabel', {
+          defaultMessage: 'Refresh Interval',
+        })}
         inputLabel={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalInputLabel',
+          'xpack.streams.settings.indexConfiguration.refreshIntervalInputLabel',
           {
             defaultMessage: 'Refresh interval',
           }
         )}
         description={i18n.translate(
-          'xpack.streams.streamDetailView.indexConfiguration.refreshIntervalDescription',
+          'xpack.streams.settings.indexConfiguration.refreshIntervalDescription',
           {
             defaultMessage:
               'Control how frequently new data becomes visible for search. A longer interval reduces resource usage; a short one makes data searchable sooner.',
@@ -269,7 +263,7 @@ export function Settings({
               )
             }
           >
-            {i18n.translate('xpack.streams.streamDetailView.cancelChangesButton', {
+            {i18n.translate('xpack.streams.settings.cancelChangesButton', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
@@ -287,7 +281,7 @@ export function Settings({
             fill
             onClick={updateSettings}
           >
-            {i18n.translate('xpack.streams.streamDetailView.saveChangesButton', {
+            {i18n.translate('xpack.streams.settings.saveChangesButton', {
               defaultMessage: 'Save changes',
             })}
           </EuiButton>
