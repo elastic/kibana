@@ -49,7 +49,7 @@ export const ControlsContent = ({
   const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
   const [controlPanels, setControlPanels] = useControlPanels(controlConfigs.controls, dataView);
   const controlGroupAPI = useRef<ControlGroupRendererApi | undefined>();
-  const schemaSelectorContainer = useRef<HTMLDivElement | null>(null);
+  const schemaSelectorContainer = useRef<HTMLLIElement | null>(null);
   const subscriptions = useRef<Subscription>(new Subscription());
   const { onPreferredSchemaChange } = useUnifiedSearchContext();
   const { status } = useTimeRangeMetadataContext();
@@ -59,7 +59,7 @@ export const ControlsContent = ({
   const appendSchemaSelector = useCallback(() => {
     const controlsWrapper = document.querySelector('[data-control-id="service.name"]');
     if (controlsWrapper && !schemaSelectorContainer.current) {
-      const container = document.createElement('div');
+      const container = document.createElement('li');
 
       controlsWrapper?.parentElement?.insertBefore(container, controlsWrapper.nextSibling);
 
