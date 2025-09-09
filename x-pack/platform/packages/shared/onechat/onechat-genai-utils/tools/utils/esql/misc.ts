@@ -6,7 +6,7 @@
  */
 
 import { INLINE_ESQL_QUERY_REGEX } from '@kbn/inference-plugin/common/tasks/nl_to_esql/constants';
-import type { EsqlResponse } from '../steps/execute_esql';
+import type { EsqlResponse } from './execute_esql';
 
 /**
  * Converts an ES|QL /_query columnar response to a JSON representation

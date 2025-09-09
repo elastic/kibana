@@ -7,11 +7,11 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { GetDataStreamMappingsRes } from './get_mappings';
-import { getDataStreamMappings } from './get_mappings';
-import { cleanupMapping } from '../utils';
+import type { GetDataStreamMappingsRes } from './get_datastream_mappings';
+import { getDataStreamMappings } from './get_datastream_mappings';
+import { cleanupMapping } from './cleanup_mapping';
 
-jest.mock('../utils');
+jest.mock('./cleanup_mapping');
 
 const cleanupMappingMock = cleanupMapping as jest.MockedFunction<typeof cleanupMapping>;
 
