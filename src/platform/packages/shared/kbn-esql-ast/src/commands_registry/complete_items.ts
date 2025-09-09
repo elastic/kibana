@@ -209,3 +209,21 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
   sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
 });
+
+export const browseDataSourcesSuggestion: ISuggestionItem = {
+  label: i18n.translate('kbn-esql-ast.esql.autocomplete.browseDataSourcesLabel', {
+    defaultMessage: 'Browse data sources',
+  }),
+  text: '',
+  kind: 'Issue',
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.clickToBrowseDataSourcesLabel', {
+    defaultMessage: 'Click to browse',
+  }),
+  sortText: '1',
+  command: {
+    id: 'esql.resources.open',
+    title: i18n.translate('kbn-esql-ast.esql.autocomplete.clickToBrowseDataSourcesLabel', {
+      defaultMessage: 'Click to browse',
+    }),
+  },
+};
