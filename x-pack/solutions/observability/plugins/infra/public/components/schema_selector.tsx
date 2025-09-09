@@ -161,7 +161,7 @@ export const SchemaSelector = ({
   schemas: DataSchemaFormat[];
   value: DataSchemaFormat | null;
   isLoading: boolean;
-  isHostsView: boolean;
+  isHostsView?: boolean;
 }) => {
   const {
     services: { telemetry },
