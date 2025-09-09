@@ -18,6 +18,7 @@ import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
 import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
@@ -225,26 +226,10 @@ export function getTextBasedDatasource({
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
-      let textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
-
-      if (textBasedQueryColumns.length > 2) {
-        const dateColumns = textBasedQueryColumns.filter((c) => c.meta.type === 'date');
-        const numberColumns = textBasedQueryColumns.filter((c) => c.meta.type === 'number');
-        const stringColumns = textBasedQueryColumns.filter((c) => c.meta.type === 'string');
-
-        if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
-          const newColumnName = stringColumns.map((c) => c.name).join(' > ');
-          textBasedQueryColumns = [
-            ...dateColumns,
-            ...numberColumns,
-            {
-              id: newColumnName,
-              name: newColumnName,
-              meta: { type: 'string', esqlType: 'keyword' },
-            },
-          ];
-        }
-      }
+      const { columns: textBasedQueryColumns } = transformEsqlMultiTermBreakdown({
+        columns: context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
+        rows: [],
+      });
 
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
       // will not return number fields. In these cases we want to suggest a datatable

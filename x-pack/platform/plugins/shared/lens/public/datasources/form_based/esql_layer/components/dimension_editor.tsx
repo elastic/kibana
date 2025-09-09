@@ -12,6 +12,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
 import { FormatSelector } from '../../dimension_panel/format_selector';
@@ -58,7 +59,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
-          let columns = table.columns.map((col) => {
+          const initialColumns = table.columns.map((col) => {
             return {
               id: col.variable ?? col.id,
               name: col.variable ? `??${col.variable}` : col.name,
@@ -75,30 +76,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             };
           });
 
-          if (columns.length > 2) {
-            const dateColumns = columns.filter((c) => c.meta.type === 'date');
-            const numberColumns = columns.filter((c) => c.meta.type === 'number');
-            const stringColumns = columns.filter((c) => c.meta.type === 'string');
-
-            if (
-              dateColumns.length === 1 &&
-              numberColumns.length === 1 &&
-              stringColumns.length >= 2
-            ) {
-              const newColumnName = stringColumns.map((c) => c.name).join(' > ');
-              columns = [
-                ...dateColumns,
-                ...numberColumns,
-                {
-                  id: newColumnName,
-                  name: newColumnName,
-                  meta: { type: 'string' },
-                  variable: undefined,
-                  compatible: true,
-                },
-              ];
-            }
-          }
+          const { columns } = transformEsqlMultiTermBreakdown({
+            columns: initialColumns,
+            rows: [],
+          });
 
           setAllColumns(columns);
         }

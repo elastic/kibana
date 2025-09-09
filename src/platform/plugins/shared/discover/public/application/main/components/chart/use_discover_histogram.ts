@@ -39,6 +39,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -517,40 +518,15 @@ function getUnifiedHistogramPropsForEsql({
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
 }) {
-  let columns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const initialColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const initialRows = documentsValue?.result ? documentsValue.result.map((r) => r.raw) : [];
   const query = savedSearch.searchSource.getField('query');
   const isEsqlMode = isOfAggregateQueryType(query);
-  let rows = documentsValue?.result ? documentsValue.result.map((r) => r.raw) : [];
 
-  if (isEsqlMode && documentsValue?.result && columns.length > 2) {
-    const dateColumns = columns.filter((c) => c.meta.type === 'date');
-    const numberColumns = columns.filter((c) => c.meta.type === 'number');
-    const stringColumns = columns.filter((c) => c.meta.type === 'string');
-
-    if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
-      const newColumnName = stringColumns.map((c) => c.name).join(' > ');
-      const stringColumnNames = stringColumns.map((c) => c.name);
-
-      rows = rows.map((row) => {
-        const newRow = { ...row };
-        newRow[newColumnName] = stringColumnNames.map((name) => row[name] ?? '(empty)').join(' > ');
-        stringColumnNames.forEach((name) => {
-          delete newRow[name];
-        });
-        return newRow;
-      });
-
-      columns = [
-        ...dateColumns,
-        ...numberColumns,
-        {
-          id: newColumnName,
-          name: newColumnName,
-          meta: { type: 'string', esqlType: 'keyword' },
-        },
-      ];
-    }
-  }
+  const { columns, rows } = transformEsqlMultiTermBreakdown({
+    columns: initialColumns,
+    rows: initialRows,
+  });
 
   const table: Datatable | undefined =
     isEsqlMode && documentsValue?.result

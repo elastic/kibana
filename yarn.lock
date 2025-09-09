@@ -5925,6 +5925,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-multiterm-transformer@link:src/platform/packages/shared/kbn-esql-multiterm-transformer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-types@link:src/platform/packages/shared/kbn-esql-types":
   version "0.0.0"
   uid ""
