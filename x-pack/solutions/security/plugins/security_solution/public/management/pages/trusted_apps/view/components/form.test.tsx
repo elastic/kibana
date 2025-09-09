@@ -303,7 +303,7 @@ describe('Trusted apps form', () => {
         (label) => (label.textContent || '').trim()
       );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
-      expect(formProps.onChange).not.toHaveBeenCalled();
+      expect(formProps.onChange).toHaveBeenCalledTimes(1);
     });
 
     it('should not allow the entry to be removed if its the only one displayed', () => {
@@ -405,7 +405,7 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        formProps.item = formProps.onChange.mock.calls.at(-1)[0].item;
         rerender();
       });
 
@@ -442,7 +442,7 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
         // update TA to show toggle change
-        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        formProps.item = formProps.onChange.mock.calls.at(-1)[0].item;
         rerender();
         expect(
           getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
@@ -525,7 +525,7 @@ describe('Trusted apps form', () => {
         const expectedAfterSwitchToBasicMode = createOnChangeArgs({
           item: createItem(propsItem3),
         });
-        expect(formProps.onChange).toHaveBeenCalledTimes(3);
+        expect(formProps.onChange).toHaveBeenCalledTimes(4);
         expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
       });
     });

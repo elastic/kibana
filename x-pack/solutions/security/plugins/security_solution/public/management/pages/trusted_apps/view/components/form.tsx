@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
@@ -314,10 +314,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
-    // Use ref to prevent unnecessary re-renders in callbacks
-    const itemRef = useRef(item);
-    itemRef.current = item;
-
     const { http } = useKibana().services;
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -434,11 +430,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleAdvancedModeChange = useCallback(
       (selectedId: string) => {
         // save current form to relevant state before switching
-        const currentItem = itemRef.current;
         if (selectedId === 'advancedMode') {
-          setLastBasicFormConditions(currentItem.entries);
+          setLastBasicFormConditions(item.entries);
         } else {
-          setLastAdvancedFormConditions(currentItem.entries);
+          setLastAdvancedFormConditions(item.entries);
         }
 
         const nextItem: ArtifactFormComponentProps['item'] = {
@@ -599,7 +594,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           return;
         }
 
-        const currentItem = itemRef.current;
+        const currentItem = item;
         const newEntries = arg.exceptionItems[0]?.entries;
 
         // More robust change detection
@@ -682,7 +677,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     useEffect(() => {
       processChanged();
     }, [processChanged]);
-
+    
     if (isIndexPatternLoading || !trustedApp) {
       return <Loader size="xl" />;
     }
