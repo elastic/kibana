@@ -405,7 +405,7 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = formProps.onChange.mock.calls.at(-1)[0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
         rerender();
       });
 
@@ -442,7 +442,7 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
         // update TA to show toggle change
-        formProps.item = formProps.onChange.mock.calls.at(-1)[0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
         rerender();
         expect(
           getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
