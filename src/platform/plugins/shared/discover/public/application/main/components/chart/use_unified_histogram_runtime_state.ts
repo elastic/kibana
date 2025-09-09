@@ -7,42 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
-import useLatest from 'react-use/lib/useLatest';
-import { selectTabRuntimeState, useCurrentTabSelector } from '../../state_management/redux';
+import { useState } from 'react';
+import {
+  selectRestorableTabRuntimeHistogramLayoutProps,
+  useCurrentTabSelector,
+} from '../../state_management/redux';
 import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
-export const useUnifiedHistogramRuntimeState = (stateContainer: DiscoverStateContainer) => {
+export const useUnifiedHistogramRuntimeState = (
+  stateContainer: DiscoverStateContainer,
+  localStorageKeyPrefix?: string
+) => {
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
-  const [options, setOptions] = useState<UseUnifiedHistogramOptions>({
-    initialLayoutProps: undefined,
+  const [options] = useState<UseUnifiedHistogramOptions>(() => {
+    const layoutPropsMap = selectRestorableTabRuntimeHistogramLayoutProps(
+      stateContainer.runtimeStateManager,
+      currentTabId
+    );
+
+    return {
+      initialLayoutProps: layoutPropsMap[localStorageKeyPrefix ?? 'default'],
+    };
   });
-
-  const [layoutProps$] = useState(
-    () =>
-      selectTabRuntimeState(stateContainer.runtimeStateManager, currentTabId)
-        .unifiedHistogramLayoutProps$
-  );
-
-  const updateTopPanelHeight = useLatest(() => {
-    layoutProps$.next({ ...layoutProps$.getValue(), topPanelHeight: undefined });
-  });
-
-  useEffect(() => {
-    const subscription = layoutProps$.subscribe((newLayoutProps) => {
-      setOptions((prevState) => ({
-        initialLayoutProps: { ...(prevState.initialLayoutProps ?? {}), ...newLayoutProps },
-      }));
-    });
-
-    return () => subscription.unsubscribe();
-  }, [layoutProps$]);
-
-  useEffect(() => {
-    updateTopPanelHeight.current();
-  }, [updateTopPanelHeight]);
 
   const unifiedHistogramProps = useDiscoverHistogram(stateContainer, options);
 

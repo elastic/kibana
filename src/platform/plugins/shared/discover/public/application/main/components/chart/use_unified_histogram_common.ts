@@ -19,20 +19,29 @@ export const useUnifiedHistogramCommon = ({
   layoutProps,
   stateContainer,
   panelsToggle,
+  localStorageKeyPrefix,
 }: {
   currentTabId: string;
   layoutProps?: UnifiedHistogramPartialLayoutProps;
   stateContainer: DiscoverStateContainer;
   panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+  localStorageKeyPrefix?: string;
 }) => {
   useEffect(() => {
-    if (layoutProps) {
-      selectTabRuntimeState(
-        stateContainer.runtimeStateManager,
-        currentTabId
-      ).unifiedHistogramLayoutProps$.next(layoutProps);
+    if (!layoutProps) {
+      return;
     }
-  }, [currentTabId, stateContainer.runtimeStateManager, layoutProps]);
+
+    const layoutPropsMap$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      currentTabId
+    ).unifiedHistogramLayoutProps$;
+
+    layoutPropsMap$.next({
+      ...layoutPropsMap$.getValue(),
+      [localStorageKeyPrefix ?? 'default']: layoutProps,
+    });
+  }, [currentTabId, layoutProps, localStorageKeyPrefix, stateContainer.runtimeStateManager]);
 
   const isEsqlMode = useIsEsqlMode();
   const renderCustomChartToggleActions = useCallback(

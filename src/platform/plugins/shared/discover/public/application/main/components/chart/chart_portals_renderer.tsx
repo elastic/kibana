@@ -142,6 +142,19 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     [getChartConfigAccessor]
   );
 
+  useEffect(() => {
+    const localStorageKeyPrefix$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramLocalStorageKeyPrefix$;
+
+    if (chartSectionConfig.replaceDefaultChart) {
+      localStorageKeyPrefix$.next(chartSectionConfig.localStorageKeyPrefix);
+    } else {
+      localStorageKeyPrefix$.next(undefined);
+    }
+  }, [chartSectionConfig, stateContainer]);
+
   return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
       stateContainer={stateContainer}
@@ -191,7 +204,10 @@ const CustomChartSectionWrapper = ({
 }: UnifiedHistogramChartProps & {
   chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
 }) => {
-  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
+    stateContainer,
+    chartSectionConfig.localStorageKeyPrefix
+  );
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
   const { api, stateProps, requestParams } = useServicesBootstrap({
@@ -228,6 +244,7 @@ const CustomChartSectionWrapper = ({
     layoutProps,
     stateContainer,
     panelsToggle,
+    localStorageKeyPrefix: chartSectionConfig.localStorageKeyPrefix,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(
