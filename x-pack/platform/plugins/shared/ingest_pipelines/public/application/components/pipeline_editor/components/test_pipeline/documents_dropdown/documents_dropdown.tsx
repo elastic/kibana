@@ -21,8 +21,6 @@ import type { Document } from '../../../types';
 
 import type { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
 
-import './documents_dropdown.scss';
-
 const i18nTexts = {
   dropdownLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.documentsdropdown.dropdownLabel',
@@ -57,7 +55,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
   updateSelectedDocument,
   openFlyout,
 }) => {
-  const [showPopover, setShowPopover] = useState<boolean>(false);
+  const [showPopover, setShowPopover] = useState(false);
 
   const managePipelineButton = (
     <EuiButtonEmpty
@@ -83,7 +81,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       panelPaddingSize="none"
       repositionOnScroll
       data-test-subj="documentsDropdown"
-      panelClassName="documentsDropdownPanel"
+      panelStyle={{ minWidth: '200px' }}
     >
       <EuiSelectable
         singleSelection
