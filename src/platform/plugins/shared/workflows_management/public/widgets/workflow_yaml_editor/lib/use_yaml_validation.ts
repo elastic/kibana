@@ -177,8 +177,12 @@ export function useYamlValidation({
 
         // Group step names by their values
         for (const stepInfo of stepNames) {
-          stepNameCounts.get(stepInfo.name)?.push(stepInfo) ??
+          const existing = stepNameCounts.get(stepInfo.name);
+          if (existing) {
+            existing.push(stepInfo);
+          } else {
             stepNameCounts.set(stepInfo.name, [stepInfo]);
+          }
         }
 
         // Add markers for duplicate step names
