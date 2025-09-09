@@ -127,8 +127,6 @@ describe('STATS Autocomplete', () => {
 
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
-        const expected = EXPECTED_FOR_FIRST_EMPTY_EXPRESSION;
-
         await statsExpectSuggestions('from a | stats ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION);
         await statsExpectSuggestions('FROM a | STATS ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION);
         await statsExpectSuggestions('from a | stats a=max(b), ', EXPECTED_FOR_EMPTY_EXPRESSION);
