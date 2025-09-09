@@ -194,7 +194,7 @@ export async function getIncomingDataByAgentsId({
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
       index: [
         {
-          names: [dataStreamPattern],
+          names: dataStreamPattern.split(','),
           privileges: ['read'],
         },
       ],
@@ -245,19 +245,16 @@ export async function getIncomingDataByAgentsId({
 
     if (!searchResult.aggregations?.agent_ids) {
       return {
-        items: agentsIds.map((id) => {
-          return { [id]: { data: false } };
-        }),
+        items: agentsIds.map((id) => ({ [id]: { data: false } })),
         dataPreview: [],
       };
     }
 
-    // @ts-expect-error aggregation type is not specified
-    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
-      (bucket: any) => bucket.key as string
-    );
-
     const dataPreview = searchResult.hits?.hits || [];
+
+    const agentIdsWithData: string[] =
+      // @ts-expect-error aggregation type is not specified
+      searchResult.aggregations.agent_ids.buckets.map((bucket: any) => bucket.key as string) ?? [];
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }

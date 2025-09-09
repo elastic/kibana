@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates log documents with non-ECS (Elastic Common Schema) field names.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { log, generateShortId, generateLongId, LONG_FIELD_NAME } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
