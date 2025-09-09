@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { Direction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -61,20 +61,15 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
       width: '15%',
     },
     {
-      name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableOverallScoreTooltip', {
-            defaultMessage: 'Overall anomaly scores within selected time range',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.overview.anomalyDetection.overallScore', {
-              defaultMessage: 'Overall score',
-            })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.overallScore', {
+        defaultMessage: 'Overall score',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.ml.overview.anomalyDetection.tableOverallScoreTooltip', {
+          defaultMessage: 'Overall anomaly scores within selected time range',
+        }),
+        icon: 'question',
+      },
       render: (group: Group) => {
         const swimLaneData = group.overallSwimLane;
 
