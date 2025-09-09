@@ -94,56 +94,56 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     );
 
     return (
-      <DataSourcesProvider indexes={indexes}>
-        <FieldActionsProvider
-          columns={columns}
-          filter={filter}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
+      <FieldActionsProvider
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      >
+        <div
+          ref={setContainerRef}
+          css={
+            containerHeight
+              ? css`
+                  height: ${containerHeight}px;
+                  overflow: auto;
+                `
+              : undefined
+          }
         >
-          <div
-            ref={setContainerRef}
-            css={
-              containerHeight
-                ? css`
-                    height: ${containerHeight}px;
-                    overflow: auto;
-                  `
-                : undefined
-            }
-          >
-            <EuiSpacer size="m" />
-            <LogsOverviewHeader
-              formattedDoc={parsedDoc}
-              doc={hit}
-              renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+          <EuiSpacer size="m" />
+          <LogsOverviewHeader
+            formattedDoc={parsedDoc}
+            doc={hit}
+            renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+          />
+          <EuiHorizontalRule margin="xs" />
+          <LogsOverviewHighlights
+            formattedDoc={parsedDoc}
+            doc={hit}
+            renderFlyoutStreamField={renderFlyoutStreamField}
+          />
+          <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
+          {isStacktraceAvailable && (
+            <LogsOverviewStacktraceSection
+              ref={stackTraceSectionRef}
+              hit={hit}
+              dataView={dataView}
             />
-            <EuiHorizontalRule margin="xs" />
-            <LogsOverviewHighlights
-              formattedDoc={parsedDoc}
-              doc={hit}
-              renderFlyoutStreamField={renderFlyoutStreamField}
-            />
-            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-            {isStacktraceAvailable && (
-              <LogsOverviewStacktraceSection
-                ref={stackTraceSectionRef}
-                hit={hit}
-                dataView={dataView}
-              />
-            )}
-            {parsedDoc[TRACE_ID_FIELD] ? (
+          )}
+          {parsedDoc[TRACE_ID_FIELD] ? (
+            <DataSourcesProvider indexes={indexes}>
               <TraceWaterfall
                 traceId={parsedDoc[TRACE_ID_FIELD]}
                 docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                 dataView={dataView}
               />
-            ) : null}
-            {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
-          </div>
-        </FieldActionsProvider>
-      </DataSourcesProvider>
+            </DataSourcesProvider>
+          ) : null}
+          {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
+        </div>
+      </FieldActionsProvider>
     );
   }
 );
