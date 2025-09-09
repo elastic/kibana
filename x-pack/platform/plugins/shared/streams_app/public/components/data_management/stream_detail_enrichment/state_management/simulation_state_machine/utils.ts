@@ -76,20 +76,28 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
       return (doc: SimulationDocReport) => doc.status === 'failed';
     case 'outcome_filter_all':
     default:
-      return (doc: SimulationDocReport) => true;
+      return (_doc: SimulationDocReport) => true;
   }
 }
 
-export function getSchemaFieldsFromSimulation(context: SimulationContext) {
-  if (!context.simulation) return context.detectedSchemaFields;
+export function getSchemaFieldsFromSimulation(context: SimulationContext): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  if (!context.simulation) {
+    return {
+      detectedSchemaFields: context.detectedSchemaFields,
+      detectedSchemaFieldsCache: context.detectedSchemaFieldsCache,
+    };
+  }
 
   const detectedFields = context.simulation.detected_fields;
-  const previousDetectedFieldsCache = context.detectedSchemaFieldsCache;
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
   const streamName = context.streamName;
 
   const schemaFields: SchemaField[] = detectedFields.map((field) => {
     // Detected field already mapped by the user on previous simulation
-    const cachedField = previousDetectedFieldsCache.get(field.name);
+    const cachedField = updatedCache.get(field.name);
     if (cachedField) {
       return cachedField;
     }
@@ -119,11 +127,14 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext) {
       };
     }
 
-    previousDetectedFieldsCache.set(fieldSchema.name, fieldSchema);
+    updatedCache.set(fieldSchema.name, fieldSchema);
     return fieldSchema;
   });
 
-  return schemaFields.sort(compareFieldsByStatus);
+  return {
+    detectedSchemaFields: schemaFields.sort(compareFieldsByStatus),
+    detectedSchemaFieldsCache: updatedCache,
+  };
 }
 
 const statusOrder = { inherited: 0, mapped: 1, unmapped: 2 };
@@ -134,24 +145,47 @@ const compareFieldsByStatus = (curr: SchemaField, next: SchemaField) => {
 export function mapField(
   context: SimulationContext,
   updatedField: MappedSchemaField
-): SchemaField[] {
-  return context.detectedSchemaFields.map((field) => {
+): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+  
+  const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== updatedField.name) return field;
 
     const schemaField: SchemaField = { ...updatedField, status: 'mapped' };
-    context.detectedSchemaFieldsCache.set(schemaField.name, schemaField);
+    updatedCache.set(schemaField.name, schemaField);
     return schemaField;
   });
+
+  return {
+    detectedSchemaFields: updatedFields,
+    detectedSchemaFieldsCache: updatedCache,
+  };
 }
 
-export function unmapField(context: SimulationContext, fieldName: string): SchemaField[] {
-  return context.detectedSchemaFields.map((field) => {
+export function unmapField(
+  context: SimulationContext,
+  fieldName: string
+): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+  
+  const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== fieldName) return field;
 
     const schemaField: SchemaField = { ...field, status: 'unmapped' };
-    context.detectedSchemaFieldsCache.set(schemaField.name, schemaField);
+    updatedCache.set(schemaField.name, schemaField);
     return schemaField;
   });
+
+  return {
+    detectedSchemaFields: updatedFields,
+    detectedSchemaFieldsCache: updatedCache,
+  };
 }
 
 export function getMappedSchemaFields(fields: SchemaField[]) {

@@ -82,17 +82,30 @@ export const simulationMachine = setup({
         previewColumnsSorting: params.sorting,
       })
     ),
-    deriveDetectedSchemaFields: assign(({ context }) => ({
-      detectedSchemaFields: getSchemaFieldsFromSimulation(context),
-    })),
-    mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
-      detectedSchemaFields: mapField(context, params.field),
-    })),
-    unmapField: assign(({ context }, params: { fieldName: string }) => ({
-      detectedSchemaFields: unmapField(context, params.fieldName),
-    })),
+    deriveDetectedSchemaFields: assign(({ context }) => {
+      const result = getSchemaFieldsFromSimulation(context);
+      return {
+        detectedSchemaFields: result.detectedSchemaFields,
+        detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+      };
+    }),
+    mapField: assign(({ context }, params: { field: MappedSchemaField }) => {
+      const result = mapField(context, params.field);
+      return {
+        detectedSchemaFields: result.detectedSchemaFields,
+        detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+      };
+    }),
+    unmapField: assign(({ context }, params: { fieldName: string }) => {
+      const result = unmapField(context, params.fieldName);
+      return {
+        detectedSchemaFields: result.detectedSchemaFields,
+        detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+      };
+    }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
+      detectedSchemaFieldsCache: new Map(),
       explicitlyEnabledPreviewColumns: [],
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],
