@@ -28,7 +28,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
-import { extractInfluencers } from '@kbn/ml-common-utils/job_utils';
+import { extractInfluencers } from '@kbn/ml-common-utils/extract_influencers';
 import type {
   AnomalySwimlaneEmbeddableUserInput,
   AnomalySwimlaneInitialInput,
