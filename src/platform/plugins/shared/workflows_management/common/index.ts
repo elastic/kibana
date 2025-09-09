@@ -10,9 +10,9 @@
 export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
+export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
 
 // Export shared utilities that are needed by both server and client
 export { buildRequestFromConnector } from './elasticsearch_request_builder';

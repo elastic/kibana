@@ -18,14 +18,13 @@ import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import YAML, { isPair, isScalar, visit } from 'yaml';
+import { getStepNode } from '../../../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { useYamlValidation } from '../lib/use_yaml_validation';
-import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
@@ -392,22 +391,15 @@ export const WorkflowYAMLEditor = ({
     onMount?.(editor, monaco);
 
     setIsEditorMounted(true);
-
-    // Trigger initial parsing if there's content
-    setTimeout(() => {
-      if (editorRef.current) {
-        const model = editorRef.current.getModel();
-        if (model && model.getValue().trim()) {
-          changeSideEffects();
-        }
-      }
-    }, 100);
   };
 
   useEffect(() => {
     // After editor is mounted or workflowId changes, validate the initial content
-    if (isEditorMounted && editorRef.current && editorRef.current.getModel()?.getValue() !== '') {
-      changeSideEffects();
+    if (isEditorMounted && editorRef.current) {
+      const model = editorRef.current.getModel();
+      if (model && model.getValue() !== '') {
+        changeSideEffects();
+      }
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
@@ -540,8 +532,8 @@ export const WorkflowYAMLEditor = ({
       alertTriggerDecorationCollectionRef.current.clear();
     }
 
-    // Don't show alert dots when in executions view
-    if (!model || !yamlDocument || !isEditorMounted || readOnly) {
+    // Don't show alert dots when in executions view or when prerequisites aren't met
+    if (!model || !yamlDocument || !isEditorMounted || readOnly || !editorRef.current) {
       return;
     }
 
@@ -626,8 +618,24 @@ export const WorkflowYAMLEditor = ({
       .flat()
       .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
 
-    alertTriggerDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(decorations) ?? null;
+    // Ensure we have a valid editor reference before creating decorations
+    if (decorations.length > 0 && editorRef.current) {
+      // Small delay to ensure Monaco editor is fully ready for decorations
+      // This addresses race conditions where the editor is mounted but not fully initialized
+      const createDecorations = () => {
+        if (editorRef.current) {
+          alertTriggerDecorationCollectionRef.current =
+            editorRef.current.createDecorationsCollection(decorations);
+        }
+      };
+
+      // Try immediately, and if that fails, try again with a small delay
+      try {
+        createDecorations();
+      } catch (error) {
+        setTimeout(createDecorations, 10);
+      }
+    }
   }, [isEditorMounted, yamlDocument, readOnly]);
 
   // Handle connector type decorations (GitLens-style inline icons)
