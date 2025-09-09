@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type {
   CloudConnectorSO,
   CloudConnectorListOptions,
-  CloudConnectorSecretVarValue,
+  CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
@@ -152,7 +152,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       // Check for AWS variables
       if (roleArn) {
-        const externalId: CloudConnectorSecretVarValue | undefined = vars.external_id?.value;
+        const externalId: CloudConnectorSecretReference | undefined = vars.external_id?.value;
 
         if (!externalId) {
           logger.error('Package policy must contain valid external_id secret reference');
