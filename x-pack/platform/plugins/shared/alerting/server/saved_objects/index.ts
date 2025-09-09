@@ -16,10 +16,11 @@ import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
+import { ruleTemplateMappings } from './rule_template_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
-import type { RawRule } from '../types';
+import type { RawRule, RawRuleTemplate } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
@@ -38,11 +39,13 @@ import {
   apiKeyPendingInvalidationModelVersions,
   maintenanceWindowModelVersions,
   ruleModelVersions,
+  ruleTemplateModelVersions,
   rulesSettingsModelVersions,
   gapFillAutoSchedulerModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
+export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_fill_auto_scheduler';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
@@ -237,6 +240,21 @@ export function setupSavedObjects(
       importableAndExportable: false,
     },
     modelVersions: adHocRunParamsModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    management: {
+      importableAndExportable: true,
+      getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
+        return `${ruleTemplateSavedObject.attributes.name}`;
+      },
+    },
+    mappings: ruleTemplateMappings,
+    modelVersions: ruleTemplateModelVersions,
   });
 
   // Encrypted attributes

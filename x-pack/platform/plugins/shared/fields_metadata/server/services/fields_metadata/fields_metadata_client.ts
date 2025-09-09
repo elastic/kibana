@@ -11,6 +11,7 @@ import { FieldsMetadataDictionary } from '../../../common';
 import type { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import type { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import type { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
+import type { OtelFieldsRepository } from './repositories/otel_fields_repository';
 import type { IntegrationFieldsSearchParams } from './repositories/types';
 import type { FindFieldsMetadataOptions, IFieldsMetadataClient } from './types';
 
@@ -25,6 +26,7 @@ interface FieldsMetadataClientDeps {
   ecsFieldsRepository: EcsFieldsRepository;
   metadataFieldsRepository: MetadataFieldsRepository;
   integrationFieldsRepository: IntegrationFieldsRepository;
+  otelFieldsRepository: OtelFieldsRepository;
 }
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
@@ -33,7 +35,8 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     private readonly logger: Logger,
     private readonly ecsFieldsRepository: EcsFieldsRepository,
     private readonly metadataFieldsRepository: MetadataFieldsRepository,
-    private readonly integrationFieldsRepository: IntegrationFieldsRepository
+    private readonly integrationFieldsRepository: IntegrationFieldsRepository,
+    private readonly otelFieldsRepository: OtelFieldsRepository
   ) {}
 
   async getByName<TFieldName extends FieldName>(
@@ -42,17 +45,25 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   ): Promise<FieldMetadata | undefined> {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
-    // 1. Try resolving from metadata-fields static metadata
+    // 1. Try resolving from metadata-fields static metadata (highest priority)
     let field = this.metadataFieldsRepository.getByName(fieldName);
 
-    // 2. Try resolving from ecs static metadata
+    // 2. Try resolving from ECS static metadata (authoritative schema)
     if (!field) {
       field = this.ecsFieldsRepository.getByName(fieldName);
     }
 
-    // 2. Try searching for the fiels in the Elastic Package Registry
+    // 3. Try resolving from OpenTelemetry semantic conventions (fallback)
+    if (!field) {
+      field = this.otelFieldsRepository.getByName(fieldName);
+    }
+
+    // 4. Try searching for the field in the Elastic Package Registry (integration-specific)
     if (!field && this.hasFleetPermissions(this.capabilities)) {
-      field = await this.integrationFieldsRepository.getByName(fieldName, { integration, dataset });
+      field = await this.integrationFieldsRepository.getByName(fieldName, {
+        integration,
+        dataset,
+      });
     }
 
     return field;
@@ -67,6 +78,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       return FieldsMetadataDictionary.create({
         ...this.metadataFieldsRepository.find().getFields(),
         ...this.ecsFieldsRepository.find().getFields(),
+        ...this.otelFieldsRepository.find().getFields(),
       });
     }
 
@@ -94,13 +106,15 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     ecsFieldsRepository,
     metadataFieldsRepository,
     integrationFieldsRepository,
+    otelFieldsRepository,
   }: FieldsMetadataClientDeps) {
     return new FieldsMetadataClient(
       capabilities,
       logger,
       ecsFieldsRepository,
       metadataFieldsRepository,
-      integrationFieldsRepository
+      integrationFieldsRepository,
+      otelFieldsRepository
     );
   }
 }

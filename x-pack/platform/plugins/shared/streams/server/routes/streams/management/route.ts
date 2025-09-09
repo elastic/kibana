@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { conditionSchema } from '@kbn/streamlang';
+import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
+import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -30,17 +31,28 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), where: conditionSchema }),
+    body: z.object({
+      stream: z.object({ name: z.string() }),
+      where: conditionSchema,
+      status: routingStatus.optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
 
+    const conditionStatus = params.body.status
+      ? params.body.status
+      : isNeverCondition(params.body.where)
+      ? 'disabled'
+      : 'enabled';
+
     return await streamsClient.forkStream({
       parent: params.path.name,
       where: params.body.where,
       name: params.body.stream.name,
+      status: conditionStatus,
     });
   },
 });

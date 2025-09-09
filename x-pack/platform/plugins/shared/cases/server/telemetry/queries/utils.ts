@@ -34,6 +34,7 @@ import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
+import { CasePersistedStatus } from '../../common/types/case';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -354,7 +355,13 @@ export const getSolutionValues = ({
 }): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
     aggs: caseAggregations,
-    keys: ['totalsByOwner', 'securitySolution.counts', 'observability.counts', 'cases.counts'],
+    keys: [
+      'totalsByOwner',
+      'securitySolution.counts',
+      'observability.counts',
+      'cases.counts',
+      `${owner}.status`,
+    ],
   });
   const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
   const attachmentsAggsForOwner = attachmentAggregations?.[owner];
@@ -363,6 +370,17 @@ export const getSolutionValues = ({
   return {
     total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
+    status: {
+      open: findValueInBuckets(aggregationsBuckets[`${owner}.status`], CasePersistedStatus.OPEN),
+      inProgress: findValueInBuckets(
+        aggregationsBuckets[`${owner}.status`],
+        CasePersistedStatus.IN_PROGRESS
+      ),
+      closed: findValueInBuckets(
+        aggregationsBuckets[`${owner}.status`],
+        CasePersistedStatus.CLOSED
+      ),
+    },
     ...getAttachmentsFrameworkStats({
       attachmentAggregations: attachmentsAggsForOwner,
       filesAggregations: fileAttachmentsForOwner,

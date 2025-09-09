@@ -8,8 +8,8 @@
  */
 
 import type { ExitForeachNode } from '@kbn/workflows';
-import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 
 describe('ExitForeachNodeImpl', () => {
   let step: ExitForeachNode;
@@ -21,6 +21,7 @@ describe('ExitForeachNodeImpl', () => {
   let setStepResult: jest.Mock<any, any, any>;
   let goToNextStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
+  let exitScope: jest.Mock<any, any, any>;
   let finishStep: jest.Mock<any, any, any>;
   let logDebug: jest.Mock<any, any, any>;
 
@@ -30,6 +31,7 @@ describe('ExitForeachNodeImpl', () => {
     setStepState = jest.fn();
     setStepResult = jest.fn();
     goToNextStep = jest.fn();
+    exitScope = jest.fn();
     finishStep = jest.fn();
     goToStep = jest.fn();
     logDebug = jest.fn();
@@ -46,6 +48,7 @@ describe('ExitForeachNodeImpl', () => {
       goToNextStep,
       finishStep,
       goToStep,
+      exitScope,
     } as any;
     const workflowLogger = {
       logDebug,
@@ -87,6 +90,11 @@ describe('ExitForeachNodeImpl', () => {
       expect(wfExecutionRuntimeManager.finishStep).not.toHaveBeenCalled();
       expect(wfExecutionRuntimeManager.setStepResult).not.toHaveBeenCalled();
     });
+
+    it('should exit iteration scope', async () => {
+      await underTest.run();
+      expect(exitScope).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('when no more items to process', () => {
@@ -124,8 +132,14 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(logDebug).toHaveBeenCalledWith(
-        `Exiting foreach step ${step.startNodeId} after processing all items.`
+        `Exiting foreach step ${step.startNodeId} after processing all items.`,
+        { workflow: { step_id: step.startNodeId } }
       );
+    });
+
+    it('should exit iteration scope and whole foreach scope', async () => {
+      await underTest.run();
+      expect(exitScope).toHaveBeenCalledTimes(2);
     });
   });
 });

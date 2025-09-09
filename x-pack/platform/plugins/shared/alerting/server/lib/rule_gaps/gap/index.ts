@@ -22,6 +22,7 @@ import {
 } from './interval_utils';
 
 interface GapConstructorParams {
+  ruleId: string;
   timestamp?: string;
   range: StringInterval;
   filledIntervals?: StringInterval[];
@@ -35,7 +36,7 @@ export class Gap {
   private _inProgressIntervals: Interval[];
   private _internalFields?: InternalFields;
   private _timestamp?: string;
-  private _ruleId?: string;
+  readonly ruleId: string;
 
   constructor({
     timestamp,
@@ -54,9 +55,7 @@ export class Gap {
     if (timestamp) {
       this._timestamp = timestamp;
     }
-    if (ruleId) {
-      this._ruleId = ruleId;
-    }
+    this.ruleId = ruleId;
   }
 
   public fillGap(interval: Interval): void {
@@ -131,10 +130,6 @@ export class Gap {
     } else {
       return gapStatus.PARTIALLY_FILLED;
     }
-  }
-
-  public get ruleId() {
-    return this._ruleId;
   }
 
   public resetInProgressIntervals(): void {

@@ -21,7 +21,7 @@ describe('MV_EXPAND Validation', () => {
 
   test('validates the most basic query', () => {
     mvExpandExpectErrors('from index | mv_expand doubleField', []);
-    mvExpandExpectErrors('from index | mv_expand a', ['Unknown column [a]']);
+    mvExpandExpectErrors('from index | mv_expand a', ['Unknown column "a"']);
 
     for (const type of ['text', 'integer', 'date', 'boolean', 'ip']) {
       mvExpandExpectErrors(`from a_index | mv_expand ${type}Field`, []);
