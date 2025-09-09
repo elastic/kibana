@@ -37,7 +37,7 @@ export function formatValidationError(error: any): { message: string; formattedE
 
   const formattedIssues = error.issues.map((issue: any) => {
     let formattedMessage: string;
-    
+
     // Handle discriminated union errors for type field
     if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
@@ -61,11 +61,11 @@ export function formatValidationError(error: any): { message: string; formattedE
     else {
       formattedMessage = issue.message;
     }
-    
+
     // Return a new issue object with the formatted message
     return {
       ...issue,
-      message: formattedMessage
+      message: formattedMessage,
     };
   });
 
@@ -73,12 +73,12 @@ export function formatValidationError(error: any): { message: string; formattedE
   const formattedError = {
     ...error,
     issues: formattedIssues,
-    message: formattedIssues.map(i => i.message).join(', ')
+    message: formattedIssues.map((i) => i.message).join(', '),
   };
 
   return {
     message: formattedError.message,
-    formattedError
+    formattedError,
   };
 }
 

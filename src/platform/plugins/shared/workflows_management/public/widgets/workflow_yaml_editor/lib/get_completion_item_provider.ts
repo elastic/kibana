@@ -11,10 +11,6 @@ import type { Scalar } from 'yaml';
 import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getAllConnectors } from '../../../../common/schema';
 import {
   ForEachStepSchema,
   IfStepSchema,
@@ -23,6 +19,10 @@ import {
   HttpStepSchema,
   WaitStepSchema,
 } from '@kbn/workflows';
+import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import { getAllConnectors } from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
@@ -41,12 +41,20 @@ function getCachedAllConnectors() {
 }
 
 // Cache for built-in step types extracted from schema
-let builtInStepTypesCache: Array<{ type: string; description: string; icon: monaco.languages.CompletionItemKind }> | null = null;
+let builtInStepTypesCache: Array<{
+  type: string;
+  description: string;
+  icon: monaco.languages.CompletionItemKind;
+}> | null = null;
 
 /**
  * Extract built-in step types from the workflow schema (single source of truth)
  */
-function getBuiltInStepTypesFromSchema(): Array<{ type: string; description: string; icon: monaco.languages.CompletionItemKind }> {
+function getBuiltInStepTypesFromSchema(): Array<{
+  type: string;
+  description: string;
+  icon: monaco.languages.CompletionItemKind;
+}> {
   if (builtInStepTypesCache !== null) {
     return builtInStepTypesCache;
   }
@@ -54,19 +62,43 @@ function getBuiltInStepTypesFromSchema(): Array<{ type: string; description: str
   // Extract step types from the actual schema definitions
   // This ensures we get all step types defined in the schema automatically
   const stepSchemas = [
-    { schema: ForEachStepSchema, description: 'Execute steps for each item in a collection', icon: monaco.languages.CompletionItemKind.Method },
-    { schema: IfStepSchema, description: 'Execute steps conditionally based on a condition', icon: monaco.languages.CompletionItemKind.Keyword },
-    { schema: ParallelStepSchema, description: 'Execute multiple branches in parallel', icon: monaco.languages.CompletionItemKind.Class },
-    { schema: MergeStepSchema, description: 'Merge results from multiple sources', icon: monaco.languages.CompletionItemKind.Interface },
-    { schema: HttpStepSchema, description: 'Make HTTP requests', icon: monaco.languages.CompletionItemKind.Reference },
-    { schema: WaitStepSchema, description: 'Wait for a specified duration', icon: monaco.languages.CompletionItemKind.Constant },
+    {
+      schema: ForEachStepSchema,
+      description: 'Execute steps for each item in a collection',
+      icon: monaco.languages.CompletionItemKind.Method,
+    },
+    {
+      schema: IfStepSchema,
+      description: 'Execute steps conditionally based on a condition',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
+      schema: ParallelStepSchema,
+      description: 'Execute multiple branches in parallel',
+      icon: monaco.languages.CompletionItemKind.Class,
+    },
+    {
+      schema: MergeStepSchema,
+      description: 'Merge results from multiple sources',
+      icon: monaco.languages.CompletionItemKind.Interface,
+    },
+    {
+      schema: HttpStepSchema,
+      description: 'Make HTTP requests',
+      icon: monaco.languages.CompletionItemKind.Reference,
+    },
+    {
+      schema: WaitStepSchema,
+      description: 'Wait for a specified duration',
+      icon: monaco.languages.CompletionItemKind.Constant,
+    },
   ];
 
   const stepTypes = stepSchemas.map(({ schema, description, icon }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
     const stepType = typeField._def.value; // Get the literal value from z.literal()
-    
+
     return {
       type: stepType,
       description,
@@ -181,22 +213,22 @@ function generateBuiltInStepSnippet(stepType: string, shouldBeQuoted: boolean): 
   switch (stepType) {
     case 'foreach':
       return `${quotedType}\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
-    
+
     case 'if':
       return `${quotedType}\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
-    
+
     case 'parallel':
       return `${quotedType}\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
-    
+
     case 'merge':
       return `${quotedType}\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
-    
+
     case 'http':
       return `${quotedType}\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
-    
+
     case 'wait':
       return `${quotedType}\nwith:\n  duration: "5s"`;
-    
+
     default:
       return `${quotedType}\nwith:\n  # Add parameters here`;
   }

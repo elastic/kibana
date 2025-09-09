@@ -34,6 +34,6 @@ export const configureMonacoYamlSchema = async (
     ...(options || {}),
     schemas,
   };
-  
+
   return configureMonacoYaml(monaco, finalOptions);
 };

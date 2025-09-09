@@ -24,8 +24,8 @@ export function YamlEditor(props: YamlEditorProps) {
       // while keeping validation and hover information enabled
       configureMonacoYamlSchema(props.schemas, {
         completion: false, // Disable schema-based completions
-        hover: true,       // Keep hover information
-        validate: true,    // Keep validation
+        hover: true, // Keep hover information
+        validate: true, // Keep validation
       });
     }
   }, [props.schemas]);

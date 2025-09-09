@@ -136,10 +136,10 @@ const useWorkflowJsonSchema = () => {
   return useMemo(() => {
     try {
       const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
-      
+
       // Post-process to improve validation messages and reduce duplicate suggestions
       const processedSchema = improveTypeFieldDescriptions(jsonSchema);
-      
+
       return processedSchema ?? null;
     } catch (error) {
       console.error('🚨 Schema generation failed:', error);
@@ -150,7 +150,7 @@ const useWorkflowJsonSchema = () => {
 
 /**
  * Since we implemented custom error formatting at the validation level,
- * we no longer need to modify the schema. The full validation works with 
+ * we no longer need to modify the schema. The full validation works with
  * user-friendly error messages.
  */
 function improveTypeFieldDescriptions(schema: any): any {
@@ -220,7 +220,6 @@ export const WorkflowYAMLEditor = ({
     stepExecutionsRef.current = stepExecutions;
   }, [stepExecutions]);
 
-  
   // REMOVED: highlightStepDecorationCollectionRef - now handled by UnifiedActionsProvider
   // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
@@ -1530,7 +1529,6 @@ const componentStyles = {
         display: 'block',
       },
 
-
       // if
       '.codicon-symbol-keyword:before': {
         content: '" "',
@@ -1542,7 +1540,6 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
-
 
       // parallel
       '.codicon-symbol-class:before': {
@@ -1568,7 +1565,6 @@ const componentStyles = {
         display: 'block',
       },
 
-
       // wait
       '.codicon-symbol-constant:before': {
         content: '" "',
@@ -1580,9 +1576,6 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
-
-
-
     }),
   editorContainer: css({
     flex: '1 1 0',

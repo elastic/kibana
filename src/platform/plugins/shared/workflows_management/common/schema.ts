@@ -155,11 +155,11 @@ export const getOutputSchemaForStepType = (stepType: string) => {
   // Handle internal actions with pattern matching
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
   if (stepType.startsWith('elasticsearch.')) {
-    return z.any(); 
+    return z.any();
   }
 
   if (stepType.startsWith('kibana.')) {
-    return z.any(); 
+    return z.any();
   }
 
   // Fallback to any if not found
