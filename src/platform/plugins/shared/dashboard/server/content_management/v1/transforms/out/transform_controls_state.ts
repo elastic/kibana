@@ -69,7 +69,11 @@ function injectControlReferences(
           }) as ControlsGroupState['controls'][number]
         );
       } else {
-        transformedControls.push(control); // TODO: Fix this type
+        transformedControls.push({
+          dataViewId: '',
+          fieldName: '',
+          ...control,
+        });
       }
     } catch (transformOutError) {
       // do not prevent read on transformOutError

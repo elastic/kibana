@@ -72,6 +72,13 @@ export type StoredControlState = Pick<
   >;
 };
 
+export interface LegacyStoredControlGroupOptions {
+  ignoreFilters?: boolean;
+  ignoreQuery?: boolean;
+  ignoreTimerange?: boolean;
+  ignoreValidations?: boolean;
+}
+
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;

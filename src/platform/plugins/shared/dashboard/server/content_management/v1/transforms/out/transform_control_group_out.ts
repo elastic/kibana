@@ -7,41 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
-
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { LegacyStoredControlGroupOptions } from '../../types';
 import { transformControlsState } from './transform_controls_state';
 
-export const transformControlGroupOut: (
+export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
-  references: Reference[]
-) => ControlsGroupState = flow(transformControlGroupProperties);
-
-function transformControlGroupProperties(
-  { panelsJSON }: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>,
-  references: Reference[]
+  references: Reference[],
+  ignoreParentSettingsJSON?: string
 ): ControlsGroupState {
-  return {
-    controls: panelsJSON ? transformControlsState(panelsJSON, references) : [],
-  };
-}
+  let controls = controlGroupInput.panelsJSON
+    ? transformControlsState(controlGroupInput.panelsJSON, references)
+    : [];
 
-/**
- * TODO: Figure out how to send 'ignoreQuery' + 'ignoreFilters'  to the children and 'showApplySelections' to the dashboard
- */
-// function transformIgnoreParentSettingsProperties({a
-//   ignoreFilters,
-//   ignoreQuery,
-//   ignoreTimerange,
-//   ignoreValidations,
-// }: ControlsIgnoreParentSettings): ControlsIgnoreParentSettings {
-//   return {
-//     ignoreFilters,
-//     ignoreQuery,
-//     ignoreTimerange,
-//     ignoreValidations,
-//   };
-// }
+  /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
+  const legacyControlGroupOptions: LegacyStoredControlGroupOptions | undefined =
+    ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
+  const ignoreFilters =
+    legacyControlGroupOptions?.ignoreFilters || legacyControlGroupOptions?.ignoreQuery;
+  if (ignoreFilters) {
+    controls = controls.reduce((prev, control) => {
+      return [...prev, { ...control, useGlobalFilters: !ignoreFilters }];
+    }, [] as ControlsGroupState['controls']);
+  }
+  return { controls };
+}

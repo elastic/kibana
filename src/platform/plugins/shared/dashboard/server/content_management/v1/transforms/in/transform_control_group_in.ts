@@ -31,12 +31,12 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn({ state: controlState });
-          // prefix all the references with their IDs
+          // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,
             ...prefixReferencesFromPanel(id, transformed.references ?? []),
           ];
-          // update the reference names in the SO
+          // update the reference names in the SO so that we can inject the references later
           const transformedState = transformed.state as StoredControlState;
           transformedState.dataViewRefName = `${id}:${transformedState.dataViewRefName}`;
           transformedControlState = transformedState;
