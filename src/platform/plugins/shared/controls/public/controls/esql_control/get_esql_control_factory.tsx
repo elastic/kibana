@@ -16,6 +16,7 @@ import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { omit } from 'lodash';
 import type { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { uiActionsService } from '../../services/kibana_services';
@@ -147,7 +148,17 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       };
 
       return {
-        api,
+        api: {
+          ...api,
+          /**
+           * TODO: Remove this once duplicating ES|QL controls has been implemented
+           * ES|QL controls can only output unique variable names, so in order to duplicate the control,
+           * we would need to add a number or other uniquifying character to the end of the variable name.
+           * The problem with this is that the user cannot edit variable names after the control is created.
+           * Once we come up with a good UX solution to this, we can return duplicatePanel to the parentApi
+           */
+          parentApi: omit(api.parentApi, 'duplicatePanel'),
+        },
         Component: () => (
           <OptionsListControlContext.Provider
             value={{

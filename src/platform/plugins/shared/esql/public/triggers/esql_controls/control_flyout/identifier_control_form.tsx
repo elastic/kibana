@@ -61,6 +61,7 @@ export function IdentifierControlForm({
       : []
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
+  // TODO Remove these from control state
   const [minimumWidth] = useState(initialState?.width ?? 'medium');
   const [grow] = useState(initialState?.grow ?? false);
 
