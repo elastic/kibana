@@ -9,6 +9,7 @@
 
 import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
@@ -17,14 +18,14 @@ import {
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-import type {
-  SearchWorkflowExecutionsParams,
-  WorkflowsManagementApi,
-} from './workflows_management_api';
+import {
+  InvalidYamlSchemaError,
+  InvalidYamlSyntaxError,
+  isWorkflowValidationError,
+} from '../../common/lib/errors';
+import type { SearchWorkflowExecutionsParams, WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
-import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
 
 export function defineRoutes(
   router: IRouter,
@@ -215,6 +216,11 @@ export function defineRoutes(
         const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
+        if (isWorkflowValidationError(error)) {
+          return response.badRequest({
+            body: error.toJSON(),
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
@@ -258,6 +264,11 @@ export function defineRoutes(
           body: updated,
         });
       } catch (error) {
+        if (isWorkflowValidationError(error)) {
+          return response.badRequest({
+            body: error.toJSON(),
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
@@ -500,6 +511,11 @@ export function defineRoutes(
             body: {
               message: `Invalid workflow yaml: ${error.message}`,
             },
+          });
+        }
+        if (isWorkflowValidationError(error)) {
+          return response.badRequest({
+            body: error.toJSON(),
           });
         }
         return response.customError({

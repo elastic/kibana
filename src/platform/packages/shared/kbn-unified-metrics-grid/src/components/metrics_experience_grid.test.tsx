@@ -8,32 +8,39 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import * as hooks from '../store/hooks';
-import * as metricHooks from '../hooks';
+import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { MetricsGridState } from '../store/slices';
+import type {
+  ChartSectionProps,
+  UnifiedHistogramInputMessage,
+  UnifiedHistogramServices,
+} from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Subject } from 'rxjs';
 
 jest.mock('../store/hooks');
 jest.mock('../hooks');
-jest.mock('./metric_chart', () => ({
-  MetricChart: jest.fn(() => <div data-test-subj="metric-chart" />),
+jest.mock('./chart', () => ({
+  Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
 }));
 
-const useAppDispatchMock = hooks.useAppDispatch as jest.Mock<typeof hooks.useAppDispatch>;
-const useAppSelectorMock = hooks.useAppSelector as jest.Mock<typeof hooks.useAppSelector>;
-const useMetricFieldsQueryMock = metricHooks.useMetricFieldsQuery as jest.MockedFunction<
-  typeof metricHooks.useMetricFieldsQuery
+const useMetricsGridStateMock = hooks.useMetricsGridState as jest.MockedFunction<
+  typeof hooks.useMetricsGridState
 >;
-const useMetricMetricDataQueryMock = metricHooks.useMetricDataQuery as jest.MockedFunction<
-  typeof metricHooks.useMetricDataQuery
+const useMetricFieldsQueryMock = hooks.useMetricFieldsQuery as jest.MockedFunction<
+  typeof hooks.useMetricFieldsQuery
 >;
-const useDimensionsQueryMock = metricHooks.useDimensionsQuery as jest.MockedFunction<
-  typeof metricHooks.useDimensionsQuery
+const useDimensionsQueryMock = hooks.useDimensionsQuery as jest.MockedFunction<
+  typeof hooks.useDimensionsQuery
 >;
+
+const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
+  typeof hooks.usePaginatedFields
+>;
+
+const input$ = new Subject<UnifiedHistogramInputMessage>();
 
 describe('MetricsExperienceGrid', () => {
   const defaultProps: ChartSectionProps = {
@@ -41,26 +48,37 @@ describe('MetricsExperienceGrid', () => {
     renderToggleActions: () => <div data-test-subj="toggleActions" />,
     chartToolbarCss: { name: '', styles: '' },
     histogramCss: { name: '', styles: '' },
-    getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+    requestParams: {
+      getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+      filters: [],
+      query: { esql: 'FROM metrics-*' },
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+      updateTimeRange: () => {},
+    },
+    services: {} as UnifiedHistogramServices,
+    input$,
   };
-
-  const mockDispatch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    useAppDispatchMock.mockReturnValue(mockDispatch);
-    useAppSelectorMock.mockImplementation(
-      (selectorFn: (state: { metricsGrid: MetricsGridState }) => <TSelected>() => TSelected) =>
-        selectorFn({
-          metricsGrid: {
-            currentPage: 0,
-            dimensions: [],
-            valueFilters: [],
-            isFullscreen: false,
-          },
-        })
-    );
+    useMetricsGridStateMock.mockReturnValue({
+      currentPage: 0,
+      dimensions: [],
+      valueFilters: [],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      onValuesChange: jest.fn(),
+      onClearValues: jest.fn(),
+      onClearAllDimensions: jest.fn(),
+    });
+
+    usePaginatedFieldsMock.mockReturnValue({
+      totalPages: 1,
+      allFields: [],
+      currentPageFields: [],
+      dimensions: [],
+    });
 
     useDimensionsQueryMock.mockReturnValue({
       data: [
@@ -73,7 +91,7 @@ describe('MetricsExperienceGrid', () => {
           value: 'baz',
         },
       ],
-    } as unknown as ReturnType<typeof metricHooks.useDimensionsQuery>);
+    } as unknown as ReturnType<typeof hooks.useDimensionsQuery>);
 
     useMetricFieldsQueryMock.mockReturnValue({
       data: [
@@ -95,21 +113,42 @@ describe('MetricsExperienceGrid', () => {
       status: 'success',
       isLoading: false,
     });
-
-    useMetricMetricDataQueryMock.mockReturnValue({
-      data: {
-        data: [],
-        esqlQuery: 'FROM metrics-*',
-        hasDimensions: true,
-      },
-    } as unknown as ReturnType<typeof metricHooks.useMetricDataQuery>);
   });
 
   it('renders the <MetricsGrid />', () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
-    expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument();
+
+    waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
+  });
+
+  it('renders the loading state', () => {
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    useMetricFieldsQueryMock.mockReturnValue({
+      data: [],
+      status: 'loading',
+      isLoading: true,
+    });
+
+    waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
+  });
+
+  it('renders the no data state', () => {
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    useMetricFieldsQueryMock.mockReturnValue({
+      data: [],
+      status: 'loading',
+      isLoading: false,
+    });
+
+    waitFor(() => expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument());
   });
 
   it('renders the toolbar', () => {
@@ -117,30 +156,31 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(getByTestId('toggleActions')).toBeInTheDocument();
-    expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
-    expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
-    expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
-    expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
+    waitFor(() => {
+      expect(getByTestId('toggleActions')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
+    });
   });
 
   it('render <ValuesSelector /> when dimensions are selected', async () => {
-    useAppSelectorMock.mockImplementation(
-      (selectorFn: (state: { metricsGrid: MetricsGridState }) => <TSelected>() => TSelected) =>
-        selectorFn({
-          metricsGrid: {
-            currentPage: 0,
-            dimensions: ['foo'],
-            valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
-            isFullscreen: false,
-          },
-        })
-    );
+    useMetricsGridStateMock.mockReturnValue({
+      currentPage: 0,
+      dimensions: ['foo'],
+      valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      onValuesChange: jest.fn(),
+      onClearValues: jest.fn(),
+      onClearAllDimensions: jest.fn(),
+    });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
-    expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument();
+    waitFor(() => expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument());
   });
 });

@@ -165,6 +165,12 @@ test('generates xy chart config', async () => {
               "layerType": "data",
               "seriesType": "bar",
               "xAccessor": "x_metric_formula_accessor0",
+              "yConfig": Array [
+                Object {
+                  "color": undefined,
+                  "forAccessor": "metric_formula_accessor0_0",
+                },
+              ],
             },
           ],
           "legend": Object {

@@ -50,6 +50,7 @@ export interface WorkflowEventLoggerContext {
   stepId?: string;
   stepName?: string;
   stepType?: string;
+  spaceId?: string;
 }
 
 export interface WorkflowEventLoggerOptions {
@@ -258,6 +259,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   private createBaseEvent(): WorkflowLogEvent {
     return {
       '@timestamp': new Date().toISOString(),
+      spaceId: this.context.spaceId,
       workflow: {
         id: this.context.workflowId,
         name: this.context.workflowName,
