@@ -34,13 +34,15 @@ interface DataViewData {
  */
 export async function loadDataView({
   dataViewId,
-  dataViewSpec,
+  locationDataViewSpec,
+  initialAdHocDataViewSpec,
   services: { dataViews },
   savedDataViews,
   adHocDataViews,
 }: {
   dataViewId?: string;
-  dataViewSpec?: DataViewSpec;
+  locationDataViewSpec?: DataViewSpec;
+  initialAdHocDataViewSpec?: DataViewSpec;
   services: DiscoverServices;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
@@ -48,24 +50,36 @@ export async function loadDataView({
   let fetchId: string | undefined = dataViewId;
 
   // Handle redirect with data view spec provided via history location state
-  if (dataViewSpec) {
-    const isPersisted = savedDataViews.find(({ id: currentId }) => currentId === dataViewSpec.id);
+  if (locationDataViewSpec) {
+    const isPersisted = savedDataViews.find(
+      ({ id: currentId }) => currentId === locationDataViewSpec.id
+    );
     if (isPersisted) {
       // If passed a spec for a persisted data view, reassign the fetchId
-      fetchId = dataViewSpec.id!;
+      fetchId = locationDataViewSpec.id!;
     } else {
       // If passed an ad hoc data view spec, clear the instance cache
       // to avoid conflicts, then create and return the data view
-      if (dataViewSpec.id) {
-        dataViews.clearInstanceCache(dataViewSpec.id);
+      if (locationDataViewSpec.id) {
+        dataViews.clearInstanceCache(locationDataViewSpec.id);
       }
-      const createdAdHocDataView = await dataViews.create(dataViewSpec);
+      const createdAdHocDataView = await dataViews.create(locationDataViewSpec);
       return {
         loadedDataView: createdAdHocDataView,
         requestedDataViewId: createdAdHocDataView.id,
         requestedDataViewFound: true,
       };
     }
+  }
+
+  // If the initial ad hoc data view spec matches the data view id, create and return it
+  if (dataViewId && initialAdHocDataViewSpec?.id === dataViewId) {
+    const createdAdHocDataView = await dataViews.create(initialAdHocDataViewSpec);
+    return {
+      loadedDataView: createdAdHocDataView,
+      requestedDataViewId: createdAdHocDataView.id,
+      requestedDataViewFound: true,
+    };
   }
 
   // First try to fetch the data view by ID
@@ -171,7 +185,8 @@ function resolveDataView({
 
 export const loadAndResolveDataView = async ({
   dataViewId,
-  dataViewSpec,
+  locationDataViewSpec,
+  initialAdHocDataViewSpec,
   savedSearch,
   isEsqlMode,
   internalState,
@@ -179,7 +194,8 @@ export const loadAndResolveDataView = async ({
   services,
 }: {
   dataViewId?: string;
-  dataViewSpec?: DataViewSpec;
+  locationDataViewSpec?: DataViewSpec;
+  initialAdHocDataViewSpec?: DataViewSpec;
   savedSearch?: SavedSearch;
   isEsqlMode?: boolean;
   internalState: InternalStateStore;
@@ -193,13 +209,16 @@ export const loadAndResolveDataView = async ({
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
   let fallback = false;
-  let dataView = dataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId);
+  let dataView = locationDataViewSpec
+    ? undefined
+    : adHocDataViews.find((dv) => dv.id === dataViewId);
 
   if (!dataView) {
     const dataViewData = await loadDataView({
       dataViewId,
+      locationDataViewSpec,
+      initialAdHocDataViewSpec,
       services,
-      dataViewSpec,
       savedDataViews,
       adHocDataViews,
     });

@@ -26,6 +26,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
 import { getPrompt } from '../lib/prompt';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import expect from 'expect';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
@@ -65,7 +66,7 @@ const mockContext = {
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
       getCurrentUser: () => ({
-        username: 'user',
+        username: 'elastic',
         email: 'email',
         fullName: 'full name',
         roles: ['user-role'],
@@ -219,7 +220,48 @@ describe('postActionsConnectorExecuteRoute', () => {
       mockConfig
     );
   });
+  test('returns 403 when updating a conversation that user does not own', async () => {
+    const resolvedContext = await mockContext.resolve();
+    const mockContextBadUser = {
+      resolve: jest.fn().mockResolvedValue({
+        ...resolvedContext,
+        elasticAssistant: {
+          ...resolvedContext.elasticAssistant,
+          getCurrentUser: jest.fn().mockResolvedValue({
+            username: 'noone',
+            profile_uid: 'noone',
+          }),
+        },
+      }),
+    };
+    const mockRequestWithConvo = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        conversationId: '123',
+      },
+    };
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(mockContextBadUser, mockRequestWithConvo, mockResponse);
 
+              expect(result).toEqual({
+                body: 'Updating a conversation is only allowed for the owner of the conversation.',
+                statusCode: 403,
+              });
+            }),
+          };
+        }),
+      },
+    };
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockConfig
+    );
+  });
   it('returns the expected error when executeCustomLlmChain fails', async () => {
     const requestWithBadConnectorId = {
       ...mockRequest,

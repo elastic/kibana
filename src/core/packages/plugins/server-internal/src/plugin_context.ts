@@ -307,6 +307,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     injection: {
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
+    dataStreams: {
+      registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
+    },
   };
 }
 
@@ -403,6 +406,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     injection: {
       fork: () => deps.injection.fork(plugin.opaqueId),
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    dataStreams: {
+      getClient: (dataStream) => deps.dataStreams.getClient(dataStream),
     },
   };
 }

@@ -13,10 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonEmpty } from '
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
-import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
-import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
-import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
+import { SERVICE_NAME_FIELD } from '@kbn/discover-utils';
+import { transactionTraceFields, spanTraceFields } from '../doc_viewer_overview/resources/fields';
+import { SummaryField } from '../doc_viewer_overview/sub_components/summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import type { FieldConfiguration } from '../resources/get_field_configuration';
 import { FullScreenWaterfall } from './full_screen_waterfall';
@@ -28,7 +27,6 @@ export interface TraceProps {
   displayType: 'span' | 'transaction';
   docId: string;
   dataView: DocViewRenderProps['dataView'];
-  tracesIndexPattern: string;
   showWaterfall?: boolean;
   showActions?: boolean;
 }
@@ -40,10 +38,10 @@ export const Trace = ({
   displayType,
   docId,
   dataView,
-  tracesIndexPattern,
   showWaterfall = true,
   showActions = true,
 }: TraceProps) => {
+  const serviceName = fields[SERVICE_NAME_FIELD].value as string;
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
 
@@ -64,6 +62,7 @@ export const Trace = ({
           rangeFrom,
           rangeTo,
           docId,
+          mode: 'summary',
         },
       }),
     }),
@@ -73,7 +72,7 @@ export const Trace = ({
   const fieldRows =
     displayType === 'span'
       ? spanTraceFields.map((fieldId: string) => (
-          <SpanSummaryField
+          <SummaryField
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
@@ -82,7 +81,7 @@ export const Trace = ({
           />
         ))
       : transactionTraceFields.map((fieldId: string) => (
-          <TransactionSummaryField
+          <SummaryField
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
@@ -99,7 +98,7 @@ export const Trace = ({
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           dataView={dataView}
-          tracesIndexPattern={tracesIndexPattern}
+          serviceName={serviceName}
           onExitFullScreen={() => {
             setShowFullScreenWaterfall(false);
           }}

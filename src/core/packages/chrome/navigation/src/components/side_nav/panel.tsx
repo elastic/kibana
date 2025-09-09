@@ -40,6 +40,7 @@ export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
           ${useEuiOverflowScroll('y')}
           border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
           height: 100%;
+          scroll-padding-top: 44px; /* account for fixed header when scrolling to elements */
         `}
         color="subdued"
         // > For instance, only plain or transparent panels can have a border and/or shadow.

@@ -9,28 +9,72 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import YAML from 'yaml';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { SchemasSettings } from 'monaco-yaml';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+import YAML, { isPair, isScalar, visit } from 'yaml';
+import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
+import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import {
   getHighlightStepDecorations,
   getMonacoRangeFromYamlNode,
   navigateToErrorPosition,
 } from '../lib/utils';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
-import { getStepNode } from '../../../../common/lib/yaml_utils';
-import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import type { YamlValidationError } from '../model/types';
+import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+
+const getTriggerNodes = (
+  yamlDocument: YAML.Document
+): Array<{ node: any; triggerType: string; typePair: any }> => {
+  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        const triggerType = pair.value.value as string;
+        // Find the parent map node that contains this trigger
+        const triggerMapNode = ancestors[ancestors.length - 1];
+        triggerNodes.push({
+          node: triggerMapNode,
+          triggerType,
+          typePair: pair, // Store the actual type pair for precise positioning
+        });
+      }
+    },
+  });
+
+  return triggerNodes;
+};
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -91,6 +135,8 @@ export const WorkflowYAMLEditor = ({
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const stepExecutionsDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const alertTriggerDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const {
     error: errorValidating,
@@ -139,13 +185,41 @@ export const WorkflowYAMLEditor = ({
 
     onMount?.(editor, monaco);
 
-    setIsEditorMounted(true);
+    // Parse initial YAML content immediately if available
+    const model = editor.getModel();
+    if (model) {
+      const value = model.getValue();
+      if (value && value.trim() !== '') {
+        validateVariables(editor);
+        try {
+          const parsedDocument = YAML.parseDocument(value);
+          // Use flushSync to ensure yamlDocument is set synchronously
+          // before isEditorMounted is set, preventing race conditions
+          flushSync(() => {
+            setYamlDocument(parsedDocument);
+          });
+        } catch (error) {
+          flushSync(() => {
+            setYamlDocument(null);
+          });
+        }
+      }
+    }
+
+    // Use flushSync here too to ensure isEditorMounted is set synchronously
+    // after yamlDocument, guaranteeing the decoration effect has both values
+    flushSync(() => {
+      setIsEditorMounted(true);
+    });
   };
 
   useEffect(() => {
     // After editor is mounted or workflowId changes, validate the initial content
-    if (isEditorMounted && editorRef.current && editorRef.current.getModel()?.getValue() !== '') {
-      changeSideEffects();
+    if (isEditorMounted && editorRef.current) {
+      const model = editorRef.current.getModel();
+      if (model && model.getValue() !== '') {
+        changeSideEffects();
+      }
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
@@ -234,6 +308,119 @@ export const WorkflowYAMLEditor = ({
     stepExecutionsDecorationCollectionRef.current =
       editorRef.current?.createDecorationsCollection(decorations) ?? null;
   }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
+
+  useEffect(() => {
+    const model = editorRef.current?.getModel() ?? null;
+    if (alertTriggerDecorationCollectionRef.current) {
+      // clear existing decorations
+      alertTriggerDecorationCollectionRef.current.clear();
+    }
+
+    // Don't show alert dots when in executions view or when prerequisites aren't met
+    if (!model || !yamlDocument || !isEditorMounted || readOnly || !editorRef.current) {
+      return;
+    }
+
+    const triggerNodes = getTriggerNodes(yamlDocument);
+    const alertTriggers = triggerNodes.filter(({ triggerType }) => triggerType === 'alert');
+
+    if (alertTriggers.length === 0) {
+      return;
+    }
+
+    const decorations = alertTriggers
+      .map(({ node, typePair }) => {
+        // Try to get the range from the typePair first, fallback to searching within the trigger node
+        let typeRange = getMonacoRangeFromYamlNode(model, typePair);
+
+        if (!typeRange) {
+          // Fallback: use the trigger node range and search for the type line
+          const triggerRange = getMonacoRangeFromYamlNode(model, node);
+          if (!triggerRange) {
+            return null;
+          }
+
+          // Find the specific line that contains "type:" and "alert" within this trigger
+          let typeLineNumber = triggerRange.startLineNumber;
+          for (
+            let lineNum = triggerRange.startLineNumber;
+            lineNum <= triggerRange.endLineNumber;
+            lineNum++
+          ) {
+            const lineContent = model.getLineContent(lineNum);
+            if (lineContent.includes('type:') && lineContent.includes('alert')) {
+              typeLineNumber = lineNum;
+              break;
+            }
+          }
+
+          typeRange = {
+            startLineNumber: typeLineNumber,
+            endLineNumber: typeLineNumber,
+            startColumn: 1,
+            endColumn: model.getLineMaxColumn(typeLineNumber),
+          };
+        }
+
+        const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            typeRange.startLineNumber,
+            1,
+            typeRange.startLineNumber,
+            model.getLineMaxColumn(typeRange.startLineNumber)
+          ),
+          options: {
+            glyphMarginClassName: 'alert-trigger-glyph',
+            glyphMarginHoverMessage: {
+              value: i18n.translate(
+                'workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip',
+                {
+                  defaultMessage:
+                    'Alert trigger: This workflow will be executed automatically only when connected to a rule via the "Run Workflow" action.',
+                }
+              ),
+            },
+          },
+        };
+
+        const lineHighlightDecoration: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            typeRange.startLineNumber,
+            1,
+            typeRange.startLineNumber,
+            model.getLineMaxColumn(typeRange.startLineNumber)
+          ),
+          options: {
+            className: 'alert-trigger-highlight',
+            marginClassName: 'alert-trigger-highlight',
+            isWholeLine: true,
+          },
+        };
+
+        return [glyphDecoration, lineHighlightDecoration];
+      })
+      .flat()
+      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
+
+    // Ensure we have a valid editor reference before creating decorations
+    if (decorations.length > 0 && editorRef.current) {
+      // Small delay to ensure Monaco editor is fully ready for decorations
+      // This addresses race conditions where the editor is mounted but not fully initialized
+      const createDecorations = () => {
+        if (editorRef.current) {
+          alertTriggerDecorationCollectionRef.current =
+            editorRef.current.createDecorationsCollection(decorations);
+        }
+      };
+
+      // Try immediately, and if that fails, try again with a small delay
+      try {
+        createDecorations();
+      } catch (error) {
+        setTimeout(createDecorations, 10);
+      }
+    }
+  }, [isEditorMounted, yamlDocument, readOnly]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -396,7 +583,8 @@ const componentStyles = {
         borderRadius: '2px',
       },
       '.template-variable-error': {
-        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        backgroundColor: euiTheme.colors.vis.euiColorVisWarning1,
+        color: euiTheme.colors.severity.danger,
         borderRadius: '2px',
       },
       '.step-highlight': {
@@ -470,6 +658,19 @@ const componentStyles = {
           backgroundColor: euiTheme.colors.danger,
           borderRadius: '50%',
         },
+      },
+      '.alert-trigger-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.warning,
+          borderRadius: '50%',
+        },
+      },
+      '.alert-trigger-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
       },
     }),
   editorContainer: css({

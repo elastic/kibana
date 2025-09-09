@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.1.3 [kibana-9.1.3-release-notes]
 
+:::{important}
+The 9.1.3 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Fixes [kibana-9.1.3-fixes]
 
 **Alerting**:
@@ -128,6 +132,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors [#221389]({{kib-pull}}221389). 
 * Adds `rrule` notation support for task scheduling [#217728]({{kib-pull}}217728).
 * Publishes new public APIs for the Maintenance Window [#216756]({{kib-pull}}216756).
+* Allows you to delete Maintenance Windows [#211399]({{kib-pull}}211399).
 * Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time [#216613]({{kib-pull}}216613).
 * Adds an embeddable panel for dashboards that allows you to show a simplified version of the Alerts table from {{observability}} or {{elastic-sec}} [#216076]({{kib-pull}}216076).
 * Ensures the **Reporting** page only shows reports generated in the current space [#221375]({{kib-pull}}221375).
@@ -368,6 +373,10 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes an issue preventing solution navigation submenu items from being displayed when the navigation is collapsed [#227705]({{kib-pull}}227705).
 
 ## 9.0.6 [kibana-9.0.6-release-notes]
+
+:::{important}
+The 9.0.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
 
 ### Features and enhancements [kibana-9.0.6-features-enhancements]
 
