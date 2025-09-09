@@ -73,10 +73,6 @@ export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
 
-export type GetAllDashboardMigrationsStatsResponse = z.infer<
-  typeof GetAllDashboardMigrationsStatsResponse
->;
-export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
 export type DeleteDashboardMigrationRequestParams = z.infer<
   typeof DeleteDashboardMigrationRequestParams
 >;
@@ -86,6 +82,11 @@ export const DeleteDashboardMigrationRequestParams = z.object({
 export type DeleteDashboardMigrationRequestParamsInput = z.input<
   typeof DeleteDashboardMigrationRequestParams
 >;
+
+export type GetAllDashboardMigrationsStatsResponse = z.infer<
+  typeof GetAllDashboardMigrationsStatsResponse
+>;
+export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
 
 export type GetDashboardMigrationRequestParams = z.infer<typeof GetDashboardMigrationRequestParams>;
 export const GetDashboardMigrationRequestParams = z.object({
