@@ -17,6 +17,9 @@ interface BrowserFieldsResult {
 // NOTE:for referential comparison optimization
 const emptyBrowserFields = {};
 
+// We don't want the cache to grow indefinitely
+// as individual dataviews can be an arbitrary size
+export const MAX_BROWSER_FIELDS_CACHE_SIZE = 10;
 /**
  * SecurityBrowserFieldsManager is a singleton class that manages the browser fields
  * for the Security Solution. It caches the browser fields to improve performance
@@ -105,6 +108,13 @@ class SecurityBrowserFieldsManager {
       }
       // If the browser fields for this dataView are not cached, build them
       const result = this.buildBrowserFields(fields);
+      // Maintain a maximum cache size to prevent unbounded memory usage
+      // An individual dataview can be an arbitrary size, so this limit is more precautionary than anything
+      if (this.dataViewIdToBrowserFieldsCache.size >= MAX_BROWSER_FIELDS_CACHE_SIZE) {
+        const firstKey = this.dataViewIdToBrowserFieldsCache.keys().next().value;
+        this.dataViewIdToBrowserFieldsCache.delete(firstKey);
+      }
+      // Cache the newly built browser fields for future use
       this.dataViewIdToBrowserFieldsCache.set(dataViewId, result);
       return result;
     }
