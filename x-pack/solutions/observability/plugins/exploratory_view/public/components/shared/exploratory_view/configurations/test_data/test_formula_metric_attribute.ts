@@ -50,7 +50,7 @@ export const sampleMetricFormulaAttribute = {
                   format: {
                     id: 'percent',
                     params: {
-                      decimals: 1,
+                      decimals: 3,
                     },
                   },
                   formula: "1- (count(kql='summary.down > 0') / count())",

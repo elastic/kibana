@@ -126,6 +126,11 @@ export function createTelemetryConfigurationTaskConfig() {
           };
         }
 
+        if (configArtifact.query_config) {
+          log.debug('Updating query configuration');
+          telemetryConfiguration.query_config = configArtifact.query_config;
+        }
+
         await taskMetricsService.end(trace);
 
         log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });
