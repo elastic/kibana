@@ -21,6 +21,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { v4 as uuidv4 } from 'uuid';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
@@ -114,6 +115,7 @@ export const chatCompleteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const threadId = uuidv4();
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -237,6 +239,7 @@ export const chatCompleteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
               isOssModel,
               conversationId,
               context: ctx,
