@@ -35,14 +35,16 @@ export const MetricTermWithHighlight = ({
           <mark
             key={index}
             css={css`
-              color: ${colors.activeHighlightColor} !important;
-              background-color: ${colors.activeHighlightBackgroundColor} !important;
+              color: ${colors.highlightColor} !important;
+              background-color: ${colors.highlightBackgroundColor} !important;
             `}
           >
             {part}
           </mark>
         ) : (
-          <span key={`${part}${index}`}>{part}</span>
+          <span data-test-subj={`${part}${index}`} key={`${part}${index}`}>
+            {part}
+          </span>
         )
       )}
     </>
