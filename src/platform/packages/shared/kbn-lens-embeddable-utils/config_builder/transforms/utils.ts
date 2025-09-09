@@ -311,7 +311,7 @@ export const addLayerColumn = (
   } else {
     layer.columnOrder.push(name);
     if (referenceColumn) {
-      layer.columnOrder.push(`${name}_reference`);
+      layer.columnOrder.push(referenceColumnId);
     }
   }
 };
