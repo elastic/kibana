@@ -67,9 +67,6 @@ export type VisualizeSavedVisInputState = SerializedTitles &
   };
 
 export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
-export type VisualizeOutputState = VisualizeSavedVisInputState &
-  Required<Omit<SerializedTitles, 'hidePanelTitles'>> &
-  ExtraSavedObjectProperties;
 
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &

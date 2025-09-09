@@ -11,18 +11,17 @@ import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plu
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { SerializedVis, VisParams } from '../types';
 
-export interface VisualizeByReferenceState {
-  savedObjectId?: string;
-  uiState?: any;
-}
-
-export interface VisualizeByValueState {
-  savedVis: SerializedVis<VisParams>;
-}
-
 export type VisualizeEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &
   Partial<DynamicActionsSerializedState>;
 
-export type VisualizeEmbeddableState = VisualizeEmbeddableBaseState &
-  (VisualizeByReferenceState | VisualizeByValueState);
+export type VisualizeByReferenceState = VisualizeEmbeddableBaseState & {
+  savedObjectId?: string;
+  uiState?: any;
+};
+
+export type VisualizeByValueState = VisualizeEmbeddableBaseState & {
+  savedVis: SerializedVis<VisParams>;
+};
+
+export type VisualizeEmbeddableState = VisualizeByReferenceState | VisualizeByValueState;

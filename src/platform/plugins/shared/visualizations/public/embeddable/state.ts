@@ -146,7 +146,7 @@ export const serializeState: (props: {
         ...(timeRange ? { timeRange } : {}),
         savedObjectId: id,
       } as VisualizeSavedObjectInputState,
-      references: []
+      references: [],
     };
   }
 
@@ -161,6 +161,6 @@ export const serializeState: (props: {
         id,
       },
     } as VisualizeSavedVisInputState,
-    references: []
+    references: [],
   };
 };

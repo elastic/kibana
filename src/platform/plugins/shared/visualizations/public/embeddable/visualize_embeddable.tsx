@@ -49,7 +49,7 @@ import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
-import type { VisualizeApi, VisualizeOutputState, VisualizeSerializedState } from './types';
+import type { VisualizeApi, VisualizeSerializedState } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
@@ -292,17 +292,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
       // Library transforms
       saveToLibrary: (newTitle: string) => {
         titleManager.api.setTitle(newTitle);
-        const { rawState, references } = serializeState({
-          serializedVis: vis$.getValue().serialize(),
-          titles: {
-            ...titleManager.getLatestState(),
-            title: newTitle,
-          },
-        });
         return saveToLibrary({
+          description: titleManager.api.description$.value,
+          serializedVis: vis$.getValue().serialize(),
+          title: newTitle,
           uiState: vis$.getValue().uiState,
-          rawState: rawState as VisualizeOutputState,
-          references,
         });
       },
       canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
