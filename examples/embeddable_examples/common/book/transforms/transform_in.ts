@@ -10,7 +10,7 @@
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
 import type { BookByReferenceState, BookEmbeddableState } from '../types';
 
-export function transformIn({ state }: { state: BookEmbeddableState }) {
+export function transformIn(state: BookEmbeddableState) {
   // extract saved object reference for by-reference state
   if ((state as BookByReferenceState).savedObjectId) {
     const { savedObjectId, ...rest } = state as BookByReferenceState;

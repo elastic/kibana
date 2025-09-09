@@ -80,10 +80,7 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut({
-        state: panelConfig,
-        references,
-      });
+      transformedPanelConfig = transforms.transformOut(panelConfig, references);
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError

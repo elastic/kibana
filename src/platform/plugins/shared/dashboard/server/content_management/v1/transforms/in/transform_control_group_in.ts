@@ -30,7 +30,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       let transformedControlState = controlState as Partial<StoredControlState>;
       try {
         if (transforms?.transformIn) {
-          const transformed = transforms.transformIn({ state: controlState });
+          const transformed = transforms.transformIn(controlState);
           // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,

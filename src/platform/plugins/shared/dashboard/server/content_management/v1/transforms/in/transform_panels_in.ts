@@ -66,7 +66,7 @@ function transformPanelIn(panel: DashboardPanel): {
   let references: undefined | SavedObjectReference[];
   try {
     if (transforms?.transformIn) {
-      const transformed = transforms.transformIn({ state: panelConfig });
+      const transformed = transforms.transformIn(panelConfig);
       transformedPanelConfig = transformed.state;
       references = transformed.references;
     }

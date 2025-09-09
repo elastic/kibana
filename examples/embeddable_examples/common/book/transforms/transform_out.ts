@@ -12,13 +12,10 @@ import type { BookState } from '../../../server';
 import type { BookEmbeddableState, BookEmbeddableState910 } from '../types';
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
 
-export function transformOut({
-  state: storedState,
-  references,
-}: {
-  state: BookEmbeddableState | BookEmbeddableState910;
-  references?: Reference[];
-}): BookEmbeddableState {
+export function transformOut(
+  storedState: BookEmbeddableState | BookEmbeddableState910,
+  references?: Reference[]
+): BookEmbeddableState {
   // storedState may contain legacy state stored from dashboards or URL
 
   // 9.1.0 by-value state stored book state under attributes

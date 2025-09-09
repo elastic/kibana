@@ -44,10 +44,7 @@ async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
   if (!transforms?.transformOut) return panel;
 
   try {
-    const transformedPanelConfig = transforms.transformOut({
-      state: panel.panelConfig,
-      references,
-    });
+    const transformedPanelConfig = transforms.transformOut(panel.panelConfig, references);
     return {
       ...panel,
       panelConfig: transformedPanelConfig,

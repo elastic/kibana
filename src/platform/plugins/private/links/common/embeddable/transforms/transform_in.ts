@@ -11,7 +11,7 @@ import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractReferences } from './references';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 
-export function transformIn({ state }: { state: LinksEmbeddableState }) {
+export function transformIn(state: LinksEmbeddableState) {
   if ((state as LinksByReferenceState).savedObjectId) {
     const { savedObjectId, ...rest } = state as LinksByReferenceState;
     return {
