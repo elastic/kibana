@@ -42,12 +42,12 @@ jest.mock(
   })
 );
 
-const mockUseExplainInAiAssistant = jest.fn();
-jest.mock('./use_explain_in_ai_assistant', () => {
-  const actual = jest.requireActual('./use_explain_in_ai_assistant');
+const mockUseAskInAiAssistant = jest.fn();
+jest.mock('./use_ask_ai_assistant', () => {
+  const actual = jest.requireActual('./use_ask_ai_assistant');
   return {
     ...actual,
-    useExplainInAiAssistant: (params: unknown) => mockUseExplainInAiAssistant(params),
+    useAskAiAssistant: (params: unknown) => mockUseAskInAiAssistant(params),
   };
 });
 
@@ -66,7 +66,7 @@ describe('ExplainWithAiAssistant', () => {
         data: [{ field: 'user.name', allowed: true, anonymized: true }],
       },
     });
-    mockUseExplainInAiAssistant.mockReturnValue({
+    mockUseAskInAiAssistant.mockReturnValue({
       showAssistantOverlay: mockShowAssistantOverlay,
       disabled: false,
     });
@@ -80,7 +80,7 @@ describe('ExplainWithAiAssistant', () => {
   });
 
   it('should not render the button when AI assistant is disabled', () => {
-    mockUseExplainInAiAssistant.mockReturnValue({
+    mockUseAskInAiAssistant.mockReturnValue({
       showAssistantOverlay: mockShowAssistantOverlay,
       disabled: true,
     });
@@ -121,7 +121,7 @@ describe('ExplainWithAiAssistant', () => {
     });
     render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
-    expect(mockUseExplainInAiAssistant).toHaveBeenCalledWith(
+    expect(mockUseAskInAiAssistant).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Explain user 'test-user' Risk Score",
         description: 'Entity: test-user',
@@ -132,7 +132,7 @@ describe('ExplainWithAiAssistant', () => {
   it('should pass correct props to useExplainInAiAssistant hook', () => {
     render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
-    expect(mockUseExplainInAiAssistant).toHaveBeenCalledWith({
+    expect(mockUseAskInAiAssistant).toHaveBeenCalledWith({
       title: "Explain user 'test-user' Risk Score",
       description: 'Entity: test-user',
       suggestedPrompt: expect.any(String),
@@ -144,7 +144,7 @@ describe('ExplainWithAiAssistant', () => {
   it('should generate prompt with anonymized field', async () => {
     render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
-    const getPromptContext = mockUseExplainInAiAssistant.mock.calls[0][0].getPromptContext;
+    const getPromptContext = mockUseAskInAiAssistant.mock.calls[0][0].getPromptContext;
     const promptContext = await getPromptContext();
 
     expect(promptContext).toContain(`Identifier: \`${ANONYMIZED_VALUE}\``);
@@ -158,7 +158,7 @@ describe('ExplainWithAiAssistant', () => {
 
     render(<AskAiAssistant {...hostProps} />, { wrapper: TestProviders });
 
-    expect(mockUseExplainInAiAssistant).toHaveBeenCalledWith(
+    expect(mockUseAskInAiAssistant).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Explain host 'test-host' Risk Score",
       })

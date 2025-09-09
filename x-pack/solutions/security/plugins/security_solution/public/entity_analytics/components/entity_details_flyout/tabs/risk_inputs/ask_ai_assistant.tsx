@@ -16,7 +16,7 @@ import type { AnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_a
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityType } from '../../../../../../common/search_strategy';
-import { useAskAiAssistant } from './use_explain_in_ai_assistant';
+import { useAskAiAssistant } from './use_ask_ai_assistant';
 
 export interface ExplainWithAiAssistantProps<T extends EntityType> {
   entityType: T;
