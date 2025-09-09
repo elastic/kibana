@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiIconTip,
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiIconTip, EuiFormRow, EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenericIndexPatternColumn } from '../operations';
