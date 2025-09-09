@@ -78,7 +78,7 @@ describe('metricsDataSourceProfileProvider', () => {
       }
     );
 
-    it.each([SolutionType.Observability, SolutionType.Security, SolutionType.Default])(
+    it.each([SolutionType.Observability, SolutionType.Security])(
       'when SolutionType is %s',
       async (solutionType) => {
         const result = await provider.resolve(
@@ -119,17 +119,6 @@ describe('metricsDataSourceProfileProvider', () => {
       expect(result).toEqual({ isMatch: false });
     });
 
-    it.each([SolutionType.Search])('when SolutionType is %s', async (solutionType) => {
-      const result = await provider.resolve(
-        createParams({
-          query: { esql: 'TS metrics-*' },
-          rootContext: { profileId: 'foo', solutionType },
-        })
-      );
-
-      expect(result).toEqual({ isMatch: false });
-    });
-
     it('when index pattern has no time series fields', async () => {
       provider = createProvider({
         getIndexPatternMetadata: jest.fn().mockResolvedValue({
@@ -147,5 +136,19 @@ describe('metricsDataSourceProfileProvider', () => {
       );
       expect(result).toEqual({ isMatch: false });
     });
+
+    it.each([SolutionType.Search, SolutionType.Default])(
+      'when SolutionType is %s',
+      async (solutionType) => {
+        const result = await provider.resolve(
+          createParams({
+            query: { esql: 'TS metrics-*' },
+            rootContext: { profileId: 'foo', solutionType },
+          })
+        );
+
+        expect(result).toEqual({ isMatch: false });
+      }
+    );
   });
 });

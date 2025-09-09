@@ -58,9 +58,7 @@ export const createMetricsDataSourceProfileProvider = (
 });
 
 function isSolutionValid(solutionType: SolutionType) {
-  return [SolutionType.Observability, SolutionType.Security, SolutionType.Default].includes(
-    solutionType
-  );
+  return [SolutionType.Observability, SolutionType.Security].includes(solutionType);
 }
 
 function isQuerySupported(query: AggregateQuery | Query | undefined): query is AggregateQuery {
