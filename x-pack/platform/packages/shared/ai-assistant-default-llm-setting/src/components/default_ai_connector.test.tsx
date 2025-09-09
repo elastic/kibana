@@ -56,7 +56,7 @@ function setupTest({
     string,
     FieldDefinition<
       UiSettingsType,
-      string | number | boolean | (string | number)[] | null | undefined
+      string | number | boolean | Array<string | number> | null | undefined
     >
   >;
   unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>;

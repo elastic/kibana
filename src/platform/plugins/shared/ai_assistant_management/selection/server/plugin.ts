@@ -52,8 +52,7 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-
-core.uiSettings.register({
+    core.uiSettings.register({
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
         readonlyMode: 'ui',
         readonly: false,
@@ -70,8 +69,8 @@ core.uiSettings.register({
         value: false,
       },
     });
-    
-core.uiSettings.register({
+
+    core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
           defaultMessage: 'AI Assistant for Observability and Search visibility',

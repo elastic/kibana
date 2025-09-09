@@ -46,11 +46,11 @@ export const ManagementSettings = React.memo(() => {
   } = useKibana().services;
 
   const {
-      navigateToApp,
-      capabilities: {
-        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
-      },
-    } = application;
+    navigateToApp,
+    capabilities: {
+      securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+    },
+  } = application;
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -139,19 +139,20 @@ export const ManagementSettings = React.memo(() => {
 
   if (conversations) {
     return (
-       <DefaultAiConnectorSettingsContextProvider
+      <DefaultAiConnectorSettingsContextProvider
         toast={notifications.toasts}
         application={application}
         docLinks={docLinks}
         featureFlags={featureFlags}
       >
-      <AssistantSettingsManagement
-        selectedConversation={currentConversation}
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
-        settings={settings}
-      /> </DefaultAiConnectorSettingsContextProvider>
+        <AssistantSettingsManagement
+          selectedConversation={currentConversation}
+          dataViews={dataViews}
+          onTabChange={handleTabChange}
+          currentTab={currentTab}
+          settings={settings}
+        />{' '}
+      </DefaultAiConnectorSettingsContextProvider>
     );
   }
 

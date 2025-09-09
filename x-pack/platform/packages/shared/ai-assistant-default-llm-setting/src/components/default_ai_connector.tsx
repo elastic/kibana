@@ -68,7 +68,7 @@ interface Props {
       string,
       FieldDefinition<
         UiSettingsType,
-        string | number | boolean | (string | number)[] | null | undefined
+        string | number | boolean | Array<string | number> | null | undefined
       >
     >;
   };
@@ -83,7 +83,7 @@ const NoDefaultOption: EuiComboBoxOptionOption<string> = {
   value: NO_DEFAULT_CONNECTOR,
 };
 
-const getOptions = (connectors: ConnectorData): EuiComboBoxOptionOption<string>[] => {
+const getOptions = (connectors: ConnectorData): Array<EuiComboBoxOptionOption<string>> => {
   const preconfigured =
     connectors.connectors
       ?.filter((connector) => connector.isPreconfigured)
@@ -122,11 +122,11 @@ const getOptions = (connectors: ConnectorData): EuiComboBoxOptionOption<string>[
 
 const getOptionsByValues = (
   value: string,
-  options: EuiComboBoxOptionOption<string>[]
-): EuiComboBoxOptionOption<string>[] => {
+  options: Array<EuiComboBoxOptionOption<string>>
+): Array<EuiComboBoxOptionOption<string>> => {
   const getOptionsByValuesHelper = (
     option: EuiComboBoxOptionOption<string>
-  ): EuiComboBoxOptionOption<string>[] => {
+  ): Array<EuiComboBoxOptionOption<string>> => {
     if (option.options === undefined && option.value === value) {
       // If the option has no sub-options and its value is in the selected values, include it
       return [option];
@@ -146,7 +146,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
   const options = useMemo(() => getOptions(connectors), [connectors]);
   const { handleFieldChange, fields, unsavedChanges } = settings;
 
-  const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
+  const onChangeDefaultLlm = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const values = selectedOptions.map((option) => option.value);
     if (values.length > 1) {
       toast?.addDanger({
