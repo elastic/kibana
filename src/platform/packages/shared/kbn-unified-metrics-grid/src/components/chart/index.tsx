@@ -98,13 +98,15 @@ export const Chart: React.FC<ChartProps> = ({
         border-radius: ${euiTheme.border.radius.medium};
       `}
     >
-      <LensWrapperMemo
-        lensProps={lensProps}
-        services={services}
-        onBrushEnd={onBrushEnd}
-        onFilter={onFilter}
-        abortController={abortController}
-      />
+      {lensProps && (
+        <LensWrapperMemo
+          lensProps={lensProps}
+          services={services}
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          abortController={abortController}
+        />
+      )}
     </div>
   );
 };
