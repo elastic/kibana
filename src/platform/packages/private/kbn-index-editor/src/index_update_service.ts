@@ -285,6 +285,8 @@ export class IndexUpdateService {
           if (isDeletingAnySavedColumn) {
             updatedAcc.push(action);
           }
+          const newTotalHits = this._totalHits$.getValue() - idsToDelete.size;
+          this._totalHits$.next(newTotalHits > 1 ? newTotalHits : 1);
           return updatedAcc;
         case 'saved':
           // Clear the buffer after save
