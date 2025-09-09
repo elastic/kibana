@@ -1290,17 +1290,5 @@
     "type",
     "updated_at"
   ],
-  "workflow": [
-    "createdBy",
-    "definition",
-    "deleted_at",
-    "description",
-    "enabled",
-    "lastUpdatedBy",
-    "name",
-    "tags",
-    "valid",
-    "yaml"
-  ],
   "workplace_search_telemetry": []
 }
