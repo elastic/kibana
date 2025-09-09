@@ -672,6 +672,28 @@ const componentStyles = {
       '.alert-trigger-highlight': {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
       },
+      '.duplicate-step-name-error': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.duplicate-step-name-error-margin': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+        // Use a solid background to completely cover the line numbers
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: euiTheme.colors.backgroundLightDanger,
+          zIndex: 1000,
+        },
+        // Make the text invisible as backup
+        color: 'transparent',
+        textShadow: 'none',
+        fontSize: 0,
+      },
     }),
   editorContainer: css({
     flex: '1 1 0',

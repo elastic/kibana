@@ -18,8 +18,7 @@ import type {
   IndexSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
-import { getDataStreamMappings, getIndexMappings } from './steps/get_mappings';
-import { flattenMapping } from './utils/mappings';
+import { flattenMapping, getDataStreamMappings, getIndexMappings } from './utils/mappings';
 
 export interface RelevantResource {
   type: EsResourceType;
