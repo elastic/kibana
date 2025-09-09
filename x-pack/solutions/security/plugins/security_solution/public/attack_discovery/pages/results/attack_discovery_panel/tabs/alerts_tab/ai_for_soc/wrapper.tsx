@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { RUNTIME_FIELD_MAP } from '../../../../../../../detections/components/alert_summary/wrapper';
+import { useCreateEaseAlertsDataView } from '../../../../../../../detections/hooks/alert_summary/use_create_data_view';
 import { Table } from './table';
-import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useCreateDataView } from '../../../../../../../common/hooks/use_create_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../../../../data_view_manager/hooks/use_data_view';
-import { SourcererScopeName } from '../../../../../../../sourcerer/store/model';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
@@ -47,27 +41,8 @@ interface AiForSOCAlertsTabProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView, loading: dataViewLoading } = useCreateEaseAlertsDataView();
 
-  const spaceId = useSpaceId();
-  const dataViewSpec = useMemo(
-    () => ({
-      title: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-      runtimeFieldMap: RUNTIME_FIELD_MAP,
-    }),
-    [spaceId]
-  );
-
-  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec,
-    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
-  });
-
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
-
-  // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
 
   return (
@@ -78,7 +53,7 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
       width="100%"
     >
       <>
-        {!dataView || !dataView.id ? (
+        {!dataView ? (
           <EuiEmptyPrompt
             color="danger"
             data-test-subj={ERROR_TEST_ID}

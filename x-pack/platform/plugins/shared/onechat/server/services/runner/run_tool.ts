@@ -6,7 +6,8 @@
  */
 
 import type { ZodObject } from '@kbn/zod';
-import { createBadRequestError } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common';
+import { createBadRequestError, ToolResultType } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   ToolHandlerContext,
@@ -50,17 +51,18 @@ export const runTool = async <TParams = Record<string, unknown>>({
         toolExecutionParams,
         manager,
       });
-      const toolReturnInternal = await tool.handler(
-        validation.data as Record<string, any>,
-        toolHandlerContext
-      );
 
-      return toolReturnInternal;
+      try {
+        return await tool.handler(validation.data as Record<string, any>, toolHandlerContext);
+      } catch (err) {
+        return {
+          results: [{ type: ToolResultType.error, data: { message: err.message } }] as ToolResult[],
+        };
+      }
     }
   );
 
   return {
-    runId: manager.context.runId,
     ...toolReturn,
   };
 };

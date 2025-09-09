@@ -250,6 +250,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                kbDataClient,
                 esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
@@ -464,6 +465,7 @@ export const postEvaluateRoute = (
                   actionsClient,
                   savedObjectsClient,
                   tools,
+                  checkpointSaver: await assistantContext.getCheckpointSaver(),
                 }),
               };
             })

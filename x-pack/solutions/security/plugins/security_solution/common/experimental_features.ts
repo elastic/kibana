@@ -126,6 +126,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoringRoutesEnabled: true,
 
   /**
+   * Enables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -243,6 +248,11 @@ export const allowedExperimentalValues = Object.freeze({
   privilegedUserMonitoringDisabled: false,
 
   /**
+   * Enables Integrations Sync for Privileged User Monitoring
+   */
+  integrationsSyncEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
@@ -251,6 +261,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Defend Insights feature
    */
   defendInsights: true,
+
+  /**
+   * Enables the Defend Insights Policy Response Failure feature
+   */
+  defendInsightsPolicyResponseFailure: false,
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
@@ -308,6 +323,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: false,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
