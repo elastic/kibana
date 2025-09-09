@@ -56,6 +56,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
       navigateToApp,
       assistantAvailability: { isAssistantManagementEnabled, hasConnectorsAllPrivilege },
+      settings
     } = useAssistantContext();
 
     useEffect(() => {
@@ -67,8 +68,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');

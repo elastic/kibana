@@ -9,7 +9,7 @@ import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
 import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
