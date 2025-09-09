@@ -940,10 +940,19 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
-export const fillAlertSuppressionFields = (fields: string[]) => {
+/**
+ * @param fields - The fields to fill in the alert suppression combo box.
+ * @param checkFieldsInComboBox - Whether to check if the fields are in the combo box before filling. It can be useful if takes time to load all options from index.
+ * If there are many fields in combobox, they are might be visible only after scrolling down menu.
+ */
+export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
+    if (checkFieldsInComboBox) {
+      cy.get(COMBO_BOX_OPTION).should('contain.text', field);
+    }
+
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
   });
 };
