@@ -38,7 +38,36 @@ to enable the {kib} server to have screenshotting capabilities.
 === Grant users access to reporting
 When security is enabled, the preferred method to grant users access to {report-features} is with <<kibana-privileges, {kib} application privileges>>. This will allow you to create custom roles that control the spaces and applications where users may generate reports.
 
-NOTE: To generate reports in a cross-cluster search environment, your role requires different privileges, based on whether you are using an API key for authentication or directly authenticating as the user. For more information, refer to {ref}/remote-clusters-cert.html#remote-clusters-privileges-ccr[Configure privileges for cross-cluster replication].
+[NOTE]
+============
+
+To generate reports in a cross-cluster search environment, ensure your role has the appropriate cluster and index privileges to access indices in the remote and local cluster. This may differ based on whether you are using an API key for authentication or directly authenticating as with your user credentials. For more information, refer to {ref}/remote-clusters-cert.html#remote-clusters-privileges-ccr[Configure privileges for cross-cluster replication]. 
+
+To provide an example, here is a role that has access to both the index in the remote cluster (`general:filebeat-*`) and the index in the local cluster (`filebeat-*`). The `read_cross_cluster` privilege allows cross-cluster search access to the remote index.
+
+
+[source, sh]
+---------------------------------------------------------------
+{
+
+ "indices": [
+
+  {
+
+   "names": [ "general:filebeat-*-isam*", "filebeat-*-isam*" ],
+
+   "privileges": [ "read", "view_index_metadata", "read_cross_cluster" ]
+
+  }
+
+ ]
+
+}
+
+---------------------------------------------------------------
+
+============
+
 
 . We recommend you explicitly opt-out of the default access control model, which will enable application privileges in Reporting. To do this, change a setting that controls the Reporting access control model in `kibana.yml`:
 +
