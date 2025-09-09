@@ -23,7 +23,9 @@ interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
 }
 
-interface UnifiedHistogramConfig {
+export const DEFAULT_HISTOGRAM_KEY_PREFIX = 'discover';
+
+export interface UnifiedHistogramConfig {
   localStorageKeyPrefix?: string;
   layoutPropsMap: Record<string, UnifiedHistogramPartialLayoutProps | undefined>;
 }

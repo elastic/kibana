@@ -11,7 +11,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import React, { useCallback, useEffect } from 'react';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { selectTabRuntimeState } from '../../state_management/redux';
+import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export const useUnifiedHistogramCommon = ({
@@ -41,7 +41,7 @@ export const useUnifiedHistogramCommon = ({
       ...histogramConfig$.getValue(),
       layoutPropsMap: {
         ...histogramConfig$.getValue().layoutPropsMap,
-        [localStorageKeyPrefix ?? 'default']: layoutProps,
+        [localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX]: layoutProps,
       },
     });
   }, [currentTabId, layoutProps, localStorageKeyPrefix, stateContainer.runtimeStateManager]);
