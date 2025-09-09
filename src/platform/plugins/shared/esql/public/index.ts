@@ -10,7 +10,6 @@
 import { EsqlPlugin, type EsqlPluginStart } from './plugin';
 
 export { ESQLLangEditor } from './create_editor';
-export { openESQLControlFlyout } from './triggers/esql_controls/esql_control_helpers';
 export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
 export type { EsqlPluginStart };
 
