@@ -72,4 +72,8 @@ export class DocCountService {
     const { count } = await this.fileUpload.isIndexSearchable(indexName, 0);
     this.initialDocCount = count;
   }
+
+  public resetInitialDocCount() {
+    this.initialDocCount = 0;
+  }
 }
