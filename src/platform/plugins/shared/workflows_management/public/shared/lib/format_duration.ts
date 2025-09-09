@@ -45,10 +45,6 @@ export function formatDuration(durationMs: number): string {
     milliseconds %= 1000;
   }
 
-  if (milliseconds > 0) {
-    milliseconds = milliseconds;
-  }
-
   let result = '';
   if (weeks > 0) {
     result += `${weeks}w `;
