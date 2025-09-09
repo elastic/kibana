@@ -1,11 +1,25 @@
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DataTypeComponent } from './services';
 
 export interface ChatDataRegistryPluginSetup {
-  getGreeting: () => string;
+  /**
+   * Registry for data type component descriptors
+   */
+  dataTypeRegistry: {
+    /**
+     * Register a custom data type component descriptor
+     */
+    register: (descriptor: DataTypeComponent) => void;
+    list: () => Array<string>;
+    clear: () => void;
+  };
 }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ChatDataRegistryPluginStart {}
-
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
-}

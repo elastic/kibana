@@ -8,6 +8,7 @@
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/public';
+import type { ChatDataRegistryPluginSetup } from '@kbn/chat-data-registry-plugin/public';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
@@ -20,6 +21,7 @@ export interface WorkChatAppPluginStart {}
 
 export interface WorkChatAppPluginSetupDependencies {
   onechat: OnechatPluginSetup;
+  chatDataRegistry: ChatDataRegistryPluginSetup;
 }
 
 export interface WorkChatAppPluginStartDependencies {

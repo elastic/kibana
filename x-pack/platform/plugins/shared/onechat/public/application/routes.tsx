@@ -11,7 +11,6 @@ import { OnechatAgentsCreate } from './pages/agent_create';
 import { OnechatAgentsEdit } from './pages/agent_edit';
 import { OnechatAgentsPage } from './pages/agents';
 import { OnechatConversationsPage } from './pages/conversations';
-import { OnechatDataCatalogPage } from './pages/data_catalog';
 import { OnechatToolCreatePage } from './pages/tool_create';
 import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
@@ -33,10 +32,6 @@ export const OnechatRoutes: React.FC<{}> = () => {
 
       <Route path="/agents">
         <OnechatAgentsPage />
-      </Route>
-
-      <Route path="/data">
-        <OnechatDataCatalogPage />
       </Route>
 
       <Route path="/tools/new">

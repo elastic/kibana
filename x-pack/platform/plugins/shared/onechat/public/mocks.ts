@@ -8,13 +8,7 @@
 import type { OnechatPluginSetup, OnechatPluginStart } from './types';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
-  return {
-    dataTypeRegistry: {
-      register: jest.fn(),
-      list: jest.fn(),
-      clear: jest.fn(),
-    },
-  };
+  return {};
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {

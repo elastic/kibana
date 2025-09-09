@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from '@kbn/onechat-plugin/server/services/data_catalog';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { DataTypeDefinition } from '@kbn/chat-data-registry-plugin/server';
+import type { ChatDataRegistryPluginSetup } from '@kbn/chat-data-registry-plugin/server';
 
 export const workChatDataTypes: DataTypeDefinition[] = [
   {
@@ -23,8 +23,8 @@ export const workChatDataTypes: DataTypeDefinition[] = [
   },
 ];
 
-export const registerWorkChatDataTypes = ({ oneChat }: { oneChat: OnechatPluginSetup }) => {
+export const registerWorkChatDataTypes = ({ chatDataRegistry }: { chatDataRegistry: ChatDataRegistryPluginSetup }) => {
   workChatDataTypes.forEach((dataType) => {
-    oneChat.data_catalog.register(dataType);
+    chatDataRegistry.dataCatalog.register(dataType);
   });
 };

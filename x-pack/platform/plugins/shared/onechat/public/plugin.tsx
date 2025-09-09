@@ -15,13 +15,7 @@ import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerAnalytics, registerApp } from './register';
 import type { OnechatInternalService } from './services';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  ToolsService,
-  DataTypeRegistry,
-} from './services';
+import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -41,7 +35,6 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
-  private readonly dataTypeRegistry = new DataTypeRegistry();
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -52,7 +45,6 @@ export class OnechatPlugin
       AGENT_BUILDER_ENABLED_SETTING_ID,
       false
     );
-    this.logger.info(`Onechat UI setting is ${isOnechatUiEnabled ? 'enabled' : 'disabled'}`);
 
     if (isOnechatUiEnabled) {
       registerApp({
@@ -66,25 +58,9 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
-
-      return {
-        dataTypeRegistry: {
-          register: (descriptor) => this.dataTypeRegistry.register(descriptor),
-          list: () => this.dataTypeRegistry.list(),
-          clear: () => this.dataTypeRegistry.clear(),
-        },
-      };
     }
 
-    return {
-      dataTypeRegistry: {
-        register: () => {},
-        list: () => {
-          return [] as string[];
-        },
-        clear: () => {},
-      },
-    };
+    return {};
   }
 
   start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
@@ -92,7 +68,6 @@ export class OnechatPlugin
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
-    const dataTypeRegistry = this.dataTypeRegistry;
 
     this.internalServices = {
       agentService,
@@ -100,7 +75,6 @@ export class OnechatPlugin
       conversationsService,
       toolsService,
       startDependencies,
-      dataTypeRegistry,
     };
 
     return {};

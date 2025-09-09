@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-import { DataCatalog } from '../components/data_catalog/data_catalog';
-
-export const OnechatDataCatalogPage = () => {
-  return <DataCatalog />;
-};
+export { DataCatalog } from './data_catalog';

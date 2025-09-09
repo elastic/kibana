@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export { AgentService } from './agents';
-export { ChatService } from './chat';
-export { ConversationsService } from './conversations';
-export { ToolsService } from './tools';
-export type { OnechatInternalService } from './types';
+export { DataCatalogService } from './data_catalog';
+export type { DataCatalogServiceSetup, DataCatalogServiceStart, DataCatalog, DataTypeDefinition } from './data_catalog';

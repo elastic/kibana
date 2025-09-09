@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import type { DataTypeComponent } from '@kbn/onechat-plugin/public/application/components/data_catalog/data_catalog';
+import type { DataTypeComponent } from '@kbn/chat-data-registry-plugin/public';
 
 /**
  * Icon component for document data type

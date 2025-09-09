@@ -14,9 +14,6 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
     tools: {
       register: jest.fn(),
     },
-    data_catalog: {
-      register: jest.fn(),
-    },
   };
 };
 
@@ -29,9 +26,6 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
     agents: {
       execute: jest.fn(),
       getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
-    },
-    data_catalog: {
-      getCatalog: jest.fn(),
     },
   };
 };

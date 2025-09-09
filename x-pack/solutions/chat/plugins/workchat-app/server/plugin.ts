@@ -69,8 +69,8 @@ export class WorkChatAppPlugin
 
     registerFeatures({ features: setupDeps.features });
 
-    // Register custom data types with onechat
-    registerWorkChatDataTypes({ oneChat: setupDeps.onechat });
+    // Register custom data types with chat data registry
+    registerWorkChatDataTypes({ chatDataRegistry: setupDeps.chatDataRegistry });
 
     return {
       integrations: {

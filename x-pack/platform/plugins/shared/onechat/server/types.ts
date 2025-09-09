@@ -12,7 +12,6 @@ import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentClient } from './services/agents';
-import type { DataCatalog, DataCatalogServiceSetup } from './services/data_catalog';
 
 export interface OnechatSetupDependencies {
   inference: InferenceServerSetup;
@@ -60,20 +59,11 @@ export interface AgentsStart {
   execute: RunAgentFn;
 }
 
-export interface DataCatalogSetup {
-  register: DataCatalogServiceSetup['register'];
-}
-
-export interface DataCatalogStart {
-  getCatalog: () => Promise<DataCatalog>;
-}
-
 /**
  * Setup contract of the onechat plugin.
  */
 export interface OnechatPluginSetup {
   tools: ToolsSetup;
-  data_catalog: DataCatalogSetup;
 }
 
 /**
@@ -82,5 +72,4 @@ export interface OnechatPluginSetup {
 export interface OnechatPluginStart {
   tools: ToolsStart;
   agents: AgentsStart;
-  data_catalog: DataCatalogStart;
 }

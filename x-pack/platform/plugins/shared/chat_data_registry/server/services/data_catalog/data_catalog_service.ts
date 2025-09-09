@@ -35,7 +35,7 @@ export class DataCatalogService {
     this.setupDeps = deps;
 
     const { logger } = this.setupDeps;
-    logger.info('Setting up the OneChat data catalog service...');
+    logger.info('Setting up the Chat Data Registry service...');
 
     return {
       register: (dataType) => this.dataCatalog.register(dataType),
@@ -44,7 +44,7 @@ export class DataCatalogService {
 
   start(deps: DataCatalogServiceStartDeps): DataCatalogServiceStart {
     const { logger } = this.setupDeps!;
-    logger.info('Starting the OneChat data catalog service...');
+    logger.info('Starting the Chat Data Registry service...');
 
     const getCatalog: DataCatalogServiceStart['getCatalog'] = async () => {
       return this.dataCatalog;

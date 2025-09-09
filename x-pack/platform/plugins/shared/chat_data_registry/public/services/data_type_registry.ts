@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import type { DataTypeComponent } from '../application/components/data_catalog/data_catalog';
+export interface DataTypeComponent {
+  /** Data type this descriptor handles */
+  getDataType(): string;
+  /** Display name for the data type */
+  getDisplayName(): string;
+  /** Optional icon component */
+  getIcon?(): React.ComponentType;
+  /** Optional description */
+  getDescription?(): string;
+}
 
 export class DataTypeRegistry {
   private descriptors = new Map<string, DataTypeComponent>();

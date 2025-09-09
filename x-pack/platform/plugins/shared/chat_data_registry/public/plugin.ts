@@ -1,39 +1,29 @@
-import { i18n } from '@kbn/i18n';
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type {
   ChatDataRegistryPluginSetup,
   ChatDataRegistryPluginStart,
-  AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
+import { DataTypeRegistry } from './services';
 
 export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
 {
-  public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
-    // Register an application into the side navigation menu
-    core.application.register({
-      id: 'chatDataRegistry',
-      title: PLUGIN_NAME,
-      async mount(params: AppMountParameters) {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
-        const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
-      },
-    });
+  private readonly dataTypeRegistry = new DataTypeRegistry();
 
+  public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
     // Return methods that should be available to other plugins
     return {
-      getGreeting() {
-        return i18n.translate('chatDataRegistry.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
+      dataTypeRegistry: {
+        register: (descriptor) => this.dataTypeRegistry.register(descriptor),
+        list: () => this.dataTypeRegistry.list(),
+        clear: () => this.dataTypeRegistry.clear(),
       },
     };
   }

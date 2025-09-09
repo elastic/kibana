@@ -38,7 +38,7 @@ export class WorkChatAppPlugin
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>,
-    { onechat }: WorkChatAppPluginSetupDependencies
+    { onechat, chatDataRegistry }: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     registerApp({
       core,
@@ -51,8 +51,8 @@ export class WorkChatAppPlugin
     });
 
     // Register custom data type descriptors
-    onechat.dataTypeRegistry.register(new WorkspaceDataType());
-    onechat.dataTypeRegistry.register(new DocumentDataType());
+    chatDataRegistry.dataTypeRegistry.register(new WorkspaceDataType());
+    chatDataRegistry.dataTypeRegistry.register(new DocumentDataType());
 
     return {
       integrations: {

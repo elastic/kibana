@@ -8,17 +8,6 @@
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-export interface DataTypeComponent {
-  /** Data type this descriptor handles */
-  getDataType(): string;
-  /** Display name for the data type */
-  getDisplayName(): string;
-  /** Optional icon component */
-  getIcon?(): React.ComponentType;
-  /** Optional description */
-  getDescription?(): string;
-}
-
 export const DataCatalog = () => {
   return (
     <KibanaPageTemplate>
