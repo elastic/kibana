@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import type { FindMaintenanceWindowsRequestQuery } from '../../../../../../../../common/routes/maintenance_window/internal/apis/find';
+import type { FindMaintenanceWindowsQuery } from '../../../../../../../../common/routes/maintenance_window/external/apis/find';
 import type { FindMaintenanceWindowsParams } from '../../../../../../../application/maintenance_window/methods/find/types';
 
 export const transformFindMaintenanceWindowParams = (
-  params: FindMaintenanceWindowsRequestQuery
+  params: FindMaintenanceWindowsQuery
 ): FindMaintenanceWindowsParams => {
   const status = params.status && !Array.isArray(params.status) ? [params.status] : params.status;
+  const searchFields: string[] = [];
+  const search: string[] = [];
+
+  if (params.title) {
+    searchFields.push('title');
+    search.push(params.title);
+  }
+  if (params.created_by) {
+    searchFields.push('createdBy');
+    search.push(params.created_by);
+  }
 
   return {
     ...(params.page ? { page: params.page } : {}),
     ...(params.per_page ? { perPage: params.per_page } : {}),
-    ...(params.search ? { search: params.search } : {}),
     ...(params.status ? { status } : {}),
+    ...(search.length ? { search: search.join(' ') } : {}),
+    searchFields,
   };
 };

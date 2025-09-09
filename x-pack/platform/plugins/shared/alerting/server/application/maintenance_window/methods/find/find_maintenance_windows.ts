@@ -55,9 +55,10 @@ export async function findMaintenanceWindows(
       ...(params
         ? {
             savedObjectsFindOptions: {
+              ...(params.search ? { search: params.search } : {}),
+              ...(params.searchFields ? { searchFields: params.searchFields } : {}),
               ...(params.page ? { page: params.page } : {}),
               ...(params.perPage ? { perPage: params.perPage } : {}),
-              ...(params.search ? { search: params.search } : {}),
               ...(filter ? { filter } : {}),
             },
           }

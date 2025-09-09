@@ -13,6 +13,11 @@ import { validatePagination } from '../../../../shared/validation/v1';
 
 export const findMaintenanceWindowsQuerySchema = schema.object(
   {
+    title: schema.maybe(schema.string()),
+    created_by: schema.maybe(schema.string()),
+    status: schema.maybe(
+      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)])
+    ),
     page: schema.number({
       defaultValue: 1,
       min: 1,
@@ -29,17 +34,6 @@ export const findMaintenanceWindowsQuerySchema = schema.object(
         description: 'The number of maintenance windows to return per page.',
       },
     }),
-    search: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'An Elasticsearch simple_query_string query that filters the objects in the response.',
-        },
-      })
-    ),
-    status: schema.maybe(
-      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)])
-    ),
   },
   {
     validate: validatePagination,
