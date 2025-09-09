@@ -129,8 +129,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // > Management
       await solutionNavigation.sidenav.clickLink({ navId: 'management' });
       await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
-      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+      await svlCommonNavigation.sidenav.clickPanelLink('management:transform');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Transforms']);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
@@ -166,8 +166,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'search_project_nav_footer.project_settings_project_nav'
       );
       await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
-      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+      await svlCommonNavigation.sidenav.clickPanelLink('management:transform');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Transforms']);
 
       await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
