@@ -194,7 +194,7 @@ const CustomChartSectionWrapper = ({
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
-  const { api, stateProps, requestParams } = useServicesBootstrap({
+  const { api, stateProps, requestParams, input$ } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
     localStorageKeyPrefix:
@@ -241,8 +241,9 @@ const CustomChartSectionWrapper = ({
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
+      input$={input$}
+      requestParams={requestParams}
       {...unifiedHistogramProps}
-      {...requestParams}
     />
   );
 };

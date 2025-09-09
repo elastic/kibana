@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface Dimension {
-  name: string;
-  type: string;
-  description?: string;
-}
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 
 export const getTopLevelNamespace = (metricName: string) => {
   // Extract top-level namespace from metric name (e.g., "system" from "system.network.in.bytes")
