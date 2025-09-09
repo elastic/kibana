@@ -23,6 +23,9 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
+    ],
+    "extraPublicDirs": [
+      "public/flyout"
     ]
   }
 }
