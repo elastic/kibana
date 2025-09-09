@@ -17,6 +17,7 @@ import {
   type SavedObject,
   type SavedObjectsRawDocParseOptions,
   type DecoratedError,
+  type SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -312,7 +313,7 @@ export function setAccessControl({
 }: {
   typeSupportsAccessControl: boolean;
   createdBy?: string;
-  accessMode?: 'default' | 'read_only';
+  accessMode?: SavedObjectAccessControl['accessMode'];
 }) {
   return typeSupportsAccessControl && createdBy
     ? {
