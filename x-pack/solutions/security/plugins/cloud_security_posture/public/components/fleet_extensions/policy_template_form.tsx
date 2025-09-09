@@ -71,8 +71,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     integrationToEnable,
     setIntegrationToEnable,
   }) => {
-    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS_AWS = '2.0.0-preview01';
-    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS_AAZURE = '3.0.1-preview01';
+    const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '2.0.0-preview01';
+    const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '3.0.1-preview01';
     const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
     const GCP_MINIMUM_ORGANIZATION_VERSION = '1.6.0';
     const GCP_MINIMUM_PACKAGE_VERSION = '1.5.2';
@@ -113,7 +113,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           type: CLOUDBEAT_AWS,
           enableOrganization: enableAwsOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
-          cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS_AWS,
+          cloudConnectorEnabledVersion: CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS,
         },
         gcp: {
           type: CLOUDBEAT_GCP,
@@ -127,7 +127,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           enableOrganization: enableAzureOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
           manualFieldsEnabled: azureManualFieldsEnabled,
-          cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS_AAZURE,
+          cloudConnectorEnabledVersion: CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE,
         },
       },
     };
