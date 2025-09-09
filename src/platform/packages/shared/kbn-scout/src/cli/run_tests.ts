@@ -39,6 +39,8 @@ export const runTestsCmd: Command<void> = {
     Running tests against local servers:
     node scripts/scout run-tests --stateful --config <playwright_config_path>
     node scripts/scout run-tests --serverless=es --headed --config <playwright_config_path>
+    node scripts/scout run-tests --serverless=es --testFiles <spec_path1,spec_path2>
+    node scripts/scout run-tests --serverless=es --testFiles <spec_directory_path>
 
     Running tests against Cloud deployment / MKI project:
     node scripts/scout run-tests --stateful --testTarget=cloud --config <playwright_config_path>
