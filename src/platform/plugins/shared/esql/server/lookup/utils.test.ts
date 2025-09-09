@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getListOfCCSResources } from './utils';
+import { getListOfCCSIndices } from './utils';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 
-describe('getListOfCCSResources', () => {
+describe('getListOfCCSIndices', () => {
   const createLookupItem = (indexName: string, aliases?: string[]): IndexAutocompleteItem => ({
     name: indexName,
     mode: 'lookup',
@@ -22,14 +22,14 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster1:index1'),
       createLookupItem('cluster2:index2'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([]);
   });
 
   it('should return empty array when no lookup indices are provided', () => {
     const clusters = ['cluster1', 'cluster2'];
     const lookupIndices: IndexAutocompleteItem[] = [];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([]);
   });
 
@@ -39,7 +39,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster3:index1'),
       createLookupItem('cluster4:index2'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([]);
   });
 
@@ -50,7 +50,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster1:index2'),
       createLookupItem('index3'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([createLookupItem('index2')]);
   });
 
@@ -61,7 +61,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster1:index2'),
       createLookupItem('cluster1:index3'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([
       createLookupItem('index1', ['alias1']),
       createLookupItem('index2'),
@@ -76,7 +76,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster2:index2'),
       createLookupItem('cluster3:index3'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([]);
   });
 
@@ -90,7 +90,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster3:index1', ['alias1']), // alias1 is duplicated to test Set uniqueness
       createLookupItem('cluster3:index4'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([createLookupItem('index1', ['alias1', 'alias2'])]);
   });
 
@@ -102,7 +102,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster1:index2'),
       createLookupItem('notacluster'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([createLookupItem('index2')]);
   });
 
@@ -114,7 +114,7 @@ describe('getListOfCCSResources', () => {
       createLookupItem('cluster2:logs-2023.01.01'),
       createLookupItem('cluster2:traces.apm'),
     ];
-    const result = getListOfCCSResources(clusters, lookupIndices);
+    const result = getListOfCCSIndices(clusters, lookupIndices);
     expect(result).toEqual([createLookupItem('logs-2023.01.01')]);
   });
 });

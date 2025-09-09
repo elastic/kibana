@@ -18,12 +18,12 @@ import type { IndexAutocompleteItem } from '@kbn/esql-types';
  * can be queried across multiple clusters.
  *
  * @param clusters - Array of cluster names to check for common indices
- * @param lookupResources - Array of IndexAutocompleteItem objects. The 'name' property is expected to be in "cluster:index" format.
+ * @param lookupIndices - Array of IndexAutocompleteItem objects. The 'name' property is expected to be in "cluster:index" format.
  * @returns Array of IndexAutocompleteItem objects that exist in all specified clusters
  *
  * @example
  * // Returns IndexAutocompleteItem for 'logs' with merged aliases ['alias1', 'alias2']
- * getListOfCCSResources(
+ * getListOfCCSIndices(
  *   ['cluster1', 'cluster2'],
  *   [
  *     { name: 'cluster1:logs', aliases: ['alias1'] },
@@ -34,16 +34,16 @@ import type { IndexAutocompleteItem } from '@kbn/esql-types';
  *
  * @example
  * // Returns IndexAutocompleteItem objects for 'index1', 'index2' because both exist in cluster1
- * getListOfCCSResources(
+ * getListOfCCSIndices(
  *   ['cluster1'],
  *   [{ name: 'cluster1:index1' }, { name: 'cluster1:index2' }, { name: 'cluster2:index3' }]
  * )
  */
-export function getListOfCCSResources(
+export function getListOfCCSIndices(
   clusters: string[],
-  lookupResources: IndexAutocompleteItem[]
+  lookupIndices: IndexAutocompleteItem[]
 ): IndexAutocompleteItem[] {
-  if (!clusters.length || !lookupResources.length) {
+  if (!clusters.length || !lookupIndices.length) {
     return [];
   }
 
@@ -55,7 +55,7 @@ export function getListOfCCSResources(
   });
 
   // Parse lookup resources and group by cluster
-  lookupResources.forEach((lookupResource) => {
+  lookupIndices.forEach((lookupResource) => {
     const colonIndex = lookupResource.name.indexOf(':');
     if (colonIndex > 0 && colonIndex < lookupResource.name.length - 1) {
       const cluster = lookupResource.name.substring(0, colonIndex);

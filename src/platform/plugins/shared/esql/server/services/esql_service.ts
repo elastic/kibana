@@ -15,7 +15,7 @@ import type {
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-import { getListOfCCSResources } from '../lookup/utils';
+import { getListOfCCSIndices } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -55,7 +55,7 @@ export class EsqlService {
     });
 
     const crossClusterCommonIndices = remoteClusters
-      ? getListOfCCSResources(remoteClustersArray, indices)
+      ? getListOfCCSIndices(remoteClustersArray, indices)
       : indices;
 
     const result: IndicesAutocompleteResult = {
