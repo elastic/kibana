@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -18,7 +21,9 @@ import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import YAML, { isPair, isScalar, visit } from 'yaml';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -222,8 +227,6 @@ export const WorkflowYAMLEditor = ({
   // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const elasticsearchStepDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const connectorTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const unifiedProvidersRef = useRef<{
@@ -252,26 +255,20 @@ export const WorkflowYAMLEditor = ({
 
   // Helper function to clear all decorations
   const clearAllDecorations = useCallback(() => {
-    console.log('🧹 Clearing all decorations to prevent misalignment');
     if (alertTriggerDecorationCollectionRef.current) {
       alertTriggerDecorationCollectionRef.current.clear();
-    }
-    if (elasticsearchStepDecorationCollectionRef.current) {
-      elasticsearchStepDecorationCollectionRef.current.clear();
     }
     if (connectorTypeDecorationCollectionRef.current) {
       connectorTypeDecorationCollectionRef.current.clear();
     }
     // Also clear step execution decorations
     if (unifiedProvidersRef.current?.stepExecution) {
-      console.log('🧹 Clearing step execution decorations');
       unifiedProvidersRef.current.stepExecution.dispose();
       unifiedProvidersRef.current.stepExecution = null;
     }
     // Clear unified actions provider highlighting
     if (unifiedProvidersRef.current?.actions) {
       // The actions provider will clear its own decorations on next update
-      console.log('🧹 Actions provider will clear on next update');
     }
   }, []);
 
@@ -286,13 +283,11 @@ export const WorkflowYAMLEditor = ({
         const value = model.getValue();
         const parsedDocument = YAML.parseDocument(value ?? '');
 
-        console.log('🔄 YAML document changing, clearing all decorations first');
         clearAllDecorations();
 
         setYamlDocument(parsedDocument);
         yamlDocumentRef.current = parsedDocument;
 
-        console.log('✅ YAML document updated, decorations will be recreated');
       } catch (error) {
         console.error('❌ Error parsing YAML document:', error);
         clearAllDecorations();
@@ -321,7 +316,6 @@ export const WorkflowYAMLEditor = ({
 
     // Setup Elasticsearch step providers if we have the required services
     if (http && notifications) {
-      console.log('WorkflowYAMLEditor: Setting up Elasticsearch step providers');
 
       // Register Elasticsearch connector handler
       const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
@@ -378,13 +372,6 @@ export const WorkflowYAMLEditor = ({
         stepExecution: null, // will be created when needed
       };
 
-      console.log('🚀 WorkflowYAMLEditor: Unified providers registered', {
-        hoverDisposable: !!hoverDisposable,
-        actionsProvider: !!actionsProvider,
-        elasticsearchHandler: !!elasticsearchHandler,
-      });
-    } else {
-      console.log('WorkflowYAMLEditor: Missing http or notifications services');
     }
 
     onMount?.(editor, monaco);
@@ -405,10 +392,6 @@ export const WorkflowYAMLEditor = ({
   // Force refresh of decorations when props.value changes externally (e.g., switching executions)
   useEffect(() => {
     if (isEditorMounted && editorRef.current && props.value !== undefined) {
-      console.log('🔄 Props.value changed - execution revision switch detected', {
-        propValueLength: props.value.length,
-        propValueStart: props.value.substring(0, 50) + '...',
-      });
 
       // Always clear decorations first when switching executions/revisions
       clearAllDecorations();
@@ -418,21 +401,14 @@ export const WorkflowYAMLEditor = ({
       if (model) {
         const currentContent = model.getValue();
         if (currentContent !== props.value) {
-          console.log('🔄 Monaco content differs from props.value, waiting for editor update', {
-            currentLength: currentContent.length,
-            propsLength: props.value.length,
-            match: currentContent === props.value,
-          });
 
           // Wait a bit longer for Monaco to update its content, then force re-parse
           setTimeout(() => {
-            console.log('🔄 Re-parsing YAML document for new execution revision');
             changeSideEffects();
           }, 50); // Longer delay to ensure Monaco editor content is updated
         } else {
           // Content matches, just force re-parse to be safe
           setTimeout(() => {
-            console.log('🔄 Content matches, but forcing re-parse for execution switch');
             changeSideEffects();
           }, 10);
         }
@@ -443,7 +419,6 @@ export const WorkflowYAMLEditor = ({
   // Force decoration refresh specifically when switching to readonly mode (executions view)
   useEffect(() => {
     if (isEditorMounted && readOnly) {
-      console.log('🔄 Switched to readonly mode, forcing complete decoration refresh');
       // Small delay to ensure all state is settled
       setTimeout(() => {
         changeSideEffects();
@@ -459,7 +434,6 @@ export const WorkflowYAMLEditor = ({
 
     // Always dispose existing provider when dependencies change to prevent stale decorations
     if (unifiedProvidersRef.current?.stepExecution) {
-      console.log('🎯 Disposing existing StepExecutionProvider for refresh');
       unifiedProvidersRef.current.stepExecution.dispose();
       unifiedProvidersRef.current.stepExecution = null;
     }
@@ -469,14 +443,6 @@ export const WorkflowYAMLEditor = ({
     const timeoutId = setTimeout(() => {
       try {
         if (readOnly) {
-          console.log('🎯 Creating StepExecutionProvider (readOnly mode detected)', {
-            hasStepExecutions: !!stepExecutions,
-            stepExecutionsLength: stepExecutions?.length || 0,
-            hasYamlDocument: !!yamlDocument,
-            hasYamlDocumentRef: !!yamlDocumentRef.current,
-            readOnly,
-            transition: 'execution-navigation',
-          });
 
           // Ensure yamlDocumentRef is synchronized
           if (yamlDocument && !yamlDocumentRef.current) {
@@ -485,27 +451,18 @@ export const WorkflowYAMLEditor = ({
 
           // Additional check: if we have stepExecutions but no yamlDocument,
           // the document might not be parsed yet - skip and let next update handle it
-          if (stepExecutions?.length > 0 && !yamlDocumentRef.current) {
+          if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
             console.warn(
               '🎯 StepExecutions present but no YAML document - waiting for document parse'
             );
             return;
           }
 
-          const stepExecutionProvider = createStepExecutionProvider(editorRef.current, {
+          const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
             getYamlDocument: () => {
-              console.log(
-                '🎯 StepExecutionProvider getYamlDocument called, returning:',
-                !!yamlDocumentRef.current
-              );
               return yamlDocumentRef.current;
             },
             getStepExecutions: () => {
-              console.log(
-                '🎯 StepExecutionProvider getStepExecutions called, returning:',
-                stepExecutionsRef.current?.length || 0,
-                'executions'
-              );
               return stepExecutionsRef.current || [];
             },
             getHighlightStep: () => highlightStep || null,
@@ -640,22 +597,14 @@ export const WorkflowYAMLEditor = ({
   // Handle connector type decorations (GitLens-style inline icons)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      console.log('🔍 DECORATION DEBUG:', {
-        isEditorMounted,
-        hasEditor: !!editorRef.current,
-        hasYamlDocument: !!yamlDocument,
-        yamlDocumentContents: yamlDocument?.contents ? 'has contents' : 'no contents',
-      });
 
       if (!isEditorMounted || !editorRef.current || !yamlDocument) {
-        console.log('❌ DECORATION EARLY RETURN: Missing requirements');
         return;
       }
 
       const editor = editorRef.current;
       const model = editor.getModel();
       if (!model) {
-        console.log('❌ DECORATION EARLY RETURN: No model');
         return;
       }
 
@@ -665,12 +614,10 @@ export const WorkflowYAMLEditor = ({
         connectorTypeDecorationCollectionRef.current = null;
       }
 
-      console.log('🎯 DECORATION: Starting decoration process');
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
       // Find all steps with connector types
       const stepNodes = getStepNodesWithType(yamlDocument);
-      console.log('🔍 Found step nodes:', stepNodes.length);
 
       for (const stepNode of stepNodes) {
         const typePair = stepNode.items.find((item: any) => item.key?.value === 'type');
@@ -686,7 +633,6 @@ export const WorkflowYAMLEditor = ({
 
         const typeRange = typePair.value.range;
 
-        console.log('🔍 DEBUG typeRange:', { connectorType, typeRange });
 
         if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
 
@@ -708,56 +654,8 @@ export const WorkflowYAMLEditor = ({
 
           // Check if this line starts with "type:" (after whitespace)
           if (!trimmedLine.startsWith('type:')) {
-            console.log(`Skipping decoration: "type:" not at line start for ${connectorType}`);
             continue; // Skip this decoration
           }
-
-          // Debug: Check what the actual character at valueEndOffset is
-          const charAtEnd = model.getValue().charAt(valueEndOffset);
-          const charAtEndMinus1 = model.getValue().charAt(valueEndOffset - 1);
-
-          console.log(`🎯 Adding decoration for ${connectorType}:`, {
-            startPosition: { line: startPosition.lineNumber, column: startPosition.column },
-            endPosition: { line: endPosition.lineNumber, column: endPosition.column },
-            valueStartOffset,
-            valueEndOffset,
-            modelLength: model.getValue().length,
-            lineContent: model.getLineContent(endPosition.lineNumber),
-            charAtEnd: `"${charAtEnd}" (code: ${charAtEnd.charCodeAt(0)})`,
-            charAtEndMinus1: `"${charAtEndMinus1}" (code: ${charAtEndMinus1.charCodeAt(0)})`,
-            rangeText: model.getValueInRange({
-              startLineNumber: startPosition.lineNumber,
-              startColumn: startPosition.column,
-              endLineNumber: endPosition.lineNumber,
-              endColumn: endPosition.column,
-            }),
-          });
-
-          // Validate positions are valid
-          if (startPosition.lineNumber < 1 || endPosition.lineNumber < 1) {
-            console.warn(`🚨 Invalid position for ${connectorType}:`, {
-              startPosition,
-              endPosition,
-            });
-            continue;
-          }
-
-          // Create unique position key to avoid duplicates
-          const positionKey = `${endPosition.lineNumber}:${endPosition.column}`;
-          console.log(`🔍 Position ${positionKey} for ${connectorType}`);
-
-          // Temporarily disable duplicate prevention to debug
-          // if (processedPositions.has(positionKey)) {
-          //   console.log(`⚠️ Skipping duplicate decoration at ${positionKey} for ${connectorType}`);
-          //   continue;
-          // }
-          // processedPositions.add(positionKey);
-
-          // The issue: startPosition and endPosition might be on different lines
-          // We need to find which line actually contains the connector type
-          console.log(
-            `🔍 Start line ${startPosition.lineNumber}, End line ${endPosition.lineNumber}`
-          );
 
           // Try to find the connector type in the start position line first
           let targetLineNumber = startPosition.lineNumber;
@@ -769,7 +667,6 @@ export const WorkflowYAMLEditor = ({
             targetLineNumber = endPosition.lineNumber;
             lineContent = model.getLineContent(targetLineNumber);
             typeIndex = lineContent.indexOf(connectorType);
-            console.log(`🔍 Trying end line ${targetLineNumber}: "${lineContent}"`);
           }
 
           let actualStartColumn;
@@ -778,20 +675,11 @@ export const WorkflowYAMLEditor = ({
             // Found the connector type in the line
             actualStartColumn = typeIndex + 1; // +1 for 1-based indexing
             actualEndColumn = typeIndex + connectorType.length + 1; // +1 for 1-based indexing
-            console.log(
-              `🎯 Found ${connectorType} on line ${targetLineNumber} in "${lineContent}"`
-            );
-            console.log(
-              `🎯 Type starts at index ${typeIndex}, columns ${actualStartColumn}-${actualEndColumn}`
-            );
           } else {
             // Fallback to calculated position
             targetLineNumber = startPosition.lineNumber;
             actualStartColumn = startPosition.column;
             actualEndColumn = endPosition.column;
-            console.log(
-              `⚠️ Could not find ${connectorType} in any line, using calculated positions`
-            );
           }
 
           // Background highlighting and after content (working version)
@@ -812,13 +700,9 @@ export const WorkflowYAMLEditor = ({
 
           decorations.push(...decorations_to_add);
 
-          console.log(
-            `✅ Adding ${decorations_to_add.length} decorations for ${connectorType} at ${positionKey}`
-          );
         }
       }
 
-      console.log('🎯 Creating decorations collection with', decorations.length, 'decorations');
 
       if (decorations.length > 0) {
         connectorTypeDecorationCollectionRef.current =
@@ -842,19 +726,6 @@ export const WorkflowYAMLEditor = ({
     }
   };
 
-  // Handle Elasticsearch step decorations - DISABLED for now to avoid conflicts
-  // The ElasticsearchStepActionsProvider handles cursor-based highlighting instead
-  // useEffect(() => {
-  //   if (!isEditorMounted || !editorRef.current || readOnly) {
-  //     return;
-  //   }
-
-  //   elasticsearchStepDecorationCollectionRef.current = updateElasticsearchStepDecorations(
-  //     editorRef.current,
-  //     yamlDocument,
-  //     elasticsearchStepDecorationCollectionRef.current
-  //   );
-  // }, [isEditorMounted, yamlDocument, readOnly]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -1087,7 +958,6 @@ export const WorkflowYAMLEditor = ({
       disposablesRef.current = [];
 
       // Dispose of decorations and actions provider
-      elasticsearchStepDecorationCollectionRef.current?.clear();
       unifiedProvidersRef.current?.actions?.dispose();
       unifiedProvidersRef.current?.stepExecution?.dispose();
       unifiedProvidersRef.current = null;

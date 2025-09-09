@@ -33,7 +33,7 @@ import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/l
 // Global cache for connectors (they don't change during runtime)
 let allConnectorsCache: any[] | null = null;
 
-function getCachedAllConnectors() {
+function getCachedAllConnectors(): any[] {
   if (allConnectorsCache === null) {
     allConnectorsCache = getAllConnectors();
   }
@@ -570,8 +570,6 @@ const connectorSchemaCache = new Map<string, Record<string, any> | null>();
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
 
-// Cache for existing parameters in with blocks
-const existingParametersCache = new Map<string, Set<string>>();
 
 function getConnectorParamsSchema(connectorType: string): Record<string, any> | null {
   // Check cache first

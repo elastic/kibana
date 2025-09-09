@@ -22,7 +22,7 @@ import type {
 // Cache for connectors (they don't change during runtime)
 let allConnectorsCache: any[] | null = null;
 
-function getCachedAllConnectors() {
+function getCachedAllConnectors(): any[] {
   if (allConnectorsCache === null) {
     allConnectorsCache = getAllConnectors();
   }
