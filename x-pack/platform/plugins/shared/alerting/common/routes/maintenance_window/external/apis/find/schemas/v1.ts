@@ -13,10 +13,27 @@ import { validatePagination } from '../../../../shared/validation/v1';
 
 export const findMaintenanceWindowsQuerySchema = schema.object(
   {
-    title: schema.maybe(schema.string()),
-    created_by: schema.maybe(schema.string()),
+    title: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The title of the maintenance window.',
+        },
+      })
+    ),
+    created_by: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The user who created the maintenance window.',
+        },
+      })
+    ),
     status: schema.maybe(
-      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)])
+      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)], {
+        meta: {
+          description:
+            'The status of the maintenance window. One of "running", "upcoming", "finished" or "archived".',
+        },
+      })
     ),
     page: schema.number({
       defaultValue: 1,
