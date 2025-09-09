@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRange, RefreshInterval } from '@kbn/data-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import { restoreStateFromSavedSearch } from './restore_from_saved_search';
 
 describe('discover restore state from saved search', () => {
-  let timefilterMock: TimefilterContract;
   const timeRange: TimeRange = {
     from: 'now-30m',
     to: 'now',
@@ -23,83 +21,67 @@ describe('discover restore state from saved search', () => {
     pause: false,
   };
 
-  beforeEach(() => {
-    timefilterMock = {
-      setTime: jest.fn(),
-      setRefreshInterval: jest.fn(),
-    } as unknown as TimefilterContract;
-  });
-
   test('should not update timefilter if attributes are not set', async () => {
-    restoreStateFromSavedSearch({
-      savedSearch: savedSearchMockWithTimeField,
-      timefilter: timefilterMock,
-    });
+    const globalState = restoreStateFromSavedSearch({ savedSearch: savedSearchMockWithTimeField });
 
-    expect(timefilterMock.setTime).not.toHaveBeenCalled();
-    expect(timefilterMock.setRefreshInterval).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should not update timefilter if timeRestore is disabled', async () => {
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: false,
         timeRange,
         refreshInterval,
       },
-      timefilter: timefilterMock,
     });
 
-    expect(timefilterMock.setTime).not.toHaveBeenCalled();
-    expect(timefilterMock.setRefreshInterval).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should update timefilter if timeRestore is enabled', async () => {
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
         timeRange,
         refreshInterval,
       },
-      timefilter: timefilterMock,
     });
 
-    expect(timefilterMock.setTime).toHaveBeenCalledWith(timeRange);
-    expect(timefilterMock.setRefreshInterval).toHaveBeenCalledWith(refreshInterval);
+    expect(globalState).toEqual({
+      timeRange,
+      refreshInterval,
+    });
   });
 
   test('should not update if data view is not time based', async () => {
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMock,
         timeRestore: true,
         timeRange,
         refreshInterval,
       },
-      timefilter: timefilterMock,
     });
 
-    expect(timefilterMock.setTime).not.toHaveBeenCalled();
-    expect(timefilterMock.setRefreshInterval).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should not update timefilter if attributes are missing', async () => {
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
       },
-      timefilter: timefilterMock,
     });
 
-    expect(timefilterMock.setTime).not.toHaveBeenCalled();
-    expect(timefilterMock.setRefreshInterval).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should not update timefilter if attributes are invalid', async () => {
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
@@ -112,10 +94,8 @@ describe('discover restore state from saved search', () => {
           value: -500,
         },
       },
-      timefilter: timefilterMock,
     });
 
-    expect(timefilterMock.setTime).not.toHaveBeenCalled();
-    expect(timefilterMock.setRefreshInterval).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 });

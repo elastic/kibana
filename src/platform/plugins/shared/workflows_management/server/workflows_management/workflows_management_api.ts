@@ -35,7 +35,7 @@ export interface GetWorkflowsParams {
   limit: number;
   page: number;
   createdBy?: string[];
-  enabled?: boolean[];
+  enabled?: boolean;
   query?: string;
   _full?: boolean;
 }
@@ -47,6 +47,11 @@ export interface GetWorkflowExecutionLogsParams {
   offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetStepExecutionParams {
+  executionId: string;
+  stepId: string;
 }
 
 export interface WorkflowExecutionLogEntry {
@@ -97,7 +102,7 @@ export class WorkflowsManagementApi {
   ) {}
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    return await this.workflowsService.searchWorkflows(params, spaceId);
+    return await this.workflowsService.getWorkflows(params, spaceId);
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -117,11 +122,24 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
+    // Parse and update the YAML to change the name
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    if (parsedYaml.error) {
+      throw parsedYaml.error;
+    }
+
+    const updatedYaml = {
+      ...parsedYaml.data,
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,
-    });
+    };
+
+    // Convert back to YAML string
+    const clonedYaml = `name: ${updatedYaml.name}\n${workflow.yaml
+      .split('\n')
+      .slice(1)
+      .join('\n')}`;
     return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
@@ -135,13 +153,7 @@ export class WorkflowsManagementApi {
     if (!originalWorkflow) {
       throw new Error(`Workflow with id ${id} not found`);
     }
-    return await this.workflowsService.updateWorkflow(
-      id,
-      workflow,
-      originalWorkflow,
-      spaceId,
-      request
-    );
+    return await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
   }
 
   public async deleteWorkflows(
@@ -149,7 +161,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
+    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId);
   }
 
   public async runWorkflow(
@@ -215,12 +227,7 @@ export class WorkflowsManagementApi {
     workflowId: string,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions(
-      {
-        workflowId,
-      },
-      spaceId
-    );
+    return await this.workflowsService.getWorkflowExecutions(workflowId, spaceId);
   }
 
   public async getWorkflowExecution(
