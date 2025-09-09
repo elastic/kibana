@@ -278,55 +278,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             </EuiFormRow>
             <EuiSpacer size="m" />
 
-
-            {agents.length === 1 && (
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
-                    defaultMessage="Replace token"
-                  />
-                }
-                fullWidth
-              >
-                <EuiFieldText
-                  fullWidth
-                  onChange={(e) =>
-                    {
-                      if ('id' in formContent) {
-                        setFormContent({
-                          ...formContent,
-                          settings: { ...formContent.settings, replace_token: e.target.value },
-                        })
-                      }
-                    }
-                  }
-                />
-              </EuiFormRow>
-            )}
-             
-            {agents.length === 1 && (<EuiSpacer size="m" />)}
-
-            <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
-                    defaultMessage="Staging"
-                  />
-                }
-                fullWidth
-              >
-                <EuiFieldText
-                  fullWidth
-                  onChange={(e) =>
-                    setFormContent({
-                      ...formContent,
-                      settings: { ...formContent.settings, staging: e.target.value },
-                    })
-                  }
-                />
-            </EuiFormRow>
-
             {/* Additional Settings Section */}
             <EuiFormRow fullWidth>
               <EuiAccordion
@@ -571,6 +522,55 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       />
                     </EuiText>
                     <EuiSpacer size="m" />
+                    {agents.length === 1 && (
+                      <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                            defaultMessage="Replace token"
+                          />
+                        }
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          fullWidth
+                          onChange={(e) =>
+                            {
+                              if ('id' in formContent) {
+                                setFormContent({
+                                  ...formContent,
+                                  settings: { ...formContent.settings, replace_token: e.target.value },
+                                })
+                              }
+                            }
+                          }
+                        />
+                      </EuiFormRow>
+                    )}
+                    
+                    {agents.length === 1 && (<EuiSpacer size="m" />)}
+
+                    <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
+                            defaultMessage="Staging"
+                          />
+                        }
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          fullWidth
+                          onChange={(e) =>
+                            setFormContent({
+                              ...formContent,
+                              settings: { ...formContent.settings, staging: e.target.value },
+                            })
+                          }
+                        />
+                    </EuiFormRow>
+                    <EuiSpacer size="m" />
+                    
                     <EuiFormRow fullWidth>
                       <EuiFlexGroup alignItems="flexStart">
                         <EuiFlexItem>
