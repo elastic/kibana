@@ -9,3 +9,4 @@
 
 export { renderChart, waitForRenderComplete } from './render_chart';
 export { setupResizeObserverMock, cleanResizeObserverMock } from './resize_observer_mock';
+export { setupCanvasMock, cleanCanvasMock } from './canvas_mock';

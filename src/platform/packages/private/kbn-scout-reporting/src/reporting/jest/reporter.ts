@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Config, AggregatedResult, TestContext, ReporterOnStartOptions } from '@jest/reporters';
+import type {
+  Config,
+  AggregatedResult,
+  TestContext,
+  ReporterOnStartOptions,
+} from '@jest/reporters';
 import { BaseReporter } from '@jest/reporters';
-import { TestResult } from '@jest/types';
+import type { TestResult } from '@jest/types';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { CodeOwnersEntry } from '@kbn/code-owners';
 import {
   type CodeOwnerArea,
-  CodeOwnersEntry,
   findAreaForCodeOwner,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
@@ -22,13 +27,13 @@ import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
-import { ScoutJestReporterOptions } from './options';
+import type { ScoutJestReporterOptions } from './options';
+import type { ScoutFileInfo } from '../../..';
 import {
   datasources,
   generateTestRunId,
   getTestIDForTitle,
   ScoutEventsReport,
-  ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
 } from '../../..';

@@ -35,6 +35,7 @@ export enum SecurityPageName {
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
+  endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
   exploreLanding = 'explore',
@@ -64,6 +65,7 @@ export enum SecurityPageName {
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
+  siemReadiness = 'siem_readiness',
   siemMigrationsRules = 'siem_migrations-rules',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -73,6 +75,7 @@ export enum SecurityPageName {
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',

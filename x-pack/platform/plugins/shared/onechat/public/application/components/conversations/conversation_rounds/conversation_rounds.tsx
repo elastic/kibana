@@ -8,20 +8,24 @@
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useMessages } from '../../../context/messages_context';
+import { useSendMessage } from '../../../context/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
 import { RoundError } from './round_error';
 import { RoundIcon } from './round_icon';
 import { RoundLayout } from './round_layout';
 import { RoundResponse } from './round_response';
+import { conversationRoundsId } from './conversation_rounds.styles';
 
 export const ConversationRounds: React.FC<{}> = () => {
+  const { isResponseLoading, retry, error } = useSendMessage();
+
   const conversationRounds = useConversationRounds();
-  const { isResponseLoading, retry, error } = useMessages();
+
   return (
     <ConversationContent>
       <EuiFlexGroup
+        id={conversationRoundsId}
         direction="column"
         gutterSize="l"
         aria-label={i18n.translate('xpack.onechat.conversationRounds', {
@@ -32,6 +36,7 @@ export const ConversationRounds: React.FC<{}> = () => {
           const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
+
           return (
             <RoundLayout
               key={index}

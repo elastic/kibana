@@ -56,6 +56,10 @@ import {
   ALERT_TABLE_GRID_VIEW_OPTION,
   TOOLTIP,
   ACKNOWLDEGED_ALERTS_FILTER_BTN,
+  SELECTED_ALERTS,
+  GROUP_ALERTS_BY_BTN,
+  TAKE_ACTION_GROUPED_ALERTS_BTN,
+  ALERT_STATUS_BADGE_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -109,17 +113,38 @@ export const openAddEndpointExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_MENU).should('be.visible');
   cy.get(ADD_ENDPOINT_EXCEPTION_BTN, { timeout: 10000 }).first().click();
 };
-export const closeFirstAlert = () => {
+export const closeFirstAlert = (verifyModal?: () => void) => {
+  expandFirstAlertActions();
+  cy.get(CLOSE_ALERT_BTN).should('be.visible');
+  cy.get(CLOSE_ALERT_BTN).click();
+  if (verifyModal) {
+    verifyModal();
+  }
+  confirmAlertCloseModal();
+  cy.get(CLOSE_ALERT_BTN).should('not.exist');
+};
+
+export const closeFirstAlertModalOff = () => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 
+export const confirmAlertCloseModal = () => {
+  // TODO remove this if statement when the FF continueSuppressionWindowAdvancedSettingEnabled is GA.
+  if (Cypress.env('CLOUD_SERVERLESS')) {
+    return;
+  }
+  cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
+  cy.get('[data-test-subj="alertCloseInfoModal"]').should('not.exist');
+};
+
 export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+  confirmAlertCloseModal();
   cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };
 
@@ -157,6 +182,16 @@ export const hideMessageTooltip = () => {
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
+
+export const closeAlertFromStatusBadge = (verifyModal?: () => void) => {
+  cy.get(ALERT_STATUS_BADGE_BUTTON).click();
+  cy.get(CLOSE_ALERT_BTN).click();
+  if (verifyModal) {
+    verifyModal();
+  }
+  confirmAlertCloseModal();
+  cy.get(CLOSE_ALERT_BTN).should('not.exist');
+};
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
@@ -336,6 +371,39 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
     cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
     cy.get('@checkbox').should('be.checked');
   }
+};
+
+export const bulkCloseSelectedAlerts = (verifyModal?: () => void) => {
+  cy.get(SELECTED_ALERTS).should('have.text', `Selected 2 alerts`);
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+  if (verifyModal) {
+    verifyModal();
+  }
+  confirmAlertCloseModal();
+};
+
+export const groupAlertsBy = (field: string) => {
+  cy.get(GROUP_ALERTS_BY_BTN).click();
+  cy.get(`[data-test-subj="panel-${field}"]`).click();
+};
+
+export const closeFirstGroupedAlerts = (verifyModal?: () => void) => {
+  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
+  cy.get(CLOSE_ALERT_BTN).click();
+  if (verifyModal) {
+    verifyModal();
+  }
+  confirmAlertCloseModal();
+};
+
+export const closeAlertFromFlyoutActions = (verifyModal?: () => void) => {
+  cy.get(TAKE_ACTION_BTN).click();
+  cy.get(CLOSE_ALERT_BTN).click();
+  if (verifyModal) {
+    verifyModal();
+  }
+  confirmAlertCloseModal();
 };
 
 export const investigateFirstAlertInTimeline = () => {

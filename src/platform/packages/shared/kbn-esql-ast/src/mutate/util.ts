@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Predicate } from './types';
+import type { Predicate } from './types';
 
 /**
  * Find the first item in an iterable (such as array) that matches a predicate.

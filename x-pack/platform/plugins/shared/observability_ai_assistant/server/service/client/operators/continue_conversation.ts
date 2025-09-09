@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, omit, pick, take } from 'lodash';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concat,
@@ -15,28 +16,22 @@ import {
   from,
   isObservable,
   map,
-  Observable,
   of,
-  OperatorFunction,
   shareReplay,
   switchMap,
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
+import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
-  CompatibleJSONSchema,
+  CONTEXT_FUNCTION_NAME,
   createFunctionNotFoundError,
-  Message,
-  MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
-import {
-  createFunctionLimitExceededError,
-  MessageOrChatEvent,
-} from '../../../../common/conversation_complete';
-import { Instruction } from '../../../../common/types';
+import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
+import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
+import type { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../../chat_function_client';

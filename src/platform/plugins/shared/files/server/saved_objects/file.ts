@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
-import type { FileMetadata } from '../../common';
-import { BaseFileMetadata, FILE_SO_TYPE } from '../../common';
+import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
+import type { FileMetadata, BaseFileMetadata } from '../../common';
+import { FILE_SO_TYPE } from '../../common';
 
 type Properties = Record<
   keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize'>,

@@ -9,8 +9,8 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
-import {
+import type { AnnotationGroups } from '../../types';
+import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -23,15 +23,10 @@ import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualizati
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
 
-export const isPersistedByReferenceAnnotationsLayer = (
+const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
 ): layer is XYPersistedByReferenceAnnotationLayerConfig =>
   isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 /**
  * This is the type of hybrid layer we get after the user has made a change to
@@ -111,9 +106,10 @@ export function convertToPersistable(state: XYState) {
       persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
       return;
     }
-    /**
+
+    /*
      * by reference annotation layer needs to be handled carefully
-     **/
+     */
 
     // make this id stable so that it won't retrigger all the time a change diff
     const referenceName = `ref-${layer.layerId}`;
@@ -158,7 +154,11 @@ export function convertToPersistable(state: XYState) {
       name: getLayerReferenceName(layer.layerId),
     });
   });
-  return { references, state: { ...persistableState, layers: persistableLayers } };
+
+  return {
+    references,
+    state: { ...persistableState, layers: persistableLayers },
+  };
 }
 
 export const isPersistedAnnotationsLayer = (

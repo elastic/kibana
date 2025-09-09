@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useState } from 'react';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export function useCreateSLO({
   configId,

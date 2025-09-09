@@ -17,10 +17,10 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
-import { InferenceUsageInfo } from '../../../../../types';
+import type { InferenceUsageInfo } from '../../../../../types';
 import { RenderMessageWithIcon } from '../../component/render_message_with_icon';
 import { ScanUsageResults } from '../../component/scan_usage_results';
 

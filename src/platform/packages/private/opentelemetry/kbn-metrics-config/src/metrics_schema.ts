@@ -10,22 +10,27 @@
 import { schema, type Type } from '@kbn/config-schema';
 import type { MetricsExporterConfig, MetricsConfig } from './types';
 
+const metricsCommonExporterConfigSchema = schema.object({
+  exportIntervalMillis: schema.maybe(schema.duration()),
+  temporalityPreference: schema.oneOf([schema.literal('cumulative'), schema.literal('delta')], {
+    defaultValue: 'delta',
+  }),
+});
+
 export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.oneOf([
   // gRPC OTLP Exporter
   schema.object({
-    grpc: schema.object({
+    grpc: metricsCommonExporterConfigSchema.extends({
       url: schema.string(),
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-      exportIntervalMillis: schema.maybe(schema.duration()),
     }),
   }),
 
   // HTTP OTLP Exporter
   schema.object({
-    http: schema.object({
+    http: metricsCommonExporterConfigSchema.extends({
       url: schema.string(),
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-      exportIntervalMillis: schema.maybe(schema.duration()),
     }),
   }),
 ]);

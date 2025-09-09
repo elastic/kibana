@@ -17,8 +17,29 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
+        },
+      },
+      {
+        name: 'classic-stream-with-fields',
+        description: '',
+        ingest: {
+          lifecycle: {
+            inherit: {},
+          },
+          processing: {
+            steps: [],
+          },
+          classic: {
+            field_overrides: {
+              xxx: {
+                type: 'keyword',
+              },
+            },
+          },
         },
       },
     ])('is valid', (val) => {
@@ -34,7 +55,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       },
@@ -52,7 +75,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
           wired: {},
         },
@@ -72,7 +97,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },
@@ -89,6 +114,7 @@ describe('ClassicStream', () => {
         data_stream_exists: true,
         dashboards: [],
         queries: [],
+        rules: [],
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
       expect(ClassicStream.GetResponse.is(val)).toBe(true);
@@ -103,7 +129,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -131,13 +159,16 @@ describe('ClassicStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -158,7 +189,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },

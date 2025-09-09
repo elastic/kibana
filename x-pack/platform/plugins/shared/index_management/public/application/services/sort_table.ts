@@ -6,7 +6,7 @@
  */
 
 import { sortBy, get } from 'lodash';
-import { Index } from '../../../common';
+import type { Index } from '../../../common';
 import type { ExtensionsService } from '../../services';
 
 type SortField =

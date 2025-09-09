@@ -12,7 +12,7 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import {
+import type {
   UiSettingsCommon,
   PersistenceAPI,
   SavedObject,
@@ -419,7 +419,7 @@ describe('IndexPatterns', () => {
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['title', 'type', 'typeMeta', 'name', 'timeFieldName'],
       perPage: 10000,
     });
   });

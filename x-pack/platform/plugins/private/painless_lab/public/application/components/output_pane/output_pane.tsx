@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTabbedContent,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { Response } from '../../types';
+import type { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
 import { ContextTab } from './context_tab';

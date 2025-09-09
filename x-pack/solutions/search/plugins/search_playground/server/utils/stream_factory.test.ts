@@ -6,7 +6,7 @@
  */
 
 import { streamFactory } from './stream_factory';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { PassThrough } from 'stream';
 
 describe('streamFactory', () => {

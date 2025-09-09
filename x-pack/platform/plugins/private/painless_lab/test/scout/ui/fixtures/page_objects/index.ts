@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
 import { PainlessLab } from './painless_lab_page';
 
 export interface PainlessLabPageObjects extends PageObjects {

@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { LineStyle } from '../types';
+import type { LineStyle } from '../types';
 
 interface LineStyleConfig {
   lineStyle?: LineStyle;

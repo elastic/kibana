@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
-import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
+import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
+import type { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
 import moment from 'moment/moment';
 import { omit } from 'lodash';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
@@ -118,7 +118,7 @@ export class SyntheticsMonitorTestService {
 
   async inspectMonitor(user: RoleCredentials, monitor: any, hideParams: boolean = true) {
     const res = await this.supertest
-      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT + `?hideParams=${hideParams}`)
       .set(user.apiKeyHeader)
       .set(this.samlAuth.getInternalRequestHeader())
       .send(monitor)

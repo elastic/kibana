@@ -14,10 +14,10 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { MessagesProvider } from '../../context/messages_context';
+import { SendMessageProvider } from '../../context/send_message_context';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { euiTheme } = useEuiTheme();
 
   const mainStyles = css`
@@ -56,11 +56,10 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  // Prefetch conversations before sidebar is opened
-  const { conversations, isLoading } = useConversationList();
+  const { conversations = [], isLoading } = useConversationList();
 
   return (
-    <MessagesProvider>
+    <SendMessageProvider>
       <KibanaPageTemplate
         offset={0}
         restrictWidth={false}
@@ -102,6 +101,6 @@ export const OnechatConversationsView: React.FC<{}> = () => {
           <Conversation />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
-    </MessagesProvider>
+    </SendMessageProvider>
   );
 };

@@ -49,7 +49,8 @@ import {
   POPOVER_ACTIONS_TRIGGER_BUTTON,
   EXPORT_RULE_ACTION_BUTTON,
 } from '../screens/rule_details';
-import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
+import type { RuleDetailsTabs } from '../urls/rule_details';
+import { ruleDetailsUrl } from '../urls/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,

@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { filter } from '../../common/filter';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';

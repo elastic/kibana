@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { safeJsonStringify } from '@kbn/std';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { AgentDefinition } from '@kbn/onechat-common';

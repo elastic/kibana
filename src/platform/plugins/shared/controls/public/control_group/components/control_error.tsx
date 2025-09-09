@@ -9,7 +9,8 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonEmpty, EuiPopover, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { useErrorTextStyle } from '@kbn/react-hooks';

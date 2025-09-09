@@ -8,7 +8,7 @@
 import expect from 'expect';
 import type SuperTest from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
 
 function prefixApiRouteWithSpace(route: string, space?: string) {

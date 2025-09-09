@@ -8,25 +8,21 @@
  */
 
 import dagre, { graphlib } from '@dagrejs/dagre';
-import { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { Position } from '@xyflow/react';
+import { getTriggerLabel } from '../../../shared/lib/graph_utils';
 
-export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
+export type NodeType =
+  | 'if'
+  | 'merge'
+  | 'parallel'
+  | 'action'
+  | 'foreach'
+  | 'atomic'
+  | 'http'
+  | 'trigger';
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'merge', 'trigger'];
-
-function getTriggerLabel(triggerType: string) {
-  switch (triggerType) {
-    case 'triggers.elastic.manual':
-      return 'Manual';
-    case 'triggers.elastic.detectionRule':
-      return 'Detection Rule';
-    case 'triggers.elastic.scheduled':
-      return 'Scheduled';
-    default:
-      return triggerType;
-  }
-}
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 export function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

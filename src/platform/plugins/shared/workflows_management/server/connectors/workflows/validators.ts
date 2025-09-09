@@ -9,22 +9,6 @@
 
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import * as i18n from './translations';
-import type { WorkflowsPublicConfigurationType, WorkflowsSecretConfigurationType } from './types';
-
-export const validateWorkflowsConfig = (
-  configObject: WorkflowsPublicConfigurationType,
-  validatorServices: { configurationUtilities: ActionsConfigurationUtilities }
-) => {
-  // No validation needed for internal API
-};
-
-export const validateConnector = (
-  config: WorkflowsPublicConfigurationType,
-  secrets: WorkflowsSecretConfigurationType
-): string | null => {
-  // No validation needed for internal API
-  return null;
-};
 
 export const validateAndNormalizeUrl = (
   configurationUtilities: ActionsConfigurationUtilities,

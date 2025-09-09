@@ -34,6 +34,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -303,9 +304,7 @@ describe('SLO Details Page', () => {
 
     await waitFor(() => {
       expect(mockNavigate).toBeCalledWith(
-        paths.sloCreateWithEncodedForm(
-          encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
-        )
+        paths.sloCreateWithEncodedForm(encodeURIComponent(encode(transformSloToCloneState(slo))))
       );
     });
   });

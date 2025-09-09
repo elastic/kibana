@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   EntityDocumentDataModel,
   EntityNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';

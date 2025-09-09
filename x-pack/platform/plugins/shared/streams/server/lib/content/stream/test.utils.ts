@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ContentPackStream } from '@kbn/content-packs-schema';
-import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
+import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 
 export const testContentPackEntry = ({
   name,
@@ -24,10 +24,13 @@ export const testContentPackEntry = ({
   request: {
     queries,
     dashboards: [],
+    rules: [],
     stream: {
       description: '',
       ingest: {
-        processing: [],
+        processing: {
+          steps: [],
+        },
         lifecycle: { inherit: {} },
         wired: { routing, fields },
       },

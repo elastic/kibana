@@ -23,9 +23,9 @@ const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
 const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   return {
     appendContext: jest.fn().mockImplementation(Promise.resolve),
-    getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
-    getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
-    getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getBooleanValue: jest.fn().mockImplementation((_, fallback) => fallback),
+    getNumberValue: jest.fn().mockImplementation((_, fallback) => fallback),
+    getStringValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
     getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
     getNumberValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),

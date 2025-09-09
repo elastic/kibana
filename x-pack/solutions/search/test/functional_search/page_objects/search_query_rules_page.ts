@@ -6,7 +6,7 @@
  */
 
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

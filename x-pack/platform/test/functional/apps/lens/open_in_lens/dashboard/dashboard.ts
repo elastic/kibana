@@ -13,7 +13,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const AREA_PANEL_INDEX = 0;
 const TIMELION_PANEL_INDEX = 1;

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { MonitorStatusTranslations } from '@kbn/uptime-plugin/common/rules/legacy_uptime/translations';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('uptime simple status alert', () => {

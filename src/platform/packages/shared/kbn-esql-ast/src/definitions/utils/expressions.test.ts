@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser } from '../../parser';
-import { SupportedDataType, FunctionDefinitionTypes } from '../types';
+import type { SupportedDataType } from '../types';
+import { FunctionDefinitionTypes } from '../types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
@@ -157,6 +158,26 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );
+    });
+
+    // this is here to fix https://github.com/elastic/kibana/issues/215157
+    it('handles conflict fields', () => {
+      expect(
+        getExpressionType(
+          getASTForExpression('fieldName'),
+          new Map([
+            [
+              'fieldName',
+              {
+                name: 'fieldName',
+                type: 'unsupported',
+                hasConflict: true,
+              },
+            ],
+          ]),
+          new Map()
+        )
+      ).toBe('unknown');
     });
 
     it('handles fields defined by a named param', () => {

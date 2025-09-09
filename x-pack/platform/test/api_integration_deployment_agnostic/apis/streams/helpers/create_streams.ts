@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
-import { StreamsSupertestRepositoryClient } from './repository_client';
+import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'queries'> & {
   name: string;
@@ -16,11 +16,14 @@ type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'que
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
+    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { dsl: {} },
-        processing: [],
+        processing: {
+          steps: [],
+        },
         wired: {
           fields: {
             '@timestamp': {
@@ -78,27 +81,27 @@ const streams: StreamPutItem[] = [
           routing: [
             {
               destination: 'logs.test',
-              if: {
+              where: {
                 and: [
                   {
                     field: 'attributes.numberfield',
-                    operator: 'gt',
-                    value: 15,
+                    gt: 15,
                   },
                 ],
               },
+              status: 'enabled',
             },
             {
               destination: 'logs.test2',
-              if: {
+              where: {
                 and: [
                   {
                     field: 'attributes.field2',
-                    operator: 'eq',
-                    value: 'abc',
+                    eq: 'abc',
                   },
                 ],
               },
+              status: 'enabled',
             },
           ],
         },
@@ -107,11 +110,14 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test',
+    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: {
+          steps: [],
+        },
         wired: {
           routing: [],
           fields: {
@@ -125,19 +131,21 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test2',
+    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [
-          {
-            grok: {
-              field: 'body.text',
+        processing: {
+          steps: [
+            {
+              action: 'grok',
+              from: 'body.text',
               patterns: ['%{NUMBER:attributes.numberfield}'],
-              if: { always: {} },
+              where: { always: {} },
             },
-          },
-        ],
+          ],
+        },
         wired: {
           fields: {
             'attributes.field2': {
@@ -151,11 +159,14 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.deeply.nested.streamname',
+    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: {
+          steps: [],
+        },
         wired: {
           fields: {
             'attributes.field2': {

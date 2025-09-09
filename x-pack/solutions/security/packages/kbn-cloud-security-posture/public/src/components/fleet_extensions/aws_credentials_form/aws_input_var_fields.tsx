@@ -7,11 +7,11 @@
 
 import React, { Suspense } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { AwsOptions } from './get_aws_credentials_form_options';
+import type { AwsOptions } from './get_aws_credentials_form_options';
 import { findVariableDef, fieldIsInvalid } from '../utils';
 
 export const AwsInputVarFields = ({
@@ -45,7 +45,7 @@ export const AwsInputVarFields = ({
 
   // Helper to get error message
   const getInvalidError = (label: string) =>
-    i18n.translate('securitySolutionPackages.cspmIntegration.integration.fieldRequired', {
+    i18n.translate('securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.', {
       defaultMessage: '{field} is required',
       values: { field: label },
     });

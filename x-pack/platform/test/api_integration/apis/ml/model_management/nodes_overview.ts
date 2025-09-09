@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.nodes[0].roles).to.contain('ml');
       expect(body.nodes[0].memory_overview.anomaly_detection.total).to.be.greaterThan(10000000);
       expect(body.nodes[0].memory_overview.dfa_training.total).to.eql(0);
-      expect(body.nodes[0].memory_overview.trained_models.total).to.eql(0);
+      expect(body.nodes[0].memory_overview.trained_models.total).to.eql(2101346304);
     });
 
     it('returns an error for the user with viewer permissions', async () => {

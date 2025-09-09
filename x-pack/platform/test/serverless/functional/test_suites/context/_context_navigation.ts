@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_FILTER_COLUMN_NAMES = [
   [
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const initialHitCount = await PageObjects.discover.getHitCount();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         await rowActions[1].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         await PageObjects.context.clickSuccessorLoadMoreButton();
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions();
           await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions();
           await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
           await browser.refresh();
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should go back via breadcrumbs with updated state after a goBack browser', async function () {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 

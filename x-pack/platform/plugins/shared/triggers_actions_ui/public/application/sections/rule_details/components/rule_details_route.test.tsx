@@ -7,14 +7,12 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { render, waitFor, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
-import { ToastsApi } from '@kbn/core/public';
+import type { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';
-import { Rule } from '../../../../types';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import type { Rule } from '../../../../types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
@@ -29,6 +27,14 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+function renderWithIntl(ui: React.ReactElement) {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+}
+
 describe('rule_details_route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,14 +47,12 @@ describe('rule_details_route', () => {
     useKibanaMock().services.spaces = spacesMock;
   }
 
-  it('render a loader while fetching data', () => {
+  it('render a loader while fetching data', async () => {
     const rule = mockRule();
 
-    expect(
-      shallow(
-        <RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
-      ).containsMatchingElement(<CenterJustifiedSpinner />)
-    ).toBeTruthy();
+    renderWithIntl(<RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />);
+
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('redirects to another page if fetched rule is an aliasMatch', async () => {
@@ -63,14 +67,15 @@ describe('rule_details_route', () => {
       alias_target_id: rule.id,
       alias_purpose: 'savedObjectConversion',
     }));
-    const wrapper = mountWithIntl(
+
+    renderWithIntl(
       <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
     );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
-    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+
     expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
       path: 'insightsAndAlerting/triggersActions/rule/new_id',
       aliasPurpose: 'savedObjectConversion',
@@ -96,18 +101,18 @@ describe('rule_details_route', () => {
       outcome: 'conflict',
       alias_target_id: rule.id,
     }));
-    const wrapper = mountWithIntl(
+
+    renderWithIntl(
       <RuleDetailsRoute
         {...mockRouterProps(rule)}
         {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }}
       />
     );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
 
-    expect(resolveRule).toHaveBeenCalledWith(rule.id);
     expect((spacesMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
       currentObjectId: 'new_id',
       objectNoun: 'rule',

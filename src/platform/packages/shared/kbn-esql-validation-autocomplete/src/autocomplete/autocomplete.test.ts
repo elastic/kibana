@@ -19,6 +19,7 @@ import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generat
 import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
   attachTriggerCommand,
   createCustomCallbackMocks,
@@ -26,10 +27,8 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getPolicyFields,
-  PartialSuggestionWithText,
   policies,
   setup,
-  SuggestOptions,
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
@@ -530,7 +529,7 @@ describe('autocomplete', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
         scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
-          .params?.[0].literalSuggestions ?? [];
+          .params?.[0].suggestedValues ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)
@@ -641,7 +640,7 @@ describe('autocomplete', () => {
         ]
       );
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'index1',
+        '',
         'dateField',
         'textField'
       );
@@ -652,7 +651,7 @@ describe('autocomplete', () => {
           { text: 'index1 | ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1, ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1 METADATA ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `index1${q.queryString}`),
         ],
         undefined,
         [
@@ -665,7 +664,7 @@ describe('autocomplete', () => {
       );
 
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'index2',
+        '',
         'dateField',
         'textField'
       );
@@ -675,7 +674,7 @@ describe('autocomplete', () => {
           { text: 'index2 | ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2, ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2 METADATA ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,
         [
@@ -692,7 +691,7 @@ describe('autocomplete', () => {
       // range to cover "bar" and not "foo$bar". We have to make sure
       // we're setting it ourselves.
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'foo$bar',
+        '',
         'dateField',
         'textField'
       );
@@ -717,7 +716,7 @@ describe('autocomplete', () => {
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 5, end: 12 },
           },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `foo$bar${q.queryString}`),
         ],
         undefined,
         [, [{ name: 'foo$bar', hidden: false }]]
@@ -725,7 +724,7 @@ describe('autocomplete', () => {
 
       // This is an identifier that matches multiple sources
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-        'i*',
+        '',
         'dateField',
         'textField'
       );
@@ -735,7 +734,7 @@ describe('autocomplete', () => {
           { text: 'i* | ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i*, ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i* METADATA ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
-          ...recommendedQuerySuggestions.map((q) => q.queryString),
+          ...recommendedQuerySuggestions.map((q) => `i*${q.queryString}`),
         ],
         undefined,
         [

@@ -12,15 +12,16 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ItemTemplate } from './item_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { Node } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
+import type { ComponentProps } from '../../route_init';
+import type { SetupModeProps } from '../../../components/renderers/setup_mode';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
   ELASTICSEARCH_SYSTEM_ID,

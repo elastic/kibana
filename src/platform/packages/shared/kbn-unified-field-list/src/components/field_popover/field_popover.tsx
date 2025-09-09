@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverProps,
   EuiPopoverTitle,
   type UseEuiTheme,
 } from '@elastic/eui';

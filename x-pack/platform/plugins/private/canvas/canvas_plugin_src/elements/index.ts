@@ -36,8 +36,8 @@ import { legacyMetricVis } from './metric_vis_legacy';
 import { metricVis } from './metric_vis';
 import { heatmap } from './heatmap';
 
-import { SetupInitializer } from '../plugin';
-import { ElementFactory } from '../../types';
+import type { SetupInitializer } from '../plugin';
+import type { ElementFactory } from '../../types';
 import { pieVis } from './pie_vis';
 
 const elementSpecs = [

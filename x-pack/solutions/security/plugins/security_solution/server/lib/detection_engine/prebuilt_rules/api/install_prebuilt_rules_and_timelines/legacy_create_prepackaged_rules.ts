@@ -60,18 +60,25 @@ export const legacyCreatePrepackagedRules = async (
     logger
   );
 
-  const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
+  const installedPrebuiltRules = rulesToMap(
+    await getExistingPrepackagedRules({ rulesClient, logger })
+  );
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
   const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-  const result = await createPrebuiltRules(detectionRulesClient, rulesToInstall);
-  if (result.errors.length > 0) {
-    throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
+  const ruleCreationResult = await createPrebuiltRules(
+    detectionRulesClient,
+    rulesToInstall,
+    logger
+  );
+
+  if (ruleCreationResult.errors.length > 0) {
+    throw new AggregateError(ruleCreationResult.errors, 'Error installing new prebuilt rules');
   }
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate);
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, logger);
 
   return {
     rules_installed: rulesToInstall.length,

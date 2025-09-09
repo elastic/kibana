@@ -6,12 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  AgentMode,
-  type ConversationRound,
-  type RoundInput,
-  type ChatAgentEvent,
-} from '@kbn/onechat-common';
+import { type ConversationRound, type RoundInput, type ChatAgentEvent } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider } from '../src/model_provider';
@@ -84,11 +79,6 @@ export interface AgentEventEmitter {
 // conversational
 
 export interface AgentParams {
-  /**
-   * Agent mode to use for this round.
-   * Defaults to `normal`.
-   */
-  agentMode?: AgentMode;
   /**
    * Previous rounds of conversation.
    * Defaults to an empty list (new conversation)

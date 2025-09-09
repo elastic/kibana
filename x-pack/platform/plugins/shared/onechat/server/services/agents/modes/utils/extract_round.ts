@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Observable, filter, firstValueFrom, map } from 'rxjs';
-import { ChatAgentEvent, isRoundCompleteEvent } from '@kbn/onechat-common';
+import type { Observable } from 'rxjs';
+import { filter, firstValueFrom, map } from 'rxjs';
+import type { ChatAgentEvent } from '@kbn/onechat-common';
+import { isRoundCompleteEvent } from '@kbn/onechat-common';
 
 export const extractRound = async (events$: Observable<ChatAgentEvent>) => {
   return await firstValueFrom(

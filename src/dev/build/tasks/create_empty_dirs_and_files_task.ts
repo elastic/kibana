@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mkdirp, Task } from '../lib';
+import type { Task } from '../lib';
+import { mkdirp } from '../lib';
 
 export const CreateEmptyDirsAndFiles: Task = {
   description: 'Creating some empty directories and files to prevent file-permission issues',

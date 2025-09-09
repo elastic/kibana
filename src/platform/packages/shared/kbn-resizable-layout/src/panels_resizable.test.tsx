@@ -10,7 +10,8 @@
 import { type ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { ResizableLayoutDirection } from '../types';
 

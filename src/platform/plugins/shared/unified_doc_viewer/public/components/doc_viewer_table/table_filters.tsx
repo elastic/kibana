@@ -10,7 +10,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { debounce } from 'lodash';
 import { fieldNameWildcardMatcher, type FieldTypeKnown } from '@kbn/field-utils';
 import type { FieldListItem } from '@kbn/unified-field-list';
@@ -19,7 +19,7 @@ import {
   type FieldTypeFilterProps,
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { FieldRow } from './field_row';
+import type { FieldRow } from './field_row';
 
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';

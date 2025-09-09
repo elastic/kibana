@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SessionViewIndex } from '../../common/types/v1';
-import { SessionViewDeps, SessionViewTelemetryKey } from '../types';
+import type { SessionViewDeps, SessionViewTelemetryKey } from '../types';
 import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
 
 // Initializing react-query

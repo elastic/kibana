@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { TimeStrings } from '@kbn/test-suites-src/functional/page_objects/common_page';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

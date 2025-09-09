@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Page } from '../../../../../common/types/pagination';
-import { EnterpriseSearchApplicationsResponse } from '../../../../../common/types/search_applications';
+import type { Page } from '../../../../../common/types/pagination';
+import type { EnterpriseSearchApplicationsResponse } from '../../../../../common/types/search_applications';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

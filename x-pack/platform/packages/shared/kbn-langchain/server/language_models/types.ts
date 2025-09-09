@@ -6,7 +6,7 @@
  */
 
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type OpenAI from 'openai';
 
 export interface InvokeAIActionParamsSchema {

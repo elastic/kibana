@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures, test as baseTest } from '@kbn/scout';
-import { StreamsPageObjects, extendPageObjects } from './page_objects';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as baseTest } from '@kbn/scout';
+import type { StreamsPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
 
 export interface StreamsTestFixtures extends ScoutTestFixtures {
   pageObjects: StreamsPageObjects;

@@ -4,23 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiTitle,
-  OnTimeChangeProps,
-} from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { toDuration } from '../../../../utils/slo/duration';
 import { useUrlAppState } from './hooks/use_url_app_state';
-import { TimeBounds } from '../../types';
+import type { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { CalendarPeriodPicker } from './calendar_period_picker';

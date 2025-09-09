@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ApiConfig,
-  FindPromptsResponse,
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
-import { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { AIConnector } from '../../../connectorland/connector_selector';
+import type React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ApiConfig, FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
-import {
-  bulkUpdatePrompts,
-  Conversation,
-  ConversationsBulkActions,
-  useFetchCurrentUserConversations,
-} from '../../../..';
-import { FetchConversationsResponse } from '../../api';
+import type { Conversation, ConversationsBulkActions } from '../../../..';
+import { bulkUpdatePrompts, useFetchCurrentUserConversations } from '../../../..';
+import type { FetchConversationsResponse } from '../../api';
 interface Params {
   allPrompts: FindPromptsResponse;
   connectors?: AIConnector[];
@@ -110,6 +103,8 @@ export const useSystemPromptUpdater = ({
     http,
     isAssistantEnabled: isAssistantEnabled && filter.length > 0,
     filter,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
   useEffect(() => {
     const updateSystemPromptSettings = (prev: SystemPromptSettings[]) => {

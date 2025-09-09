@@ -13,7 +13,7 @@ import { getPackages } from '@kbn/repo-packages';
 import globby from 'globby';
 import Piscina from 'piscina';
 
-import { Task } from '../lib';
+import type { Task } from '../lib';
 
 export const CopyLegacySource: Task = {
   description: 'Copying legacy/non-package source into platform-generic build directory',

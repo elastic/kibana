@@ -23,6 +23,7 @@ import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
+import { GRAPH_ENTITY_NODE_ID } from '../test_ids';
 
 const NODE_SHAPE_WIDTH = 81;
 const NODE_SHAPE_HEIGHT = 80;
@@ -44,7 +45,7 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
   return (
-    <NodeContainer>
+    <NodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
       <NodeShapeContainer>
         {interactive && (
           <NodeShapeOnHoverSvg

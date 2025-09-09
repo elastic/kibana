@@ -7,14 +7,14 @@
 
 import '../index.scss';
 import { i18n } from '@kbn/i18n';
-import SemVer from 'semver/classes/semver';
-import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
+import type SemVer from 'semver/classes/semver';
+import type { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
-import { AppDependencies } from './app_context';
+import type { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
 import { UiMetricService } from './services';
@@ -23,8 +23,8 @@ import { renderApp } from '.';
 import { setUiMetricService } from './services/api';
 import { notificationService } from './services/notification';
 import { httpService } from './services/http';
-import { ExtensionsService } from '../services/extensions_service';
-import { StartDependencies } from '../types';
+import type { ExtensionsService } from '../services/extensions_service';
+import type { StartDependencies } from '../types';
 
 function initSetup({
   usageCollection,

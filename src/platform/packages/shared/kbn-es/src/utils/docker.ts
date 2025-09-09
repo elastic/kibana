@@ -9,13 +9,14 @@
 
 import chalk from 'chalk';
 import execa from 'execa';
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
-import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
@@ -32,7 +33,7 @@ import {
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
-import { EsClusterExecOptions } from '../cluster_exec_options';
+import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
@@ -64,11 +65,22 @@ interface BaseOptions extends ImageOptions {
 }
 
 export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
+export const serverlessProductTiers = new Set<string>([
+  'essentials',
+  'logs_essentials',
+  'complete',
+  'search_ai_lake',
+]);
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
   return serverlessProjectTypes.has(value);
 };
 
 export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'chat';
+export type ServerlessProductTier =
+  | 'essentials'
+  | 'logs_essentials'
+  | 'complete'
+  | 'search_ai_lake';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
@@ -79,6 +91,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   host?: string;
   /**  Serverless project type */
   projectType: ServerlessProjectType;
+  /** Product tier for serverless project */
+  productTier?: ServerlessProductTier;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Full path where the ES cluster will store data */
@@ -267,8 +281,8 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+      ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
     ],
   },
   {
@@ -288,7 +302,6 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
     ],
   },
@@ -630,6 +643,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     files,
     resources,
     projectType,
+    productTier,
     dataPath = 'stateless',
   } = options;
   const objectStorePath = resolve(basePath, dataPath);
@@ -646,7 +660,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
   if (clean && exists) {
     log.info('Cleaning existing object store.');
-    await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    try {
+      await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    } catch (error) {
+      // Fall back to sudo if needed, CI user can have issues removing old state
+      await execa('sudo', ['rm', '-rf', objectStorePath]);
+    }
   }
 
   if (clean || !exists) {
@@ -689,8 +708,21 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
+  const tierSpecificRolesFileExists = (filePath: string): boolean => {
+    try {
+      return existsSync(filePath);
+    } catch (e) {
+      return false;
+    }
+  };
+
   // Read roles for the specified projectType
-  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
+  const tierSpecificRolesResourcePath =
+    productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, productTier, 'roles.yml');
+  const rolesResourcePath =
+    tierSpecificRolesResourcePath && tierSpecificRolesFileExists(tierSpecificRolesResourcePath)
+      ? tierSpecificRolesResourcePath
+      : resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
 
   const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
 

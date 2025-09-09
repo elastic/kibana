@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { AppMountParameters } from '@kbn/core-application-browser';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
-import { AnalyticsServiceSetup } from '@kbn/core/public';
-import { OnechatInternalService } from './services';
-import { OnechatPluginStart } from './types';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { OnechatInternalService } from './services';
+import type { OnechatStartDependencies } from './types';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
 import { eventTypes } from '../common/events';
 
@@ -19,7 +19,7 @@ export const registerApp = ({
   core,
   getServices,
 }: {
-  core: CoreSetup<OnechatPluginStart>;
+  core: CoreSetup<OnechatStartDependencies>;
   getServices: () => OnechatInternalService;
 }) => {
   core.application.register({
@@ -50,12 +50,12 @@ export const registerApp = ({
     ],
     async mount({ element, history }: AppMountParameters) {
       const { mountApp } = await import('./application');
-      const [coreStart, startPluginDeps] = await core.getStartServices();
+      const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(ONECHAT_TITLE);
       const services = getServices();
 
-      return mountApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
+      return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
     },
   });
 };

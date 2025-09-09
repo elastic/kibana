@@ -7,7 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiSuperSelect, EuiSuperSelectOption, EuiText } from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';

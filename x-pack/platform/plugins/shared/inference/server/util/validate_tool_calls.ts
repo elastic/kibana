@@ -5,12 +5,8 @@
  * 2.0.
  */
 import Ajv from 'ajv';
-import {
-  ToolCallsOf,
-  ToolChoiceType,
-  ToolOptions,
-  UnvalidatedToolCall,
-} from '@kbn/inference-common';
+import type { ToolCallsOf, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
 import {
   createToolNotFoundError,
   createToolValidationError,

@@ -10,9 +10,9 @@
 import { generateFileHashMock, getFileCacheKeyMock } from './file_hash.test.mocks';
 
 import { resolve } from 'path';
-import { Stats } from 'fs';
+import type { Stats } from 'fs';
 import { getFileHash } from './file_hash';
-import { IFileHashCache } from './file_hash_cache';
+import type { IFileHashCache } from './file_hash_cache';
 
 const mockedCache = (): jest.Mocked<IFileHashCache> => ({
   del: jest.fn(),

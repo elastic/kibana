@@ -10,7 +10,8 @@ import '../../../../../shared/doc_links/__mocks__/doc_links.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 

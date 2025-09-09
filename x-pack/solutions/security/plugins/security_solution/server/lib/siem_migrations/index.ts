@@ -8,10 +8,14 @@
 import { memoize } from 'lodash';
 import type { SiemMigrationsCreateClientParams } from './common/types';
 import type { SiemMigrationsService } from './siem_migrations_service';
+import type { RuleMigrationsClientDependencies } from './rules/types';
+import type { DashboardMigrationsClientDependencies } from './dashboards/types';
 
 export const getSiemMigrationClients = (
   siemMigrationsService: SiemMigrationsService,
-  params: SiemMigrationsCreateClientParams
+  params: SiemMigrationsCreateClientParams & {
+    dependencies: RuleMigrationsClientDependencies & DashboardMigrationsClientDependencies;
+  }
 ) => {
   return {
     getRulesClient: memoize(() =>
@@ -19,7 +23,14 @@ export const getSiemMigrationClients = (
         request: params.request,
         currentUser: params.currentUser,
         spaceId: params.spaceId,
-        dependencies: params.dependencies,
+        dependencies: {
+          inferenceClient: params.dependencies.inferenceClient,
+          actionsClient: params.dependencies.actionsClient,
+          savedObjectsClient: params.dependencies.savedObjectsClient,
+          packageService: params.dependencies.packageService,
+          telemetry: params.dependencies.telemetry,
+          rulesClient: params.dependencies.rulesClient,
+        },
       })
     ),
 
@@ -28,7 +39,13 @@ export const getSiemMigrationClients = (
         request: params.request,
         currentUser: params.currentUser,
         spaceId: params.spaceId,
-        dependencies: params.dependencies,
+        dependencies: {
+          inferenceClient: params.dependencies.inferenceClient,
+          actionsClient: params.dependencies.actionsClient,
+          savedObjectsClient: params.dependencies.savedObjectsClient,
+          packageService: params.dependencies.packageService,
+          telemetry: params.dependencies.telemetry,
+        },
       })
     ),
   };

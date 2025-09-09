@@ -6,13 +6,13 @@
  */
 
 import { type FilterControlConfig } from '@kbn/alerts-ui-shared';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
-import { AlertStatus } from '../../../../common/typings';
-import { AlertSearchBarContainerState } from '../types';
+import type { AlertStatus } from '../../../../common/typings';
+import type { AlertSearchBarContainerState } from '../types';
 
 interface AlertSearchBarStateTransitions {
   setRangeFrom: (

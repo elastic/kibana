@@ -6,9 +6,9 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 
 interface IntegrationInfoFieldsProps {
   newPolicy: NewPackagePolicy;
@@ -29,7 +29,7 @@ export const IntegrationSettings = ({
         error: validationResults?.name || null,
         label: (
           <FormattedMessage
-            id="securitySolutionPackages.fleetIntegration.integrationNameLabel"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationNameLabel"
             defaultMessage="Name"
           />
         ),
@@ -40,7 +40,7 @@ export const IntegrationSettings = ({
         error: validationResults?.description || null,
         label: (
           <FormattedMessage
-            id="securitySolutionPackages.fleetIntegration.integrationDescriptionLabel"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationDescriptionLabel"
             defaultMessage="Description"
           />
         ),

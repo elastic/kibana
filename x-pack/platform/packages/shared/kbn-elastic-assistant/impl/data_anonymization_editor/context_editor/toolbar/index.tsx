@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
 import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';

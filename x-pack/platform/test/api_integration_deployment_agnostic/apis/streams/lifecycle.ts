@@ -7,16 +7,13 @@
 
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
-import {
+import type {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamLifecycleDisabled,
-  Streams,
-  isDisabledLifecycle,
-  isDslLifecycle,
-  isIlmLifecycle,
 } from '@kbn/streams-schema';
-import { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
+import { Streams, isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import type { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import {
   disableStreams,
   enableStreams,
@@ -24,11 +21,9 @@ import {
   getStream,
   getIlmStats,
 } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
@@ -112,12 +107,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           wired: { fields: {}, routing: [] },
         },
       },
       dashboards: [],
       queries: [],
+      rules: [],
     };
 
     describe('Wired streams update', () => {
@@ -127,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await putStream(apiClient, 'logs', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -160,6 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -177,6 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -203,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -214,13 +216,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.overrides', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.overrides.lifecycle',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
@@ -242,6 +251,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -253,6 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -267,13 +278,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.10d.20d.inherits',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
             },
           },
@@ -289,6 +307,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.no', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -301,6 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.no.retention', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -324,6 +344,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               dashboards: [],
               queries: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -341,13 +362,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, 'logs.ilm', {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
                   fields: {},
-                  routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
+                  routing: [
+                    { destination: 'logs.ilm.stream', where: { never: {} }, status: 'disabled' },
+                  ],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
@@ -365,6 +389,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -380,6 +405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -401,6 +427,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -420,6 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -444,12 +472,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
         dashboards: [],
         queries: [],
+        rules: [],
       };
 
       let clean: () => Promise<void>;
@@ -502,6 +533,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -524,6 +556,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -547,6 +580,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               dashboards: [],
               queries: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -566,6 +600,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -585,6 +620,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -611,6 +647,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -655,6 +692,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -669,6 +707,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -692,6 +731,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -713,6 +753,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -745,6 +786,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {

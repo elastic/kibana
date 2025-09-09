@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
-import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';

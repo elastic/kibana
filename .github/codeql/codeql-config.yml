@@ -41,8 +41,8 @@ paths-ignore:
   - oas_docs
   - packages/kbn-babel-*
   - packages/kbn-capture-oas-snapshot-cli
-  - packages/kbn-check-mappings-update-cli
   - packages/kbn-check-prod-native-modules-cli
+  - packages/kbn-check-saved-objects-cli
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
   - packages/kbn-dependency-*
@@ -128,10 +128,9 @@ paths-ignore:
   - x-pack/platform/test
   - x-pack/performance
   - x-pack/scripts
+  - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
   - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/solutions/*/test
-  - x-pack/test
-  - x-pack/test_serverless
 query-filters:
   - exclude:
       paths:

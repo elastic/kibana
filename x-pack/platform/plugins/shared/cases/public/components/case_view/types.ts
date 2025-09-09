@@ -5,10 +5,13 @@
  * 2.0.
  */
 import type { ComponentType, MutableRefObject } from 'react';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import type { CasesNavigation } from '../links';
-import type { CaseViewRefreshPropInterface, CaseUI } from '../../../common';
+import type {
+  CaseViewRefreshPropInterface,
+  CaseUI,
+  CaseViewAlertsTableProps,
+} from '../../../common';
 import type { UseFetchAlertData } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
@@ -41,10 +44,3 @@ export interface OnUpdateFields {
   onSuccess?: () => void;
   onError?: () => void;
 }
-
-export type CaseViewAlertsTableProps = Pick<
-  AlertsTableProps,
-  'id' | 'ruleTypeIds' | 'consumers' | 'query' | 'showAlertStatusWithFlapping' | 'onLoaded'
-> & {
-  services?: AlertsTableProps['services'];
-};

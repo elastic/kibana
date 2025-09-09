@@ -17,7 +17,7 @@ describe('WiredStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: { steps: [] },
           wired: {
             fields: {},
             routing: [],
@@ -37,7 +37,9 @@ describe('WiredStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           wired: {
             fields: {},
             routing: [],
@@ -61,7 +63,7 @@ describe('WiredStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: { steps: [] },
           classic: {},
           wired: {
             fields: {},
@@ -84,7 +86,7 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [],
@@ -105,6 +107,7 @@ describe('WiredStream', () => {
         inherited_fields: {},
         dashboards: [],
         queries: [],
+        rules: [],
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);
@@ -119,7 +122,7 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [],
@@ -151,13 +154,14 @@ describe('WiredStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [],
@@ -181,7 +185,9 @@ describe('WiredStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             wired: {
               fields: {},
               routing: [],

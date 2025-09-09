@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { useNestedMenu } from './use_nested_menu';

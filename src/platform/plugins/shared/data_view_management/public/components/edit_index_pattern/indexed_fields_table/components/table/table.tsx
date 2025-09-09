@@ -8,13 +8,13 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from '@kbn/core/public';
+import type { OverlayModalStart } from '@kbn/core/public';
 import { FieldDescription } from '@kbn/field-utils';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiIcon,
   EuiInMemoryTable,
   EuiIconTip,
-  EuiBasicTableColumn,
   EuiBadge,
   EuiToolTip,
   EuiModalHeader,
@@ -36,9 +36,9 @@ import {
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
 
-import { DataView } from '@kbn/data-views-plugin/public';
-import { StartServices } from '../../../../../types';
-import { IndexedFieldItem } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { StartServices } from '../../../../../types';
+import type { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
   // runtime fields that aren't composite subfields

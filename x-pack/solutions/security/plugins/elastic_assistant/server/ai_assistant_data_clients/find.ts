@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsAggregationContainer,
   MappingRuntimeFields,
   Sort,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
+import type { EsQueryConfig, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 
 interface FindOptions {
   filter?: string;

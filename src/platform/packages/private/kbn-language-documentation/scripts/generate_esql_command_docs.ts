@@ -16,7 +16,7 @@ import {
   processingCommandsItems,
 } from './resources/commands/processing_data';
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
-import { CommandDefinition, MultipleLicenseInfo } from '../src/types';
+import type { CommandDefinition, MultipleLicenseInfo } from '../src/types';
 import { getLicenseInfoForCommand } from '../src/utils/get_license_info';
 import {
   DEFINITION_DIR_SUFFIX,

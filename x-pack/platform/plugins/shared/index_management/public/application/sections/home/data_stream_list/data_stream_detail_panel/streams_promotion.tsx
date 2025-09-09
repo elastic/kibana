@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common';
+import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common';
 import { useAppContext } from '../../../../app_context';
 
 export function StreamsPromotion({ dataStreamName }: { dataStreamName: string }) {

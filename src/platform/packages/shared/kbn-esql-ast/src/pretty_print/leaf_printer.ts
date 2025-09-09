@@ -8,7 +8,7 @@
  */
 
 import { quotableKeywords } from './utils';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLColumn,

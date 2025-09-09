@@ -10,11 +10,11 @@ import type {
   QueryDslQueryContainer,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface CreateEsQueryRuleParams {
   size: number;

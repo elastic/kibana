@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { PluginName } from '@kbn/core-base-common';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { StatusServiceSetup } from '@kbn/core-status-server';

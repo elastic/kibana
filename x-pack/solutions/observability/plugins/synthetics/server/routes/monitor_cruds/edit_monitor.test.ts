@@ -6,8 +6,8 @@
  */
 
 import { syncEditedMonitor } from './edit_monitor';
-import { SavedObject } from '@kbn/core/server';
-import {
+import type { SavedObject } from '@kbn/core/server';
+import type {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,

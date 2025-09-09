@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
-import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import { Streams, FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   disableStreams,
   enableStreams,
@@ -35,11 +35,14 @@ const upsertRequest = ({
   queries?: StreamQuery[];
 }) => ({
   dashboards: [],
+  rules: [],
   queries,
   stream: {
     description: 'Test stream',
     ingest: {
-      processing: [],
+      processing: {
+        steps: [],
+      },
       wired: { fields, routing },
       lifecycle: { inherit: {} },
     },
@@ -76,7 +79,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_a.child1.nested',
-              if: { field: 'resource.attributes.hello', operator: 'eq', value: 'yes' },
+              where: { field: 'resource.attributes.hello', eq: 'yes' },
+              status: 'enabled',
             },
           ],
         })
@@ -94,11 +98,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_a.child1',
-              if: { field: 'resource.attributes.foo', operator: 'eq', value: 'bar' },
+              where: { field: 'resource.attributes.foo', eq: 'bar' },
+              status: 'enabled',
             },
             {
               destination: 'logs.branch_a.child2',
-              if: { field: 'resource.attributes.bar', operator: 'eq', value: 'foo' },
+              where: { field: 'resource.attributes.bar', eq: 'foo' },
+              status: 'enabled',
             },
           ],
         })
@@ -110,11 +116,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_b.child1',
-              if: { field: 'resource.attributes.foo', operator: 'eq', value: 'bar' },
+              where: { field: 'resource.attributes.foo', eq: 'bar' },
+              status: 'enabled',
             },
             {
               destination: 'logs.branch_b.child2',
-              if: { field: 'resource.attributes.bar', operator: 'eq', value: 'foo' },
+              where: { field: 'resource.attributes.bar', eq: 'foo' },
+              status: 'enabled',
             },
           ],
         })
@@ -222,7 +230,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(rootEntry.request.stream.ingest.wired.routing).to.eql([
           {
             destination: 'branch_a',
-            if: { never: {} },
+            where: { never: {} },
+            status: 'disabled',
           },
         ]);
         const leafEntry = contentPack.entries.find(
@@ -282,13 +291,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'ok',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
             {
@@ -298,13 +310,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'a'.repeat(twoMB),
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
           ]
@@ -362,10 +377,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_c.nested',
-            if: {
+            status: 'enabled',
+            where: {
               field: 'resource.attributes.hello',
-              operator: 'eq',
-              value: 'yes',
+              eq: 'yes',
             },
           },
         ]);
@@ -433,7 +448,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_d.branch_b',
-            if: { never: {} },
+            where: { never: {} },
+            status: 'disabled',
           },
         ]);
       });
@@ -454,7 +470,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: '',
                     ingest: {
-                      processing: [],
+                      processing: {
+                        steps: [],
+                      },
                       wired: {
                         fields,
                         routing: [],
@@ -464,6 +482,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             ]
@@ -546,13 +565,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: {
                       fields: {},
                       routing: [
                         {
                           destination: 'child',
-                          if: { never: {} },
+                          where: { never: {} },
+                          status: 'disabled',
                         },
                       ],
                     },
@@ -561,6 +583,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
             {
@@ -570,13 +593,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
           ]
@@ -613,7 +639,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: {
                       fields: {},
                       routing: [],
@@ -625,6 +653,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 queries: [
                   { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
                 ],
+                rules: [],
               },
             },
           ]
