@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
-import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
-import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   IngestStreamSettings,
   WiredIngestStreamEffectiveSettings,
 } from '@kbn/streams-schema/src/models/ingest/settings';
+import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
