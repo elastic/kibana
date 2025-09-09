@@ -27,7 +27,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
-import { useFlyoutA11y } from '../../hooks/use_flyout_a11y';
+import { useFlyoutA11y } from './hooks/use_flyout_a11y';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
