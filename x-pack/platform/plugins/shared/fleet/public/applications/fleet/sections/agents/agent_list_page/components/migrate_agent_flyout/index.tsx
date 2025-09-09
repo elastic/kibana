@@ -290,10 +290,14 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       <EuiFieldText
                         fullWidth
                         onChange={(e) =>
-                          setFormContent({
-                            ...formContent,
-                            settings: { ...formContent.settings, replace_token: e.target.value },
-                          })
+                          {
+                            if ('id' in formContent) {
+                              setFormContent({
+                                ...formContent,
+                                settings: { ...formContent.settings, replace_token: e.target.value },
+                              })
+                            }
+                          }
                         }
                       />
                     </EuiFormRow>)}
