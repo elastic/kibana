@@ -38,7 +38,7 @@ export const BooleanInput = ({ onError, onChange, ...restOfProps }: ValueInputPr
 
   const onChangeHandler = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!['true', 'false'].includes(e.target.value.toLowerCase())) {
+      if (!['true', 'false'].includes(e.target.value.trim().toLowerCase())) {
         const booleanError = i18n.translate('indexEditor.cellValueInput.validation.boolean', {
           defaultMessage: 'Value must be true or false',
         });
