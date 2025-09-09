@@ -48,7 +48,7 @@ import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
 
-import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/get_default_swimlane_panel_title';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import type { AnomalySwimLaneEmbeddableState } from '../..';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
