@@ -24,6 +24,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       });
     });
 
+    loadTestFile(require.resolve('./converse/esql.ts'));
     loadTestFile(require.resolve('./esql_tools.ts'));
     loadTestFile(require.resolve('./esql_tools_internal.ts'));
     loadTestFile(require.resolve('./agents.ts'));

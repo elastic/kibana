@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import { services } from '../api_integration_deployment_agnostic/services';
+import { createStatefulTestConfig } from '../api_integration_deployment_agnostic/default_configs/stateful.config.base';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
-
-  return {
-    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
-    testFiles: [require.resolve('./apis')],
-    servers: xPackAPITestsConfig.get('servers'),
-    services: xPackAPITestsConfig.get('services'),
-    junit: {
-      reportName: 'X-Pack OneChat API Integration Tests',
-    },
-    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [...xPackAPITestsConfig.get('kbnTestServer.serverArgs')],
-    },
-  };
-}
+export default createStatefulTestConfig({
+  services,
+  testFiles: [require.resolve('./apis')],
+  junit: {
+    reportName: 'X-Pack OneChat API Integration Tests',
+  },
+  // @ts-expect-error
+  kbnTestServer: {
+    serverArgs: [
+      `--logging.loggers=${JSON.stringify([
+        {
+          name: 'plugins.onechat',
+          level: 'all',
+          appenders: ['default'],
+        },
+      ])}`,
+    ],
+  },
+});

@@ -7,6 +7,7 @@
 
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { AiopsProvider } from './aiops';
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 import { UsageAPIProvider } from './usage_api';
@@ -36,6 +37,8 @@ export const services = {
   spaces: SpacesServiceProvider,
   transform: TransformProvider,
   usageAPI: UsageAPIProvider,
+  supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
+  samlAuth: commonFunctionalServices.samlAuth,
   synthtrace: SynthtraceClientProvider,
   ingestManager: IngestManagerProvider,
 };
