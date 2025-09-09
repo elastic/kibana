@@ -11,9 +11,8 @@ import { maintenanceWindowStatusSchema } from '../../../../shared/schemas/v1';
 import { maxMaintenanceWindowDocs } from '../../../../shared/constants/v1';
 import { validatePagination } from '../../../../shared/validation/v1';
 
-export const findMaintenanceWindowsRequestQuerySchema = schema.object(
+export const findMaintenanceWindowsQuerySchema = schema.object(
   {
-    // we do not need to use schema.maybe here, because if we do not pass property page, defaultValue will be used
     page: schema.number({
       defaultValue: 1,
       min: 1,
@@ -22,7 +21,6 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The page number to return.',
       },
     }),
-    // we do not need to use schema.maybe here, because if we do not pass property per_page, defaultValue will be used
     per_page: schema.number({
       defaultValue: 1000,
       min: 0,
@@ -48,7 +46,7 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
   }
 );
 
-export const findMaintenanceWindowsResponseBodySchema = schema.object({
+export const findMaintenanceWindowsResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),

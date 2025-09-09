@@ -14,3 +14,12 @@ export const maintenanceWindowCategoryIdTypes = {
 
 export type MaintenanceWindowCategoryIdTypes =
   (typeof maintenanceWindowCategoryIdTypes)[keyof typeof maintenanceWindowCategoryIdTypes];
+
+export const maxMaintenanceWindowDocs = 10000;
+
+export const maintenanceWindowStatus = {
+  RUNNING: 'running',
+  FINISHED: 'finished',
+  UPCOMING: 'upcoming',
+  ARCHIVED: 'archived',
+} as const;
