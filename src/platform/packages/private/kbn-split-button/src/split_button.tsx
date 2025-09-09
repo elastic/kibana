@@ -21,6 +21,7 @@ type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   isSecondaryButtonDisabled?: boolean;
   secondaryButtonIcon: string;
   secondaryButtonAriaLabel?: string;
+  secondaryButtonTitle?: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -37,6 +38,7 @@ export const SplitButton = ({
   isSecondaryButtonDisabled = false,
   secondaryButtonIcon,
   secondaryButtonAriaLabel,
+  secondaryButtonTitle,
   onSecondaryButtonClick,
 
   // Primary button props
@@ -83,6 +85,7 @@ export const SplitButton = ({
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
         data-icon={secondaryButtonIcon}
         aria-label={secondaryButtonAriaLabel}
+        title={secondaryButtonTitle}
         display="base"
         color={color}
         size={size}
