@@ -22,9 +22,10 @@ interface ModalOptions {
   getIlmPolicies: () => Promise<PolicyFromES[]>;
   definition: Streams.ingest.all.GetResponse;
   setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  readOnly: boolean;
 }
 
-export function IlmField({ getIlmPolicies, definition, setLifecycle }: ModalOptions) {
+export function IlmField({ getIlmPolicies, definition, setLifecycle, readOnly }: ModalOptions) {
   const existingLifecycle = definition.effective_lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
@@ -83,6 +84,21 @@ export function IlmField({ getIlmPolicies, definition, setLifecycle }: ModalOpti
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const selectedOption = policies.find((option) => option.label === selectedPolicy);
+
+  if (readOnly && selectedOption) {
+    return (
+      <EuiPanel hasBorder hasShadow={false} paddingSize="s" color="subdued">
+        <>
+          {selectedOption.label}
+          <EuiText size="xs" color="subdued" className="eui-displayBlock">
+            <small>{selectedOption.data?.phases || ''}</small>
+          </EuiText>
+        </>
+      </EuiPanel>
+    );
+  }
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="s">

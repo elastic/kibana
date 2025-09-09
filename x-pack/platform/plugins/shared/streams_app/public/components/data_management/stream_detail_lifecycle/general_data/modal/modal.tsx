@@ -24,6 +24,7 @@ import {
   EuiSwitch,
   EuiButtonGroup,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IlmField } from './ilm';
@@ -110,32 +111,53 @@ export function EditLifecycleModal({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {isWired && !isRoot(definition.stream.name) && (
-            <>
-              <EuiFlexItem>
-                <EuiText>
-                  <h5>
-                    {i18n.translate('xpack.streams.streamDetailLifecycle.dataRetention', {
-                      defaultMessage: 'Inherit from parent stream',
-                    })}
-                  </h5>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSwitch
-                  label={i18n.translate('xpack.streams.streamDetailLifecycle.inherit', {
-                    defaultMessage: "Use the retention configuration from this stream's parent",
-                  })}
-                  checked={isInherit}
-                  onChange={() => {
-                    setLifecycle({ inherit: {} });
-                    setIsInherit(!isInherit);
-                  }}
-                  data-test-subj="inheritDataRetentionSwitch"
-                />
-              </EuiFlexItem>
-            </>
+        <EuiFlexGroup direction="column" gutterSize="l">
+          {(!isWired || !isRoot(definition.stream.name)) && (
+            <EuiFlexItem>
+              <EuiText>
+                <h5>
+                  {isWired
+                    ? i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
+                        {
+                          defaultMessage: 'Inherit from parent stream',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.classicInheritSwitchLabel',
+                        {
+                          defaultMessage: 'Inherit from index template',
+                        }
+                      )}
+                </h5>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={
+                  isWired
+                    ? i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
+                        {
+                          defaultMessage:
+                            "Use the retention configuration from this stream's parent",
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
+                        {
+                          defaultMessage:
+                            "Use the retention configuration from this stream's index template",
+                        }
+                      )
+                }
+                checked={isInherit}
+                onChange={() => {
+                  setLifecycle({ inherit: {} });
+                  setIsInherit(!isInherit);
+                }}
+                data-test-subj="inheritDataRetentionSwitch"
+              />
+            </EuiFlexItem>
           )}
 
           <EuiFlexItem>
@@ -146,9 +168,7 @@ export function EditLifecycleModal({
                 })}
               </h5>
             </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
+            <EuiSpacer size="s" />
             <EuiButtonGroup
               legend={i18n.translate('xpack.streams.streamDetailLifecycle.dataRetentionOptions', {
                 defaultMessage: 'Data retention',
@@ -168,39 +188,35 @@ export function EditLifecycleModal({
               isDisabled={isInherit}
               isFullWidth
             />
-          </EuiFlexItem>
+            <EuiSpacer size="s" />
 
-          {selectedAction === 'ilm' && !isInherit && (
-            <EuiFlexItem>
+            {selectedAction === 'ilm' && (
               <IlmField
                 getIlmPolicies={getIlmPolicies}
                 definition={definition}
                 setLifecycle={setLifecycle}
+                readOnly={isInherit}
               />
-            </EuiFlexItem>
-          )}
+            )}
 
-          {selectedAction === 'custom' && !isInherit && (
-            <EuiFlexItem>
+            {selectedAction === 'custom' && (
               <DslField
                 definition={definition}
-                isDisabled={false}
+                isDisabled={isInherit}
                 value={initialCustomPeriodValue}
                 setLifecycle={setLifecycle}
               />
-            </EuiFlexItem>
-          )}
+            )}
 
-          {!isServerless && selectedAction === 'custom' && (
-            <EuiFlexItem>
+            {!isServerless && selectedAction === 'custom' && (
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.streams.streamDetailLifecycle.description', {
                   defaultMessage:
                     'This retention period stores data in the hot tier for best indexing and search performance. To use alternative storage tiers, consider an ILM policy.',
                 })}
               </EuiText>
-            </EuiFlexItem>
-          )}
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
 
