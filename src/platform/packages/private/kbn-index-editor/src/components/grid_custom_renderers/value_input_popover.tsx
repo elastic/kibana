@@ -149,7 +149,7 @@ export const getValueInputPopover =
         <EuiCallOut
           size="s"
           title={i18n.translate('indexEditor.flyout.grid.cell.noColumnDefined', {
-            defaultMessage: 'Name the field before adding cell values',
+            defaultMessage: 'Define a field name in the column header before adding cell values',
           })}
         />
       );
