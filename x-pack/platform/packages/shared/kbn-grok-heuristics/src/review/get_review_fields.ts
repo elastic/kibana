@@ -75,8 +75,8 @@ export function isCollapsiblePattern(pattern: string) {
 }
 
 export function sanitize(value: string) {
-  // First escape existing backslashes
-  const escaped = value.replaceAll(/\\/g, '\\\\');
-  // Then escape regex meta-characters
+  // switch to RegExp.escape() when we are on node 24+
+  const escaped = value.replaceAll(/\\(?![sdwSDW])/g, '\\\\');
+
   return escaped.replaceAll(/[\.\[\]\{\}]/g, '\\$&');
 }
