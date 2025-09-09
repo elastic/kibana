@@ -39,17 +39,16 @@ export class ReferencedPanelManager {
 
     const panelsToFetch = [...this.panelsTypeById.entries()].map(([id, type]) => ({ id, type }));
 
-    let savedObjs;
+    let savedObjects;
     try {
-      const { saved_objects: savedObjects } =
-        await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
-      savedObjs = savedObjects;
+      const response = await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
+      savedObjects = response.saved_objects;
     } catch (error) {
       this.logger.error(`Failed to fetch referenced panels: ${error}`);
       return 0;
     }
 
-    savedObjs.forEach((so) => {
+    savedObjects.forEach((so) => {
       this.panelsById.set(so.id, {
         ...so.attributes,
         references: so.references,

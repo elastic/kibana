@@ -57,7 +57,7 @@ export class RelatedDashboardsClient {
       );
     }
     const linkedDashboardIds = (
-      (await await this.alertsClient.getRuleById(ruleId))?.artifacts?.dashboards || []
+      (await this.alertsClient.getRuleById(ruleId))?.artifacts?.dashboards || []
     ).map((d) => d.id);
 
     const [suggestedDashboards, linkedDashboards] = await Promise.all([
@@ -65,12 +65,12 @@ export class RelatedDashboardsClient {
       this.linkedDashboardsClient.getLinkedDashboardsByIds(linkedDashboardIds),
     ]);
 
-    const filteredSuggestedDashboards = suggestedDashboards.filter(
-      (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
-    );
+    const filteredSuggestedDashboards = suggestedDashboards
+      .filter((suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id))
+      .slice(0, 10); // limit to 10 suggested dashboards
 
     return {
-      suggestedDashboards: filteredSuggestedDashboards.slice(0, 10), // limit to 10 suggested dashboards
+      suggestedDashboards: filteredSuggestedDashboards,
       linkedDashboards,
     };
   }
