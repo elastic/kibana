@@ -3,7 +3,7 @@ info:
   version: '2023-10-31'
   title: Entity Store - Upsert Entity
 paths:
-  /api/entity_store/entities/{entityType}/{entityId}:
+  /api/entity_store/entities/{entityType}:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -25,11 +25,6 @@ paths:
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
-        - name: entityId
-          in: path
-          required: true
-          schema:
-            type: string
         - name: force
           in: query
           required: false

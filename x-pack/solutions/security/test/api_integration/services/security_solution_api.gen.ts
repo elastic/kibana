@@ -2350,7 +2350,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       return supertest
         .get(
           getRouteUrlForSpace(
-            replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
             kibanaSpace
           )
         )

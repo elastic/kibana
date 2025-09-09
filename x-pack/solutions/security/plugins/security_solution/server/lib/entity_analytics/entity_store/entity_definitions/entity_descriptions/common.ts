@@ -38,79 +38,81 @@ export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldD
   ];
 };
 
-export const getNestedEntityFieldsDescriptions = (field: EntityType) => {
+export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
+  const prefix = rootField ? `${rootField}.entity` : 'entity';
+
   return [
-    newestValue({ source: `${field}.entity.name`, destination: 'entity.name' }),
-    newestValue({ source: `${field}.entity.source`, destination: 'entity.source' }),
-    newestValue({ source: `${field}.entity.type`, destination: 'entity.type' }),
-    newestValue({ source: `${field}.entity.sub_type`, destination: 'entity.sub_type' }),
-    newestValue({ source: `${field}.entity.url`, destination: 'entity.url' }),
+    newestValue({ source: `${prefix}.name`, destination: 'entity.name' }),
+    newestValue({ source: `${prefix}.source`, destination: 'entity.source' }),
+    newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
+    newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
+    newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
     newestValue({
-      source: `${field}.entity.attributes.StorageClass`,
+      source: `${prefix}.attributes.StorageClass`,
       destination: 'entity.attributes.StorageClass',
     }),
     newestValue({
-      source: `${field}.entity.attributes.MfaEnabled`,
+      source: `${prefix}.attributes.MfaEnabled`,
       destination: 'entity.attributes.MfaEnabled',
     }),
     newestValue({
-      source: `${field}.entity.attributes.Privileged`,
+      source: `${prefix}.attributes.Privileged`,
       destination: 'entity.attributes.Privileged',
     }),
     newestValue({
-      source: `${field}.entity.attributes.GrantedPermissions`,
+      source: `${prefix}.attributes.GrantedPermissions`,
       destination: 'entity.attributes.GrantedPermissions',
     }),
     newestValue({
-      source: `${field}.entity.attributes.KnownRedirect`,
+      source: `${prefix}.attributes.KnownRedirect`,
       destination: 'entity.attributes.KnownRedirect',
     }),
     newestValue({
-      source: `${field}.entity.attributes.Asset`,
+      source: `${prefix}.attributes.Asset`,
       destination: 'entity.attributes.Asset',
     }),
     newestValue({
-      source: `${field}.entity.attributes.Managed`,
+      source: `${prefix}.attributes.Managed`,
       destination: 'entity.attributes.Managed',
     }),
     newestValue({
-      source: `${field}.entity.attributes.OsCurrent`,
+      source: `${prefix}.attributes.OsCurrent`,
       destination: 'entity.attributes.OsCurrent',
     }),
     newestValue({
-      source: `${field}.entity.attributes.OsPatchCurrent`,
+      source: `${prefix}.attributes.OsPatchCurrent`,
       destination: 'entity.attributes.OsPatchCurrent',
     }),
     newestValue({
-      source: `${field}.entity.attributes.OauthConsentRestriction`,
+      source: `${prefix}.attributes.OauthConsentRestriction`,
       destination: 'entity.attributes.OauthConsentRestriction',
     }),
     newestValue({
-      source: `${field}.entity.lifecycle.FirstSeen`,
+      source: `${prefix}.lifecycle.FirstSeen`,
       destination: 'entity.lifecycle.FirstSeen',
     }),
     newestValue({
-      source: `${field}.entity.lifecycle.LastActivity`,
+      source: `${prefix}.lifecycle.LastActivity`,
       destination: 'entity.lifecycle.LastActivity',
     }),
     newestValue({
-      source: `${field}.entity.lifecycle.IssuedAt`,
+      source: `${prefix}.lifecycle.IssuedAt`,
       destination: 'entity.lifecycle.IssuedAt',
     }),
     newestValue({
-      source: `${field}.entity.lifecycle.LastPasswordChange`,
+      source: `${prefix}.lifecycle.LastPasswordChange`,
       destination: 'entity.lifecycle.LastPasswordChange',
     }),
     newestValue({
-      source: `${field}.entity.behavior.UsedUsbDevice`,
+      source: `${prefix}.behavior.UsedUsbDevice`,
       destination: 'entity.behavior.UsedUsbDevice',
     }),
     newestValue({
-      source: `${field}.entity.behavior.BruteForceVictim`,
+      source: `${prefix}.behavior.BruteForceVictim`,
       destination: 'entity.behavior.BruteForceVictim',
     }),
     newestValue({
-      source: `${field}.entity.behavior.NewCountryLogin`,
+      source: `${prefix}.behavior.NewCountryLogin`,
       destination: 'entity.behavior.NewCountryLogin',
     }),
   ];
