@@ -198,4 +198,9 @@ export const labels = {
       }),
     },
   },
+  management: {
+    agentBuilder: i18n.translate('xpack.onechat.management.agentBuilder.title', {
+      defaultMessage: 'Agent Builder',
+    }),
+  },
 };

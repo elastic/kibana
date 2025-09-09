@@ -21,10 +21,9 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      readonly: true,
-      readonlyMode: 'ui',
       technicalPreview: true,
       requiresPageReload: true,
+      readonly: false,
     },
   });
 };
