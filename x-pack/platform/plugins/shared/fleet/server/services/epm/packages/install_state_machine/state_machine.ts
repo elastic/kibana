@@ -89,15 +89,15 @@ export async function handleState(
       if (currentState.isAsync) {
         // For async steps, start the operation but don't wait for completion
         const asyncOperation = currentState.onTransition.call(undefined, updatedContext);
-        
+
         // Store the promise for potential later monitoring
         const asyncKey = `${currentStateName}AsyncOperation`;
         updatedContext[asyncKey] = asyncOperation;
-        
+
         // Store error/result keys for later access
         const asyncResultKey = `${currentStateName}AsyncResult`;
         const asyncErrorKey = `${currentStateName}AsyncError`;
-        
+
         // Handle completion/errors in background without blocking state machine
         asyncOperation
           .then((result: any) => {
@@ -147,7 +147,7 @@ export async function handleState(
           };
         }
       }
-      
+
       currentStatus = 'success';
       logger.debug(
         `Executed state: ${currentStateName} with status: ${currentStatus} - nextState: ${currentState.nextState}`
