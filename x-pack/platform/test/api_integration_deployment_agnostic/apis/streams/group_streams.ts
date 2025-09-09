@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams } from './helpers/requests';
@@ -19,6 +20,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   let apiClient: StreamsSupertestRepositoryClient;
+  const existingDataStreamName = 'logs-existing-datastream';
+  const unmanagedStreamName = 'logs-test-unmanaged';
 
   describe('Group streams', () => {
     before(async () => {
@@ -29,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await disableStreams(apiClient);
       await esClient.indices.deleteDataStream({
-        name: 'logs-existing-datastream',
+        name: [existingDataStreamName, unmanagedStreamName],
       });
     });
 
@@ -48,9 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     members: ['logs'],
                   },
                 },
-                dashboards: [],
-                queries: [],
-                rules: [],
+                ...emptyAssets,
               },
             },
           })
@@ -104,9 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -132,9 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 members: ['logs'],
               },
             },
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
           });
         });
 
@@ -152,9 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs.test'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -178,9 +173,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 members: ['logs.test'],
               },
             },
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
           });
         });
 
@@ -210,9 +203,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs', 'logs.test'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -231,9 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['test-group'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -278,9 +267,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['test-group'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -301,13 +288,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['non-existent-stream'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
             .expect(400);
+        });
+
+        it('promotes unmanaged Classic streams to managed Classic streams when added as a member', async () => {
+          await esClient.indices.createDataStream({
+            name: unmanagedStreamName,
+          });
+
+          await apiClient
+            .fetch('PUT /api/streams/{name} 2023-10-31', {
+              params: {
+                path: { name: 'test-group' },
+                body: {
+                  stream: {
+                    description: 'A Group stream',
+                    group: {
+                      metadata: {},
+                      tags: [],
+                      members: [unmanagedStreamName],
+                    },
+                  },
+                  ...emptyAssets,
+                },
+              },
+            })
+            .expect(200);
+
+          const { found } = await esClient.get({
+            index: '.kibana_streams',
+            id: unmanagedStreamName,
+          });
+          expect(found).to.be(true);
         });
 
         it('cannot create a Group stream with duplicated relationships', async () => {
@@ -324,9 +340,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs', 'logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -335,13 +349,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('cannot overwrite an existing data stream', async () => {
           await esClient.indices.createDataStream({
-            name: 'logs-existing-datastream',
+            name: existingDataStreamName,
           });
 
           await apiClient
             .fetch('PUT /api/streams/{name} 2023-10-31', {
               params: {
-                path: { name: 'logs-existing-datastream' },
+                path: { name: existingDataStreamName },
                 body: {
                   stream: {
                     description: 'A Group stream',
@@ -351,9 +365,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -374,9 +386,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
