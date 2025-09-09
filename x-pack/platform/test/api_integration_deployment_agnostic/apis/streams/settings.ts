@@ -38,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const dataStreams = await esClient.indices.getDataStreamSettings({ name: streams });
     for (const dataStream of dataStreams.data_streams) {
       Object.entries(expectedSettings).forEach(([key, expectedValue]) => {
-        expect(get(dataStream.effective_settings, key)).to.eql(String(expectedValue.value));
+        expect(get(dataStream.effective_settings, key)).to.eql(expectedValue.value);
       });
     }
   }
