@@ -15,6 +15,7 @@ export class KubernetesEAFlowPage {
   private readonly codeBlock: Locator;
   private readonly copyToClipboardButton: Locator;
   private readonly logsDataReceivedIndicator: Locator;
+  private readonly exploreLogsButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -29,10 +30,12 @@ export class KubernetesEAFlowPage {
     this.copyToClipboardButton = this.page.getByTestId(
       'observabilityOnboardingCopyToClipboardButton'
     );
-    // logs essentials mode 
+    // logs essentials mode
     this.logsDataReceivedIndicator = this.page
       .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
-      .getByText(/logs.*ready|data.*ready|ready.*explore/i);
+      .getByText('We are monitoring your cluster');
+
+      this.exploreLogsButton = this.page.getByText('Explore logs');
   }
 
   public async assertVisibilityCodeBlock() {
@@ -59,5 +62,9 @@ export class KubernetesEAFlowPage {
 
   public async clickKubernetesAgentCTA() {
     await this.kubernetesAgentExploreDataActionLink.click();
+  }
+
+  public async clickExploreLogsCTA() {
+    await this.exploreLogsButton.click();
   }
 }

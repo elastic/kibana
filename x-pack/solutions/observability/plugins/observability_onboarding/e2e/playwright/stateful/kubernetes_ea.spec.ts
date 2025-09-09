@@ -7,7 +7,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
@@ -63,8 +62,9 @@ test('Kubernetes EA', async ({
     await kubernetesEAFlowPage.clickKubernetesAgentCTA();
     await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
   } else {
+    await page.waitForTimeout(5 * 60000);
+    
     await kubernetesEAFlowPage.assertLogsDataReceivedIndicator();
-    await page.waitForTimeout(2 * 60000);
-    await kubernetesEAFlowPage.clickKubernetesAgentCTA();
+    await kubernetesEAFlowPage.clickExploreLogsCTA();
   } 
 });
