@@ -150,7 +150,7 @@ export function mapField(
   detectedSchemaFieldsCache: Map<string, SchemaField>;
 } {
   const updatedCache = new Map(context.detectedSchemaFieldsCache);
-  
+
   const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== updatedField.name) return field;
 
@@ -173,7 +173,7 @@ export function unmapField(
   detectedSchemaFieldsCache: Map<string, SchemaField>;
 } {
   const updatedCache = new Map(context.detectedSchemaFieldsCache);
-  
+
   const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== fieldName) return field;
 
