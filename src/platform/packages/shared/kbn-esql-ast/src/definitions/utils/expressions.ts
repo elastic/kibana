@@ -130,6 +130,15 @@ export function getExpressionType(
       argTypes,
       literalMask
     );
+
+    if (matchingSignatures.length > 0 && argTypes.includes('null')) {
+      // if one of the arguments is null, the return type is null.
+      // this is true for most (all?) functions in ES|QL
+      // though it is not reflected in our function definitions
+      // so we handle it here
+      return 'null';
+    }
+
     const returnTypes = uniq(matchingSignatures.map((sig) => sig.returnType));
 
     if (
