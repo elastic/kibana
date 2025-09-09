@@ -9,13 +9,23 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLogReadinessTask } from '@kbn/siem-readiness';
 import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText, EuiButton } from '@elastic/eui';
+import { ReadinessTasksPanel } from './readiness_tasks_table';
 
 const SiemReadinessDashboard = () => {
   const { logReadinessTask } = useLogReadinessTask();
 
   const handleLogTask = useCallback(async () => {
-    logReadinessTask({ task_id: '1', status: 'complete', meta: { demo: 'demo_data' } });
+    logReadinessTask({ task_id: '1', status: 'completed', meta: { demo: 'demo_data' } });
   }, [logReadinessTask]);
+
+  return (
+    <>
+      <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
+      <EuiPageSection>
+        <ReadinessTasksPanel />
+      </EuiPageSection>
+    </>
+  );
 
   return (
     <>

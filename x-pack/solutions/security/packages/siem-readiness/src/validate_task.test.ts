@@ -49,7 +49,7 @@ describe('validateTask', () => {
     it('should validate a complete task with all required meta fields', () => {
       const task: SiemReadinessTask = {
         task_id: 'enable-endpoint-visibility',
-        status: 'complete',
+        status: 'completed',
         meta: {
           agent_status: 'healthy',
           endpoint_count: 5,
@@ -62,7 +62,7 @@ describe('validateTask', () => {
     it('should validate a task with cloud provider array', () => {
       const task: SiemReadinessTask = {
         task_id: 'ingest-cloud-audit-logs',
-        status: 'complete',
+        status: 'completed',
         meta: {
           cloud_provider: ['aws', 'azure'],
           log_count: 100,
@@ -88,7 +88,7 @@ describe('validateTask', () => {
     it('should validate a task with no meta requirements', () => {
       const task: SiemReadinessTask = {
         task_id: 'no-meta-task',
-        status: 'complete',
+        status: 'completed',
       };
 
       expect(() => validateTask(task)).not.toThrow();
@@ -97,7 +97,7 @@ describe('validateTask', () => {
     it('should validate a task with empty meta requirements', () => {
       const task: SiemReadinessTask = {
         task_id: 'empty-meta-task',
-        status: 'complete',
+        status: 'completed',
         meta: {},
       };
 
@@ -109,7 +109,7 @@ describe('validateTask', () => {
     it('should throw error for non-existent task_id', () => {
       const task: SiemReadinessTask = {
         task_id: 'non-existent-task' as never,
-        status: 'complete',
+        status: 'completed',
         meta: {},
       };
 
@@ -131,7 +131,7 @@ describe('validateTask', () => {
       };
 
       expect(() => validateTask(task)).toThrow(
-        'Invalid status: in-progress. Must be one of: complete, incomplete'
+        'Invalid status: in-progress. Must be one of: completed, incomplete'
       );
     });
   });
@@ -140,7 +140,7 @@ describe('validateTask', () => {
     it('should throw error when meta is missing but required', () => {
       const task: SiemReadinessTask = {
         task_id: 'enable-endpoint-visibility',
-        status: 'complete',
+        status: 'completed',
         // meta is missing
       };
 
@@ -152,7 +152,7 @@ describe('validateTask', () => {
     it('should throw error when meta is not an object', () => {
       const task: SiemReadinessTask = {
         task_id: 'enable-endpoint-visibility',
-        status: 'complete',
+        status: 'completed',
         meta: 'invalid' as never,
       };
 
@@ -164,7 +164,7 @@ describe('validateTask', () => {
     it('should throw error for missing required meta field', () => {
       const task: SiemReadinessTask = {
         task_id: 'ingest-cloud-audit-logs',
-        status: 'complete',
+        status: 'completed',
         meta: {
           cloud_provider: ['aws'],
           // log_count is missing
@@ -179,7 +179,7 @@ describe('validateTask', () => {
     it('should throw error for incorrect meta field type', () => {
       const task: SiemReadinessTask = {
         task_id: 'ingest-cloud-audit-logs',
-        status: 'complete',
+        status: 'completed',
         meta: {
           cloud_provider: 'aws', // should be array, not string
           log_count: 50,
@@ -194,7 +194,7 @@ describe('validateTask', () => {
     it('should throw error for extra meta fields', () => {
       const task: SiemReadinessTask = {
         task_id: 'enable-endpoint-visibility',
-        status: 'complete',
+        status: 'completed',
         meta: {
           agent_status: 'healthy',
           endpoint_count: 123,

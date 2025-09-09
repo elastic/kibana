@@ -9,7 +9,7 @@ import type { SiemReadinessTask } from '..';
 import { READINESS_TASKS } from './readiness_tasks';
 
 const validTaskIds = READINESS_TASKS.map((config) => config.id);
-const validStatuses: SiemReadinessTask['status'][] = ['complete', 'incomplete'];
+const validStatuses: SiemReadinessTask['status'][] = ['completed', 'incomplete'];
 
 export const validateTask = (task: SiemReadinessTask): void => {
   // Find task
@@ -28,6 +28,10 @@ export const validateTask = (task: SiemReadinessTask): void => {
   const expectedMetaFields = taskConfig.meta;
 
   if (expectedMetaFields) {
+    if (!('meta' in task)) {
+      throw new Error(`Task ${task.task_id} should have a meta field`);
+    }
+
     const expectedFields = Object.keys(expectedMetaFields);
 
     if (!task.meta || typeof task.meta !== 'object') {

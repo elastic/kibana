@@ -7,21 +7,20 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 import { API_VERSIONS } from '../../../../common/constants';
-import { POST_SIEM_READINESS_TASK_API_PATH } from '../../../../common/api/siem_readiness/constants';
+import { GET_SIEM_READINESS_TASKS_API_PATH } from '../../../../common/api/siem_readiness/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 
 const SIEM_READINESS_INDEX = 'security_solution-siem_readiness';
 
-export const postReadinessTaskRoute = (
+export const getLatestReadinessTaskRoute = (
   router: SiemReadinessRoutesDeps['router'],
   logger: SiemReadinessRoutesDeps['logger']
 ) => {
   router.versioned
-    .post({
+    .get({
       access: 'public',
-      path: POST_SIEM_READINESS_TASK_API_PATH,
+      path: GET_SIEM_READINESS_TASKS_API_PATH,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -31,15 +30,7 @@ export const postReadinessTaskRoute = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: {
-            body: schema.object({
-              task_id: schema.string(),
-              status: schema.oneOf([schema.literal('completed'), schema.literal('incomplete')]),
-              meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-            }),
-          },
-        },
+        validate: {},
       },
 
       async (context, request, response) => {
@@ -49,26 +40,27 @@ export const postReadinessTaskRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const indexDocument = {
-            ...request.body,
-            '@timestamp': new Date().toISOString(),
-          };
-
-          await esClient.index({
+          const searchResult = await esClient.search({
             index: SIEM_READINESS_INDEX,
-            body: indexDocument,
+            body: {
+              query: { match_all: {} },
+              sort: [{ '@timestamp': { order: 'desc' } }],
+            },
           });
 
           logger.info(
-            `Indexed SIEM readiness task (${request.body.task_id}) to ${SIEM_READINESS_INDEX}`
+            `Retrieved ${searchResult.hits.hits.length} SIEM readiness tasks from ${SIEM_READINESS_INDEX}`
           );
 
-          return response.ok({ body: request.body });
+          return response.ok({
+            body: {
+              hits: searchResult.hits.hits,
+              total: searchResult.hits.total,
+            },
+          });
         } catch (e) {
           const error = transformError(e);
-          logger.error(
-            `Error logging SIEM readiness task (${request.body.task_id}): ${error.message}`
-          );
+          logger.error(`Error retrieving SIEM readiness tasks: ${error.message}`);
 
           return siemResponse.error({
             statusCode: error.statusCode,
