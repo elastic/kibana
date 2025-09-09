@@ -570,7 +570,6 @@ const connectorSchemaCache = new Map<string, Record<string, any> | null>();
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
 
-
 function getConnectorParamsSchema(connectorType: string): Record<string, any> | null {
   // Check cache first
   if (connectorSchemaCache.has(connectorType)) {

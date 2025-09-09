@@ -287,7 +287,6 @@ export const WorkflowYAMLEditor = ({
 
         setYamlDocument(parsedDocument);
         yamlDocumentRef.current = parsedDocument;
-
       } catch (error) {
         console.error('❌ Error parsing YAML document:', error);
         clearAllDecorations();
@@ -316,7 +315,6 @@ export const WorkflowYAMLEditor = ({
 
     // Setup Elasticsearch step providers if we have the required services
     if (http && notifications) {
-
       // Register Elasticsearch connector handler
       const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
         http,
@@ -371,7 +369,6 @@ export const WorkflowYAMLEditor = ({
         actions: actionsProvider,
         stepExecution: null, // will be created when needed
       };
-
     }
 
     onMount?.(editor, monaco);
@@ -392,7 +389,6 @@ export const WorkflowYAMLEditor = ({
   // Force refresh of decorations when props.value changes externally (e.g., switching executions)
   useEffect(() => {
     if (isEditorMounted && editorRef.current && props.value !== undefined) {
-
       // Always clear decorations first when switching executions/revisions
       clearAllDecorations();
 
@@ -401,7 +397,6 @@ export const WorkflowYAMLEditor = ({
       if (model) {
         const currentContent = model.getValue();
         if (currentContent !== props.value) {
-
           // Wait a bit longer for Monaco to update its content, then force re-parse
           setTimeout(() => {
             changeSideEffects();
@@ -443,7 +438,6 @@ export const WorkflowYAMLEditor = ({
     const timeoutId = setTimeout(() => {
       try {
         if (readOnly) {
-
           // Ensure yamlDocumentRef is synchronized
           if (yamlDocument && !yamlDocumentRef.current) {
             yamlDocumentRef.current = yamlDocument;
@@ -597,7 +591,6 @@ export const WorkflowYAMLEditor = ({
   // Handle connector type decorations (GitLens-style inline icons)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-
       if (!isEditorMounted || !editorRef.current || !yamlDocument) {
         return;
       }
@@ -632,7 +625,6 @@ export const WorkflowYAMLEditor = ({
         }
 
         const typeRange = typePair.value.range;
-
 
         if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
 
@@ -699,10 +691,8 @@ export const WorkflowYAMLEditor = ({
           ];
 
           decorations.push(...decorations_to_add);
-
         }
       }
-
 
       if (decorations.length > 0) {
         connectorTypeDecorationCollectionRef.current =
@@ -725,7 +715,6 @@ export const WorkflowYAMLEditor = ({
       return { className: connectorType };
     }
   };
-
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);

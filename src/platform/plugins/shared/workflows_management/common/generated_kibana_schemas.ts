@@ -1,10 +1,19 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
- * 
+ *
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
  * Generated at: 2025-09-09T10:49:17.745Z
  * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
- * 
+ *
  * To regenerate: npm run generate:kibana-connectors
  */
 
@@ -151,7 +160,7 @@ export const verification_mode = z.enum(['certificate', 'full', 'none']);
 export const webhook_config = z
   .object({
     authType: auth_type.nullable(),
-    ca: ca,
+    ca,
     certType: cert_type,
     hasAuth: has_auth.default(true),
     headers: z.object({}).partial().passthrough().nullable(),
@@ -188,7 +197,9 @@ export const xmatters_config = z
   .object({ configUrl: z.string().nullable(), usesBasic: z.boolean().default(true) })
   .partial()
   .passthrough();
-export const bedrock_secrets = z.object({ accessKey: z.string(), secret: z.string() }).passthrough();
+export const bedrock_secrets = z
+  .object({ accessKey: z.string(), secret: z.string() })
+  .passthrough();
 export const crowdstrike_secrets = z
   .object({ clientId: z.string(), clientSecret: z.string() })
   .passthrough();
@@ -235,11 +246,11 @@ export const crt = z.string();
 export const key = z.string();
 export const pfx = z.string();
 export const webhook_secrets = z
-  .object({ crt: crt, key: key, pfx: pfx, password: z.string(), user: z.string() })
+  .object({ crt, key, pfx, password: z.string(), user: z.string() })
   .partial()
   .passthrough();
 export const cases_webhook_secrets = z
-  .object({ crt: crt, key: key, pfx: pfx, password: z.string(), user: z.string() })
+  .object({ crt, key, pfx, password: z.string(), user: z.string() })
   .partial()
   .passthrough();
 export const xmatters_secrets = z
@@ -736,7 +747,7 @@ export const params_es_query_dsl_rule = z
     size: size.int().optional(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
@@ -803,7 +814,7 @@ export const params_es_query_kql_rule = z
     size: size.int(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield.optional(),
     timeWindowSize: timewindowsize.int(),
@@ -819,7 +830,7 @@ export const params_index_threshold_rule = z
     index: z.array(z.string()),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
@@ -1401,7 +1412,9 @@ export const APM_UI_service_object = z
   .object({ environment: z.string(), name: z.string() })
   .partial()
   .passthrough();
-export const APM_UI_delete_service_object = z.object({ service: APM_UI_service_object }).passthrough();
+export const APM_UI_delete_service_object = z
+  .object({ service: APM_UI_service_object })
+  .passthrough();
 export const APM_UI_delete_agent_configurations_response = z
   .object({ result: z.string() })
   .partial()
@@ -1893,13 +1906,10 @@ export const Cases_case_response_properties = z
     closed_by: Cases_case_response_closed_by_properties.nullable(),
     comments: z
       .array(
-        z.union( [
-          Cases_alert_comment_response_properties,
-          Cases_user_comment_response_properties,
-        ])
+        z.union([Cases_alert_comment_response_properties, Cases_user_comment_response_properties])
       )
       .max(10000),
-    connector: z.union( [
+    connector: z.union([
       Cases_connector_properties_none,
       Cases_connector_properties_cases_webhook,
       Cases_connector_properties_jira,
@@ -1981,7 +1991,9 @@ export const Cases_owners = z.array(Cases_owner);
 export const owner = z.union([Cases_owner, Cases_owners]).optional();
 export const Cases_searchFieldsType = z.enum(['description', 'title']);
 export const Cases_searchFieldsTypeArray = z.array(Cases_searchFieldsType);
-export const searchFields = z.union([Cases_searchFieldsType, Cases_searchFieldsTypeArray]).optional();
+export const searchFields = z
+  .union([Cases_searchFieldsType, Cases_searchFieldsTypeArray])
+  .optional();
 export const Cases_alert_response_properties = z
   .object({ attached_at: z.string().datetime({ offset: true }), id: z.string(), index: z.string() })
   .partial()
@@ -2009,7 +2021,7 @@ export const Cases_update_user_comment_request_properties = z
     version: z.string(),
   })
   .passthrough();
-export const Cases_update_case_comment_request = z.union( [
+export const Cases_update_case_comment_request = z.union([
   Cases_update_alert_comment_request_properties,
   Cases_update_user_comment_request_properties,
 ]);
@@ -2025,7 +2037,7 @@ export const Cases_add_alert_comment_request_properties = z
 export const Cases_add_user_comment_request_properties = z
   .object({ comment: z.string().max(30000), owner: Cases_owner, type: z.literal('user') })
   .passthrough();
-export const Cases_add_case_comment_request = z.union( [
+export const Cases_add_case_comment_request = z.union([
   Cases_add_alert_comment_request_properties,
   Cases_add_user_comment_request_properties,
 ]);
@@ -2138,12 +2150,18 @@ export const Cases_payload_create_case = z
   .partial()
   .passthrough();
 export const Cases_payload_delete = z.object({}).partial().passthrough();
-export const Cases_payload_description = z.object({ description: z.string() }).partial().passthrough();
+export const Cases_payload_description = z
+  .object({ description: z.string() })
+  .partial()
+  .passthrough();
 export const Cases_payload_pushed = z
   .object({ externalService: Cases_external_service.nullable() })
   .partial()
   .passthrough();
-export const Cases_payload_settings = z.object({ settings: Cases_settings }).partial().passthrough();
+export const Cases_payload_settings = z
+  .object({ settings: Cases_settings })
+  .partial()
+  .passthrough();
 export const Cases_payload_severity = z
   .object({ severity: Cases_case_severity.default('low') })
   .partial()
@@ -2675,7 +2693,9 @@ export const Security_Detections_API_IsRuleImmutable = z.boolean();
 export const Security_Detections_API_RequiredField = z
   .object({ ecs: z.boolean(), name: z.string().min(1), type: z.string().min(1) })
   .passthrough();
-export const Security_Detections_API_RequiredFieldArray = z.array(Security_Detections_API_RequiredField);
+export const Security_Detections_API_RequiredFieldArray = z.array(
+  Security_Detections_API_RequiredField
+);
 export const Security_Detections_API_RuleRevision = z.number();
 export const Security_Detections_API_RuleSignatureId = z.string();
 export const Security_Detections_API_IsExternalRuleCustomized = z.boolean();
@@ -2688,7 +2708,7 @@ export const Security_Detections_API_ExternalRuleSource = z
 export const Security_Detections_API_InternalRuleSource = z
   .object({ type: z.literal('internal') })
   .passthrough();
-export const Security_Detections_API_RuleSource = z.union( [
+export const Security_Detections_API_RuleSource = z.union([
   Security_Detections_API_ExternalRuleSource,
   Security_Detections_API_InternalRuleSource,
 ]);
@@ -2754,9 +2774,8 @@ export const Security_Detections_API_EqlOptionalFields = z
   })
   .partial()
   .passthrough();
-export const Security_Detections_API_EqlRuleResponseFields = Security_Detections_API_EqlRequiredFields.and(
-  Security_Detections_API_EqlOptionalFields
-);
+export const Security_Detections_API_EqlRuleResponseFields =
+  Security_Detections_API_EqlRequiredFields.and(Security_Detections_API_EqlOptionalFields);
 export const Security_Detections_API_EqlRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3112,7 +3131,10 @@ export const Security_Detections_API_ThreatMatchRule = z
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_ThreatMatchRuleResponseFields);
 export const Security_Detections_API_AnomalyThreshold = z.number();
-export const Security_Detections_API_MachineLearningJobId = z.union([z.string(), z.array(z.string())]);
+export const Security_Detections_API_MachineLearningJobId = z.union([
+  z.string(),
+  z.array(z.string()),
+]);
 export const Security_Detections_API_MachineLearningRuleRequiredFields = z
   .object({
     anomaly_threshold: Security_Detections_API_AnomalyThreshold.int().gte(0),
@@ -3790,9 +3812,8 @@ export const Security_Detections_API_RulePatchProps = z.union([
   Security_Detections_API_NewTermsRulePatchProps,
   Security_Detections_API_EsqlRulePatchProps,
 ]);
-export const Security_Detections_API_EqlRuleCreateFields = Security_Detections_API_EqlRequiredFields.and(
-  Security_Detections_API_EqlOptionalFields
-);
+export const Security_Detections_API_EqlRuleCreateFields =
+  Security_Detections_API_EqlRequiredFields.and(Security_Detections_API_EqlOptionalFields);
 export const Security_Detections_API_EqlRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4862,7 +4883,10 @@ export const Security_Exceptions_API_CreateRuleExceptionListItemCommentArray = z
   Security_Exceptions_API_CreateRuleExceptionListItemComment
 );
 export const Security_Exceptions_API_ExceptionListItemDescription = z.string();
-export const Security_Exceptions_API_ExceptionListItemEntryOperator = z.enum(['excluded', 'included']);
+export const Security_Exceptions_API_ExceptionListItemEntryOperator = z.enum([
+  'excluded',
+  'included',
+]);
 export const Security_Exceptions_API_ExceptionListItemEntryMatch = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
@@ -5138,10 +5162,20 @@ export const Saved_objects_400_response = z
 export const Security_Endpoint_Exceptions_API_ExceptionListDescription = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionListId = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionListHumanId = z.string();
-export const Security_Endpoint_Exceptions_API_ExceptionListMeta = z.object({}).partial().passthrough();
+export const Security_Endpoint_Exceptions_API_ExceptionListMeta = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Exceptions_API_ExceptionListName = z.string();
-export const Security_Endpoint_Exceptions_API_ExceptionNamespaceType = z.enum(['agnostic', 'single']);
-export const Security_Endpoint_Exceptions_API_ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
+export const Security_Endpoint_Exceptions_API_ExceptionNamespaceType = z.enum([
+  'agnostic',
+  'single',
+]);
+export const Security_Endpoint_Exceptions_API_ExceptionListOsType = z.enum([
+  'linux',
+  'macos',
+  'windows',
+]);
 export const Security_Endpoint_Exceptions_API_ExceptionListOsTypeArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListOsType
 );
@@ -5303,7 +5337,10 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray = z.ar
 export const Security_Endpoint_Exceptions_API_ExceptionListItemExpireTime = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemId = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemHumanId = z.string();
-export const Security_Endpoint_Exceptions_API_ExceptionListItemMeta = z.object({}).partial().passthrough();
+export const Security_Endpoint_Exceptions_API_ExceptionListItemMeta = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemName = z.string();
 export const Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListOsType
@@ -5380,7 +5417,10 @@ export const Security_Endpoint_Management_API_GetEndpointActionListResponse = z
   .object({})
   .partial()
   .passthrough();
-export const Security_Endpoint_Management_API_AgentIds = z.union([z.array(z.string().min(1)), z.string()]);
+export const Security_Endpoint_Management_API_AgentIds = z.union([
+  z.array(z.string().min(1)),
+  z.string(),
+]);
 export const query = z
   .object({ agent_ids: Security_Endpoint_Management_API_AgentIds })
   .partial()
@@ -5422,7 +5462,10 @@ export const Security_Endpoint_Management_API_GetEndpointActionResponse = z
   .object({})
   .partial()
   .passthrough();
-export const Security_Endpoint_Management_API_SuccessResponse = z.object({}).partial().passthrough();
+export const Security_Endpoint_Management_API_SuccessResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Management_API_AgentTypes = z.enum([
   'endpoint',
   'sentinel_one',
@@ -5455,7 +5498,10 @@ export const Security_Endpoint_Management_API_ExecuteRouteRequestBody = z
       })
       .passthrough()
   );
-export const Security_Endpoint_Management_API_ExecuteRouteResponse = z.object({}).partial().passthrough();
+export const Security_Endpoint_Management_API_ExecuteRouteResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Management_API_GetFileRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5467,7 +5513,10 @@ export const Security_Endpoint_Management_API_GetFileRouteRequestBody = z
   })
   .passthrough()
   .and(z.object({ parameters: z.object({ path: z.string() }).passthrough() }).passthrough());
-export const Security_Endpoint_Management_API_GetFileRouteResponse = z.object({}).partial().passthrough();
+export const Security_Endpoint_Management_API_GetFileRouteResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const EndpointIsolateAction_Body = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5478,7 +5527,10 @@ export const EndpointIsolateAction_Body = z
     parameters: Security_Endpoint_Management_API_Parameters.optional(),
   })
   .passthrough();
-export const Security_Endpoint_Management_API_IsolateRouteResponse = z.object({}).partial().passthrough();
+export const Security_Endpoint_Management_API_IsolateRouteResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Management_API_KillProcessRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5624,7 +5676,10 @@ export const Security_Endpoint_Management_API_ScanRouteRequestBody = z
   })
   .passthrough()
   .and(z.object({ parameters: z.object({ path: z.string() }).passthrough() }).passthrough());
-export const Security_Endpoint_Management_API_ScanRouteResponse = z.object({}).partial().passthrough();
+export const Security_Endpoint_Management_API_ScanRouteResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Management_API_ActionStateSuccessResponse = z
   .object({
     body: z
@@ -5687,8 +5742,14 @@ export const Security_Endpoint_Management_API_UploadRouteRequestBody = z
       })
       .passthrough()
   );
-export const Security_Endpoint_Management_API_UploadRouteResponse = z.object({}).partial().passthrough();
-export const Security_Endpoint_Management_API_MetadataListResponse = z.object({}).partial().passthrough();
+export const Security_Endpoint_Management_API_UploadRouteResponse = z
+  .object({})
+  .partial()
+  .passthrough();
+export const Security_Endpoint_Management_API_MetadataListResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Endpoint_Management_API_EndpointMetadataResponse = z
   .object({})
   .partial()
@@ -5772,7 +5833,12 @@ export const Security_Entity_Analytics_API_PrivmonUserCsvUploadStats = z
   .object({ failed: z.number().int(), successful: z.number().int(), total: z.number().int() })
   .passthrough();
 export const Security_Entity_Analytics_API_Interval = z.string();
-export const Security_Entity_Analytics_API_EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const Security_Entity_Analytics_API_EntityType = z.enum([
+  'user',
+  'host',
+  'service',
+  'generic',
+]);
 export const Security_Entity_Analytics_API_IndexPattern = z.string();
 export const InitEntityStore_Body = z
   .object({
@@ -5886,7 +5952,9 @@ export const Security_Entity_Analytics_API_EngineDataviewUpdateResult = z
 export const Security_Entity_Analytics_API_InspectQuery = z
   .object({ dsl: z.array(z.string()), response: z.array(z.string()) })
   .passthrough();
-export const Security_Entity_Analytics_API_EngineMetadata = z.object({ Type: z.string() }).passthrough();
+export const Security_Entity_Analytics_API_EngineMetadata = z
+  .object({ Type: z.string() })
+  .passthrough();
 export const Security_Entity_Analytics_API_EntityRiskLevels = z.enum([
   'Unknown',
   'Low',
@@ -7761,11 +7829,12 @@ export const Security_Timeline_API_NoteCreatedAndUpdatedMetadata = z
   })
   .partial()
   .passthrough();
-export const Security_Timeline_API_BareNote = Security_Timeline_API_NoteCreatedAndUpdatedMetadata.and(
-  z
-    .object({ eventId: z.string().nullish(), note: z.string().nullish(), timelineId: z.string() })
-    .passthrough()
-);
+export const Security_Timeline_API_BareNote =
+  Security_Timeline_API_NoteCreatedAndUpdatedMetadata.and(
+    z
+      .object({ eventId: z.string().nullish(), note: z.string().nullish(), timelineId: z.string() })
+      .passthrough()
+  );
 export const Security_Timeline_API_Note = Security_Timeline_API_BareNote.and(
   z.object({ noteId: z.string(), version: z.string() }).passthrough()
 );
@@ -7889,8 +7958,14 @@ export const Security_Osquery_API_CreateLiveQueryRequestBody = z
   .partial()
   .passthrough();
 export const Security_Osquery_API_CreateLiveQueryResponse = z.object({}).partial().passthrough();
-export const Security_Osquery_API_FindLiveQueryDetailsResponse = z.object({}).partial().passthrough();
-export const Security_Osquery_API_GetLiveQueryResultsResponse = z.object({}).partial().passthrough();
+export const Security_Osquery_API_FindLiveQueryDetailsResponse = z
+  .object({})
+  .partial()
+  .passthrough();
+export const Security_Osquery_API_GetLiveQueryResultsResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Osquery_API_FindPacksResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_PackDescription = z.string();
 export const Security_Osquery_API_PackDescriptionOrUndefined = Security_Osquery_API_PackDescription;
@@ -7960,7 +8035,10 @@ export const Security_Osquery_API_CreateSavedQueryRequestBody = z
   .passthrough();
 export const Security_Osquery_API_CreateSavedQueryResponse = z.object({}).partial().passthrough();
 export const Security_Osquery_API_DefaultSuccessResponse = z.object({}).partial().passthrough();
-export const Security_Osquery_API_FindSavedQueryDetailResponse = z.object({}).partial().passthrough();
+export const Security_Osquery_API_FindSavedQueryDetailResponse = z
+  .object({})
+  .partial()
+  .passthrough();
 export const Security_Osquery_API_IntervalOrUndefined = Security_Osquery_API_Interval;
 export const Security_Osquery_API_UpdateSavedQueryRequestBody = z
   .object({
@@ -12521,7 +12599,7 @@ export const Synthetics_tcpMonitorFields = Synthetics_commonMonitorFields.and(
     })
     .passthrough()
 );
-export const post_synthetic_monitors_Body = z.union( [
+export const post_synthetic_monitors_Body = z.union([
   Synthetics_browserMonitorFields,
   Synthetics_httpMonitorFields,
   Synthetics_icmpMonitorFields,
@@ -12883,19 +12961,20 @@ export const Security_Timeline_API_ImportTimelineResult = z
   })
   .partial()
   .passthrough();
-export const Security_Timeline_API_TimelineSavedToReturnObject = Security_Timeline_API_SavedTimeline.and(
-  z
-    .object({
-      eventIdToNoteIds: z.array(Security_Timeline_API_Note).nullish(),
-      noteIds: z.array(z.string()).nullish(),
-      notes: z.array(Security_Timeline_API_Note).nullish(),
-      pinnedEventIds: z.array(z.string()).nullish(),
-      pinnedEventsSaveObject: z.array(Security_Timeline_API_PinnedEvent).nullish(),
-      savedObjectId: z.string(),
-      version: z.string(),
-    })
-    .passthrough()
-);
+export const Security_Timeline_API_TimelineSavedToReturnObject =
+  Security_Timeline_API_SavedTimeline.and(
+    z
+      .object({
+        eventIdToNoteIds: z.array(Security_Timeline_API_Note).nullish(),
+        noteIds: z.array(z.string()).nullish(),
+        notes: z.array(Security_Timeline_API_Note).nullish(),
+        pinnedEventIds: z.array(z.string()).nullish(),
+        pinnedEventsSaveObject: z.array(Security_Timeline_API_PinnedEvent).nullish(),
+        savedObjectId: z.string(),
+        version: z.string(),
+      })
+      .passthrough()
+  );
 export const Security_Timeline_API_ImportTimelines = Security_Timeline_API_SavedTimeline.and(
   z
     .object({
@@ -13220,7 +13299,7 @@ export const SLOs_slo_with_summary_response = z
     enabled: z.boolean(),
     groupBy: SLOs_group_by,
     id: z.string(),
-    indicator: z.union( [
+    indicator: z.union([
       SLOs_indicator_properties_custom_kql,
       SLOs_indicator_properties_apm_availability,
       SLOs_indicator_properties_apm_latency,
@@ -13315,7 +13394,10 @@ export const SLOs_bulk_purge_rollup_request = z
     ]),
   })
   .passthrough();
-export const SLOs_bulk_purge_rollup_response = z.object({ taskId: z.string() }).partial().passthrough();
+export const SLOs_bulk_purge_rollup_response = z
+  .object({ taskId: z.string() })
+  .partial()
+  .passthrough();
 export const SLOs_delete_slo_instances_request = z
   .object({ list: z.array(z.object({ instanceId: z.string(), sloId: z.string() }).passthrough()) })
   .passthrough();
@@ -13348,7 +13430,7 @@ export const SLOs_slo_definition_response = z
     enabled: z.boolean(),
     groupBy: SLOs_group_by,
     id: z.string(),
-    indicator: z.union( [
+    indicator: z.union([
       SLOs_indicator_properties_custom_kql,
       SLOs_indicator_properties_apm_availability,
       SLOs_indicator_properties_apm_latency,
@@ -13508,7 +13590,9 @@ export const Security_Endpoint_Exceptions_API_EndpointListItem =
   Security_Endpoint_Exceptions_API_ExceptionListItem;
 export const Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter =
   Security_Endpoint_Exceptions_API_NonEmptyString;
-export const Security_Endpoint_Management_API_Commands = z.array(Security_Endpoint_Management_API_Command);
+export const Security_Endpoint_Management_API_Commands = z.array(
+  Security_Endpoint_Management_API_Command
+);
 export const Security_Endpoint_Management_API_EndDate = z.string();
 export const Security_Endpoint_Management_API_HostStatuses = z.array(
   z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])
@@ -13529,14 +13613,21 @@ export const Security_Endpoint_Management_API_SortField = z.enum([
   'last_checkin',
 ]);
 export const Security_Endpoint_Management_API_StartDate = z.string();
-export const Security_Endpoint_Management_API_Types = z.array(Security_Endpoint_Management_API_Type);
-export const Security_Endpoint_Management_API_UserIds = z.union([z.array(z.string().min(1)), z.string()]);
+export const Security_Endpoint_Management_API_Types = z.array(
+  Security_Endpoint_Management_API_Type
+);
+export const Security_Endpoint_Management_API_UserIds = z.union([
+  z.array(z.string().min(1)),
+  z.string(),
+]);
 export const Security_Endpoint_Management_API_WithOutputs = z.union([
   z.array(z.string().min(1)),
   z.string(),
 ]);
-export const Security_Entity_Analytics_API_Metadata = Security_Entity_Analytics_API_TransformStatsMetadata;
-export const Security_Exceptions_API_FindExceptionListItemsFilter = Security_Exceptions_API_NonEmptyString;
+export const Security_Entity_Analytics_API_Metadata =
+  Security_Entity_Analytics_API_TransformStatsMetadata;
+export const Security_Exceptions_API_FindExceptionListItemsFilter =
+  Security_Exceptions_API_NonEmptyString;
 export const Security_Exceptions_API_FindExceptionListsFilter = z.string();
 export const Security_Exceptions_API_UUID = z.string();
 export const Security_Exceptions_API_RuleId = Security_Exceptions_API_UUID;
@@ -13563,4 +13654,3 @@ export const Security_Timeline_API_SortFieldTimeline = z.enum([
   'updated',
   'created',
 ]);
-

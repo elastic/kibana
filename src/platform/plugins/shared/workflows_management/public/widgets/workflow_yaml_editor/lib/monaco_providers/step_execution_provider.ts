@@ -111,7 +111,7 @@ export class StepExecutionProvider {
 
             const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
             if (!stepRange) {
-              //console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
+              // console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
               return null;
             }
 
@@ -195,7 +195,7 @@ export class StepExecutionProvider {
         .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
 
       this.decorationsCollection = this.editor.createDecorationsCollection(decorations);
-        /*
+      /*
       console.log(
         '✅ StepExecutionProvider: Applied',
         decorations.length,

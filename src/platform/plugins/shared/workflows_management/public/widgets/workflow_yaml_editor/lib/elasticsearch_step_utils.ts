@@ -57,11 +57,11 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
   const elasticsearchSteps: ElasticsearchStepData[] = [];
 
   if (!yamlDocument?.contents) {
-    //console.log('getElasticsearchSteps: No document contents');
+    // console.log('getElasticsearchSteps: No document contents');
     return elasticsearchSteps;
   }
 
-  //console.log('getElasticsearchSteps: Starting YAML visit');
+  // console.log('getElasticsearchSteps: Starting YAML visit');
 
   visit(yamlDocument, {
     Pair(key, pair, ancestors) {
@@ -69,7 +69,7 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
         return;
       }
 
-      //console.log('getElasticsearchSteps: Found type pair', pair.value);
+      // console.log('getElasticsearchSteps: Found type pair', pair.value);
 
       // Check if this is a type field within a step
       const path = ancestors.slice();
@@ -84,14 +84,14 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
         }
       }
 
-      //console.log('getElasticsearchSteps: isStepType', isStepType);
+      // console.log('getElasticsearchSteps: isStepType', isStepType);
 
       if (isStepType && isScalar(pair.value)) {
         const stepType = pair.value.value as string;
-        //console.log('getElasticsearchSteps: Found step type', stepType);
+        // console.log('getElasticsearchSteps: Found step type', stepType);
 
         if (isElasticsearchStep(stepType)) {
-          //console.log('getElasticsearchSteps: Is Elasticsearch step', stepType);
+          // console.log('getElasticsearchSteps: Is Elasticsearch step', stepType);
           // Find the parent step node that contains this type
           const stepNode = ancestors[ancestors.length - 1];
 
