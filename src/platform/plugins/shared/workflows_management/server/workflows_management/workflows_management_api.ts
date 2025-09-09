@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -21,19 +22,20 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import { i18n } from '@kbn/i18n';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import type { WorkflowsService } from './workflows_management_service';
 import type { LogSearchResult } from './lib/workflow_logger';
+import type { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
   page: number;
   createdBy?: string[];
-  enabled?: boolean[];
+  enabled?: boolean;
   query?: string;
   _full?: boolean;
 }
@@ -45,6 +47,11 @@ export interface GetWorkflowExecutionLogsParams {
   offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetStepExecutionParams {
+  executionId: string;
+  stepId: string;
 }
 
 export interface WorkflowExecutionLogEntry {
@@ -95,7 +102,7 @@ export class WorkflowsManagementApi {
   ) {}
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    return await this.workflowsService.searchWorkflows(params, spaceId);
+    return await this.workflowsService.getWorkflows(params, spaceId);
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -115,11 +122,24 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
+    // Parse and update the YAML to change the name
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    if (parsedYaml.error) {
+      throw parsedYaml.error;
+    }
+
+    const updatedYaml = {
+      ...parsedYaml.data,
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,
-    });
+    };
+
+    // Convert back to YAML string
+    const clonedYaml = `name: ${updatedYaml.name}\n${workflow.yaml
+      .split('\n')
+      .slice(1)
+      .join('\n')}`;
     return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
@@ -133,13 +153,7 @@ export class WorkflowsManagementApi {
     if (!originalWorkflow) {
       throw new Error(`Workflow with id ${id} not found`);
     }
-    return await this.workflowsService.updateWorkflow(
-      id,
-      workflow,
-      originalWorkflow,
-      spaceId,
-      request
-    );
+    return await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
   }
 
   public async deleteWorkflows(
@@ -147,7 +161,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
+    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId);
   }
 
   public async runWorkflow(
@@ -155,9 +169,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
+    const { event, ...manualInputs } = inputs;
     const context = {
-      ...inputs,
+      event,
       spaceId,
+      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
@@ -177,6 +193,16 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
+    }
+
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const context = {
       ...inputs,
@@ -189,6 +215,7 @@ export class WorkflowsManagementApi {
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        yaml: workflowYaml,
         isTestRun: true,
       },
       context
@@ -200,12 +227,7 @@ export class WorkflowsManagementApi {
     workflowId: string,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions(
-      {
-        workflowId,
-      },
-      spaceId
-    );
+    return await this.workflowsService.getWorkflowExecutions(workflowId, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -273,6 +295,14 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     return await this.workflowsService.getStepExecution(params, spaceId);
+  }
+
+  public async cancelWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<void> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return await workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   public async getWorkflowStats(spaceId: string) {
