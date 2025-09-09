@@ -91,7 +91,9 @@ export async function autocomplete(
 
   switch (pos) {
     case 'expression_without_assignment': {
-      const expressionRoot = /,\s*$/.test(innerText)
+      const isNewMultipleExpression = /,\s*$/.test(innerText);
+
+      const expressionRoot = isNewMultipleExpression
         ? undefined // we're in a new expression, but there isn't an AST node for it yet
         : command.args[command.args.length - 1];
 
@@ -106,6 +108,7 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
+          ...(!isNewMultipleExpression ? [byCompleteItem] : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
         ],
         afterCompleteSuggestions: [
