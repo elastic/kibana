@@ -6,9 +6,8 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { GetAllStatsDashboardMigrationResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type { GetAllDashboardMigrationsStatsResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_ALL_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
-import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
@@ -33,20 +32,15 @@ export const registerSiemDashboardMigrationsStatsAllRoute = (
           context,
           req,
           res
-        ): Promise<IKibanaResponse<GetAllStatsDashboardMigrationResponse>> => {
+        ): Promise<IKibanaResponse<GetAllDashboardMigrationsStatsResponse>> => {
           try {
             const ctx = await context.resolve(['securitySolution']);
             const dashboardMigrationsClient =
               ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-            const allStats = await dashboardMigrationsClient.data.items.getAllStats();
-            const response = {
-              ...allStats,
-              name: 'Dashboard Migrations',
-              status: MigrationTaskStatusEnum.ready,
-            };
+            const allStats = await dashboardMigrationsClient.task.getAllStats();
 
-            return res.ok({ body: response });
+            return res.ok({ body: allStats });
           } catch (err) {
             logger.error(err);
             return res.badRequest({ body: err.message });
