@@ -43,14 +43,10 @@ export const createTracesContextService = async ({
     }
 
     const { transaction, span } = indices;
-    const allIndices = getAllIndices(transaction, span);
-    const uniqueIndices = Array.from(new Set(allIndices));
+    const allTraceIndices = getAllIndices(transaction, span);
 
-    const tracesIndexPattern = uniqueIndices.join();
-    const allowedDataSources = [
-      createRegExpPatternFrom(uniqueIndices, 'data'),
-      DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
-    ];
+    const tracesIndexPattern = allTraceIndices.join();
+    const allowedDataSources = [...allTraceIndices, DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
 
     return getTracesContextService({ tracesIndexPattern, allowedDataSources });
   } catch (error) {
@@ -59,7 +55,7 @@ export const createTracesContextService = async ({
 };
 
 function getAllIndices(transaction: string, span: string) {
-  return [transaction, span].flatMap((index) => index.split(','));
+  return Array.from(new Set([transaction, span].flatMap((index) => index.split(','))));
 }
 
 export const getTracesContextService = ({
@@ -67,7 +63,7 @@ export const getTracesContextService = ({
   allowedDataSources,
 }: {
   tracesIndexPattern?: string;
-  allowedDataSources: RegExp[];
+  allowedDataSources: Array<string | RegExp>;
 }) => ({
   getAllTracesIndexPattern: () => tracesIndexPattern,
   isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
