@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import type { GetGapFillAutoSchedulerParams } from '../../../../../../application/rule/methods/get_gap_fill_auto_scheduler/types';
+import type { GetGapFillAutoSchedulerParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/get/types';
 
 export const transformRequest = (id: string): GetGapFillAutoSchedulerParams => ({
   id,
