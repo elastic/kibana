@@ -27,3 +27,9 @@ export {
   type ListSourcesResponse,
 } from './list_search_sources';
 export { resolveResource, type ResolveResourceResponse } from './resolve_resource';
+export {
+  scoreRelevance,
+  RelevanceScore,
+  type RelevanceCandidate,
+  type RatingWithReason,
+} from './score_relevance';
