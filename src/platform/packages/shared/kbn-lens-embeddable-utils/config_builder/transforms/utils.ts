@@ -25,11 +25,8 @@ import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
-import type {
-  AnyLensStateColumn,
-  AnyBucketLensStateColumn,
-  AnyMetricLensStateColumn,
-} from './columns/types';
+import type { AnyLensStateColumn } from './columns/types';
+import { isLensStateBucketColumnType } from './columns/utils';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -49,6 +46,14 @@ export const getDefaultReferences = (
   ];
 };
 
+// Need to dance a bit to satisfy TypeScript
+function convertToTypedLayerColumns(layer: FormBasedLayer): {
+  columns: Record<string, AnyLensStateColumn>;
+} {
+  // @TODO move it to satisfies
+  return layer as { columns: Record<string, AnyLensStateColumn> };
+}
+
 /**
  * given Lens State layer and column id, returns the corresponding Lens API operation
  * @param columnId
@@ -56,7 +61,8 @@ export const getDefaultReferences = (
  * @returns
  */
 export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => {
-  const column = layer.columns[columnId];
+  const typedLayer = convertToTypedLayerColumns(layer);
+  const column = typedLayer.columns[columnId];
   if (!column) {
     return undefined;
   }
@@ -65,14 +71,15 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
     column: c as AnyLensStateColumn,
     id,
   }));
-  if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
-    return fromBucketLensStateToAPI(column as AnyBucketLensStateColumn, columnMap);
+  if (isLensStateBucketColumnType(column)) {
+    return fromBucketLensStateToAPI(column, columnMap);
   }
-  return getMetricApiColumnFromLensState(
-    column as AnyMetricLensStateColumn,
-    layer.columns as Record<string, AnyMetricLensStateColumn>
-  );
+  return getMetricApiColumnFromLensState(column, typedLayer.columns);
 };
+
+function isTextBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is TextBasedLayer {
+  return 'index' in layer && 'query' in layer;
+}
 
 /**
  * Builds dataset state from the layer configuration
@@ -81,19 +88,18 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
  * @returns
  */
 export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
-  if ('index' in layer) {
+  if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
       index: layer.index,
       query: layer.query,
     };
-  } else {
-    return {
-      type: 'index',
-      index: (layer as FormBasedLayer).indexPatternId,
-      time_field: '@timestamp',
-    };
   }
+  return {
+    type: 'index',
+    index: layer.indexPatternId,
+    time_field: '@timestamp',
+  };
 };
 
 // builds Lens State references from list of dataviews
@@ -101,10 +107,10 @@ export function buildReferences(dataviews: Record<string, string>) {
   const references = [];
   for (const layerid in dataviews) {
     if (dataviews[layerid]) {
-      references.push(...getDefaultReferences(dataviews[layerid], layerid));
+      references.push(getDefaultReferences(dataviews[layerid], layerid));
     }
   }
-  return references.flat();
+  return references.flat(2);
 }
 
 export function isSingleLayer(
@@ -121,21 +127,28 @@ export function isSingleLayer(
  * @returns
  */
 export function getDatasetIndex(dataset: LensApiState['dataset']) {
-  let index: string;
-  let timeFieldName: string = '@timestamp';
-
-  if (dataset.type === 'index') {
-    index = dataset.index;
-    timeFieldName = dataset.time_field || '@timestamp';
-  } else if (dataset.type === 'esql') {
-    index = getIndexPatternFromESQLQuery(dataset.query); // parseIndexFromQuery(config.dataset.query);
-  } else if (dataset.type === 'dataView') {
-    index = dataset.name;
-  } else {
-    return undefined;
+  const timeFieldName: string = '@timestamp';
+  switch (dataset.type) {
+    case 'index':
+      return {
+        index: dataset.index,
+        timeFieldName,
+      };
+    case 'esql':
+      return {
+        index: getIndexPatternFromESQLQuery(dataset.query),
+        timeFieldName,
+      };
+    case 'dataView':
+      return {
+        index: dataset.name,
+        timeFieldName,
+      };
+    case 'table':
+      return;
+    default:
+      throw Error('dataset type not supported');
   }
-
-  return { index, timeFieldName };
 }
 
 // internal function used to build datasource states layer
@@ -155,14 +168,13 @@ function buildDatasourceStatesLayer(
     const table = dataset as unknown as LensDatatableDataset;
     const newLayer = {
       table,
-      columns: getValueColumns(layer, i),
+      columns: getValueColumns(config, i),
       allColumns: table.columns.map(
-        (column) =>
-          ({
-            fieldName: column.name,
-            columnId: column.id,
-            meta: column.meta,
-          } as TextBasedLayerColumn)
+        (column): TextBasedLayerColumn => ({
+          fieldName: column.name,
+          columnId: column.id,
+          meta: column.meta,
+        })
       ),
       index: '',
       query: undefined,
@@ -172,7 +184,7 @@ function buildDatasourceStatesLayer(
   }
 
   function buildESQLLayer(config: LensApiState): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(layer, i) as TextBasedLayerColumn[];
+    const columns = getValueColumns(config, i) as TextBasedLayerColumn[];
 
     const newLayer = {
       index: index.index,
@@ -301,14 +313,17 @@ export const addLayerColumn = (
  * @param options
  * @returns
  */
-export const generateLayer = (id: string, options: LensApiState) => {
+export const generateLayer = (
+  id: string,
+  options: LensApiState
+): Record<string, PersistedIndexPatternLayer> => {
   return {
     [id]: {
       sampling: options.sampling,
       ignoreGlobalFilters: options.ignore_global_filters,
       columns: {},
       columnOrder: [],
-    } as PersistedIndexPatternLayer,
+    },
   };
 };
 
