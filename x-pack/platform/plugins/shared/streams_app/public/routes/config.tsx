@@ -52,11 +52,11 @@ const streamsAppRoutes = {
         children: {
           '/{key}': {
             element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
             ),
           },
           /**
-           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and lifecycle view
+           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and retention view
            */
           // '/{key}/{tab}': {
           //   element: <StreamDetailView />,
@@ -71,7 +71,7 @@ const streamsAppRoutes = {
            */
           '/{key}/{tab}': {
             element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
             ),
             params: t.type({
               path: t.type({
