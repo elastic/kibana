@@ -8,6 +8,7 @@
 import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
@@ -15,6 +16,8 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../hooks/use_conversation_id';
 import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
+import type { ConversationSettings } from '../../../services/types';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -29,6 +32,13 @@ export const Conversation: React.FC<{}> = () => {
 
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the newConversationSubtitle
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -69,8 +79,10 @@ export const Conversation: React.FC<{}> = () => {
             )}
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
+              {conversationSettings?.selectedContextComponent ?? null}
               <ConversationInputForm
                 starterPrompt={starterPrompt}
+                contextPrompt={conversationSettings?.contextPrompt}
                 onSubmit={() => {
                   setStickToBottom(true);
                 }}

@@ -107,7 +107,11 @@ export const useConversationActions = () => {
         produce((draft) => {
           const nextRound: ConversationRound = {
             id: pendingRoundId,
-            input: { message: userMessage },
+            input: {
+              message: `${
+                conversationSettings?.transformUserContextPrompt?.(userMessage) ?? userMessage
+              }`,
+            },
             response: { message: '' },
             steps: [],
           };

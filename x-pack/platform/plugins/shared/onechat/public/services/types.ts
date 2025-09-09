@@ -31,6 +31,9 @@ export interface ConversationSettings {
   customMenuItems?: React.ReactElement[];
   onSelectPrompt?: (prompt: string, title: string) => void;
   selectedConversationId?: string;
+  selectedContextComponent?: React.ReactElement;
+  contextPrompt?: string;
+  transformUserContextPrompt?: (promptText: string) => any;
 }
 
 export interface OnechatInternalService {

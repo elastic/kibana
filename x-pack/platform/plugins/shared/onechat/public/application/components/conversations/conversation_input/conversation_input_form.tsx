@@ -18,6 +18,7 @@ import { ConversationInputTextArea } from './conversation_input_text_area';
 interface ConversationInputFormProps {
   onSubmit: () => void;
   starterPrompt?: string;
+  contextPrompt?: string;
 }
 
 const fullHeightStyles = css`
@@ -27,9 +28,10 @@ const fullHeightStyles = css`
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
   onSubmit,
   starterPrompt,
+  contextPrompt,
 }) => {
   const isSendingMessage = useIsSendingMessage();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(contextPrompt ?? '');
   const { sendMessage, pendingMessage } = useSendMessage();
 
   // Populate input with starter prompt when it changes
@@ -38,6 +40,12 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
       setInput(starterPrompt);
     }
   }, [starterPrompt]);
+
+  useEffect(() => {
+    if (contextPrompt) {
+      setInput(contextPrompt);
+    }
+  }, [contextPrompt]);
   const { euiTheme } = useEuiTheme();
   const isSubmitDisabled = !input.trim() || isSendingMessage;
 

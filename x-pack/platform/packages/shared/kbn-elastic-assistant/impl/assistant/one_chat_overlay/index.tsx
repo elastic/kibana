@@ -21,6 +21,11 @@ import type { ShowOneChatOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { EMPTY_SCREEN_DESCRIPTION } from '../translations';
 import { useConversationMenuItems } from '../settings/settings_context_menu/use_conversation_menu_items';
+import { SelectedPromptContexts } from '../prompt_editor/selected_prompt_contexts';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
+import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
+import { useDataStreamApis } from '../use_data_stream_apis';
+import { getCombinedMessage } from '../prompt/helpers';
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
@@ -30,9 +35,15 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 
 export const OneChatOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  // TODO: Use userPrompt for setting initial prompt in conversation
+  const [contextPrompt, setContextPrompt] = useState<string | undefined>(undefined);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   // id if the conversation exists in the data stream, title if it's a new conversation
   const [connectorId, setConnectorId] = useState<string | undefined>(undefined);
+  // TODO: Implement prompt context registration functionality
+  const [selectedPromptContexts, setSelectedPromptContexts] = useState<
+    Record<string, SelectedPromptContext>
+  >({});
 
   // TODO: Use promptContextId when implementing prompt context functionality
   // eslint-disable-next-line no-console
@@ -44,6 +55,7 @@ export const OneChatOverlay = React.memo(() => {
     http,
     toasts,
     commentActionsMounter,
+    promptContexts,
     onechatServices,
     alertsIndexPattern,
     knowledgeBase,
@@ -159,6 +171,67 @@ export const OneChatOverlay = React.memo(() => {
   const { menuItems: conversationMenuItems, modals: conversationModals } =
     useConversationMenuItems();
 
+  // Get anonymization fields from the API
+  const { anonymizationFields } = useDataStreamApis({
+    http,
+    isAssistantEnabled,
+  });
+
+  useEffect(() => {
+    const promptContext: PromptContext | undefined = promptContexts[promptContextId ?? ''];
+    if (promptContext != null) {
+      if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
+        const addNewSelectedPromptContext = async () => {
+          const newSelectedPromptContext = await getNewSelectedPromptContext({
+            anonymizationFields,
+            promptContext,
+          });
+          setSelectedPromptContexts((prev) => ({
+            ...prev,
+            [promptContext.id]: newSelectedPromptContext,
+          }));
+        };
+
+        addNewSelectedPromptContext();
+      }
+
+      if (promptContext.suggestedUserPrompt != null) {
+        setContextPrompt(promptContext.suggestedUserPrompt);
+      }
+    }
+  }, [
+    promptContextId,
+    promptContexts,
+    selectedPromptContexts,
+    setSelectedPromptContexts,
+    anonymizationFields,
+  ]);
+
+  // Memoized SelectedPromptContexts component
+  const memoizedSelectedPromptContexts = useMemo(() => {
+    return (
+      <SelectedPromptContexts
+        promptContexts={promptContexts}
+        selectedPromptContexts={selectedPromptContexts}
+        setSelectedPromptContexts={setSelectedPromptContexts}
+        currentReplacements={undefined} // TODO: Get from current conversation when available
+      />
+    );
+  }, [promptContexts, selectedPromptContexts]);
+
+  // Transform user context prompt handler
+  const transformUserContextPrompt = useCallback(
+    (promptText: string) => {
+      const userMessage = getCombinedMessage({
+        currentReplacements: {},
+        promptText,
+        selectedPromptContexts,
+      });
+      return userMessage.content ?? '';
+    },
+    [selectedPromptContexts]
+  );
+
   // Move setConversationSettings to useEffect to avoid setState during render
   useEffect(() => {
     if (onechatServices) {
@@ -175,6 +248,9 @@ export const OneChatOverlay = React.memo(() => {
           size: knowledgeBase.latestAlerts,
         },
         customMenuItems: conversationMenuItems,
+        selectedContextComponent: memoizedSelectedPromptContexts,
+        contextPrompt,
+        transformUserContextPrompt,
       });
     }
   }, [
@@ -186,6 +262,10 @@ export const OneChatOverlay = React.memo(() => {
     handleConnectorSelectionChange,
     onSelectPrompt,
     conversationMenuItems,
+    memoizedSelectedPromptContexts,
+    promptContexts,
+    contextPrompt,
+    transformUserContextPrompt,
   ]);
 
   if (!onechatServices) return null;

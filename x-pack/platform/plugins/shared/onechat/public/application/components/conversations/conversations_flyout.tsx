@@ -19,7 +19,6 @@ import {
 import { css } from '@emotion/react';
 import useEvent from 'react-use/lib/useEvent';
 import styled from '@emotion/styled';
-import { i18n } from '@kbn/i18n';
 import { OnechatConversationsView } from './conversations_view';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useSpaceId } from '../../hooks/use_space_id';
@@ -49,7 +48,7 @@ export const ConversationsFlyout: React.FC<ConversationsFlyoutProps> = ({
   onClose,
   handleShortcutPress,
 }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const spaceId = useSpaceId();
   const { euiTheme } = useEuiTheme();
   const flyoutRef = useRef<HTMLDivElement>();
@@ -64,42 +63,6 @@ export const ConversationsFlyout: React.FC<ConversationsFlyoutProps> = ({
     [handleShortcutPress]
   );
   useEvent('keydown', onKeyDown);
-  const mainStyles = css`
-    border: none;
-  `;
-  const backgroundStyles = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  `;
-  const sidebarStyles = css`
-    ${backgroundStyles}
-    padding: ${euiTheme.size.base};
-    max-block-size: calc(var(--kbn-application--content-height));
-  `;
-  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
-  const headerStyles = css`
-    ${backgroundStyles}
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border: none;
-    block-size: ${headerHeight};
-  `;
-  const contentStyles = css`
-    ${backgroundStyles}
-    width: 100%;
-    height: 100%;
-    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
-  `;
-
-  const labels = {
-    header: i18n.translate('xpack.onechat.conversationsView.header', {
-      defaultMessage: 'Conversation header',
-    }),
-    content: i18n.translate('xpack.onechat.conversationsView.content', {
-      defaultMessage: 'Conversation content',
-    }),
-  };
-
   const { conversations = [], isLoading } = useConversationList();
 
   if (!isVisible || !OnechatConversationsView) return null;

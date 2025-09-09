@@ -113,6 +113,135 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
 /**
+ * The basis of a content reference
+ */
+export interface BaseContentReference {
+  /**
+   * Id of the content reference
+   */
+  id: string;
+  /**
+   * Type of the content reference
+   */
+  type: string;
+}
+
+/**
+ * References a knowledge base entry
+ */
+export interface KnowledgeBaseEntryContentReference extends BaseContentReference {
+  type: 'KnowledgeBaseEntry';
+  /**
+   * Id of the Knowledge Base Entry
+   */
+  knowledgeBaseEntryId: string;
+  /**
+   * Name of the knowledge base entry
+   */
+  knowledgeBaseEntryName: string;
+}
+
+/**
+ * References an ESQL query
+ */
+export interface EsqlContentReference extends BaseContentReference {
+  type: 'EsqlQuery';
+  /**
+   * An ESQL query
+   */
+  query: string;
+  /**
+   * Label of the query
+   */
+  label: string;
+  /**
+   * Time range to select in the time picker.
+   */
+  timerange?: {
+    from: string;
+    to: string;
+  };
+}
+
+/**
+ * References a security alert
+ */
+export interface SecurityAlertContentReference extends BaseContentReference {
+  type: 'SecurityAlert';
+  /**
+   * ID of the Alert
+   */
+  alertId: string;
+}
+
+/**
+ * References an external URL
+ */
+export interface HrefContentReference extends BaseContentReference {
+  type: 'Href';
+  /**
+   * Label of the query
+   */
+  label?: string;
+  /**
+   * URL to the external resource
+   */
+  href: string;
+}
+
+/**
+ * References the security alerts page
+ */
+export interface SecurityAlertsPageContentReference extends BaseContentReference {
+  type: 'SecurityAlertsPage';
+}
+
+/**
+ * References the product documentation
+ */
+export interface ProductDocumentationContentReference extends BaseContentReference {
+  type: 'ProductDocumentation';
+  /**
+   * Title of the documentation
+   */
+  title: string;
+  /**
+   * URL to the documentation
+   */
+  url: string;
+}
+
+/**
+ * A content reference - union of all specific content reference types
+ */
+export type ContentReferenceInternal =
+  | KnowledgeBaseEntryContentReference
+  | SecurityAlertContentReference
+  | SecurityAlertsPageContentReference
+  | ProductDocumentationContentReference
+  | EsqlContentReference
+  | HrefContentReference;
+
+/**
+ * A content reference (alias for ContentReferenceInternal)
+ */
+export type ContentReference = ContentReferenceInternal;
+
+/**
+ * A collection of content references
+ */
+export interface ContentReferences {
+  [key: string]: ContentReference;
+}
+
+export interface MessageMetadata {
+  /**
+   * Data referred to by the message content.
+   */
+  contentReferences?: ContentReferences;
+}
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
@@ -127,6 +256,12 @@ export interface ConversationRound {
   response: AssistantResponse;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
+  /** The timestamp of the round */
+  timestamp?: string;
+  /**
+   * Metadata
+   */
+  metadata?: MessageMetadata;
 }
 
 export interface Conversation {
