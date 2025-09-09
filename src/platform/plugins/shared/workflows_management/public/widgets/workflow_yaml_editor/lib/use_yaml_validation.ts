@@ -13,17 +13,12 @@ import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
-  getCurrentPath,
   parseWorkflowYamlToJSON,
   formatValidationError,
-} from '../../../../common/lib/yaml_utils';
-import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import {
   getCurrentPath,
   getPathFromAncestors,
-  parseWorkflowYamlToJSON,
 } from '../../../../common/lib/yaml_utils';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';

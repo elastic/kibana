@@ -161,6 +161,7 @@ export class UnifiedActionsProvider {
           context.connectorType,
           '- showing highlighting only'
         );
+        */
         // No action buttons for this step type, but still show highlighting
         this.updateActionButtons([], position);
       }
