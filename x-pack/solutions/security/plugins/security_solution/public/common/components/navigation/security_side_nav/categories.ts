@@ -40,4 +40,8 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
     type: LinkCategoryType.separator,
     linkIds: [SecurityPageName.assetInventory],
   },
+  {
+    type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.siemReadiness],
+  },
 ];
