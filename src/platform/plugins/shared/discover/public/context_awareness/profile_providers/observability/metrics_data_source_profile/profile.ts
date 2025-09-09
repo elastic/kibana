@@ -21,7 +21,7 @@ export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvid
 
 const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
 // FIXME: could kbn-esql-ast provide a union type with existing commands?
-const VALID_ESQL_COMMANDS = new Set(['from', 'ts', 'limit', 'sort']);
+const SUPPORTED_ESQL_COMMANDS = new Set(['from', 'ts', 'limit', 'sort', 'where']);
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
@@ -67,5 +67,5 @@ function isQuerySupported(query: AggregateQuery | Query | undefined): query is A
   }
 
   const parsed = Parser.parse(query.esql);
-  return parsed.root.commands.every((c) => VALID_ESQL_COMMANDS.has(c.name));
+  return parsed.root.commands.every((c) => SUPPORTED_ESQL_COMMANDS.has(c.name));
 }

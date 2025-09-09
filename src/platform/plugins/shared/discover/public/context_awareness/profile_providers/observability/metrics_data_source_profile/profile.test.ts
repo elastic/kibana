@@ -61,22 +61,24 @@ describe('metricsDataSourceProfileProvider', () => {
       });
     });
 
-    it.each(['TS metrics-*', 'FROM metrics-* | LIMIT 10', 'FROM metrics-* | SORT @timestamp DESC'])(
-      'when query conatains supported commands %s',
-      async (query) => {
-        const result = await provider.resolve(
-          createParams({
-            query: { esql: query },
-            rootContext: { profileId: 'foo', solutionType: SolutionType.Observability },
-          })
-        );
+    it.each([
+      'TS metrics-*',
+      'FROM metrics-* | LIMIT 10',
+      'FROM metrics-* | SORT @timestamp DESC',
+      'FROM metrics-* | WHERE host.name="foo"',
+    ])('when query conatains supported commands %s', async (query) => {
+      const result = await provider.resolve(
+        createParams({
+          query: { esql: query },
+          rootContext: { profileId: 'foo', solutionType: SolutionType.Observability },
+        })
+      );
 
-        expect(result).toEqual({
-          isMatch: true,
-          context: { category: DataSourceCategory.Metrics },
-        });
-      }
-    );
+      expect(result).toEqual({
+        isMatch: true,
+        context: { category: DataSourceCategory.Metrics },
+      });
+    });
 
     it.each([SolutionType.Observability, SolutionType.Security])(
       'when SolutionType is %s',
