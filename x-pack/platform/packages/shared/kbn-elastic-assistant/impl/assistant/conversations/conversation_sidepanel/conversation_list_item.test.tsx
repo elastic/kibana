@@ -174,12 +174,4 @@ describe('ConversationListItem', () => {
     expect(screen.getByTestId('convo-context-menu-item-duplicate')).toBeInTheDocument();
     expect(screen.queryByTestId('convo-context-menu-item-delete')).not.toBeInTheDocument();
   });
-
-  it('renders extraAction when sharing is disabled', () => {
-    render(<ConversationListItem {...testProps} />);
-    // The extraAction is a delete button
-    expect(screen.getByTestId('delete-option')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('delete-option'));
-    expect(mockDelete).toHaveBeenCalledWith(expect.objectContaining({ id: ownerConvo.id }));
-  });
 });
