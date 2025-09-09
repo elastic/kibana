@@ -17,7 +17,6 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { i18n } from '@kbn/i18n';
 
 function getSettingsFields({
   settingsKeys,
@@ -50,7 +49,7 @@ function getSettingsFields({
 
 export function useEditableSettings(settingsKeys: string[]) {
   const {
-    services: { settings, notifications },
+    services: { settings },
   } = useKibana();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -97,13 +96,6 @@ export function useEditableSettings(settingsKeys: string[]) {
         if (updateErrorOccurred) {
           throw new Error('One or more settings updates failed');
         }
-      } catch (error) {
-        notifications?.toasts.addDanger({
-          title: i18n.translate('xpack.onechat.management.agentBuilder.saveAllErrorTitle', {
-            defaultMessage: 'Failed to update settings',
-          }),
-          text: error.message,
-        });
       } finally {
         setIsSaving(false);
         subscription.unsubscribe();

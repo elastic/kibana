@@ -10,6 +10,7 @@ import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { FieldRow, FieldRowKibanaProvider } from '@kbn/management-settings-components-field-row';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { BottomBarActions } from './bottom_bar_actions';
 import { useEditableSettings } from '../hooks/use_editable_settings';
 import { labels } from '../../application/utils/i18n';
@@ -19,6 +20,21 @@ export const AgentBuilderSettingsApp: React.FC<{}> = () => {
   const settingsKeys = [AGENT_BUILDER_ENABLED_SETTING_ID];
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(settingsKeys);
+
+  async function handleSave() {
+    try {
+      await saveAll();
+      window.location.reload();
+    } catch (e) {
+      const error = e as Error;
+      services.notifications?.toasts.addDanger({
+        title: i18n.translate('xpack.onechat.management.agentBuilder.save.error', {
+          defaultMessage: 'An error occurred while saving the settings',
+        }),
+        text: error.message,
+      });
+    }
+  }
 
   const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
@@ -56,7 +72,7 @@ export const AgentBuilderSettingsApp: React.FC<{}> = () => {
       <BottomBarActions
         isLoading={isSaving}
         onDiscardChanges={cleanUnsavedChanges}
-        onSave={saveAll}
+        onSave={handleSave}
         unsavedChangesCount={Object.keys(unsavedChanges).length}
         areChangesInvalid={hasInvalidChanges}
       />
