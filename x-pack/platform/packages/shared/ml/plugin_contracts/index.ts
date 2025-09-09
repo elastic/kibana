@@ -14,13 +14,13 @@ import type { AnomalySwimLaneComponentType } from '@kbn/ml-common-types/anomaly_
 export interface MlPluginSetup {
   getLocator?: (() => Promise<LocatorPublic<MlLocatorParams>>) | undefined;
   getManagementLocator?: (() => Promise<MlManagementLocator>) | undefined;
-  elasticModels?: IElasticModels | undefined;
+  getElasticModels?: (() => Promise<IElasticModels>) | undefined;
 }
 
 export interface MlPluginStart {
   getLocator?: (() => Promise<LocatorPublic<MlLocatorParams>>) | undefined;
   getManagementLocator?: (() => Promise<MlManagementLocator>) | undefined;
-  elasticModels?: IElasticModels | undefined;
+  getElasticModels?: (() => Promise<IElasticModels>) | undefined;
   getMlApi: () => Promise<MlApi>;
   components: {
     AnomalySwimLane: AnomalySwimLaneComponentType;

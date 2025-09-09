@@ -315,14 +315,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     return {
       getLocator: this.getLocator,
       getManagementLocator: this.getManagementLocator,
-      elasticModels: getElasticModels(core.http),
+      getElasticModels: async () => await getElasticModels(core.http),
     };
   }
 
   start(core: CoreStart, deps: MlStartDependencies): MlPluginStart {
     return {
       getLocator: this.getLocator,
-      elasticModels: getElasticModels(core.http),
+      getElasticModels: async () => await getElasticModels(core.http),
       getMlApi: async () => await getMlSharedServices(core.http),
       getManagementLocator: this.getManagementLocator,
       components: {
