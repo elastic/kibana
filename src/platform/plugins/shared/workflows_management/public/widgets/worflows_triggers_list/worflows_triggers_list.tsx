@@ -29,7 +29,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
   const [first, ...rest] = triggers || [];
 
   // Rare edge-case: empty triggers list
-  if (!first) return;
+  if (!first) return null;
 
   return (
     <>
