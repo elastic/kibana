@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useMemo, useState } from 'react';
 import type { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
@@ -26,7 +25,7 @@ function getSettingsFields({
   uiSettings?: IUiSettingsClient;
 }) {
   if (!uiSettings) {
-    return {} as Record<string, FieldDefinition>;
+    return {};
   }
   const uiSettingsDefinition = uiSettings.getAll();
   const normalizedSettings = normalizeSettings(uiSettingsDefinition);
@@ -68,7 +67,7 @@ export function useEditableSettings(settingsKeys: string[]) {
 
   const handleFieldChange: OnFieldChangeFn = (id, change) => {
     if (!change) {
-      const { [id]: _removed, ...rest } = unsavedChanges;
+      const { [id]: unsavedChange, ...rest } = unsavedChanges;
       setUnsavedChanges(rest);
       return;
     }
@@ -82,23 +81,27 @@ export function useEditableSettings(settingsKeys: string[]) {
   async function saveAll() {
     if (settings && !isEmpty(unsavedChanges)) {
       let updateErrorOccurred = false;
-      const subscription = settings.client.getUpdateErrors$().subscribe(() => {
+      const subscription = settings.client.getUpdateErrors$().subscribe((error) => {
         updateErrorOccurred = true;
       });
       try {
         setIsSaving(true);
-        const updates = Object.entries(unsavedChanges).map(([key, value]) =>
+        const arr = Object.entries(unsavedChanges).map(([key, value]) =>
           settings.client.set(key, value.unsavedValue)
         );
-        await Promise.all(updates);
-        setForceReloadSettings((state) => state + 1);
+        await Promise.all(arr);
+        setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
         if (updateErrorOccurred) {
           throw new Error('One or more settings updates failed');
         }
+      } catch (e) {
+        throw e;
       } finally {
         setIsSaving(false);
-        subscription.unsubscribe();
+        if (subscription) {
+          subscription.unsubscribe();
+        }
       }
     }
   }
@@ -111,7 +114,7 @@ export function useEditableSettings(settingsKeys: string[]) {
       try {
         setIsSaving(true);
         await settings.client.set(id, change);
-        setForceReloadSettings((state) => state + 1);
+        setForceReloadSettings((state) => ++state);
       } finally {
         setIsSaving(false);
       }
