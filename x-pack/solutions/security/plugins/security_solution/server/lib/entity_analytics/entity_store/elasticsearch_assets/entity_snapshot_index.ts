@@ -38,22 +38,6 @@ export async function createEntitySnapshotIndex({
   );
 }
 
-export async function deleteEntitySnapshotIndex({
-  entityType,
-  esClient,
-  snapshotDate,
-  namespace,
-}: Options) {
-  return esClient.indices.delete(
-    {
-      index: getEntitiesSnapshotIndexName(entityType, snapshotDate, namespace),
-    },
-    {
-      ignore: [404],
-    }
-  );
-}
-
 export async function deleteAllEntitySnapshotIndices({
   entityType,
   esClient,

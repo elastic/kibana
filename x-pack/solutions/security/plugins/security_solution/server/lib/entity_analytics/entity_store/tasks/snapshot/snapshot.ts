@@ -6,12 +6,7 @@
  */
 
 import moment from 'moment';
-import {
-  type AnalyticsServiceSetup,
-  type ElasticsearchClient,
-  type Logger,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { type ElasticsearchClient, type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   RunContext,
   TaskManagerSetupContract,
@@ -27,7 +22,7 @@ import {
 import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constants';
 import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_snapshot_index';
 import { getEntitiesIndexName, getEntitiesResetIndexName } from '../../utils';
-import { entityStoreTaskLogFactory, entityStoreTaskDebugLogFactory } from '../utils';
+import { entityStoreTaskLogMessageFactory } from '../utils';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 function getTaskId(namespace: string, entityType: EntityType): string {
@@ -35,13 +30,11 @@ function getTaskId(namespace: string, entityType: EntityType): string {
 }
 
 export function registerEntityStoreSnapshotTask({
-  getStartServices,
   logger,
-  telemetry,
   taskManager,
+  getStartServices,
 }: {
   logger: Logger;
-  telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
 }): void {
@@ -69,12 +62,13 @@ export function registerEntityStoreSnapshotTask({
           async run() {
             return runTask({
               logger,
-              telemetry,
               context,
               esClientGetter,
             });
           },
-          async cancel() {},
+          async cancel() {
+            logger.warn(`[Entity Store]  Task ${TYPE} timed out`);
+          },
         };
       },
     },
@@ -93,9 +87,9 @@ export async function startEntityStoreSnapshotTask({
   taskManager: TaskManagerStartContract;
 }) {
   const taskId = getTaskId(namespace, entityType);
-  const log = entityStoreTaskLogFactory(logger, taskId);
+  const msg = entityStoreTaskLogMessageFactory(taskId);
 
-  log('attempting to schedule');
+  logger.info(msg('attempting to schedule'));
   try {
     const task = await taskManager.ensureScheduled({
       id: taskId,
@@ -109,9 +103,9 @@ export async function startEntityStoreSnapshotTask({
         entityType,
       },
     });
-    log(`scheduled ${task.id} with schedule ${JSON.stringify(task.schedule)}`);
+    logger.info(msg(`scheduled with ${JSON.stringify(task.schedule)}`));
   } catch (e) {
-    logger.warn(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
+    logger.error(msg(`error scheduling task, received ${e.message}`));
     throw e;
   }
 }
@@ -127,12 +121,14 @@ export async function removeEntityStoreSnapshotTask({
   entityType: EntityType;
   taskManager: TaskManagerStartContract;
 }) {
+  const taskId = getTaskId(namespace, entityType);
+  const msg = entityStoreTaskLogMessageFactory(taskId);
   try {
     await taskManager.remove(getTaskId(namespace, entityType));
-    logger.info(`[Entity Store]  Removed snapshot task for ${entityType} in ${namespace}`);
+    logger.info(msg(`removed snapshot task`));
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(`[Entity Store]  Failed to remove snapshot task: ${err.message}`);
+      logger.error(msg(`failed to remove snapshot task: ${err.message}`));
       throw err;
     }
   }
@@ -170,12 +166,10 @@ const removeAllFieldsAndResetTimestamp = (entityType: EntityType): string => {
 
 export async function runTask({
   logger,
-  telemetry,
   context,
   esClientGetter,
 }: {
   logger: Logger;
-  telemetry: AnalyticsServiceSetup;
   context: RunContext;
   esClientGetter: () => Promise<ElasticsearchClient>;
 }): Promise<{
@@ -183,19 +177,18 @@ export async function runTask({
 }> {
   const state = context.taskInstance.state as EntityStoreFieldRetentionTaskState;
   const taskId = context.taskInstance.id;
-  const log = entityStoreTaskLogFactory(logger, taskId);
-  const debugLog = entityStoreTaskDebugLogFactory(logger, taskId);
+  const msg = entityStoreTaskLogMessageFactory(taskId);
   const esClient = await esClientGetter();
   try {
     const taskStartTime = moment().utc();
     const snapshotDate = rewindToYesterday(taskStartTime.toDate());
-    log('running task');
+    logger.info(msg('running task'));
 
     const entityType = context.taskInstance.params.entityType as EntityType;
     const namespace = context.taskInstance.params.namespace as string;
     if (namespace === '') {
       const err = `Task ${taskId} expected vaild namespace in params, got ""`;
-      log(err);
+      logger.error(msg(err));
       throw err;
     }
     const updatedState = {
@@ -207,11 +200,11 @@ export async function runTask({
     };
 
     if (taskId !== getTaskId(namespace, entityType)) {
-      log('outdated task; exiting');
+      logger.warn(msg('outdated task; exiting'));
       return { state: updatedState };
     }
 
-    debugLog('creating snapshot index');
+    logger.info(msg('creating snapshot index'));
     const { index: snapshotIndex } = await createEntitySnapshotIndex({
       esClient,
       entityType,
@@ -219,7 +212,7 @@ export async function runTask({
       snapshotDate,
     });
 
-    debugLog(`reindexing entities to ${snapshotIndex}`);
+    logger.info(msg(`reindexing entities to ${snapshotIndex}`));
     await esClient.reindex({
       source: {
         index: [getEntitiesIndexName(entityType, namespace)],
@@ -231,7 +224,7 @@ export async function runTask({
     });
 
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
-    debugLog(`reindexing entities to ${resetIndex}`);
+    logger.info(msg(`reindexing entities to ${resetIndex}`));
     await esClient.reindex({
       source: {
         index: [getEntitiesIndexName(entityType, namespace)],
@@ -249,21 +242,13 @@ export async function runTask({
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
     updatedState.lastSnapshotTookSeconds = taskDurationInSeconds;
-    log(`task run completed in ${taskDurationInSeconds} seconds`);
-
-    // TODO(kuba): Do we want to add custom telemetry events like the other tasks have?
-    /*
-    telemetry.reportEvent(FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT.eventType, {
-      duration: taskDurationInSeconds,
-      interval: context.taskInstance.schedule?.interval,
-    });
-    */
+    logger.info(msg(`task run completed in ${taskDurationInSeconds} seconds`));
 
     return {
       state: updatedState,
     };
   } catch (e) {
-    logger.error(`[Entity Store] [task ${taskId}]: error running task, received ${e.message}`);
+    logger.error(msg(`error running task, received ${e.message}`));
     throw e;
   }
 }
@@ -312,8 +297,5 @@ export async function getEntityStoreSnapshotTaskState({
  * @returns d - 1 day
  */
 export function rewindToYesterday(d: Date): Date {
-  const yesterday = new Date(d);
-  yesterday.setUTCHours(0, 0, 0, 0);
-  yesterday.setUTCSeconds(d.getUTCSeconds() - 60);
-  return yesterday;
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - 1));
 }

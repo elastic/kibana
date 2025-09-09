@@ -293,7 +293,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreSnapshotTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
-        telemetry: core.analytics,
         taskManager: plugins.taskManager,
       });
     }
