@@ -24979,6 +24979,9 @@ paths:
                               items:
                                 type: string
                               type: array
+                            previous_version:
+                              nullable: true
+                              type: string
                             type:
                               type: string
                             updated_at:
@@ -26187,6 +26190,9 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            nullable: true
+                            type: string
                           type:
                             type: string
                           updated_at:
@@ -26836,6 +26842,9 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            nullable: true
+                            type: string
                           type:
                             type: string
                           updated_at:
