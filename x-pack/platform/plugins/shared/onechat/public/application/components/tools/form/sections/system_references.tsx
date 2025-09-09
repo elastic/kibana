@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { i18nMessages } from '../i18n';
-import { ToolFormSection } from '../components/esql/tool_form_section';
+import { ToolFormSection } from '../components/tool_form_section';
 import { ToolFormMode } from '../tool_form';
 import type { ToolFormData } from '../types/tool_form_types';
 export interface SystemReferencesProps {

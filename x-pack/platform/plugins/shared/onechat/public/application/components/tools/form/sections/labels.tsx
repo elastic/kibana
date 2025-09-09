@@ -9,7 +9,7 @@ import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useToolsTags } from '../../../../hooks/tools/use_tool_tags';
-import { ToolFormSection } from '../components/esql/tool_form_section';
+import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import { ToolFormMode } from '../tool_form';
 import type { ToolFormData } from '../types/tool_form_types';

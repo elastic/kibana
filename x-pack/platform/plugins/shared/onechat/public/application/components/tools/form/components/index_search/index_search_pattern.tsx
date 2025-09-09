@@ -30,7 +30,7 @@ export const IndexSearchPattern: React.FC = () => {
   } = useController({ name: 'pattern', control });
 
   const patternValue = value ?? '';
-  const hasQuery = (patternValue.trim().length ?? 0) > 0;
+  const hasQuery = patternValue.trim().length > 0;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
@@ -74,15 +74,15 @@ export const IndexSearchPattern: React.FC = () => {
       }),
       width: '120px',
       render: (type: string) => {
-        const human =
-          type === 'index'
-            ? labels.tools.indexTypeLabel
-            : type === 'alias'
-            ? labels.tools.aliasTypeLabel
-            : labels.tools.dataStreamTypeLabel;
         return (
           <EuiBadge color="hollow" data-test-subj="onechatIndexPatternBadge">
-            {human}
+            {type === 'index'
+              ? labels.tools.indexTypeLabel
+              : type === 'alias'
+              ? labels.tools.aliasTypeLabel
+              : type === 'data_stream'
+              ? labels.tools.dataStreamTypeLabel
+              : undefined}
           </EuiBadge>
         );
       },

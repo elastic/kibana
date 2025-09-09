@@ -5,19 +5,8 @@
  * 2.0.
  */
 
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
-import type { EsqlToolDefinition, EsqlToolDefinitionWithSchema } from './esql';
-import type {
-  IndexSearchToolDefinition,
-  IndexSearchToolDefinitionWithSchema,
-} from './index_search';
+import { type ToolDefinition } from './definition';
 
-export function isPersistedTool(
-  tool: ToolDefinitionWithSchema
-): tool is EsqlToolDefinitionWithSchema | IndexSearchToolDefinitionWithSchema;
-export function isPersistedTool(
-  tool: ToolDefinition
-): tool is EsqlToolDefinition | IndexSearchToolDefinition;
 export function isPersistedTool(tool: ToolDefinition): boolean {
-  return tool.type === ToolType.esql || tool.type === ToolType.index_search;
+  return !tool.readonly;
 }

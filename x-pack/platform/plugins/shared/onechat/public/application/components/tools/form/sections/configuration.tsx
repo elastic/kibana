@@ -8,14 +8,14 @@
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ToolType } from '@kbn/onechat-common/tools/definition';
 import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { ToolFormSection } from '../components/esql/tool_form_section';
+import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
 import { EsqlConfiguration } from './configuration_fields/esql_configuration_fields';
 import { IndexSearchConfiguration } from './configuration_fields/index_search_configuration_fields';
 import { TOOL_TYPE_QUERY_PARAM } from '../../create_tool';
+import { useQueryState } from '../../../../hooks/use_query_state';
 
 export const Configuration = () => {
   const {
@@ -23,15 +23,14 @@ export const Configuration = () => {
     control,
   } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Keep select tool type in sync with URL query param
+  const [urlQueryToolType, setUrlQueryToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
+
   useEffect(() => {
-    if (!type) return;
-    const next = new URLSearchParams(searchParams.toString());
-    next.set(TOOL_TYPE_QUERY_PARAM, type);
-    setSearchParams(next, { replace: true });
-  }, [type, searchParams, setSearchParams]);
+    if (type && type !== urlQueryToolType) {
+      setUrlQueryToolType(type);
+    }
+  }, [type, urlQueryToolType, setUrlQueryToolType]);
 
   const configurationFields =
     type === ToolType.esql ? (

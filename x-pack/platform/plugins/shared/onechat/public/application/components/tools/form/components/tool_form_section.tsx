@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, useEuiTheme } fro
 import { isEqual } from 'lodash';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { memo } from 'react';
-import { i18nMessages } from '../../i18n';
+import { i18nMessages } from '../i18n';
 
 export interface ToolFormSectionDocumentation {
   title: string;

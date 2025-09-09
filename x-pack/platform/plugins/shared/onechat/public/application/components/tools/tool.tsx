@@ -24,7 +24,6 @@ import { isEsqlTool, isIndexSearchTool } from '@kbn/onechat-common/tools';
 import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { FormProvider } from 'react-hook-form';
 import type {
   CreateToolPayload,
@@ -51,6 +50,7 @@ import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
 import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
 import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
+import { useQueryState } from '../../hooks/use_query_state';
 
 interface ToolBaseProps {
   tool?: ToolDefinitionWithSchema;
@@ -80,18 +80,21 @@ export type ToolProps = ToolCreateProps | ToolEditProps | ToolViewProps;
 export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
+    OPEN_TEST_FLYOUT_QUERY_PARAM,
+    { defaultValue: false }
+  );
+  const [urlToolType] = useQueryState<ToolType | undefined>(TOOL_TYPE_QUERY_PARAM);
 
   const initialToolType = useMemo(() => {
-    const value = searchParams.get(TOOL_TYPE_QUERY_PARAM);
-    switch (value) {
+    switch (urlToolType) {
       case ToolType.esql:
       case ToolType.index_search:
-        return value as ToolType;
+        return urlToolType;
       default:
         return undefined;
     }
-  }, [searchParams]);
+  }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
   const { reset, formState, watch, handleSubmit } = form;
@@ -102,14 +105,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   // Handle opening test tool flyout on navigation
   useEffect(() => {
-    const shouldOpen = searchParams.get(OPEN_TEST_FLYOUT_QUERY_PARAM) === 'true';
-    if (shouldOpen && currentToolId && !showTestFlyout) {
+    if (openTestFlyoutParam && currentToolId && !showTestFlyout) {
       setShowTestFlyout(true);
-      const next = new URLSearchParams(searchParams);
-      next.delete(OPEN_TEST_FLYOUT_QUERY_PARAM);
-      setSearchParams(next, { replace: true });
+      setOpenTestFlyoutParam(false);
     }
-  }, [searchParams, currentToolId, showTestFlyout, setSearchParams]);
+  }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam]);
 
   const handleCancel = useCallback(() => {
     navigateToOnechatUrl(appPaths.tools.list);
