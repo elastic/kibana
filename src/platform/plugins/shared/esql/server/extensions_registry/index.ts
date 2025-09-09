@@ -105,14 +105,43 @@ export class ESQLExtensionsRegistry {
     return uniqBy(recommendedItems, uniqByProperty);
   }
 
-  private unsetRecommendedItems<T>(
+  private unsetRecommendedItems<T extends { name: string }>(
     map: Map<string, T[]>,
-    indexPattern: string,
-    activeSolutionId: SolutionId
+    items: T[],
+    activeSolutionId: SolutionId,
+    getIndexPattern: (item: T) => string | undefined,
+    itemTypeName: string // e.g., 'query' or 'field' for error messages
   ): void {
-    const registryId = `${activeSolutionId}>${indexPattern}`;
-    if (map.has(registryId)) {
-      map.delete(registryId);
+    if (!Array.isArray(items)) {
+      throw new Error(`Recommended ${itemTypeName}s must be an array`);
+    }
+
+    for (const item of items) {
+      if (typeof item.name !== 'string') {
+        continue; // Skip if the recommended item is malformed (missing name)
+      }
+
+      const indexPattern = getIndexPattern(item);
+      if (!indexPattern) {
+        // No index pattern found, possibly malformed or not valid for registration
+        continue;
+      }
+
+      const registryId = `${activeSolutionId}>${indexPattern}`;
+
+      if (map.has(registryId)) {
+        const existingItems = map.get(registryId)!;
+        const filteredItems = existingItems.filter(
+          (existingItem) => existingItem.name !== item.name
+        );
+        if (filteredItems.length === 0) {
+          // If no items left for this index pattern, remove the entry from the map
+          map.delete(registryId);
+        } else {
+          // Otherwise, update the map with the filtered items
+          map.set(registryId, filteredItems);
+        }
+      }
     }
   }
 
@@ -150,9 +179,23 @@ export class ESQLExtensionsRegistry {
     );
   }
 
-  unsetRecommendedQueries(indexPattern: string, activeSolutionId: SolutionId): void {
-    // Unsetting queries is currently supported only by index pattern and solution ID
-    this.unsetRecommendedItems(this.recommendedQueries, indexPattern, activeSolutionId);
+  unsetRecommendedQueries(
+    recommendedQueries: RecommendedQuery[],
+    activeSolutionId: SolutionId
+  ): void {
+    this.unsetRecommendedItems(
+      this.recommendedQueries,
+      recommendedQueries,
+      activeSolutionId,
+      (recommendedQuery) => {
+        // Ensure it has a 'query' property
+        if (typeof recommendedQuery.query !== 'string') {
+          return undefined;
+        }
+        return getIndexPatternFromESQLQuery(recommendedQuery.query);
+      },
+      'query'
+    );
   }
 
   setRecommendedFields(recommendedFields: RecommendedField[], activeSolutionId: SolutionId): void {

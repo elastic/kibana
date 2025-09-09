@@ -59,9 +59,8 @@ import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
 import {
-  METRICS_INDEX_PATTERN,
   setEsqlRecommendedQueries,
-  unsetEsqlRecommendedQueries,
+  unsetMetricsExperienceEsqlRecommendedQueries,
 } from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -189,7 +188,7 @@ export class ObservabilityPlugin
           if (isMetricsExperienceEnabled) {
             setEsqlRecommendedQueries(plugins.esql);
           } else {
-            unsetEsqlRecommendedQueries(plugins.esql, METRICS_INDEX_PATTERN);
+            unsetMetricsExperienceEsqlRecommendedQueries(plugins.esql);
           }
         });
     });

@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import { ObservabilityPlugin } from './plugin';
 import {
   setEsqlRecommendedQueries,
-  unsetEsqlRecommendedQueries,
+  unsetMetricsExperienceEsqlRecommendedQueries,
 } from './lib/esql_extensions/set_esql_recommended_queries';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -18,7 +18,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 
 jest.mock('./lib/esql_extensions/set_esql_recommended_queries', () => ({
   setEsqlRecommendedQueries: jest.fn(),
-  unsetEsqlRecommendedQueries: jest.fn(),
+  unsetMetricsExperienceEsqlRecommendedQueries: jest.fn(),
 }));
 
 describe('Observability plugin', () => {
@@ -56,7 +56,7 @@ describe('Observability plugin', () => {
       subject.next(true); // Enable Metrics Experience feature flag
       expect(setEsqlRecommendedQueries).toHaveBeenCalled();
       subject.next(false); // Disable Metrics Experience feature flag
-      expect(unsetEsqlRecommendedQueries).toHaveBeenCalled();
+      expect(unsetMetricsExperienceEsqlRecommendedQueries).toHaveBeenCalled();
     });
   });
   describe('stop()', () => {

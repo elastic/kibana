@@ -230,14 +230,12 @@ describe('ESQLExtensionsRegistry', () => {
   // --- unsetRecommendedQueries tests ---
 
   describe('unsetRecommendedQueries', () => {
-    const METRICS_INDEX_PATTERN = 'metrics-*';
-
     beforeEach(() => {
       availableDatasources = {
         indices: [
           { name: 'logs-2023' },
           { name: 'logs-2024' },
-          { name: METRICS_INDEX_PATTERN },
+          { name: 'metrics-*' },
           { name: 'other_index' },
         ],
         data_streams: [],
@@ -249,20 +247,37 @@ describe('ESQLExtensionsRegistry', () => {
       const solutionId: SolutionId = 'oblt';
       const queries: RecommendedQuery[] = [
         { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
-        { name: 'Metrics Query', query: `FROM ${METRICS_INDEX_PATTERN} | STATS max(bytes)` },
+        { name: 'Metrics Query 1', query: `FROM metrics-* | STATS max(bytes)` },
+        { name: 'Metrics Query 2', query: `FROM metrics-* | STATS avg(cpu.usage)` },
         { name: 'Other Query', query: 'FROM other_index | LIMIT 10' },
       ];
 
       registry.setRecommendedQueries(queries, solutionId);
-      registry.unsetRecommendedQueries(METRICS_INDEX_PATTERN, solutionId);
+      registry.unsetRecommendedQueries(
+        [{ name: 'Metrics Query 1', query: `FROM metrics-* | STATS max(bytes)` }],
+        solutionId
+      );
 
       // Metrics query should be removed
       const metricsQueries = registry.getRecommendedQueries(
-        `FROM ${METRICS_INDEX_PATTERN}`,
+        `FROM metrics-*`,
         availableDatasources,
         solutionId
       );
-      expect(metricsQueries).toEqual([]);
+      expect(metricsQueries).toEqual([queries[2]]);
+
+      registry.unsetRecommendedQueries(
+        [{ name: 'Metrics Query 2', query: `FROM metrics-* | STATS avg(cpu.usage)` }],
+        solutionId
+      );
+
+      // Metrics query should be removed
+      const emptyMetricsQueries = registry.getRecommendedQueries(
+        `FROM metrics-*`,
+        availableDatasources,
+        solutionId
+      );
+      expect(emptyMetricsQueries).toEqual([]);
 
       // Other queries should still exist
       const logsQueries = registry.getRecommendedQueries(
@@ -277,7 +292,7 @@ describe('ESQLExtensionsRegistry', () => {
         availableDatasources,
         solutionId
       );
-      expect(otherQueries).toEqual([queries[2]]);
+      expect(otherQueries).toEqual([queries[3]]);
     });
 
     it('should only remove queries for the specified solution ID', () => {
@@ -285,17 +300,17 @@ describe('ESQLExtensionsRegistry', () => {
       const securitySolutionId: SolutionId = 'security';
       const metricsQuery = {
         name: 'Metrics Query',
-        query: `FROM ${METRICS_INDEX_PATTERN} | STATS max(bytes)`,
+        query: `FROM metrics-* | STATS max(bytes)`,
       };
 
       // Register the same query for two different solutions
       registry.setRecommendedQueries([metricsQuery], obltSolutionId);
       registry.setRecommendedQueries([metricsQuery], securitySolutionId);
-      registry.unsetRecommendedQueries(METRICS_INDEX_PATTERN, obltSolutionId);
+      registry.unsetRecommendedQueries([metricsQuery], obltSolutionId);
 
       // Should be removed from oblt
       const obltQueries = registry.getRecommendedQueries(
-        `FROM ${METRICS_INDEX_PATTERN}`,
+        `FROM metrics-*`,
         availableDatasources,
         obltSolutionId
       );
@@ -303,7 +318,7 @@ describe('ESQLExtensionsRegistry', () => {
 
       // Should still exist for security
       const securityQueries = registry.getRecommendedQueries(
-        `FROM ${METRICS_INDEX_PATTERN}`,
+        `FROM metrics-*`,
         availableDatasources,
         securitySolutionId
       );
@@ -317,7 +332,7 @@ describe('ESQLExtensionsRegistry', () => {
       registry.setRecommendedQueries([logsQuery], solutionId);
 
       // This should not throw an error
-      registry.unsetRecommendedQueries('non-existent-pattern', solutionId);
+      registry.unsetRecommendedQueries([{ name: 'non-existent-pattern', query: '' }], solutionId);
 
       // Original query should still be available
       const retrievedQueries = registry.getRecommendedQueries(
