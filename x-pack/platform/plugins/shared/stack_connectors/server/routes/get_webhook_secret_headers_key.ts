@@ -44,7 +44,7 @@ export const getWebhookSecretHeadersKeyRoute = (
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization as returning headers does not require any.',
+            'This route is opted out from authorization because it relies on the authorization model inside the actions client.',
         },
       },
       validate: {
@@ -82,13 +82,11 @@ export const getWebhookSecretHeadersKeyRoute = (
           id
         );
 
-      const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || [];
+      const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || {};
 
-      const secretHeadersArray = secretHeaders.map((header) => ({
-        key: header.key,
-      }));
+      const secretHeadersArray = Object.keys(secretHeaders) || [];
 
-      return res.ok({ body: { secretHeaders: secretHeadersArray } });
+      return res.ok({ body: secretHeadersArray });
     }
   );
 };
