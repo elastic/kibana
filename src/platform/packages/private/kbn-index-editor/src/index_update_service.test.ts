@@ -9,22 +9,25 @@
 
 import { firstValueFrom } from 'rxjs';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ROW_PLACEHOLDER_PREFIX } from './constants';
 import { IndexUpdateService } from './index_update_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 
 describe('IndexUpdateService', () => {
   let http: HttpStart;
   let data: DataPublicPluginStart;
   let service: IndexUpdateService;
+  let notifications: NotificationsStart;
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
     data = dataPluginMock.createStartContract();
-    service = new IndexUpdateService(http, data, true);
+    notifications = notificationServiceMock.createStartContract();
+
+    service = new IndexUpdateService(http, data, notifications, true);
   });
 
   afterEach(() => {
