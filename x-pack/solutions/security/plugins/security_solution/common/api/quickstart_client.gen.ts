@@ -264,17 +264,13 @@ import type {
   CreatePrivilegesImportIndexResponse,
 } from './entity_analytics/monitoring/create_index.gen';
 import type {
-  SearchPrivilegesIndicesRequestQueryInput,
-  SearchPrivilegesIndicesResponse,
-} from './entity_analytics/monitoring/search_indices.gen';
-import type {
   DeleteMonitoringEngineRequestQueryInput,
   DeleteMonitoringEngineResponse,
-} from './entity_analytics/privilege_monitoring/engine/delete.gen';
-import type { DisableMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/disable.gen';
-import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
-import type { ScheduleMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/schedule_now.gen';
-import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+} from './entity_analytics/monitoring/engine/delete.gen';
+import type { DisableMonitoringEngineResponse } from './entity_analytics/monitoring/engine/disable.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/monitoring/engine/schedule_now.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/monitoring/health.gen';
 import type {
   CreateEntitySourceRequestBodyInput,
   CreateEntitySourceResponse,
@@ -286,28 +282,32 @@ import type {
   UpdateEntitySourceRequestParamsInput,
   UpdateEntitySourceRequestBodyInput,
   UpdateEntitySourceResponse,
-} from './entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
-import type { PrivMonPrivilegesResponse } from './entity_analytics/privilege_monitoring/privileges.gen';
+} from './entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/monitoring/privileges.gen';
+import type {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesResponse,
+} from './entity_analytics/monitoring/search_indices.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/create.gen';
+} from './entity_analytics/monitoring/users/create.gen';
 import type {
   DeletePrivMonUserRequestParamsInput,
   DeletePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/delete.gen';
+} from './entity_analytics/monitoring/users/delete.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
-} from './entity_analytics/privilege_monitoring/users/list.gen';
+} from './entity_analytics/monitoring/users/list.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
   UpdatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/update.gen';
-import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
+} from './entity_analytics/monitoring/users/update.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/monitoring/users/upload_csv.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -397,8 +397,12 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
+  GetAllDashboardMigrationsStatsResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationDashboardsRequestQueryInput,
+  GetDashboardMigrationDashboardsRequestParamsInput,
+  GetDashboardMigrationDashboardsResponse,
   GetDashboardMigrationResourcesRequestQueryInput,
   GetDashboardMigrationResourcesRequestParamsInput,
   GetDashboardMigrationResourcesResponse,
@@ -1443,6 +1447,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migrations stats for all migrations stored in the system
+   */
+  async getAllDashboardMigrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetAllDashboardMigrationsStats`);
+    return this.kbnClient
+      .request<GetAllDashboardMigrationsStatsResponse>({
+        path: '/internal/siem_migrations/dashboards/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the rule migrations stats for all migrations stored in the system
    */
   async getAllStatsRuleMigration() {
@@ -1498,6 +1517,26 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboards added to an existing dashboard migration
+   */
+  async getDashboardMigrationDashboards(props: GetDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request<GetDashboardMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2545,7 +2584,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Run a shell command on an endpoint.
+   * Run a script on a host. Currently supported only for some agent types.
    */
   async runScriptAction(props: RunScriptActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
@@ -3111,6 +3150,10 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationDashboardsProps {
+  query: GetDashboardMigrationDashboardsRequestQueryInput;
+  params: GetDashboardMigrationDashboardsRequestParamsInput;
 }
 export interface GetDashboardMigrationResourcesProps {
   query: GetDashboardMigrationResourcesRequestQueryInput;
