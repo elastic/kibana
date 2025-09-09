@@ -41,7 +41,7 @@ export const getValueInputPopover =
 
     let inputWidth: number | undefined;
     if (cellContentsElement) {
-      inputWidth = cellContentsElement.offsetWidth;
+      inputWidth = cellContentsElement.offsetWidth - 8;
     }
 
     const [inputValue, setInputValue] = useState<string>(cellValue ?? '');
