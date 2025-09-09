@@ -8,15 +8,6 @@
  */
 
 export {
-  extractControlsReferences,
-  injectControlsReferences,
-} from '../../../common/references/controls_references';
-export {
-  extractTimeSeriesReferences,
-  injectTimeSeriesReferences,
-} from '../../../common/references/timeseries_references';
-
-export {
   extractReferences,
   injectReferences,
   convertSavedObjectAttributesToReferences,
