@@ -26,6 +26,7 @@ import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_i
 import type { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   VULN_MGMT_POLICY_TEMPLATE,
@@ -39,9 +40,93 @@ import {
   type TaskHealthStatus,
 } from './task_state';
 import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
+import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
+import type { CloudSecurityPostureConfig } from '../config';
+import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
+
+// Comprehensive template validation that checks all fields against benchmarkScoreMapping
+const validateBenchmarkScoreTemplate = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  try {
+    logger.debug('Checking benchmark score template mapping against expected mapping');
+    
+    const templateResponse = await esClient.indices.getIndexTemplate({ 
+      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME 
+    });
+    
+    const template = templateResponse.index_templates[0]?.index_template;
+    
+    if (!template?.template?.mappings?.properties) {
+      logger.warn(`Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has no mapping properties, will trigger fixing`);
+      await triggerTemplateFix(esClient, logger);
+      return;
+    }
+
+    const templateProperties = template.template.mappings.properties;
+    const expectedProperties = benchmarkScoreMapping.properties;
+
+    if (!expectedProperties) {
+      logger.warn('Expected mapping has no properties');
+      return;
+    }
+
+    let hasFieldMismatch = false;
+    const fieldMismatches: string[] = [];
+
+    // Check all expected fields against template fields
+    for (const [fieldName, expectedField] of Object.entries(expectedProperties)) {
+      const templateField = templateProperties[fieldName];
+      
+      if (!templateField) {
+        logger.warn(`Field '${fieldName}' missing in template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}`);
+        fieldMismatches.push(`${fieldName} (missing)`);
+        hasFieldMismatch = true;
+      } else if (templateField.type !== (expectedField as any)?.type) {
+        logger.warn(
+          `Field '${fieldName}' type mismatch in template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}: expected ${(expectedField as any)?.type}, got ${templateField.type}`
+        );
+        fieldMismatches.push(`${fieldName} (${templateField.type} → ${(expectedField as any)?.type})`);
+        hasFieldMismatch = true;
+      }
+    }
+
+    if (hasFieldMismatch) {
+      logger.warn(
+        `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has field mapping issues: ${fieldMismatches.join(', ')}. Will trigger fixing.`
+      );
+      await triggerTemplateFix(esClient, logger);
+      return;
+    }
+
+    logger.debug(`Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} mapping validation passed - all fields match expected mapping`);
+  } catch (error) {
+    logger.error('Error during template validation:', error);
+    // On error, trigger fixing to be safe
+    await triggerTemplateFix(esClient, logger);
+  }
+};
+
+// Helper function to trigger template fixing
+const triggerTemplateFix = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  try {
+    const config: CloudSecurityPostureConfig = { 
+      enabled: true,
+      serverless: { enabled: true },
+      enableExperimental: []
+    };
+    await createBenchmarkScoreIndex(esClient, config, logger);
+  } catch (fixError) {
+    logger.error('Error during template fixing:', fixError);
+  }
+};
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
@@ -401,6 +486,9 @@ export const aggregateLatestFindings = async (
 ): Promise<TaskHealthStatus> => {
   try {
     const startAggTime = performance.now();
+
+    // Validate benchmark score template mapping before aggregating findings
+    await validateBenchmarkScoreTemplate(esClient, logger);
 
     const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
