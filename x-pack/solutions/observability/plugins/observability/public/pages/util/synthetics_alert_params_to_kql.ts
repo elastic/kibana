@@ -29,9 +29,6 @@ const fieldMap: Record<SupportedAlertParam, string> = {
   tags: 'tags',
 };
 function getFieldnameForKey(key: SupportedAlertParam): string {
-  if (!fieldMap[key]) {
-    throw new Error(`Unsupported alert param: ${key}`);
-  }
   return fieldMap[key];
 }
 
