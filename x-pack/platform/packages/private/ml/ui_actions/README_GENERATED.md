@@ -1,35 +1,34 @@
-# @kbn/reporting-export-types-png-common
+# @kbn/ml-ui-actions
 
 ## Description
-The @kbn/reporting-export-types-png-common package provides TypeScript type definitions and interfaces for Kibana components.
+The @kbn/ml-ui-actions package provides user interface components and visual elements for Kibana.
 
 ## Contents
 - `README.md`
-- `constants.ts`: TypeScript source code
 - `index.ts`: Main entry point for the package
+- `jest.config.js`: Jest testing configuration
 - `kibana.jsonc`: Kibana package configuration
 - `package.json`: Package configuration and metadata
 - `tsconfig.json`: TypeScript configuration
 
 ## Architecture
 
-This package is part of the Kibana type definitions package ecosystem. It has no direct Kibana package dependencies and can be used independently within the Kibana ecosystem.
+This package is part of the Kibana ui components package ecosystem. It has no direct Kibana package dependencies and can be used independently within the Kibana ecosystem.
 
 **Note:** This is a private package and should only be used internally within Kibana.
 ## Usage
 
-To use the @kbn/reporting-export-types-png-common package in your Kibana plugin:
+To use the @kbn/ml-ui-actions package in your Kibana plugin:
 
 ```typescript
-import { PNG_REPORT_TYPE_V2, PNG_JOB_TYPE_V2, JobParamsPNGDeprecated } from '@kbn/reporting-export-types-png-common';
+import { CategorizeFieldContext, ACTION_CATEGORIZE_FIELD, CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 
 // Example usage will depend on the specific exports
 ```
 
 ### Available Interfaces
-- `BaseParamsPNG`
-- `JobParamsPNGV2`
-- `TaskPayloadPNGV2`
+- `CategorizeFieldContext`
+- `CreateCategorizationADJobContext`
 ## Tutorials
 
 For general Kibana development tutorials, see the [dev_docs/tutorials](./dev_docs/tutorials) folder.
