@@ -9,7 +9,6 @@ import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 export interface CaptureScreenshotOptions {
   timeout?: number;
-  idleFor?: number;
   stableFor?: number;
 }
 

@@ -19,7 +19,7 @@ export const captureScreenshotFromUrl = async (
   url: string,
   options: CaptureScreenshotOptions = {}
 ): Promise<CaptureResult | null> => {
-  const { timeout = 90000 } = options;
+  const { timeout = 90000, stableFor = 2000 } = options;
 
   const iframe = document.createElement('iframe');
 
@@ -43,7 +43,7 @@ export const captureScreenshotFromUrl = async (
         return resolve(null);
       }
 
-      await waitForNoGlobalLoadingIndicator(iframe.contentDocument);
+      await waitForNoGlobalLoadingIndicator(iframe.contentDocument, timeout * 2, stableFor);
 
       try {
         const canvas = await domtoimage.toCanvas(element);

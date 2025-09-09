@@ -6,9 +6,9 @@
  */
 
 export const waitForNoGlobalLoadingIndicator = async (
-  doc: Document | null = document,
-  timeout = 180000,
-  stableFor = 2000
+  doc: Document | null,
+  timeout: number,
+  stableFor: number
 ): Promise<void> => {
   const start = Date.now();
   let lastChange = Date.now();
