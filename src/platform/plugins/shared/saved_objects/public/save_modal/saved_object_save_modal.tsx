@@ -90,10 +90,7 @@ const generateId = htmlIdGenerator();
  * @deprecated
  * @removeBy 8.8.0
  */
-class SavedObjectSaveModalComponent<T = void> extends React.Component<
-  Props<T>,
-  SaveModalState
-> {
+class SavedObjectSaveModalComponent<T = void> extends React.Component<Props<T>, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
   private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();

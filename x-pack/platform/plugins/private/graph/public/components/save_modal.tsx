@@ -8,7 +8,11 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OnSaveProps, SaveResult, SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
+import {
+  OnSaveProps,
+  SaveResult,
+  SavedObjectSaveModalWithSaveResult,
+} from '@kbn/saved-objects-plugin/public';
 
 import { GraphSavePolicy } from '../types/config';
 
