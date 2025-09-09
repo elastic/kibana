@@ -7,11 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  KeyboardSensor,
+  MeasuringStrategy,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ControlState } from '@kbn/controls-schemas';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
+
+import { ControlPanel } from './components/control_panel';
 
 export const ControlsRenderer = ({
   parentApi,
@@ -22,17 +39,104 @@ export const ControlsRenderer = ({
     [controlId: string]: ControlState;
   };
 }) => {
-  return Object.values(getInitialState()).map((control) => (
-    <EmbeddableRenderer
-      key={control.id}
-      maybeId={control.id}
-      type={control.type}
-      getParentApi={() => parentApi}
-      onApiAvailable={(api) => {
-        // console.log('REFIST', parentApi.registerChildApi);
-        parentApi.registerChildApi(api);
-      }}
-      hidePanelChrome
-    />
-  ));
+  const controlsInOrder = Object.values(getInitialState()).sort((controlA, controlB) => {
+    return controlA.order - controlB.order;
+  });
+
+  /** Handle drag and drop */
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const onDragEnd = useCallback(({ over, active }: DragEndEvent) => {
+    // const oldIndex = active?.data.current?.sortable.index;
+    // const newIndex = over?.data.current?.sortable.index;
+    // if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+    //   controlsManager.controlsInOrder$.next(arrayMove([...controlsInOrder], oldIndex, newIndex));
+    // }
+    // (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
+    // setDraggingId(null);
+  }, []);
+
+  if (controlsInOrder.length === 0) {
+    return null;
+  }
+
+  return (
+    <EuiPanel
+      css={styles.panel}
+      borderRadius="m"
+      paddingSize="none"
+      color={draggingId ? 'success' : 'transparent'}
+      className="controlsWrapper"
+      data-test-subj="controls-group-wrapper"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        direction="row"
+        responsive={false}
+        data-test-subj="controls-group"
+      >
+        <EuiFlexItem>
+          <DndContext
+            onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+            onDragEnd={onDragEnd}
+            onDragCancel={() => setDraggingId(null)}
+            sensors={sensors}
+            measuring={{
+              droppable: {
+                strategy: MeasuringStrategy.BeforeDragging,
+              },
+            }}
+          >
+            <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
+              <EuiFlexGroup
+                component="ul"
+                className="controlGroup"
+                alignItems="center"
+                gutterSize="s"
+                wrap={true}
+              >
+                {controlsInOrder.map(({ id, type }) => (
+                  <ControlPanel type={type} uuid={id!} parentApi={parentApi} />
+                ))}
+              </EuiFlexGroup>
+            </SortableContext>
+            {/* <DragOverlay>
+              {draggingId ? (
+                <ControlClone
+                  key={draggingId}
+                  labelPosition={labelPosition}
+                  controlApi={controlsManager.getControlApi(draggingId)}
+                />
+              ) : null}
+            </DragOverlay> */}
+          </DndContext>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  // return Object.values(getInitialState()).map((control) => (
+  //   <EmbeddableRenderer
+  //     key={control.id}
+  //     maybeId={control.id}
+  //     type={control.type}
+  //     getParentApi={() => parentApi}
+  //     onApiAvailable={(api) => {
+  //       // console.log('REFIST', parentApi.registerChildApi);
+  //       parentApi.registerChildApi(api);
+  //     }}
+  //     hidePanelChrome
+  //   />
+  // ));
+};
+
+const styles = {
+  panel: css({
+    display: 'flex',
+    alignItems: 'center',
+  }),
+  autoApply: css({ alignSelf: 'end' }),
 };
