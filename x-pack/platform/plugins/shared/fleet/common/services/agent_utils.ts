@@ -6,7 +6,7 @@
  */
 import semverValid from 'semver/functions/valid';
 
-import type { AgentTargetVersion } from '../types';
+import type { Agent, AgentTargetVersion } from '../types';
 
 export function removeSOAttributes(kuery: string): string {
   return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
@@ -45,3 +45,8 @@ export function checkTargetVersionsValidity(
     return `sum of percentages cannot exceed 100`;
   }
 }
+
+export const getFipsAgentsCount = (agents: Agent[]) => {
+  const fipsAgents = agents.filter((agent) => agent.local_metadata?.elastic?.agent?.fips === true);
+  return fipsAgents.length;
+};

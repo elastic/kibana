@@ -50,6 +50,7 @@ import {
   useStartServices,
   useUIExtension,
   useAuthz,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -76,8 +77,6 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { packageHasAtLeastOneSecret } from '../utils';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
-
-import { useAgentPoliciesWithFipsAgents } from '../../../../hooks/use_agent_policies_with_fips';
 
 import {
   AddIntegrationFlyoutConfigureHeader,
@@ -294,7 +293,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     }
   }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentPolicies]);
 
-  const policiesHaveFipsAgents = useAgentPoliciesWithFipsAgents(agentPolicyIds);
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
+
+  const fipsAgentsCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
+  }, [agentPolicyData?.items]);
 
   useEffect(() => {
     if (
@@ -600,7 +605,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="xl" />
         </>
       ) : null}
-      {policiesHaveFipsAgents && !fipsCompatibleIntegration && (
+      {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
           <EuiCallOut
             size="m"

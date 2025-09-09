@@ -304,6 +304,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   revision: schema.number(),
   agents: schema.maybe(schema.number()),
   unprivileged_agents: schema.maybe(schema.number()),
+  fips_agents: schema.maybe(schema.number()),
   is_protected: schema.boolean({
     meta: {
       description:
