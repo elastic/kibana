@@ -57,17 +57,6 @@ export const getColumns = (): Array<
       );
     },
   },
-  // {
-  //   field: 'lastSeen',
-  //   name: i18n.translate(
-  //     'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.lastSeen',
-  //     { defaultMessage: 'Last seen' }
-  //   ),
-  //   sortable: (item) => item.lastSeen || 0,
-  //   render: (_, item) => (
-  //     <Timestamp timestamp={item.lastSeen} timeUnit="minutes" renderMode="tooltip" />
-  //   ),
-  // },
   {
     field: 'occurrences',
     width: '20%',
@@ -76,5 +65,17 @@ export const getColumns = (): Array<
       { defaultMessage: 'Occurrences' }
     ),
     sortable: (item) => item.occurrences || 0,
+    render: (_, item) =>
+      item.occurrences
+        ? i18n.translate(
+            'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.occurrences.value',
+            {
+              defaultMessage: `{occurrences} occ.`,
+              values: {
+                occurrences: item.occurrences,
+              },
+            }
+          )
+        : NOT_AVAILABLE_LABEL,
   },
 ];
