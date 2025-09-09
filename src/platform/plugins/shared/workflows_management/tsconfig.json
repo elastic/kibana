@@ -46,6 +46,7 @@
     "@kbn/core-chrome-layout",
     "@kbn/core-security-browser",
     "@kbn/react-kibana-context-theme",
+    "@kbn/storage-adapter",
     "@kbn/core-i18n-browser-mocks"
   ],
   "exclude": ["target/**/*"]
