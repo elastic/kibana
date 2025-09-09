@@ -12,6 +12,7 @@ import {
   createRuntimeStateManager,
   internalStateActions,
   selectTabRuntimeState,
+  selectTab,
 } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
@@ -29,7 +30,7 @@ describe('InternalStateStore', () => {
       storage: services.storage,
     });
     const store = createInternalStateStore({
-      services: createDiscoverServicesMock(),
+      services,
       customizationContext: mockCustomizationContext,
       runtimeStateManager,
       urlStateStorage,
@@ -46,7 +47,7 @@ describe('InternalStateStore', () => {
     );
   });
 
-  it('should set control state', () => {
+  it('should set control state', async () => {
     const services = createDiscoverServicesMock();
     const urlStateStorage = createKbnUrlStateStorage();
     const runtimeStateManager = createRuntimeStateManager();
@@ -55,15 +56,13 @@ describe('InternalStateStore', () => {
       storage: services.storage,
     });
     const store = createInternalStateStore({
-      services: createDiscoverServicesMock(),
+      services,
       customizationContext: mockCustomizationContext,
       runtimeStateManager,
       urlStateStorage,
       tabsStorageManager,
     });
-    store.dispatch(
-      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
-    );
+    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(selectTab(store.getState(), tabId).controlGroupState).toBeUndefined();
 
