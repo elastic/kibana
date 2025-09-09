@@ -908,23 +908,6 @@ export function isKnownEmptyQuery(query: estypes.QueryDslQueryContainer) {
   return false;
 }
 
-/**
- * Extract unique influencers from the job or collection of jobs
- * @param jobs
- */
-export function extractInfluencers(jobs: Job | Job[]): string[] {
-  if (!Array.isArray(jobs)) {
-    jobs = [jobs];
-  }
-  const influencers = new Set<string>();
-  for (const job of jobs) {
-    for (const influencer of job.analysis_config.influencers || []) {
-      influencers.add(influencer);
-    }
-  }
-  return Array.from(influencers);
-}
-
 export function removeNodeInfo(job: CombinedJobWithStats) {
   const newJob = cloneDeep(job);
   if (newJob.node !== undefined) {
