@@ -19,10 +19,9 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
-import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { LensAttributes, LensDatatableDataset } from '../types';
-import type { LensApiState } from '../schema';
+import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
@@ -77,7 +76,9 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
   return getMetricApiColumnFromLensState(column, typedLayer.columns);
 };
 
-function isTextBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is TextBasedLayer {
+function isTextBasedLayer(
+  layer: LensApiState | FormBasedLayer | TextBasedLayer
+): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
 }
 
@@ -164,8 +165,11 @@ function buildDatasourceStatesLayer(
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
-  function buildValueLayer(config: LensApiState): TextBasedPersistedState['layers'][0] {
-    const table = dataset as unknown as LensDatatableDataset;
+  function buildValueLayer(
+    config: TextBasedLayer,
+    ds: NarrowByType<LensApiState['dataset'], 'table'>
+  ): TextBasedPersistedState['layers'][0] {
+    const table = ds.table as LensDatatableDataset;
     const newLayer = {
       table,
       columns: getValueColumns(config, i),
@@ -183,12 +187,15 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  function buildESQLLayer(config: LensApiState): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(config, i) as TextBasedLayerColumn[];
+  function buildESQLLayer(
+    config: TextBasedLayer,
+    ds: NarrowByType<LensApiState['dataset'], 'esql'>
+  ): TextBasedPersistedState['layers'][0] {
+    const columns = getValueColumns(config, i);
 
     const newLayer = {
       index: index.index,
-      query: { esql: (dataset as any).query } as AggregateQuery,
+      query: { esql: ds.query },
       timeField: '@timestamp',
       columns,
       allColumns: columns,
@@ -198,9 +205,16 @@ function buildDatasourceStatesLayer(
   }
 
   if (dataset.type === 'esql') {
-    return ['textBased', buildESQLLayer(layer)];
-  } else if (dataset.type === 'table') {
-    return ['textBased', buildValueLayer(layer)];
+    if (!isTextBasedLayer(layer)) {
+      throw new Error('Expected TextBasedLayer for esql dataset');
+    }
+    return ['textBased', buildESQLLayer(layer, dataset)];
+  }
+  if (dataset.type === 'table') {
+    if (!isTextBasedLayer(layer)) {
+      throw new Error('Expected TextBasedLayer for esql dataset');
+    }
+    return ['textBased', buildValueLayer(layer, dataset)];
   }
   return ['formBased', buildDataLayers(layer, i, index)];
 }
@@ -243,7 +257,7 @@ export const buildDatasourceStates = async (
       throw Error('dataset must be defined');
     }
 
-    const index = await getDatasetIndex(dataset);
+    const index = getDatasetIndex(dataset);
 
     const [type, layerConfig] = buildDatasourceStatesLayer(
       layer,
