@@ -158,7 +158,7 @@ export const getSuggestions = async (
         datasourceMap,
         visualizationMap,
         preferredChartType,
-        preferredVisAttributes: preferredVisAttributes ?? undefined,
+        preferredVisAttributes: preferredVisAttributes,
       }) ?? [];
 
     // Lens might not return suggestions for some cases, i.e. in case of errors
