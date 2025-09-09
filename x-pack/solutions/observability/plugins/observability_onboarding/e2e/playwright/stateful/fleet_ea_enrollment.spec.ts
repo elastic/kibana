@@ -42,7 +42,8 @@ test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPa
 
   const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
-  fs.writeFileSync(outputPath, clipboardData);
+  const nonInteractiveFlag = ' -n';
+  fs.writeFileSync(outputPath, clipboardData + nonInteractiveFlag);
 
   await fleetAgentsOverviewPage.assertAgentEnrolled();
   await fleetAgentsOverviewPage.assertIncomingDataConfirmed();
