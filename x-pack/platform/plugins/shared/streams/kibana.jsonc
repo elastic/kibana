@@ -20,7 +20,8 @@
       "ruleRegistry",
       "security",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "fieldsMetadata"
     ],
     "optionalPlugins": ["cloud", "serverless", "globalSearch"],
     "requiredBundles": [],

@@ -10,6 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { InferenceClient } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { getOtelFieldName } from './convert_ecs_fields_to_otel';
 
@@ -35,6 +36,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export const processingGrokSuggestionsSchema = z.object({
@@ -56,6 +58,7 @@ export const handleProcessingGrokSuggestions = async ({
   params,
   inferenceClient,
   streamsClient,
+  fieldsMetadataClient,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
   const stream = await streamsClient.getStream(params.path.name);
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
@@ -73,14 +76,18 @@ export const handleProcessingGrokSuggestions = async ({
   // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
   const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
 
+  const fieldMetadata = await Promise.all(
+    reviewResult.fields.map(async (field) => fieldsMetadataClient.getByName(field.ecs_field))
+  );
+
   return {
     log_source: reviewResult.log_source,
-    fields: reviewResult.fields.map((field) => {
+    fields: reviewResult.fields.map((field, index) => {
       const name = field.ecs_field.startsWith('@timestamp')
         ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
         : field.ecs_field;
       return {
-        name: useOtelFieldNames ? getOtelFieldName(name) : name,
+        name: useOtelFieldNames ? getOtelFieldName(name, fieldMetadata[index]) : name,
         columns: field.columns,
         grok_components: field.grok_components,
       };

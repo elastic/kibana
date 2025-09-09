@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
+
 /**
  * THESE MAPPINGS HAVE BEEN GENERATED FROM THE ECS DOCUMENTATION - DO NOT MODIFY MANUALLY!
  *
@@ -231,13 +233,24 @@ const RESOURCE_FIELDS: string[] = [
  *
  * See https://www.elastic.co/docs/reference/ecs/ecs-otel-alignment-details for full reference.
  */
-export function getOtelFieldName(ecsFieldName: string): string {
+export function getOtelFieldName(
+  ecsFieldName: string,
+  fieldMetadata: FieldMetadata | undefined
+): string {
   if (ecsFieldName === '@timestamp') {
     return `@timestamp`; // Special case for `@timestamp` field which should be kept as is.
   }
   if (ecsFieldName === 'message') {
     return `body.text`; // Special case for `message` field which should be stored as `body.text` instead of `body` (SemConv).
   }
+  if (fieldMetadata && fieldMetadata.otel) {
+    // If the field has an 'equivalent' OTEL mapping, use that as the authoritative field name (still need to namespace it though)
+    const equivalent = fieldMetadata.otel.find((otel) => otel.relation === 'equivalent');
+    if (equivalent && 'attribute' in equivalent) {
+      ecsFieldName = equivalent.attribute;
+    }
+  }
+
   if (OTLP_FIELDS[ecsFieldName]) {
     return `${OTLP_FIELDS[ecsFieldName]}`; // OTLP fields are mapped to their OTLP counterparts and stored in the root of the document.
   }
@@ -249,27 +262,4 @@ export function getOtelFieldName(ecsFieldName: string): string {
     return `${prefix}.${EQUIVALENT_FIELDS[ecsFieldName]}`; // Equivalent fields are mapped to their SemConv counterparts
   }
   return `${prefix}.${ecsFieldName}`; // All other fields (unknown/conflict) are stored as custom attributes.
-}
-
-/**
- * Will match %{SYNTAX}, %{SYNTAX:SEMANTIC}, %{SYNTAX:SEMANTIC:TYPE}, and support special characters and dots.
- */
-export const SUBPATTERNS_REGEX =
-  /%\{([A-Z0-9_@#$%&*+=\-\.]+)(?::([A-Za-z0-9_@#$%&*+=\-\.]+))?(?::([A-Za-z]+))?\}/g;
-
-/**
- * Maps ECS fields in Grok patterns to OpenTelemetry semantic convention.
- *
- * See https://www.elastic.co/docs/reference/ecs/ecs-otel-alignment-details for full reference.
- */
-export function convertEcsFieldsToOtel(grokPattern: string): string {
-  return grokPattern.replace(
-    SUBPATTERNS_REGEX,
-    (match, pattern: string, field?: string, type?: string) => {
-      if (!field) {
-        return match; // No field, return as is
-      }
-      return `%{${pattern}:${getOtelFieldName(field)}${type ? `:${type}` : ''}}`;
-    }
-  );
 }
