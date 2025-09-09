@@ -24,11 +24,11 @@ export interface ToolsActionsContextType {
   viewTool: (toolId: string) => void;
   deleteTool: (toolId: string) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
-  cloneTool: (toolId: string, toolType: ToolType) => void;
+  cloneTool: (toolId: string) => void;
   testTool: (toolId: string) => void;
   getCreateToolUrl: (toolType: ToolType) => string;
   getEditToolUrl: (toolId: string) => string;
-  getCloneToolUrl: (toolId: string, toolType: ToolType) => string;
+  getCloneToolUrl: (toolId: string) => string;
   getViewToolUrl: (toolId: string) => string;
 }
 
@@ -91,20 +91,18 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
   );
 
   const cloneTool = useCallback(
-    (toolId: string, toolType: ToolType) => {
+    (toolId: string) => {
       navigateToOnechatUrl(appPaths.tools.new, {
         [TOOL_SOURCE_QUERY_PARAM]: toolId,
-        [TOOL_TYPE_QUERY_PARAM]: toolType,
       });
     },
     [navigateToOnechatUrl]
   );
 
   const getCloneToolUrl = useCallback(
-    (toolId: string, toolType: ToolType) => {
+    (toolId: string) => {
       return createOnechatUrl(appPaths.tools.new, {
         [TOOL_SOURCE_QUERY_PARAM]: toolId,
-        [TOOL_TYPE_QUERY_PARAM]: toolType,
       });
     },
     [createOnechatUrl]

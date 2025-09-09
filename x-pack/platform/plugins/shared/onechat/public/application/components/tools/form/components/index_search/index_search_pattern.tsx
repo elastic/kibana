@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useController, useFormContext } from 'react-hook-form';
+import { css } from '@emotion/react';
 import { labels } from '../../../../../utils/i18n';
 import { useIndexSearchSources } from '../../../../../hooks/tools/use_resolve_search_sources';
 import type { IndexSearchToolFormData } from '../../types/tool_form_types';
@@ -27,7 +28,25 @@ export const IndexSearchPattern: React.FC = () => {
   const {
     field: { ref, value, onChange, onBlur, name },
     fieldState,
-  } = useController({ name: 'pattern', control });
+  } = useController({
+    name: 'pattern',
+    control,
+    rules: {
+      required: {
+        value: true,
+        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.requiredError', {
+          defaultMessage: 'Pattern is required.',
+        }),
+      },
+      pattern: {
+        value: /^(?!.*,$).+$/,
+        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.trailingCommaError', {
+          defaultMessage:
+            'Pattern cannot end with a comma. Add another pattern or remove the comma.',
+        }),
+      },
+    },
+  });
 
   const patternValue = value ?? '';
   const hasQuery = patternValue.trim().length > 0;
@@ -38,33 +57,40 @@ export const IndexSearchPattern: React.FC = () => {
     setPageIndex(0);
   }, [patternValue]);
 
-  const { data, isLoading } = useIndexSearchSources({
+  const { data, isLoading, error } = useIndexSearchSources({
     pattern: patternValue,
   });
 
   const items = useMemo(() => (hasQuery ? data?.results ?? [] : []), [data, hasQuery]);
   const total = hasQuery ? data?.total ?? 0 : 0;
 
+  const validatePattern = useCallback(() => {
+    if (fieldState.invalid) return;
+
+    if (error) {
+      setError('pattern', {
+        type: 'error',
+        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.error', {
+          defaultMessage: 'Error loading index patterns.',
+        }),
+      });
+    } else if (patternValue && total === 0) {
+      setError('pattern', {
+        type: 'noMatches',
+        message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.noMatchesError', {
+          defaultMessage: 'No matches found for this pattern.',
+        }),
+      });
+    } else if (!patternValue || total > 0) {
+      clearErrors('pattern');
+    }
+  }, [patternValue, total, error, setError, clearErrors, fieldState.invalid]);
+
   const pageOfItems = useMemo(() => {
     const start = pageIndex * pageSize;
     const end = start + pageSize;
     return items.slice(start, end);
   }, [items, pageIndex, pageSize]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (patternValue && total === 0) {
-        setError('pattern', {
-          type: 'noMatches',
-          message: i18n.translate('xpack.onechat.tools.indexPattern.pattern.noMatchesError', {
-            defaultMessage: 'No matches found for this pattern.',
-          }),
-        });
-      } else if (total > 0) {
-        clearErrors('pattern');
-      }
-    }
-  }, [patternValue, total, isLoading, setError, clearErrors]);
 
   const columns: Array<EuiBasicTableColumn<{ type: string; name: string }>> = [
     {
@@ -120,7 +146,10 @@ export const IndexSearchPattern: React.FC = () => {
         name={name}
         value={patternValue}
         onChange={onChange}
-        onBlur={onBlur}
+        onBlur={() => {
+          onBlur();
+          validatePattern();
+        }}
         inputRef={ref}
         isInvalid={fieldState.invalid}
         aria-label={i18n.translate('xpack.onechat.tools.indexPattern.pattern.inputAriaLabel', {
@@ -129,19 +158,21 @@ export const IndexSearchPattern: React.FC = () => {
         data-test-subj="onechatIndexPatternInput"
       />
 
-      {hasQuery && total > 0 && (
+      {hasQuery && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            size="s"
-            title={i18n.translate('xpack.onechat.tools.indexPattern.pattern.matchSuccess', {
-              defaultMessage:
-                'Your index pattern matches {count, plural, one {# source} other {# sources}}.',
-              values: { count: total },
-            })}
-            color="success"
-            iconType="check"
-          />
+          {
+            <EuiCallOut
+              size="s"
+              title={i18n.translate('xpack.onechat.tools.indexPattern.pattern.matchSuccess', {
+                defaultMessage:
+                  'Your index pattern matches {count, plural, one {# source} other {# sources}}.',
+                values: { count: total },
+              })}
+              color={total === 0 ? 'warning' : 'success'}
+              iconType={total === 0 ? 'warning' : 'check'}
+            />
+          }
         </>
       )}
 
@@ -151,6 +182,9 @@ export const IndexSearchPattern: React.FC = () => {
         items={pageOfItems}
         columns={columns}
         loading={hasQuery ? isLoading : false}
+        css={css`
+          min-height: 300px; /* Prevent layout shift when loading */
+        `}
         rowHeader="name"
         noItemsMessage={
           hasQuery

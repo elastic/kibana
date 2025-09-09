@@ -78,7 +78,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       key="clone"
       size="s"
       onClick={() => {
-        cloneTool(tool.id, tool.type);
+        cloneTool(tool.id);
         setIsOpen(false);
       }}
     >

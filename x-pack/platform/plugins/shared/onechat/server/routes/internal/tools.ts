@@ -104,7 +104,6 @@ export function registerInternalToolsRoutes({
         ...aliases.map((a) => ({ type: 'alias' as const, name: a.name })),
         ...dataStreams.map((d) => ({ type: 'data_stream' as const, name: d.name })),
       ];
-
       return response.ok<ResolveSearchSourcesResponse>({
         body: {
           results,

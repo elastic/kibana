@@ -56,10 +56,10 @@ export const Configuration = () => {
           render={({ field: { ref, ...field } }) => (
             <EuiSelect
               options={[
-                { text: i18nMessages.configuration.form.type.esqlOption, value: 'esql' },
+                { text: i18nMessages.configuration.form.type.esqlOption, value: ToolType.esql },
                 {
                   text: i18nMessages.configuration.form.type.indexSearchOption,
-                  value: 'index_search',
+                  value: ToolType.index_search,
                 },
               ]}
               {...field}
