@@ -17,7 +17,7 @@ import {
 import { getJoinAggKey } from '../../../../../../common/get_agg_key';
 import type {
   CountAggDescriptor,
-  JoinDescriptor,
+  ESDistanceSourceDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../../styles/vector/vector_style';
@@ -74,8 +74,8 @@ export function createDistanceJoinLayerDescriptor({
         applyGlobalQuery: true,
         applyGlobalTime: true,
         applyForceRefresh: true,
-      },
-    } as JoinDescriptor,
+      } as ESDistanceSourceDescriptor,
+    },
   ];
 
   return GeoJsonVectorLayer.createDescriptor({
