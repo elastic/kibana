@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
+import { isEqual } from 'lodash';
 
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../..';
@@ -14,10 +15,15 @@ import { getPackageSavedObjects } from '../../packages/get';
 import { MAX_CONCURRENT_INDEX_PATTERN_OPERATIONS } from '../../../../constants';
 export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
-export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
+export function getIndexPatternTypes() {
+  if (isEqual(appContextService.getConfig()?.internal?.excludeDataStreamTypes, ['metrics'])) {
+    return [dataTypes.Logs];
+  }
+  return [dataTypes.Logs, dataTypes.Metrics];
+}
 
 export function getIndexPatternSavedObjects() {
-  return indexPatternTypes.map((indexPatternType) => ({
+  return getIndexPatternTypes().map((indexPatternType) => ({
     id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
     // workaround until https://github.com/elastic/kibana/issues/164454 is fixed
@@ -37,7 +43,7 @@ export async function makeManagedIndexPatternsGlobal(
 
   const results = [];
 
-  for (const indexPatternType of indexPatternTypes) {
+  for (const indexPatternType of getIndexPatternTypes()) {
     try {
       const result = await savedObjectsClient.updateObjectsSpaces(
         [{ id: `${indexPatternType}-*`, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }],
@@ -66,7 +72,9 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjects
     return [];
   }
 
-  const patternsToDelete = indexPatternTypes.map((indexPatternType) => `${indexPatternType}-*`);
+  const patternsToDelete = getIndexPatternTypes().map(
+    (indexPatternType) => `${indexPatternType}-*`
+  );
 
   const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
     patternsToDelete.map((pattern) => ({ id: pattern, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }))

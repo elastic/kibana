@@ -24,7 +24,7 @@ import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
 import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
 import {
-  indexPatternTypes,
+  getIndexPatternTypes,
   getIndexPatternSavedObjects,
   makeManagedIndexPatternsGlobal,
 } from '../index_pattern/install';
@@ -615,7 +615,7 @@ async function installKibanaSavedObjectsChunk({
 
 // Filter out any reserved index patterns
 function removeReservedIndexPatterns(kibanaAssets: ArchiveAsset[]) {
-  const reservedPatterns = indexPatternTypes.map((pattern) => `${pattern}-*`);
+  const reservedPatterns = getIndexPatternTypes().map((pattern) => `${pattern}-*`);
 
   return kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
 }

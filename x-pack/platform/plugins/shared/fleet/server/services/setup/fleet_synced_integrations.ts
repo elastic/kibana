@@ -17,7 +17,7 @@ import { FleetSetupError } from '../../errors';
 import { appContextService } from '../app_context';
 import {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
-  indexPatternTypes,
+  getIndexPatternTypes,
 } from '../epm/kibana/index_pattern/install';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { licenseService } from '../license';
@@ -153,7 +153,7 @@ export async function createCCSIndexPatterns(
   const indexPatternSavedObjectsWithRemoteCluster: SavedObject[] = [];
 
   for (const clusterName of remoteClusterNames) {
-    for (const indexPatternType of indexPatternTypes) {
+    for (const indexPatternType of getIndexPatternTypes()) {
       indexPatternSavedObjectsWithRemoteCluster.push({
         id: `${clusterName}:${indexPatternType}-*`,
         type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
