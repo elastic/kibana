@@ -43,7 +43,6 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/presentation-util",
-    "@kbn/esql"
   ],
   "exclude": ["target/**/*"]
 }
