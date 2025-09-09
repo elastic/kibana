@@ -10,26 +10,20 @@
 import type { Subject } from 'rxjs';
 
 import type {
-  OptionsListControlState as OptionsListSchemaType,
+  OptionsListControlState,
   OptionsListSelection,
   OptionsListDisplaySettings,
   OptionsListSortingType,
   DataControlState,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  PublishesTitle,
-  PublishingSubject,
-  SerializedTitles,
-} from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
 import type { EditorState } from './editor_state_manager';
 import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
 import type { OptionsListSuggestions } from '../../../../common/options_list';
-
-export type OptionsListControlState = OptionsListSchemaType & SerializedTitles;
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
   DataControlApi & {

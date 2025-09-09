@@ -68,7 +68,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
   return {
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = { ...initialState.rawState };
+      const state = initialState.rawState;
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);

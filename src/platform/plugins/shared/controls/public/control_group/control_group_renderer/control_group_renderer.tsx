@@ -19,15 +19,13 @@ import { useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 
 import type { ControlGroupApi } from '../..';
+import type { ControlGroupRuntimeState } from '../../../common';
 import {
   type ControlGroupStateBuilder,
   controlGroupStateBuilder,
 } from '../utils/control_group_state_builder';
-import type {
-  ControlGroupCreationOptions,
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-} from './types';
+import type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
+import { deserializeControlGroup } from '../utils/serialization_utils';
 import { defaultRuntimeState, serializeRuntimeState } from '../utils/serialize_runtime_state';
 
 export interface ControlGroupRendererProps {
@@ -160,10 +158,8 @@ export const ControlGroupRenderer = ({
             );
             controlGroupApi.resetUnsavedChanges();
           },
-          // getInput$: () => lastState$Ref.current.pipe(map(deserializeControlGroup)),
-          getInput$: () => lastState$Ref.current,
-          // getInput: () => deserializeControlGroup(lastState$Ref.current.value),
-          getInput: () => {},
+          getInput$: () => lastState$Ref.current.pipe(map(deserializeControlGroup)),
+          getInput: () => deserializeControlGroup(lastState$Ref.current.value),
         };
         setControlGroup(controlGroupRendererApi);
         onApiAvailable(controlGroupRendererApi);

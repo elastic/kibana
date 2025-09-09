@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export type ControlApi = PublishesBlockingError & PublishesDataLoading;
 
-/** TODO: Delete this */
+/** TODO: This feels redundant and doesn't actually do much anymore. We should remove it. */
 export const initializeDefaultControlManager = () => {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);

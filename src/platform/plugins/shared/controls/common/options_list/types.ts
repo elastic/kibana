@@ -9,9 +9,7 @@
 
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { OptionsListControlState } from '@kbn/controls-schemas';
-
-import type { OptionsListSelection } from './options_list_selections';
+import type { OptionsListControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
 /**
  * ----------------------------------------------------------------

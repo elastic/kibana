@@ -85,7 +85,7 @@ export const createDataControlOfType = <
       {
         panelType: type,
         serializedState: {
-          rawState: { id: controlId, ...state },
+          rawState: state,
         },
       },
       true

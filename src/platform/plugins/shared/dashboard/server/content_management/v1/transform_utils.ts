@@ -13,8 +13,6 @@ import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { transformDashboardOut, transformReferencesOut } from './transforms';
 import type { DashboardItem, PartialDashboardItem } from './types';
-import { ControlsGroupState } from '@kbn/controls-schemas';
-import { Reference } from '@kbn/content-management-utils';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;

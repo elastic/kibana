@@ -108,11 +108,12 @@ export const createDashboardSavedObjectType = ({
       },
       controlGroupInput: {
         properties: {
-          controlStyle: { type: 'keyword', index: false, doc_values: false }, // TODO: Remove
-          chainingSystem: { type: 'keyword', index: false, doc_values: false }, // TODO: Remove
+          /** TODO: Most of these settings are being removed. What should we do with this? */
+          controlStyle: { type: 'keyword', index: false, doc_values: false },
+          chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },
-          showApplySelections: { type: 'boolean', index: false, doc_values: false }, // TODO: Remove
-          ignoreParentSettingsJSON: { type: 'text', index: false }, // TODO: Remove
+          showApplySelections: { type: 'boolean', index: false, doc_values: false },
+          ignoreParentSettingsJSON: { type: 'text', index: false },
         },
       },
       timeFrom: { type: 'keyword', index: false, doc_values: false },
