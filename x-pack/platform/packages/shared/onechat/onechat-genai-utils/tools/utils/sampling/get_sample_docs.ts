@@ -6,7 +6,7 @@
  */
 
 import { castArray, uniq } from 'lodash';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit, QueryDslFieldAndFormat } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
 
@@ -23,16 +23,19 @@ export interface SampleDoc {
 export const getSampleDocs = async ({
   index,
   size = 100,
+  _source = false,
+  fields = [{ field: '*', include_unmapped: true }],
   esClient,
 }: {
   index: string | string[];
   size?: number;
+  _source?: boolean;
+  fields?: QueryDslFieldAndFormat[];
   esClient: ElasticsearchClient;
-}): Promise<{ samples: SampleDoc[]; total: number }> => {
+}): Promise<{ samples: SampleDoc[] }> => {
   const { hits } = await esClient.search<Record<string, any>>({
     index,
     size,
-    track_total_hits: true,
     query: {
       bool: {
         should: [
@@ -48,6 +51,8 @@ export const getSampleDocs = async ({
         ],
       },
     },
+    fields,
+    _source,
     sort: {
       _score: {
         order: 'desc',
@@ -56,9 +61,8 @@ export const getSampleDocs = async ({
   });
 
   const samples = hits.hits.map<SampleDoc>(mapSearchHit);
-  const total = typeof hits.total === 'number' ? hits.total! : hits.total?.value!;
 
-  return { samples, total };
+  return { samples };
 };
 
 const mapSearchHit = (hit: SearchHit<Record<string, any>>): SampleDoc => {

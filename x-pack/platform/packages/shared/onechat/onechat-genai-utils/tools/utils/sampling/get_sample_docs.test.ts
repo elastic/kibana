@@ -61,7 +61,6 @@ describe('getSampleDocs', () => {
       expect.objectContaining({
         index: 'test-index',
         size: 10,
-        track_total_hits: true,
       })
     );
   });
@@ -80,13 +79,12 @@ describe('getSampleDocs', () => {
       )
     );
 
-    const { samples, total } = await getSampleDocs({
+    const { samples } = await getSampleDocs({
       index: 'test-index',
       size: 10,
       esClient,
     });
 
-    expect(total).toBe(10);
     expect(samples).toHaveLength(1);
     expect(samples[0]).toEqual({
       id: 'doc-1',
@@ -117,13 +115,12 @@ describe('getSampleDocs', () => {
       )
     );
 
-    const { samples, total } = await getSampleDocs({
+    const { samples } = await getSampleDocs({
       index: 'test-index',
       size: 10,
       esClient,
     });
 
-    expect(total).toBe(10);
     expect(samples).toHaveLength(1);
     expect(samples[0]).toEqual({
       id: 'doc-1',
@@ -158,13 +155,12 @@ describe('getSampleDocs', () => {
       )
     );
 
-    const { samples, total } = await getSampleDocs({
+    const { samples } = await getSampleDocs({
       index: 'test-index',
       size: 10,
       esClient,
     });
 
-    expect(total).toBe(10);
     expect(samples).toHaveLength(1);
     expect(samples[0]).toEqual({
       id: 'doc-1',
@@ -225,13 +221,12 @@ describe('getSampleDocs', () => {
   it('supports processing an empty response', async () => {
     esClient.search.mockResponse(createResponse([]));
 
-    const { samples, total } = await getSampleDocs({
+    const { samples } = await getSampleDocs({
       index: 'test-index',
       size: 10,
       esClient,
     });
 
     expect(samples).toHaveLength(0);
-    expect(total).toBe(0);
   });
 });
