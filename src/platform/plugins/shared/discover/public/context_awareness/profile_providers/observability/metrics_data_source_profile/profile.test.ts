@@ -78,5 +78,17 @@ describe('metricsDataSourceProfileProvider', () => {
       );
       expect(result).toEqual(RESOLUTION_MISMATCH);
     });
+
+    it('when the root solutionType is not Observability', () => {
+      const result = provider.resolve(
+        createParams({
+          rootContext: {
+            profileId: 'security-root-profile',
+            solutionType: SolutionType.Security,
+          },
+        })
+      );
+      expect(result).toEqual(RESOLUTION_MISMATCH);
+    });
   });
 });
