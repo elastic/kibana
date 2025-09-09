@@ -13,4 +13,14 @@ export interface PrivMonBulkUser {
   sourceId: string;
 }
 
+export interface PrivMonOktaIntegrationsUser {
+  username: string;
+  email: string | undefined;
+  roles: string[];
+  sourceId: string;
+  existingUserId: undefined;
+  lastSeen: string;
+  isPrivileged: true;
+}
+
 export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';

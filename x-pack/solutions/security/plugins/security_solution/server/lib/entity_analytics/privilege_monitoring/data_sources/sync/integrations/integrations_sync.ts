@@ -12,11 +12,7 @@ import { createSourcesSyncService } from '../sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
 
 export const createIntegrationsSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const { deps } = dataClient;
-  const esClient = deps.clusterClient.asCurrentUser;
-
   const updateDetectionService = createUpdateDetectionService(dataClient);
-  const deletionDetectionService = undefined;
   const sourcesSyncService = createSourcesSyncService(dataClient);
 
   const integrationsSync = async (soClient: SavedObjectsClientContract) => {

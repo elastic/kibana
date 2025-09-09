@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Matcher } from '../../../constants';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { AfterKey } from './privileged_status_match';

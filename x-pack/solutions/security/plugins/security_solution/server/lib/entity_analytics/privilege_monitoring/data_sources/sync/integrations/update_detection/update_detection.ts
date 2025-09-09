@@ -7,18 +7,19 @@
 
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
+import type { PrivMonOktaIntegrationsUser } from '../../../../types';
 import { createPatternMatcherService } from './privileged_status_match';
+import { createPrivilegeStatusUpdateService } from './privileged_status_update';
 // TODO: fill in
 export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const privilegedStatusUpdateOperations = undefined; // = bulkPrivilegeStatusUpdateOperationsFactory(dataClient);
+  const statusUpdateService = createPrivilegeStatusUpdateService(dataClient);
   const patternMatcherService = createPatternMatcherService(dataClient);
 
   const updateDetection = async (source: MonitoringEntitySource) => {
-    // implement update detection logic
-    dataClient.log('debug', `Checking for updates in integration source ${JSON.stringify(source)}`);
-
-    const users = await patternMatcherService.findPrivilegedUsersFromMatchers(source);
+    const users: PrivMonOktaIntegrationsUser[] =
+      await patternMatcherService.findPrivilegedUsersFromMatchers(source);
     // logic to compare users for updating internal index
+    await statusUpdateService.updatePrivilegedStatus(users);
   };
   return {
     updateDetection,

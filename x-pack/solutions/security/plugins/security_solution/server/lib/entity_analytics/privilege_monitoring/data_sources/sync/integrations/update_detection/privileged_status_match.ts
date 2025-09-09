@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
+import type { PrivMonOktaIntegrationsUser } from '../../../../types';
 
-export type AfterKey = Record<string, string> | undefined; // needs to be record of field to field value?
+export type AfterKey = Record<string, string> | undefined;
 
 // Top hits _source structure
 export interface PrivTopHitSource {
@@ -27,9 +27,9 @@ export interface PrivTopHitSource {
 export interface PrivTopHit {
   _index?: string;
   _id?: string;
-  _score?: number | null;
+  _score?: number | null; // remove
   _source?: PrivTopHitSource;
-  sort?: number[]; // epoch millis from your sort on @timestamp
+  sort?: number[]; // remove
 }
 
 // One composite bucket
@@ -51,66 +51,61 @@ export interface PrivMatchersAggregation {
 export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataClient) => {
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
-  ): Promise<PrivMatchersAggregation[]> => {
-    // want to type this properly
+  ): Promise<PrivMonOktaIntegrationsUser[]> => {
     // pagination variables
     let afterKey: AfterKey | undefined;
     const pageSize = 1; // adjust as needed
     let fetchMore = true;
-    const matcherConfig = source.matchers?.[0]; // maybe don't even need this
+    const matcherConfig = source.matchers?.[0];
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
     const script = buildMatcherScript(matcherConfig);
-    const testAggs: PrivMatchersAggregation[] = [];
+    const users: PrivMonOktaIntegrationsUser[] = [];
     try {
       while (fetchMore) {
-        dataClient.log(
-          'info',
-          `Fetching next page of privileged users with afterKey: ${JSON.stringify(afterKey)}`
-        );
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
           ...buildPrivilegedSearchBody(script, 'now-10y', afterKey, pageSize), // adjust time range as needed
         });
         const aggregations = response.aggregations;
-        /* const aggregations = response.aggregations as {
-          privileged_user_status_since_last_run: {
-            buckets: Array<{
-              key: { username: string };
-              latest_doc_for_user: {
-                hits: {
-                  hits: Array<{
-                    _source?: { user?: { name?: string; roles?: string[] } };
-                    sort?: number[];
-                  }>;
-                };
-              };
-            }>;
-            after_key?: AfterKey;
-          };
-        };*/
         // move to next page
         afterKey = aggregations?.privileged_user_status_since_last_run?.after_key;
         if (aggregations) {
-          testAggs.push(aggregations);
+          users.push(processAggregations(aggregations));
         }
         if (!afterKey) {
           // no more pages
           fetchMore = false;
         }
       }
-      return testAggs;
+      dataClient.log(
+        'info',
+        `Found ${JSON.stringify(users, null, 2)} privileged users from matchers.`
+      );
+      return users;
     } catch (error) {
       dataClient.log('error', `Error finding privileged users from matchers: ${error.message}`);
       return [];
     }
   };
-
-  const bulkPrivilegeStatusUpdateOperationsFactory = (users: unknown[]) => {
-    // implement logic to create bulk update operations for privileged users
+  const processAggregations = (
+    aggregation: PrivMatchersAggregation
+  ): PrivMonOktaIntegrationsUser => {
+    const buckets: PrivBucket | undefined =
+      aggregation.privileged_user_status_since_last_run?.buckets[0];
+    if (!buckets) {
+      return undefined as unknown as PrivMonOktaIntegrationsUser;
+    }
+    const topHit: PrivTopHit = buckets.latest_doc_for_user.hits.hits[0];
+    return {
+      //  username: topHit._source?.user?.name || 'unknown',
+      username: buckets.key.username,
+      email: topHit._source?.user?.email,
+      roles: topHit._source?.user?.roles || [],
+      sourceId: 'from_matcher', // update placeholder
+      existingUserId: undefined, // to be filled in later
+      lastSeen: topHit._source?.['@timestamp'] || new Date().toISOString(),
+      isPrivileged: true, // since matched by matcher
+    };
   };
-
-  return {
-    findPrivilegedUsersFromMatchers,
-    bulkPrivilegeStatusUpdateOperationsFactory,
-  };
+  return { findPrivilegedUsersFromMatchers };
 };
