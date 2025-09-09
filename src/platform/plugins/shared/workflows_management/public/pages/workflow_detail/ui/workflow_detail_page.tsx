@@ -268,7 +268,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               </EuiFlexItem>
             )}
             {isExecutionGraphEnabled && workflow && (
-              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+              <EuiFlexItem css={styles.visualEditor}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <ExecutionGraph workflowYaml={yamlValue} />
                 </React.Suspense>
