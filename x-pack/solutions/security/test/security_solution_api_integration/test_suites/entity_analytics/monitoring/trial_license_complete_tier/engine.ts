@@ -452,14 +452,14 @@ export default ({ getService }: FtrProviderContext) => {
         log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 
         expect(user1AfterSecondSync?.['@timestamp']).toEqual(user1AfterFirstSync?.['@timestamp']);
-        expect(user1AfterSecondSync?.event.ingested).toEqual(user1AfterFirstSync?.event.ingested);
+        expect(user1AfterSecondSync?.event?.ingested).toEqual(user1AfterFirstSync?.event?.ingested);
       });
     });
 
     describe('default entity sources', () => {
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
         await enablePrivmonSetting(kibanaServer);
-        await privMonUtils.initPrivMonEngine();
+        await privmonUtils.initPrivMonEngine();
 
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
