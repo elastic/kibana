@@ -17,45 +17,46 @@ interface Props {
 
 export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
+const dismissLabel = i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss', {
+  defaultMessage: 'Dismiss',
+});
+
 export const KubernetesTour = ({ children }: Props) => {
   const [isTourSeen, setIsTourSeen] = useLocalStorage(KUBERNETES_TOUR_STORAGE_KEY, false);
   const markTourAsSeen = () => setIsTourSeen(true);
 
   return (
-    <div>
-      <EuiTourStep
-        content={
-          <EuiText size="s" color="subdued" data-test-subj="infra-kubernetesTour-text">
-            {i18n.translate('xpack.infra.homePage.kubernetesTour.text', {
-              defaultMessage:
-                'Click here to see your infrastructure in different ways, including Kubernetes pods.',
-            })}
-          </EuiText>
-        }
-        isStepOpen={!isTourSeen}
-        maxWidth={350}
-        onFinish={markTourAsSeen}
-        step={1}
-        stepsTotal={1}
-        title={i18n.translate('xpack.infra.homePage.kubernetesTour.title', {
-          defaultMessage: 'Want a different view?',
-        })}
-        anchorPosition="downCenter"
-        footerAction={
-          <EuiButtonEmpty
-            data-test-subj="infra-kubernetesTour-dismiss"
-            size="s"
-            color="text"
-            onClick={markTourAsSeen}
-          >
-            {i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss', {
-              defaultMessage: 'Dismiss',
-            })}
-          </EuiButtonEmpty>
-        }
-      >
-        {children}
-      </EuiTourStep>
-    </div>
+    <EuiTourStep
+      content={
+        <EuiText size="s" color="subdued" data-test-subj="infra-kubernetesTour-text">
+          {i18n.translate('xpack.infra.homePage.kubernetesTour.text', {
+            defaultMessage:
+              'Click here to see your infrastructure in different ways, including Kubernetes pods.',
+          })}
+        </EuiText>
+      }
+      isStepOpen={!isTourSeen}
+      maxWidth={350}
+      onFinish={markTourAsSeen}
+      step={1}
+      stepsTotal={1}
+      title={i18n.translate('xpack.infra.homePage.kubernetesTour.title', {
+        defaultMessage: 'Want a different view?',
+      })}
+      anchorPosition="downCenter"
+      footerAction={
+        <EuiButtonEmpty
+          aria-label={dismissLabel}
+          data-test-subj="infra-kubernetesTour-dismiss"
+          size="s"
+          color="text"
+          onClick={markTourAsSeen}
+        >
+          {dismissLabel}
+        </EuiButtonEmpty>
+      }
+    >
+      {children}
+    </EuiTourStep>
   );
 };
