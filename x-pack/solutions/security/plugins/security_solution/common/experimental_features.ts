@@ -126,6 +126,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoringRoutesEnabled: true,
 
   /**
+   * Enables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -318,6 +323,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: false,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
