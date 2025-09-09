@@ -66,7 +66,7 @@ export function prepareInlineEditPanel(
     const isNewPanel = initialState.isNewPanel;
 
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
-    // Save the user's preferred chart type to localStorage
+    // Save the user's preferred chart type to session storage
     if (!isNewPanel && attributes) {
       saveUserChartTypeToSessionStorage(attributes.visualizationType);
     }
