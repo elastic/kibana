@@ -39,23 +39,23 @@ describe('IndexUpdateService', () => {
     it('emits ESQL query with metadata once the index is created', async () => {
       service.setIndexName('my-index');
       service.setIndexCreated(true);
-      service.setQstr('response:200');
+      service.setQstr('200');
       service.setSort([['@timestamp' as any, 'desc']]);
 
       const query = await firstValueFrom(service.esqlQuery$);
 
       expect(query.toLowerCase()).toBe(
-        'from "my-index" metadata _id, _source | where qstr("response:200") | limit 1000 | sort @timestamp desc'
+        'from "my-index" metadata _id, _source | where qstr("*200*") | limit 1000 | sort @timestamp desc'
       );
     });
 
     it('emits Discover ESQL query without metadata', async () => {
       service.setIndexName('logs-*');
-      service.setQstr('level:ERROR');
+      service.setQstr('ERROR');
 
       const query = await firstValueFrom(service.esqlDiscoverQuery$);
 
-      expect(query).toBe('FROM "logs-*" | WHERE QSTR("level:ERROR") | LIMIT 1000');
+      expect(query).toBe('FROM "logs-*" | WHERE QSTR("*ERROR*") | LIMIT 1000');
     });
   });
 
