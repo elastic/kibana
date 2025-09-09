@@ -100,8 +100,11 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    // In logs essentials mode, validate logs exploration button is visible
-    await otelKubernetesFlowPage.assertLogsExplorationButtonVisible();
-    await otelKubernetesFlowPage.clickExploreLogsCTA();
+    await page.waitForTimeout(5 * 60000);
+    
+    // Navigate to Discover and validate actual data exists  
+    const discoverValidation = await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
   }
 });

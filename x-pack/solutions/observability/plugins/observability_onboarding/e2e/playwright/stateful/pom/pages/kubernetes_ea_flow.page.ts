@@ -6,6 +6,7 @@
  */
 
 import { expect, type Page, type Locator } from '@playwright/test';
+import { DiscoverValidation } from './discover_validation';
 
 export class KubernetesEAFlowPage {
   page: Page;
@@ -66,5 +67,10 @@ export class KubernetesEAFlowPage {
 
   public async clickExploreLogsCTA() {
     await this.exploreLogsButton.click();
+  }
+
+  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidation> {
+    await this.exploreLogsButton.click();
+    return new DiscoverValidation(this.page);
   }
 }
