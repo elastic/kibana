@@ -125,7 +125,7 @@ export function Settings({
           body: {
             ingest: {
               ...definition.stream.ingest,
-              settings: prepareSettings(definition, settings),
+              settings: prepareSettings(settings),
             },
           },
         },
@@ -291,27 +291,19 @@ export function Settings({
   );
 }
 
-const prepareSettings = (
-  definition: Streams.ingest.all.GetResponse,
-  input: Record<string, { value: string; from?: string }>
-): IngestStreamSettings => {
-  const isInherited = (name: string) => {
-    const val = input[name];
-    return val && val.from && val.from !== definition.stream.name;
-  };
-
+const prepareSettings = (input: Record<string, Setting>): IngestStreamSettings => {
   const settings: IngestStreamSettings = {};
-  if (input['index.number_of_shards'] && !isInherited('index.number_of_shards')) {
+  if (input['index.number_of_shards']?.override === true) {
     settings['index.number_of_shards'] = { value: Number(input['index.number_of_shards'].value) };
   }
 
-  if (input['index.number_of_replicas'] && !isInherited('index.number_of_replicas')) {
+  if (input['index.number_of_replicas']?.override === true) {
     settings['index.number_of_replicas'] = {
       value: Number(input['index.number_of_replicas'].value),
     };
   }
 
-  if (input['index.refresh_interval'] && !isInherited('index.refresh_interval')) {
+  if (input['index.refresh_interval']?.override === true) {
     const value = input['index.refresh_interval'].value;
     if (Number(value) === -1) {
       settings['index.refresh_interval'] = { value: -1 };
