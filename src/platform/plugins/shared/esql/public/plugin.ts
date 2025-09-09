@@ -49,7 +49,7 @@ interface EsqlPluginStartDependencies {
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getInferenceEndpointsAutocomplete?: (
     taskType: InferenceTaskType
@@ -106,14 +106,18 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const variablesService = new EsqlVariablesService();
 
-    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
-      async () => {
+    const getJoinIndicesAutocomplete = cacheParametrizedAsyncFunction(
+      async (remoteClusters?: string) => {
+        const query = remoteClusters ? { remoteClusters } : {};
+
         const result = await core.http.get<IndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/join/indices'
+          '/internal/esql/autocomplete/join/indices',
+          { query }
         );
 
         return result;
       },
+      (remoteClusters?: string) => remoteClusters || '',
       1000 * 60 * 5, // Keep the value in cache for 5 minutes
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
