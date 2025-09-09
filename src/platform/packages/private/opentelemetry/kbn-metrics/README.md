@@ -44,9 +44,21 @@ const meter = metrics.getMeter('kibana.ops');
 // NOTE: All counters registered for the same meter are reported in the same document.
 
 // 2.a. Push metric
-const metricShort = meter.createGauge('elu.history.short', { valueType: ValueType.DOUBLE });
-const metricMedium = meter.createGauge('elu.history.medium', { valueType: ValueType.DOUBLE });
-const metricLong = meter.createGauge('elu.history.medium', { valueType: ValueType.DOUBLE });
+const metricShort = meter.createGauge('elu.history.short', {
+  description: "The short-term event loop utilization history.",
+  unit: '1',
+  valueType: ValueType.DOUBLE,
+});
+const metricMedium = meter.createGauge('elu.history.medium', {
+  description: "The medium-term event loop utilization history.",
+  unit: '1',
+  valueType: ValueType.DOUBLE,
+});
+const metricLong = meter.createGauge('elu.history.medium', {
+  description: "The long-term event loop utilization history.",
+  unit: '1',
+  valueType: ValueType.DOUBLE,
+});
 this.elu$.subscribe(({ short, medium, long }) => {
   metricShort.record(short, { ...anyOptionalLabels });
   metricMedium.record(medium, { ...anyOptionalLabels });
@@ -55,16 +67,16 @@ this.elu$.subscribe(({ short, medium, long }) => {
 
 // 2.b. Observable metric
 meter
-  .createObservableCounter('uptime', { unit: 's', valueType: ValueType.INT })
+  .createObservableCounter('process.uptime', { description: 'Process uptime', unit: 's', valueType: ValueType.INT })
   .addCallback((result) => {
     result.observe(process.uptime(), { ...anyOptionalLabels });
   });
 
 // 2.b.+ Batching multiple observable metrics
-const memoryHeapLimit = meter.createObservableUpDownCounter('v8js.memory.heap.limit');
-const memoryHeapUsed = meter.createObservableUpDownCounter('v8js.memory.heap.used');
-const memoryHeapAvailable = meter.createObservableUpDownCounter('v8js.memory.heap.available_size');
-const memoryHeapPhysical = meter.createObservableUpDownCounter('v8js.memory.heap.physical_size');
+const memoryHeapLimit = meter.createObservableUpDownCounter('v8js.memory.heap.limit', {...});
+const memoryHeapUsed = meter.createObservableUpDownCounter('v8js.memory.heap.used', {...});
+const memoryHeapAvailable = meter.createObservableUpDownCounter('v8js.memory.heap.available_size', {...});
+const memoryHeapPhysical = meter.createObservableUpDownCounter('v8js.memory.heap.physical_size', {...});
 
 meter.addBatchObservableCallback((result) => {
   v8.getHeapSpaceStatistics().forEach((space) => {
@@ -128,7 +140,7 @@ The [OTel docs](https://opentelemetry.io/docs/concepts/signals/metrics/) provide
 
 A quick summary:
 
-1. Use `Histogram` when you are able to record your metric in push-based mode, and when you're interested in value statistics like _How many requests took less than 1s?_.
+1. Use `Histogram` when you're interested in value statistics like _How many requests took less than 1s?_. This API is only available for push-based metrics.
 2. The difference between a `Counter` and an `UpDownCounter` is that the former is an always-growing metric, while the latter can increase or decrease.
 3. Use a `Counter` (or `UpDownCounter`) instead of a `Gauge` if your metric can be summed up (e.g. number of requests or process' memory usage). 
 4. Use a `Gauge` when it doesn't make sense to sum up the metric (e.g. process' uptime or event loop delay).
