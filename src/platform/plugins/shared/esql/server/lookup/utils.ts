@@ -73,20 +73,17 @@ export function getListOfCCSIndices(
     return [];
   }
 
-  // Start with resources from the first cluster
-  const firstClusterIndices = new Set(clusterResourcesMaps[0].keys());
-  let commonIndices = new Set(firstClusterIndices);
+  // Start with indices from the first cluster
+  let commonIndices = Array.from(clusterResourcesMaps[0].keys());
 
   // Find intersection with other clusters
   for (let i = 1; i < clusterResourcesMaps.length; i++) {
-    commonIndices = new Set(
-      [...commonIndices].filter((index) => clusterResourcesMaps[i].has(index))
-    );
+    commonIndices = commonIndices.filter((index) => clusterResourcesMaps[i].has(index));
   }
 
   // Return the IndexAutocompleteItem objects for common indices with cluster prefix removed
-  return [...commonIndices].map((index) => {
-    const allAliases = new Set<string>();
+  return commonIndices.map((index) => {
+    const allAliases: string[] = [];
     let baseItem: IndexAutocompleteItem | undefined;
 
     for (const clusterMap of clusterResourcesMaps) {
@@ -96,7 +93,7 @@ export function getListOfCCSIndices(
           baseItem = item;
         }
         if (item.aliases) {
-          item.aliases.forEach((alias) => allAliases.add(alias));
+          allAliases.push(...item.aliases);
         }
       }
     }
@@ -104,7 +101,7 @@ export function getListOfCCSIndices(
     return {
       ...baseItem!,
       name: index,
-      aliases: [...allAliases],
+      aliases: [...new Set(allAliases)], // Remove duplicates
     };
   });
 }
