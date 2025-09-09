@@ -114,7 +114,9 @@ export const installationStatuses = {
 // This array also controls the order in which the asset types are displayed
 export const displayedAssetTypes: DisplayedAssetTypes = [
   ...Object.values(KibanaSavedObjectType),
-  ...Object.values(ElasticsearchAssetType),
+  ...(Object.values(ElasticsearchAssetType).filter(
+    (assetType) => assetType !== ElasticsearchAssetType.knowledgeBase
+  ) as ElasticsearchAssetType[]), // Filter out knowledgeBase assets, we dont want to expose to the user
 ];
 
 export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);

@@ -9,3 +9,5 @@
 
 export * from './value_formatters';
 export * from './value_formatters/constants';
+export * from './esql/create_esql_query';
+export * from './esql/constants';

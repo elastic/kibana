@@ -35,6 +35,8 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
   transformEnhancementsIn: EnhancementsRegistry['transformIn'];
   transformEnhancementsOut: EnhancementsRegistry['transformOut'];
   getAllMigrations: () => MigrateFunctionsObject;
+  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
+  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
