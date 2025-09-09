@@ -27,6 +27,8 @@ import type { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAgg
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
+  BENCHMARK_SCORE_INDEX_PATTERN,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   VULN_MGMT_POLICY_TEMPLATE,
@@ -41,8 +43,7 @@ import {
 } from './task_state';
 import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
-import type { CloudSecurityPostureConfig } from '../config';
-import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
+import { scorePipelineIngestConfig } from '../create_indices/ingest_pipelines';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
@@ -111,20 +112,40 @@ const validateBenchmarkScoreTemplate = async (
   }
 };
 
-// Helper function to trigger template fixing
+// Helper function to fix only the template mapping (no index creation)
 const triggerTemplateFix = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
   try {
-    const config: CloudSecurityPostureConfig = { 
-      enabled: true,
-      serverless: { enabled: true },
-      enableExperimental: []
-    };
-    await createBenchmarkScoreIndex(esClient, config, logger);
+    logger.info(`Updating template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} to fix mapping issues`);
+
+    await esClient.indices.putIndexTemplate({
+      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
+      index_patterns: [BENCHMARK_SCORE_INDEX_PATTERN],
+      template: {
+        mappings: benchmarkScoreMapping,
+        settings: {
+        index: {
+          default_pipeline: scorePipelineIngestConfig.id,
+      },
+      lifecycle: { name: '' },
+    },
+      },
+      _meta: {
+        package: {
+          name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+        },
+        managed_by: 'cloud_security_posture',
+        managed: true,
+      },
+      priority: 500,
+    });
+
+    logger.info(`Successfully updated template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} mapping`);
   } catch (fixError) {
     logger.error('Error during template fixing:', fixError);
+    throw fixError;
   }
 };
 
