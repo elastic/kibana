@@ -22,6 +22,7 @@ import { internalManagementRoutes } from './internal/streams/management/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
 import { ruleRoutes } from './rules/route';
+import { failureStoreRoutes } from './internal/streams/failure_store/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -32,6 +33,7 @@ export const streamsRouteRepository = {
   ...internalSchemaRoutes,
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
+  ...failureStoreRoutes,
   // public APIs
   ...dashboardRoutes,
   ...crudRoutes,
