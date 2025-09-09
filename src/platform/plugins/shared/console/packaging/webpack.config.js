@@ -12,6 +12,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
+const webpack = require('webpack');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
 
@@ -24,13 +25,14 @@ const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 module.exports = [
   // React bundle configuration
   {
+
     mode: process.env.NODE_ENV || 'development',
     entry: require.resolve('./react/index.tsx'),
     context: __dirname,
     devtool: 'cheap-source-map',
     output: {
       libraryTarget: 'commonjs',
-      path: path.resolve(BUILD_OUTPUT_DIR, 'react'),
+      path: path.resolve(__dirname, '../target/react'),
       filename: 'index.js',
       chunkFilename: '[name].chunk.js',
       publicPath: 'auto',
@@ -55,8 +57,8 @@ module.exports = [
         'moment-timezone': 'commonjs moment-timezone',
         '@elastic/datemath': 'commonjs @elastic/datemath',
         'monaco-editor': 'commonjs monaco-editor',
-        '@kbn/monaco': 'commonjs @kbn/monaco',
-        '@kbn/code-editor': 'commonjs @kbn/code-editor',
+        // '@kbn/monaco': 'commonjs @kbn/monaco',
+        // '@kbn/code-editor': 'commonjs @kbn/code-editor',
       },
       // Handle react-dom internal imports only
       function (context, request, callback) {
@@ -71,12 +73,12 @@ module.exports = [
         }
         callback();
       },
-      function (context, request, callback) {
-        if (/^@kbn\/code-editor\//.test(request)) {
-          return callback(null, 'commonjs ' + request);
-        }
-        callback();
-      },
+      // function (context, request, callback) {
+        // if (/^@kbn\/code-editor\//.test(request)) {
+          // return callback(null, 'commonjs ' + request);
+        // }
+        // callback();
+      // },
     ],
     module: {
       rules: [
@@ -100,7 +102,7 @@ module.exports = [
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              envName: 'development',
+              envName: 'production',
               presets: [BABEL_PRESET],
             },
           },
@@ -237,7 +239,7 @@ module.exports = [
         cleanOnceBeforeBuildPatterns: [path.resolve(BUILD_OUTPUT_DIR, 'react/**/*')],
       }),
       // new MonacoWebpackPlugin({}),
-      new BundleAnalyzerPlugin(),
+      // new BundleAnalyzerPlugin(),
     ],
   },
 

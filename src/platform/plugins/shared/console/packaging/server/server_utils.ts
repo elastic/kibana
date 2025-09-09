@@ -10,7 +10,7 @@
 import { merge } from 'lodash';
 import * as path from 'path';
 import * as fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'fs';
 import normalizePath from 'normalize-path';
 import type {
   EndpointDescription,
@@ -245,7 +245,7 @@ export function createSpecDefinitionsLoader(
     endpointsAvailability,
     fs: {
       readFileSync: fs.readFileSync,
-      globSync: glob.sync,
+      globSync,
       normalizePath,
       join: path.join,
       basename: path.basename,

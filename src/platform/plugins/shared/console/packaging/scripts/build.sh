@@ -45,17 +45,17 @@ cd "$KIBANA_ROOT" && node scripts/extract_plugin_translations.js --output-dir sr
 cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Generate console definitions..."
-# ./generate_console_definitions.sh
+./generate_console_definitions.sh
 
 echo "Building JavaScript and CSS..."
 cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" yarn webpack --config src/platform/plugins/shared/console/packaging/webpack.config.js
 cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Build react TS definitions..."
-npx tsc react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/react/index.d.ts" --skipLibCheck
+npx tsc ../react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/react/index.d.ts" --skipLibCheck
 
 echo "Build server TS definitions..."
-npx tsc server/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/server/index.d.ts" --skipLibCheck
+npx tsc ../server/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/server/index.d.ts" --skipLibCheck
 
 echo "Build complete! Files generated:"
 ls -la "$OUTPUT_DIR/"

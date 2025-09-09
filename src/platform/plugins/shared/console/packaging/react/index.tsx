@@ -10,10 +10,10 @@
 import React, { useEffect } from 'react';
 // import 'monaco-editor/min/vs/editor/editor.main.css';
 
-// (window as any).MonacoEnvironment = {
-// getWorkerUrl: () => '',
-// getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
-// };
+(window as any).MonacoEnvironment = {
+  getWorkerUrl: () => '',
+  getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
+};
 
 // Create a provider factory for packaging environment
 const createPackagingParsedRequestsProvider = () => {

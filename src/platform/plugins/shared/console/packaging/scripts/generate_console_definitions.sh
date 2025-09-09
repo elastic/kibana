@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK_DIR="/tmp/console_definitions_temp"
 KIBANA_REPO="https://github.com/elastic/kibana.git"
 ES_SPEC_REPO="https://github.com/elastic/elasticsearch-specification.git"
-VERSIONS=("9.0" "8.19" "8.18")
+VERSIONS=("9.0" "9.1")
 
 echo "=== Console Definitions Generator ==="
 echo "Script directory: $SCRIPT_DIR"
@@ -38,14 +38,14 @@ process_version() {
     # Clone Kibana repo with shallow clone for specific version
     echo "Cloning Kibana $version (shallow clone)..."
     git clone --depth 1 --branch "$version" "$KIBANA_REPO" "kibana-$version" || {
-        echo "Error: Tag $version not found in Kibana repository..."
+        echo "Error: Branch $version not found in Kibana repository..."
         return 1
     }
 
     # Clone Elasticsearch specification repo with shallow clone
     echo "Cloning Elasticsearch specification v$version (shallow clone)..."
     git clone --depth 1 --branch "$version" "$ES_SPEC_REPO" "elasticsearch-specification-$version" || {
-        echo "Error: Tag $version not found in elasticsearch-specification..."
+        echo "Error: Branch $version not found in elasticsearch-specification..."
         return 1
     }
 
@@ -71,15 +71,15 @@ process_version() {
     echo "Console definitions for version $version generated successfully!"
 
     # Create final destination directory
+    mkdir -p "$SCRIPT_DIR/../server/console_definitions/$version"
     PERSISTENT_DEST="$(realpath "$SCRIPT_DIR/../server/console_definitions/$version")"
-    mkdir -p "$PERSISTENT_DEST"
 
     # Copy entire spec_definitions directory structure from Kibana repo
     KIBANA_SPEC_DEFINITIONS_DIR="src/platform/plugins/shared/console/server/lib/spec_definitions"
     if [ -d "$KIBANA_SPEC_DEFINITIONS_DIR" ]; then
         echo "Copying spec_definitions directory structure to: $PERSISTENT_DEST"
         cp -r "$KIBANA_SPEC_DEFINITIONS_DIR/." "$PERSISTENT_DEST/"
-        
+
         # Fix import paths in TypeScript files to point to the correct spec_definitions_service
         echo "Fixing import paths in TypeScript files for version $version..."
         # Fix files directly in js/ folder

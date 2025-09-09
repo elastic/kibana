@@ -166,7 +166,7 @@ export const MonacoEditor = ({
           try {
             const columns = await getESQLQueryColumns({
               esqlQuery: queryToExecute,
-              search: data.search.search,
+              search: data?.search?.search,
             });
             return (
               columns?.map((c) => {
@@ -186,7 +186,7 @@ export const MonacoEditor = ({
       },
     };
     return callbacks;
-  }, [licensing, dataViews, application, http, data.search.search]);
+  }, [licensing, dataViews, application, http, data?.search?.search]);
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
