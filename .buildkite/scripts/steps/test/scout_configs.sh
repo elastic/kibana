@@ -52,7 +52,7 @@ fi
 # Define run modes based on group
 declare -A RUN_MODES
 RUN_MODES["platform"]="--stateful --serverless=es --serverless=oblt --serverless=security"
-RUN_MODES["observability"]="--stateful --serverless=oblt"
+RUN_MODES["observability"]="--stateful --serverless=oblt --serverless=oblt-logs-essentials"
 RUN_MODES["search"]="--stateful --serverless=es"
 RUN_MODES["security"]="--stateful --serverless=security"
 
