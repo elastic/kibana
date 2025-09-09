@@ -968,6 +968,54 @@ paths:
       summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
+  /api/entity_store/entities/{entityType}:
+    get:
+      description: >
+        Given an entity type, an entity id and the contents of an entity, 
+        update (or create) the contents of an entity. By default only a
+        specific  set of fields are allowed to be modified, being that
+        `entity.attributes.*,  entity.lifecyle.* and entity.behavior.*`. If you
+        wish to update any  other field you must use the query parameter
+        `force=true`. Be aware  that some fields always fetch the first seen
+        value, thus your changes won't be seen. And also, due to technical
+        limitations, there is no  guarantee that collected values will end up in
+        the final list of  seen values.
+      operationId: UpsertEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entity'
+        description: Schema for the updating a single entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+          description: Entity Updated or Created
+        '400':
+          description: Operation on a non existent field or on a not initiated Engine
+        '403':
+          description: Operation on a not exposed field
+        '404':
+          description: Entity not found
+      summary: Updates or creates an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -1562,6 +1610,70 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityField:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            Asset:
+              type: boolean
+            GrantedPermissions:
+              type: string
+            KnownRedirect:
+              type: boolean
+            Managed:
+              type: boolean
+            MfaEnabled:
+              type: boolean
+            OauthConsentRestriction:
+              type: string
+            OsCurrent:
+              type: string
+            OsPatchCurrent:
+              type: string
+            Privileged:
+              type: boolean
+            StorageClass:
+              type: string
+        behavior:
+          type: object
+          properties:
+            BruteForceVictim:
+              type: boolean
+            NewCountryLogin:
+              type: boolean
+            UsedUsbDevice:
+              type: boolean
+        EngineMetadata:
+          $ref: '#/components/schemas/EngineMetadata'
+        id:
+          type: string
+        lifecycle:
+          type: object
+          properties:
+            FirstSeen:
+              format: date-time
+              type: string
+            IssuedAt:
+              format: date-time
+              type: string
+            LastActivity:
+              format: date-time
+              type: string
+            LastPasswordChange:
+              format: date-time
+              type: string
+        name:
+          type: string
+        source:
+          type: string
+        sub_type:
+          type: string
+        type:
+          type: string
+      required:
+        - id
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1670,24 +1782,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            category:
-              type: string
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            id:
-              type: string
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - id
-            - name
-            - type
+          $ref: '#/components/schemas/EntityField'
       required:
         - entity
     HostEntity:
@@ -1704,20 +1799,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
           type: object
           properties:
@@ -1735,6 +1817,8 @@ components:
               items:
                 type: string
               type: array
+            entity:
+              $ref: '#/components/schemas/EntityField'
             hostname:
               items:
                 type: string
@@ -1762,7 +1846,6 @@ components:
           required:
             - name
       required:
-        - host
         - entity
     IdField:
       enum:
@@ -1974,20 +2057,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
           type: object
           properties:
@@ -1997,6 +2067,8 @@ components:
         service:
           type: object
           properties:
+            entity:
+              $ref: '#/components/schemas/EntityField'
             name:
               type: string
             risk:
@@ -2004,7 +2076,6 @@ components:
           required:
             - name
       required:
-        - service
         - entity
     StoreStatus:
       enum:
@@ -2093,20 +2164,7 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
           type: object
           properties:
@@ -2147,7 +2205,6 @@ components:
           required:
             - name
       required:
-        - user
         - entity
     UserName:
       type: object
