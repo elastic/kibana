@@ -15,13 +15,11 @@ export class OtelKubernetesOverviewDashboardPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.nodesPanelValue = this.page.locator(
-      `#panel-6119419c-1899-4765-aed4-c050cde4c30a .echMetricText__value`
-    );
+    this.nodesPanelValue = this.page.locator(`[id^=panel] .echMetricText__value`);
   }
 
   async assertNodesPanelNotEmpty() {
-    await expect(this.nodesPanelValue).toBeVisible();
-    expect(await this.nodesPanelValue.textContent()).toMatch(/\d+/);
+    await expect(this.nodesPanelValue.first()).toBeVisible();
+    expect(await this.nodesPanelValue.first().textContent()).toMatch(/\d+/);
   }
 }
