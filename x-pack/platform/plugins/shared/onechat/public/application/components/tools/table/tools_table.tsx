@@ -9,7 +9,6 @@ import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
 import { getToolsTableColumns } from './tools_table_columns';
@@ -19,14 +18,7 @@ import { useToolsTableSearch } from './tools_table_search';
 
 export const OnechatToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
-  const { includeSystemTools } = useToolsPreferences();
-  const {
-    tools,
-    isLoading: isLoadingTools,
-    error: toolsError,
-  } = useToolsService({
-    includeSystemTools,
-  });
+  const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
   const { searchConfig, results: tableTools } = useToolsTableSearch();
