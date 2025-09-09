@@ -13,6 +13,7 @@ import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
+import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
@@ -189,7 +190,15 @@ export function ContentFrameworkTable({
   }
 
   return (
-    <div ref={setContainerRef}>
+    <div
+      ref={setContainerRef}
+      // EUI Override: This is necessary to prevent a blank space at the bottom of the grid due to an internal height calculation
+      css={css`
+        .euiDataGrid__virtualized {
+          height: auto !important;
+        }
+      `}
+    >
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"
         id={id}
@@ -203,7 +212,7 @@ export function ContentFrameworkTable({
         initialPageSize={DEFAULT_INITIAL_PAGE_SIZE}
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
-        gridStyle={{ stripes: false, rowHover: 'none' }}
+        gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
       />
     </div>
   );
