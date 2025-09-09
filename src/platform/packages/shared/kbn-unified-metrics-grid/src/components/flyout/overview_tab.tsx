@@ -12,7 +12,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DimensionBadges } from './dimension_badges';
-import { categorizeDimensions } from '../../utils';
+import { categorizeDimensions } from '../../common/utils/dimensions';
 import { TabTitleAndDescription } from './tab_title_and_description';
 
 interface OverviewTabProps {

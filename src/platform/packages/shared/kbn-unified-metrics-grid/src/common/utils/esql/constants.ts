@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './value_formatters';
-export * from './dimension_utils';
+export const DIMENSIONS_COLUMN = '__DIMENSIONS__';

@@ -7,76 +7,87 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth, Parser, BasicPrettyPrinter } from '@kbn/esql-ast';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import type { QueryOperator } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
+import { DIMENSIONS_COLUMN } from './constants';
 
 interface CreateESQLQueryParams {
-  metricName: string;
+  metricField: string;
   index?: string;
   instrument?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
+  timeRange?: TimeRange;
 }
+
+const separator = '\u203A'.normalize('NFC');
 
 export function createESQLQuery({
   index = 'metrics-*',
   instrument,
+  timeRange,
   dimensions = [],
-  metricName,
+  metricField,
   filters,
 }: CreateESQLQueryParams) {
-  // Build dimension part for ES|QL query
-  const dimensionFields =
-    dimensions && dimensions.length > 0
-      ? dimensions.map((dim: string) => `\`${dim}\``).join(', ')
-      : '';
+  const source = timeseries(index);
 
-  const { root } = Parser.parse(`TS ${index}`);
-
+  const whereConditions: QueryOperator[] = [];
   if (filters && filters.length) {
     const valuesByField = new Map<string, Set<string>>();
 
     for (const filter of filters) {
-      if (valuesByField.has(filter.field)) {
-        const values = valuesByField.get(filter.field);
-        values?.add(filter.value);
+      const currentValues = valuesByField.get(filter.field);
+      if (currentValues) {
+        currentValues.add(filter.value);
       } else {
         valuesByField.set(filter.field, new Set([filter.value]));
       }
     }
 
-    const whereConditions: string[] = [];
     valuesByField.forEach((value, key) => {
-      const values = [...value].map((v) => `"${v}"`).join(', ');
-      whereConditions.push(`${key} IN (${values})`);
+      whereConditions.push(
+        where(`${key} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
+      );
     });
-
-    root.commands.push(synth.cmd(`WHERE ${whereConditions.join(' AND ')}`));
   }
 
-  // Choose ES|QL query based on time_series_metric type
-  if (instrument === 'counter') {
-    root.commands.push(
-      synth.cmd(`
-        STATS SUM(RATE(\`${metricName}\`)) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
-        dimensionFields ? `, ${dimensionFields}` : ''
-      }`)
-    );
-  } else if (instrument === 'gauge') {
-    root.commands.push(
-      synth.cmd(`
-        STATS AVG(\`${metricName}\`) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
-        dimensionFields ? `, ${dimensionFields}` : ''
-      }`)
-    );
-  } else {
-    // Default fallback for other metric types
-    root.commands.push(
-      synth.cmd(`
-        STATS AVG(\`${metricName}\`) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
-        dimensionFields ? `, ${dimensionFields}` : ''
-      }`)
-    );
-  }
+  const queryPipeline = source.pipe(
+    ...whereConditions,
+    dimensions.length > 0
+      ? where(dimensions.map((dim) => `${dim} IS NOT NULL`).join(' AND '))
+      : (query) => query,
+    instrument === 'counter'
+      ? stats(
+          `SUM(RATE(??metricField)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${
+            dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
+          }`,
+          {
+            metricField,
+            _tstart: timeRange?.from ?? 'NOW() - 15 minute',
+            _tend: timeRange?.to ?? 'NOW()',
+          }
+        )
+      : stats(
+          `AVG(??metricField) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend) ${
+            dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
+          }`,
+          {
+            metricField,
+            _tstart: timeRange?.from ?? 'NOW() - 15 minute',
+            _tend: timeRange?.to ?? 'NOW()',
+          }
+        ),
+    ...(dimensions.length > 0
+      ? dimensions.length === 1
+        ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
+        : [
+            evaluate(`${DIMENSIONS_COLUMN} = CONCAT(${dimensions.join(`, " ${separator} ", `)})`),
+            drop(`${dimensions.join(',')}`),
+          ]
+      : [])
+  );
 
-  return BasicPrettyPrinter.print(root);
+  return queryPipeline.toString();
 }

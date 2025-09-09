@@ -18,6 +18,7 @@ import {
   EuiNotificationBadge,
   EuiText,
 } from '@elastic/eui';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
@@ -28,10 +29,7 @@ interface ValuesFilterProps {
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
-  timeRange?: {
-    from?: string;
-    to?: string;
-  };
+  timeRange: TimeRange;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -51,8 +49,8 @@ export const ValuesSelector = ({
   } = useDimensionsQuery({
     dimensions: selectedDimensions,
     indices,
-    from: timeRange?.from,
-    to: timeRange?.to,
+    from: timeRange.from,
+    to: timeRange.to,
   });
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
