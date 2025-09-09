@@ -9,14 +9,12 @@ import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
 
 interface ElasticsearchExample extends Example {
   input: {
     prompt: string;
     scope?: AssistantScope;
-    followUps?: string[];
   };
   output: {
     criteria: string[];
@@ -61,21 +59,10 @@ export function createEvaluateElasticsearchDataset({
       {
         dataset,
         task: async ({ input }) => {
-          let response = await chatClient.complete({
+          const response = await chatClient.complete({
             messages: input.prompt,
             scope: input.scope,
           });
-
-          for (const followUp of input.followUps ?? []) {
-            response = await chatClient.complete({
-              conversationId: response.conversationId,
-              messages: response.messages.concat({
-                content: followUp,
-                role: MessageRole.User,
-              }),
-              scope: input.scope,
-            });
-          }
 
           return {
             errors: response.errors,
