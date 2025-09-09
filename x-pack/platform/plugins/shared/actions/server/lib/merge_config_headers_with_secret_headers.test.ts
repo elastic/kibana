@@ -19,7 +19,7 @@ describe('mergeConfigHeadersWithSecretHeaders', () => {
       secretKey: 'secretValue',
     });
   });
-  it('merges config and secret headers correclty if the keys are the same', () => {
+  it('merges config and secret headers correctly if the keys are the same', () => {
     expect(
       mergeConfigHeadersWithSecretHeaders({ key: 'configValue' }, { key: 'secretValue' })
     ).toEqual({
@@ -42,12 +42,12 @@ describe('mergeConfigHeadersWithSecretHeaders', () => {
       secretKey: 'secretValue',
     });
   });
-  it('should return only secretHeaders when secretHeaders is null', () => {
+  it('should return only configHeaders when secretHeaders is null', () => {
     expect(mergeConfigHeadersWithSecretHeaders({ configKey: 'configValue' }, null)).toEqual({
       configKey: 'configValue',
     });
   });
-  it('should return only secretHeaders when secretHeaders is undefined', () => {
+  it('should return only configHeaders when secretHeaders is undefined', () => {
     expect(mergeConfigHeadersWithSecretHeaders({ configKey: 'configValue' }, undefined)).toEqual({
       configKey: 'configValue',
     });

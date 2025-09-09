@@ -12,7 +12,6 @@ import type {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  Logger,
 } from '@kbn/core/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
@@ -45,7 +44,7 @@ export const getWebhookSecretHeadersKeyRoute = (
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization as returning headers does not require any.',
+            'This route is opted out from authorization because it relies on the authorization model inside the actions client.',
         },
       },
       validate: {
@@ -83,18 +82,11 @@ export const getWebhookSecretHeadersKeyRoute = (
           id
         );
 
-      console.log('decryptedConnector: ', decryptedConnector.attributes);
+      const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || {};
 
-      const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || [];
+      const secretHeadersArray = Object.keys(secretHeaders) || [];
 
-      console.log('secretHeaders: ', secretHeaders);
-
-      const secretHeadersArray = Object.keys(secretHeaders).map((key) => ({
-        key,
-      }));
-
-      return res.ok({ body: { secretHeaders: secretHeadersArray } });
-      // return res.ok({ body: secretHeaders });
+      return res.ok({ body: secretHeadersArray });
     }
   );
 };

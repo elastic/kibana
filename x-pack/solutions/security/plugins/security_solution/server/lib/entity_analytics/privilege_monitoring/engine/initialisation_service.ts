@@ -26,16 +26,19 @@ import {
   PrivilegeMonitoringEngineDescriptorClient,
 } from '../saved_objects';
 import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
+import { createInitialisationSourcesService } from './initialisation_sources_service';
 
 export type InitialisationService = ReturnType<typeof createInitialisationService>;
 export const createInitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
   const { taskManager } = deps;
+
   if (!taskManager) {
     throw new Error('Task Manager is not available');
   }
 
   const IndexService = createPrivmonIndexService(dataClient);
+  const InitSourceCreationService = createInitialisationSourcesService(dataClient);
 
   const init = async (
     soClient: SavedObjectsClientContract
@@ -56,11 +59,17 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       MonitoringEngineComponentResourceEnum.privmon_engine,
       'Initializing privilege monitoring engine'
     );
-
     const descriptor = await descriptorClient.init();
-    dataClient.log('debug', `Initialized privileged monitoring engine saved object`);
+    dataClient.log('info', `Initialized privileged monitoring engine saved object`);
 
-    await createOrUpdateDefaultDataSource(monitoringIndexSourceClient);
+    if (deps.experimentalFeatures?.integrationsSyncEnabled ?? false) {
+      // upsert index AND integration sources
+      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
+    } else {
+      // upsert ONLY index source
+      await createOrUpdateDefaultDataSource(monitoringIndexSourceClient);
+    }
+
     try {
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await IndexService.createIngestPipelineIfDoesNotExist();
@@ -148,6 +157,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       dataClient.log('info', 'Creating default index source for privilege monitoring.');
 
       try {
+        // TODO: failing test, empty sources array. FIX
         const indexSourceDescriptor = monitoringIndexSourceClient.create(defaultIndexSource);
 
         dataClient.log(
@@ -168,6 +178,5 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       }
     }
   };
-
   return { init };
 };
