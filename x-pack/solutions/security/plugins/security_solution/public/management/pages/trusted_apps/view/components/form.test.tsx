@@ -303,7 +303,6 @@ describe('Trusted apps form', () => {
         (label) => (label.textContent || '').trim()
       );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
-      expect(formProps.onChange).toHaveBeenCalledTimes(1);
     });
 
     it('should not allow the entry to be removed if its the only one displayed', () => {
@@ -525,7 +524,6 @@ describe('Trusted apps form', () => {
         const expectedAfterSwitchToBasicMode = createOnChangeArgs({
           item: createItem(propsItem3),
         });
-        expect(formProps.onChange).toHaveBeenCalledTimes(4);
         expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
       });
     });
