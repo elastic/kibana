@@ -123,5 +123,7 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-di",
     "@kbn/licensing-types",
+    "@kbn/fleet-plugin",
+    "@kbn/alerting-plugin",
   ]
 }
