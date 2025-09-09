@@ -10,21 +10,24 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { ScopedModel } from '@kbn/onechat-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ToolResult } from '@kbn/onechat-common/tools';
-import { isNotFoundError } from '@kbn/es-errors';
+import { ToolResultType } from '@kbn/onechat-common/tools';
+import { extractTextContent } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
 import { getSearchPrompt } from './prompts';
+import type { SearchTarget } from './types';
+import { progressMessages } from './i18n';
 
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
-  index: Annotation<string | undefined>(),
+  targetPattern: Annotation<string | undefined>(),
   // inner
   indexIsValid: Annotation<boolean>(),
-  selectedIndex: Annotation<string>(),
+  searchTarget: Annotation<SearchTarget>(),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
@@ -42,66 +45,46 @@ export type StateType = typeof StateAnnotation.State;
 export const createSearchToolGraph = ({
   model,
   esClient,
+  logger,
+  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  logger: Logger;
+  events?: ToolEventEmitter;
 }) => {
   const tools = [
-    createRelevanceSearchTool({ model, esClient }),
-    createNaturalLanguageSearchTool({ model, esClient }),
+    createRelevanceSearchTool({ model, esClient, events }),
+    createNaturalLanguageSearchTool({ model, esClient, events }),
   ];
 
   const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
   const selectAndValidateIndex = async (state: StateType) => {
-    if (state.index) {
-      let exists = false;
-      try {
-        const response = await esClient.indices.resolveIndex({
-          name: state.index,
-          allow_no_indices: true,
-        });
-        exists =
-          response.indices.length > 0 ||
-          response.aliases.length > 0 ||
-          response.data_streams.length > 0;
-      } catch (e) {
-        if (isNotFoundError(e)) {
-          exists = false;
-        }
-      }
+    events?.reportProgress(progressMessages.selectingTarget());
 
-      if (exists) {
-        return {
-          selectedIndex: state.index,
-          indexIsValid: true,
-        };
-      } else {
-        return {
-          indexIsValid: false,
-          error: `No index, alias or data streams found for '${state.index}'`,
-        };
-      }
+    const explorerRes = await indexExplorer({
+      nlQuery: state.nlQuery,
+      indexPattern: state.targetPattern ?? '*',
+      esClient,
+      model,
+      logger,
+      limit: 1,
+    });
+
+    if (explorerRes.resources.length > 0) {
+      const selectedResource = explorerRes.resources[0];
+      events?.reportProgress(progressMessages.selectedTarget(selectedResource.name));
+
+      return {
+        indexIsValid: true,
+        searchTarget: { type: selectedResource.type, name: selectedResource.name },
+      };
     } else {
-      const explorerRes = await indexExplorer({
-        nlQuery: state.nlQuery,
-        indexPattern: '*',
-        esClient,
-        model,
-        limit: 1,
-      });
-
-      if (explorerRes.indices.length > 0) {
-        return {
-          indexIsValid: true,
-          selectedIndex: explorerRes.indices[0].indexName,
-        };
-      } else {
-        return {
-          indexIsValid: false,
-          error: `Could not figure out which index to use`,
-        };
-      }
+      return {
+        indexIsValid: false,
+        error: `Could not figure out which index to use`,
+      };
     }
   };
 
@@ -114,8 +97,9 @@ export const createSearchToolGraph = ({
   });
 
   const callSearchAgent = async (state: StateType) => {
+    events?.reportProgress(progressMessages.resolvingSearchStrategy());
     const response = await searchModel.invoke(
-      getSearchPrompt({ nlQuery: state.nlQuery, index: state.selectedIndex })
+      getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
     );
     return {
       messages: [response],
@@ -159,9 +143,24 @@ export const createSearchToolGraph = ({
 };
 
 const extractToolResults = (message: BaseMessage): ToolResult[] => {
-  if (!isToolMessage(message) || !message.artifact || !Array.isArray(message.artifact.results)) {
-    throw new Error('No artifact attached to tool message');
+  if (!isToolMessage(message)) {
+    throw new Error(`Trying to extract tool results for non-tool result`);
   }
-
-  return message.artifact.results as ToolResult[];
+  if (message.artifact) {
+    if (!Array.isArray(message.artifact.results)) {
+      throw new Error(
+        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
+          message.artifact
+        )}`
+      );
+    }
+    return message.artifact.results as ToolResult[];
+  } else {
+    const content = extractTextContent(message);
+    if (content.startsWith('Error:')) {
+      return [{ type: ToolResultType.error, data: { message: content } }];
+    } else {
+      throw new Error(`No artifact attached to tool message. Content was ${message.content}`);
+    }
+  }
 };

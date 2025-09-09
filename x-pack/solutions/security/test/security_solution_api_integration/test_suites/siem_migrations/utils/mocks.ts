@@ -6,19 +6,16 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import {
-  RuleTranslationResult,
-  SiemMigrationStatus,
-} from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
 import type {
   ElasticRule,
   OriginalRule,
   RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { INDEX_PATTERN as SIEM_MIGRATIONS_BASE_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
-import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/task/util/comments';
-import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
+import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/task/util/comments';
+import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/types';
+
+const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
 const SIEM_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;
@@ -99,58 +96,6 @@ export const getMigrationRuleDocuments = (
     docs.push(getMigrationRuleDocument(overrideParams));
   }
   return docs;
-};
-
-export const statsOverrideCallbackFactory = ({
-  migrationId,
-  failed = 0,
-  pending = 0,
-  processing = 0,
-  completed = 0,
-  fullyTranslated = 0,
-  partiallyTranslated = 0,
-}: {
-  migrationId: string;
-  failed?: number;
-  pending?: number;
-  processing?: number;
-  completed?: number;
-  fullyTranslated?: number;
-  partiallyTranslated?: number;
-}) => {
-  const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
-    let translationResult;
-    let status = SiemMigrationStatus.PENDING;
-
-    const pendingEndIndex = failed + pending;
-    const processingEndIndex = failed + pending + processing;
-    const completedEndIndex = failed + pending + processing + completed;
-    if (index < failed) {
-      status = SiemMigrationStatus.FAILED;
-    } else if (index < pendingEndIndex) {
-      status = SiemMigrationStatus.PENDING;
-    } else if (index < processingEndIndex) {
-      status = SiemMigrationStatus.PROCESSING;
-    } else if (index < completedEndIndex) {
-      status = SiemMigrationStatus.COMPLETED;
-      const fullyTranslatedEndIndex = completedEndIndex - completed + fullyTranslated;
-      const partiallyTranslatedEndIndex =
-        completedEndIndex - completed + fullyTranslated + partiallyTranslated;
-      if (index < fullyTranslatedEndIndex) {
-        translationResult = RuleTranslationResult.FULL;
-      } else if (index < partiallyTranslatedEndIndex) {
-        translationResult = RuleTranslationResult.PARTIAL;
-      } else {
-        translationResult = RuleTranslationResult.UNTRANSLATABLE;
-      }
-    }
-    return {
-      migration_id: migrationId,
-      translation_result: translationResult,
-      status,
-    };
-  };
-  return overrideCallback;
 };
 
 const getDefaultMigrationDoc: () => Omit<StoredSiemMigration, 'id'> = () => ({
