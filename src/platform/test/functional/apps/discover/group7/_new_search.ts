@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
-      expect(await discover.getHitCount()).to.be('1000');
+      expect(await discover.getHitCount()).to.be('1,000');
     });
 
     it('should work correctly for a saved search in ESQL mode', async () => {
