@@ -358,7 +358,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
                 />
               );
             } else {
-              return undefined;
+              // when rendering custom nodes, there always needs to be a character so the row assumes the correct row height
+              return <>&nbsp;</>;
             }
           }
         : undefined,
