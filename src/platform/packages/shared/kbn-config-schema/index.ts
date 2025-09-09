@@ -159,7 +159,7 @@ function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): Typ
  *
  * @note wrapping with `maybe` ignores `defaultValue` on `type`.
  */
-function maybe<V>(type: Type<V>): Type<V | undefined> {
+function maybe<V, D extends DefaultValue<V> = never>(type: Type<V, D>): Type<V | undefined, D> {
   return new MaybeType(type);
 }
 

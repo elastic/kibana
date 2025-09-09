@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExtendsDeepOptions } from './type';
+import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
+import type { DefaultValue, ExtendsDeepOptions } from './type';
 import { Type } from './type';
 
-import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
-export class MaybeType<V> extends Type<V | undefined> {
-  private readonly maybeType: Type<V>;
+export class MaybeType<V, D extends DefaultValue<V> = never> extends Type<V | undefined, D> {
+  private readonly maybeType: Type<V, D>;
 
-  constructor(type: Type<V>) {
+  constructor(type: Type<V, D>) {
     super(
       type
         .getSchema()
