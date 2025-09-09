@@ -42,7 +42,7 @@ export class StepExecutionProvider {
 
     this.updateDecorations();
 
-    console.log('🎯 StepExecutionProvider: Created');
+    // console.log('🎯 StepExecutionProvider: Created');
   }
 
   /**
@@ -68,33 +68,35 @@ export class StepExecutionProvider {
       // Only apply step execution decorations in readonly mode (Executions view)
       // This prevents interference with interactive highlighting
       if (!model || !yamlDocument || !this.isReadOnly()) {
+        /*
         console.log('🎯 StepExecutionProvider: Skipping decoration update', {
           hasModel: !!model,
           hasYamlDocument: !!yamlDocument,
           isReadOnly: this.isReadOnly(),
           stepExecutionsLength: stepExecutions?.length || 0,
         });
+        */
         return;
       }
 
       // If no step executions, clear decorations but don't error
       if (!stepExecutions || stepExecutions.length === 0) {
-        console.log('🎯 StepExecutionProvider: No step executions to decorate');
+        // console.log('🎯 StepExecutionProvider: No step executions to decorate');
         return;
       }
 
-      console.log('🎯 StepExecutionProvider: Processing', stepExecutions.length, 'step executions');
+      // console.log('🎯 StepExecutionProvider: Processing', stepExecutions.length, 'step executions');
 
       // Validate that YAML document has the expected structure
       if (!yamlDocument.contents) {
-        console.warn('🎯 StepExecutionProvider: YAML document has no contents');
+        // console.warn('🎯 StepExecutionProvider: YAML document has no contents');
         return;
       }
 
       // Additional validation: ensure model content matches document
       const modelValue = model.getValue();
       if (!modelValue || modelValue.trim().length === 0) {
-        console.warn('🎯 StepExecutionProvider: Model has no content');
+        // console.warn('🎯 StepExecutionProvider: Model has no content');
         return;
       }
 
@@ -103,23 +105,25 @@ export class StepExecutionProvider {
           try {
             const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
             if (!stepNode) {
-              console.warn(`❌ No stepNode found for stepId: ${stepExecution.stepId}`);
+              // console.warn(`❌ No stepNode found for stepId: ${stepExecution.stepId}`);
               return null;
             }
 
             const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
             if (!stepRange) {
-              console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
+              //console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
               return null;
             }
 
             // Validate that range positions are valid for current model
             const lineCount = model.getLineCount();
             if (stepRange.startLineNumber < 1 || stepRange.endLineNumber > lineCount) {
+              /*
               console.warn(`❌ Invalid stepRange for stepId: ${stepExecution.stepId}`, {
                 stepRange: `${stepRange.startLineNumber}-${stepRange.endLineNumber}`,
                 modelLineCount: lineCount,
               });
+              */
               return null;
             }
 
@@ -191,7 +195,7 @@ export class StepExecutionProvider {
         .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
 
       this.decorationsCollection = this.editor.createDecorationsCollection(decorations);
-
+        /*
       console.log(
         '✅ StepExecutionProvider: Applied',
         decorations.length,
@@ -199,6 +203,7 @@ export class StepExecutionProvider {
         stepExecutions.length,
         'steps'
       );
+      */
     } catch (error) {
       console.error('🎯 StepExecutionProvider: Error in updateDecorations:', error);
     }
@@ -212,7 +217,7 @@ export class StepExecutionProvider {
       return;
     }
 
-    console.log('🎯 StepExecutionProvider: Disposing');
+    // console.log('🎯 StepExecutionProvider: Disposing');
 
     if (this.decorationsCollection) {
       this.decorationsCollection.clear();

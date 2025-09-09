@@ -276,7 +276,7 @@ ${Object.entries(category.examples.params || {})
       const stepYaml = stepContext.stepNode.toString();
       await navigator.clipboard.writeText(stepYaml);
 
-      console.log('GenericMonacoConnectorHandler: Step copied to clipboard');
+      // console.log('GenericMonacoConnectorHandler: Step copied to clipboard');
     } catch (error) {
       console.error('GenericMonacoConnectorHandler: Error copying step', error);
     }
@@ -300,11 +300,13 @@ ${Object.entries(category.examples.params || {})
       if (!hasName) issues.push('Missing step name');
       if (!hasType) issues.push('Missing step type');
 
+      /*
       if (issues.length === 0) {
         console.log('GenericMonacoConnectorHandler: Step validation passed');
       } else {
         console.warn('GenericMonacoConnectorHandler: Step validation issues:', issues);
       }
+      */
     } catch (error) {
       console.error('GenericMonacoConnectorHandler: Error validating step', error);
     }

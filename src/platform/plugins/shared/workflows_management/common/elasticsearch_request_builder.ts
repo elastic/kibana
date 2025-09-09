@@ -17,7 +17,7 @@ export function buildRequestFromConnector(
   stepType: string,
   params: any
 ): { method: string; path: string; body?: any; params?: any } {
-  console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
+  // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
   // Find the connector definition for this step type
   const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c) => c.type === stepType);
@@ -43,10 +43,10 @@ export function buildRequestFromConnector(
     }
 
     // Debug logging
-    console.log('DEBUG - selectedPattern:', selectedPattern);
-    console.log('DEBUG - pathParams:', Array.from(pathParams));
-    console.log('DEBUG - urlParamKeys:', Array.from(urlParamKeys));
-    console.log('DEBUG - bodyParamKeys:', Array.from(bodyParamKeys));
+    // console.log('DEBUG - selectedPattern:', selectedPattern);
+    // console.log('DEBUG - pathParams:', Array.from(pathParams));
+    // console.log('DEBUG - urlParamKeys:', Array.from(urlParamKeys));
+    // console.log('DEBUG - bodyParamKeys:', Array.from(bodyParamKeys));
 
     // Replace path parameters in the selected pattern
     for (const [key, value] of Object.entries(params)) {
@@ -78,16 +78,18 @@ export function buildRequestFromConnector(
       if (bodyParamKeys.has(key)) {
         // This parameter should go in the body
         body[key] = value;
-        console.log(`DEBUG - Added to body (bodyParam): ${key} = ${value}`);
+        // console.log(`DEBUG - Added to body (bodyParam): ${key} = ${value}`);
       } else if (urlParamKeys.has(key)) {
         // This parameter should go in URL query parameters
         const queryValue = Array.isArray(value) ? value.join(',') : value;
         queryParams[key] = queryValue;
+        /*
         console.log(
           `DEBUG - Added to queryParams: ${key} = ${queryValue} (original: ${JSON.stringify(
             value
           )})`
         );
+        */
       } else if (key === 'body') {
         // Handle explicit body parameter
         if (typeof value === 'object' && value !== null) {
@@ -96,7 +98,7 @@ export function buildRequestFromConnector(
       } else {
         // All other parameters go in the body (fallback)
         body[key] = value;
-        console.log(`DEBUG - Added to body (fallback): ${key} = ${value}`);
+        // console.log(`DEBUG - Added to body (fallback): ${key} = ${value}`);
       }
     }
 
@@ -107,7 +109,7 @@ export function buildRequestFromConnector(
       params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
     };
 
-    console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
+    // console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
     return result;
   }
 

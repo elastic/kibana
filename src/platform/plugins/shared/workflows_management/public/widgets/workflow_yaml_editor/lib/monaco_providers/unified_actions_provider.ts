@@ -82,30 +82,30 @@ export class UnifiedActionsProvider {
     try {
       const model = this.editor.getModel();
       if (!model) {
-        console.log('UnifiedActionsProvider: No model');
+        // console.log('UnifiedActionsProvider: No model');
         return;
       }
 
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
-        console.log('UnifiedActionsProvider: No YAML document');
+        // console.log('UnifiedActionsProvider: No YAML document');
         this.clearHighlightAndActions();
         return;
       }
 
       const position = this.editor.getPosition();
       if (!position) {
-        console.log('UnifiedActionsProvider: No position');
+        // console.log('UnifiedActionsProvider: No position');
         this.clearHighlightAndActions();
         return;
       }
 
-      console.log('UnifiedActionsProvider: Checking position', position);
+      // console.log('UnifiedActionsProvider: Checking position', position);
 
       // Build action context
       const context = await this.buildActionContext(model, position, yamlDocument);
       if (!context) {
-        console.log('UnifiedActionsProvider: Could not build action context');
+        // console.log('UnifiedActionsProvider: Could not build action context');
         this.clearHighlightAndActions();
         return;
       }
@@ -130,28 +130,32 @@ export class UnifiedActionsProvider {
       // Find appropriate handler for action buttons
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (handler) {
+        /*
         console.log(
           'UnifiedActionsProvider: Found Monaco handler for connector type:',
           context.connectorType
         );
-
+        */
         // Generate and display action buttons
+        /*
         console.log('🔍 Generating actions for context:', {
           connectorType: context.connectorType,
           stepName: context.stepContext?.stepName,
           isInWithBlock: context.stepContext?.isInWithBlock,
           yamlPath: context.yamlPath,
         });
-
+        */
         const actions = await handler.generateActions(context);
 
+        /*
         console.log('🔍 Generated actions:', {
           actionCount: actions.length,
           actions: actions.map((a) => ({ id: a.id, label: a.label })),
         });
-
+        */
         this.updateActionButtons(actions, position);
       } else {
+        /*
         console.log(
           'UnifiedActionsProvider: No Monaco handler found for connector type:',
           context.connectorType,
@@ -179,25 +183,28 @@ export class UnifiedActionsProvider {
       const absolutePosition = model.getOffsetAt(position);
       let yamlPath = getCurrentPath(yamlDocument, absolutePosition);
 
+      /*
       console.log('🔍 buildActionContext debug:', {
         absolutePosition,
         yamlPath,
         position: { line: position.lineNumber, column: position.column },
       });
+      */
 
       // If no path found (e.g., cursor after colon), try to find it from the current line
       if (yamlPath.length === 0) {
         yamlPath = this.getPathFromCurrentLine(model, position, yamlDocument);
-        console.log('🔍 buildActionContext: Found path from current line:', yamlPath);
+        // console.log('🔍 buildActionContext: Found path from current line:', yamlPath);
       }
 
       // Detect connector type and step context
       const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
 
-      console.log('🔍 buildActionContext stepContext result:', stepContext);
+      // console.log('🔍 buildActionContext stepContext result:', stepContext);
+      
 
       if (!stepContext?.stepType) {
-        console.log('❌ buildActionContext: No stepContext or stepType, returning null');
+        // console.log('❌ buildActionContext: No stepContext or stepType, returning null');
         return null;
       }
 
@@ -235,18 +242,19 @@ export class UnifiedActionsProvider {
     try {
       const lineContent = model.getLineContent(position.lineNumber);
       const beforeCursor = lineContent.substring(0, position.column - 1);
-
+      /*
       console.log('🔍 getPathFromCurrentLine:', {
         lineContent: JSON.stringify(lineContent),
         beforeCursor: JSON.stringify(beforeCursor),
         position: { line: position.lineNumber, column: position.column },
       });
+      */
 
       // Check if we're after a colon (common case: "with:|")
       const colonMatch = beforeCursor.match(/(\w+)\s*:\s*$/);
       if (colonMatch) {
         const keyName = colonMatch[1];
-        console.log('🔍 Found key after colon:', keyName);
+        // console.log('🔍 Found key after colon:', keyName);
 
         // Try to find this key in the document by looking at nearby positions
         // Look at the start of the key on this line
@@ -277,14 +285,14 @@ export class UnifiedActionsProvider {
         const testPosition = lineStartPosition + offset;
         const testPath = getCurrentPath(yamlDocument, testPosition);
         if (testPath.length > 0) {
-          console.log('🔍 Found fallback path at offset', offset, ':', testPath);
+          // console.log('🔍 Found fallback path at offset', offset, ':', testPath);
           return testPath;
         }
       }
 
       return [];
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error getting path from current line', error);
+      // console.warn('UnifiedActionsProvider: Error getting path from current line', error);
       return [];
     }
   }
@@ -299,24 +307,25 @@ export class UnifiedActionsProvider {
   ): any {
     // Look for steps in the path
     const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');
-    console.log('🔍 detectStepContext: stepsIndex:', stepsIndex, 'yamlPath:', yamlPath);
+    // console.log('🔍 detectStepContext: stepsIndex:', stepsIndex, 'yamlPath:', yamlPath);
 
     if (stepsIndex === -1) {
-      console.log('❌ detectStepContext: No "steps" found in yamlPath');
+      // console.log('❌ detectStepContext: No "steps" found in yamlPath');
       return null;
     }
 
     // Get step index
     const stepIndex = parseInt(String(yamlPath[stepsIndex + 1]), 10);
+    /*
     console.log(
       '🔍 detectStepContext: stepIndex:',
       stepIndex,
       'raw value:',
       yamlPath[stepsIndex + 1]
     );
-
+    */
     if (isNaN(stepIndex)) {
-      console.log('❌ detectStepContext: stepIndex is NaN');
+      // console.log('❌ detectStepContext: stepIndex is NaN');
       return null;
     }
 
@@ -345,6 +354,7 @@ export class UnifiedActionsProvider {
         )
       );
 
+      /*
       console.log('🔍 detectStepContext result:', {
         stepName,
         stepType,
@@ -353,7 +363,7 @@ export class UnifiedActionsProvider {
         isInSubBlock,
         yamlPath,
       });
-
+      */
       return {
         stepName,
         stepType,
@@ -363,7 +373,7 @@ export class UnifiedActionsProvider {
         typeNode,
       };
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error detecting step context', error);
+      // console.warn('UnifiedActionsProvider: Error detecting step context', error);
       return null;
     }
   }
@@ -443,12 +453,13 @@ export class UnifiedActionsProvider {
 
       // Update decorations
       this.highlightedLines.set(decorations);
-
+      /*
       console.log('🔍 Step highlighting applied:', {
         stepName: context.stepContext.stepName,
         stepType: context.stepContext.stepType,
         lines: stepRange ? `${stepRange.startLineNumber}-${stepRange.endLineNumber}` : 'none',
       });
+      */
     } catch (error) {
       console.warn('UnifiedActionsProvider: Error updating highlighting', error);
     }
@@ -472,12 +483,14 @@ export class UnifiedActionsProvider {
       const startPos = model.getPositionAt(startOffset);
       const endPos = model.getPositionAt(endOffset);
 
+      /*
       console.log('🔍 getStepRange initial:', {
         startOffset,
         endOffset,
         startPos: { line: startPos.lineNumber, column: startPos.column },
         endPos: { line: endPos.lineNumber, column: endPos.column },
       });
+      */
 
       // Adjust end position to exclude trailing empty lines and prevent bleeding into next step
       let adjustedEndLine = endPos.lineNumber;
@@ -487,7 +500,7 @@ export class UnifiedActionsProvider {
       while (adjustedEndLine > startPos.lineNumber) {
         const lineContent = model.getLineContent(adjustedEndLine);
         const trimmedContent = lineContent.trim();
-
+        /*
         console.log(
           '🔍 Checking line',
           adjustedEndLine,
@@ -496,6 +509,7 @@ export class UnifiedActionsProvider {
           'trimmed:',
           JSON.stringify(trimmedContent)
         );
+        */
 
         // If this line is non-empty and doesn't start with "- " (which would be the next step)
         if (trimmedContent.length > 0 && !trimmedContent.startsWith('- ')) {
@@ -509,7 +523,7 @@ export class UnifiedActionsProvider {
           // Go back to the previous line and use its end
           adjustedEndLine = Math.max(startPos.lineNumber, adjustedEndLine - 1);
           adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
-          console.log('🔍 Found next step marker, adjusting to previous line', adjustedEndLine);
+          //console.log('🔍 Found next step marker, adjusting to previous line', adjustedEndLine);
           break;
         }
 
@@ -522,11 +536,12 @@ export class UnifiedActionsProvider {
         adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
       }
 
+      /*
       console.log('🔍 getStepRange adjustment:', {
         originalEnd: { line: endPos.lineNumber, column: endPos.column },
         adjustedEnd: { line: adjustedEndLine, column: adjustedEndColumn },
       });
-
+      */
       return new monaco.Range(
         startPos.lineNumber,
         startPos.column,
@@ -534,7 +549,7 @@ export class UnifiedActionsProvider {
         adjustedEndColumn
       );
     } catch (error) {
-      console.warn('UnifiedActionsProvider: Error getting step range', error);
+      // console.warn('UnifiedActionsProvider: Error getting step range', error);
       return null;
     }
   }
@@ -552,11 +567,12 @@ export class UnifiedActionsProvider {
       return;
     }
 
+    /*
     console.log(
       'UnifiedActionsProvider: Setting up action buttons:',
       actions.map((a) => a.label)
     );
-
+    */
     // Calculate position for floating buttons - always position at first line of step
     const lineHeight = this.editor.getOption(monaco.editor.EditorOption.lineHeight);
     const scrollTop = this.editor.getScrollTop();
@@ -570,7 +586,7 @@ export class UnifiedActionsProvider {
       }
     } catch (error) {
       // Fallback to current position
-      console.warn('Could not get step range, using current position');
+      // console.warn('Could not get step range, using current position');
     }
 
     // Position floating buttons inside the step area (like Dev Console play button)
