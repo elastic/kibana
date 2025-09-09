@@ -87,6 +87,7 @@ import {
   InputNotFoundError,
   StreamNotFoundError,
   FleetNotFoundError,
+  PackagePolicyRequestError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -164,6 +165,16 @@ import {
   _packagePoliciesBulkUpgrade,
   _packagePoliciesUpgrade,
 } from './package_policies/upgrade';
+
+function validatePackagePolicyId(id: string): void {
+  // Elasticsearch role names should only contain letters, numbers, dots, underscores, and hyphens
+  // This validation ensures package policy IDs can be safely used as role descriptor names
+  if (!/^[a-zA-Z0-9._-]+$/.test(id)) {
+    throw new PackagePolicyRequestError(
+      `Invalid package policy ID: '${id}'. IDs can only contain letters, numbers, dots, underscores, and hyphens.`
+    );
+  }
+}
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -264,6 +275,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
+
+    // Validate user-provided package policy ID if provided
+    if (options?.id) {
+      validatePackagePolicyId(packagePolicyId);
+    }
 
     let authorizationHeader = options.authorizationHeader;
 
@@ -558,6 +574,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
+    // Validate all agent policy IDs
+    agentPolicyIds.forEach(validatePackagePolicyId);
 
     const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds]);
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
