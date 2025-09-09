@@ -184,5 +184,34 @@ streamlangApiTest.describe(
         'new_tag',
       ]);
     });
+
+    streamlangApiTest(
+      'should escape (and not parse) template syntax {{ and {{{',
+      async ({ testBed, esql }) => {
+        const indexName = 'stream-e2e-test-append-escape-template';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'append',
+              to: '{{my.list}}',
+              value: ['{{{template.value}}}'],
+            } as AppendProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+
+        const docs = [{ '{{my.list}}': ['existing'] }];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents[0]).toEqual(
+          expect.objectContaining({
+            '{{my.list}}': ['existing', '{{{template.value}}}'],
+          })
+        );
+      }
+    );
   }
 );

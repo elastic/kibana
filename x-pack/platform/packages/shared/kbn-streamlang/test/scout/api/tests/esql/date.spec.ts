@@ -93,24 +93,6 @@ streamlangApiTest.describe(
       expect(esqlResult.documents[0]['@timestamp']).toEqual('2025/01/01');
     });
 
-    // Templating isn's supported in ES|QL
-    streamlangApiTest('should use a templated format', async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-date-templated';
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'date',
-            from: 'log.time',
-            formats: ['{{dateFormat}}'],
-          } as DateProcessor,
-        ],
-      };
-      const { query } = transpile(streamlangDSL);
-      const docs = [{ log: { time: '2025/01/01' }, dateFormat: 'yyyy/MM/dd' }];
-      await testBed.ingest(indexName, docs);
-      expect(esql.queryOnIndex(indexName, query)).rejects.toThrowError();
-    });
-
     streamlangApiTest('should not parse a date when where is false', async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-where-false';
       const streamlangDSL: StreamlangDSL = {
@@ -159,6 +141,37 @@ streamlangApiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
         expect(esqlResult.documents[0]['log.time']).toEqual('01-01-2025');
         expect(esqlResult.columnNames).not.toContain('@timestamp');
+      }
+    );
+
+    streamlangApiTest(
+      'should escape (and not parse) template syntax {{ and {{{',
+      async ({ testBed, esql }) => {
+        const indexName = 'stream-e2e-test-date-escape-template';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'date',
+              from: '{{date.field}}',
+              to: '{{{parsed.field}}}',
+              formats: ['ISO8601'],
+            } as DateProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+
+        const docs = [{ '{{date.field}}': '2025-01-01T12:34:56.789Z' }];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents[0]).toEqual(
+          expect.objectContaining({
+            '{{date.field}}': '2025-01-01T12:34:56.789Z',
+            '{{{parsed.field}}}': '2025-01-01T12:34:56.789Z',
+          })
+        );
       }
     );
   }
