@@ -33,7 +33,7 @@ export class SuggestedDashboardsClient {
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
     private referencedPanelManager: ReferencedPanelManager
-  ) { }
+  ) {}
 
   // fetchSuggested retrieves suggested dashboards using two sets of criteria:
   // 1. Unfiltered matches based on fields and indices present in the alert data.
