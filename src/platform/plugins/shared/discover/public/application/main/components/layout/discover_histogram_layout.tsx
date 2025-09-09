@@ -18,13 +18,9 @@ export const DiscoverHistogramLayout = ({
   ...mainContentProps
 }: DiscoverMainContentProps) => {
   const chartPortalNode = useCurrentChartPortalNode();
-  const localStorageKeyPrefix = useCurrentTabRuntimeState(
+  const { localStorageKeyPrefix, layoutPropsMap } = useCurrentTabRuntimeState(
     mainContentProps.stateContainer.runtimeStateManager,
-    (tab) => tab.unifiedHistogramLocalStorageKeyPrefix$
-  );
-  const layoutPropsMap = useCurrentTabRuntimeState(
-    mainContentProps.stateContainer.runtimeStateManager,
-    (tab) => tab.unifiedHistogramLayoutProps$
+    (tab) => tab.unifiedHistogramConfig$
   );
   const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? 'default'];
 

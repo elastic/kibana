@@ -83,7 +83,7 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectInitialUnifiedHistogramLayoutPropsMap as selectRestorableTabRuntimeHistogramLayoutProps,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,

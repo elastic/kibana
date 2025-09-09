@@ -23,16 +23,15 @@ interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
 }
 
-type UnifiedHistogramLayoutPropsMap = Record<
-  string,
-  UnifiedHistogramPartialLayoutProps | undefined
->;
+interface UnifiedHistogramConfig {
+  localStorageKeyPrefix?: string;
+  layoutPropsMap: Record<string, UnifiedHistogramPartialLayoutProps | undefined>;
+}
 
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
-  unifiedHistogramLocalStorageKeyPrefix?: string;
-  unifiedHistogramLayoutProps: UnifiedHistogramLayoutPropsMap;
+  unifiedHistogramConfig: UnifiedHistogramConfig;
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   currentDataView: DataView;
@@ -73,7 +72,7 @@ export const createTabRuntimeState = ({
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
   initialValues?: {
-    unifiedHistogramLayoutProps?: InitialUnifiedHistogramLayoutPropsMap;
+    unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = ebtManager.createScopedEBTManager();
@@ -83,10 +82,10 @@ export const createTabRuntimeState = ({
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
-    unifiedHistogramLocalStorageKeyPrefix$: new BehaviorSubject<string | undefined>(undefined),
-    unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramLayoutPropsMap>(
-      initialValues?.unifiedHistogramLayoutProps ?? {}
-    ),
+    unifiedHistogramConfig$: new BehaviorSubject<UnifiedHistogramConfig>({
+      localStorageKeyPrefix: undefined,
+      layoutPropsMap: initialValues?.unifiedHistogramLayoutPropsMap ?? {},
+    }),
     scopedProfilesManager$: new BehaviorSubject(
       profilesManager.createScopedProfilesManager({ scopedEbtManager })
     ),
@@ -128,12 +127,12 @@ export const selectTabRuntimeGlobalState = (
   };
 };
 
-export const selectRestorableTabRuntimeHistogramLayoutProps = (
+export const selectInitialUnifiedHistogramLayoutPropsMap = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
 ): InitialUnifiedHistogramLayoutPropsMap => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const layoutPropsMap = tabRuntimeState?.unifiedHistogramLayoutProps$.getValue();
+  const layoutPropsMap = tabRuntimeState?.unifiedHistogramConfig$.getValue().layoutPropsMap ?? {};
 
   return Object.keys(layoutPropsMap).reduce<InitialUnifiedHistogramLayoutPropsMap>((acc, key) => {
     const topPanelHeight = layoutPropsMap[key]?.topPanelHeight;

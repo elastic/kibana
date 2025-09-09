@@ -32,14 +32,17 @@ export const useUnifiedHistogramCommon = ({
       return;
     }
 
-    const layoutPropsMap$ = selectTabRuntimeState(
+    const histogramConfig$ = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       currentTabId
-    ).unifiedHistogramLayoutProps$;
+    ).unifiedHistogramConfig$;
 
-    layoutPropsMap$.next({
-      ...layoutPropsMap$.getValue(),
-      [localStorageKeyPrefix ?? 'default']: layoutProps,
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      layoutPropsMap: {
+        ...histogramConfig$.getValue().layoutPropsMap,
+        [localStorageKeyPrefix ?? 'default']: layoutProps,
+      },
     });
   }, [currentTabId, layoutProps, localStorageKeyPrefix, stateContainer.runtimeStateManager]);
 
