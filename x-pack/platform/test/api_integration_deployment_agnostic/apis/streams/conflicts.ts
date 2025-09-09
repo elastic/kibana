@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { RoutingStatus } from '@kbn/streams-schema';
+import { Streams, emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { putStream, disableStreams, enableStreams, forkStream } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -71,6 +71,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('classic/wired conflicts', function () {
+      // Can't test this on MKI because it's not possible to access the .kibana_streams index directly
+      this.tags(['failsOnMKI']);
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
         await enableStreams(apiClient);
@@ -92,20 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   dsl: {},
                 },
                 processing: {
-                  steps: [
-                    {
-                      action: 'manual_ingest_pipeline',
-                      processors: [
-                        {
-                          set: {
-                            field: 'abc',
-                            // this will cause the stream to be created halfway
-                            break: true,
-                          },
-                        },
-                      ],
-                    },
-                  ],
+                  steps: [],
                 },
                 wired: {
                   routing: [],
@@ -113,12 +102,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             },
-            queries: [],
-            dashboards: [],
-            rules: [],
+            ...emptyAssets,
           },
-          500
+          200
         );
+        // delete the tracking document so streams doesn't know anymore about the wired stream
+        await esClient.delete({
+          index: '.kibana_streams-000001',
+          id: 'logs.child',
+          refresh: 'wait_for',
+        });
+
+        // validate it doesn't show as a wired stream
+        const streamsResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.child',
+            },
+          },
+        });
+        expect(Streams.WiredStream.GetResponse.is(streamsResponse.body)).to.be(false);
+
         // Assert that the data stream was created
         const response = await esClient.indices.getDataStream({ name: 'logs.child' });
         expect(response.data_streams).to.have.length(1);
@@ -134,19 +138,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   dsl: {},
                 },
                 processing: {
-                  steps: [
-                    {
-                      action: 'manual_ingest_pipeline',
-                      processors: [
-                        {
-                          set: {
-                            field: 'abc',
-                            value: true,
-                          },
-                        },
-                      ],
-                    },
-                  ],
+                  steps: [],
                 },
                 wired: {
                   routing: [],
@@ -154,12 +146,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             },
-            queries: [],
-            dashboards: [],
-            rules: [],
+            ...emptyAssets,
           },
           200
         );
+
+        // validate it does show as a wired stream
+        const streamsResponse2 = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.child',
+            },
+          },
+        });
+        expect(Streams.WiredStream.GetResponse.is(streamsResponse2.body)).to.be(true);
       });
     });
   });

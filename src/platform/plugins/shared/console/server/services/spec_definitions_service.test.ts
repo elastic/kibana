@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
 import fs from 'fs';
 import { SpecDefinitionsService } from '.';
 import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 
 const mockReadFileSync = jest.spyOn(fs, 'readFileSync');
-const mockGlobbySync = jest.spyOn(globby, 'sync');
+const mockGlobbySync = jest.spyOn(fs, 'globSync');
 const mockJsLoadersGetter = jest.fn();
 
 jest.mock('../lib', () => {
