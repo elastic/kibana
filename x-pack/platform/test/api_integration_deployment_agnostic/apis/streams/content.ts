@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 import type { ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -34,8 +34,7 @@ const upsertRequest = ({
   routing?: RoutingDefinition[];
   queries?: StreamQuery[];
 }) => ({
-  dashboards: [],
-  rules: [],
+  ...emptyAssets,
   queries,
   stream: {
     description: 'Test stream',
@@ -298,9 +297,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
-                rules: [],
+                ...emptyAssets,
               },
             },
             {
@@ -317,9 +314,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
-                rules: [],
+                ...emptyAssets,
               },
             },
           ]
@@ -480,9 +475,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       lifecycle: { inherit: {} },
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             ]
@@ -581,9 +574,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
-                rules: [],
+                ...emptyAssets,
               },
             },
             {
@@ -600,9 +591,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
-                rules: [],
+                ...emptyAssets,
               },
             },
           ]
@@ -649,7 +638,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
+                ...emptyAssets,
                 queries: [
                   { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
                 ],
