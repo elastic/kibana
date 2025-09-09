@@ -12,7 +12,7 @@ import Path from 'path';
 
 import execa from 'execa';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cmd` : path);
 

@@ -6,13 +6,8 @@
  */
 
 import { shareReplay, switchMap, Observable } from 'rxjs';
-import { KibanaRequest } from '@kbn/core-http-server';
-import {
-  AgentMode,
-  type RoundInput,
-  type Conversation,
-  type ChatAgentEvent,
-} from '@kbn/onechat-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { type RoundInput, type Conversation, type ChatAgentEvent } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({
@@ -20,17 +15,17 @@ export const executeAgent$ = ({
   request,
   agentService,
   conversation$,
-  mode,
   nextInput,
   abortSignal,
+  defaultConnectorId,
 }: {
   agentId: string;
   request: KibanaRequest;
   agentService: AgentsServiceStart;
   conversation$: Observable<Conversation>;
-  mode: AgentMode;
   nextInput: RoundInput;
   abortSignal?: AbortSignal;
+  defaultConnectorId?: string;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
@@ -40,8 +35,8 @@ export const executeAgent$ = ({
             request,
             agentId,
             abortSignal,
+            defaultConnectorId,
             agentParams: {
-              agentMode: mode,
               nextInput,
               conversation: conversation.rounds,
             },

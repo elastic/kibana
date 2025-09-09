@@ -14,22 +14,7 @@ export const getSiemMigrationClients = (
   params: SiemMigrationsCreateClientParams
 ) => {
   return {
-    getRulesClient: memoize(() =>
-      siemMigrationsService.createRulesClient({
-        request: params.request,
-        currentUser: params.currentUser,
-        spaceId: params.spaceId,
-        dependencies: params.dependencies,
-      })
-    ),
-
-    getDashboardsClient: memoize(() =>
-      siemMigrationsService.createDashboardsClient({
-        request: params.request,
-        currentUser: params.currentUser,
-        spaceId: params.spaceId,
-        dependencies: params.dependencies,
-      })
-    ),
+    getRulesClient: memoize(() => siemMigrationsService.createRulesClient(params)),
+    getDashboardsClient: memoize(() => siemMigrationsService.createDashboardsClient(params)),
   };
 };

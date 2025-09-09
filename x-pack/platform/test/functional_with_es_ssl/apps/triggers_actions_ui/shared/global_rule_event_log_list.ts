@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { getUrlPrefix } from '../../../../alerting_api_integration/common/lib';
-import { Role, User } from '../../../../cases_api_integration/common/lib/authentication/types';
+import type { Role, User } from '../../../../cases_api_integration/common/lib/authentication/types';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getTestAlertData } from '../../../lib/get_test_data';
 
 const SPACE2 = {

@@ -18,7 +18,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
+import type { Thresholds } from './core_vital_item';
+import { getCoreVitalTooltipMessage } from './core_vital_item';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_GOOD_LABEL,

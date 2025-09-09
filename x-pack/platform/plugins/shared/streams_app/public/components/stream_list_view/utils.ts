@@ -8,8 +8,8 @@
 import { getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { Direction } from '@elastic/eui';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers';
+import type { Direction } from '@elastic/eui';
+import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
 
@@ -110,7 +110,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   let retentionMs = 0;
-  const lc = node.effective_lifecycle;
+  const lc = node.effective_lifecycle!;
   if (isDslLifecycle(lc)) {
     retentionMs = lc.dsl.data_retention
       ? parseDurationInSeconds(lc.dsl.data_retention) * 1000

@@ -6,7 +6,7 @@
  */
 
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 
 async function navigate({
   configId,

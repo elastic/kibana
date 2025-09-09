@@ -15,6 +15,7 @@
     "@kbn/std",
     "@kbn/config-schema",
     "@kbn/i18n",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

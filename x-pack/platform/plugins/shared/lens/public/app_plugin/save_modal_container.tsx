@@ -8,20 +8,20 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { LensDocumentService, LensDocument } from '../persistence';
+import type { LensDocumentService, LensDocument } from '../persistence';
 import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
-import { Simplify, VisualizeEditorContext } from '../types';
+import type { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState } from '../react_embeddable/types';
 import { isLegacyEditorEmbeddable } from './app_helpers';
 
 type ExtraProps = Simplify<
@@ -174,8 +174,8 @@ export function SaveModalContainer({
       savingToLibraryPermitted={savingToLibraryPermitted}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
-      onSave={(saveProps, options) => {
-        runLensSave(saveProps, options);
+      onSave={async (saveProps, options) => {
+        await runLensSave(saveProps, options);
       }}
       onClose={onClose}
       getAppNameFromId={getAppNameFromId}

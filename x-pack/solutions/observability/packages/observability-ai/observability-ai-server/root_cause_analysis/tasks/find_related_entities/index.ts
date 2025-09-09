@@ -10,18 +10,14 @@ import type {
   FieldPatternResultWithChanges,
   TruncatedDocumentAnalysis,
 } from '@kbn/ai-tools';
-import { InferenceClient } from '@kbn/inference-common';
-import { Logger } from '@kbn/logging';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
-import {
-  RelatedEntityFromSearchResults,
-  analyzeFetchedRelatedEntities,
-} from './analyze_fetched_related_entities';
-import {
-  RelatedEntityKeywordSearch,
-  writeKeywordSearchForRelatedEntities,
-} from './write_keyword_searches_for_related_entities';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { RelatedEntityFromSearchResults } from './analyze_fetched_related_entities';
+import { analyzeFetchedRelatedEntities } from './analyze_fetched_related_entities';
+import type { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
+import { writeKeywordSearchForRelatedEntities } from './write_keyword_searches_for_related_entities';
 
 export type { RelatedEntityFromSearchResults };
 

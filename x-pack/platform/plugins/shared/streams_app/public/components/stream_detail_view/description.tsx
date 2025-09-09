@@ -7,9 +7,10 @@
 
 import { EuiInlineEditText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useUpdateStreams } from '../../hooks/use_update_streams';

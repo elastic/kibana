@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { TimeStrings } from '../../../page_objects/common_page';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { TimeStrings } from '../../../page_objects/common_page';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -303,10 +303,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reset all histogram state when resetting the saved search', async () => {
       await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       const savedSearch = 'histogram state';
       await discover.saveSearch(savedSearch);
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await discover.chooseBreakdownField('extension.keyword');
       await discover.setChartInterval('Second');
       await retry.try(async () => {
@@ -320,8 +325,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
       await discover.toggleChartVisibility();
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await discover.revertUnsavedChanges();
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await retry.try(async () => {
         const requestData =

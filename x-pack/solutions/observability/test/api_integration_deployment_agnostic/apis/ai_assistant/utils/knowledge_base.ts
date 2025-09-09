@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { Client } from '@elastic/elasticsearch';
+import type {
   Instruction,
   KnowledgeBaseEntry,
-  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import expect from '@kbn/expect';
 import pRetry from 'p-retry';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setAdvancedSettings } from './advanced_settings';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import type { ObservabilityAIAssistantApiClient } from '../../../services/observability_ai_assistant_api';
@@ -65,18 +65,18 @@ export async function waitForKnowledgeBaseReady(
     log.debug(`Waiting for knowledge base to be ready...`);
     const { body, status } = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
-    const { kbState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
-    if (status !== 200 || kbState !== KnowledgeBaseState.READY) {
+    const { inferenceModelState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
+    if (status !== 200 || inferenceModelState !== InferenceModelState.READY) {
       log.warning(`Knowledge base is not ready yet:
         Status code: ${status}
-        State: ${kbState}
+        State: ${inferenceModelState}
         isReIndexing: ${isReIndexing}
         concreteWriteIndex: ${concreteWriteIndex}
         currentInferenceId: ${currentInferenceId}`);
     }
 
     expect(status).to.be(200);
-    expect(kbState).to.be(KnowledgeBaseState.READY);
+    expect(inferenceModelState).to.be(InferenceModelState.READY);
     expect(isReIndexing).to.be(false);
     log.info(`Knowledge base is in ready state.`);
   });
@@ -150,6 +150,7 @@ export async function addSampleDocsToCustomIndex(
   customSearchConnectorIndex: string
 ) {
   const es = getService('es');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertest = getService('supertest');
   const log = getService('log');
 

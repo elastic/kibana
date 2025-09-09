@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { copyToClipboard } from '@elastic/eui';
 
 interface RegisterContextMenuActionsParams {

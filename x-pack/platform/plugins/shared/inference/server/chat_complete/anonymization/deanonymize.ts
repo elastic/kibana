@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
+import type { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
@@ -13,37 +13,16 @@ export function deanonymize<TMessage extends Message>(
   message: TMessage,
   anonymizations: Anonymization[]
 ): { message: TMessage; deanonymizations: Deanonymization[] } {
-  // reverse order of anonymizations when unmasking, this ensures
-  // doubly masked parts are unmasked appropriately. e.g.:
-  // a => b => c should be unmasked as c => b => a. if you start
-  // with a, you won't find a match, only c will be unmasked to b.
-  const reversedAnonymizations = anonymizations.concat().reverse();
-
   function replace(content: string) {
     let next = content;
     const deanonymizations: Deanonymization[] = [];
 
-    reversedAnonymizations.forEach(({ entity }) => {
+    anonymizations.forEach(({ entity }) => {
       let index = next.indexOf(entity.mask);
 
       while (index !== -1) {
         const start = index;
         const end = start + entity.value.length;
-
-        // If we later replace a mask that occurs *before* an already-stored
-        // entity, that entity’s coordinates shift by the length delta between
-        // mask and value.  Because we iterate right-to-left (to handle nested
-        // masks), we must correct existing ranges before we store the new one.
-
-        const lengthDelta = entity.value.length - entity.mask.length; // usually negative
-
-        // Adjust previously stored ranges that start after the current mask.
-        deanonymizations.forEach((d) => {
-          if (d.start > start) {
-            d.start += lengthDelta;
-            d.end += lengthDelta;
-          }
-        });
 
         deanonymizations.push({ start, end, entity });
 

@@ -11,20 +11,20 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { coreMock } from '@kbn/core/public/mocks';
 import { type Query } from '@kbn/es-query';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import {
+import type {
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { EmbeddableStateTransfer } from '.';
+import type { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import {
+import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
@@ -50,6 +50,8 @@ const createSetupContract = (): Setup => {
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerTransforms: jest.fn(),
     registerEnhancement: jest.fn(),
+    transformEnhancementsIn: jest.fn(),
+    transformEnhancementsOut: jest.fn(),
   };
   return setupContract;
 };

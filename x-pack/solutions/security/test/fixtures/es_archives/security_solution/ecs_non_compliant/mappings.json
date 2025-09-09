@@ -24,6 +24,13 @@
               }
             }
           },
+          "host": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              }
+            }
+          },
           "container": {
             "properties": {
               "image": {

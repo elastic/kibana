@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { reducer, initialValue, Action, Store } from './editor';
-import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
-import { TextObject } from '../../../common/text_object';
+import type { Action, Store } from './editor';
+import { reducer, initialValue } from './editor';
+import type { DevToolsSettings } from '../../services';
+import { DEFAULT_SETTINGS } from '../../services';
+import type { TextObject } from '../../../common/text_object';
 import { SHELL_TAB_ID } from '../containers/main/constants';
-import { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
+import type { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
 import { RestoreMethod } from '../../types';
 
 describe('editor store', () => {

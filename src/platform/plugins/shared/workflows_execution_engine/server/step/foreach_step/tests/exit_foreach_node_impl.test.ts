@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitForeachNode } from '@kbn/workflows';
+import type { ExitForeachNode } from '@kbn/workflows';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('ExitForeachNodeImpl', () => {
   let step: ExitForeachNode;
@@ -21,7 +21,9 @@ describe('ExitForeachNodeImpl', () => {
   let setStepResult: jest.Mock<any, any, any>;
   let goToNextStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
+  let exitScope: jest.Mock<any, any, any>;
   let finishStep: jest.Mock<any, any, any>;
+  let logDebug: jest.Mock<any, any, any>;
 
   beforeEach(() => {
     startStep = jest.fn();
@@ -29,8 +31,10 @@ describe('ExitForeachNodeImpl', () => {
     setStepState = jest.fn();
     setStepResult = jest.fn();
     goToNextStep = jest.fn();
+    exitScope = jest.fn();
     finishStep = jest.fn();
     goToStep = jest.fn();
+    logDebug = jest.fn();
     step = {
       id: 'testStep',
       type: 'exit-foreach',
@@ -44,8 +48,12 @@ describe('ExitForeachNodeImpl', () => {
       goToNextStep,
       finishStep,
       goToStep,
+      exitScope,
     } as any;
-    underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager);
+    const workflowLogger = {
+      logDebug,
+    } as any;
+    underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager, workflowLogger);
   });
 
   describe('when no foreach step', () => {
@@ -54,13 +62,9 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should throw an error', async () => {
-      await underTest.run();
-
-      expect(wfExecutionRuntimeManager.setStepResult).toHaveBeenCalledWith(step.startNodeId, {
-        output: null,
-        error: expect.any(Error),
-      });
-      expect(wfExecutionRuntimeManager.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      await expect(underTest.run()).rejects.toThrow(
+        new Error(`Foreach state for step ${step.startNodeId} not found`)
+      );
     });
   });
 
@@ -85,6 +89,11 @@ describe('ExitForeachNodeImpl', () => {
 
       expect(wfExecutionRuntimeManager.finishStep).not.toHaveBeenCalled();
       expect(wfExecutionRuntimeManager.setStepResult).not.toHaveBeenCalled();
+    });
+
+    it('should exit iteration scope', async () => {
+      await underTest.run();
+      expect(exitScope).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -117,6 +126,20 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(wfExecutionRuntimeManager.goToNextStep).toHaveBeenCalled();
+    });
+
+    it('should log debug message', async () => {
+      await underTest.run();
+
+      expect(logDebug).toHaveBeenCalledWith(
+        `Exiting foreach step ${step.startNodeId} after processing all items.`,
+        { workflow: { step_id: step.startNodeId } }
+      );
+    });
+
+    it('should exit iteration scope and whole foreach scope', async () => {
+      await underTest.run();
+      expect(exitScope).toHaveBeenCalledTimes(2);
     });
   });
 });

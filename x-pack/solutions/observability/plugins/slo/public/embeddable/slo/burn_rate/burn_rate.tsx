@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingChart,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useRef, useState } from 'react';
 import { SimpleBurnRate } from '../../../components/slo/simple_burn_rate/burn_rate';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { SloOverviewDetails } from '../common/slo_overview_details';
-import { EmbeddableProps } from './types';
+import type { EmbeddableProps } from './types';
 
 export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: EmbeddableProps) {
   const containerRef = useRef<HTMLDivElement>(null);

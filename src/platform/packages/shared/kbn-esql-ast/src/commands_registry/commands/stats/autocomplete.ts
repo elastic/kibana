@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-// import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { Walker } from '../../../walker';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isAssignment, isColumn } from '../../../ast/is';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 import type {
   ESQLCommand,
   ESQLCommandOption,
@@ -171,6 +171,7 @@ export async function autocomplete(
         preferredExpressionType: 'boolean',
         context,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
       });
 
       // Is this a complete boolean expression?
@@ -287,9 +288,10 @@ async function getExpressionSuggestions({
         innerText,
         expressionRoot,
         location,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
         context,
         getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
         advanceCursorAfterInitialColumn,
         ignoredColumnsForEmptyExpression: ignoredColumns,
       }))

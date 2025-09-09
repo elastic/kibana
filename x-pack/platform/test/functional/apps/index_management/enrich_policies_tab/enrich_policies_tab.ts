@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
@@ -56,20 +56,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await log.debug('Navigating to the enrich policies tab');
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the enrich policies tab
-      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
     });
 
     after(async () => {
       await log.debug('Cleaning up created index and policy');
-
+      try {
+        await es.enrich.deletePolicy({ name: ENRICH_POLICY_NAME });
+      } catch (e) {
+        log.debug(`[Teardown error] Error deleting test policy: ${e.message}`);
+      }
       try {
         await es.indices.delete({ index: ENRICH_INDEX_NAME });
       } catch (e) {
-        log.debug('[Teardown error] Error deleting test policy');
-        throw e;
+        log.debug(`[Teardown error] Error deleting test index: ${e.message}`);
       }
     });
 
@@ -100,10 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('can delete a policy', async () => {
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the enrich policies tab
-      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
       // Since we disabled wait_for_completion in the server request, we dont know when
       // a given policy will finish executing. Until that happens the policy cannot
       // be deleted. 2s seems to be plenty enough to guarantee that, at least for this
@@ -121,9 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       this.tags('skipFIPS');
       it('read only access', async () => {
         await security.testUser.setRoles(['index_management_monitor_enrich_only']);
-        await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
 
         await testSubjects.missingOrFail('createPolicyButton');
         await testSubjects.missingOrFail('deletePolicyButton');

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FieldErrors, Resolver } from 'react-hook-form';
+import type { FieldErrors, Resolver } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { QueryRuleEditorForm } from '../types';
+import type { QueryRuleEditorForm } from '../types';
 
 const hasErrors = (errors: FieldErrors<QueryRuleEditorForm>): boolean =>
   Object.keys(errors).length > 0;

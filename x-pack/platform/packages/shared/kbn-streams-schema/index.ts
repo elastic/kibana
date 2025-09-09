@@ -13,38 +13,12 @@ export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
 export {
-  type ProcessorDefinition,
-  type ProcessorConfig,
-  type ProcessorDefinitionWithId,
-  type ProcessorType,
-  type ProcessorTypeOf,
-  type KvProcessorDefinition,
-  type KvProcessorConfig,
-  type GeoIpProcessorConfig,
-  type GeoIpProcessorDefinition,
-  type SetProcessorConfig,
-  type SetProcessorDefinition,
-  type RenameProcessorConfig,
-  type RenameProcessorDefinition,
-  type UrlDecodeProcessorConfig,
-  type UrlDecodeProcessorDefinition,
-  type UserAgentProcessorConfig,
-  type UserAgentProcessorDefinition,
-  type DateProcessorConfig,
-  type DateProcessorDefinition,
-  type DissectProcessorConfig,
-  type DissectProcessorDefinition,
-  type GrokProcessorConfig,
-  type GrokProcessorDefinition,
-  type ManualIngestPipelineProcessorConfig as ManualIngestPipelineProcessorConfig,
-  type ManualIngestPipelineProcessorDefinition as ManualIngestPipelineProcessorDefinition,
-  getProcessorConfig,
-  getProcessorType,
-  processorWithIdDefinitionSchema,
-  processorDefinitionSchema,
-} from './src/models/ingest/processors';
-
-export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
+  type RoutingDefinition,
+  routingStatus,
+  type RoutingStatus,
+  isRoutingEnabled,
+  routingDefinitionListSchema,
+} from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';
 
@@ -93,8 +67,6 @@ export {
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
 
-export { getConditionFields } from './src/helpers/get_condition_fields';
-
 export {
   type StreamQuery,
   type StreamQueryKql,
@@ -125,29 +97,12 @@ export {
   isDisabledLifecycle,
 } from './src/models/ingest/lifecycle';
 
-export {
-  type BinaryFilterCondition,
-  type Condition,
-  type FilterCondition,
-  type UnaryFilterCondition,
-  type AlwaysCondition,
-  type UnaryOperator,
-  type NeverCondition,
-  isAlwaysCondition,
-  isAndCondition,
-  isFilterCondition,
-  isNeverCondition,
-  isOrCondition,
-  isUnaryFilterCondition,
-  isBinaryFilterCondition,
-  conditionSchema,
-  isCondition,
-} from './src/conditions';
-
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
+  SignificantEventsGenerateResponse,
+  GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
 
-export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
+export { emptyAssets } from './src/helpers/empty_assets';

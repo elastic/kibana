@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 const PAGE_URL = '/app/security/rules/id/';
 

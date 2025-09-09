@@ -71,6 +71,7 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter, lo
 
           return response.ok({ body });
         } catch (err) {
+          logger.error(`getAllIntegrationsRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

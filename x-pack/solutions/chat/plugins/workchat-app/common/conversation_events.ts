@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ContentRef } from '@kbn/wci-common';
+import type { ContentRef } from '@kbn/wci-common';
 
 export enum ConversationEventType {
   userMessage = 'user_message',

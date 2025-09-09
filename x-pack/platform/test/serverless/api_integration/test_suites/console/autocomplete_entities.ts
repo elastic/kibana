@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
 export default ({ getService }: FtrProviderContext) => {
   const svlCommonApi = getService('svlCommonApi');

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Pagination } from '@kbn/slo-schema/src/models/pagination';
+import type { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import { createSLO } from '../fixtures/slo';
 import {
   aHitFromSummaryIndex,
@@ -16,7 +17,7 @@ import {
 } from '../fixtures/summary_search_document';
 import { DefaultSummarySearchClient } from './summary_search_client';
 import type { Sort, SummarySearchClient } from './types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const defaultSort: Sort = {
   field: 'sli_value',

@@ -31,9 +31,9 @@ import {
   getGlobalParamAction,
   selectGlobalParamState,
 } from '../../../state/global_params';
-import { ClientPluginsStart } from '../../../../../plugin';
-import { ListParamItem } from './params_list';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
+import type { ListParamItem } from './params_list';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 

@@ -14,14 +14,14 @@ import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import { DashboardLinkComponent, DashboardLinkProps } from './dashboard_link_component';
+import type { DashboardLinkProps } from './dashboard_link_component';
+import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
-import { createLinksSavedObjectRef } from '../../lib/saved_object_ref_utils';
 
 function createMockLinksParent({
   initialQuery,
@@ -31,7 +31,7 @@ function createMockLinksParent({
   initialFilters?: Filter[];
 }) {
   const parent = {
-    ...getMockLinksParentApi({}, [createLinksSavedObjectRef('456')]),
+    ...getMockLinksParentApi({ savedObjectId: '456' }),
     locator: {
       getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
       navigate: jest.fn(),

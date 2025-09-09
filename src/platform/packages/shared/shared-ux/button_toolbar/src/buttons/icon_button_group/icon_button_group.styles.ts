@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 
 export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
   const border = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain} !important`;

@@ -12,7 +12,7 @@ import React from 'react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { UnifiedHistogramBreakdownContext } from '../../types';
+import type { UnifiedHistogramBreakdownContext } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 

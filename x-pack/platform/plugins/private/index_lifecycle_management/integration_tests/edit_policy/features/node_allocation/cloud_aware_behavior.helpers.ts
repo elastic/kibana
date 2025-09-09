@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { TestBedConfig } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
+import type { TestBedConfig } from '@kbn/test-jest-helpers';
 
-import { AppServicesContext } from '../../../../public/types';
+import type { AppServicesContext } from '../../../../public/types';
 import { createTogglePhaseAction, createNodeAllocationActions } from '../../../helpers';
 import { initTestBed } from '../../init_test_bed';
 

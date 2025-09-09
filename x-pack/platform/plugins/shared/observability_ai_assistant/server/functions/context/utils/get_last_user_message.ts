@@ -6,7 +6,8 @@
  */
 
 import { last } from 'lodash';
-import { Message, MessageRole } from '../../../../common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
 
 export function getLastUserMessage(messages: Message[]): string | undefined {
   const lastUserMessage = last(

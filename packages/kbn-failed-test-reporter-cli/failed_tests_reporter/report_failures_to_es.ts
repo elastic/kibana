@@ -9,9 +9,9 @@
 
 import { Client, HttpConnection } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { TestFailure } from './get_failures';
+import type { TestFailure } from './get_failures';
 
 export async function reportFailuresToEs(log: ToolingLog, failures: TestFailure[]) {
   if (!failures?.length) {

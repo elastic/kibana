@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import type {
   DashboardAttributes,

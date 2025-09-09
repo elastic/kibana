@@ -5,43 +5,33 @@
  * 2.0.
  */
 
-import { defer, switchMap, Observable } from 'rxjs';
-import { Span } from '@opentelemetry/api';
+import type { Observable } from 'rxjs';
+import { defer } from 'rxjs';
+import type { Span } from '@opentelemetry/api';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { getConnectorList, getDefaultConnector } from '../../runner/utils';
+import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 
 export const getChatModel$ = ({
   connectorId,
   request,
-  actions,
   inference,
   span,
 }: {
-  connectorId?: string;
+  connectorId: string;
   request: KibanaRequest;
-  actions: ActionsPluginStart;
   inference: InferenceServerStart;
   span?: Span;
 }): Observable<InferenceChatModel> => {
   return defer(async () => {
-    let selectedConnectorId = connectorId;
-    if (!selectedConnectorId) {
-      const connectors = await getConnectorList({ actions, request });
-      const defaultConnector = getDefaultConnector({ connectors });
-      selectedConnectorId = defaultConnector.connectorId;
-    }
-    span?.setAttribute('elastic.connector.id', selectedConnectorId);
-    return selectedConnectorId;
-  }).pipe(
-    switchMap((selectedConnectorId) => {
-      return inference.getChatModel({
-        request,
-        connectorId: selectedConnectorId,
-        chatModelOptions: {},
-      });
-    })
-  );
+    span?.setAttribute('elastic.connector.id', connectorId);
+    return inference.getChatModel({
+      request,
+      connectorId,
+      chatModelOptions: {
+        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+      },
+    });
+  });
 };

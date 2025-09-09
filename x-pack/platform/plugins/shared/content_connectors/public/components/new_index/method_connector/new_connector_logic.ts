@@ -5,36 +5,34 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector, ConnectorDefinition } from '@kbn/search-connectors';
+import type { Connector, ConnectorDefinition } from '@kbn/search-connectors';
 
-import { HttpSetup, NavigateToUrlOptions } from '@kbn/core/public';
-import {
-  AddConnectorApiLogic,
+import type { HttpSetup, NavigateToUrlOptions } from '@kbn/core/public';
+import type {
   AddConnectorApiLogicActions,
   AddConnectorApiLogicArgs,
   AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
-import {
-  GenerateConfigApiActions,
-  GenerateConfigApiLogic,
-} from '../../../api/connector/generate_connector_config_api_logic';
-import {
-  GenerateConnectorNamesApiLogic,
+import type { GenerateConfigApiActions } from '../../../api/connector/generate_connector_config_api_logic';
+import { GenerateConfigApiLogic } from '../../../api/connector/generate_connector_config_api_logic';
+import type {
   GenerateConnectorNamesApiLogicActions,
   GenerateConnectorNamesApiResponse,
 } from '../../../api/connector/generate_connector_names_api_logic';
+import { GenerateConnectorNamesApiLogic } from '../../../api/connector/generate_connector_names_api_logic';
 
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-import {
-  ConnectorViewActions,
-  ConnectorViewLogic,
-} from '../../connector_detail/connector_view_logic';
-import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
-import { APIKeyResponse, Status } from '../../../../common/types/api';
-import { Actions } from '../../../api/api_logic/create_api_logic';
+import type { ConnectorViewActions } from '../../connector_detail/connector_view_logic';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+import type { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
+import type { APIKeyResponse } from '../../../../common/types/api';
+import { Status } from '../../../../common/types/api';
+import type { Actions } from '../../../api/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../shared/encode_path_params';
 import { SearchIndexTabId } from '../../../../common/constants';
 

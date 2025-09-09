@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RootSchema, EventTypeOpts } from '@kbn/core/public';
+import type { RootSchema, EventTypeOpts } from '@kbn/core/public';
 import { EventMetric, FieldType } from '../types';
 
 const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { AssistantTelemetry } from '../../../..';
+import type React from 'react';
+import { useCallback, useState } from 'react';
+import type { AssistantTelemetry } from '../../../..';
 import type { KnowledgeBaseConfig } from '../../types';
 
 interface Params {

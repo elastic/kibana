@@ -7,15 +7,17 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/streams-schema';
+import { createIsNarrowSchema } from '@kbn/zod-helpers';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
-type StringOrNumberOrBoolean = string | number | boolean;
+export type StringOrNumberOrBoolean = string | number | boolean;
 
-type OperatorKey = keyof Omit<ShorthandBinaryFilterCondition, 'field'>;
+export type BinaryOperatorKeys = keyof Omit<ShorthandBinaryFilterCondition, 'field'>;
+export type UnaryOperatorKeys = keyof Omit<ShorthandUnaryFilterCondition, 'field'>;
+export type OperatorKeys = BinaryOperatorKeys | UnaryOperatorKeys;
 
-export const OPERATORS: OperatorKey[] = [
+export const BINARY_OPERATORS: BinaryOperatorKeys[] = [
   'eq',
   'neq',
   'lt',
@@ -27,6 +29,8 @@ export const OPERATORS: OperatorKey[] = [
   'endsWith',
   'range',
 ];
+
+export const UNARY_OPERATORS: UnaryOperatorKeys[] = ['exists'];
 
 export interface RangeCondition {
   gt?: StringOrNumberOrBoolean;
@@ -72,7 +76,7 @@ export const shorthandBinaryFilterConditionSchema = z
   .refine(
     (obj) =>
       // At least one operator must be present
-      Object.keys(obj).some((key) => OPERATORS.includes(key as OperatorKey)),
+      Object.keys(obj).some((key) => BINARY_OPERATORS.includes(key as BinaryOperatorKeys)),
     { message: 'At least one operator must be specified' }
   );
 
@@ -156,3 +160,7 @@ export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysCon
 export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
+
+export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
+
+export const NEVER_CONDITION: NeverCondition = Object.freeze({ never: {} });

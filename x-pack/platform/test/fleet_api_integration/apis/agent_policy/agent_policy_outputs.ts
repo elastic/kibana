@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

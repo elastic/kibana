@@ -13,6 +13,8 @@ const pipelineSlug = process.argv[2];
 const branch = process.argv[3] || 'main';
 const commit = process.argv[4] || 'HEAD';
 const kibanaBuildId = process.argv[5] || '';
+// key=value pairs in space separated string
+const extraEnvVariables = process.argv[6] || '';
 
 (async () => {
   try {
@@ -22,6 +24,11 @@ const kibanaBuildId = process.argv[5] || '';
       branch,
       env: {
         ...(kibanaBuildId && { KIBANA_BUILD_ID: kibanaBuildId }),
+        ...extraEnvVariables.split(' ').reduce<Record<string, string>>((acc, varString) => {
+          const [key, value] = varString.split('=');
+          acc[key] = value;
+          return acc;
+        }, {}),
       },
       ignore_pipeline_branch_filters: true, // Required because of a Buildkite bug
     });

@@ -15,7 +15,7 @@ import {
   DEFAULT_WORKPAD_CSS,
 } from '../../common/lib';
 import type { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
-import { CanvasTemplate, CanvasWorkpad } from '../../types';
+import type { CanvasTemplate, CanvasWorkpad } from '../../types';
 import { coreServices } from './kibana_services';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;

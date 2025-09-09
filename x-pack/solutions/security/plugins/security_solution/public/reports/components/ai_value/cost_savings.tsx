@@ -14,7 +14,6 @@ import { CostSavingsMetric } from './cost_savings_metric';
 import * as i18n from './translations';
 
 interface Props {
-  attackAlertIds: string[];
   minutesPerAlert: number;
   analystHourlyRate: number;
   from: string;
@@ -24,7 +23,6 @@ interface Props {
 }
 
 export const CostSavings: React.FC<Props> = ({
-  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -50,7 +48,6 @@ export const CostSavings: React.FC<Props> = ({
       <CostSavingsMetric
         from={from}
         to={to}
-        attackAlertIds={attackAlertIds}
         analystHourlyRate={analystHourlyRate}
         minutesPerAlert={minutesPerAlert}
       />

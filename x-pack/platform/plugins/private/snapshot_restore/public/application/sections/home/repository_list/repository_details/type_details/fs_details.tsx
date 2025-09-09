@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { FSRepository } from '../../../../../../../common/types';
+import type { FSRepository } from '../../../../../../../common/types';
 
 interface Props {
   repository: FSRepository;

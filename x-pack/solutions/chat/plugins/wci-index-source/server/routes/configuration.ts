@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { apiCapabilities } from '@kbn/workchat-app/common/features';
 import { buildSchema } from '@kbn/wc-index-schema-builder';
-import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
 import type {
   GenerateConfigurationResponse,
   SearchIndicesResponse,
@@ -33,11 +32,12 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
     },
     async (ctx, request, res) => {
       try {
-        const [, { actions, inference }] = await core.getStartServices();
-        const { elasticsearch } = await ctx.core;
+        const [{ elasticsearch }, { inference }] = await Promise.all([
+          ctx.core,
+          core.getStartServices().then(([, plugins]) => plugins),
+        ]);
 
-        const connectors = await getConnectorList({ actions, request });
-        const connector = getDefaultConnector({ connectors });
+        const connector = await inference.getDefaultConnector(request);
 
         const chatModel = await inference.getChatModel({
           request,

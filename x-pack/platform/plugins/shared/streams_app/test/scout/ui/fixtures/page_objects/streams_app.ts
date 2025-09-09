@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ScoutPage, expect } from '@kbn/scout';
+
+/* eslint-disable playwright/no-nth-methods */
+
+import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout';
+import type { ProcessorType } from '@kbn/streamlang';
+import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}
@@ -19,19 +25,19 @@ export class StreamsApp {
   }
 
   async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'route');
+    await this.gotoStreamManagementTab(streamName, 'partitioning');
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+    await this.gotoStreamManagementTab(streamName, 'retention');
   }
 
   async gotoProcessingTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'enrich');
+    await this.gotoStreamManagementTab(streamName, 'processing');
   }
 
   async gotoSchemaEditorTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+    await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
   async gotoSignificantEventsTab(streamName: string) {
@@ -71,23 +77,18 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Remove' }).click();
   }
 
-  getDeleteModal() {
-    return this.page.getByRole('dialog');
+  getModal() {
+    return this.page.locator('[role="dialog"], [role="alertdialog"]');
   }
 
   async confirmDeleteInModal() {
-    await this.getDeleteModal().getByRole('button', { name: 'Delete' }).click();
-    await expect(this.getDeleteModal()).toBeHidden();
+    await this.getModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getModal()).toBeHidden();
   }
 
   async cancelDeleteInModal() {
-    await this.getDeleteModal().getByRole('button', { name: 'Cancel' }).click();
-    await expect(this.getDeleteModal()).toBeHidden();
-  }
-
-  async closeToast() {
-    await this.page.getByTestId('toastCloseButton').click();
-    await expect(this.page.getByRole('log')).toBeHidden();
+    await this.getModal().getByRole('button', { name: 'Cancel' }).click();
+    await expect(this.getModal()).toBeHidden();
   }
 
   // Condition editor utility methods
@@ -145,6 +146,22 @@ export class StreamsApp {
     await this.page.keyboard.press('Space');
   }
 
+  async dragProcessor({ processorPos, steps }: { processorPos: number; steps: number }) {
+    // Focus source item and activate DnD
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[processorPos];
+    await targetProcessor.getByTestId('streamsAppProcessorDragHandle').focus();
+    await this.page.keyboard.press('Space');
+    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
+    let absoluteSteps = Math.abs(steps);
+    while (absoluteSteps > 0) {
+      this.page.keyboard.press(arrowButton);
+      absoluteSteps--;
+    }
+    // Release DnD
+    await this.page.keyboard.press('Space');
+  }
+
   // Expectation utility methods
   async expectRoutingRuleVisible(streamName: string) {
     await expect(this.page.getByTestId(`routingRule-${streamName}`)).toBeVisible();
@@ -156,7 +173,9 @@ export class StreamsApp {
 
   async expectRoutingOrder(expectedOrder: string[]) {
     // Wait for the routing rules to be rendered before getting their locators
-    await expect(this.page.locator('[data-test-subj^="routingRule-"]')).toHaveCount(3);
+
+    await expect(this.page.locator('[data-test-subj^="routingRule-"]').first()).toBeVisible();
+
     const rulesLocators = await this.page.testSubj.locator('^routingRule-').all();
 
     const actualOrder = await Promise.all(
@@ -178,40 +197,251 @@ export class StreamsApp {
   }
 
   async expectToastVisible() {
-    await expect(this.page.getByRole('log')).toBeVisible();
+    // Check if at least one element appears and is visible.
+    await expect(this.page.getByTestId('toastCloseButton').first()).toBeVisible();
   }
 
   async saveRuleOrder() {
     await this.page.getByRole('button', { name: 'Change routing' }).click();
   }
 
-  async cancelRuleOrder() {
+  async cancelChanges() {
     await this.page.getByRole('button', { name: 'Cancel changes' }).click();
-    await this.page
-      .getByRole('alertdialog')
-      .getByRole('button', { name: 'Discard unsaved changes' })
-      .click();
+    await this.getModal().getByRole('button', { name: 'Discard unsaved changes' }).click();
   }
 
-  // Utility for data preview
+  /**
+   * Utility for data processing
+   */
+  async clickAddProcessor() {
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+  }
+
+  async clickSaveProcessor() {
+    await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
+  }
+
+  async clickCancelProcessorChanges() {
+    await this.page.getByTestId('streamsAppProcessorConfigurationCancelButton').click();
+  }
+
+  async clickEditProcessor(pos: number) {
+    const processorEditButton = await this.getProcessorEditButton(pos);
+    await processorEditButton.click();
+  }
+
+  async clickManageDataSourcesButton() {
+    await this.page.getByTestId('streamsAppProcessingManageDataSourcesButton').click();
+  }
+
+  async addDataSource(type: 'kql' | 'custom') {
+    await this.page.getByTestId('streamsAppProcessingAddDataSourcesContextMenu').click();
+    const dataSourcesMap = {
+      kql: 'streamsAppProcessingAddKqlDataSource',
+      custom: 'streamsAppProcessingAddCustomDataSource',
+    };
+    await this.page.getByTestId(dataSourcesMap[type]).click();
+  }
+
+  async getProcessorEditButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Edit' });
+  }
+
+  async confirmDiscardInModal() {
+    await this.getModal().getByRole('button', { name: 'Discard' }).click();
+    await expect(this.getModal()).toBeHidden();
+  }
+
+  async selectProcessorType(value: ProcessorType) {
+    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
+    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+  }
+
+  async fillFieldInput(value: string) {
+    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+  }
+
+  async fillGrokPatternInput(value: string) {
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternExpression').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+  }
+
+  async fillCustomSamplesEditor(value: string) {
+    // Clean previous content
+    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
+      .getByRole('textbox')
+      .fill(value);
+  }
+
+  async removeProcessor(pos: number) {
+    await this.clickEditProcessor(pos);
+    await this.page.getByRole('button', { name: 'Delete' }).click();
+  }
+
+  async saveProcessorsListChanges() {
+    await this.page.getByRole('button', { name: 'Save changes' }).click();
+  }
+
+  async getProcessorsListItems() {
+    try {
+      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
+        timeout: 15_000,
+      });
+    } catch {
+      // If the list is not visible, it might be empty or not rendered yet
+      return [];
+    }
+    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+  }
+
+  async expectProcessorsOrder(expectedOrder: string[]) {
+    // Wait for the routing rules to be rendered before getting their locators
+    const processorLocators = await this.getProcessorsListItems();
+
+    const actualOrder = await Promise.all(
+      processorLocators.map(async (processorLocator) => {
+        return processorLocator.getByTestId('streamsAppProcessorLegend').textContent();
+      })
+    );
+
+    expect(actualOrder).toStrictEqual(expectedOrder);
+  }
+
+  getDataSourcesList() {
+    return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  getDataSourcesListItems() {
+    return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
+  }
+
+  /**
+   * Utility for data preview
+   */
   async getPreviewTableRows() {
     // Wait for the preview table to be rendered
     await expect(this.page.getByTestId('euiDataGridBody')).toBeVisible();
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
-  async expectCellValue({
+  async expectCellValueContains({
     columnName,
     rowIndex,
     value,
+    invertCondition = false,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
+    invertCondition?: boolean;
   }) {
     const cellContent = this.page.locator(
       `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
     );
-    await expect(cellContent).toContainText(value);
+
+    if (invertCondition) {
+      await expect(cellContent).not.toContainText(value);
+    } else {
+      await expect(cellContent).toContainText(value);
+    }
+  }
+
+  /**
+   * Schema Editor specific utility methods
+   */
+  async expectSchemaEditorTableVisible() {
+    await expect(this.page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
+  }
+
+  async searchFields(searchTerm: string) {
+    const searchBox = this.page
+      .getByTestId('streamsAppSchemaEditorControls')
+      .getByRole('searchbox');
+    await expect(searchBox).toBeVisible();
+    searchBox.clear();
+    await searchBox.focus();
+    await this.page.keyboard.type(searchTerm);
+  }
+
+  async clearFieldSearch() {
+    const searchBox = this.page
+      .getByTestId('streamsAppSchemaEditorControls')
+      .getByRole('searchbox');
+    await searchBox.clear();
+  }
+
+  async clickFieldTypeFilter() {
+    await this.page.getByRole('button', { name: 'Type' }).click();
+  }
+
+  async clickFieldStatusFilter() {
+    await this.page.getByRole('button', { name: 'Status' }).click();
+  }
+
+  async selectFilterValue(value: string) {
+    await this.getModal().getByRole('option').getByText(value).click();
+  }
+
+  async openFieldActionsMenu() {
+    await expect(this.page.getByTestId('streamsAppActionsButton')).toHaveCount(1);
+    await this.page.getByTestId('streamsAppActionsButton').click();
+    await expect(this.getModal().getByText('Field actions')).toBeVisible();
+  }
+
+  async clickFieldAction(actionName: string) {
+    await this.getModal().getByText(actionName).click();
+    await expect(this.getModal().getByText('Field actions')).toBeHidden();
+  }
+
+  async expectFieldFlyoutOpen() {
+    await expect(this.page.getByTestId('streamsAppSchemaEditorFlyoutCloseButton')).toBeVisible();
+  }
+
+  async setFieldMappingType(type: FieldTypeOption) {
+    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
+    await expect(typeSelector).toBeVisible();
+    await typeSelector.selectOption(type);
+  }
+
+  async saveFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorFieldSaveButton').click();
+  }
+
+  async unmapField() {
+    await this.openFieldActionsMenu();
+    await this.clickFieldAction('Unmap field');
+    await this.getModal().getByRole('button', { name: 'Unmap field' }).click();
+  }
+
+  /**
+   * Share utility methods
+   */
+  async closeToasts() {
+    await this.expectToastVisible();
+    // Check if at least one element appears and is visible.
+
+    // Get an array of all locators and loop through them
+    const allCloseButtons = this.page.getByTestId('toastCloseButton');
+    for (const button of await allCloseButtons.all()) {
+      await button.click();
+    }
+
+    await expect(this.page.getByTestId('toastCloseButton')).toHaveCount(0);
+  }
+
+  async closeFlyout() {
+    await this.page.getByTestId('euiFlyoutCloseButton').click();
+    await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
   }
 }

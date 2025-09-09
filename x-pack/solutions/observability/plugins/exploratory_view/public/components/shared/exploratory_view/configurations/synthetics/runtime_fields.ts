@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuntimeField } from '@kbn/data-views-plugin/public';
+import type { RuntimeField } from '@kbn/data-views-plugin/public';
 import { MS_TO_HUMANIZE_PRECISE } from './field_formats';
 import {
   SYNTHETICS_DNS_TIMINGS,

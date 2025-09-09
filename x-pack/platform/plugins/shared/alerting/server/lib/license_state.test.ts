@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import type { ILicenseState } from './license_state';
 import { LicenseState } from './license_state';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();

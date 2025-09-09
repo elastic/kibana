@@ -11,6 +11,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
+import type { Observable } from 'rxjs';
 import {
   catchError,
   defer,
@@ -19,7 +20,6 @@ import {
   from,
   map,
   merge as mergeOperator,
-  Observable,
   of,
   shareReplay,
   switchMap,
@@ -28,27 +28,29 @@ import {
 } from 'rxjs';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { withInferenceSpan } from '@kbn/inference-tracing';
-import {
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import type {
   ChatCompleteResponse,
   FunctionCallingMode,
   InferenceClient,
-  ToolChoiceType,
 } from '@kbn/inference-common';
-import { isLockAcquisitionError } from '@kbn/lock-manager';
+import { ToolChoiceType } from '@kbn/inference-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
-import {
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
+} from '../../../common/conversation_complete';
+import {
   createConversationNotFoundError,
   StreamingChatResponseEventType,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema } from '../../../common/functions/types';
+import type { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type Instruction,
   type Conversation,
@@ -59,9 +61,8 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -71,13 +72,10 @@ import { convertInferenceEventsToStreamingEvents } from './operators/convert_inf
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
-import { deleteInferenceEndpoint, waitForKbModel, warmupModel } from '../inference_endpoint';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
+import { warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
-import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
-import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
 import { addAnonymizationData } from './operators/add_anonymization_data';
 
 const MAX_FUNCTION_CALLS = 8;
@@ -203,7 +201,7 @@ export class ObservabilityAIAssistantClient {
     simulateFunctionCalling?: boolean;
     disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return withInferenceSpan('run_tools', () => {
+    return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
@@ -229,15 +227,13 @@ export class ObservabilityAIAssistantClient {
               logger: this.dependencies.logger,
               scopes: this.dependencies.scopes,
               chat: (name, chatParams) =>
-                withInferenceSpan('get_title', () =>
-                  this.chat(name, {
-                    ...chatParams,
-                    simulateFunctionCalling,
-                    connectorId,
-                    signal,
-                    stream: false,
-                  })
-                ),
+                this.chat(name, {
+                  ...chatParams,
+                  simulateFunctionCalling,
+                  connectorId,
+                  signal,
+                  stream: false,
+                }),
             }).pipe(shareReplay());
 
       const systemMessage$ = kbUserInstructions$.pipe(
@@ -263,7 +259,7 @@ export class ObservabilityAIAssistantClient {
             ? getContextFunctionRequestIfNeeded(initialMessages)
             : undefined;
 
-          return withInferenceSpan('run_tools', () =>
+          return withActiveInferenceSpan('ContinueConversation', () =>
             mergeOperator(
               // if we have added a context function request, also emit
               // the messageAdd event for it, so we can notify the consumer
@@ -486,6 +482,8 @@ export class ObservabilityAIAssistantClient {
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      temperature: 0.25,
+      maxRetries: 1,
       metadata: {
         connectorTelemetry: {
           pluginId: 'observability_ai_assistant',
@@ -504,8 +502,6 @@ export class ObservabilityAIAssistantClient {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({
           ...options,
-          temperature: 0.25,
-          maxRetries: 0,
           stream: true,
         })
       ).pipe(
@@ -526,8 +522,6 @@ export class ObservabilityAIAssistantClient {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
         messages: convertMessagesForInference(messages, this.dependencies.logger),
-        temperature: 0.25,
-        maxRetries: 0,
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
@@ -676,81 +670,11 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getModelStatus();
   };
 
-  setupKnowledgeBase = async (
-    nextInferenceId: string,
-    waitUntilComplete: boolean = false
-  ): Promise<{
-    reindex: boolean;
-    currentInferenceId: string | undefined;
-    nextInferenceId: string;
-  }> => {
-    const { esClient, core, logger } = this.dependencies;
-
-    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
-
-    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
-    if (currentInferenceId === nextInferenceId) {
-      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
-      if (waitUntilComplete) {
-        logger.debug('Waiting for warmup to complete...');
-        await warmupModelPromise;
-        logger.debug('Warmup completed.');
-      }
-      return { reindex: false, currentInferenceId, nextInferenceId };
-    }
-
-    await createOrUpdateKnowledgeBaseIndexAssets({
-      core: this.dependencies.core,
-      logger: this.dependencies.logger,
-      inferenceId: nextInferenceId,
-    });
-
-    const kbSetupPromise = waitForKbModel({
-      core: this.dependencies.core,
-      esClient,
-      logger,
-      config: this.dependencies.config,
-      inferenceId: nextInferenceId,
-    })
-      .then(async () => {
-        logger.info(
-          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
-        );
-
-        await reIndexKnowledgeBaseWithLock({
-          core,
-          logger,
-          esClient,
-        });
-
-        // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
-        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
-          void deleteInferenceEndpoint({
-            esClient,
-            logger,
-            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
-          });
-        }
-      })
-      .catch((e) => {
-        if (isLockAcquisitionError(e)) {
-          logger.info(e.message);
-        } else {
-          logger.error(
-            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
-          );
-          logger.debug(e);
-        }
-      });
-
-    if (waitUntilComplete) {
-      logger.debug('Waiting for knowledge base setup to complete...');
-      await kbSetupPromise;
-      logger.debug('Knowledge base setup completed.');
-    }
-
-    return { reindex: true, currentInferenceId, nextInferenceId };
+  setupKnowledgeBase = async (nextInferenceId: string, waitUntilComplete: boolean = false) => {
+    return this.dependencies.knowledgeBaseService.setupKnowledgeBase(
+      nextInferenceId,
+      waitUntilComplete
+    );
   };
 
   warmupKbModel = (inferenceId: string) => {

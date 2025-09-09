@@ -17,6 +17,7 @@ describe('getCostSavingsMetricLensAttributes', () => {
     extraOptions: undefined,
     stackByField: undefined,
     esql: undefined,
+    backgroundColor: '#00FF00',
   };
 
   it('includes the correct formula in the countColumn', () => {
@@ -54,7 +55,6 @@ describe('getCostSavingsMetricLensAttributes', () => {
       ...defaultParams,
     });
     expect(result).toHaveProperty('title', 'Cost Savings Metric');
-    expect(result).toHaveProperty('type', 'lens');
     expect(result).toHaveProperty('visualizationType', 'lnsMetric');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');

@@ -9,13 +9,11 @@ import React from 'react';
 import { EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useConversationTitle } from '../../hooks/use_conversation';
 
-interface ConversationTitleProps {
-  title: string;
-}
-
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({ title }) => {
+export const ConversationTitle: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const { title, isLoading } = useConversationTitle();
 
   const labels = {
     ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
@@ -37,9 +35,11 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ title }) =
 
   return (
     <EuiPageHeaderSection css={sectionStyles}>
-      <EuiTitle aria-label={labels.ariaLabel} size="xxs">
-        <h1>{title || labels.newConversationDisplay}</h1>
-      </EuiTitle>
+      {!isLoading && (
+        <EuiTitle aria-label={labels.ariaLabel} size="xxs">
+          <h1>{title || labels.newConversationDisplay}</h1>
+        </EuiTitle>
+      )}
     </EuiPageHeaderSection>
   );
 };

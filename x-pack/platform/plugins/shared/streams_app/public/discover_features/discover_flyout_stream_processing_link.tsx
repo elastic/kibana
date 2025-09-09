@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { StreamsAppLocator } from '../../common/locators';
+import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
@@ -39,7 +39,7 @@ export function DiscoverFlyoutStreamProcessingLink({
 
   const href = locator.getRedirectUrl({
     name: value,
-    managementTab: 'enrich',
+    managementTab: 'processing',
     pageState: {
       v: 1,
       dataSources: [

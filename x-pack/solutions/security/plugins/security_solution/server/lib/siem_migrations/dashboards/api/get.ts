@@ -11,9 +11,9 @@ import type { GetDashboardMigrationResponse } from '../../../../../common/siem_m
 import { GetDashboardMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/utils/authz';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { withLicense } from '../../common/utils/with_license';
+import { authz } from '../../common/api/util/authz';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { withLicense } from '../../common/api/util/with_license';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemDashboardMigrationsGetRoute = (
@@ -37,7 +37,10 @@ export const registerSiemDashboardMigrationsGetRoute = (
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<GetDashboardMigrationResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'dashboards'
+          );
 
           const { migration_id: migrationId } = req.params;
           try {

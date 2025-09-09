@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import type { ExpressionColor } from '@elastic/eui/src/components/expression/expression';
 import type { EuiFacetGroupLayout } from '@elastic/eui/src/components/facet/facet_group';
-import { ListTypeText, ViewerStatus } from '../types';
+import type { ListTypeText } from '../types';
+import { ViewerStatus } from '../types';
 import * as i18n from '../translations';
 import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
 

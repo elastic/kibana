@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedValue } from '@kbn/data-plugin/common';
+import type { SerializedValue } from '@kbn/data-plugin/common';
 
 /**
  * A rule that matches based on raw values

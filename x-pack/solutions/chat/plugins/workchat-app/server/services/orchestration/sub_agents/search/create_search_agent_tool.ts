@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Logger } from '@kbn/core/server';
-import { ToolsProvider } from '../../mcp_gateway';
+import type { ToolsProvider } from '../../mcp_gateway';
 import { getSearchAgentCaller } from './run_search_agent';
 
 export const createSearchAgentTool = ({
