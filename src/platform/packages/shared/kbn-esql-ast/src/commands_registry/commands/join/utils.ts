@@ -111,11 +111,10 @@ export const getFieldSuggestions = async (
     }),
   ]);
 
-  const supportsControls = context?.supportsControls ?? false;
   const joinFields = buildFieldsDefinitionsWithMetadata(
     lookupIndexFields.filter((f) => !ignoredFields.includes(f.name)),
     [],
-    { supportsControls },
+    { supportsControls: false }, // Controls are being added as part of the sourceFields, no need to add them again as joinFields.
     context?.variables
   );
 
@@ -123,9 +122,6 @@ export const getFieldSuggestions = async (
   const union = suggestionUnion(sourceFields, joinFields);
 
   for (const commonField of intersection) {
-    if (commonField.command?.id === 'esql.control.fields.create') {
-      continue;
-    }
     commonField.sortText = '1';
     commonField.documentation = {
       value: i18n.translate('kbn-esql-ast.esql.autocomplete.join.sharedField', {
