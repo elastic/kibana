@@ -21,6 +21,7 @@ import {
   getConversationMock,
   getAppendConversationMessagesSchemaMock,
   getQueryConversationParams,
+  getEsConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
 import { transformESToConversations } from './transforms';
 import { getUpdateScript } from './helpers';
@@ -63,36 +64,8 @@ const createMockMessage = (overrides?: Partial<Message>): Message => {
   };
 };
 
-// Create EsConversationSchema mock based on existing patterns
-const createMockEsConversation = (): EsConversationSchema => ({
-  '@timestamp': '2020-04-20T15:25:31.830Z',
-  created_at: '2020-04-20T15:25:31.830Z',
-  title: 'title-1',
-  updated_at: '2020-04-20T15:25:31.830Z',
-  messages: [],
-  id: '1',
-  namespace: 'default',
-  exclude_from_last_conversation_storage: false,
-  api_config: {
-    action_type_id: '.gen-ai',
-    connector_id: 'c1',
-    default_system_prompt_id: 'prompt-1',
-    model: 'test',
-    provider: 'Azure OpenAI',
-  },
-  category: 'assistant',
-  users: [
-    {
-      id: '1111',
-      name: 'elastic',
-    },
-  ],
-  created_by: {
-    id: '1111',
-    name: 'elastic',
-  },
-  replacements: undefined,
-});
+// Use shared mock from conversations_schema.mock.ts
+const createMockEsConversation = (): EsConversationSchema => getEsConversationSchemaMock();
 
 const createSuccessfulBulkResponse = (
   docsUpdated: EsConversationSchema[]
