@@ -135,96 +135,27 @@ const useWorkflowJsonSchema = () => {
   // Generate JSON schema dynamically to include all current connectors
   return useMemo(() => {
     try {
-      // Expose schema to global scope for debugging if needed
-      (window as any).WORKFLOW_ZOD_SCHEMA = WORKFLOW_ZOD_SCHEMA;
-
       const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
-
-      // Post-process to improve type field descriptions in Monaco tooltips
-      return improveTypeFieldDescriptions(jsonSchema) ?? null;
+      
+      // Post-process to improve validation messages and reduce duplicate suggestions
+      const processedSchema = improveTypeFieldDescriptions(jsonSchema);
+      
+      return processedSchema ?? null;
     } catch (error) {
+      console.error('🚨 Schema generation failed:', error);
       return null;
     }
   }, []);
 };
 
 /**
- * Improve the JSON schema to show better tooltips for the type field
- * Instead of showing all 568 connector types, show grouped descriptions
+ * Since we implemented custom error formatting at the validation level,
+ * we no longer need to modify the schema. The full validation works with 
+ * user-friendly error messages.
  */
 function improveTypeFieldDescriptions(schema: any): any {
-  const processSchema = (obj: any, path: string[] = []): any => {
-    if (!obj || typeof obj !== 'object') return obj;
-
-    // Check if we're processing a step definition with a 'with' property
-    if (obj.properties?.type && obj.properties?.with) {
-      // Replace the 'with' schema with a generic one that has NO properties
-      obj.properties.with = {
-        type: 'object',
-        description: 'Connector parameters - use autocomplete for available options',
-        additionalProperties: true,
-        // NO properties defined here - this prevents monaco-yaml from suggesting anything
-      };
-    }
-
-    // Look for the type field in steps
-    if (obj.properties?.type && path.includes('steps')) {
-      // Remove enum/const values to prevent Monaco from suggesting them
-      delete obj.properties.type.enum;
-      delete obj.properties.type.const;
-      delete obj.properties.type.oneOf;
-
-      // Just define it as a string with a pattern
-      obj.properties.type = {
-        type: 'string',
-        description: 'Connector type for this workflow step',
-        // Don't include enum values here
-      };
-    }
-
-    // Handle oneOf arrays that contain type definitions
-    if (obj.oneOf && Array.isArray(obj.oneOf) && path.includes('steps')) {
-      // Replace the complex oneOf with a simpler schema
-      return {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            description: 'Connector type for this workflow step',
-            // No enum values
-          },
-          with: {
-            type: 'object',
-            description:
-              'Parameters for the connector - press Ctrl+Space (Ctrl+I on Mac) to see all available options',
-            additionalProperties: true,
-          },
-          name: {
-            type: 'string',
-            description: 'Optional step name',
-          },
-        },
-        required: ['type'],
-        additionalProperties: false,
-      };
-    }
-
-    // Recursively process
-    if (Array.isArray(obj)) {
-      return obj.map((item, index) => processSchema(item, [...path, index.toString()]));
-    } else if (obj && typeof obj === 'object') {
-      const result: any = {};
-      for (const [key, value] of Object.entries(obj)) {
-        result[key] = processSchema(value, [...path, key]);
-      }
-      return result;
-    }
-
-    return obj;
-  };
-
-  const processedSchema = processSchema(schema);
-  return processedSchema;
+  // Return schema as-is - custom error formatter handles user experience
+  return schema;
 }
 
 export interface WorkflowYAMLEditorProps {
@@ -288,6 +219,8 @@ export const WorkflowYAMLEditor = ({
   useEffect(() => {
     stepExecutionsRef.current = stepExecutions;
   }, [stepExecutions]);
+
+  
   // REMOVED: highlightStepDecorationCollectionRef - now handled by UnifiedActionsProvider
   // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
@@ -528,23 +461,6 @@ export const WorkflowYAMLEditor = ({
     }
   }, [readOnly, isEditorMounted, changeSideEffects]);
 
-  // Update providers when YAML document changes
-  useEffect(() => {
-    if (isEditorMounted && editorRef.current && yamlDocument && unifiedProvidersRef.current) {
-      console.log('WorkflowYAMLEditor: Updating providers with YAML document');
-
-      // Step execution provider updates will be handled separately when needed
-
-      // The unified actions provider is already created, it will automatically
-      // respond to YAML document changes through the getYamlDocument callback
-    }
-  }, [isEditorMounted, yamlDocument]);
-
-  // REMOVED: Old decoration-based highlighting - now handled by UnifiedActionsProvider
-  // useEffect(() => {
-  //   // This functionality is now handled by UnifiedActionsProvider for better consistency
-  // }, [highlightStep, isEditorMounted, yamlDocument]);
-
   // Step execution provider - managed through provider architecture
   useEffect(() => {
     if (!isEditorMounted || !editorRef.current) {
@@ -757,7 +673,8 @@ export const WorkflowYAMLEditor = ({
         const connectorType = typePair.value.value;
 
         // Skip decoration for very short connector types to avoid false matches
-        if (connectorType.length < 3) {
+        // allow "if" as a special case
+        if (connectorType.length < 3 && connectorType !== 'if') {
           continue; // Skip this iteration
         }
 
@@ -1021,7 +938,7 @@ export const WorkflowYAMLEditor = ({
           top: -1px;
         }
 
-        /* SHADOW ICONS */
+        /* FOR SHADOW ICONS */
 
         .connector-inline-highlight.connector-elasticsearch::after {
           background-image: url("data:image/svg+xml;base64,PHN2ZyBkYXRhLXR5cGU9ImxvZ29FbGFzdGljIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSIgdmlld0JveD0iMCAwIDMyIDMyIj4KPHBhdGggZD0iTTI3LjU2NDggMTEuMjQyNUMzMi42NjU0IDEzLjE4MiAzMi40MzczIDIwLjYzNzggMjcuMzE5NyAyMi4zNjk0TDI3LjE1NzYgMjIuNDI0MUwyNi45OTA2IDIyLjM4NTFMMjEuNzEwMyAyMS4xNDY4TDIxLjQ0MjcgMjEuMDg0M0wyMS4zMTU4IDIwLjg0MDFMMTkuOTE1NCAxOC4xNDk3TDE5LjY5ODYgMTcuNzMyN0wyMC4wNTExIDE3LjQyMjJMMjYuOTU1NCAxMS4zNTI4TDI3LjIyNjkgMTEuMTEzNkwyNy41NjQ4IDExLjI0MjVaIiBmaWxsPSIjMEI2NEREIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNMjIuMDQ3MiAyMS4yMzlMMjYuODQ3IDIyLjM2NEwyNy4xNjI1IDIyLjQzODJMMjcuMjczOCAyMi43NDE5TDI3LjMzOTIgMjIuOTMyNEMyNy45NjE1IDI0Ljg5NjIgMjcuMDc5NyAyNi43MTE3IDI1LjY4NjkgMjcuNzI5MkMyNC4yNTI4IDI4Ljc3NjcgMjIuMTc3NSAyOS4wNDg4IDIwLjUwNTIgMjcuNzUwN0wyMC4yMTUyIDI3LjUyNjFMMjAuMjgzNiAyNy4xNjQ4TDIxLjMyMDcgMjEuNzEwN0wyMS40Mzc5IDIxLjA5NjRMMjIuMDQ3MiAyMS4yMzlaIiBmaWxsPSIjOUFEQzMwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNNS4wMTA3NCA5LjYyOTk3TDEwLjI3NzMgMTAuODg0OUwxMC41NTk2IDEwLjk1MjJMMTAuNjgxNiAxMS4yMTU5TDExLjkxNyAxMy44NjUzTDEyLjEwMzUgMTQuMjY2N0wxMS43NzY0IDE0LjU2MzZMNS4wNDI5NyAyMC42NjQyTDQuNzcwNTEgMjAuOTEyMkw0LjQyNTc4IDIwLjc4MDRDMS45Mzg5IDE5LjgzMDMgMC43MjA0MDcgMTcuNDU1OCAwLjc1MTk1MyAxNS4xNTM0QzAuNzgzNjg2IDEyLjg0NTMgMi4wNzMwNSAxMC41MDk0IDQuNjgzNTkgOS42NDQ2Mkw0Ljg0NTcgOS41OTA5MUw1LjAxMDc0IDkuNjI5OTdaIiBmaWxsPSIjMUJBOUY1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8cGF0aCBkPSJNNi4yODEwMSA0LjMxOTgyQzcuNjk3MjMgMy4yMzk0IDkuNzYxMzUgMi45MzM0IDExLjUwMjcgNC4yNTE0NkwxMS43OTk2IDQuNDc3MDVMMTEuNzI5MiA0Ljg0MzI2TDEwLjY3NzUgMTAuMzE2OUwxMC41NTkzIDEwLjkzMjFMOS45NDk5NSAxMC43ODc2TDUuMTUwMTUgOS42NTA4OEw0LjgzMzc0IDkuNTc1NjhMNC43MjMzOSA5LjI3MDAyQzQuMDE1MDcgNy4zMDI5NSA0Ljg3MjYzIDUuMzk0MjkgNi4yODEwMSA0LjMxOTgyWiIgZmlsbD0iI0YwNEU5OCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPHBhdGggZD0iTTEyLjQ2NjEgMTQuNDMzMUwxOS40OTYzIDE3LjY0NEwxOS42ODM4IDE3LjczTDE5Ljc3ODYgMTcuOTEyNkwyMS4zMzQyIDIwLjg5NzlMMjEuNDI5OSAyMS4wODI1TDIxLjM5MDkgMjEuMjg3NkwyMC4yMjQ5IDI3LjM4OTJMMjAuMjAxNCAyNy41MTEyTDIwLjEzMzEgMjcuNjEzOEMxNy40NTM0IDMxLjU3MiAxMy4yMzA1IDMyLjMyNDUgOS44NjQ1IDMwLjg3MzVDNi41MDkzMiAyOS40MjcyIDQuMDMwNyAyNS44MDQ0IDQuNzM5NSAyMS4xMzgyTDQuNzcxNzMgMjAuOTI3Mkw0LjkyOTkzIDIwLjc4MzdMMTEuODEzNyAxNC41MzQ3TDEyLjEwNjcgMTQuMjY5TDEyLjQ2NjEgMTQuNDMzMVoiIGZpbGw9IiMwMkJDQjciIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS4yIi8+CjxwYXRoIGQ9Ik0xMS44OTIzIDQuNDEwMjJDMTQuNDM4MSAwLjY3NjQyNiAxOC43NDEgMC4xMDUzMDMgMjIuMTMzNSAxLjUzOTEyQzI1LjUyNjMgMi45NzMwMiAyOC4xMjMxIDYuNDU5NzkgMjcuMjM2MSAxMC45MDI0TDI3LjE5NyAxMS4xMDE2TDI3LjA0MzcgMTEuMjM1NEwxOS45NzgzIDE3LjQ0ODNMMTkuNjg1MyAxNy43MDYxTDE5LjMzMTggMTcuNTQzTDEyLjMyOTggMTQuMzMyMUwxMi4xMjg3IDE0LjI0MDNMMTIuMDM0OSAxNC4wMzkxTDEwLjY1NSAxMS4wNTE4TDEwLjU3NCAxMC44NzUxTDEwLjYxMTEgMTAuNjg0NkwxMS43OTk2IDQuNjMyODdMMTEuODIzIDQuNTExNzhMMTEuODkyMyA0LjQxMDIyWiIgZmlsbD0iI0ZFQzUxNCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPC9zdmc+");
@@ -1053,6 +970,42 @@ export const WorkflowYAMLEditor = ({
           background-repeat: no-repeat;
         }
         
+        .connector-inline-highlight.connector-http::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDEpIj4KICAgIDxwYXRoIGZpbGw9IiNDNzNBNjMiIGQ9Ik0xNC45NDI1LDEyLjU2Mjg3NSBDMTMuNjE2MjUsMTQuNzkyMzc1IDEyLjM0NTYyNSwxNi45NTEzNzUgMTEuMDQ4NSwxOS4wOTQxMjUgQzEwLjcxNTM3NSwxOS42NDQyNSAxMC41NTA1LDIwLjA5MjM3NSAxMC44MTY2MjUsMjAuNzkxNjI1IEMxMS41NTEzNzUsMjIuNzIzMzc1IDEwLjUxNDg3NSwyNC42MDMyNSA4LjU2Njg3NSwyNS4xMTM1IEM2LjcyOTc1LDI1LjU5NDg3NSA0LjkzOTg3NSwyNC4zODc1IDQuNTc1Mzc1LDIyLjQyMDYyNSBDNC4yNTIzNzUsMjAuNjc5NzUgNS42MDMzNzUsMTguOTczMTI1IDcuNTIyODc1LDE4LjcwMSBDNy42ODM2MjUsMTguNjc4IDcuODQ3ODc1LDE4LjY3NTM3NSA4LjExODEyNSwxOC42NTUxMjUgTDExLjAzNzg3NSwxMy43NTkxMjUgQzkuMjAxNSwxMS45MzMxMjUgOC4xMDg1LDkuNzk4NzUgOC4zNTAzNzUsNy4xNTM3NSBDOC41MjEzNzUsNS4yODQxMjUgOS4yNTY2MjUsMy42NjgzNzUgMTAuNjAwMzc1LDIuMzQ0MTI1IEMxMy4xNzQxMjUsLTAuMTkxODc1IDE3LjEwMDYyNSwtMC42MDI1IDIwLjEzMTEyNSwxLjM0NCBDMjMuMDQxNjI1LDMuMjEzNzUgMjQuMzc0NjI1LDYuODU1NzUgMjMuMjM4Mzc1LDkuOTcyODc1IEMyMi4zODE2MjUsOS43NDA2MjUgMjEuNTE4ODc1LDkuNTA2Mzc1IDIwLjU3MDUsOS4yNDkxMjUgQzIwLjkyNzI1LDcuNTE2IDIwLjY2MzM3NSw1Ljk1OTc1IDE5LjQ5NDUsNC42MjY1IEMxOC43MjIyNSwzLjc0NjI1IDE3LjczMTI1LDMuMjg0ODc1IDE2LjYwNDUsMy4xMTQ4NzUgQzE0LjM0NTUsMi43NzM2MjUgMTIuMTI3NjI1LDQuMjI0ODc1IDExLjQ2OTUsNi40NDIxMjUgQzEwLjcyMjUsOC45NTgzNzUgMTEuODUzMTI1LDExLjAxNCAxNC45NDI1LDEyLjU2MyBMMTQuOTQyNSwxMi41NjI4NzUgWiIvPgogICAgPHBhdGggZmlsbD0iIzRCNEI0QiIgZD0iTTE4LjczMDEyNSw5LjkyNjI1IEMxOS42NjQ1LDExLjU3NDYyNSAyMC42MTMyNSwxMy4yNDc4NzUgMjEuNTUzNSwxNC45MDU3NSBDMjYuMzA2LDEzLjQzNTM3NSAyOS44ODkyNSwxNi4wNjYyNSAzMS4xNzQ3NSwxOC44ODI4NzUgQzMyLjcyNzUsMjIuMjg1MjUgMzEuNjY2LDI2LjMxNSAyOC42MTY2MjUsMjguNDE0MTI1IEMyNS40ODY2MjUsMzAuNTY4ODc1IDIxLjUyODI1LDMwLjIwMDc1IDE4Ljc1NTEyNSwyNy40MzI3NSBDMTkuNDYxODc1LDI2Ljg0MTEyNSAyMC4xNzIxMjUsMjYuMjQ2ODc1IDIwLjkzMSwyNS42MTIgQzIzLjY3LDI3LjM4NiAyNi4wNjU2MjUsMjcuMzAyNSAyNy44NDQxMjUsMjUuMjAxNzUgQzI5LjM2MDc1LDIzLjQwOTYyNSAyOS4zMjc4NzUsMjAuNzM3NSAyNy43NjcyNSwxOC45ODMgQzI1Ljk2NjI1LDE2Ljk1ODM3NSAyMy41NTM4NzUsMTYuODk2NjI1IDIwLjYzNzg3NSwxOC44NDAxMjUgQzE5LjQyODI1LDE2LjY5NDEyNSAxOC4xOTc2MjUsMTQuNTY1MjUgMTcuMDI2MjUsMTIuNDAzNzUgQzE2LjYzMTI1LDExLjY3NTI1IDE2LjE5NTI1LDExLjI1MjUgMTUuMzA1LDExLjA5ODM3NSBDMTMuODE4Mzc1LDEwLjg0MDYyNSAxMi44NTg2MjUsOS41NjQgMTIuODAxLDguMTMzNzUgQzEyLjc0NDM3NSw2LjcxOTI1IDEzLjU3Nzc1LDUuNDQwNjI1IDE0Ljg4MDI1LDQuOTQyNSBDMTYuMTcwNSw0LjQ0ODg3NSAxNy42ODQ2MjUsNC44NDcyNSAxOC41NTI1LDUuOTQ0MjUgQzE5LjI2MTc1LDYuODQwNSAxOS40ODcxMjUsNy44NDkyNSAxOS4xMTM4NzUsOC45NTQ2MjUgQzE5LjAxMDEyNSw5LjI2Mjg3NSAxOC44NzU3NSw5LjU2MTEyNSAxOC43MzAxMjUsOS45MjYzNzUgTDE4LjczMDEyNSw5LjkyNjI1IFoiLz4KICAgIDxwYXRoIGZpbGw9IiM0QTRBNEEiIGQ9Ik0yMC45NjMzNzUsMjMuNDAxMjUgTDE1LjI0MjEyNSwyMy40MDEyNSBDMTQuNjkzNzUsMjUuNjU2NzUgMTMuNTA5MjUsMjcuNDc3NzUgMTEuNDY4Mzc1LDI4LjYzNTc1IEM5Ljg4MTc1LDI5LjUzNTc1IDguMTcxNzUsMjkuODQwODc1IDYuMzUxNzUsMjkuNTQ3IEMzLjAwMDc1LDI5LjAwNjYyNSAwLjI2MDc1LDI1Ljk5IDAuMDE5NSwyMi41OTMyNSBDLTAuMjUzNSwxOC43NDUyNSAyLjM5MTM3NSwxNS4zMjQ4NzUgNS45MTY3NSwxNC41NTY2MjUgQzYuMTYwMTI1LDE1LjQ0MDUgNi40MDYxMjUsMTYuMzMyODc1IDYuNjQ5NSwxNy4yMTQ2MjUgQzMuNDE1LDE4Ljg2NDg3NSAyLjI5NTUsMjAuOTQ0MTI1IDMuMjAwNzUsMjMuNTQ0MTI1IEMzLjk5NzYyNSwyNS44MzIxMjUgNi4yNjEyNSwyNy4wODYyNSA4LjcxOTEyNSwyNi42MDEyNSBDMTEuMjI5MTI1LDI2LjEwNiAxMi40OTQ2MjUsMjQuMDIgMTIuMzQwMTI1LDIwLjY3MjI1IEMxNC43MTk2MjUsMjAuNjcyMjUgMTcuMTAxMTI1LDIwLjY0NzYyNSAxOS40ODA4NzUsMjAuNjg0Mzc1IEMyMC40MTAxMjUsMjAuNjk5IDIxLjEyNzUsMjAuNjAyNjI1IDIxLjgyNzUsMTkuNzgzMzc1IEMyMi45OCwxOC40MzUzNzUgMjUuMTAxMzc1LDE4LjU1NyAyNi4zNDI2MjUsMTkuODMwMTI1IEMyNy42MTExMjUsMjEuMTMxMjUgMjcuNTUwMzc1LDIzLjIyNDc1IDI2LjIwOCwyNC40NzEgQzI0LjkxMjg3NSwyNS42NzM1IDIyLjg2Njc1LDI1LjYwOTI1IDIxLjY1NSwyNC4zMTM1IEMyMS40MDYsMjQuMDQ2NSAyMS4yMDk3NSwyMy43MjkzNzUgMjAuOTYzMzc1LDIzLjQwMTI1IFoiLz4KICA8L2c+Cjwvc3ZnPgo=");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .connector-inline-highlight.connector-foreach::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yIDhhNS45OCA1Ljk4IDAgMCAwIDEuNzU3IDQuMjQzQTUuOTggNS45OCAwIDAgMCA4IDE0djFhNi45OCA2Ljk4IDAgMCAxLTQuOTUtMi4wNUE2Ljk4IDYuOTggMCAwIDEgMSA4YzAtMS43OS42ODMtMy41OCAyLjA0OC00Ljk0N2wuMDA0LS4wMDQuMDE5LS4wMkwzLjEgM0gxVjJoNHY0SDRWMy41MjVhNi41MSA2LjUxIDAgMCAwLS4yMi4yMWwtLjAxMy4wMTMtLjAwMy4wMDItLjAwNy4wMDdBNS45OCA1Ljk4IDAgMCAwIDIgOFptMTAuMjQzLTQuMjQzQTUuOTggNS45OCAwIDAgMCA4IDJWMWE2Ljk4IDYuOTggMCAwIDEgNC45NSAyLjA1QTYuOTggNi45OCAwIDAgMSAxNSA4YTYuOTggNi45OCAwIDAgMS0yLjA0NyA0Ljk0N2wtLjAwNS4wMDQtLjAxOC4wMi0uMDMuMDI5SDE1djFoLTR2LTRoMXYyLjQ3NWE2Ljc0NCA2Ljc0NCAwIDAgMCAuMjItLjIxbC4wMTMtLjAxMy4wMDMtLjAwMi4wMDctLjAwN0E1Ljk4IDUuOTggMCAwIDAgMTQgOGE1Ljk4IDUuOTggMCAwIDAtMS43NTctNC4yNDNaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .connector-inline-highlight.connector-if::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNNSwxMC4wMzc3MTg4IEM1LjYzNTI1ODUyLDkuMzg5NDQzNzcgNi41MjA2NTU5MSw4Ljk4NzIxMDE2IDcuNSw4Ljk4NzIxMDE2IEw5LjUsOC45ODcyMTAxNiBDMTAuNzMwNzc2NSw4Ljk4NzIxMDE2IDExLjc1MzgyNCw4LjA5NzgxNjE1IDExLjk2MTUwMTMsNi45MjY2NjkxNiBDMTEuMTE4NDg5Miw2LjY5MTU0NjExIDEwLjUsNS45MTgwMDA5OSAxMC41LDUgQzEwLjUsMy44OTU0MzA1IDExLjM5NTQzMDUsMyAxMi41LDMgQzEzLjYwNDU2OTUsMyAxNC41LDMuODk1NDMwNSAxNC41LDUgQzE0LjUsNS45NDI1NDI2MiAxMy44NDc5OTk3LDYuNzMyODAyNDEgMTIuOTcwNDE0Miw2Ljk0NDM2NDM4IEMxMi43NDY0MzcxLDguNjYxMzUwMDIgMTEuMjc4MDU0Miw5Ljk4NzIxMDE2IDkuNSw5Ljk4NzIxMDE2IEw3LjUsOS45ODcyMTAxNiBDNi4yNjA2ODU5Miw5Ljk4NzIxMDE2IDUuMjMxOTkyODYsMTAuODg4OTg1OSA1LjAzNDI5NDgxLDEyLjA3MjE2MzMgQzUuODc5NDUzODgsMTIuMzA1ODgzOCA2LjUsMTMuMDgwNDczNyA2LjUsMTQgQzYuNSwxNS4xMDQ1Njk1IDUuNjA0NTY5NSwxNiA0LjUsMTYgQzMuMzk1NDMwNSwxNiAyLjUsMTUuMTA0NTY5NSAyLjUsMTQgQzIuNSwxMy4wNjgwODAzIDMuMTM3Mzg2MzksMTIuMjg1MDMwMSA0LDEyLjA2MzAwODcgTDQsMy45MzY5OTEyNiBDMy4xMzczODYzOSwzLjcxNDk2OTg2IDIuNSwyLjkzMTkxOTcxIDIuNSwyIEMyLjUsMC44OTU0MzA1IDMuMzk1NDMwNSwwIDQuNSwwIEM1LjYwNDU2OTUsMCA2LjUsMC44OTU0MzA1IDYuNSwyIEM2LjUsMi45MzE5MTk3MSA1Ljg2MjYxMzYxLDMuNzE0OTY5ODYgNSwzLjkzNjk5MTI2IEw1LDEwLjAzNzcxODggWiBNNC41LDMgQzUuMDUyMjg0NzUsMyA1LjUsMi41NTIyODQ3NSA1LjUsMiBDNS41LDEuNDQ3NzE1MjUgNS4wNTIyODQ3NSwxIDQuNSwxIEMzLjk0NzcxNTI1LDEgMy41LDEuNDQ3NzE1MjUgMy41LDIgQzMuNSwyLjU1MjI4NDc1IDMuOTQ3NzE1MjUsMyA0LjUsMyBaIE00LjUsMTUgQzUuMDUyMjg0NzUsMTUgNS41LDE0LjU1MjI4NDcgNS41LDE0IEM1LjUsMTMuNDQ3NzE1MyA1LjA1MjI4NDc1LDEzIDQuNSwxMyBDMy45NDc3MTUyNSwxMyAzLjUsMTMuNDQ3NzE1MyAzLjUsMTQgQzMuNSwxNC41NTIyODQ3IDMuOTQ3NzE1MjUsMTUgNC41LDE1IFogTTEyLjUsNiBDMTMuMDUyMjg0Nyw2IDEzLjUsNS41NTIyODQ3NSAxMy41LDUgQzEzLjUsNC40NDc3MTUyNSAxMy4wNTIyODQ3LDQgMTIuNSw0IEMxMS45NDc3MTUzLDQgMTEuNSw0LjQ0NzcxNTI1IDExLjUsNSBDMTEuNSw1LjU1MjI4NDc1IDExLjk0NzcxNTMsNiAxMi41LDYgWiIvPgo8L3N2Zz4K");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .connector-inline-highlight.connector-parallel::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNNSAyYTEgMSAwIDAwLTEgMXYxMGExIDEgMCAxMDIgMFYzYTEgMSAwIDAwLTEtMXptNiAwYTEgMSAwIDAwLTEgMXYxMGExIDEgMCAxMDIgMFYzYTEgMSAwIDAwLTEtMXoiIC8+Cjwvc3ZnPg==");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .connector-inline-highlight.connector-merge::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMC4zNTQgOC4zNTQgMTQuMjA3IDQuNSAxMC4zNTMuNjQ2bC0uNzA3LjcwOEwxMi4yOTMgNEgydjFoMTAuMjkzTDkuNjQ2IDcuNjQ2bC43MDcuNzA4Wm0tNC43MDcgN0wxLjc5MyAxMS41bDMuODU0LTMuODU0LjcwNy43MDhMMy43MDcgMTFIMTR2MUgzLjcwN2wyLjY0NyAyLjY0Ni0uNzA3LjcwOFoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPgo8L3N2Zz4K");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .connector-inline-highlight.connector-wait::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOC41IDcuNVY0aC0xdjQuNUgxMnYtMUg4LjVaIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTUgOEE3IDcgMCAxIDEgMSA4YTcgNyAwIDAgMSAxNCAwWm0tMSAwQTYgNiAwIDEgMSAyIDhhNiA2IDAgMCAxIDEyIDBaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
         /* After content icons */
         .connector-decoration {
           margin-left: 4px;
@@ -1101,7 +1054,6 @@ export const WorkflowYAMLEditor = ({
       suggest: {
         snippetsPreventQuickSuggestions: false,
         showSnippets: true,
-        // Add these to show suggestions after 1 character
         triggerCharacters: true,
         minWordLength: 1, // Show suggestions after 1 character
         filterGraceful: true, // Better filtering
@@ -1496,7 +1448,7 @@ const componentStyles = {
         boxShadow: `0 1px 3px rgba(0, 120, 212, 0.1)`,
       },
 
-      // Custom icons for Monaco autocomplete
+      // Custom icons for Monaco autocomplete (SUGGESTIONS)
       // Slack
       '.codicon-symbol-event:before': {
         content: '" "',
@@ -1536,7 +1488,7 @@ const componentStyles = {
         width: '16px',
         height: '16px',
         backgroundImage:
-          'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTYuNSA0QzUuMTE5IDQgNCA1LjExOSA0IDYuNUM0IDcuODgxIDUuMTE5IDkgNi41IDlIMTBDMTEuMzgxIDkgMTIuNSA3Ljg4MSAxMi41IDYuNUMxMi41IDUuMTE5IDExLjM4MSA0IDEwIDRINi41Wk02LjUgNUgxMEMxMC44MjggNSAxMS41IDUuNjcyIDExLjUgNi41QzExLjUgNy4zMjggMTAuODI4IDggMTAgOEg2LjVDNS42NzIgOCA1IDcuMzI4IDUgNi41QzUgNS42NzIgNS42NzIgNSA2LjUgNVoiIGZpbGw9IiNGRjZDMzciLz4KPHBhdGggZD0iTTYgN0M2IDguMzgxIDcuMTE5IDkuNSA4LjUgOS41SDEyQzEzLjM4MSA5LjUgMTQuNSA4LjM4MSAxNC41IDdDMTQuNSA1LjYxOSAxMy4zODEgNC41IDEyIDQuNUg4LjVDNy4xMTkgNC41IDYgNS42MTkgNiA3WiIgZmlsbD0iIzAwN0NGRiIgb3BhY2l0eT0iMC43Ii8+PC9zdmc+")',
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDEpIj4KICAgIDxwYXRoIGZpbGw9IiNDNzNBNjMiIGQ9Ik0xNC45NDI1LDEyLjU2Mjg3NSBDMTMuNjE2MjUsMTQuNzkyMzc1IDEyLjM0NTYyNSwxNi45NTEzNzUgMTEuMDQ4NSwxOS4wOTQxMjUgQzEwLjcxNTM3NSwxOS42NDQyNSAxMC41NTA1LDIwLjA5MjM3NSAxMC44MTY2MjUsMjAuNzkxNjI1IEMxMS41NTEzNzUsMjIuNzIzMzc1IDEwLjUxNDg3NSwyNC42MDMyNSA4LjU2Njg3NSwyNS4xMTM1IEM2LjcyOTc1LDI1LjU5NDg3NSA0LjkzOTg3NSwyNC4zODc1IDQuNTc1Mzc1LDIyLjQyMDYyNSBDNC4yNTIzNzUsMjAuNjc5NzUgNS42MDMzNzUsMTguOTczMTI1IDcuNTIyODc1LDE4LjcwMSBDNy42ODM2MjUsMTguNjc4IDcuODQ3ODc1LDE4LjY3NTM3NSA4LjExODEyNSwxOC42NTUxMjUgTDExLjAzNzg3NSwxMy43NTkxMjUgQzkuMjAxNSwxMS45MzMxMjUgOC4xMDg1LDkuNzk4NzUgOC4zNTAzNzUsNy4xNTM3NSBDOC41MjEzNzUsNS4yODQxMjUgOS4yNTY2MjUsMy42NjgzNzUgMTAuNjAwMzc1LDIuMzQ0MTI1IEMxMy4xNzQxMjUsLTAuMTkxODc1IDE3LjEwMDYyNSwtMC42MDI1IDIwLjEzMTEyNSwxLjM0NCBDMjMuMDQxNjI1LDMuMjEzNzUgMjQuMzc0NjI1LDYuODU1NzUgMjMuMjM4Mzc1LDkuOTcyODc1IEMyMi4zODE2MjUsOS43NDA2MjUgMjEuNTE4ODc1LDkuNTA2Mzc1IDIwLjU3MDUsOS4yNDkxMjUgQzIwLjkyNzI1LDcuNTE2IDIwLjY2MzM3NSw1Ljk1OTc1IDE5LjQ5NDUsNC42MjY1IEMxOC43MjIyNSwzLjc0NjI1IDE3LjczMTI1LDMuMjg0ODc1IDE2LjYwNDUsMy4xMTQ4NzUgQzE0LjM0NTUsMi43NzM2MjUgMTIuMTI3NjI1LDQuMjI0ODc1IDExLjQ2OTUsNi40NDIxMjUgQzEwLjcyMjUsOC45NTgzNzUgMTEuODUzMTI1LDExLjAxNCAxNC45NDI1LDEyLjU2MyBMMTQuOTQyNSwxMi41NjI4NzUgWiIvPgogICAgPHBhdGggZmlsbD0iIzRCNEI0QiIgZD0iTTE4LjczMDEyNSw5LjkyNjI1IEMxOS42NjQ1LDExLjU3NDYyNSAyMC42MTMyNSwxMy4yNDc4NzUgMjEuNTUzNSwxNC45MDU3NSBDMjYuMzA2LDEzLjQzNTM3NSAyOS44ODkyNSwxNi4wNjYyNSAzMS4xNzQ3NSwxOC44ODI4NzUgQzMyLjcyNzUsMjIuMjg1MjUgMzEuNjY2LDI2LjMxNSAyOC42MTY2MjUsMjguNDE0MTI1IEMyNS40ODY2MjUsMzAuNTY4ODc1IDIxLjUyODI1LDMwLjIwMDc1IDE4Ljc1NTEyNSwyNy40MzI3NSBDMTkuNDYxODc1LDI2Ljg0MTEyNSAyMC4xNzIxMjUsMjYuMjQ2ODc1IDIwLjkzMSwyNS42MTIgQzIzLjY3LDI3LjM4NiAyNi4wNjU2MjUsMjcuMzAyNSAyNy44NDQxMjUsMjUuMjAxNzUgQzI5LjM2MDc1LDIzLjQwOTYyNSAyOS4zMjc4NzUsMjAuNzM3NSAyNy43NjcyNSwxOC45ODMgQzI1Ljk2NjI1LDE2Ljk1ODM3NSAyMy41NTM4NzUsMTYuODk2NjI1IDIwLjYzNzg3NSwxOC44NDAxMjUgQzE5LjQyODI1LDE2LjY5NDEyNSAxOC4xOTc2MjUsMTQuNTY1MjUgMTcuMDI2MjUsMTIuNDAzNzUgQzE2LjYzMTI1LDExLjY3NTI1IDE2LjE5NTI1LDExLjI1MjUgMTUuMzA1LDExLjA5ODM3NSBDMTMuODE4Mzc1LDEwLjg0MDYyNSAxMi44NTg2MjUsOS41NjQgMTIuODAxLDguMTMzNzUgQzEyLjc0NDM3NSw2LjcxOTI1IDEzLjU3Nzc1LDUuNDQwNjI1IDE0Ljg4MDI1LDQuOTQyNSBDMTYuMTcwNSw0LjQ0ODg3NSAxNy42ODQ2MjUsNC44NDcyNSAxOC41NTI1LDUuOTQ0MjUgQzE5LjI2MTc1LDYuODQwNSAxOS40ODcxMjUsNy44NDkyNSAxOS4xMTM4NzUsOC45NTQ2MjUgQzE5LjAxMDEyNSw5LjI2Mjg3NSAxOC44NzU3NSw5LjU2MTEyNSAxOC43MzAxMjUsOS45MjYzNzUgTDE4LjczMDEyNSw5LjkyNjI1IFoiLz4KICAgIDxwYXRoIGZpbGw9IiM0QTRBNEEiIGQ9Ik0yMC45NjMzNzUsMjMuNDAxMjUgTDE1LjI0MjEyNSwyMy40MDEyNSBDMTQuNjkzNzUsMjUuNjU2NzUgMTMuNTA5MjUsMjcuNDc3NzUgMTEuNDY4Mzc1LDI4LjYzNTc1IEM5Ljg4MTc1LDI5LjUzNTc1IDguMTcxNzUsMjkuODQwODc1IDYuMzUxNzUsMjkuNTQ3IEMzLjAwMDc1LDI5LjAwNjYyNSAwLjI2MDc1LDI1Ljk5IDAuMDE5NSwyMi41OTMyNSBDLTAuMjUzNSwxOC43NDUyNSAyLjM5MTM3NSwxNS4zMjQ4NzUgNS45MTY3NSwxNC41NTY2MjUgQzYuMTYwMTI1LDE1LjQ0MDUgNi40MDYxMjUsMTYuMzMyODc1IDYuNjQ5NSwxNy4yMTQ2MjUgQzMuNDE1LDE4Ljg2NDg3NSAyLjI5NTUsMjAuOTQ0MTI1IDMuMjAwNzUsMjMuNTQ0MTI1IEMzLjk5NzYyNSwyNS44MzIxMjUgNi4yNjEyNSwyNy4wODYyNSA4LjcxOTEyNSwyNi42MDEyNSBDMTEuMjI5MTI1LDI2LjEwNiAxMi40OTQ2MjUsMjQuMDIgMTIuMzQwMTI1LDIwLjY3MjI1IEMxNC43MTk2MjUsMjAuNjcyMjUgMTcuMTAxMTI1LDIwLjY0NzYyNSAxOS40ODA4NzUsMjAuNjg0Mzc1IEMyMC40MTAxMjUsMjAuNjk5IDIxLjEyNzUsMjAuNjAyNjI1IDIxLjgyNzUsMTkuNzgzMzc1IEMyMi45OCwxOC40MzUzNzUgMjUuMTAxMzc1LDE4LjU1NyAyNi4zNDI2MjUsMTkuODMwMTI1IEMyNy42MTExMjUsMjEuMTMxMjUgMjcuNTUwMzc1LDIzLjIyNDc1IDI2LjIwOCwyNC40NzEgQzI0LjkxMjg3NSwyNS42NzM1IDIyLjg2Njc1LDI1LjYwOTI1IDIxLjY1NSwyNC4zMTM1IEMyMS40MDYsMjQuMDQ2NSAyMS4yMDk3NSwyMy43MjkzNzUgMjAuOTYzMzc1LDIzLjQwMTI1IFoiLz4KICA8L2c+Cjwvc3ZnPgo=")',
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
         display: 'block',
@@ -1565,6 +1517,72 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
+
+      // foreach
+      '.codicon-symbol-method:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yIDhhNS45OCA1Ljk4IDAgMCAwIDEuNzU3IDQuMjQzQTUuOTggNS45OCAwIDAgMCA4IDE0djFhNi45OCA2Ljk4IDAgMCAxLTQuOTUtMi4wNUE2Ljk4IDYuOTggMCAwIDEgMSA4YzAtMS43OS42ODMtMy41OCAyLjA0OC00Ljk0N2wuMDA0LS4wMDQuMDE5LS4wMkwzLjEgM0gxVjJoNHY0SDRWMy41MjVhNi41MSA2LjUxIDAgMCAwLS4yMi4yMWwtLjAxMy4wMTMtLjAwMy4wMDItLjAwNy4wMDdBNS45OCA1Ljk4IDAgMCAwIDIgOFptMTAuMjQzLTQuMjQzQTUuOTggNS45OCAwIDAgMCA4IDJWMWE2Ljk4IDYuOTggMCAwIDEgNC45NSAyLjA1QTYuOTggNi45OCAwIDAgMSAxNSA4YTYuOTggNi45OCAwIDAgMS0yLjA0NyA0Ljk0N2wtLjAwNS4wMDQtLjAxOC4wMi0uMDMuMDI5SDE1djFoLTR2LTRoMXYyLjQ3NWE2Ljc0NCA2Ljc0NCAwIDAgMCAuMjItLjIxbC4wMTMtLjAxMy4wMDMtLjAwMi4wMDctLjAwN0E1Ljk4IDUuOTggMCAwIDAgMTQgOGE1Ljk4IDUuOTggMCAwIDAtMS43NTctNC4yNDNaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+
+      // if
+      '.codicon-symbol-keyword:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNNSwxMC4wMzc3MTg4IEM1LjYzNTI1ODUyLDkuMzg5NDQzNzcgNi41MjA2NTU5MSw4Ljk4NzIxMDE2IDcuNSw4Ljk4NzIxMDE2IEw5LjUsOC45ODcyMTAxNiBDMTAuNzMwNzc2NSw4Ljk4NzIxMDE2IDExLjc1MzgyNCw4LjA5NzgxNjE1IDExLjk2MTUwMTMsNi45MjY2NjkxNiBDMTEuMTE4NDg5Miw2LjY5MTU0NjExIDEwLjUsNS45MTgwMDA5OSAxMC41LDUgQzEwLjUsMy44OTU0MzA1IDExLjM5NTQzMDUsMyAxMi41LDMgQzEzLjYwNDU2OTUsMyAxNC41LDMuODk1NDMwNSAxNC41LDUgQzE0LjUsNS45NDI1NDI2MiAxMy44NDc5OTk3LDYuNzMyODAyNDEgMTIuOTcwNDE0Miw2Ljk0NDM2NDM4IEMxMi43NDY0MzcxLDguNjYxMzUwMDIgMTEuMjc4MDU0Miw5Ljk4NzIxMDE2IDkuNSw5Ljk4NzIxMDE2IEw3LjUsOS45ODcyMTAxNiBDNi4yNjA2ODU5Miw5Ljk4NzIxMDE2IDUuMjMxOTkyODYsMTAuODg4OTg1OSA1LjAzNDI5NDgxLDEyLjA3MjE2MzMgQzUuODc5NDUzODgsMTIuMzA1ODgzOCA2LjUsMTMuMDgwNDczNyA2LjUsMTQgQzYuNSwxNS4xMDQ1Njk1IDUuNjA0NTY5NSwxNiA0LjUsMTYgQzMuMzk1NDMwNSwxNiAyLjUsMTUuMTA0NTY5NSAyLjUsMTQgQzIuNSwxMy4wNjgwODAzIDMuMTM3Mzg2MzksMTIuMjg1MDMwMSA0LDEyLjA2MzAwODcgTDQsMy45MzY5OTEyNiBDMy4xMzczODYzOSwzLjcxNDk2OTg2IDIuNSwyLjkzMTkxOTcxIDIuNSwyIEMyLjUsMC44OTU0MzA1IDMuMzk1NDMwNSwwIDQuNSwwIEM1LjYwNDU2OTUsMCA2LjUsMC44OTU0MzA1IDYuNSwyIEM2LjUsMi45MzE5MTk3MSA1Ljg2MjYxMzYxLDMuNzE0OTY5ODYgNSwzLjkzNjk5MTI2IEw1LDEwLjAzNzcxODggWiBNNC41LDMgQzUuMDUyMjg0NzUsMyA1LjUsMi41NTIyODQ3NSA1LjUsMiBDNS41LDEuNDQ3NzE1MjUgNS4wNTIyODQ3NSwxIDQuNSwxIEMzLjk0NzcxNTI1LDEgMy41LDEuNDQ3NzE1MjUgMy41LDIgQzMuNSwyLjU1MjI4NDc1IDMuOTQ3NzE1MjUsMyA0LjUsMyBaIE00LjUsMTUgQzUuMDUyMjg0NzUsMTUgNS41LDE0LjU1MjI4NDcgNS41LDE0IEM1LjUsMTMuNDQ3NzE1MyA1LjA1MjI4NDc1LDEzIDQuNSwxMyBDMy45NDc3MTUyNSwxMyAzLjUsMTMuNDQ3NzE1MyAzLjUsMTQgQzMuNSwxNC41NTIyODQ3IDMuOTQ3NzE1MjUsMTUgNC41LDE1IFogTTEyLjUsNiBDMTMuMDUyMjg0Nyw2IDEzLjUsNS41NTIyODQ3NSAxMy41LDUgQzEzLjUsNC40NDc3MTUyNSAxMy4wNTIyODQ3LDQgMTIuNSw0IEMxMS45NDc3MTUzLDQgMTEuNSw0LjQ0NzcxNTI1IDExLjUsNSBDMTEuNSw1LjU1MjI4NDc1IDExLjk0NzcxNTMsNiAxMi41LDYgWiIvPgo8L3N2Zz4K")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+
+      // parallel
+      '.codicon-symbol-class:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNNSAyYTEgMSAwIDAwLTEgMXYxMGExIDEgMCAxMDIgMFYzYTEgMSAwIDAwLTEtMXptNiAwYTEgMSAwIDAwLTEgMXYxMGExIDEgMCAxMDIgMFYzYTEgMSAwIDAwLTEtMXoiIC8+Cjwvc3ZnPg==")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+      // merge
+      '.codicon-symbol-interface:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMC4zNTQgOC4zNTQgMTQuMjA3IDQuNSAxMC4zNTMuNjQ2bC0uNzA3LjcwOEwxMi4yOTMgNEgydjFoMTAuMjkzTDkuNjQ2IDcuNjQ2bC43MDcuNzA4Wm0tNC43MDcgN0wxLjc5MyAxMS41bDMuODU0LTMuODU0LjcwNy43MDhMMy43MDcgMTFIMTR2MUgzLjcwN2wyLjY0NyAyLjY0Ni0uNzA3LjcwOFoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPgo8L3N2Zz4K")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+
+      // wait
+      '.codicon-symbol-constant:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOC41IDcuNVY0aC0xdjQuNUgxMnYtMUg4LjVaIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTUgOEE3IDcgMCAxIDEgMSA4YTcgNyAwIDAgMSAxNCAwWm0tMSAwQTYgNiAwIDEgMSAyIDhhNiA2IDAgMCAxIDEyIDBaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+
+
     }),
   editorContainer: css({
     flex: '1 1 0',

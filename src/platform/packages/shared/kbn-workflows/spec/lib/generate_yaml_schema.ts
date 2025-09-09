@@ -48,19 +48,6 @@ export interface InternalConnectorContract extends ConnectorContract {
   };
 }
 
-function generateStepSchemaForConnector(
-  connector: ConnectorContract,
-  stepSchema: z.ZodType,
-  loose: boolean = false
-) {
-  return BaseConnectorStepSchema.extend({
-    type: z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-    with: connector.paramsSchema,
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
-  });
-}
-
 function createRecursiveStepSchema(
   connectors: ConnectorContract[],
   loose: boolean = false
@@ -73,9 +60,15 @@ function createRecursiveStepSchema(
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
 
-    // Create connector schemas with specific types for validation
+    // Create individual connector schemas for proper validation
+    // This gives us proper schema validation per connector type
     const connectorSchemas = connectors.map((c) =>
-      generateStepSchemaForConnector(c, stepSchema, loose)
+      BaseConnectorStepSchema.extend({
+        type: z.literal(c.type),
+        'connector-id': c.connectorIdRequired ? z.string() : z.string().optional(),
+        with: c.paramsSchema,
+        'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+      })
     );
 
     // Return discriminated union with all step types
@@ -86,7 +79,7 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       httpSchema,
-      ...connectorSchemas, // Include them for validation
+      ...connectorSchemas,
     ]);
   });
 

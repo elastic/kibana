@@ -24,6 +24,64 @@ import {
 } from 'yaml';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 
+/**
+ * Custom error message formatter for Zod validation errors
+ * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
+ */
+export function formatValidationError(error: any): { message: string; formattedError: any } {
+  // If it's not a Zod error structure, return as-is
+  if (!error?.issues || !Array.isArray(error.issues)) {
+    const message = error?.message || String(error);
+    return { message, formattedError: error };
+  }
+
+  const formattedIssues = error.issues.map((issue: any) => {
+    let formattedMessage: string;
+    
+    // Handle discriminated union errors for type field
+    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+      formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+    }
+    // Handle literal type errors for type field (avoid listing all 1000+ options)
+    else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
+      const receivedValue = issue.received;
+      if (receivedValue?.startsWith?.('elasticsearch.')) {
+        formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
+      } else if (receivedValue?.startsWith?.('kibana.')) {
+        formattedMessage = `Unknown Kibana API: "${receivedValue}". Use autocomplete to see valid kibana.* APIs.`;
+      } else {
+        formattedMessage = `Unknown connector type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, inference.*`;
+      }
+    }
+    // Handle union errors with too many options
+    else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
+      formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+    }
+    // Return original message for other errors
+    else {
+      formattedMessage = issue.message;
+    }
+    
+    // Return a new issue object with the formatted message
+    return {
+      ...issue,
+      message: formattedMessage
+    };
+  });
+
+  // Create a new ZodError-like object with formatted issues
+  const formattedError = {
+    ...error,
+    issues: formattedIssues,
+    message: formattedIssues.map(i => i.message).join(', ')
+  };
+
+  return {
+    message: formattedError.message,
+    formattedError
+  };
+}
+
 const YAML_STRINGIFY_OPTIONS = {
   indent: 2,
   lineWidth: -1,
@@ -131,9 +189,11 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     const json = doc.toJSON();
     const result = schema.safeParse(json);
     if (!result.success) {
+      // Use custom error formatter for better user experience
+      const { message, formattedError } = formatValidationError(result.error);
       return {
         success: false,
-        error: new InvalidYamlSchemaError(result.error.message, result.error),
+        error: new InvalidYamlSchemaError(message, formattedError),
       };
     }
     return result;

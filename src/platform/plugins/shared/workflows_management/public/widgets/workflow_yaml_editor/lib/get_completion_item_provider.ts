@@ -16,6 +16,14 @@ import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import { getAllConnectors } from '../../../../common/schema';
 import {
+  ForEachStepSchema,
+  IfStepSchema,
+  ParallelStepSchema,
+  MergeStepSchema,
+  HttpStepSchema,
+  WaitStepSchema,
+} from '@kbn/workflows';
+import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
@@ -30,6 +38,44 @@ function getCachedAllConnectors() {
     allConnectorsCache = getAllConnectors();
   }
   return allConnectorsCache;
+}
+
+// Cache for built-in step types extracted from schema
+let builtInStepTypesCache: Array<{ type: string; description: string; icon: monaco.languages.CompletionItemKind }> | null = null;
+
+/**
+ * Extract built-in step types from the workflow schema (single source of truth)
+ */
+function getBuiltInStepTypesFromSchema(): Array<{ type: string; description: string; icon: monaco.languages.CompletionItemKind }> {
+  if (builtInStepTypesCache !== null) {
+    return builtInStepTypesCache;
+  }
+
+  // Extract step types from the actual schema definitions
+  // This ensures we get all step types defined in the schema automatically
+  const stepSchemas = [
+    { schema: ForEachStepSchema, description: 'Execute steps for each item in a collection', icon: monaco.languages.CompletionItemKind.Method },
+    { schema: IfStepSchema, description: 'Execute steps conditionally based on a condition', icon: monaco.languages.CompletionItemKind.Keyword },
+    { schema: ParallelStepSchema, description: 'Execute multiple branches in parallel', icon: monaco.languages.CompletionItemKind.Class },
+    { schema: MergeStepSchema, description: 'Merge results from multiple sources', icon: monaco.languages.CompletionItemKind.Interface },
+    { schema: HttpStepSchema, description: 'Make HTTP requests', icon: monaco.languages.CompletionItemKind.Reference },
+    { schema: WaitStepSchema, description: 'Wait for a specified duration', icon: monaco.languages.CompletionItemKind.Constant },
+  ];
+
+  const stepTypes = stepSchemas.map(({ schema, description, icon }) => {
+    // Extract the literal type value from the Zod schema
+    const typeField = schema.shape.type;
+    const stepType = typeField._def.value; // Get the literal value from z.literal()
+    
+    return {
+      type: stepType,
+      description,
+      icon,
+    };
+  });
+
+  builtInStepTypesCache = stepTypes;
+  return stepTypes;
 }
 
 export interface LineParseResult {
@@ -123,6 +169,37 @@ function generateConnectorSnippet(connectorType: string, shouldBeQuoted: boolean
   });
 
   return withBlock;
+}
+
+/**
+ * Generate a snippet template for built-in step types
+ */
+function generateBuiltInStepSnippet(stepType: string, shouldBeQuoted: boolean): string {
+  const quotedType = shouldBeQuoted ? `"${stepType}"` : stepType;
+
+  // Generate appropriate snippets based on step type
+  switch (stepType) {
+    case 'foreach':
+      return `${quotedType}\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
+    
+    case 'if':
+      return `${quotedType}\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
+    
+    case 'parallel':
+      return `${quotedType}\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
+    
+    case 'merge':
+      return `${quotedType}\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
+    
+    case 'http':
+      return `${quotedType}\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
+    
+    case 'wait':
+      return `${quotedType}\nwith:\n  duration: "5s"`;
+    
+    default:
+      return `${quotedType}\nwith:\n  # Add parameters here`;
+  }
 }
 
 /**
@@ -767,6 +844,9 @@ function getConnectorTypeSuggestions(
 
   const suggestions: monaco.languages.CompletionItem[] = [];
 
+  // Get built-in step types from the schema (single source of truth)
+  const builtInStepTypes = getBuiltInStepTypesFromSchema();
+
   // Get all connectors
   const allConnectors = getCachedAllConnectors();
 
@@ -818,11 +898,35 @@ function getConnectorTypeSuggestions(
       suggestions.push(createSnippetSuggestion(api));
     });
   } else {
-    // Show all matching connectors
-    // console.log('Debug autocomplete: typePrefix =', JSON.stringify(typePrefix));
-    // console.log('Debug autocomplete: allConnectors count =', allConnectors.length);
-    // console.log('Debug autocomplete: sample connector types =', allConnectors.slice(0, 5).map((c: any) => c.type));
+    // First, add built-in step types that match the prefix
+    const matchingBuiltInTypes = builtInStepTypes.filter((stepType) =>
+      stepType.type.toLowerCase().includes(typePrefix.toLowerCase())
+    );
 
+    matchingBuiltInTypes.forEach((stepType) => {
+      const snippetText = generateBuiltInStepSnippet(stepType.type, shouldBeQuoted);
+      const extendedRange = {
+        startLineNumber: range.startLineNumber,
+        endLineNumber: range.endLineNumber,
+        startColumn: range.startColumn,
+        endColumn: Math.max(range.endColumn, 1000),
+      };
+
+      suggestions.push({
+        label: stepType.type,
+        kind: stepType.icon,
+        insertText: snippetText,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: extendedRange,
+        documentation: stepType.description,
+        filterText: stepType.type,
+        sortText: `!${stepType.type}`, // Priority prefix to sort before connector suggestions
+        detail: 'Built-in workflow step',
+        preselect: false,
+      });
+    });
+
+    // Then add matching connectors
     const matchingConnectors = allConnectors
       .map((c: any) => c.type)
       .filter((connectorType: string) => {
@@ -839,18 +943,8 @@ function getConnectorTypeSuggestions(
           elasticsearchMatch = afterPrefix.toLowerCase().startsWith(lowerPrefix);
         }
 
-        const matches = fullMatch || elasticsearchMatch;
-
-        // if (typePrefix === 'e' && connectorType.startsWith('elasticsearch.e')) {
-        //   console.log('Debug autocomplete: checking', connectorType, 'fullMatch:', fullMatch, 'elasticsearchMatch:', elasticsearchMatch, 'matches:', matches);
-        // }
-
-        return matches;
+        return fullMatch || elasticsearchMatch;
       });
-    //      .slice(0, 50);
-
-    // console.log('Debug autocomplete: matchingConnectors count =', matchingConnectors.length);
-    // console.log('Debug autocomplete: first 10 matching =', matchingConnectors.slice(0, 10));
 
     matchingConnectors.forEach((connectorType) => {
       suggestions.push(createSnippetSuggestion(connectorType));
