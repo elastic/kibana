@@ -10,8 +10,8 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_CASES_INDEX_NAME,
-  CAI_CASES_INDEX_ALIAS,
+  getCasesDestinationIndexName,
+  getCasesDestinationIndexAlias,
   CAI_CASES_INDEX_VERSION,
   CAI_CASES_SOURCE_INDEX,
   getCasesSourceQuery,
@@ -37,8 +37,10 @@ export const createCasesAnalyticsIndex = ({
   taskManager: TaskManagerStartContract;
   spaceId: string;
   owner: Owner;
-}): AnalyticsIndex =>
-  new AnalyticsIndex({
+}): AnalyticsIndex => {
+  console.log(`!!!!! destIndex: ${getCasesDestinationIndexName(spaceId, owner)}`);
+  console.log(`!!!!! owner: ${owner}`);
+  return new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
@@ -53,6 +55,7 @@ export const createCasesAnalyticsIndex = ({
     sourceIndex: CAI_CASES_SOURCE_INDEX,
     sourceQuery: getCasesSourceQuery(spaceId, owner),
   });
+};
 
 export const scheduleCasesAnalyticsSyncTask = ({
   taskManager,
@@ -79,11 +82,3 @@ export const scheduleCasesAnalyticsSyncTask = ({
     logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
-
-export function getCasesDestinationIndexName(spaceId: string, owner: Owner) {
-  return `${CAI_CASES_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
-}
-
-export function getCasesDestinationIndexAlias(spaceId: string, owner: Owner) {
-  return `${CAI_CASES_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
-}

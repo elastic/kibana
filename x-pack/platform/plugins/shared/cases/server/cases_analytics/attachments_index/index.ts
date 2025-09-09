@@ -10,8 +10,8 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_ATTACHMENTS_INDEX_NAME,
-  CAI_ATTACHMENTS_INDEX_ALIAS,
+  getAttachmentsDestinationIndexName,
+  getAttachmentsDestinationIndexAlias,
   CAI_ATTACHMENTS_INDEX_VERSION,
   CAI_ATTACHMENTS_SOURCE_INDEX,
   getAttachmentsSourceQuery,
@@ -79,11 +79,3 @@ export const scheduleAttachmentsAnalyticsSyncTask = ({
     logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
-
-export function getAttachmentsDestinationIndexName(spaceId: string, owner: Owner) {
-  return `${CAI_ATTACHMENTS_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
-}
-
-function getAttachmentsDestinationIndexAlias(spaceId: string, owner: Owner) {
-  return `${CAI_ATTACHMENTS_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
-}

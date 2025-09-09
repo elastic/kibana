@@ -12,11 +12,13 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { join } from 'path';
 import {
   runActivityBackfillTask,
   runAttachmentsBackfillTask,
   runCasesBackfillTask,
   runCommentsBackfillTask,
+  runSchedulerTask,
 } from '../../../../../common/lib/api/analytics';
 import {
   createCase,
@@ -54,6 +56,20 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         auth: authSpace1,
       });
+      await supertest
+        .post('/api/saved_objects/_import')
+        .query({ overwrite: true })
+        .attach(
+          'file',
+          join(
+            __dirname,
+            '../../../../../common/fixtures/saved_object_exports/single_case_user_actions_one_comment.ndjson'
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      await runSchedulerTask(supertest);
     });
 
     after(async () => {
@@ -94,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.try(async () => {
         const caseAnalytics = await esClient.get({
-          index: '.internal.cases',
+          index: '.internal.cases.default-securitysolution',
           id: `cases:${caseToBackfill.id}`,
         });
 
@@ -150,12 +166,8 @@ export default ({ getService }: FtrProviderContext): void => {
     // This test passes locally but fails in the flaky test runner.
     // Increasing the timeout did not work.
     it.skip('should backfill the cases attachments index', async () => {
-      const postedCase = await createCase(
-        supertest,
-        { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
-        200,
-        authSpace1
-      );
+      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      await runSchedulerTask(supertest);
 
       await createFileAttachment({
         supertest,
@@ -180,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments',
+          index: '.internal.cases-attachments.default-securitysolution',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
         });
 
@@ -188,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const secondAttachmentAnalytics = await esClient.get({
-        index: '.internal.cases-attachments',
+        index: '.internal.cases-attachments.default-securitysolution',
         id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
       });
 
@@ -197,17 +209,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should backfill the cases comments index', async () => {
       const postedCase = await createCase(supertest, postCaseReq, 200);
+      await runSchedulerTask(supertest);
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
         params: postCommentUserReq,
       });
-
       await runCommentsBackfillTask(supertest);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
-          index: '.internal.cases-comments',
+          index: '.internal.cases-comments.default-securitysolution',
           id: `cases-comments:${patchedCase.comments![0].id}`,
         });
 
@@ -242,6 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should backfill the activity index', async () => {
       const postedCase = await createCase(supertest, postCaseReq, 200);
+      await runSchedulerTask(supertest);
       await updateCase({
         supertest,
         params: {
@@ -269,7 +282,7 @@ export default ({ getService }: FtrProviderContext): void => {
       let activityArray: any[] = [];
       await retry.try(async () => {
         const activityAnalytics = await esClient.search({
-          index: '.internal.cases-activity',
+          index: '.internal.cases-activity.default-securitysolution',
         });
 
         // @ts-ignore

@@ -11,27 +11,28 @@ import {
   getCAIActivityBackfillTaskId,
   getCAIActivitySynchronizationTaskId,
   CAI_ACTIVITY_SOURCE_INDEX,
+  getActivityDestinationIndexName,
   getActivitySourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/activity_index/constants';
 import {
   getCAIAttachmentsBackfillTaskId,
   getCAIAttachmentsSynchronizationTaskId,
   CAI_ATTACHMENTS_SOURCE_INDEX,
-  CAI_ATTACHMENTS_INDEX_NAME,
+  getAttachmentsDestinationIndexName,
   getAttachmentsSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/attachments_index/constants';
 import {
   getCAICasesBackfillTaskId,
   getCAICasesSynchronizationTaskId,
   CAI_CASES_SOURCE_INDEX,
-  CAI_CASES_INDEX_NAME,
+  getCasesDestinationIndexName,
   getCasesSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/cases_index/constants';
 import {
   getCAICommentsBackfillTaskId,
   getCAICommentsSynchronizationTaskId,
   CAI_COMMENTS_SOURCE_INDEX,
-  CAI_COMMENTS_INDEX_NAME,
+  getCommentsDestinationIndexName,
   getCommentsSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/comments_index/constants';
 
@@ -40,12 +41,11 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      taskId: getCAICasesBackfillTaskId('space1', 'securitySolutionFixture'),
+      taskId: getCAICasesBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_CASES_SOURCE_INDEX,
-      destIndex: CAI_CASES_INDEX_NAME,
+      destIndex: getCasesDestinationIndexName('default', 'securitySolution'),
       // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getCasesSourceQuery('space1', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolutionFixture')),
     })
     .expect(200);
 };
@@ -54,8 +54,7 @@ export const runCasesSynchronizationTask = async (supertest: SuperTest.Agent) =>
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    // @ts-expect-error: the owner in the test env is not aligned with real world env
-    .send({ taskId: getCAICasesSynchronizationTaskId('space1', 'securitySolutionFixture') })
+    .send({ taskId: getCAICasesSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -64,13 +63,20 @@ export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => 
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      taskId: getCAIAttachmentsBackfillTaskId('space1', 'securitySolutionFixture'),
+      taskId: getCAIAttachmentsBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-      destIndex: CAI_ATTACHMENTS_INDEX_NAME,
+      destIndex: getAttachmentsDestinationIndexName('default', 'securitySolution'),
       // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('space1', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolutionFixture')),
     })
+    .expect(200);
+};
+
+export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
+  await supertest
+    .post('/api/analytics_index/scheduler/run_soon')
+    .set('kbn-xsrf', 'xxx')
+    .send()
     .expect(200);
 };
 
@@ -78,8 +84,7 @@ export const runAttachmentsSynchronizationTask = async (supertest: SuperTest.Age
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    // @ts-expect-error: the owner in the test env is not aligned with real world env
-    .send({ taskId: getCAIAttachmentsSynchronizationTaskId('space1', 'securitySolutionFixture') })
+    .send({ taskId: getCAIAttachmentsSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -88,12 +93,11 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      taskId: getCAICommentsBackfillTaskId('space1', 'securitySolutionFixture'),
+      taskId: getCAICommentsBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-      destIndex: CAI_COMMENTS_INDEX_NAME,
+      destIndex: getCommentsDestinationIndexName('default', 'securitySolution'),
       // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getCommentsSourceQuery('space1', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolutionFixture')),
     })
     .expect(200);
 };
@@ -102,8 +106,7 @@ export const runCommentsSynchronizationTask = async (supertest: SuperTest.Agent)
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    // @ts-expect-error: the owner in the test env is not aligned with real world env
-    .send({ taskId: getCAICommentsSynchronizationTaskId('space1', 'securitySolutionFixture') })
+    .send({ taskId: getCAICommentsSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -112,13 +115,11 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      taskId: getCAIActivityBackfillTaskId('space1', 'securitySolutionFixture'),
+      taskId: getCAIActivityBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
+      destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
       // @ts-expect-error: the owner in the test env is not aligned with real world env
-      destIndex: getActivityDestinationIndexName('space1', 'securitySolutionFixture'),
-      // @ts-expect-error: the owner in the test env is not aligned with real world env
-      sourceQuery: JSON.stringify(getActivitySourceQuery('space1', 'securitySolutionFixture')),
+      sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolutionFixture')),
     })
     .expect(200);
 };
@@ -127,7 +128,6 @@ export const runActivitySynchronizationTask = async (supertest: SuperTest.Agent)
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    // @ts-expect-error: the owner in the test env is not aligned with real world env
-    .send({ taskId: getCAIActivitySynchronizationTaskId('space1', 'securitySolutionFixture') })
+    .send({ taskId: getCAIActivitySynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };

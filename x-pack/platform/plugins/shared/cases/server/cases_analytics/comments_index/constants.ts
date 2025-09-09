@@ -10,9 +10,15 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Owner } from '../../../common/constants/types';
 
-export const CAI_COMMENTS_INDEX_NAME = '.internal.cases-comments';
+export const CAI_COMMENTS_INDEX_NAME_BASE = '.internal.cases-comments';
+export function getCommentsDestinationIndexName(spaceId: string, owner: Owner) {
+  return `${CAI_COMMENTS_INDEX_NAME_BASE}.${spaceId}-${owner}`.toLowerCase();
+}
 
-export const CAI_COMMENTS_INDEX_ALIAS = '.cases-comments';
+export const CAI_COMMENTS_INDEX_ALIAS_BASE = '.cases-comments';
+export function getCommentsDestinationIndexAlias(spaceId: string, owner: Owner) {
+  return `${CAI_COMMENTS_INDEX_ALIAS_BASE}.${spaceId}-${owner}`.toLowerCase();
+}
 
 export const CAI_COMMENTS_INDEX_VERSION = 1;
 

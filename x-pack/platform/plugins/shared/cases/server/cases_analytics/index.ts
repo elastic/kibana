@@ -21,27 +21,18 @@ import { registerCAIBackfillTask } from './tasks/backfill_task';
 import { registerCAISynchronizationTask } from './tasks/synchronization_task';
 import {
   createAttachmentsAnalyticsIndex,
-  getAttachmentsDestinationIndexName,
   scheduleAttachmentsAnalyticsSyncTask,
 } from './attachments_index';
-import {
-  createCasesAnalyticsIndex,
-  getCasesDestinationIndexName,
-  scheduleCasesAnalyticsSyncTask,
-} from './cases_index';
-import {
-  createCommentsAnalyticsIndex,
-  getCommentsDestinationIndexName,
-  scheduleCommentsAnalyticsSyncTask,
-} from './comments_index';
-import {
-  createActivityAnalyticsIndex,
-  getActivityDestinationIndexName,
-  scheduleActivityAnalyticsSyncTask,
-} from './activity_index';
+import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cases_index';
+import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
+import { createActivityAnalyticsIndex, scheduleActivityAnalyticsSyncTask } from './activity_index';
 import type { ConfigType } from '../config';
 import { getAllSpacesWithCases } from './utils';
 import { registerCAISchedulerTask } from './tasks/scheduler_task';
+import { getActivityDestinationIndexName } from './activity_index/constants';
+import { getAttachmentsDestinationIndexName } from './attachments_index/constants';
+import { getCasesDestinationIndexName } from './cases_index/constants';
+import { getCommentsDestinationIndexName } from './comments_index/constants';
 
 export const createCasesAnalyticsIndexes = async ({
   esClient,

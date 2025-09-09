@@ -10,8 +10,8 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_COMMENTS_INDEX_NAME,
-  CAI_COMMENTS_INDEX_ALIAS,
+  getCommentsDestinationIndexName,
+  getCommentsDestinationIndexAlias,
   CAI_COMMENTS_INDEX_VERSION,
   CAI_COMMENTS_SOURCE_INDEX,
   getCommentsSourceQuery,
@@ -79,11 +79,3 @@ export const scheduleCommentsAnalyticsSyncTask = ({
     logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
-
-export function getCommentsDestinationIndexName(spaceId: string, owner: Owner) {
-  return `${CAI_COMMENTS_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
-}
-
-function getCommentsDestinationIndexAlias(spaceId: string, owner: Owner) {
-  return `${CAI_COMMENTS_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
-}

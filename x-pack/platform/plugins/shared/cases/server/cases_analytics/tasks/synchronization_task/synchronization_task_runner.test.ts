@@ -12,14 +12,14 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { SynchronizationTaskRunner } from './synchronization_task_runner';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
-import { CAI_CASES_INDEX_NAME, CAI_CASES_SYNC_TYPE } from '../../cases_index/constants';
+import { getCasesDestinationIndexName, CAI_CASES_SYNC_TYPE } from '../../cases_index/constants';
 
 describe('SynchronizationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const sourceIndex = '.source-index';
-  const destIndex = CAI_CASES_INDEX_NAME;
+  const destIndex = getCasesDestinationIndexName('default', 'securitySolution');
 
   const painlessScriptId = 'painlessScriptId';
   const painlessScript = {
