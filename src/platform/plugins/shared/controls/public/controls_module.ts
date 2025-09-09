@@ -17,4 +17,6 @@ export { getTimesliderControlFactory } from './controls/timeslider_control/get_t
 export { getESQLControlFactory } from './controls/esql_control/get_esql_control_factory';
 
 export { createControlAction } from './actions/create_control_action';
+export { createESQLControlAction } from './actions/create_esql_control_action';
+
 export { ControlGroupRenderer } from './control_group/control_group_renderer/control_group_renderer';

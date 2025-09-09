@@ -12,3 +12,4 @@ export const ACTION_CLEAR_CONTROL = 'clearControl';
 export const ACTION_DELETE_CONTROL = 'deleteControl';
 export const ACTION_CREATE_CONTROL = 'createControl';
 export const OPTIONS_LIST_ACTION = 'addOptionsList';
+export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';

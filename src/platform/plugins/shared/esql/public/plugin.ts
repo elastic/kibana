@@ -12,11 +12,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  ADD_PANEL_TRIGGER,
-  type UiActionsSetup,
-  type UiActionsStart,
-} from '@kbn/ui-actions-plugin/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
@@ -97,18 +93,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     );
 
     uiActions.addTriggerActionAsync(ESQL_CONTROL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
-      const { CreateESQLControlAction } = await import(
-        './triggers/esql_controls/esql_control_action'
-      );
-      const createESQLControlAction = new CreateESQLControlAction(
-        core,
-        data.search.search,
-        data.query.timefilter.timefilter
-      );
-      return createESQLControlAction;
-    });
-
-    uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
       const { CreateESQLControlAction } = await import(
         './triggers/esql_controls/esql_control_action'
       );

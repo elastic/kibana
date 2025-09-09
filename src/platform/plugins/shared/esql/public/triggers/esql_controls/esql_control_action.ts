@@ -8,22 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  type ESQLControlVariable,
-  type ESQLControlState,
-  apiPublishesESQLVariables,
-} from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
-import { openESQLControlFlyout } from './esql_control_helpers';
 
 function isESQLVariableType(value: string): value is ESQLVariableType {
   return Object.values(ESQLVariableType).includes(value as ESQLVariableType);
@@ -33,7 +26,7 @@ export function isActionCompatible(core: CoreStart, variableType: ESQLVariableTy
   return core.uiSettings.get(ENABLE_ESQL) && isESQLVariableType(variableType);
 }
 
-interface ESQLControlTriggerContext {
+interface Context {
   queryString: string;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
@@ -42,15 +35,11 @@ interface ESQLControlTriggerContext {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
 }
-const isESQLControlTriggerContext = (context: unknown): context is ESQLControlTriggerContext =>
-  Object.hasOwn(context as ESQLControlTriggerContext, 'variableType');
-
-type Context = ESQLControlTriggerContext | EmbeddableApiContext;
 
 export class CreateESQLControlAction implements Action<Context> {
   public type = ACTION_CREATE_ESQL_CONTROL;
   public id = ACTION_CREATE_ESQL_CONTROL;
-  public order = 0;
+  public order = 50;
 
   constructor(
     protected readonly core: CoreStart,
@@ -60,60 +49,57 @@ export class CreateESQLControlAction implements Action<Context> {
 
   public getDisplayName(): string {
     return i18n.translate('esql.createESQLControlLabel', {
-      defaultMessage: 'ES|QL control',
+      defaultMessage: 'Creates an ES|QL control',
     });
   }
 
   public getIconType() {
-    return 'controls';
+    return 'pencil';
   }
 
-  public async isCompatible(context: Context) {
-    if (isESQLControlTriggerContext(context))
-      return isActionCompatible(this.core, context.variableType);
-    return apiIsPresentationContainer(context.embeddable);
+  public async isCompatible({ variableType }: Context) {
+    return isActionCompatible(this.core, variableType);
   }
 
-  public async execute(context: Context) {
-    if (isESQLControlTriggerContext(context)) {
-      const { variableType } = context;
-
-      if (!isActionCompatible(this.core, variableType)) {
-        throw new IncompatibleActionError();
-      }
-
-      openESQLControlFlyout({
-        ...context,
-        core: this.core,
-        search: this.search,
-        timefilter: this.timefilter,
-      });
-    } else {
-      const embeddable = apiIsPresentationContainer(context.embeddable) ? context.embeddable : null;
-      if (!embeddable) throw new Error('Embeddable API unable to add new panel');
-
-      const variablesInParent = apiPublishesESQLVariables(embeddable)
-        ? embeddable.esqlVariables$.value
-        : [];
-
-      openESQLControlFlyout({
-        core: this.core,
-        search: this.search,
-        timefilter: this.timefilter,
-        queryString: '',
-        variableType: ESQLVariableType.VALUES,
-        esqlVariables: variablesInParent,
-        onSaveControl: async (controlState: ESQLControlState) => {
-          embeddable.addNewPanel({
-            panelType: 'esqlControl',
-            serializedState: {
-              rawState: {
-                ...controlState,
-              },
-            },
-          });
-        },
-      });
+  public async execute({
+    queryString,
+    variableType,
+    esqlVariables,
+    onSaveControl,
+    onCancelControl,
+    cursorPosition,
+    initialState,
+  }: Context) {
+    if (!isActionCompatible(this.core, variableType)) {
+      throw new IncompatibleActionError();
     }
+
+    openLazyFlyout({
+      core: this.core,
+      parentApi: this.search,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const { loadESQLControlFlyout } = await import('./esql_control_helpers');
+        return await loadESQLControlFlyout({
+          queryString,
+          core: this.core,
+          search: this.search,
+          timefilter: this.timefilter,
+          variableType,
+          esqlVariables,
+          ariaLabelledBy,
+          onSaveControl,
+          onCancelControl,
+          cursorPosition,
+          initialState,
+          closeFlyout,
+        });
+      },
+      flyoutProps: {
+        'data-test-subj': 'create_esql_control_flyout',
+        isResizable: true,
+        maxWidth: 800,
+        triggerId: 'dashboard-controls-menu-button',
+      },
+    });
   }
 }
