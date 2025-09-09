@@ -140,10 +140,10 @@ The [OTel docs](https://opentelemetry.io/docs/concepts/signals/metrics/) provide
 
 A quick summary:
 
-1. Use `Histogram` when you're interested in value statistics like _How many requests took less than 1s?_. This API is only available for push-based metrics.
-2. The difference between a `Counter` and an `UpDownCounter` is that the former is an always-growing metric, while the latter can increase or decrease.
-3. Use a `Counter` (or `UpDownCounter`) instead of a `Gauge` if your metric can be summed up (e.g. number of requests or process' memory usage). 
-4. Use a `Gauge` when it doesn't make sense to sum up the metric (e.g. process' uptime or event loop delay).
+1. Use `Histogram` when you're interested in value statistics like _How many requests took less than 1s?_. This API is only available for push-based metrics. Example: HTTP request duration.
+2. Use `Counter` for an ever-growing metric that can be summed up during analysis. Example: Number of served HTTP requests.
+3. Use `UpDownCounter` for counters that can also decrease. Example: Process' memory usage.
+4. Use `Gauge` when it doesn't make sense to sum up the metric during analysis. Example: Process' Uptime or Event Loop Delay.
 
 ### Attributes
 
