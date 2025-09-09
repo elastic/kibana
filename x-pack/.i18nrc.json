@@ -92,6 +92,7 @@
       "platform/packages/shared/ml/kibana_context",
       "platform/packages/shared/ml/license",
       "platform/packages/shared/ml/ml_client",
+      "platform/packages/shared/ml/node_checks",
       "platform/packages/shared/ml/saved_objects",
       "platform/packages/shared/ml/server_api_schemas",
       "platform/packages/shared/ml/services",
