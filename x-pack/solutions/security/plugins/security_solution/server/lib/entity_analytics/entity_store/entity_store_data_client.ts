@@ -118,8 +118,13 @@ import { entityEngineDescriptorTypeName } from './saved_object';
 import {
   createEntityUpdatesIndex,
   deleteEntityUpdatesIndex,
+  getEntityUpdatesIndexName,
 } from './elasticsearch_assets/updates_entity_index';
-import { createEntityUpdatesIndexComponentTemplate } from './elasticsearch_assets/updates_component_template';
+import {
+  createEntityUpdatesIndexComponentTemplate,
+  deleteEntityUpdatesIndexComponentTemplate,
+  getEntityUpdatesIndexComponentTemplateStatus,
+} from './elasticsearch_assets/updates_component_template';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -243,10 +248,17 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
+          getEntityIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+            indexName: getEntityUpdatesIndexName(type, namespace),
+          }),
           getEntityIndexComponentTemplateStatus({
             definitionId: definition.id,
             esClient: this.esClient,
           }),
+          getEntityUpdatesIndexComponentTemplateStatus(definition.id, this.esClient),
         ])
       : Promise.resolve([] as EngineComponentStatus[]);
   }
@@ -479,7 +491,7 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
 
-      /* Updates componenets components */
+      // CRUD Assets
       await createEntityUpdatesIndexComponentTemplate(description, this.esClient);
       this.log(`debug`, entityType, `Created entity updates index component template`);
       await createEntityUpdatesIndex(entityType, this.esClient, namespace, logger);
@@ -736,7 +748,10 @@ export class EntityStoreDataClient {
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
 
+      // CRUD Assets
       await deleteEntityUpdatesIndex(entityType, this.esClient, namespace, logger);
+      this.log('debug', entityType, `Delete entity updates index`);
+      await deleteEntityUpdatesIndexComponentTemplate(description, this.esClient);
       this.log('debug', entityType, `Delete entity updates index`);
 
       if (deleteData) {
