@@ -8,7 +8,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { getKibanaContextFn } from '../../common';
+import { getKibanaContextFn } from '../../common/expressions/kibana_context';
 import type { SavedSearchPublicPluginStart, SavedSearchPublicStartDependencies } from '../plugin';
 
 /**
