@@ -27,6 +27,94 @@ import type {
 
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
 
+export const DETECTION_RULE_UPDATE_EVENT: EventTypeOpts<{
+  ruleId: string;
+  ruleName: string;
+  hasMissingBaseVersion: boolean;
+  finalResult: 'SUCCESS' | 'SKIP' | 'ERROR';
+  updatedFieldsSummary: {
+    count: number;
+    nonSolvableConflictsCount: number;
+    solvableConflictsCount: number;
+    noConflictsCount: number;
+  };
+  updatedFieldsTotal: string[];
+  updatedFieldsWithNonSolvableConflicts: string[];
+  updatedFieldsWithSolvableConflicts: string[];
+  updatedFieldsWithNoConflicts: string[];
+}> = {
+  eventType: 'detection_rule_update',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
+    ruleName: { type: 'keyword', _meta: { description: 'Rule name' } },
+    hasMissingBaseVersion: {
+      type: 'boolean',
+      _meta: { description: 'True if base version is missing for this rule' },
+    },
+    finalResult: {
+      type: 'keyword',
+      _meta: { description: 'Overall outcome: SUCCESS | SKIP | ERROR' },
+    },
+    updatedFieldsSummary: {
+      properties: {
+        count: { type: 'long', _meta: { description: 'Number of updated fields' } },
+        nonSolvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of non-solvable conflicts' },
+        },
+        solvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of solvable conflicts' },
+        },
+        noConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of fields without conflicts' },
+        },
+      },
+    },
+    updatedFieldsTotal: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields that were updated' },
+    },
+    updatedFieldsWithNonSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with non-solvable conflicts' },
+    },
+    updatedFieldsWithSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with solvable conflicts' },
+    },
+    updatedFieldsWithNoConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
+
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
   taskDurationInSeconds: number;
@@ -1227,6 +1315,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 };
 
 export const events = [
+  DETECTION_RULE_UPDATE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
