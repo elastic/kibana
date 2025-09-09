@@ -25,7 +25,6 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
-import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -44,7 +43,7 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient, wiredStatus$ },
+        streams: { streamsRepositoryClient },
         share,
       },
     },
@@ -59,8 +58,6 @@ export function StreamListView() {
         onboardingLocator.navigate({});
       }
     : undefined;
-
-  const wiredStatus = useObservable(wiredStatus$);
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
