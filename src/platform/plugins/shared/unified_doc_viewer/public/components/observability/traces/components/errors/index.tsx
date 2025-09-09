@@ -65,7 +65,7 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
       })}
       description={i18n.translate(
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
-        { defaultMessage: 'Errors related to this trace or service' }
+        { defaultMessage: 'Errors that occurred during this span and their causes' }
       )}
     >
       <EuiSpacer size="s" />
@@ -78,16 +78,14 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-              <EuiInMemoryTable
-                responsiveBreakpoint={false}
-                items={response.errorGroups}
-                columns={columns}
-                pagination={{ showPerPageOptions: false, pageSize: 5 }}
-                sorting={sorting}
-                compressed
-              />
-            </EuiPanel>
+            <EuiInMemoryTable
+              responsiveBreakpoint={false}
+              items={response.errorGroups}
+              columns={columns}
+              pagination={{ showPerPageOptions: false, pageSize: 5 }}
+              sorting={sorting}
+              compressed
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

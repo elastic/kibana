@@ -34,7 +34,7 @@ export const getColumns = (): Array<
     sortable: (item) => item.name || '',
     render: (_, item) => {
       return (
-        <div
+        <span
           css={css`
             width: 100%;
           `}
@@ -53,23 +53,24 @@ export const getColumns = (): Array<
               />
             </EuiText>
           )}
-        </div>
+        </span>
       );
     },
   },
-  {
-    field: 'lastSeen',
-    name: i18n.translate(
-      'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.lastSeen',
-      { defaultMessage: 'Last seen' }
-    ),
-    sortable: (item) => item.lastSeen || 0,
-    render: (_, item) => (
-      <Timestamp timestamp={item.lastSeen} timeUnit="minutes" renderMode="tooltip" />
-    ),
-  },
+  // {
+  //   field: 'lastSeen',
+  //   name: i18n.translate(
+  //     'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.lastSeen',
+  //     { defaultMessage: 'Last seen' }
+  //   ),
+  //   sortable: (item) => item.lastSeen || 0,
+  //   render: (_, item) => (
+  //     <Timestamp timestamp={item.lastSeen} timeUnit="minutes" renderMode="tooltip" />
+  //   ),
+  // },
   {
     field: 'occurrences',
+    width: '20%',
     name: i18n.translate(
       'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.occurrences',
       { defaultMessage: 'Occurrences' }
