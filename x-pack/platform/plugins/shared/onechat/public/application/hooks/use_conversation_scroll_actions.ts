@@ -7,10 +7,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-const scrollToMostRecentRound = (
-  position: ScrollLogicalPosition,
-  scrollBehavior: ScrollBehavior = 'smooth'
-) => {
+const DISTANCE_FROM_BOTTOM_THRESHOLD = 50; // pixels
+const SCROLL_POSITION_CHECK_INTERVAL = 1500; // milliseconds
+
+const scrollToMostRecentRound = ({
+  position,
+  scrollBehavior = 'smooth',
+}: {
+  position: ScrollLogicalPosition;
+  scrollBehavior?: ScrollBehavior;
+}) => {
   requestAnimationFrame(() => {
     const conversationRoundsElement = document.querySelector(
       '[id="onechatConversationRoundsContainer"]'
@@ -27,6 +33,16 @@ const scrollToMostRecentRound = (
       }
     }
   });
+};
+
+// Scrolls the most recent round to the top of it's parent scroll container
+const scrollToMostRecentRoundTop = () => {
+  scrollToMostRecentRound({ position: 'start' });
+};
+
+// Scrolls the most recent round to the bottom of it's parent scroll container
+const scrollToMostRecentRoundBottom = () => {
+  scrollToMostRecentRound({ position: 'end' });
 };
 
 export const useConversationScrollActions = ({
@@ -46,18 +62,16 @@ export const useConversationScrollActions = ({
     const checkScrollPosition = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-      const threshold = 50;
 
-      setShowScrollButton(distanceFromBottom > threshold);
+      setShowScrollButton(distanceFromBottom > DISTANCE_FROM_BOTTOM_THRESHOLD);
     };
 
-    // Set up scroll listener
     scrollContainer.addEventListener('scroll', checkScrollPosition);
 
     // Set up interval for streaming check (only when response is loading)
     let interval: NodeJS.Timeout | undefined;
     if (isResponseLoading) {
-      interval = setInterval(checkScrollPosition, 1500);
+      interval = setInterval(checkScrollPosition, SCROLL_POSITION_CHECK_INTERVAL);
     }
 
     return () => {
@@ -75,7 +89,8 @@ export const useConversationScrollActions = ({
 
   return {
     showScrollButton,
-    scrollToMostRecentRound,
+    scrollToMostRecentRoundTop,
+    scrollToMostRecentRoundBottom,
     stickToBottom,
   };
 };

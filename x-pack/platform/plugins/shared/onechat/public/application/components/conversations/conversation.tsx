@@ -16,7 +16,7 @@ import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 import { useConversationId } from '../../hooks/use_conversation_id';
 import { useSendMessage } from '../../context/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
-import { useConversation } from '../../hooks/use_conversation';
+import { useConversationStatus } from '../../hooks/use_conversation';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -31,23 +31,25 @@ export const Conversation: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
-  const { isFetched } = useConversation();
+  const { isFetched } = useConversationStatus();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const { showScrollButton, scrollToMostRecentRound, stickToBottom } = useConversationScrollActions(
-    {
-      isResponseLoading,
-      conversationId: conversationId || '',
-      scrollContainer: scrollContainerRef.current,
-    }
-  );
+  const {
+    showScrollButton,
+    scrollToMostRecentRoundBottom,
+    scrollToMostRecentRoundTop,
+    stickToBottom,
+  } = useConversationScrollActions({
+    isResponseLoading,
+    conversationId: conversationId || '',
+    scrollContainer: scrollContainerRef.current,
+  });
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
-  // Stick to bottom only on initial conversation load (not when new rounds are added)
+  // Stick to bottom only on initial conversation load or when {conversationId} is changed
   useEffect(() => {
     if (isFetched && conversationId) {
-      // Uses {requestAnimationFrame} to ensure DOM is rendered
       requestAnimationFrame(() => {
         stickToBottom();
       });
@@ -87,7 +89,7 @@ export const Conversation: React.FC<{}> = () => {
                     css={scrollDownButtonStyles}
                     iconType="sortDown"
                     aria-label="Scroll down"
-                    onClick={() => scrollToMostRecentRound('end')}
+                    onClick={scrollToMostRecentRoundBottom}
                   />
                 )}
               </EuiResizablePanel>
@@ -100,11 +102,7 @@ export const Conversation: React.FC<{}> = () => {
             )}
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationInputForm
-                onSubmit={() => {
-                  scrollToMostRecentRound('start');
-                }}
-              />
+              <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
             </EuiResizablePanel>
           </>
         );

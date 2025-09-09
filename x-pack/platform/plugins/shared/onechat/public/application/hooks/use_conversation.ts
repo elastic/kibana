@@ -39,6 +39,11 @@ export const useConversation = () => {
   return { conversation, isLoading, isFetched };
 };
 
+export const useConversationStatus = () => {
+  const { isLoading, isFetched } = useConversation();
+  return { isLoading, isFetched };
+};
+
 export const useAgentId = () => {
   const { conversation } = useConversation();
   return conversation?.agent_id;
