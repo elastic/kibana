@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, GraphNode } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
@@ -96,11 +96,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   // TODO: To rename to getCurrentNode and use proper type
-  public getCurrentStep(): any {
-    // must be a proper type
-    if (this.currentStepIndex < 0 || this.currentStepIndex >= this.topologicalOrder.length) {
-      return null; // No current step
-    }
+  public getCurrentStep(): GraphNode {
     const currentStepId = this.topologicalOrder[this.currentStepIndex];
     return this.workflowGraph.getNode(currentStepId);
   }
