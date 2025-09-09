@@ -8005,6 +8005,9 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "fips_agents": {
+                            "type": "number"
+                          },
                           "fleet_server_host_id": {
                             "nullable": true,
                             "type": "string"
@@ -9351,6 +9354,9 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fips_agents": {
+                          "type": "number"
+                        },
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
@@ -10402,6 +10408,9 @@
                           "download_source_id": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "fips_agents": {
+                            "type": "number"
                           },
                           "fleet_server_host_id": {
                             "nullable": true,
@@ -11700,6 +11709,9 @@
                         "download_source_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "fips_agents": {
+                          "type": "number"
                         },
                         "fleet_server_host_id": {
                           "nullable": true,
@@ -13048,6 +13060,9 @@
                           "nullable": true,
                           "type": "string"
                         },
+                        "fips_agents": {
+                          "type": "number"
+                        },
                         "fleet_server_host_id": {
                           "nullable": true,
                           "type": "string"
@@ -14193,6 +14208,9 @@
                         "download_source_id": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "fips_agents": {
+                          "type": "number"
                         },
                         "fleet_server_host_id": {
                           "nullable": true,
