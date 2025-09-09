@@ -685,7 +685,7 @@ export class WorkflowsService {
           },
           {
             match: {
-              'id.keyword': params.stepExecutionId,
+              'workflow.step_execution_id.keyword': params.stepExecutionId,
             },
           },
           {
