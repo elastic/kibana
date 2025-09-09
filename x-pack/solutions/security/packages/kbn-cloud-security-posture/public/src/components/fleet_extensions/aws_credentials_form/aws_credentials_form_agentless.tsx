@@ -170,7 +170,7 @@ export const AwsCredentialsFormAgentless = ({
           showCloudConnectors ? (
             <FormattedMessage
               id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys or assume role to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">

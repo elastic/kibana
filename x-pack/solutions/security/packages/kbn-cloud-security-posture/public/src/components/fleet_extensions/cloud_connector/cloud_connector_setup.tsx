@@ -132,9 +132,9 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       ),
       content: (
         <ReusableCloudConnectorForm
-          input={input}
+          isEditPage={isEditPage}
           newPolicy={newPolicy}
-          updatePolicy={updatePolicy}
+          cloudProvider={cloudProvider}
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
         />
@@ -186,6 +186,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           selectedTabId={selectedTabId}
           onTabClick={onTabClick}
           isEditPage={isEditPage}
+          cloudProvider={cloudProvider || 'aws'}
           cloudConnectorsCount={cloudConnectorsCount || 0}
         />
       )}

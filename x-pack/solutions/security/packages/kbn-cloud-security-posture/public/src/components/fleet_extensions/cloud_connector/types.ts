@@ -13,6 +13,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSecretVar } from '@kbn/fleet-plugin/public';
+import type { CloudConnectorRoleArn } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
 import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 
@@ -41,7 +42,7 @@ export interface CloudConnectorOption {
   label: string;
   value: string;
   id: string;
-  roleArn?: string;
+  roleArn?: CloudConnectorRoleArn;
   externalId?: CloudConnectorSecretVar;
 }
 
@@ -109,5 +110,10 @@ export interface InputVars {
 
 // Type alias for the actual vars type from Fleet
 export type PackagePolicyVars =
-  | Record<string, { value?: string; type?: string; [key: string]: unknown }>
+  | Record<
+      string,
+      | { value?: string; type?: string; [key: string]: unknown }
+      | CloudConnectorSecretVar
+      | undefined
+    >
   | undefined;

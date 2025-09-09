@@ -54,14 +54,18 @@ export const useCloudConnectorSetup = (
       const inputVars = input.streams.find((i) => i.enabled)?.vars;
 
       // Handle undefined cases safely
-      updateInputVarsWithCredentials(inputVars as PackagePolicyVars, credentials);
+      const updatedInputVars = updateInputVarsWithCredentials(
+        inputVars as PackagePolicyVars,
+        credentials,
+        true
+      );
       setNewConnectionCredentials(credentials);
 
       // Apply updatedVars to the policy using utility function
       if (inputVars) {
         const updatedPolicyWithInputs = updatePolicyInputs(
           updatedPolicy,
-          inputVars as PackagePolicyVars
+          updatedInputVars as PackagePolicyVars
         );
         updatedPolicy.inputs = updatedPolicyWithInputs.inputs;
       }
@@ -79,7 +83,10 @@ export const useCloudConnectorSetup = (
       const inputVars = input.streams.find((i) => i.enabled)?.vars;
 
       // Handle undefined cases safely
-      updateInputVarsWithCredentials(inputVars as PackagePolicyVars, credentials);
+      const updatedInputVars = updateInputVarsWithCredentials(
+        inputVars as PackagePolicyVars,
+        credentials
+      );
       // Update existing connection credentials state
       setExistingConnectionCredentials(credentials);
 
@@ -87,7 +94,7 @@ export const useCloudConnectorSetup = (
       if (inputVars) {
         const updatedPolicyWithInputs = updatePolicyInputs(
           updatedPolicy,
-          inputVars as PackagePolicyVars
+          updatedInputVars as PackagePolicyVars
         );
         updatedPolicy.inputs = updatedPolicyWithInputs.inputs;
       }

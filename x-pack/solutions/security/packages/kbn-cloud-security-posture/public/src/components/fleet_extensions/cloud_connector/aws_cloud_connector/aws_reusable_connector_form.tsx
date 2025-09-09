@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
 import type { CloudConnectorOption, ComboBoxOption } from '../types';
@@ -13,9 +13,11 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
 
 export const AWSReusableConnectorForm: React.FC<{
+  cloudConnectorId: string | undefined;
+  isEditPage: boolean;
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
-}> = ({ credentials, setCredentials }) => {
+}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
 
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
@@ -34,9 +36,37 @@ export const AWSReusableConnectorForm: React.FC<{
   }));
 
   // Find the currently selected connector based on credentials
-  const selectedConnector = credentials?.cloudConnectorId
-    ? comboBoxOptions.find((opt) => opt.value === credentials.cloudConnectorId) || null
-    : null;
+  const selectedConnector = useMemo(() => {
+    return (isEditPage && cloudConnectorId) || credentials?.cloudConnectorId
+      ? comboBoxOptions.find(
+          (opt) => opt.value === credentials.cloudConnectorId || opt.value === cloudConnectorId
+        ) || null
+      : null;
+  }, [isEditPage, cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
+
+  const handleConnectorChange = useCallback(
+    (selected: Array<{ label: string; value?: string }>) => {
+      const [selectedOption] = selected;
+
+      if (selectedOption?.value) {
+        const connector = cloudConnectorData.find((opt) => opt.id === selectedOption.value);
+        if (connector?.roleArn && connector?.externalId) {
+          setCredentials({
+            roleArn: connector.roleArn.value,
+            externalId: connector.externalId.value,
+            cloudConnectorId: connector.id,
+          });
+        }
+      } else {
+        setCredentials({
+          roleArn: undefined,
+          externalId: undefined,
+          cloudConnectorId: undefined,
+        });
+      }
+    },
+    [cloudConnectorData, setCredentials]
+  );
 
   return (
     <>
@@ -56,26 +86,7 @@ export const AWSReusableConnectorForm: React.FC<{
           fullWidth
           singleSelection={true}
           selectedOptions={selectedConnector ? [selectedConnector] : []}
-          onChange={(selected) => {
-            const [selectedOption] = selected;
-
-            if (selectedOption) {
-              const connector = cloudConnectorData.find((opt) => opt.id === selectedOption.value);
-              if (connector?.roleArn && connector?.externalId) {
-                setCredentials({
-                  roleArn: connector.roleArn,
-                  externalId: connector.externalId,
-                  cloudConnectorId: connector.id,
-                });
-              }
-            } else {
-              setCredentials({
-                roleArn: undefined,
-                externalId: undefined,
-                cloudConnectorId: undefined,
-              });
-            }
-          }}
+          onChange={handleConnectorChange}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

@@ -11,16 +11,20 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type {
   CloudConnectorSO,
   CloudConnectorListOptions,
-  CloudConnectorSecretVarValue,
+  CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
-import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
+import type {
+  CreateCloudConnectorRequest,
+  UpdateCloudConnectorRequest,
+} from '../routes/cloud_connector/handlers';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import {
   CloudConnectorCreateError,
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
+  CloudConnectorUpdateError,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -34,6 +38,11 @@ export interface CloudConnectorServiceInterface {
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
   ): Promise<CloudConnectorSO[]>;
+  update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    cloudConnector: UpdateCloudConnectorRequest
+  ): Promise<CloudConnectorSO>;
 }
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
@@ -138,6 +147,59 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     }
   }
 
+  async update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    cloudConnector: UpdateCloudConnectorRequest
+  ): Promise<CloudConnectorSO> {
+    const logger = this.getLogger('update');
+
+    try {
+      logger.info(`Updating cloud connector with id: ${id}`);
+
+      // Get the existing cloud connector
+      const existingCloudConnector = await soClient.get<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        id
+      );
+
+      // Validate the update request if vars are provided
+      if (cloudConnector.vars) {
+        this.validateCloudConnectorDetails({
+          name: cloudConnector.name || existingCloudConnector.attributes.name,
+          vars: cloudConnector.vars,
+          cloudProvider:
+            cloudConnector.cloudProvider || existingCloudConnector.attributes.cloudProvider,
+        });
+      }
+
+      // Prepare the update attributes
+      const updateAttributes: Partial<CloudConnectorSOAttributes> = {
+        updated_at: new Date().toISOString(),
+      };
+
+      // Update the cloud connector
+      const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        id,
+        { ...updateAttributes, ...cloudConnector }
+      );
+
+      logger.info(`Successfully updated cloud connector with id: ${id}`);
+
+      return {
+        id: updatedSavedObject.id,
+        ...existingCloudConnector.attributes,
+        ...updatedSavedObject.attributes,
+      };
+    } catch (error) {
+      logger.error(`Failed to update cloud connector with id: ${id}`, error.message);
+      throw new CloudConnectorUpdateError(
+        `CloudConnectorService Failed to update cloud connector: ${error.message}\n${error.stack}`
+      );
+    }
+  }
+
   private validateCloudConnectorDetails(cloudConnector: CreateCloudConnectorRequest) {
     const logger = this.getLogger('validate cloud connector details');
     const vars = cloudConnector.vars;
@@ -152,7 +214,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       // Check for AWS variables
       if (roleArn) {
-        const externalId: CloudConnectorSecretVarValue | undefined = vars.external_id?.value;
+        const externalId: CloudConnectorSecretReference | undefined = vars.external_id?.value;
 
         if (!externalId) {
           logger.error('Package policy must contain valid external_id secret reference');

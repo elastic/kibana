@@ -24,7 +24,6 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
   input,
   newPolicy,
   packageInfo,
-  isEditPage = false,
   cloud,
   updatePolicy,
   hasInvalidRequiredVars = false,
@@ -46,7 +45,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
 
   // Update inputVars with current credentials using utility function or inputVars if no credentials are provided
   const updatedInputVars = credentials
-    ? updateInputVarsWithCredentials(inputVars as PackagePolicyVars, credentials)
+    ? updateInputVarsWithCredentials(inputVars as PackagePolicyVars, credentials, true)
     : inputVars;
 
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);

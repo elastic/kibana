@@ -265,6 +265,19 @@ export async function extractAndWriteSecrets(opts: {
   if (!secretPaths.length) {
     return { packagePolicy, secretReferences: [] };
   }
+  const cloudConnectorsSecretReferences =
+    packagePolicy.supports_cloud_connector && packagePolicy.cloud_connector_id
+      ? getCloudConnectorSecretReferences(packagePolicy, secretPaths)
+      : [];
+
+  const hasCloudConnectorSecretReferences =
+    packagePolicy.supports_cloud_connector &&
+    packagePolicy.cloud_connector_id &&
+    cloudConnectorsSecretReferences.length;
+
+  if (hasCloudConnectorSecretReferences) {
+    return { packagePolicy, secretReferences: cloudConnectorsSecretReferences };
+  }
 
   const secretsToCreate = secretPaths.filter(
     (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
@@ -280,12 +293,6 @@ export async function extractAndWriteSecrets(opts: {
     secrets,
     packagePolicy
   );
-
-  const cloudConnectorsSecretReferences = getCloudConnectorSecretReferences(
-    packagePolicy,
-    secretPaths
-  );
-
   return {
     packagePolicy: policyWithSecretRefs,
     secretReferences: [
@@ -295,7 +302,6 @@ export async function extractAndWriteSecrets(opts: {
         }
         return [...acc, { id: secret.id }];
       }, []),
-      ...cloudConnectorsSecretReferences,
     ],
   };
 }
@@ -506,6 +512,13 @@ export async function isOutputSecretStorageEnabled(
     return true;
   }
 
+  // Enable output secrets storage in development environment
+  const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'dev';
+  if (isDevelopment) {
+    logger.debug('Output secrets storage is enabled for development environment');
+    return true;
+  }
+
   // now check the flag in settings to see if the fleet server requirement has already been met
   // once the requirement has been met, output secrets are always on
   const settings = await settingsService.getSettingsOrUndefined(soClient);
@@ -699,13 +712,20 @@ function getCloudConnectorSecretReferences(
   packagePolicy: NewPackagePolicy,
   secretPaths: SecretPath[]
 ): PolicySecretReference[] {
-  return packagePolicy?.supports_cloud_connector
-    ? secretPaths
-        .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
-        .map((secretPath) => ({
-          id: secretPath.value.value?.id,
-        }))
-    : [];
+  // For cloud connectors, we need to find secret paths that are already secret references
+  if (!packagePolicy?.supports_cloud_connector || !packagePolicy.cloud_connector_id) {
+    return [];
+  }
+  return secretPaths
+    .filter(
+      (secretPath) =>
+        !!secretPath.value?.value &&
+        typeof secretPath.value.value === 'object' &&
+        secretPath.value.value?.id
+    )
+    .map((secretPath) => ({
+      id: secretPath.value.value?.id,
+    }));
 }
 
 /**

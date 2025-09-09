@@ -31,8 +31,9 @@ const fetchCloudConnectors = async (
 };
 
 export const useGetCloudConnectors = () => {
+  const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
-  return useQuery(['cloud-connectors'], () => fetchCloudConnectors(http), {
+  return useQuery([CLOUD_CONNECTOR_QUERY_KEY], () => fetchCloudConnectors(http), {
     enabled: true,
   });
 };

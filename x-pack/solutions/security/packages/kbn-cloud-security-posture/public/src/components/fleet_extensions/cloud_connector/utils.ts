@@ -173,7 +173,8 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
  */
 export const updateInputVarsWithCredentials = (
   inputVars: PackagePolicyVars | undefined,
-  credentials: CloudConnectorCredentials | undefined
+  credentials: CloudConnectorCredentials | undefined,
+  isNewCredentials: boolean = false
 ): PackagePolicyVars | undefined => {
   if (!inputVars) return inputVars;
 
@@ -190,28 +191,30 @@ export const updateInputVarsWithCredentials = (
   } else {
     // Clear role_arn fields when roleArn is undefined
     if (updatedInputVars.role_arn) {
-      updatedInputVars.role_arn.value = undefined;
+      updatedInputVars.role_arn = { value: undefined };
     }
     if (updatedInputVars['aws.role_arn']) {
-      updatedInputVars['aws.role_arn'].value = undefined;
+      updatedInputVars['aws.role_arn'] = { value: undefined };
     }
   }
 
   // Update external_id fields
   if (credentials?.externalId !== undefined) {
     if (updatedInputVars.external_id) {
-      updatedInputVars.external_id.value = credentials.externalId;
+      updatedInputVars.external_id = isNewCredentials
+        ? { value: credentials.externalId }
+        : credentials.externalId;
     }
     if (updatedInputVars['aws.credentials.external_id']) {
-      updatedInputVars['aws.credentials.external_id'].value = credentials.externalId;
+      updatedInputVars['aws.credentials.external_id'] = { value: credentials.externalId };
     }
   } else {
     // Clear external_id fields when externalId is undefined
     if (updatedInputVars.external_id) {
-      updatedInputVars.external_id.value = undefined;
+      updatedInputVars.external_id = { value: undefined };
     }
     if (updatedInputVars['aws.credentials.external_id']) {
-      updatedInputVars['aws.credentials.external_id'].value = undefined;
+      updatedInputVars['aws.credentials.external_id'] = { value: undefined };
     }
   }
 

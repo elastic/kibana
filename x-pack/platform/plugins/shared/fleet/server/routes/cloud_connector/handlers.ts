@@ -76,3 +76,42 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     });
   }
 };
+
+export interface UpdateCloudConnectorRequest {
+  name?: string;
+  vars?: CloudConnectorVars;
+  cloudProvider?: CloudProvider;
+  packagePolicyCount?: number;
+  updated_at?: string;
+}
+
+export const updateCloudConnectorHandler: FleetRequestHandler<
+  { id: string },
+  undefined,
+  UpdateCloudConnectorRequest
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+  const logger = appContextService
+    .getLogger()
+    .get('CloudConnectorService updateCloudConnectorHandler');
+
+  try {
+    logger.info(`Updating cloud connector with id: ${request.params.id}`);
+    const cloudConnector = await cloudConnectorService.update(
+      internalSoClient,
+      request.params.id,
+      request.body
+    );
+    logger.info('Successfully updated cloud connector');
+    return response.ok({ body: cloudConnector });
+  } catch (error) {
+    logger.error('Failed to update cloud connector', error.message);
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: error.message,
+      },
+    });
+  }
+};

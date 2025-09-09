@@ -128,6 +128,12 @@ export class CloudConnectorInvalidVarsError extends FleetError {
   }
 }
 
+export class CloudConnectorUpdateError extends FleetError {
+  constructor(message: string) {
+    super(`Error updating cloud connector in Fleet, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}

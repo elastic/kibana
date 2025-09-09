@@ -19,6 +19,7 @@ export interface CloudConnectorTabsProps {
   selectedTabId: string;
   onTabClick: (tab: CloudConnectorTab) => void;
   isEditPage: boolean;
+  cloudProvider: string | undefined;
   cloudConnectorsCount: number;
 }
 
@@ -26,14 +27,9 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
   tabs,
   selectedTabId,
   onTabClick,
-  isEditPage,
   cloudConnectorsCount,
+  isEditPage,
 }) => {
-  const TABS = {
-    NEW_CONNECTION: 'new-connection',
-    EXISTING_CONNECTION: 'existing-connection',
-  };
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -45,7 +41,7 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
               onTabClick(tab);
             }}
             isSelected={tab.id === selectedTabId}
-            disabled={tab.id === TABS.NEW_CONNECTION ? isEditPage : !cloudConnectorsCount}
+            disabled={isEditPage && !cloudConnectorsCount}
           >
             {tab.name}
           </EuiTab>
