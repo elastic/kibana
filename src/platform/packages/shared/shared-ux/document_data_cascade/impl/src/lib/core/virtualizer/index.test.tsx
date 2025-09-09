@@ -9,8 +9,9 @@
 
 import { renderHook } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
+import { defaultRangeExtractor, type Range } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
-import { useRowVirtualizerHelper } from '.';
+import { useCascadeVirtualizer, useCascadeVirtualizerRangeExtractor } from '.';
 
 const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
   return Array.from(
@@ -19,12 +20,14 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
       new Proxy(
         {
           id: `row-${index}`,
+          index,
+          depth: 0,
+          getIsExpanded: () => false,
+          getParentRows: () => [] as Row<GroupNode>[],
         } as Row<GroupNode>,
         {
+          // escape hatch so we don't have to mock every property on the Row object
           get(target, prop) {
-            if (prop === 'depth') {
-              return 0;
-            }
             return Reflect.get(target, prop);
           },
         }
@@ -32,20 +35,108 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
   );
 };
 
-describe('useRowVirtualizerHelper', () => {
-  it('should render correctly', () => {
-    const { result } = renderHook(() =>
-      useRowVirtualizerHelper({
-        rows: rowsToRender(100),
-        overscan: 5,
-        enableStickyGroupHeader: false,
-        getScrollElement: () => document.body,
-      })
-    );
+describe('virtualizer', () => {
+  describe('useCascadeVirtualizer', () => {
+    it('should render correctly', () => {
+      const { result } = renderHook(() =>
+        useCascadeVirtualizer({
+          rows: rowsToRender(100),
+          overscan: 5,
+          enableStickyGroupHeader: false,
+          getScrollElement: () => document.body,
+        })
+      );
 
-    expect(result.current).toHaveProperty('activeStickyIndex');
-    expect(result.current).toHaveProperty('rowVirtualizer');
-    expect(result.current).toHaveProperty('virtualizedRowsSizeCache');
-    expect(result.current).toHaveProperty('virtualizedRowComputedTranslateValue');
+      expect(result.current).toHaveProperty('activeStickyIndex');
+      expect(result.current).toHaveProperty('rowVirtualizer');
+      expect(result.current).toHaveProperty('virtualizedRowsSizeCache');
+      expect(result.current).toHaveProperty('virtualizedRowComputedTranslateValue');
+    });
+  });
+
+  describe('useCascadeVirtualizerRangeExtractor', () => {
+    it('should return the default virtualizer range when the prop `enableStickyGroupHeader` is false', () => {
+      const setActiveStickyIndex = jest.fn();
+
+      const { result } = renderHook(() =>
+        useCascadeVirtualizerRangeExtractor({
+          rows: rowsToRender(100),
+          enableStickyGroupHeader: false,
+          setActiveStickyIndex,
+        })
+      );
+
+      const range: Range = {
+        startIndex: 10,
+        endIndex: 20,
+        overscan: 5,
+        count: 10,
+      };
+
+      expect(result.current(range)).toEqual(defaultRangeExtractor(range));
+      expect(setActiveStickyIndex).not.toHaveBeenCalled();
+    });
+
+    it('will mark a row with depth 0 as sticky when the prop `enableStickyGroupHeader` is true and the row is expanded', () => {
+      const rows = rowsToRender(100);
+
+      const expandedRowIndex = 0;
+
+      // mock the group row with depth 0 as expanded
+      jest.spyOn(rows[expandedRowIndex], 'getIsExpanded').mockReturnValue(true);
+
+      const setActiveStickyIndex = jest.fn();
+
+      const { result } = renderHook(() =>
+        useCascadeVirtualizerRangeExtractor({
+          rows,
+          enableStickyGroupHeader: true,
+          setActiveStickyIndex,
+        })
+      );
+
+      const range: Range = {
+        // have range start at the expanded row index, so it gets picked as the active sticky index
+        startIndex: expandedRowIndex,
+        endIndex: 20,
+        overscan: 5,
+        count: 10,
+      };
+
+      expect(result.current(range)).toEqual(defaultRangeExtractor(range));
+      expect(setActiveStickyIndex).toHaveBeenCalledWith(expandedRowIndex);
+    });
+
+    it('when the range passed starts with a child row, the index for its parent row is included in the returned range value', () => {
+      const rows = rowsToRender(100);
+
+      const parentRowIndex = 5;
+      const childRowIndex = 10;
+
+      // mock the child row to have a parent row
+      jest
+        .spyOn(rows[childRowIndex], 'getParentRows')
+        .mockReturnValue([rows[parentRowIndex]] as Row<GroupNode>[]);
+
+      const range: Range = {
+        startIndex: childRowIndex,
+        endIndex: 20,
+        overscan: 5,
+        count: 15,
+      };
+
+      const setActiveStickyIndex = jest.fn();
+
+      const { result } = renderHook(() =>
+        useCascadeVirtualizerRangeExtractor({
+          rows,
+          enableStickyGroupHeader: true,
+          setActiveStickyIndex,
+        })
+      );
+
+      expect(result.current(range)).toEqual(expect.arrayContaining([parentRowIndex]));
+      expect(setActiveStickyIndex).toHaveBeenCalledWith(parentRowIndex);
+    });
   });
 });

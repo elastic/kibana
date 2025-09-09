@@ -8,12 +8,12 @@
  */
 
 import type React from 'react';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { type Row } from '@tanstack/react-table';
-import { useVirtualizer, defaultRangeExtractor } from '@tanstack/react-virtual';
+import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 
-export interface VirtualizerHelperProps<G extends GroupNode>
+export interface CascadeVirtualizerProps<G extends GroupNode>
   extends Pick<Parameters<typeof useVirtualizer>[0], 'getScrollElement' | 'overscan'> {
   rows: Row<G>[];
   /**
@@ -22,55 +22,90 @@ export interface VirtualizerHelperProps<G extends GroupNode>
   enableStickyGroupHeader: boolean;
 }
 
-interface VirtualizerHelperReturn {
+interface CascadeVirtualizerReturnValue
+  extends Pick<ReturnType<typeof useVirtualizer>, 'scrollOffset' | 'measureElement'> {
   activeStickyIndex: number | null;
-  rowVirtualizer: ReturnType<typeof useVirtualizer>;
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<number, number>;
   scrollToVirtualizedIndex: (index: number) => void;
   scrollToLastVirtualizedRow: () => void;
+  items: VirtualItem[];
+  totalSize: number;
 }
 
-export const useRowVirtualizerHelper = <G extends GroupNode>({
+export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
+  rows: Row<G>[];
+  enableStickyGroupHeader: boolean;
+  setActiveStickyIndex: (index: number | null) => void;
+}
+
+/**
+ * @internal
+ * @description custom range extractor for cascade component, used to modify the range items the virtualizer displays,
+ * we leverage it in this case to include group rows we'd like to render as sticky headings.
+ * see {@link https://tanstack.com/virtual/v3/docs/api/virtualizer#rangeextractor} for more details
+ */
+export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
+  rows,
+  enableStickyGroupHeader,
+  setActiveStickyIndex,
+}: VirtualizerRangeExtractorArgs<G>) => {
+  const activeStickyIndexRef = useRef<number | null>(null);
+
+  return useCallback<NonNullable<Parameters<typeof useVirtualizer>[0]['rangeExtractor']>>(
+    (range) => {
+      const rangeStartRow = rows[range.startIndex];
+
+      if (!enableStickyGroupHeader) {
+        return defaultRangeExtractor(range);
+      }
+
+      let parentRows;
+
+      // when it's a group row and there
+      activeStickyIndexRef.current =
+        rangeStartRow.depth === 0 && rangeStartRow.getIsExpanded()
+          ? // select the row as is when it's a root group row
+            rangeStartRow.index
+          : // when its a group that's not of depth 0, it must have a parent row that is already expanded
+          (parentRows = rangeStartRow.getParentRows())?.length
+          ? parentRows.reduce<number | null>((acc, row, idx) => {
+              return (acc! += row.index + idx);
+            }, 0)
+          : null;
+
+      const next = new Set(
+        [activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(
+          Number.isInteger
+        ) as number[]
+      );
+
+      setActiveStickyIndex(activeStickyIndexRef.current);
+
+      return Array.from(next).sort((a, b) => a - b);
+    },
+    [rows, enableStickyGroupHeader, setActiveStickyIndex]
+  );
+};
+
+export const useCascadeVirtualizer = <G extends GroupNode>({
   overscan,
   enableStickyGroupHeader,
   rows,
   getScrollElement,
-}: VirtualizerHelperProps<G>): VirtualizerHelperReturn => {
+}: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
-  const activeStickyIndexRef = useRef<number | null>(null);
+  const [activeStickyIndex, setActiveStickyIndex] = useState<number | null>(null);
+  const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
+    rows,
+    enableStickyGroupHeader,
+    setActiveStickyIndex,
+  });
 
   /**
    * @description records the computed translate value for each item of virtualized row
    */
   const virtualizedRowComputedTranslateValueRef = useRef(new Map<number, number>());
-
-  /**
-   * @description range extractor, used to inform virtualizer about our rendering needs in relation to marking specific rows as sticky rows.
-   * see {@link https://tanstack.com/virtual/latest/docs/api/virtualizer#rangeextractor} for more details
-   */
-  const rangeExtractor = useCallback<
-    NonNullable<Parameters<typeof useVirtualizer>[0]['rangeExtractor']>
-  >(
-    (range) => {
-      if (!enableStickyGroupHeader) {
-        return defaultRangeExtractor(range);
-      }
-
-      const rangeStartRow = rows[range.startIndex];
-
-      // TODO: get buy in to make all item parents sticky, right now we only select the top most parent as sticky
-      activeStickyIndexRef.current =
-        rangeStartRow.subRows?.length && rangeStartRow.getIsExpanded()
-          ? rangeStartRow.index
-          : rangeStartRow.getParentRows()[0]?.index ?? null;
-      const next = new Set(
-        [activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(Boolean)
-      );
-      return Array.from(next).sort((a, b) => a - b);
-    },
-    [rows, enableStickyGroupHeader]
-  );
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -87,12 +122,17 @@ export const useRowVirtualizerHelper = <G extends GroupNode>({
   });
 
   return {
-    rowVirtualizer: virtualizer,
+    get items() {
+      return virtualizer.getVirtualItems();
+    },
+    get totalSize() {
+      return virtualizer.getTotalSize();
+    },
     get virtualizedRowsSizeCache() {
       return virtualizedRowsSizeCacheRef.current;
     },
     get activeStickyIndex() {
-      return activeStickyIndexRef.current;
+      return activeStickyIndex;
     },
     get virtualizedRowComputedTranslateValue() {
       return virtualizedRowComputedTranslateValueRef.current;
@@ -103,6 +143,10 @@ export const useRowVirtualizerHelper = <G extends GroupNode>({
     get scrollToLastVirtualizedRow() {
       return () => this.scrollToVirtualizedIndex(rows.length - 1);
     },
+    get scrollOffset() {
+      return virtualizer.scrollOffset;
+    },
+    measureElement: virtualizer.measureElement,
   };
 };
 
@@ -121,12 +165,9 @@ export const getGridHeaderPositioningStyle = (
  */
 export const getGridRowPositioningStyle = (
   renderIndex: number,
-  isActiveStickyRow: boolean,
   virtualizedRowComputedTranslateValueMap: Map<number, number>
 ): React.CSSProperties => {
-  return !isActiveStickyRow
-    ? {
-        transform: `translateY(${virtualizedRowComputedTranslateValueMap.get(renderIndex) ?? 0}px)`,
-      }
-    : {};
+  return {
+    transform: `translateY(${virtualizedRowComputedTranslateValueMap.get(renderIndex) ?? 0}px)`,
+  };
 };

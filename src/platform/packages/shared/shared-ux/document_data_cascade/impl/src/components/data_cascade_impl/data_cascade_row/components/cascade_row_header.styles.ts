@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CascadeRowPrimitive, CascadeRowHeaderPrimitive } from './cascade_row';
-export { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { CascadeSizing } from '../../types';
+
+export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) => ({
+  rowHeaderSlotWrapper: css({
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+  }),
+});
