@@ -146,11 +146,6 @@ describe('PipelinesEdit section', () => {
       });
     });
 
-    // TODO: remove this test when we fully migrate to react-router 6+ and history 5+
-    // This is a workaround for a known issue with history lib not decoding the URL properly
-    // See https://github.com/remix-run/history/issues/786
-    // And this test ensures that we don't break this workaround in future changes while on history v4
-    // More info check in corresponding source file
     describe('AND pipeline name contains special characters', () => {
       it('SHOULD properly decode the name', () => {
         const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {}); // to suppress history v4 warning
@@ -159,10 +154,7 @@ describe('PipelinesEdit section', () => {
         const pipelineName = 'my-p!@#$%^&()_+|}{":?><./;\'[]\\=-`~ipeline';
         // single encoding assumes that it's a reloaded page or opened in a new tab
         // from a previously transitioned double encoded URL
-        //
-        // when transitioning from list -> clone page we do:
-        // history.push('/<basename>/edit/' + encodeURIComponent(encodeURIComponent('<pipelineName>')))
-        // which works around a bug in history v4 (see comments above and in source file)
+        // See https://github.com/elastic/kibana/issues/234500
         const initialRoute = '/edit/' + encodeURIComponent(pipelineName);
         const pipeline = {
           id: 'p1',
@@ -177,8 +169,7 @@ describe('PipelinesEdit section', () => {
         try {
           // simualting mismatch on global window.location.pathname
           // on reload or new tab open from copied URL in address bar
-          //
-          // which happens because of history v4 bug (see comments above and in source file)
+          // See https://github.com/elastic/kibana/issues/234500
           Object.defineProperty(window, 'location', {
             configurable: true,
             value: {

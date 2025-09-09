@@ -94,11 +94,6 @@ describe('PipelinesCreate section', () => {
       });
     });
 
-    // TODO: remove this test when we fully migrate to react-router 6+ and history 5+
-    // This is a workaround for a known issue with history lib not decoding the URL properly
-    // See https://github.com/remix-run/history/issues/786
-    // And this test ensures that we don't break this workaround in future changes while on history v4
-    // More info check in corresponding source file
     describe('AND pipeline name contains special characters', () => {
       it('SHOULD correctly decode the name and pass it to the form', () => {
         const services = createMockServices();

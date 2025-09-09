@@ -65,54 +65,22 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
   }, [services.metric, services.breadcrumbs]);
 
   const goToEditPipeline = (pipelineName: string) => {
-    // When we client-side react-router/history navigate to edit page
-    // we double encode the pathname part like this: history.push('/<basename>/edit/' + encodeURIComponent(encodeURIComponent('<name>')))
-
-    // Why? Because if we encode it once, history lib will automatically decode it upon loading the page
-    // incorrectly mangling the resulting pipeline name, due to a bug in history library
-
-    // And the bug being incorrect choice of decode api call (decodeURI instead of decodeURIComponent)
-    // see this history v4 bug https://github.com/remix-run/history/issues/786 (it was fixed in history v5, i.e. react-router v6)
-    // and this offending line https://github.com/remix-run/history/blob/6104a6a2e40ae17a47a297621afff9a6cb184bfc/modules/LocationUtils.js#L36
-
-    // decodeURI cannot decode special characters like `#` and `@` etc which can be valid in pipeline names.
-    // For example 'asd!@#$ asd%^&' -> encodeURIComponent -> 'asd!%40%23%24%20asd%25%5E%26' -> decodeURI -> 'asd!%40%23%24 asd%^%26'
-    // I.e. (cannot decode @#$^& signs), resulting decoded string is not the original string anymore.
-    // Furthermore it's a malformed URI now for decodeURIComponent and cannot be decoded back to the original string.
-
-    // So we double encode it to make sure all special characters are protected from decodeURI
-    // with a layer of encoding that decodeURI can decode properly, and then our client side
-    // decodeURIComponent call can decode the remaining encoded layer of special characters properly back to the original string.
+    // this double encoding (+1 in getEditPath) is a
+    // temporary workaround for history v4 bug with url-encoded
+    // route params see https://github.com/elastic/kibana/issues/234500
     const encodedParam = encodeURIComponent(pipelineName);
     history.push(getEditPath({ pipelineName: encodedParam }));
   };
 
   const goToClonePipeline = (clonedPipelineName: string) => {
-    // When we client-side react-router/history navigate to clone page from pipelines list,
-    // we double encode the pathname part like this: history.push('/<basename>/create/' + encodeURIComponent(encodeURIComponent('<sourceName>')))
-
-    // Why? Because if we encode it once, history lib will automatically decode it upon loading the page
-    // incorrectly mangling the resulting pipeline name, due to a bug in history library
-
-    // And the bug being incorrect choice of decode api call (decodeURI instead of decodeURIComponent)
-    // see this history v4 bug https://github.com/remix-run/history/issues/786 (it was fixed in history v5, i.e. react-router v6)
-    // and this offending line https://github.com/remix-run/history/blob/6104a6a2e40ae17a47a297621afff9a6cb184bfc/modules/LocationUtils.js#L36
-
-    // decodeURI cannot decode special characters like `#` and `@` etc which can be valid in pipeline names.
-    // For example 'asd!@#$ asd%^&' -> encodeURIComponent -> 'asd!%40%23%24%20asd%25%5E%26' -> decodeURI -> 'asd!%40%23%24 asd%^%26'
-    // I.e. (cannot decode @#$^& signs), resulting decoded string is not the original string anymore.
-    // Furthermore it's a malformed URI now for decodeURIComponent and cannot be decoded back to the original string.
-
-    // So we double encode it to make sure all special characters are protected from decodeURI
-    // with a layer of encoding that decodeURI can decode properly, and then our client side
-    // decodeURIComponent call can decode the remaining encoded layer of special characters properly back to the original string.
+    // this double encoding (+1 in getClonePath) is a
+    // temporary workaround for history v4 bug with url-encoded
+    // route params see https://github.com/elastic/kibana/issues/234500
     const encodedParam = encodeURIComponent(clonedPipelineName);
     history.push(getClonePath({ clonedPipelineName: encodedParam }));
   };
 
   const goToCreatePipeline = (pipelineName: string) => {
-    // We don't need to double encode here, only single encoding is enough
-    // because we don't change pathname part only searchparams part which is not touched by history lib
     history.push(getCreatePath({ pipelineName }));
   };
 

@@ -11,8 +11,9 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SectionLoading, useKibana, attemptToURIDecode } from '../../../shared_imports';
+import { SectionLoading, useKibana } from '../../../shared_imports';
 
+import { normalizePipelineNameFromParams } from '../../lib/normalize_pipeline_name_from_params';
 import { PipelinesCreate } from '../pipelines_create';
 import { getErrorText } from '../utils';
 
@@ -28,49 +29,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 
-  let normalizedSourceName = sourceName;
-  if (!window.location.pathname.endsWith(sourceName)) {
-    // Context:
-
-    // When we client-side react-router/history navigate to this clone page from pipelines list,
-    // we double encode the pathname part like this: history.push('/<basename>/create/' + encodeURIComponent(encodeURIComponent('<sourceName>')))
-
-    // Why? Because if we encode it once, history lib will automatically decode it upon loading the page
-    // incorrectly mangling the resulting pipeline name, due to a bug in history library
-
-    // And the bug being incorrect choice of decode api call (decodeURI instead of decodeURIComponent)
-    // see this history v4 bug https://github.com/remix-run/history/issues/786 (it was fixed in history v5, i.e. react-router v6)
-    // and this offending line https://github.com/remix-run/history/blob/6104a6a2e40ae17a47a297621afff9a6cb184bfc/modules/LocationUtils.js#L36
-
-    // decodeURI cannot decode special characters like `#` and `@` etc which can be valid in pipeline names.
-    // For example 'asd!@#$ asd%^&' -> encodeURIComponent -> 'asd!%40%23%24%20asd%25%5E%26' -> decodeURI -> 'asd!%40%23%24 asd%^%26'
-    // I.e. (cannot decode @#$^& signs), resulting decoded string is not the original string anymore.
-    // Furthermore it's a malformed URI now for decodeURIComponent and cannot be decoded back to the original string.
-
-    // So we double encode it to make sure all special characters are protected from decodeURI
-    // with a layer of encoding that decodeURI can decode properly, and then our client side
-    // decodeURIComponent call can decode the remaining encoded layer of special characters properly back to the original string.
-
-    // Problem:
-
-    // If then the user copies that already pre-decoded URL from the URL bar and opens it in a new tab or
-    // reloads the page, the reloaded page will invoke react-routers/history decoding against it again.
-    // But this time the pathname part is no longer double encoded in the URL, and it's only single encoded now.
-    // So history lib decodeURI call will decode it and mangle it as described above.
-
-    // Solution:
-
-    // A good indication that the pathname part is mangled is when
-    // window.location.pathname parts visible in the browser addressbar,
-    // don't match the ones from react router history.location.pathname parts.
-    // (and match.params.name is in sync with react-router's history.location.pathname part)
-    //
-    // So if that happens, we just take the last part of window.location.pathname as the source
-    // of truth for the pipeline name we want to load as safely parse it afterwards
-    normalizedSourceName = window.location.pathname.split('/').pop() || sourceName;
-  }
-
-  const decodedSourceName = attemptToURIDecode(normalizedSourceName)!;
+  const decodedSourceName = normalizePipelineNameFromParams(sourceName) ?? '';
   const {
     error,
     data: pipeline,
