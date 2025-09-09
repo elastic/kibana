@@ -295,8 +295,7 @@ export const addLayerColumn = (
   first = false,
   postfix = ''
 ) => {
-  const column = Array.isArray(config) ? config[0] : config;
-  const referenceColumn = Array.isArray(config) ? config[1] : undefined;
+  const [column, referenceColumn] = Array.isArray(config) ? config : [config];
   const name = columnName + postfix;
 
   layer.columns = {
