@@ -19,17 +19,21 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { DefaultAIConnector } from '@kbn/ai-assistant-default-llm-setting';
+import { useGenAIConnectors } from '@kbn/ai-assistant/src/hooks';
+import { DefaultAiConnectorSettingsContextProvider } from '@kbn/ai-assistant-default-llm-setting/src/context/default_ai_connector_context';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
-  const {
-    docLinks,
-    settings,
-    notifications,
-    application: { capabilities, getUrlForApp },
-  } = useKibana().services;
+  const { docLinks, settings, notifications, application, featureFlags } = useKibana().services;
+  const { capabilities, getUrlForApp } = application;
   const { config } = useAppContext();
+  const connectors = useGenAIConnectors();
 
   const settingsKeys = [
     aiAnonymizationSettings,
@@ -38,8 +42,13 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];
 
+  const customComponentSettingsKeys = [
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  ];
+
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(settingsKeys);
+    useEditableSettings([...settingsKeys, ...customComponentSettingsKeys]);
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
 
@@ -88,6 +97,18 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
           </FieldRowProvider>
         );
       })}
+      <DefaultAiConnectorSettingsContextProvider
+        toast={notifications.toasts}
+        application={application}
+        docLinks={docLinks}
+        featureFlags={featureFlags}
+      >
+        <DefaultAIConnector
+          settings={{ fields, handleFieldChange, unsavedChanges }}
+          connectors={connectors}
+        />
+      </DefaultAiConnectorSettingsContextProvider>
+
       {config.logSourcesEnabled && (
         <LogSourcesSettingSynchronisationInfo
           isLoading={false}
