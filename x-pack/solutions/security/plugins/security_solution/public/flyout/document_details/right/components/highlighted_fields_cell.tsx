@@ -68,15 +68,15 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   scopeId = '',
   showPreview = false,
   ancestorsIndexName,
-  displayValuesLimit,
+  displayValuesLimit = 2,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
   const { euiTheme } = useEuiTheme();
-  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
-  const togglePopover = useCallback(
-    () => setIsOverflowPopoverOpen((currentIsOpen) => !currentIsOpen),
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const toggleContentExpansion = useCallback(
+    () => setIsContentExpanded((currentIsOpen) => !currentIsOpen),
     []
   );
 
@@ -112,9 +112,10 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
     return [];
   }, [values, displayValuesLimit]);
 
-  const isShowMoreButtonVisible = useMemo(() => {
-    return !!displayValuesLimit && displayValuesLimit < (values?.length ?? 0);
-  }, [displayValuesLimit, values]);
+  const isContentTooLarge = useMemo(
+    () => !!displayValuesLimit && displayValuesLimit < (values?.length ?? 0),
+    [displayValuesLimit, values]
+  );
 
   const renderValue = useCallback(
     (value: string, i: number) => (
@@ -155,14 +156,16 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         }
       `}
     >
-      {visibleValues != null &&
-        visibleValues.map((value, i) => {
-          return renderValue(value, i);
-        })}
-      {isOverflowPopoverOpen && overflownValues?.map(renderValue)}
-      {isShowMoreButtonVisible && (
-        <EuiButtonEmpty size="xs" flush="both" onClick={togglePopover}>
-          {isOverflowPopoverOpen ? (
+      {visibleValues != null && visibleValues.map((value, i) => renderValue(value, i))}
+      {isContentExpanded && overflownValues?.map(renderValue)}
+      {isContentTooLarge && (
+        <EuiButtonEmpty
+          size="xs"
+          flush="both"
+          onClick={toggleContentExpansion}
+          data-test-subj="toggle-show-more-button"
+        >
+          {isContentExpanded ? (
             <FormattedMessage
               id="xpack.securitySolution.flyout.alertsHighlightedField.showMore"
               defaultMessage="Show less"
