@@ -8,12 +8,13 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiText, EuiTextTruncate } from '@elastic/eui';
-import { Timestamp } from '@kbn/apm-ui-shared';
+import { EuiText, EuiTextTruncate, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
+import { ERROR_GROUP_ID } from '@kbn/apm-types';
+import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 const NOT_AVAILABLE_LABEL = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.na',
@@ -22,9 +23,9 @@ const NOT_AVAILABLE_LABEL = i18n.translate(
   }
 );
 
-export const getColumns = (): Array<
-  EuiBasicTableColumn<ErrorGroupMainStatisticsResponse['errorGroups'][0]>
-> => [
+export const getColumns = (
+  generateDiscoverLink: GenerateDiscoverLink
+): Array<EuiBasicTableColumn<ErrorGroupMainStatisticsResponse['errorGroups'][0]>> => [
   {
     field: 'name',
     name: i18n.translate(
@@ -33,18 +34,28 @@ export const getColumns = (): Array<
     ),
     sortable: (item) => item.name || '',
     render: (_, item) => {
+      const href = generateDiscoverLink({ [ERROR_GROUP_ID]: item.groupId });
+
+      const content = (
+        <EuiTextTruncate
+          data-test-subj={`error-group-${item.groupId}`}
+          text={item.name || NOT_AVAILABLE_LABEL}
+        />
+      );
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          <EuiText size="s">
-            <EuiTextTruncate
-              data-test-subj={`error-name-${item.groupId}`}
-              text={item.name || NOT_AVAILABLE_LABEL}
-            />
-          </EuiText>
+          {href ? (
+            <EuiLink data-test-subj={`error-group-link-${item.groupId}`} href={href}>
+              {content}
+            </EuiLink>
+          ) : (
+            content
+          )}
+          <EuiText size="s" />
           {item.culprit && (
             <EuiText size="xs" color="subdued">
               <EuiTextTruncate

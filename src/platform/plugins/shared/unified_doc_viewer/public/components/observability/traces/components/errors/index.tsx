@@ -17,19 +17,14 @@
  */
 
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getColumns } from './get_columns';
 import { useFetchErrors } from './use_fetch_errors';
+import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 export interface Props {
   traceId: string;
@@ -43,6 +38,9 @@ const sorting: EuiInMemoryTableProps['sorting'] = {
 };
 
 export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
+  const { indexes } = useDataSourcesContext();
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.errors });
+
   const { loading, error, response } = useFetchErrors({
     traceId,
     transactionId,
@@ -50,7 +48,7 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
     serviceName,
   });
 
-  const columns = useMemo(() => getColumns(), []);
+  const columns = useMemo(() => getColumns(generateDiscoverLink), [generateDiscoverLink]);
 
   if (loading || (!error && response.errorGroups.length === 0)) {
     return null;
