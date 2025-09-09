@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBottomBar, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   isLoading: boolean;
@@ -26,12 +27,21 @@ export const BottomBarActions: React.FC<Props> = ({
   if (unsavedChangesCount === 0) return null;
 
   return (
-    <EuiBottomBar paddingSize="s" position="fixed">
+    <EuiBottomBar
+      paddingSize="s"
+      position="fixed"
+      aria-label={i18n.translate('xpack.onechat.management.bottomBar.ariaLabel', {
+        defaultMessage: 'Settings actions',
+      })}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <p>
-              {unsavedChangesCount} {unsavedChangesCount === 1 ? 'change' : 'changes'}
+            <p aria-live="polite" aria-atomic="true" data-test-subj="unsavedChangesCount">
+              {i18n.translate('xpack.onechat.management.bottomBar.unsavedChangesCount', {
+                defaultMessage: '{count, plural, one {# change} other {# changes}}',
+                values: { count: unsavedChangesCount },
+              })}
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -42,8 +52,13 @@ export const BottomBarActions: React.FC<Props> = ({
                 color="text"
                 onClick={onDiscardChanges}
                 data-test-subj="agentBuilderDiscard"
+                aria-label={i18n.translate('xpack.onechat.management.bottomBar.discardAria', {
+                  defaultMessage: 'Discard unsaved changes',
+                })}
               >
-                Discard
+                {i18n.translate('xpack.onechat.management.bottomBar.discard', {
+                  defaultMessage: 'Discard',
+                })}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -53,8 +68,13 @@ export const BottomBarActions: React.FC<Props> = ({
                 isDisabled={!!areChangesInvalid}
                 onClick={onSave}
                 data-test-subj="agentBuilderSave"
+                aria-label={i18n.translate('xpack.onechat.management.bottomBar.saveAria', {
+                  defaultMessage: 'Save changes',
+                })}
               >
-                Save changes
+                {i18n.translate('xpack.onechat.management.bottomBar.save', {
+                  defaultMessage: 'Save changes',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
