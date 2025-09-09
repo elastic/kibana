@@ -23,6 +23,8 @@ import type {
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { LogSearchResult } from './lib/workflow_logger';
@@ -189,6 +191,16 @@ export class WorkflowsManagementApi {
       // TODO: handle error properly
       // It should throw BadRequestError in the API
       throw parsedYaml.error;
+    }
+
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
