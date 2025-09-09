@@ -69,5 +69,10 @@
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
     "@kbn/scout",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-plugin",
+    "@kbn/react-kibana-context-theme",
   ]
 }
