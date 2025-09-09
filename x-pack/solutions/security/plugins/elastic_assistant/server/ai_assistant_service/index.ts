@@ -141,6 +141,7 @@ export class AIAssistantService {
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
+  private isCheckpointSaverEnabled: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -203,6 +204,14 @@ export class AIAssistantService {
       .catch((error) => {
         this.options.logger.warn(`Failed to initialize productDocManager: ${error.message}`);
       });
+  }
+
+  public getIsCheckpointSaverEnabled() {
+    return this.isCheckpointSaverEnabled;
+  }
+
+  public setIsCheckpointSaverEnabled(isEnabled: boolean) {
+    this.isCheckpointSaverEnabled = isEnabled;
   }
 
   public isInitialized() {
