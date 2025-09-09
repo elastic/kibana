@@ -11,7 +11,7 @@ import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { FieldRow, FieldRowKibanaProvider } from '@kbn/management-settings-components-field-row';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BottomBarActions } from './bottom_bar_actions';
-import { useEditableSettings } from './hooks/use_editable_settings';
+import { useEditableSettings } from '../hooks/use_editable_settings';
 import { labels } from '../../application/utils/i18n';
 
 export const AgentBuilderSettingsApp: React.FC<{}> = () => {
