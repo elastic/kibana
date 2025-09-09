@@ -40,7 +40,7 @@ import { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysolution-ex
 import { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
 import { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
 import { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

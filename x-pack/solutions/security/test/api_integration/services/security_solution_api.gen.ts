@@ -188,7 +188,7 @@ import {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -665,8 +665,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
-     * Download a file from an endpoint.
-     */
+      * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -680,8 +684,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get information for the specified file using the file ID.
-     */
+      * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
       return supertest
         .get(

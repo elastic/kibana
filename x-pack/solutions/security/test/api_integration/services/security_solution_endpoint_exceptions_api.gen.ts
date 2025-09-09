@@ -25,7 +25,7 @@ import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-e
 import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
 import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
 import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
