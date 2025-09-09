@@ -13,7 +13,7 @@ export const LoadingGroup = () => {
   return (
     <EuiSkeletonTitle size="s" isLoading={true}>
       <FormattedMessage
-        id="xpack.securitySolution.assetInventory.grouping.loadingGroupPanelTitle"
+        id="securitySolutionPackages.cloudSecurityGrouping.loadingGroupPanelTitle"
         defaultMessage="Loading"
       />
     </EuiSkeletonTitle>
