@@ -74,7 +74,7 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
     statusService = createEngineStatusService(dataClient, mockSavedObjectClient);
   });
   describe('disable', () => {
-    it.only('should not disable the privilege monitoring engine if it is not started', async () => {
+    it('should not disable the privilege monitoring engine if it is not started', async () => {
       mockGetEngineDescriptor.mockResolvedValue({
         status: 'error',
         error: {
