@@ -8,7 +8,6 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '@kbn/metrics-experience-plugin/public';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -29,10 +28,6 @@ export const createMetricsDataSourceProfileProvider = (
   },
   resolve: (params) => {
     const metricsClient = services.metricsContextService.getMetricsExperienceClient();
-    const isEnabled = services.core.featureFlags.getBooleanValue(
-      METRICS_EXPERIENCE_FEATURE_FLAG_KEY,
-      false
-    );
 
     const isValidQuery =
       isOfAggregateQueryType(params.query) && params.query.esql.toLowerCase().includes('metrics');
@@ -40,8 +35,7 @@ export const createMetricsDataSourceProfileProvider = (
     if (
       params.rootContext.solutionType !== SolutionType.Observability ||
       !isValidQuery ||
-      !metricsClient ||
-      !isEnabled
+      !metricsClient
     ) {
       return {
         isMatch: false,

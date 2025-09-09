@@ -14,6 +14,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { MetricsExperienceClient } from './api';
 import { createMetricsExperienceClient } from './api';
 import type { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
+import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';
 
 const MetricsExperienceApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.Application }))
@@ -56,8 +57,13 @@ export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
   }
 
   public start(_core: CoreStart) {
+    const isEnabled = _core.featureFlags.getBooleanValue(
+      METRICS_EXPERIENCE_FEATURE_FLAG_KEY,
+      false
+    );
+
     return {
-      metricsExperienceClient: this.repositoryClient,
+      metricsExperienceClient: isEnabled ? this.repositoryClient : undefined,
     };
   }
 
