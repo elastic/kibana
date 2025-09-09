@@ -1,19 +1,10 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-/*
  * AUTO-GENERATED FILE - DO NOT EDIT
- *
+ * 
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
- * Generated at: 2025-09-09T10:49:17.745Z
+ * Generated at: 2025-09-09T12:58:33.019Z
  * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
- *
+ * 
  * To regenerate: npm run generate:kibana-connectors
  */
 
@@ -21,14 +12,18 @@ import { z } from '@kbn/zod';
 
 // Zodios imports removed for schemas file
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const bedrock_config = z
   .object({
     apiUrl: z.string(),
     defaultModel: z.string().optional().default('us.anthropic.claude-3-7-sonnet-20250219-v1:0'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const crowdstrike_config = z.object({ url: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const d3security_config = z.object({ url: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const email_config = z
   .object({
     clientId: z.string().nullish(),
@@ -44,6 +39,7 @@ export const email_config = z
     tenantId: z.string().nullish(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const gemini_config = z
   .object({
     apiUrl: z.string(),
@@ -52,7 +48,9 @@ export const gemini_config = z
     gcpProjectID: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const resilient_config = z.object({ apiUrl: z.string(), orgId: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const index_config = z
   .object({
     executionTimeField: z.string().nullish().default(null),
@@ -60,10 +58,13 @@ export const index_config = z
     refresh: z.boolean().optional().default(false),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const jira_config = z.object({ apiUrl: z.string(), projectKey: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const genai_azure_config = z
   .object({ apiProvider: z.literal('Azure OpenAI'), apiUrl: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const genai_openai_config = z
   .object({
     apiProvider: z.literal('OpenAI'),
@@ -71,6 +72,7 @@ export const genai_openai_config = z
     defaultModel: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const genai_openai_other_config = z
   .object({
     apiProvider: z.literal('Other'),
@@ -83,9 +85,13 @@ export const genai_openai_other_config = z
     headers: z.record(z.string()).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const opsgenie_config = z.object({ apiUrl: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const pagerduty_config = z.object({ apiUrl: z.string().nullable() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const sentinelone_config = z.object({ url: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const servicenow_config = z
   .object({
     apiUrl: z.string(),
@@ -96,6 +102,7 @@ export const servicenow_config = z
     usesTableApi: z.boolean().optional().default(true),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const servicenow_itom_config = z
   .object({
     apiUrl: z.string(),
@@ -105,6 +112,7 @@ export const servicenow_itom_config = z
     userIdentifierValue: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const slack_api_config = z
   .object({
     allowedChannels: z.array(
@@ -113,6 +121,7 @@ export const slack_api_config = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const swimlane_config = z
   .object({
     apiUrl: z.string(),
@@ -147,20 +156,29 @@ export const swimlane_config = z
       .optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const thehive_config = z
   .object({ organisation: z.string().optional(), url: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const tines_config = z.object({ url: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const torq_config = z.object({ webhookIntegrationUrl: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const auth_type = z.enum(['webhook-authentication-basic', 'webhook-authentication-ssl']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ca = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const cert_type = z.enum(['ssl-crt-key', 'ssl-pfx']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const has_auth = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const verification_mode = z.enum(['certificate', 'full', 'none']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const webhook_config = z
   .object({
     authType: auth_type.nullable(),
-    ca,
+    ca: ca,
     certType: cert_type,
     hasAuth: has_auth.default(true),
     headers: z.object({}).partial().passthrough().nullable(),
@@ -170,6 +188,7 @@ export const webhook_config = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const cases_webhook_config = z
   .object({
     authType: auth_type.nullish(),
@@ -193,28 +212,37 @@ export const cases_webhook_config = z
     viewIncidentUrl: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const xmatters_config = z
   .object({ configUrl: z.string().nullable(), usesBasic: z.boolean().default(true) })
   .partial()
   .passthrough();
-export const bedrock_secrets = z
-  .object({ accessKey: z.string(), secret: z.string() })
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const bedrock_secrets = z.object({ accessKey: z.string(), secret: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const crowdstrike_secrets = z
   .object({ clientId: z.string(), clientSecret: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const d3security_secrets = z.object({ token: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const email_secrets = z
   .object({ clientSecret: z.string(), password: z.string(), user: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const gemini_secrets = z.object({ credentialsJson: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const resilient_secrets = z
   .object({ apiKeyId: z.string(), apiKeySecret: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const jira_secrets = z.object({ apiToken: z.string(), email: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const defender_secrets = z.object({ clientSecret: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const teams_secrets = z.object({ webhookUrl: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const genai_secrets = z
   .object({
     apiKey: z.string(),
@@ -224,9 +252,13 @@ export const genai_secrets = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const opsgenie_secrets = z.object({ apiKey: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const pagerduty_secrets = z.object({ routingKey: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const sentinelone_secrets = z.object({ token: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const servicenow_secrets = z
   .object({
     clientSecret: z.string(),
@@ -237,26 +269,38 @@ export const servicenow_secrets = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const slack_api_secrets = z.object({ token: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const swimlane_secrets = z.object({ apiToken: z.string() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const thehive_secrets = z.object({ apiKey: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const tines_secrets = z.object({ email: z.string(), token: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const torq_secrets = z.object({ token: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const crt = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const key = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const pfx = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const webhook_secrets = z
-  .object({ crt, key, pfx, password: z.string(), user: z.string() })
+  .object({ crt: crt, key: key, pfx: pfx, password: z.string(), user: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const cases_webhook_secrets = z
-  .object({ crt, key, pfx, password: z.string(), user: z.string() })
+  .object({ crt: crt, key: key, pfx: pfx, password: z.string(), user: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const xmatters_secrets = z
   .object({ password: z.string(), secretsUrl: z.string(), user: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_actions_connector_id_Body = z.object({
   connector_type_id: z.string(),
   name: z.string(),
@@ -317,6 +361,7 @@ export const post_actions_connector_id_Body = z.object({
     .optional()
     .default({}),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const defender_config = z
   .object({
     apiUrl: z.string(),
@@ -326,6 +371,7 @@ export const defender_config = z
     tenantId: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_actions_connector_id_Body = z.object({
   name: z.string(),
   config: z
@@ -384,12 +430,15 @@ export const put_actions_connector_id_Body = z.object({
     .optional()
     .default({}),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_acknowledge_resolve_pagerduty = z
   .object({ dedupKey: z.string().max(255), eventAction: z.enum(['acknowledge', 'resolve']) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_documents = z
   .object({ documents: z.array(z.object({}).partial().passthrough()) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_message_email = z
   .object({
     bcc: z.array(z.string()).optional(),
@@ -399,13 +448,16 @@ export const run_message_email = z
     to: z.array(z.string()).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_message_serverlog = z
   .object({
     level: z.enum(['debug', 'error', 'fatal', 'info', 'trace', 'warn']).optional().default('info'),
     message: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_message_slack = z.object({ message: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_trigger_pagerduty = z
   .object({
     class: z.string().optional(),
@@ -423,6 +475,7 @@ export const run_trigger_pagerduty = z
     timestamp: z.string().datetime({ offset: true }).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_addevent = z
   .object({
     subAction: z.literal('addEvent'),
@@ -445,6 +498,7 @@ export const run_addevent = z
       .optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_closealert = z
   .object({
     subAction: z.literal('closeAlert'),
@@ -458,12 +512,14 @@ export const run_closealert = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_closeincident = z
   .object({
     subAction: z.literal('closeIncident'),
     subActionParams: z.object({ incident: z.union([z.unknown(), z.unknown()]) }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_createalert = z
   .object({
     subAction: z.literal('createAlert'),
@@ -511,45 +567,55 @@ export const run_createalert = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_fieldsbyissuetype = z
   .object({
     subAction: z.literal('fieldsByIssueType'),
     subActionParams: z.object({ id: z.string() }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_getagentdetails = z
   .object({
     subAction: z.literal('getAgentDetails'),
     subActionParams: z.object({ ids: z.array(z.string()) }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_getagents = z.object({ subAction: z.literal('getAgents') }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_getchoices = z
   .object({
     subAction: z.literal('getChoices'),
     subActionParams: z.object({ fields: z.array(z.string()) }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_getfields = z.object({ subAction: z.literal('getFields') }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_getincident = z
   .object({
     subAction: z.literal('getIncident'),
     subActionParams: z.object({ externalId: z.string() }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_issue = z
   .object({
     subAction: z.literal('issue'),
     subActionParams: z.object({ id: z.string() }).passthrough().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_issues = z
   .object({
     subAction: z.literal('issues'),
     subActionParams: z.object({ title: z.string() }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_issuetypes = z.object({ subAction: z.literal('issueTypes') }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_postmessage = z
   .object({
     subAction: z.literal('postMessage'),
@@ -563,6 +629,7 @@ export const run_postmessage = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_pushtoservice = z
   .object({
     subAction: z.literal('pushToService'),
@@ -611,12 +678,14 @@ export const run_pushtoservice = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const run_validchannelid = z
   .object({
     subAction: z.literal('validChannelId'),
     subActionParams: z.object({ channelId: z.string() }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_actions_connector_id_execute_Body = z.object({
   params: z.union([
     run_acknowledge_resolve_pagerduty,
@@ -643,10 +712,12 @@ export const post_actions_connector_id_execute_Body = z.object({
     run_validchannelid,
   ]),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Alerting_401_response = z
   .object({ error: z.literal('Unauthorized'), message: z.string(), statusCode: z.literal(401) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Alerting_fieldmap_properties = z
   .object({
     array: z.boolean(),
@@ -662,6 +733,7 @@ export const Alerting_fieldmap_properties = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_apm_anomaly = z
   .object({
     serviceName: z.string().optional(),
@@ -672,6 +744,7 @@ export const params_property_apm_anomaly = z
     anomalySeverityType: z.enum(['critical', 'major', 'minor', 'warning']),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_apm_error_count = z
   .object({
     serviceName: z.string().optional(),
@@ -688,6 +761,7 @@ export const params_property_apm_error_count = z
     errorGroupingKey: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_apm_transaction_duration = z
   .object({
     serviceName: z.string().optional(),
@@ -706,6 +780,7 @@ export const params_property_apm_transaction_duration = z
     aggregationType: z.enum(['avg', '95th', '99th']),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_apm_transaction_error_rate = z
   .object({
     serviceName: z.string().optional(),
@@ -723,18 +798,31 @@ export const params_property_apm_transaction_error_rate = z
       .default(['service.name', 'service.environment', 'transaction.type']),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const aggfield = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const aggtype = z.enum(['avg', 'count', 'max', 'min', 'sum']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const excludehitsfrompreviousrun = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const groupby = z.enum(['all', 'top']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const size = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const termfield = z.union([z.string(), z.array(z.string())]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const termsize = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const threshold = z.array(z.number().int());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const thresholdcomparator = z.enum(['>', '>=', '<', '<=', 'between', 'notBetween']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const timefield = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const timewindowsize = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const timewindowunit = z.enum(['s', 'm', 'h', 'd']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_es_query_dsl_rule = z
   .object({
     aggField: aggfield.optional(),
@@ -747,13 +835,14 @@ export const params_es_query_dsl_rule = z
     size: size.int().optional(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold,
+    threshold: threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
     timeWindowUnit: timewindowunit,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_es_query_esql_rule = z
   .object({
     aggField: aggfield.optional(),
@@ -771,6 +860,7 @@ export const params_es_query_esql_rule = z
     timeWindowUnit: timewindowunit,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const filter = z
   .object({
     meta: z
@@ -795,6 +885,7 @@ export const filter = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_es_query_kql_rule = z
   .object({
     aggField: aggfield.optional(),
@@ -814,13 +905,14 @@ export const params_es_query_kql_rule = z
     size: size.int(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold,
+    threshold: threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield.optional(),
     timeWindowSize: timewindowsize.int(),
     timeWindowUnit: timewindowunit,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_index_threshold_rule = z
   .object({
     aggField: aggfield.optional(),
@@ -830,13 +922,14 @@ export const params_index_threshold_rule = z
     index: z.array(z.string()),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold,
+    threshold: threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
     timeWindowUnit: timewindowunit,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_infra_inventory = z
   .object({
     criteria: z.array(
@@ -899,6 +992,7 @@ export const params_property_infra_inventory = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_log_threshold = z.union([
   z
     .object({
@@ -1010,6 +1104,7 @@ export const params_property_log_threshold = z.union([
     })
     .passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_infra_metric_threshold = z
   .object({
     criteria: z.array(
@@ -1090,6 +1185,7 @@ export const params_property_infra_metric_threshold = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_slo_burn_rate = z
   .object({
     sloId: z.string(),
@@ -1100,10 +1196,12 @@ export const params_property_slo_burn_rate = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_synthetics_uptime_tls = z
   .object({ search: z.string(), certExpirationThreshold: z.number(), certAgeThreshold: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const params_property_synthetics_monitor_status = z
   .object({
     availability: z
@@ -1137,6 +1235,7 @@ export const params_property_synthetics_monitor_status = z
     isAutoGenerated: z.boolean().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_alerting_rule_id_Body = z.object({
   actions: z
     .array(
@@ -1230,6 +1329,7 @@ export const post_alerting_rule_id_Body = z.object({
     .optional()
     .default({}),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_alerting_rule_id_Body = z.object({
   actions: z
     .array(
@@ -1302,6 +1402,7 @@ export const put_alerting_rule_id_Body = z.object({
   tags: z.array(z.string()).optional().default([]),
   throttle: z.string().nullish(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_alerting_rule_id_snooze_schedule_Body = z.object({
   schedule: z
     .object({
@@ -1324,11 +1425,15 @@ export const post_alerting_rule_id_snooze_schedule_Body = z.object({
     })
     .partial(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const search_fields = z.union([z.array(z.string()), z.string()]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const has_reference = z.object({ id: z.string(), type: z.string() }).nullish();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_agent_keys_object = z
   .object({ name: z.string(), privileges: z.array(z.enum(['event:write', 'config_agent:read'])) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_agent_keys_response = z
   .object({
     agentKey: z
@@ -1343,26 +1448,32 @@ export const APM_UI_agent_keys_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_400_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_401_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_403_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_500_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_404_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_create_annotation_object = z
   .object({
     '@timestamp': z.string(),
@@ -1371,6 +1482,7 @@ export const APM_UI_create_annotation_object = z
     tags: z.array(z.string()).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_create_annotation_response = z
   .object({
     _id: z.string(),
@@ -1392,6 +1504,7 @@ export const APM_UI_create_annotation_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_annotation_search_response = z
   .object({
     annotations: z.array(
@@ -1408,18 +1521,21 @@ export const APM_UI_annotation_search_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_service_object = z
   .object({ environment: z.string(), name: z.string() })
   .partial()
   .passthrough();
-export const APM_UI_delete_service_object = z
-  .object({ service: APM_UI_service_object })
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const APM_UI_delete_service_object = z.object({ service: APM_UI_service_object }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_delete_agent_configurations_response = z
   .object({ result: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_settings_object = z.record(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_agent_configuration_object = z
   .object({
     '@timestamp': z.number(),
@@ -1430,10 +1546,12 @@ export const APM_UI_agent_configuration_object = z
     settings: APM_UI_settings_object,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_agent_configurations_response = z
   .object({ configurations: z.array(APM_UI_agent_configuration_object) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_agent_configuration_intake_object = z
   .object({
     agent_name: z.string().optional(),
@@ -1441,18 +1559,22 @@ export const APM_UI_agent_configuration_intake_object = z
     settings: APM_UI_settings_object,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_service_agent_name_response = z
   .object({ agentName: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_service_environment_object = z
   .object({ alreadyConfigured: z.boolean(), name: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_service_environments_response = z
   .object({ environments: z.array(APM_UI_service_environment_object) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_search_agent_configuration_object = z
   .object({
     etag: z.string().optional(),
@@ -1460,6 +1582,7 @@ export const APM_UI_search_agent_configuration_object = z
     service: APM_UI_service_object,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_search_agent_configuration_response = z
   .object({
     _id: z.string(),
@@ -1469,10 +1592,12 @@ export const APM_UI_search_agent_configuration_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_single_agent_configuration_response = z
   .object({ id: z.string() })
   .passthrough()
   .and(APM_UI_agent_configuration_object);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_base_source_map_object = z
   .object({
     compressionAlgorithm: z.string(),
@@ -1490,6 +1615,7 @@ export const APM_UI_base_source_map_object = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_source_maps_response = z
   .object({
     artifacts: z.array(
@@ -1522,10 +1648,12 @@ export const APM_UI_source_maps_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_501_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_upload_source_map_object = z
   .object({
     bundle_filepath: z.string(),
@@ -1534,32 +1662,38 @@ export const APM_UI_upload_source_map_object = z
     sourcemap: z.any(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const APM_UI_upload_source_maps_response = z
   .object({ body: z.string() })
   .partial()
   .passthrough()
   .and(APM_UI_base_source_map_object);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_IdField = z.enum([
   'host.name',
   'user.name',
   'service.name',
   'entity.id',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityRecordIdParts = z
   .object({ id_field: Security_Entity_Analytics_API_IdField, id_value: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityLevel = z.enum([
   'low_impact',
   'medium_impact',
   'high_impact',
   'extreme_impact',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_CreateAssetCriticalityRecord =
   Security_Entity_Analytics_API_AssetCriticalityRecordIdParts.and(
     z
       .object({ criticality_level: Security_Entity_Analytics_API_AssetCriticalityLevel })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts = z
   .object({
     asset: z
@@ -1607,10 +1741,12 @@ export const Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts = z
       .optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityRecord =
   Security_Entity_Analytics_API_CreateAssetCriticalityRecord.and(
     Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts
   ).and(z.object({ '@timestamp': z.string().datetime({ offset: true }) }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateAssetCriticalityRecord_Body =
   Security_Entity_Analytics_API_CreateAssetCriticalityRecord.and(
     z
@@ -1618,6 +1754,7 @@ export const CreateAssetCriticalityRecord_Body =
       .partial()
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload = z.enum([
   'low_impact',
   'medium_impact',
@@ -1625,6 +1762,7 @@ export const Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload =
   'extreme_impact',
   'unassigned',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const BulkUpsertAssetCriticalityRecords_Body = z
   .object({
     records: z
@@ -1641,18 +1779,24 @@ export const BulkUpsertAssetCriticalityRecords_Body = z
       .max(1000),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem = z
   .object({ index: z.number().int(), message: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_AssetCriticalityBulkUploadStats = z
   .object({ failed: z.number().int(), successful: z.number().int(), total: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_4xx_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number().int() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_assignees = z.array(z.object({ uid: z.string() }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_category = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_none = z
   .object({
     fields: z.string().nullable(),
@@ -1661,6 +1805,7 @@ export const Cases_connector_properties_none = z
     type: z.literal('.none'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_cases_webhook = z
   .object({
     fields: z.string().nullable(),
@@ -1669,6 +1814,7 @@ export const Cases_connector_properties_cases_webhook = z
     type: z.literal('.cases-webhook'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_jira = z
   .object({
     fields: z
@@ -1683,6 +1829,7 @@ export const Cases_connector_properties_jira = z
     type: z.literal('.jira'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_resilient = z
   .object({
     fields: z
@@ -1694,6 +1841,7 @@ export const Cases_connector_properties_resilient = z
     type: z.literal('.resilient'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_servicenow = z
   .object({
     fields: z
@@ -1710,6 +1858,7 @@ export const Cases_connector_properties_servicenow = z
     type: z.literal('.servicenow'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_servicenow_sir = z
   .object({
     fields: z
@@ -1728,6 +1877,7 @@ export const Cases_connector_properties_servicenow_sir = z
     type: z.literal('.servicenow-sir'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_properties_swimlane = z
   .object({
     fields: z.object({ caseId: z.string().nullable() }).passthrough(),
@@ -1736,12 +1886,19 @@ export const Cases_connector_properties_swimlane = z
     type: z.literal('.swimlane'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_description = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_settings = z.object({ syncAlerts: z.boolean() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_severity = z.enum(['critical', 'high', 'low', 'medium']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_status = z.enum(['closed', 'in-progress', 'open']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_tags = z.array(z.string().max(256));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_title = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_update_case_request = z
   .object({
     cases: z
@@ -1788,6 +1945,7 @@ export const Cases_update_case_request = z
       .max(100),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_response_closed_by_properties = z
   .object({
     email: z.string().nullable(),
@@ -1796,7 +1954,9 @@ export const Cases_case_response_closed_by_properties = z
     username: z.string().nullable(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_owner = z.enum(['cases', 'observability', 'securitySolution']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_alert_comment_response_properties = z
   .object({
     alertId: z.array(z.string()).optional(),
@@ -1838,6 +1998,7 @@ export const Cases_alert_comment_response_properties = z
     version: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_response_created_by_properties = z
   .object({
     email: z.string().nullable(),
@@ -1846,6 +2007,7 @@ export const Cases_case_response_created_by_properties = z
     username: z.string().nullable(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_response_pushed_by_properties = z
   .object({
     email: z.string().nullable(),
@@ -1854,6 +2016,7 @@ export const Cases_case_response_pushed_by_properties = z
     username: z.string().nullable(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_response_updated_by_properties = z
   .object({
     email: z.string().nullable(),
@@ -1862,6 +2025,7 @@ export const Cases_case_response_updated_by_properties = z
     username: z.string().nullable(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_user_comment_response_properties = z
   .object({
     comment: z.string().optional(),
@@ -1877,6 +2041,7 @@ export const Cases_user_comment_response_properties = z
     version: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_external_service = z
   .object({
     connector_id: z.string(),
@@ -1898,6 +2063,7 @@ export const Cases_external_service = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_response_properties = z
   .object({
     assignees: Cases_assignees.max(10).nullish(),
@@ -1906,10 +2072,13 @@ export const Cases_case_response_properties = z
     closed_by: Cases_case_response_closed_by_properties.nullable(),
     comments: z
       .array(
-        z.union([Cases_alert_comment_response_properties, Cases_user_comment_response_properties])
+        z.union( [
+          Cases_alert_comment_response_properties,
+          Cases_user_comment_response_properties,
+        ])
       )
       .max(10000),
-    connector: z.union([
+    connector: z.union( [
       Cases_connector_properties_none,
       Cases_connector_properties_cases_webhook,
       Cases_connector_properties_jira,
@@ -1949,6 +2118,7 @@ export const Cases_case_response_properties = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_create_case_request = z
   .object({
     assignees: Cases_assignees.max(10).nullish(),
@@ -1982,25 +2152,38 @@ export const Cases_create_case_request = z
     title: Cases_case_title.max(160),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_string = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_string_array = z.array(Cases_string);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const assignees = z.union([Cases_string, Cases_string_array]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_case_categories = z.array(Cases_case_category);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const category = z.union([Cases_case_category, Cases_case_categories]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_owners = z.array(Cases_owner);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const owner = z.union([Cases_owner, Cases_owners]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_searchFieldsType = z.enum(['description', 'title']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_searchFieldsTypeArray = z.array(Cases_searchFieldsType);
-export const searchFields = z
-  .union([Cases_searchFieldsType, Cases_searchFieldsTypeArray])
-  .optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const searchFields = z.union([Cases_searchFieldsType, Cases_searchFieldsTypeArray]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_alert_response_properties = z
   .object({ attached_at: z.string().datetime({ offset: true }), id: z.string(), index: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_alert_identifiers = z.union([z.string(), z.array(z.string())]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_alert_indices = z.union([z.string(), z.array(z.string())]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_rule = z.object({ id: z.string(), name: z.string() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_update_alert_comment_request_properties = z
   .object({
     alertId: Cases_alert_identifiers,
@@ -2012,6 +2195,7 @@ export const Cases_update_alert_comment_request_properties = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_update_user_comment_request_properties = z
   .object({
     comment: z.string().max(30000),
@@ -2021,10 +2205,12 @@ export const Cases_update_user_comment_request_properties = z
     version: z.string(),
   })
   .passthrough();
-export const Cases_update_case_comment_request = z.union([
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Cases_update_case_comment_request = z.union( [
   Cases_update_alert_comment_request_properties,
   Cases_update_user_comment_request_properties,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_add_alert_comment_request_properties = z
   .object({
     alertId: Cases_alert_identifiers,
@@ -2034,17 +2220,22 @@ export const Cases_add_alert_comment_request_properties = z
     type: z.literal('alert'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_add_user_comment_request_properties = z
   .object({ comment: z.string().max(30000), owner: Cases_owner, type: z.literal('user') })
   .passthrough();
-export const Cases_add_case_comment_request = z.union([
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Cases_add_case_comment_request = z.union( [
   Cases_add_alert_comment_request_properties,
   Cases_add_user_comment_request_properties,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_add_case_file_request = z
   .object({ file: z.any(), filename: z.string().optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_actions = z.enum(['add', 'create', 'delete', 'push_to_service', 'update']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_alert_comment = z
   .object({
     comment: z
@@ -2060,10 +2251,12 @@ export const Cases_payload_alert_comment = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_assignees = z
   .object({ assignees: Cases_assignees.max(10).nullable() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_connector_types = z.enum([
   '.cases-webhook',
   '.jira',
@@ -2073,6 +2266,7 @@ export const Cases_connector_types = z.enum([
   '.servicenow-sir',
   '.swimlane',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_connector = z
   .object({
     connector: z
@@ -2107,6 +2301,7 @@ export const Cases_payload_connector = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_create_case = z
   .object({
     assignees: Cases_assignees.max(10).nullable(),
@@ -2149,29 +2344,32 @@ export const Cases_payload_create_case = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_delete = z.object({}).partial().passthrough();
-export const Cases_payload_description = z
-  .object({ description: z.string() })
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Cases_payload_description = z.object({ description: z.string() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_pushed = z
   .object({ externalService: Cases_external_service.nullable() })
   .partial()
   .passthrough();
-export const Cases_payload_settings = z
-  .object({ settings: Cases_settings })
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Cases_payload_settings = z.object({ settings: Cases_settings }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_severity = z
   .object({ severity: Cases_case_severity.default('low') })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_status = z.object({ status: Cases_case_status }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_tags = z
   .object({ tags: z.array(z.string()) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_title = z.object({ title: z.string() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_payload_user_comment = z
   .object({
     comment: z
@@ -2181,6 +2379,7 @@ export const Cases_payload_user_comment = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_user_actions_find_response_properties = z
   .object({
     action: Cases_actions,
@@ -2227,8 +2426,11 @@ export const Cases_user_actions_find_response_properties = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_closure_types = z.enum(['close-by-pushing', 'close-by-user']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_template_tags = z.array(z.string().max(256));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_templates = z.array(
   z
     .object({
@@ -2271,6 +2473,7 @@ export const Cases_templates = z.array(
     .partial()
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_set_case_configuration_request = z
   .object({
     closure_type: Cases_closure_types,
@@ -2300,6 +2503,7 @@ export const Cases_set_case_configuration_request = z
     templates: Cases_templates.optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Cases_update_case_configuration_request = z
   .object({
     closure_type: Cases_closure_types.optional(),
@@ -2329,10 +2533,13 @@ export const Cases_update_case_configuration_request = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_400_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_allownoindex = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_fieldattrs = z
   .object({
     count: z.number().int(),
@@ -2341,21 +2548,30 @@ export const Data_views_fieldattrs = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_fieldformats = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_namespaces = z.array(z.string().default('default'));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_runtimefieldmap = z
   .object({ script: z.object({ source: z.string() }).partial().passthrough(), type: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_sourcefilters = z.array(z.object({ value: z.string() }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_timefieldname = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_title = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_type = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_typemeta = z
   .object({
     aggs: z.object({}).partial().passthrough(),
     params: z.object({}).partial().passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_create_data_view_request_object = z
   .object({
     data_view: z
@@ -2379,6 +2595,7 @@ export const Data_views_create_data_view_request_object = z
     override: z.boolean().optional().default(false),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_typemeta_response = z
   .object({
     aggs: z.object({}).partial().passthrough(),
@@ -2386,6 +2603,7 @@ export const Data_views_typemeta_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_data_view_response_object = z
   .object({
     data_view: z
@@ -2409,10 +2627,12 @@ export const Data_views_data_view_response_object = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_404_response = z
   .object({ error: z.literal('Not Found'), message: z.string(), statusCode: z.literal(404) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_update_data_view_request_object = z
   .object({
     data_view: z
@@ -2433,12 +2653,15 @@ export const Data_views_update_data_view_request_object = z
     refresh_fields: z.boolean().optional().default(false),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const createRuntimeFieldDefault_Body = z
   .object({ name: z.string(), runtimeField: z.object({}).partial().passthrough() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const setDefaultDatailViewDefault_Body = z
   .object({ data_view_id: z.string().nullable(), force: z.boolean().optional().default(false) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Data_views_swap_data_view_request_object = z
   .object({
     delete: z.boolean().optional(),
@@ -2449,22 +2672,28 @@ export const Data_views_swap_data_view_request_object = z
     toId: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_PlatformErrorResponse = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SiemErrorResponse = z
   .object({ message: z.string(), status_code: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionAlertsFilter = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionNotifyWhen = z.enum([
   'onActiveAlert',
   'onThrottleInterval',
   'onActionGroupChange',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionThrottle = z.union([
   z.enum(['no_actions', 'rule']),
   z.string(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionFrequency = z
   .object({
     notifyWhen: Security_Detections_API_RuleActionNotifyWhen,
@@ -2472,10 +2701,15 @@ export const Security_Detections_API_RuleActionFrequency = z
     throttle: Security_Detections_API_RuleActionThrottle,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionGroup = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleActionParams = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NonEmptyString = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleAction = z
   .object({
     action_type_id: z.string(),
@@ -2487,15 +2721,22 @@ export const Security_Detections_API_RuleAction = z
     uuid: Security_Detections_API_NonEmptyString.min(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedObjectResolveAliasPurpose = z.enum([
   'savedObjectConversion',
   'savedObjectImport',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedObjectResolveAliasTargetId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleAuthorArray = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BuildingBlockType = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_IsRuleEnabled = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ExceptionListType = z.enum([
   'detection',
   'rule_default',
@@ -2506,6 +2747,7 @@ export const Security_Detections_API_ExceptionListType = z.enum([
   'endpoint_host_isolation_exceptions',
   'endpoint_blocklists',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleExceptionList = z
   .object({
     id: z.string().min(1),
@@ -2514,25 +2756,39 @@ export const Security_Detections_API_RuleExceptionList = z
     type: Security_Detections_API_ExceptionListType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleFalsePositiveArray = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleIntervalFrom = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleInterval = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_InvestigationFields = z
   .object({ field_names: z.array(Security_Detections_API_NonEmptyString).min(1) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleLicense = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MaxSignals = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleMetadata = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleName = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsIndexNamespace = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_InvestigationGuide = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedObjectResolveOutcome = z.enum([
   'exactMatch',
   'aliasMatch',
   'conflict',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsIndex = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleReferenceArray = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RelatedIntegration = z
   .object({
     integration: Security_Detections_API_NonEmptyString.min(1).optional(),
@@ -2540,18 +2796,22 @@ export const Security_Detections_API_RelatedIntegration = z
     version: Security_Detections_API_NonEmptyString.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RelatedIntegrationArray = z.array(
   Security_Detections_API_RelatedIntegration
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RequiredFieldInput = z
   .object({ name: z.string().min(1), type: z.string().min(1) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EcsMapping = z.record(
   z
     .object({ field: z.string(), value: z.union([z.string(), z.array(z.string())]) })
     .partial()
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_OsqueryQuery = z
   .object({
     ecs_mapping: Security_Detections_API_EcsMapping.optional(),
@@ -2563,6 +2823,7 @@ export const Security_Detections_API_OsqueryQuery = z
     version: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_OsqueryParams = z
   .object({
     ecs_mapping: Security_Detections_API_EcsMapping,
@@ -2574,12 +2835,15 @@ export const Security_Detections_API_OsqueryParams = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_OsqueryResponseAction = z
   .object({ action_type_id: z.literal('.osquery'), params: Security_Detections_API_OsqueryParams })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_DefaultParams = z
   .object({ command: z.literal('isolate'), comment: z.string().optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ProcessesParams = z
   .object({
     command: z.enum(['kill-process', 'suspend-process']),
@@ -2589,6 +2853,7 @@ export const Security_Detections_API_ProcessesParams = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EndpointResponseAction = z
   .object({
     action_type_id: z.literal('.endpoint'),
@@ -2598,11 +2863,14 @@ export const Security_Detections_API_EndpointResponseAction = z
     ]),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ResponseAction = z.union([
   Security_Detections_API_OsqueryResponseAction,
   Security_Detections_API_EndpointResponseAction,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RiskScore = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RiskScoreMapping = z.array(
   z
     .object({
@@ -2613,9 +2881,13 @@ export const Security_Detections_API_RiskScoreMapping = z.array(
     })
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleNameOverride = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SetupGuide = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_Severity = z.enum(['low', 'medium', 'high', 'critical']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SeverityMapping = z.array(
   z
     .object({
@@ -2626,13 +2898,17 @@ export const Security_Detections_API_SeverityMapping = z.array(
     })
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleTagArray = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatTactic = z
   .object({ id: z.string(), name: z.string(), reference: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatSubtechnique = z
   .object({ id: z.string(), name: z.string(), reference: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatTechnique = z
   .object({
     id: z.string(),
@@ -2641,6 +2917,7 @@ export const Security_Detections_API_ThreatTechnique = z
     subtechnique: z.array(Security_Detections_API_ThreatSubtechnique).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_Threat = z
   .object({
     framework: z.string(),
@@ -2648,13 +2925,21 @@ export const Security_Detections_API_Threat = z
     technique: z.array(Security_Detections_API_ThreatTechnique).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatArray = z.array(Security_Detections_API_Threat);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_TimelineTemplateId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_TimelineTemplateTitle = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_TimestampOverride = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_TimestampOverrideFallbackDisabled = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleIntervalTo = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleVersion = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleExecutionMetrics = z
   .object({
     execution_gap_duration_s: z.number().int().gte(0),
@@ -2666,6 +2951,7 @@ export const Security_Detections_API_RuleExecutionMetrics = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleExecutionStatus = z.enum([
   'going to run',
   'running',
@@ -2673,7 +2959,9 @@ export const Security_Detections_API_RuleExecutionStatus = z.enum([
   'failed',
   'succeeded',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleExecutionStatusOrder = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleExecutionSummary = z
   .object({
     last_execution: z
@@ -2687,31 +2975,41 @@ export const Security_Detections_API_RuleExecutionSummary = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_UUID = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleObjectId = Security_Detections_API_UUID;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_IsRuleImmutable = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RequiredField = z
   .object({ ecs: z.boolean(), name: z.string().min(1), type: z.string().min(1) })
   .passthrough();
-export const Security_Detections_API_RequiredFieldArray = z.array(
-  Security_Detections_API_RequiredField
-);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Detections_API_RequiredFieldArray = z.array(Security_Detections_API_RequiredField);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleRevision = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleSignatureId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_IsExternalRuleCustomized = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ExternalRuleSource = z
   .object({
     is_customized: Security_Detections_API_IsExternalRuleCustomized,
     type: z.literal('external'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_InternalRuleSource = z
   .object({ type: z.literal('internal') })
   .passthrough();
-export const Security_Detections_API_RuleSource = z.union([
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Detections_API_RuleSource = z.union( [
   Security_Detections_API_ExternalRuleSource,
   Security_Detections_API_InternalRuleSource,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ResponseFields = z
   .object({
     created_at: z.string().datetime({ offset: true }),
@@ -2727,8 +3025,11 @@ export const Security_Detections_API_ResponseFields = z
     updated_by: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlQueryLanguage = z.literal('eql');
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleQuery = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlRequiredFields = z
   .object({
     language: Security_Detections_API_EqlQueryLanguage,
@@ -2736,18 +3037,23 @@ export const Security_Detections_API_EqlRequiredFields = z
     type: z.literal('eql'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertSuppressionDurationUnit = z.enum(['s', 'm', 'h']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertSuppressionDuration = z
   .object({
     unit: Security_Detections_API_AlertSuppressionDurationUnit,
     value: z.number().int().gte(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertSuppressionGroupBy = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertSuppressionMissingFieldsStrategy = z.enum([
   'doNotSuppress',
   'suppress',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertSuppression = z
   .object({
     duration: Security_Detections_API_AlertSuppressionDuration.optional(),
@@ -2756,12 +3062,19 @@ export const Security_Detections_API_AlertSuppression = z
       Security_Detections_API_AlertSuppressionMissingFieldsStrategy.optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_DataViewId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EventCategoryOverride = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleFilterArray = z.array(z.unknown());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_IndexPatternArray = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_TiebreakerField = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_TimestampField = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_AlertSuppression,
@@ -2774,8 +3087,11 @@ export const Security_Detections_API_EqlOptionalFields = z
   })
   .partial()
   .passthrough();
-export const Security_Detections_API_EqlRuleResponseFields =
-  Security_Detections_API_EqlRequiredFields.and(Security_Detections_API_EqlOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Detections_API_EqlRuleResponseFields = Security_Detections_API_EqlRequiredFields.and(
+  Security_Detections_API_EqlOptionalFields
+);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -2822,10 +3138,13 @@ export const Security_Detections_API_EqlRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_EqlRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleRequiredFields = z
   .object({ type: z.literal('query') })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_AlertSuppression,
@@ -2836,7 +3155,9 @@ export const Security_Detections_API_QueryRuleOptionalFields = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_KqlQueryLanguage = z.enum(['kuery', 'lucene']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleResponseFields =
   Security_Detections_API_QueryRuleRequiredFields.and(
     Security_Detections_API_QueryRuleOptionalFields
@@ -2848,6 +3169,7 @@ export const Security_Detections_API_QueryRuleResponseFields =
       })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -2894,9 +3216,11 @@ export const Security_Detections_API_QueryRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_QueryRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleRequiredFields = z
   .object({ saved_id: Security_Detections_API_SavedQueryId, type: z.literal('saved_query') })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_AlertSuppression,
@@ -2907,10 +3231,12 @@ export const Security_Detections_API_SavedQueryRuleOptionalFields = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleResponseFields =
   Security_Detections_API_SavedQueryRuleRequiredFields.and(
     Security_Detections_API_SavedQueryRuleOptionalFields
   ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -2957,11 +3283,15 @@ export const Security_Detections_API_SavedQueryRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_SavedQueryRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdCardinality = z.array(
   z.object({ field: z.string(), value: z.number().int().gte(0) }).passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdField = z.union([z.string(), z.array(z.string())]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdValue = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_Threshold = z
   .object({
     cardinality: Security_Detections_API_ThresholdCardinality.optional(),
@@ -2969,6 +3299,7 @@ export const Security_Detections_API_Threshold = z
     value: Security_Detections_API_ThresholdValue.int().gte(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleRequiredFields = z
   .object({
     query: Security_Detections_API_RuleQuery,
@@ -2976,9 +3307,11 @@ export const Security_Detections_API_ThresholdRuleRequiredFields = z
     type: z.literal('threshold'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdAlertSuppression = z
   .object({ duration: Security_Detections_API_AlertSuppressionDuration })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_ThresholdAlertSuppression,
@@ -2989,10 +3322,12 @@ export const Security_Detections_API_ThresholdRuleOptionalFields = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleResponseFields =
   Security_Detections_API_ThresholdRuleRequiredFields.and(
     Security_Detections_API_ThresholdRuleOptionalFields
   ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3039,7 +3374,9 @@ export const Security_Detections_API_ThresholdRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_ThresholdRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatIndex = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMappingEntry = z
   .object({
     field: Security_Detections_API_NonEmptyString.min(1),
@@ -3048,10 +3385,13 @@ export const Security_Detections_API_ThreatMappingEntry = z
     value: Security_Detections_API_NonEmptyString.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMapping = z.array(
   z.object({ entries: z.array(Security_Detections_API_ThreatMappingEntry) }).passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatQuery = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleRequiredFields = z
   .object({
     query: Security_Detections_API_RuleQuery,
@@ -3061,10 +3401,15 @@ export const Security_Detections_API_ThreatMatchRuleRequiredFields = z
     type: z.literal('threat_match'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ConcurrentSearches = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ItemsPerSearch = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatFilters = z.array(z.unknown());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatIndicatorPath = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_AlertSuppression,
@@ -3080,10 +3425,12 @@ export const Security_Detections_API_ThreatMatchRuleOptionalFields = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleResponseFields =
   Security_Detections_API_ThreatMatchRuleRequiredFields.and(
     Security_Detections_API_ThreatMatchRuleOptionalFields
   ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3130,11 +3477,11 @@ export const Security_Detections_API_ThreatMatchRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_ThreatMatchRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AnomalyThreshold = z.number();
-export const Security_Detections_API_MachineLearningJobId = z.union([
-  z.string(),
-  z.array(z.string()),
-]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Detections_API_MachineLearningJobId = z.union([z.string(), z.array(z.string())]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRuleRequiredFields = z
   .object({
     anomaly_threshold: Security_Detections_API_AnomalyThreshold.int().gte(0),
@@ -3142,14 +3489,17 @@ export const Security_Detections_API_MachineLearningRuleRequiredFields = z
     type: z.literal('machine_learning'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRuleOptionalFields = z
   .object({ alert_suppression: Security_Detections_API_AlertSuppression })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRuleResponseFields =
   Security_Detections_API_MachineLearningRuleRequiredFields.and(
     Security_Detections_API_MachineLearningRuleOptionalFields
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3196,8 +3546,11 @@ export const Security_Detections_API_MachineLearningRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_MachineLearningRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_HistoryWindowStart = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsFields = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleRequiredFields = z
   .object({
     history_window_start: Security_Detections_API_HistoryWindowStart.min(1),
@@ -3206,6 +3559,7 @@ export const Security_Detections_API_NewTermsRuleRequiredFields = z
     type: z.literal('new_terms'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleOptionalFields = z
   .object({
     alert_suppression: Security_Detections_API_AlertSuppression,
@@ -3215,10 +3569,12 @@ export const Security_Detections_API_NewTermsRuleOptionalFields = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleResponseFields =
   Security_Detections_API_NewTermsRuleRequiredFields.and(
     Security_Detections_API_NewTermsRuleOptionalFields
   ).and(z.object({ language: Security_Detections_API_KqlQueryLanguage }).passthrough());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3265,11 +3621,14 @@ export const Security_Detections_API_NewTermsRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_NewTermsRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRuleOptionalFields = z
   .object({ alert_suppression: Security_Detections_API_AlertSuppression })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlQueryLanguage = z.literal('esql');
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRuleRequiredFields = z
   .object({
     language: Security_Detections_API_EsqlQueryLanguage,
@@ -3277,10 +3636,12 @@ export const Security_Detections_API_EsqlRuleRequiredFields = z
     type: z.literal('esql'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRuleResponseFields =
   Security_Detections_API_EsqlRuleOptionalFields.and(
     Security_Detections_API_EsqlRuleRequiredFields
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRule = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3327,6 +3688,7 @@ export const Security_Detections_API_EsqlRule = z
   .passthrough()
   .and(Security_Detections_API_ResponseFields)
   .and(Security_Detections_API_EsqlRuleResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleResponse = z.union([
   Security_Detections_API_EqlRule,
   Security_Detections_API_QueryRule,
@@ -3337,6 +3699,7 @@ export const Security_Detections_API_RuleResponse = z.union([
   Security_Detections_API_NewTermsRule,
   Security_Detections_API_EsqlRule,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlRulePatchFields = z
   .object({
     language: Security_Detections_API_EqlQueryLanguage,
@@ -3346,6 +3709,7 @@ export const Security_Detections_API_EqlRulePatchFields = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_EqlOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3393,6 +3757,7 @@ export const Security_Detections_API_EqlRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_EqlRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleDefaultableFields = z
   .object({
     language: Security_Detections_API_KqlQueryLanguage,
@@ -3400,12 +3765,14 @@ export const Security_Detections_API_QueryRuleDefaultableFields = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRulePatchFields = z
   .object({ type: z.literal('query') })
   .partial()
   .passthrough()
   .and(Security_Detections_API_QueryRuleOptionalFields)
   .and(Security_Detections_API_QueryRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3453,16 +3820,19 @@ export const Security_Detections_API_QueryRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_QueryRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleDefaultableFields = z
   .object({ language: Security_Detections_API_KqlQueryLanguage })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRulePatchFields = z
   .object({ saved_id: Security_Detections_API_SavedQueryId, type: z.literal('saved_query') })
   .partial()
   .passthrough()
   .and(Security_Detections_API_SavedQueryRuleOptionalFields)
   .and(Security_Detections_API_SavedQueryRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3510,10 +3880,12 @@ export const Security_Detections_API_SavedQueryRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_SavedQueryRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleDefaultableFields = z
   .object({ language: Security_Detections_API_KqlQueryLanguage })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRulePatchFields = z
   .object({
     query: Security_Detections_API_RuleQuery,
@@ -3524,6 +3896,7 @@ export const Security_Detections_API_ThresholdRulePatchFields = z
   .passthrough()
   .and(Security_Detections_API_ThresholdRuleOptionalFields)
   .and(Security_Detections_API_ThresholdRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3571,10 +3944,12 @@ export const Security_Detections_API_ThresholdRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_ThresholdRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleDefaultableFields = z
   .object({ language: Security_Detections_API_KqlQueryLanguage })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRulePatchFields = z
   .object({
     query: Security_Detections_API_RuleQuery,
@@ -3587,6 +3962,7 @@ export const Security_Detections_API_ThreatMatchRulePatchFields = z
   .passthrough()
   .and(Security_Detections_API_ThreatMatchRuleOptionalFields)
   .and(Security_Detections_API_ThreatMatchRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3634,6 +4010,7 @@ export const Security_Detections_API_ThreatMatchRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_ThreatMatchRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRulePatchFields = z
   .object({
     anomaly_threshold: Security_Detections_API_AnomalyThreshold.int().gte(0),
@@ -3643,6 +4020,7 @@ export const Security_Detections_API_MachineLearningRulePatchFields = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_MachineLearningRuleOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3690,10 +4068,12 @@ export const Security_Detections_API_MachineLearningRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_MachineLearningRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleDefaultableFields = z
   .object({ language: Security_Detections_API_KqlQueryLanguage })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRulePatchFields = z
   .object({
     history_window_start: Security_Detections_API_HistoryWindowStart.min(1),
@@ -3705,6 +4085,7 @@ export const Security_Detections_API_NewTermsRulePatchFields = z
   .passthrough()
   .and(Security_Detections_API_NewTermsRuleOptionalFields)
   .and(Security_Detections_API_NewTermsRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3752,6 +4133,7 @@ export const Security_Detections_API_NewTermsRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_NewTermsRulePatchFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRulePatchProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction),
@@ -3802,6 +4184,7 @@ export const Security_Detections_API_EsqlRulePatchProps = z
   .partial()
   .passthrough()
   .and(Security_Detections_API_EsqlRuleOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RulePatchProps = z.union([
   Security_Detections_API_EqlRulePatchProps,
   Security_Detections_API_QueryRulePatchProps,
@@ -3812,8 +4195,11 @@ export const Security_Detections_API_RulePatchProps = z.union([
   Security_Detections_API_NewTermsRulePatchProps,
   Security_Detections_API_EsqlRulePatchProps,
 ]);
-export const Security_Detections_API_EqlRuleCreateFields =
-  Security_Detections_API_EqlRequiredFields.and(Security_Detections_API_EqlOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Detections_API_EqlRuleCreateFields = Security_Detections_API_EqlRequiredFields.and(
+  Security_Detections_API_EqlOptionalFields
+);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -3860,10 +4246,12 @@ export const Security_Detections_API_EqlRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_EqlRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleCreateFields =
   Security_Detections_API_QueryRuleRequiredFields.and(
     Security_Detections_API_QueryRuleOptionalFields
   ).and(Security_Detections_API_QueryRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -3910,10 +4298,12 @@ export const Security_Detections_API_QueryRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_QueryRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleCreateFields =
   Security_Detections_API_SavedQueryRuleRequiredFields.and(
     Security_Detections_API_SavedQueryRuleOptionalFields
   ).and(Security_Detections_API_SavedQueryRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -3960,10 +4350,12 @@ export const Security_Detections_API_SavedQueryRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_SavedQueryRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleCreateFields =
   Security_Detections_API_ThresholdRuleRequiredFields.and(
     Security_Detections_API_ThresholdRuleOptionalFields
   ).and(Security_Detections_API_ThresholdRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4010,10 +4402,12 @@ export const Security_Detections_API_ThresholdRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_ThresholdRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleCreateFields =
   Security_Detections_API_ThreatMatchRuleRequiredFields.and(
     Security_Detections_API_ThreatMatchRuleOptionalFields
   ).and(Security_Detections_API_ThreatMatchRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4060,10 +4454,12 @@ export const Security_Detections_API_ThreatMatchRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_ThreatMatchRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRuleCreateFields =
   Security_Detections_API_MachineLearningRuleRequiredFields.and(
     Security_Detections_API_MachineLearningRuleOptionalFields
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4110,10 +4506,12 @@ export const Security_Detections_API_MachineLearningRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_MachineLearningRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleCreateFields =
   Security_Detections_API_NewTermsRuleRequiredFields.and(
     Security_Detections_API_NewTermsRuleOptionalFields
   ).and(Security_Detections_API_NewTermsRuleDefaultableFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4160,10 +4558,12 @@ export const Security_Detections_API_NewTermsRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_NewTermsRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRuleCreateFields =
   Security_Detections_API_EsqlRuleOptionalFields.and(
     Security_Detections_API_EsqlRuleRequiredFields
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRuleCreateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4210,6 +4610,7 @@ export const Security_Detections_API_EsqlRuleCreateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_EsqlRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleCreateProps = z.union([
   Security_Detections_API_EqlRuleCreateProps,
   Security_Detections_API_QueryRuleCreateProps,
@@ -4220,6 +4621,7 @@ export const Security_Detections_API_RuleCreateProps = z.union([
   Security_Detections_API_NewTermsRuleCreateProps,
   Security_Detections_API_EsqlRuleCreateProps,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EqlRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4267,6 +4669,7 @@ export const Security_Detections_API_EqlRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_EqlRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_QueryRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4314,6 +4717,7 @@ export const Security_Detections_API_QueryRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_QueryRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SavedQueryRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4361,6 +4765,7 @@ export const Security_Detections_API_SavedQueryRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_SavedQueryRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThresholdRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4408,6 +4813,7 @@ export const Security_Detections_API_ThresholdRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_ThresholdRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThreatMatchRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4455,6 +4861,7 @@ export const Security_Detections_API_ThreatMatchRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_ThreatMatchRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MachineLearningRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4502,6 +4909,7 @@ export const Security_Detections_API_MachineLearningRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_MachineLearningRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NewTermsRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4549,6 +4957,7 @@ export const Security_Detections_API_NewTermsRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_NewTermsRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_EsqlRuleUpdateProps = z
   .object({
     actions: z.array(Security_Detections_API_RuleAction).optional(),
@@ -4596,6 +5005,7 @@ export const Security_Detections_API_EsqlRuleUpdateProps = z
   })
   .passthrough()
   .and(Security_Detections_API_EsqlRuleCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleUpdateProps = z.union([
   Security_Detections_API_EqlRuleUpdateProps,
   Security_Detections_API_QueryRuleUpdateProps,
@@ -4606,6 +5016,7 @@ export const Security_Detections_API_RuleUpdateProps = z.union([
   Security_Detections_API_NewTermsRuleUpdateProps,
   Security_Detections_API_EsqlRuleUpdateProps,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkDeleteRules = z
   .object({
     action: z.literal('delete'),
@@ -4615,6 +5026,7 @@ export const Security_Detections_API_BulkDeleteRules = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkDisableRules = z
   .object({
     action: z.literal('disable'),
@@ -4624,6 +5036,7 @@ export const Security_Detections_API_BulkDisableRules = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkEnableRules = z
   .object({
     action: z.literal('enable'),
@@ -4633,6 +5046,7 @@ export const Security_Detections_API_BulkEnableRules = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkExportRules = z
   .object({
     action: z.literal('export'),
@@ -4642,6 +5056,7 @@ export const Security_Detections_API_BulkExportRules = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkDuplicateRules = z
   .object({
     action: z.literal('duplicate'),
@@ -4655,6 +5070,7 @@ export const Security_Detections_API_BulkDuplicateRules = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkManualRuleRun = z
   .object({
     action: z.literal('run'),
@@ -4665,6 +5081,7 @@ export const Security_Detections_API_BulkManualRuleRun = z
     run: z.object({ end_date: z.string(), start_date: z.string() }).passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkManualRuleFillGaps = z
   .object({
     action: z.literal('fill_gaps'),
@@ -4675,12 +5092,14 @@ export const Security_Detections_API_BulkManualRuleFillGaps = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadTags = z
   .object({
     type: z.enum(['add_tags', 'delete_tags', 'set_tags']),
     value: Security_Detections_API_RuleTagArray,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadIndexPatterns = z
   .object({
     overwrite_data_views: z.boolean().optional(),
@@ -4688,6 +5107,7 @@ export const Security_Detections_API_BulkActionEditPayloadIndexPatterns = z
     value: Security_Detections_API_IndexPatternArray,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadInvestigationFields = z
   .object({
     type: z.enum([
@@ -4698,6 +5118,7 @@ export const Security_Detections_API_BulkActionEditPayloadInvestigationFields = 
     value: Security_Detections_API_InvestigationFields,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadTimeline = z
   .object({
     type: z.literal('set_timeline'),
@@ -4709,6 +5130,7 @@ export const Security_Detections_API_BulkActionEditPayloadTimeline = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NormalizedRuleAction = z.object({
   alerts_filter: Security_Detections_API_RuleActionAlertsFilter.optional(),
   frequency: Security_Detections_API_RuleActionFrequency.optional(),
@@ -4716,7 +5138,9 @@ export const Security_Detections_API_NormalizedRuleAction = z.object({
   id: Security_Detections_API_RuleActionId,
   params: Security_Detections_API_RuleActionParams,
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ThrottleForBulkActions = z.enum(['rule', '1h', '1d', '7d']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadRuleActions = z
   .object({
     type: z.enum(['add_rule_actions', 'set_rule_actions']),
@@ -4728,6 +5152,7 @@ export const Security_Detections_API_BulkActionEditPayloadRuleActions = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadSchedule = z
   .object({
     type: z.literal('set_schedule'),
@@ -4739,26 +5164,31 @@ export const Security_Detections_API_BulkActionEditPayloadSchedule = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadSetAlertSuppression = z
   .object({
     type: z.literal('set_alert_suppression'),
     value: Security_Detections_API_AlertSuppression,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold = z
   .object({
     type: z.literal('set_alert_suppression_for_threshold'),
     value: Security_Detections_API_ThresholdAlertSuppression,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression = z
   .object({ type: z.literal('delete_alert_suppression') })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayloadAlertSuppression = z.union([
   Security_Detections_API_BulkActionEditPayloadSetAlertSuppression,
   Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold,
   Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionEditPayload = z.union([
   Security_Detections_API_BulkActionEditPayloadTags,
   Security_Detections_API_BulkActionEditPayloadIndexPatterns,
@@ -4768,6 +5198,7 @@ export const Security_Detections_API_BulkActionEditPayload = z.union([
   Security_Detections_API_BulkActionEditPayloadSchedule,
   Security_Detections_API_BulkActionEditPayloadAlertSuppression,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkEditRules = z
   .object({
     action: z.literal('edit'),
@@ -4778,6 +5209,7 @@ export const Security_Detections_API_BulkEditRules = z
     query: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PerformRulesBulkAction_Body = z.union([
   Security_Detections_API_BulkDeleteRules,
   Security_Detections_API_BulkDisableRules,
@@ -4788,6 +5220,7 @@ export const PerformRulesBulkAction_Body = z.union([
   Security_Detections_API_BulkManualRuleFillGaps,
   Security_Detections_API_BulkEditRules,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionsDryRunErrCode = z.enum([
   'IMMUTABLE',
   'PREBUILT_CUSTOMIZATION_LICENSE',
@@ -4800,9 +5233,11 @@ export const Security_Detections_API_BulkActionsDryRunErrCode = z.enum([
   'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD',
   'RULE_FILL_GAPS_DISABLED_RULE',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RuleDetailsInError = z
   .object({ id: z.string(), name: z.string().optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_NormalizedRuleError = z
   .object({
     err_code: Security_Detections_API_BulkActionsDryRunErrCode.optional(),
@@ -4811,8 +5246,11 @@ export const Security_Detections_API_NormalizedRuleError = z
     status_code: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkGapsFillingSkipReason = z.literal('NO_GAPS_TO_FILL');
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkActionSkipResult = z
   .object({
     id: z.string(),
@@ -4823,6 +5261,7 @@ export const Security_Detections_API_BulkActionSkipResult = z
     ]),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkEditActionResults = z
   .object({
     created: z.array(Security_Detections_API_RuleResponse),
@@ -4831,6 +5270,7 @@ export const Security_Detections_API_BulkEditActionResults = z
     updated: z.array(Security_Detections_API_RuleResponse),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkEditActionSummary = z
   .object({
     failed: z.number().int(),
@@ -4839,6 +5279,7 @@ export const Security_Detections_API_BulkEditActionSummary = z
     total: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkEditActionResponse = z
   .object({
     attributes: z
@@ -4854,12 +5295,15 @@ export const Security_Detections_API_BulkEditActionResponse = z
     success: z.boolean().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_BulkExportActionResponse = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ExportRules_Body = z
   .object({
     objects: z.array(z.object({ rule_id: Security_Detections_API_RuleSignatureId }).passthrough()),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_ErrorSchema = z.object({
   error: z.object({ message: z.string(), status_code: z.number().int().gte(400) }).passthrough(),
   id: z.string().optional(),
@@ -4867,6 +5311,7 @@ export const Security_Detections_API_ErrorSchema = z.object({
   list_id: z.string().min(1).optional(),
   rule_id: Security_Detections_API_RuleSignatureId.optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_WarningSchema = z
   .object({
     actionPath: z.string(),
@@ -4875,18 +5320,21 @@ export const Security_Detections_API_WarningSchema = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_NonEmptyString = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_CreateRuleExceptionListItemComment = z
   .object({ comment: Security_Exceptions_API_NonEmptyString.min(1) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_CreateRuleExceptionListItemCommentArray = z.array(
   Security_Exceptions_API_CreateRuleExceptionListItemComment
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemDescription = z.string();
-export const Security_Exceptions_API_ExceptionListItemEntryOperator = z.enum([
-  'excluded',
-  'included',
-]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Exceptions_API_ExceptionListItemEntryOperator = z.enum(['excluded', 'included']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryMatch = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
@@ -4895,6 +5343,7 @@ export const Security_Exceptions_API_ExceptionListItemEntryMatch = z
     value: Security_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryMatchAny = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
@@ -4903,7 +5352,9 @@ export const Security_Exceptions_API_ExceptionListItemEntryMatchAny = z
     value: z.array(Security_Exceptions_API_NonEmptyString).min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ListId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ListType = z.enum([
   'binary',
   'boolean',
@@ -4929,6 +5380,7 @@ export const Security_Exceptions_API_ListType = z.enum([
   'short',
   'text',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryList = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
@@ -4939,6 +5391,7 @@ export const Security_Exceptions_API_ExceptionListItemEntryList = z
     type: z.literal('list'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryExists = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
@@ -4946,11 +5399,13 @@ export const Security_Exceptions_API_ExceptionListItemEntryExists = z
     type: z.literal('exists'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem = z.union([
   Security_Exceptions_API_ExceptionListItemEntryMatch,
   Security_Exceptions_API_ExceptionListItemEntryMatchAny,
   Security_Exceptions_API_ExceptionListItemEntryExists,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryNested = z
   .object({
     entries: z.array(Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem).min(1),
@@ -4958,6 +5413,7 @@ export const Security_Exceptions_API_ExceptionListItemEntryNested = z
     type: z.literal('nested'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryMatchWildcard = z
   .object({
     field: Security_Exceptions_API_NonEmptyString.min(1),
@@ -4966,6 +5422,7 @@ export const Security_Exceptions_API_ExceptionListItemEntryMatchWildcard = z
     value: Security_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntry = z.union([
   Security_Exceptions_API_ExceptionListItemEntryMatch,
   Security_Exceptions_API_ExceptionListItemEntryMatchAny,
@@ -4974,19 +5431,29 @@ export const Security_Exceptions_API_ExceptionListItemEntry = z.union([
   Security_Exceptions_API_ExceptionListItemEntryNested,
   Security_Exceptions_API_ExceptionListItemEntryMatchWildcard,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemEntryArray = z.array(
   Security_Exceptions_API_ExceptionListItemEntry
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemHumanId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemMeta = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemName = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionNamespaceType = z.enum(['agnostic', 'single']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemOsTypeArray = z.array(
   Security_Exceptions_API_ExceptionListOsType
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemTags = z.array(z.string().min(1));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemType = z.literal('simple');
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_CreateRuleExceptionListItemProps = z
   .object({
     comments: Security_Exceptions_API_CreateRuleExceptionListItemCommentArray.optional(),
@@ -5002,9 +5469,11 @@ export const Security_Exceptions_API_CreateRuleExceptionListItemProps = z
     type: Security_Exceptions_API_ExceptionListItemType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateRuleExceptionListItems_Body = z
   .object({ items: z.array(Security_Exceptions_API_CreateRuleExceptionListItemProps) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemComment = z
   .object({
     comment: Security_Exceptions_API_NonEmptyString.min(1),
@@ -5015,12 +5484,17 @@ export const Security_Exceptions_API_ExceptionListItemComment = z
     updated_by: Security_Exceptions_API_NonEmptyString.min(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemCommentArray = z.array(
   Security_Exceptions_API_ExceptionListItemComment
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemExpireTime = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItemId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListHumanId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListItem = z
   .object({
     _version: z.string().optional(),
@@ -5046,18 +5520,22 @@ export const Security_Exceptions_API_ExceptionListItem = z
     updated_by: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_PlatformErrorResponse = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_SiemErrorResponse = z
   .object({ message: z.string(), status_code: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RulePreviewParams = z
   .object({
     invocationCount: z.number().int(),
     timeframeEnd: z.string().datetime({ offset: true }),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const RulePreview_Body = z.union([
   Security_Detections_API_EqlRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
   Security_Detections_API_QueryRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
@@ -5070,6 +5548,7 @@ export const RulePreview_Body = z.union([
   Security_Detections_API_NewTermsRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
   Security_Detections_API_EsqlRuleCreateProps.and(Security_Detections_API_RulePreviewParams),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RulePreviewLoggedRequest = z
   .object({
     description: Security_Detections_API_NonEmptyString.min(1),
@@ -5079,6 +5558,7 @@ export const Security_Detections_API_RulePreviewLoggedRequest = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_RulePreviewLogs = z
   .object({
     duration: z.number().int(),
@@ -5088,24 +5568,30 @@ export const Security_Detections_API_RulePreviewLogs = z
     warnings: z.array(Security_Detections_API_NonEmptyString),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertAssignees = z
   .object({ add: z.array(z.string().min(1)), remove: z.array(z.string().min(1)) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertIds = z.array(z.string().min(1));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SetAlertAssignees_Body = z
   .object({
     assignees: Security_Detections_API_AlertAssignees,
     ids: Security_Detections_API_AlertIds.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsSortCombinations = z.union([
   z.string(),
   z.object({}).partial().passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsSort = z.union([
   Security_Detections_API_AlertsSortCombinations,
   z.array(Security_Detections_API_AlertsSortCombinations),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SearchAlerts_Body = z
   .object({
     _source: z.union([z.boolean(), z.string(), z.array(z.string())]),
@@ -5119,18 +5605,21 @@ export const SearchAlerts_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertStatus = z.enum([
   'open',
   'closed',
   'acknowledged',
   'in-progress',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SetAlertsStatusByIds = z
   .object({
     signal_ids: z.array(z.string().min(1)).min(1),
     status: Security_Detections_API_AlertStatus,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SetAlertsStatusByQuery = z
   .object({
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
@@ -5138,48 +5627,54 @@ export const Security_Detections_API_SetAlertsStatusByQuery = z
     status: Security_Detections_API_AlertStatus,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SetAlertsStatus_Body = z.union([
   Security_Detections_API_SetAlertsStatusByIds,
   Security_Detections_API_SetAlertsStatusByQuery,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertTag = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertTags = z.array(Security_Detections_API_AlertTag);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SetAlertTags = z
   .object({
     tags_to_add: Security_Detections_API_AlertTags,
     tags_to_remove: Security_Detections_API_AlertTags,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SetAlertTags_Body = z
   .object({
     ids: Security_Detections_API_AlertIds.min(1),
     tags: Security_Detections_API_SetAlertTags,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Saved_objects_400_response = z
   .object({ error: z.literal('Bad Request'), message: z.string(), statusCode: z.literal(400) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListHumanId = z.string();
-export const Security_Endpoint_Exceptions_API_ExceptionListMeta = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Exceptions_API_ExceptionListMeta = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListName = z.string();
-export const Security_Endpoint_Exceptions_API_ExceptionNamespaceType = z.enum([
-  'agnostic',
-  'single',
-]);
-export const Security_Endpoint_Exceptions_API_ExceptionListOsType = z.enum([
-  'linux',
-  'macos',
-  'windows',
-]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Exceptions_API_ExceptionNamespaceType = z.enum(['agnostic', 'single']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Exceptions_API_ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListOsTypeArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListOsType
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListTags = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListType = z.enum([
   'detection',
   'rule_default',
@@ -5190,7 +5685,9 @@ export const Security_Endpoint_Exceptions_API_ExceptionListType = z.enum([
   'endpoint_host_isolation_exceptions',
   'endpoint_blocklists',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListVersion = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionList = z
   .object({
     _version: z.string().optional(),
@@ -5212,17 +5709,22 @@ export const Security_Endpoint_Exceptions_API_ExceptionList = z
     version: Security_Endpoint_Exceptions_API_ExceptionListVersion.int().gte(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_EndpointList = z.union([
   Security_Endpoint_Exceptions_API_ExceptionList,
   z.object({}).partial(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_PlatformErrorResponse = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_SiemErrorResponse = z
   .object({ message: z.string(), status_code: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_NonEmptyString = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemComment = z
   .object({
     comment: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
@@ -5233,14 +5735,18 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemComment = z
     updated_by: Security_Endpoint_Exceptions_API_NonEmptyString.min(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListItemComment
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryOperator = z.enum([
   'excluded',
   'included',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
@@ -5249,6 +5755,7 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch = z
     value: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
@@ -5257,7 +5764,9 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny = z
     value: z.array(Security_Endpoint_Exceptions_API_NonEmptyString).min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ListId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ListType = z.enum([
   'binary',
   'boolean',
@@ -5283,6 +5792,7 @@ export const Security_Endpoint_Exceptions_API_ListType = z.enum([
   'short',
   'text',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryList = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
@@ -5296,6 +5806,7 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryList = z
     type: z.literal('list'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
@@ -5303,11 +5814,13 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists = z
     type: z.literal('exists'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryNestedEntryItem = z.union([
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch,
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny,
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryNested = z
   .object({
     entries: z.array(Security_Endpoint_Exceptions_API_ExceptionListItemEntryNestedEntryItem).min(1),
@@ -5315,6 +5828,7 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryNested = z
     type: z.literal('nested'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchWildcard = z
   .object({
     field: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
@@ -5323,6 +5837,7 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchWildcar
     value: Security_Endpoint_Exceptions_API_NonEmptyString.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntry = z.union([
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch,
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny,
@@ -5331,22 +5846,29 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItemEntry = z.union([
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryNested,
   Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchWildcard,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListItemEntry
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemExpireTime = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemHumanId = z.string();
-export const Security_Endpoint_Exceptions_API_ExceptionListItemMeta = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Exceptions_API_ExceptionListItemMeta = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemName = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray = z.array(
   Security_Endpoint_Exceptions_API_ExceptionListOsType
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemTags = z.array(z.string().min(1));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItemType = z.literal('simple');
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_ExceptionListItem = z
   .object({
     _version: z.string().optional(),
@@ -5372,6 +5894,7 @@ export const Security_Endpoint_Exceptions_API_ExceptionListItem = z
     updated_by: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateEndpointListItem_Body = z
   .object({
     comments: Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray.optional(),
@@ -5385,6 +5908,7 @@ export const CreateEndpointListItem_Body = z
     type: Security_Endpoint_Exceptions_API_ExceptionListItemType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UpdateEndpointListItem_Body = z
   .object({
     _version: z.string().optional(),
@@ -5400,6 +5924,7 @@ export const UpdateEndpointListItem_Body = z
     type: Security_Endpoint_Exceptions_API_ExceptionListItemType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Command = z.enum([
   'isolate',
   'unisolate',
@@ -5411,22 +5936,27 @@ export const Security_Endpoint_Management_API_Command = z.enum([
   'upload',
   'scan',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const agentIds = z.union([z.array(z.string().min(1)), z.string()]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Type = z.enum(['automated', 'manual']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_GetEndpointActionListResponse = z
   .object({})
   .partial()
   .passthrough();
-export const Security_Endpoint_Management_API_AgentIds = z.union([
-  z.array(z.string().min(1)),
-  z.string(),
-]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_AgentIds = z.union([z.array(z.string().min(1)), z.string()]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const query = z
   .object({ agent_ids: Security_Endpoint_Management_API_AgentIds })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_AgentId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_PendingActionDataType = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_PendingActionsSchema = z.union([
   z
     .object({
@@ -5444,6 +5974,7 @@ export const Security_Endpoint_Management_API_PendingActionsSchema = z.union([
     .passthrough(),
   z.object({}).partial().passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ActionStatusSuccessResponse = z
   .object({
     body: z
@@ -5458,24 +5989,29 @@ export const Security_Endpoint_Management_API_ActionStatusSuccessResponse = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_GetEndpointActionResponse = z
   .object({})
   .partial()
   .passthrough();
-export const Security_Endpoint_Management_API_SuccessResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_SuccessResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_AgentTypes = z.enum([
   'endpoint',
   'sentinel_one',
   'crowdstrike',
   'microsoft_defender_endpoint',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Comment = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_EndpointIds = z.array(z.string().min(1));
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Parameters = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Timeout = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ExecuteRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5498,10 +6034,9 @@ export const Security_Endpoint_Management_API_ExecuteRouteRequestBody = z
       })
       .passthrough()
   );
-export const Security_Endpoint_Management_API_ExecuteRouteResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_ExecuteRouteResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_GetFileRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5513,10 +6048,9 @@ export const Security_Endpoint_Management_API_GetFileRouteRequestBody = z
   })
   .passthrough()
   .and(z.object({ parameters: z.object({ path: z.string() }).passthrough() }).passthrough());
-export const Security_Endpoint_Management_API_GetFileRouteResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_GetFileRouteResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const EndpointIsolateAction_Body = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5527,10 +6061,9 @@ export const EndpointIsolateAction_Body = z
     parameters: Security_Endpoint_Management_API_Parameters.optional(),
   })
   .passthrough();
-export const Security_Endpoint_Management_API_IsolateRouteResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_IsolateRouteResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_KillProcessRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5561,10 +6094,12 @@ export const Security_Endpoint_Management_API_KillProcessRouteRequestBody = z
       })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_KillProcessRouteResponse = z
   .object({})
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_GetProcessesRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5575,10 +6110,12 @@ export const Security_Endpoint_Management_API_GetProcessesRouteRequestBody = z
     parameters: Security_Endpoint_Management_API_Parameters.optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_GetProcessesRouteResponse = z
   .object({})
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_RawScriptParameters = z
   .object({
     commandLine: z.string().min(1).optional(),
@@ -5586,6 +6123,7 @@ export const Security_Endpoint_Management_API_RawScriptParameters = z
     timeout: z.number().int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_HostPathScriptParameters = z
   .object({
     commandLine: z.string().min(1).optional(),
@@ -5593,6 +6131,7 @@ export const Security_Endpoint_Management_API_HostPathScriptParameters = z
     timeout: z.number().int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_CloudFileScriptParameters = z
   .object({
     cloudFile: z.string().min(1),
@@ -5600,9 +6139,11 @@ export const Security_Endpoint_Management_API_CloudFileScriptParameters = z
     timeout: z.number().int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_SentinelOneRunScriptParameters = z
   .object({ inputParams: z.string().min(1).optional(), script: z.string().min(1) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_RunScriptRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5625,6 +6166,7 @@ export const Security_Endpoint_Management_API_RunScriptRouteRequestBody = z
       })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse = z
   .object({
     data: z
@@ -5665,6 +6207,7 @@ export const Security_Endpoint_Management_API_ResponseActionCreateSuccessRespons
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ScanRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5676,10 +6219,9 @@ export const Security_Endpoint_Management_API_ScanRouteRequestBody = z
   })
   .passthrough()
   .and(z.object({ parameters: z.object({ path: z.string() }).passthrough() }).passthrough());
-export const Security_Endpoint_Management_API_ScanRouteResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_ScanRouteResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ActionStateSuccessResponse = z
   .object({
     body: z
@@ -5687,6 +6229,7 @@ export const Security_Endpoint_Management_API_ActionStateSuccessResponse = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_SuspendProcessRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5713,14 +6256,17 @@ export const Security_Endpoint_Management_API_SuspendProcessRouteRequestBody = z
       })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_SuspendProcessRouteResponse = z
   .object({})
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_UnisolateRouteResponse = z
   .object({})
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_UploadRouteRequestBody = z
   .object({
     agent_type: Security_Endpoint_Management_API_AgentTypes.optional(),
@@ -5742,35 +6288,37 @@ export const Security_Endpoint_Management_API_UploadRouteRequestBody = z
       })
       .passthrough()
   );
-export const Security_Endpoint_Management_API_UploadRouteResponse = z
-  .object({})
-  .partial()
-  .passthrough();
-export const Security_Endpoint_Management_API_MetadataListResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_UploadRouteResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_MetadataListResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_EndpointMetadataResponse = z
   .object({})
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const query__2 = z
   .object({ agentId: Security_Endpoint_Management_API_AgentId })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ProtectionUpdatesNoteResponse = z
   .object({ note: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus = z.enum([
   'started',
   'error',
   'disabled',
   'not_installed',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_MonitoringEngineDescriptor = z
   .object({ status: Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EntityAnalyticsPrivileges = z
   .object({
     has_all_required: z.boolean(),
@@ -5787,10 +6335,12 @@ export const Security_Entity_Analytics_API_EntityAnalyticsPrivileges = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_UserName = z
   .object({ user: z.object({ name: z.string() }).partial().passthrough() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_MonitoredUserDoc = z
   .object({
     '@timestamp': z.string().datetime({ offset: true }),
@@ -5822,6 +6372,7 @@ export const Security_Entity_Analytics_API_MonitoredUserDoc = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem = z
   .object({
     index: z.number().int().nullable(),
@@ -5829,17 +6380,17 @@ export const Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem = z
     username: z.string().nullable(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_PrivmonUserCsvUploadStats = z
   .object({ failed: z.number().int(), successful: z.number().int(), total: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_Interval = z.string();
-export const Security_Entity_Analytics_API_EntityType = z.enum([
-  'user',
-  'host',
-  'service',
-  'generic',
-]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Entity_Analytics_API_EntityType = z.enum(['user', 'host', 'service', 'generic']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_IndexPattern = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const InitEntityStore_Body = z
   .object({
     delay: z
@@ -5869,6 +6420,7 @@ export const InitEntityStore_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EngineStatus = z.enum([
   'installing',
   'started',
@@ -5876,6 +6428,7 @@ export const Security_Entity_Analytics_API_EngineStatus = z.enum([
   'updating',
   'error',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EngineDescriptor = z
   .object({
     delay: z
@@ -5911,6 +6464,7 @@ export const Security_Entity_Analytics_API_EngineDescriptor = z
     type: Security_Entity_Analytics_API_EntityType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const InitEntityEngine_Body = z
   .object({
     delay: z
@@ -5939,6 +6493,7 @@ export const InitEntityEngine_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EngineDataviewUpdateResult = z
   .object({
     changes: z
@@ -5949,12 +6504,13 @@ export const Security_Entity_Analytics_API_EngineDataviewUpdateResult = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_InspectQuery = z
   .object({ dsl: z.array(z.string()), response: z.array(z.string()) })
   .passthrough();
-export const Security_Entity_Analytics_API_EngineMetadata = z
-  .object({ Type: z.string() })
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Entity_Analytics_API_EngineMetadata = z.object({ Type: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EntityRiskLevels = z.enum([
   'Unknown',
   'Low',
@@ -5962,6 +6518,7 @@ export const Security_Entity_Analytics_API_EntityRiskLevels = z.enum([
   'High',
   'Critical',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_RiskScoreInput = z
   .object({
     category: z.string(),
@@ -5973,6 +6530,7 @@ export const Security_Entity_Analytics_API_RiskScoreInput = z
     timestamp: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EntityRiskScoreRecord = z
   .object({
     '@timestamp': z.string().datetime({ offset: true }),
@@ -5991,6 +6549,7 @@ export const Security_Entity_Analytics_API_EntityRiskScoreRecord = z
     notes: z.array(z.string()),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_UserEntity = z
   .object({
     '@timestamp': z.string().datetime({ offset: true }).optional(),
@@ -6025,6 +6584,7 @@ export const Security_Entity_Analytics_API_UserEntity = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_HostEntity = z
   .object({
     '@timestamp': z.string().datetime({ offset: true }).optional(),
@@ -6060,6 +6620,7 @@ export const Security_Entity_Analytics_API_HostEntity = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_ServiceEntity = z
   .object({
     '@timestamp': z.string().datetime({ offset: true }).optional(),
@@ -6088,6 +6649,7 @@ export const Security_Entity_Analytics_API_ServiceEntity = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_GenericEntity = z
   .object({
     '@timestamp': z.string().datetime({ offset: true }).optional(),
@@ -6107,12 +6669,14 @@ export const Security_Entity_Analytics_API_GenericEntity = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_Entity = z.union([
   Security_Entity_Analytics_API_UserEntity,
   Security_Entity_Analytics_API_HostEntity,
   Security_Entity_Analytics_API_ServiceEntity,
   Security_Entity_Analytics_API_GenericEntity,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_TransformStatsMetadata = z
   .object({
     delete_time_in_ms: z.number().int().optional(),
@@ -6134,6 +6698,7 @@ export const Security_Entity_Analytics_API_TransformStatsMetadata = z
     trigger_count: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EngineComponentResource = z.enum([
   'entity_engine',
   'entity_definition',
@@ -6145,6 +6710,7 @@ export const Security_Entity_Analytics_API_EngineComponentResource = z.enum([
   'task',
   'transform',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_EngineComponentStatus = z
   .object({
     errors: z
@@ -6157,6 +6723,7 @@ export const Security_Entity_Analytics_API_EngineComponentStatus = z
     resource: Security_Entity_Analytics_API_EngineComponentResource,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_StoreStatus = z.enum([
   'not_installed',
   'installing',
@@ -6164,14 +6731,21 @@ export const Security_Entity_Analytics_API_StoreStatus = z.enum([
   'stopped',
   'error',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListMeta = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListName = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListOsTypeArray = z.array(
   Security_Exceptions_API_ExceptionListOsType
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListTags = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListType = z.enum([
   'detection',
   'rule_default',
@@ -6182,7 +6756,9 @@ export const Security_Exceptions_API_ExceptionListType = z.enum([
   'endpoint_host_isolation_exceptions',
   'endpoint_blocklists',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListVersion = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionList = z
   .object({
     _version: z.string().optional(),
@@ -6204,6 +6780,7 @@ export const Security_Exceptions_API_ExceptionList = z
     version: Security_Exceptions_API_ExceptionListVersion.int().gte(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateExceptionList_Body = z
   .object({
     description: Security_Exceptions_API_ExceptionListDescription,
@@ -6217,6 +6794,7 @@ export const CreateExceptionList_Body = z
     version: Security_Exceptions_API_ExceptionListVersion.int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UpdateExceptionList_Body = z
   .object({
     _version: z.string().optional(),
@@ -6232,6 +6810,7 @@ export const UpdateExceptionList_Body = z
     version: Security_Exceptions_API_ExceptionListVersion.int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListsImportBulkError = z
   .object({
     error: z.object({ message: z.string(), status_code: z.number().int() }).passthrough(),
@@ -6240,15 +6819,19 @@ export const Security_Exceptions_API_ExceptionListsImportBulkError = z
     list_id: Security_Exceptions_API_ExceptionListHumanId.min(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_ExceptionListsImportBulkErrorArray = z.array(
   Security_Exceptions_API_ExceptionListsImportBulkError
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_CreateExceptionListItemComment = z
   .object({ comment: Security_Exceptions_API_NonEmptyString.min(1) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_CreateExceptionListItemCommentArray = z.array(
   Security_Exceptions_API_CreateExceptionListItemComment
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateExceptionListItem_Body = z
   .object({
     comments: Security_Exceptions_API_CreateExceptionListItemCommentArray.optional(),
@@ -6267,15 +6850,18 @@ export const CreateExceptionListItem_Body = z
     type: Security_Exceptions_API_ExceptionListItemType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_UpdateExceptionListItemComment = z
   .object({
     comment: Security_Exceptions_API_NonEmptyString.min(1),
     id: Security_Exceptions_API_NonEmptyString.min(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_UpdateExceptionListItemCommentArray = z.array(
   Security_Exceptions_API_UpdateExceptionListItemComment
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UpdateExceptionListItem_Body = z
   .object({
     _version: z.string().optional(),
@@ -6296,12 +6882,14 @@ export const UpdateExceptionListItem_Body = z
     type: Security_Exceptions_API_ExceptionListItemType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateSharedExceptionList_Body = z
   .object({
     description: Security_Exceptions_API_ExceptionListDescription,
     name: Security_Exceptions_API_ExceptionListName,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agent_download_sources_Body = z.object({
   host: z.string().url(),
   id: z.string().optional(),
@@ -6323,6 +6911,7 @@ export const post_fleet_agent_download_sources_Body = z.object({
     .partial()
     .optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agent_policies_Body = z.object({
   advanced_settings: z
     .object({
@@ -6396,11 +6985,13 @@ export const post_fleet_agent_policies_Body = z.object({
   supports_agentless: z.boolean().nullish().default(false),
   unenroll_timeout: z.number().gte(0).optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agent_policies_bulk_get_Body = z.object({
   full: z.boolean().optional(),
   ids: z.array(z.string()),
   ignoreMissing: z.boolean().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_agent_policies_agentpolicyid_Body = z.object({
   advanced_settings: z
     .object({
@@ -6475,23 +7066,30 @@ export const put_fleet_agent_policies_agentpolicyid_Body = z.object({
   supports_agentless: z.boolean().nullish().default(false),
   unenroll_timeout: z.number().gte(0).optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agent_policies_agentpolicyid_copy_Body = z.object({
   description: z.string().optional(),
   name: z.string().min(1),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agent_policies_delete_Body = z.object({
   agentPolicyId: z.string(),
   force: z.boolean().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agent_policies_outputs_Body = z.object({ ids: z.array(z.string()) });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const agentsIds = z.union([z.array(z.string()), z.string()]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_Body = z.object({ actionIds: z.array(z.string()) });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_agents_agentid_Body = z
   .object({
     tags: z.array(z.string()),
     user_provided_metadata: z.object({}).partial().passthrough(),
   })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_agentid_actions_Body = z.object({
   action: z.union([
     z.object({
@@ -6505,29 +7103,35 @@ export const post_fleet_agents_agentid_actions_Body = z.object({
     }),
   ]),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_agentid_request_diagnostics_Body = z
   .object({ additional_metrics: z.array(z.literal('z.any()')) })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_agentid_unenroll_Body = z
   .object({ force: z.boolean(), revoke: z.boolean() })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_agentid_upgrade_Body = z.object({
   force: z.boolean().optional(),
   skipRateLimitCheck: z.boolean().optional(),
   source_uri: z.string().optional(),
   version: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_bulk_reassign_Body = z.object({
   agents: z.union([z.array(z.string()), z.string()]),
   batchSize: z.number().optional(),
   includeInactive: z.boolean().optional().default(false),
   policy_id: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_bulk_request_diagnostics_Body = z.object({
   additional_metrics: z.array(z.literal('z.any()')).optional(),
   agents: z.union([z.array(z.string()), z.string()]),
   batchSize: z.number().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_bulk_unenroll_Body = z.object({
   agents: z.union([z.array(z.string()), z.string()]),
   batchSize: z.number().optional(),
@@ -6535,6 +7139,7 @@ export const post_fleet_agents_bulk_unenroll_Body = z.object({
   includeInactive: z.boolean().optional(),
   revoke: z.boolean().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_bulk_update_agent_tags_Body = z.object({
   agents: z.union([z.array(z.string()), z.string()]),
   batchSize: z.number().optional(),
@@ -6542,6 +7147,7 @@ export const post_fleet_agents_bulk_update_agent_tags_Body = z.object({
   tagsToAdd: z.array(z.string()).optional(),
   tagsToRemove: z.array(z.string()).optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_agents_bulk_upgrade_Body = z.object({
   agents: z.union([z.array(z.string()), z.string()]),
   batchSize: z.number().optional(),
@@ -6553,14 +7159,17 @@ export const post_fleet_agents_bulk_upgrade_Body = z.object({
   start_time: z.string().optional(),
   version: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_enrollment_api_keys_Body = z.object({
   expiration: z.string().optional(),
   name: z.string().optional(),
   policy_id: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_bulk_assets_Body = z.object({
   assetIds: z.array(z.object({ id: z.string(), type: z.string() })),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_custom_integrations_Body = z.object({
   datasets: z.array(
     z.object({
@@ -6571,10 +7180,12 @@ export const post_fleet_epm_custom_integrations_Body = z.object({
   force: z.boolean().optional(),
   integrationName: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_epm_custom_integrations_pkgname_Body = z.object({
   categories: z.array(z.string()).optional(),
   readMeData: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_packages_bulk_Body = z.object({
   force: z.boolean().optional().default(false),
   packages: z
@@ -6586,26 +7197,33 @@ export const post_fleet_epm_packages_bulk_Body = z.object({
     )
     .min(1),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_packages_bulk_uninstall_Body = z.object({
   force: z.boolean().optional().default(false),
   packages: z.array(z.object({ name: z.string(), version: z.string() })).min(1),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_packages_bulk_upgrade_Body = z.object({
   force: z.boolean().optional().default(false),
   packages: z.array(z.object({ name: z.string(), version: z.string().optional() })).min(1),
   prerelease: z.boolean().optional(),
   upgrade_package_policies: z.boolean().optional().default(false),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_packages_pkgname_pkgversion_Body = z
   .object({ force: z.boolean().default(false), ignore_constraints: z.boolean().default(false) })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_Body = z
   .object({ force: z.boolean(), space_ids: z.array(z.string()).min(1) })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body = z.object({
   transforms: z.array(z.object({ transformId: z.string() })),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const searchAfter = z.array(z.union([z.string(), z.number()])).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_fleet_server_hosts_Body = z.object({
   host_urls: z.array(z.string()).min(1),
   id: z.string().optional(),
@@ -6638,6 +7256,7 @@ export const post_fleet_fleet_server_hosts_Body = z.object({
     .partial()
     .nullish(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_fleet_server_hosts_itemid_Body = z.object({
   host_urls: z.array(z.string()).min(1).optional(),
   is_default: z.boolean().optional(),
@@ -6668,6 +7287,7 @@ export const put_fleet_fleet_server_hosts_itemid_Body = z.object({
     .partial()
     .nullish(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_outputs_Body = z.union([
   z.object({
     allow_edit: z.array(z.string()).optional(),
@@ -6881,6 +7501,7 @@ export const post_fleet_outputs_Body = z.union([
     write_to_logs_streams: z.boolean().optional(),
   }),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_outputs_outputid_Body = z.union([
   z
     .object({
@@ -7097,6 +7718,7 @@ export const put_fleet_outputs_outputid_Body = z.union([
     write_to_logs_streams: z.boolean().optional(),
   }),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_package_policies_Body = z.union([
   z.object({
     additional_datastreams_permissions: z.array(z.string()).nullish(),
@@ -7305,10 +7927,12 @@ export const post_fleet_package_policies_Body = z.union([
       .optional(),
   }),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_package_policies_bulk_get_Body = z.object({
   ids: z.array(z.string()),
   ignoreMissing: z.boolean().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_package_policies_packagepolicyid_Body = z.union([
   z
     .object({
@@ -7515,17 +8139,21 @@ export const put_fleet_package_policies_packagepolicyid_Body = z.union([
       .optional(),
   }),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_package_policies_delete_Body = z.object({
   force: z.boolean().optional(),
   packagePolicyIds: z.array(z.string()),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_package_policies_upgrade_Body = z.object({
   packagePolicyIds: z.array(z.string()),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_package_policies_upgrade_dryrun_Body = z.object({
   packagePolicyIds: z.array(z.string()),
   packageVersion: z.string().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_fleet_proxies_Body = z.object({
   certificate: z.string().nullish(),
   certificate_authorities: z.string().nullish(),
@@ -7536,6 +8164,7 @@ export const post_fleet_proxies_Body = z.object({
   proxy_headers: z.record(z.union([z.string(), z.boolean(), z.number()])).nullish(),
   url: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_proxies_itemid_Body = z.object({
   certificate: z.string().nullable(),
   certificate_authorities: z.string().nullable(),
@@ -7544,6 +8173,7 @@ export const put_fleet_proxies_itemid_Body = z.object({
   proxy_headers: z.record(z.union([z.string(), z.boolean(), z.number()])).nullable(),
   url: z.string().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_settings_Body = z
   .object({
     additional_yaml_config: z.string(),
@@ -7554,16 +8184,25 @@ export const put_fleet_settings_Body = z
     prerelease_integrations_enabled: z.boolean(),
   })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_fleet_space_settings_Body = z
   .object({ allowed_namespace_prefixes: z.array(z.string()) })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListVersionId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListDeserializer = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListMetadata = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListName = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListSerializer = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListType = z.enum([
   'binary',
   'boolean',
@@ -7589,7 +8228,9 @@ export const Security_Lists_API_ListType = z.enum([
   'short',
   'text',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListVersion = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_List = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
@@ -7610,12 +8251,15 @@ export const Security_Lists_API_List = z
     version: Security_Lists_API_ListVersion.int().gte(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_PlatformErrorResponse = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_SiemErrorResponse = z
   .object({ message: z.string(), status_code: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PatchList_Body = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
@@ -7626,6 +8270,7 @@ export const PatchList_Body = z
     version: Security_Lists_API_ListVersion.int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateList_Body = z
   .object({
     description: Security_Lists_API_ListDescription.min(1),
@@ -7638,6 +8283,7 @@ export const CreateList_Body = z
     version: z.number().int().gte(1).optional().default(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UpdateList_Body = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
@@ -7648,10 +8294,15 @@ export const UpdateList_Body = z
     version: Security_Lists_API_ListVersion.int().gte(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_FindListsCursor = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListItemId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListItemMetadata = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListItemValue = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListItem = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
@@ -7670,6 +8321,7 @@ export const Security_Lists_API_ListItem = z
     value: Security_Lists_API_ListItemValue.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PatchListItem_Body = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
@@ -7679,6 +8331,7 @@ export const PatchListItem_Body = z
     value: Security_Lists_API_ListItemValue.min(1).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateListItem_Body = z
   .object({
     id: Security_Lists_API_ListItemId.min(1).optional(),
@@ -7688,6 +8341,7 @@ export const CreateListItem_Body = z
     value: Security_Lists_API_ListItemValue.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const UpdateListItem_Body = z
   .object({
     _version: Security_Lists_API_ListVersionId.optional(),
@@ -7696,7 +8350,9 @@ export const UpdateListItem_Body = z
     value: Security_Lists_API_ListItemValue.min(1),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_FindListItemsCursor = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListItemPrivileges = z
   .object({
     application: z.record(z.boolean()),
@@ -7706,6 +8362,7 @@ export const Security_Lists_API_ListItemPrivileges = z
     username: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_ListPrivileges = z
   .object({
     application: z.record(z.boolean()),
@@ -7715,6 +8372,7 @@ export const Security_Lists_API_ListPrivileges = z
     username: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_logstash_pipeline_Body = z
   .object({
     description: z.string().optional(),
@@ -7722,6 +8380,7 @@ export const put_logstash_pipeline_Body = z
     settings: z.object({}).partial().passthrough().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_maintenance_window_Body = z.object({
   enabled: z.boolean().optional(),
   schedule: z.object({
@@ -7745,6 +8404,7 @@ export const post_maintenance_window_Body = z.object({
   scope: z.object({ alerting: z.object({ query: z.object({ kql: z.string() }) }) }).optional(),
   title: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const patch_maintenance_window_id_Body = z
   .object({
     enabled: z.boolean(),
@@ -7770,23 +8430,29 @@ export const patch_maintenance_window_id_Body = z
     title: z.string(),
   })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseSuccess = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseDatafeeds = z
   .object({ success: Machine_learning_APIs_mlSyncResponseSuccess })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseAnomalyDetectors = z
   .object({ success: Machine_learning_APIs_mlSyncResponseSuccess })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseDataFrameAnalytics = z
   .object({ success: Machine_learning_APIs_mlSyncResponseSuccess })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseTrainedModels = z
   .object({ success: Machine_learning_APIs_mlSyncResponseSuccess })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseSavedObjectsCreated = z
   .object({
     'anomaly-detector': z.record(Machine_learning_APIs_mlSyncResponseAnomalyDetectors),
@@ -7795,6 +8461,7 @@ export const Machine_learning_APIs_mlSyncResponseSavedObjectsCreated = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSyncResponseSavedObjectsDeleted = z
   .object({
     'anomaly-detector': z.record(Machine_learning_APIs_mlSyncResponseAnomalyDetectors),
@@ -7803,6 +8470,7 @@ export const Machine_learning_APIs_mlSyncResponseSavedObjectsDeleted = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSync200Response = z
   .object({
     datafeedsAdded: z.record(Machine_learning_APIs_mlSyncResponseDatafeeds),
@@ -7812,14 +8480,17 @@ export const Machine_learning_APIs_mlSync200Response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Machine_learning_APIs_mlSync4xxResponse = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number().int() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const DeleteNote_Body = z.union([
   z.object({ noteId: z.string() }).passthrough(),
   z.object({ noteIds: z.array(z.string()).nullable() }).passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_NoteCreatedAndUpdatedMetadata = z
   .object({
     created: z.number().nullable(),
@@ -7829,18 +8500,21 @@ export const Security_Timeline_API_NoteCreatedAndUpdatedMetadata = z
   })
   .partial()
   .passthrough();
-export const Security_Timeline_API_BareNote =
-  Security_Timeline_API_NoteCreatedAndUpdatedMetadata.and(
-    z
-      .object({ eventId: z.string().nullish(), note: z.string().nullish(), timelineId: z.string() })
-      .passthrough()
-  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Timeline_API_BareNote = Security_Timeline_API_NoteCreatedAndUpdatedMetadata.and(
+  z
+    .object({ eventId: z.string().nullish(), note: z.string().nullish(), timelineId: z.string() })
+    .passthrough()
+);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_Note = Security_Timeline_API_BareNote.and(
   z.object({ noteId: z.string(), version: z.string() }).passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_GetNotesResult = z
   .object({ notes: z.array(Security_Timeline_API_Note), totalCount: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PersistNoteRoute_Body = z
   .object({
     note: Security_Timeline_API_BareNote,
@@ -7848,9 +8522,11 @@ export const PersistNoteRoute_Body = z
     version: z.string().nullish(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_ResponseNote = z
   .object({ note: Security_Timeline_API_Note })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_Function = z
   .object({
     description: z.string(),
@@ -7859,10 +8535,12 @@ export const Observability_AI_Assistant_API_Function = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_Instruction = z.union([
   z.string(),
   z.object({ id: z.string(), text: z.string() }).passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_FunctionCall = z
   .object({
     arguments: z.string().optional(),
@@ -7870,6 +8548,7 @@ export const Observability_AI_Assistant_API_FunctionCall = z
     trigger: z.enum(['assistant', 'user', 'elastic']),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_MessageRoleEnum = z.enum([
   'system',
   'assistant',
@@ -7877,6 +8556,7 @@ export const Observability_AI_Assistant_API_MessageRoleEnum = z.enum([
   'user',
   'elastic',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_Message = z
   .object({
     '@timestamp': z.string(),
@@ -7892,6 +8572,7 @@ export const Observability_AI_Assistant_API_Message = z
       .passthrough(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const observability_ai_assistant_chat_complete_Body = z
   .object({
     actions: z.array(Observability_AI_Assistant_API_Function).optional(),
@@ -7904,25 +8585,42 @@ export const observability_ai_assistant_chat_complete_Body = z
     title: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_FindLiveQueryResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ECSMappingItem = z
   .object({ field: z.string(), value: z.union([z.string(), z.array(z.string())]) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ECSMapping = z.record(Security_Osquery_API_ECSMappingItem);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ECSMappingOrUndefined = Security_Osquery_API_ECSMapping;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PackId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PackIdOrUndefined = Security_Osquery_API_PackId;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_QueryId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Platform = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PlatformOrUndefined = Security_Osquery_API_Platform;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Query = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Removed = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_RemovedOrUndefined = Security_Osquery_API_Removed;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Snapshot = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SnapshotOrUndefined = Security_Osquery_API_Snapshot;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Version = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_VersionOrUndefined = Security_Osquery_API_Version;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ArrayQueriesItem = z
   .object({
     ecs_mapping: Security_Osquery_API_ECSMappingOrUndefined.nullable(),
@@ -7935,10 +8633,15 @@ export const Security_Osquery_API_ArrayQueriesItem = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ArrayQueries = z.array(Security_Osquery_API_ArrayQueriesItem);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_QueryOrUndefined = Security_Osquery_API_Query;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SavedQueryId = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SavedQueryIdOrUndefined = Security_Osquery_API_SavedQueryId;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_CreateLiveQueryRequestBody = z
   .object({
     agent_all: z.boolean(),
@@ -7957,23 +8660,29 @@ export const Security_Osquery_API_CreateLiveQueryRequestBody = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_CreateLiveQueryResponse = z.object({}).partial().passthrough();
-export const Security_Osquery_API_FindLiveQueryDetailsResponse = z
-  .object({})
-  .partial()
-  .passthrough();
-export const Security_Osquery_API_GetLiveQueryResultsResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Osquery_API_FindLiveQueryDetailsResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Osquery_API_GetLiveQueryResultsResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_FindPacksResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PackDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PackDescriptionOrUndefined = Security_Osquery_API_PackDescription;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Enabled = z.boolean();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_EnabledOrUndefined = Security_Osquery_API_Enabled;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PackName = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PolicyIds = z.array(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PolicyIdsOrUndefined = Security_Osquery_API_PolicyIds;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ObjectQueriesItem = z
   .object({
     ecs_mapping: Security_Osquery_API_ECSMappingOrUndefined.nullable(),
@@ -7987,8 +8696,11 @@ export const Security_Osquery_API_ObjectQueriesItem = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_ObjectQueries = z.record(Security_Osquery_API_ObjectQueriesItem);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Shards = z.record(z.number());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_CreatePacksRequestBody = z
   .object({
     description: Security_Osquery_API_PackDescriptionOrUndefined.nullable(),
@@ -8000,8 +8712,11 @@ export const Security_Osquery_API_CreatePacksRequestBody = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_CreatePacksResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_FindPackResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_UpdatePacksRequestBody = z
   .object({
     description: Security_Osquery_API_PackDescriptionOrUndefined.nullable(),
@@ -8013,12 +8728,18 @@ export const Security_Osquery_API_UpdatePacksRequestBody = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_UpdatePacksResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_FindSavedQueryResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SavedQueryDescription = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SavedQueryDescriptionOrUndefined =
   Security_Osquery_API_SavedQueryDescription;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_Interval = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_CreateSavedQueryRequestBody = z
   .object({
     description: Security_Osquery_API_SavedQueryDescriptionOrUndefined.nullable(),
@@ -8033,13 +8754,15 @@ export const Security_Osquery_API_CreateSavedQueryRequestBody = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_CreateSavedQueryResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_DefaultSuccessResponse = z.object({}).partial().passthrough();
-export const Security_Osquery_API_FindSavedQueryDetailResponse = z
-  .object({})
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Osquery_API_FindSavedQueryDetailResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_IntervalOrUndefined = Security_Osquery_API_Interval;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_UpdateSavedQueryRequestBody = z
   .object({
     description: Security_Osquery_API_SavedQueryDescriptionOrUndefined.nullable(),
@@ -8054,10 +8777,13 @@ export const Security_Osquery_API_UpdateSavedQueryRequestBody = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_UpdateSavedQueryResponse = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PersistPinnedEventRoute_Body = z
   .object({ eventId: z.string(), pinnedEventId: z.string().nullish(), timelineId: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_PinnedEventCreatedAndUpdatedMetadata = z
   .object({
     created: z.number().nullable(),
@@ -8067,26 +8793,32 @@ export const Security_Timeline_API_PinnedEventCreatedAndUpdatedMetadata = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_BarePinnedEvent =
   Security_Timeline_API_PinnedEventCreatedAndUpdatedMetadata.and(
     z.object({ eventId: z.string(), timelineId: z.string() }).passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_PinnedEvent = Security_Timeline_API_BarePinnedEvent.and(
   z.object({ pinnedEventId: z.string(), version: z.string() }).passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_PersistPinnedEventResponse = z.union([
   Security_Timeline_API_PinnedEvent,
   z.object({ unpinned: z.boolean() }).passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_TaskManagerUnavailableResponse = z
   .object({ message: z.string(), status_code: z.number().int().gte(400) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_CleanUpRiskEngineErrorResponse = z
   .object({
     cleanup_successful: z.boolean(),
     errors: z.array(z.object({ error: z.string(), seq: z.number().int() }).passthrough()),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ConfigureRiskEngineSavedObject_Body = z
   .object({
     exclude_alert_statuses: z.array(z.string()),
@@ -8095,19 +8827,23 @@ export const ConfigureRiskEngineSavedObject_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse = z
   .object({
     errors: z.array(z.object({ error: z.string(), seq: z.number().int() }).passthrough()),
     risk_engine_saved_object_configured: z.boolean(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_RiskEngineScheduleNowResponse = z
   .object({ success: z.boolean() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse = z
   .object({ full_error: z.string(), message: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_saved_objects_export_Body = z
   .object({
     excludeExportDetails: z.boolean().default(false),
@@ -8121,6 +8857,7 @@ export const post_saved_objects_export_Body = z
     type: z.union([z.string(), z.array(z.string())]),
   })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const resolveImportErrors_Body = z
   .object({
     file: z.any().optional(),
@@ -8145,6 +8882,7 @@ export const resolveImportErrors_Body = z
     ),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldCreateProps = z
   .object({
     allowed: z.boolean().optional(),
@@ -8152,9 +8890,11 @@ export const Security_AI_Assistant_API_AnonymizationFieldCreateProps = z
     field: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldUpdateProps = z
   .object({ allowed: z.boolean().optional(), anonymized: z.boolean().optional(), id: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PerformAnonymizationFieldsBulkAction_Body = z
   .object({
     create: z.array(Security_AI_Assistant_API_AnonymizationFieldCreateProps),
@@ -8166,9 +8906,11 @@ export const PerformAnonymizationFieldsBulkAction_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldDetailsInError = z
   .object({ id: z.string(), name: z.string().optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_NormalizedAnonymizationFieldError = z
   .object({
     anonymization_fields: z.array(Security_AI_Assistant_API_AnonymizationFieldDetailsInError),
@@ -8177,8 +8919,11 @@ export const Security_AI_Assistant_API_NormalizedAnonymizationFieldError = z
     status_code: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_NonEmptyString = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_NonEmptyTimestamp = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldResponse = z
   .object({
     allowed: z.boolean().optional(),
@@ -8193,9 +8938,11 @@ export const Security_AI_Assistant_API_AnonymizationFieldResponse = z
     updatedBy: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason = z.literal(
   'ANONYMIZATION_FIELD_NOT_MODIFIED'
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult = z
   .object({
     id: z.string(),
@@ -8203,6 +8950,7 @@ export const Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult =
     skip_reason: Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResults = z
   .object({
     created: z.array(Security_AI_Assistant_API_AnonymizationFieldResponse),
@@ -8211,6 +8959,7 @@ export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResults 
     updated: z.array(Security_AI_Assistant_API_AnonymizationFieldResponse),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_BulkCrudActionSummary = z
   .object({
     failed: z.number().int(),
@@ -8219,6 +8968,7 @@ export const Security_AI_Assistant_API_BulkCrudActionSummary = z
     total: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResponse = z
   .object({
     anonymization_fields_count: z.number().int().optional(),
@@ -8234,8 +8984,11 @@ export const Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResponse
     success: z.boolean().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_MessageData = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ChatMessageRole = z.enum(['system', 'user', 'assistant']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ChatMessage = z
   .object({
     content: z.string().optional(),
@@ -8244,6 +8997,7 @@ export const Security_AI_Assistant_API_ChatMessage = z
     role: Security_AI_Assistant_API_ChatMessageRole,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ChatCompleteProps = z
   .object({
     connectorId: z.string(),
@@ -8258,11 +9012,14 @@ export const Security_AI_Assistant_API_ChatCompleteProps = z
     responseLanguage: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const DeleteAllConversations_Body = z
   .object({ excludedIds: z.array(z.string()) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_Provider = z.enum(['OpenAI', 'Azure OpenAI', 'Other']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ApiConfig = z
   .object({
     actionTypeId: z.string(),
@@ -8272,10 +9029,13 @@ export const Security_AI_Assistant_API_ApiConfig = z
     provider: Security_AI_Assistant_API_Provider.optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ConversationCategory = z.enum(['assistant', 'insights']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_BaseContentReference = z
   .object({ id: z.string(), type: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z
@@ -8286,20 +9046,24 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryContentReference =
       })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_SecurityAlertContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z.object({ alertId: z.string(), type: z.literal('SecurityAlert') }).passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_SecurityAlertsPageContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z.object({ type: z.literal('SecurityAlertsPage') }).passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ProductDocumentationContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z
       .object({ title: z.string(), type: z.literal('ProductDocumentation'), url: z.string() })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_EsqlContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z
@@ -8311,12 +9075,14 @@ export const Security_AI_Assistant_API_EsqlContentReference =
       })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_HrefContentReference =
   Security_AI_Assistant_API_BaseContentReference.and(
     z
       .object({ href: z.string(), label: z.string().optional(), type: z.literal('Href') })
       .passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ContentReferences = z.record(
   z.union([
     Security_AI_Assistant_API_KnowledgeBaseEntryContentReference,
@@ -8327,20 +9093,26 @@ export const Security_AI_Assistant_API_ContentReferences = z.record(
     Security_AI_Assistant_API_HrefContentReference,
   ])
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_MessageMetadata = z
   .object({ contentReferences: Security_AI_Assistant_API_ContentReferences })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_Reader = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_MessageRole = z.enum(['system', 'user', 'assistant']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_TraceData = z
   .object({ traceId: z.string(), transactionId: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_User = z
   .object({ id: z.string(), name: z.string() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_Message = z
   .object({
     content: z.string(),
@@ -8354,7 +9126,9 @@ export const Security_AI_Assistant_API_Message = z
     user: Security_AI_Assistant_API_User.optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_Replacements = z.record(z.string());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ConversationCreateProps = z
   .object({
     apiConfig: Security_AI_Assistant_API_ApiConfig.optional(),
@@ -8366,6 +9140,7 @@ export const Security_AI_Assistant_API_ConversationCreateProps = z
     title: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ConversationResponse = z
   .object({
     apiConfig: Security_AI_Assistant_API_ApiConfig.optional(),
@@ -8383,6 +9158,7 @@ export const Security_AI_Assistant_API_ConversationResponse = z
     users: z.array(Security_AI_Assistant_API_User),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ConversationUpdateProps = z
   .object({
     apiConfig: Security_AI_Assistant_API_ApiConfig.optional(),
@@ -8395,15 +9171,18 @@ export const Security_AI_Assistant_API_ConversationUpdateProps = z
     users: z.array(Security_AI_Assistant_API_User).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseResponse = z
   .object({ success: z.boolean() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseResource = z.enum([
   'security_labs',
   'defend_insights',
   'user',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DocumentEntryRequiredFields = z
   .object({
     kbResource: Security_AI_Assistant_API_KnowledgeBaseResource,
@@ -8412,13 +9191,16 @@ export const Security_AI_Assistant_API_DocumentEntryRequiredFields = z
     type: z.literal('document'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_Vector = z
   .object({ modelId: z.string(), tokens: z.record(z.number()) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DocumentEntryOptionalFields = z
   .object({ required: z.boolean(), vector: Security_AI_Assistant_API_Vector })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DocumentEntryCreateFields = z
   .object({
     global: z.boolean().optional(),
@@ -8429,6 +9211,7 @@ export const Security_AI_Assistant_API_DocumentEntryCreateFields = z
   .passthrough()
   .and(Security_AI_Assistant_API_DocumentEntryRequiredFields)
   .and(Security_AI_Assistant_API_DocumentEntryOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_IndexEntryRequiredFields = z
   .object({
     description: z.string(),
@@ -8438,13 +9221,16 @@ export const Security_AI_Assistant_API_IndexEntryRequiredFields = z
     type: z.literal('index'),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_InputSchema = z.array(
   z.object({ description: z.string(), fieldName: z.string(), fieldType: z.string() }).passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_IndexEntryOptionalFields = z
   .object({ inputSchema: Security_AI_Assistant_API_InputSchema, outputFields: z.array(z.string()) })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_IndexEntryCreateFields = z
   .object({
     global: z.boolean().optional(),
@@ -8455,10 +9241,12 @@ export const Security_AI_Assistant_API_IndexEntryCreateFields = z
   .passthrough()
   .and(Security_AI_Assistant_API_IndexEntryRequiredFields)
   .and(Security_AI_Assistant_API_IndexEntryOptionalFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps = z.union([
   Security_AI_Assistant_API_DocumentEntryCreateFields,
   Security_AI_Assistant_API_IndexEntryCreateFields,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_ResponseFields = z
   .object({
     createdAt: z.string(),
@@ -8468,10 +9256,12 @@ export const Security_AI_Assistant_API_ResponseFields = z
     updatedBy: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DocumentEntryResponseFields =
   Security_AI_Assistant_API_DocumentEntryRequiredFields.and(
     Security_AI_Assistant_API_DocumentEntryOptionalFields
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DocumentEntry = z
   .object({
     global: z.boolean(),
@@ -8482,10 +9272,12 @@ export const Security_AI_Assistant_API_DocumentEntry = z
   .passthrough()
   .and(Security_AI_Assistant_API_ResponseFields)
   .and(Security_AI_Assistant_API_DocumentEntryResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_IndexEntryResponseFields =
   Security_AI_Assistant_API_IndexEntryRequiredFields.and(
     Security_AI_Assistant_API_IndexEntryOptionalFields
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_IndexEntry = z
   .object({
     global: z.boolean(),
@@ -8496,15 +9288,18 @@ export const Security_AI_Assistant_API_IndexEntry = z
   .passthrough()
   .and(Security_AI_Assistant_API_ResponseFields)
   .and(Security_AI_Assistant_API_IndexEntryResponseFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryResponse = z.union([
   Security_AI_Assistant_API_DocumentEntry,
   Security_AI_Assistant_API_IndexEntry,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema = z.object({
   error: z.string(),
   message: z.string(),
   statusCode: z.number(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DocumentEntryUpdateFields = z
   .object({
     global: z.boolean().optional(),
@@ -8515,6 +9310,7 @@ export const Security_AI_Assistant_API_DocumentEntryUpdateFields = z
   })
   .passthrough()
   .and(Security_AI_Assistant_API_DocumentEntryCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_IndexEntryUpdateFields = z
   .object({
     global: z.boolean().optional(),
@@ -8525,10 +9321,12 @@ export const Security_AI_Assistant_API_IndexEntryUpdateFields = z
   })
   .passthrough()
   .and(Security_AI_Assistant_API_IndexEntryCreateFields);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps = z.union([
   Security_AI_Assistant_API_DocumentEntryUpdateFields,
   Security_AI_Assistant_API_IndexEntryUpdateFields,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PerformKnowledgeBaseEntryBulkAction_Body = z
   .object({
     create: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps),
@@ -8540,9 +9338,11 @@ export const PerformKnowledgeBaseEntryBulkAction_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError = z
   .object({ id: z.string(), name: z.string().optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError = z
   .object({
     err_code: z.string().optional(),
@@ -8551,9 +9351,11 @@ export const Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError = z
     statusCode: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason = z.literal(
   'KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED'
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult = z
   .object({
     id: z.string(),
@@ -8561,6 +9363,7 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult = 
     skip_reason: Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults = z
   .object({
     created: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryResponse),
@@ -8569,6 +9372,7 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults =
     updated: z.array(Security_AI_Assistant_API_KnowledgeBaseEntryResponse),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionSummary = z
   .object({
     failed: z.number().int(),
@@ -8577,6 +9381,7 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionSummary =
     total: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResponse = z
   .object({
     attributes: z
@@ -8592,14 +9397,18 @@ export const Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResponse 
     success: z.boolean().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_DeleteResponseFields = z
   .object({ id: Security_AI_Assistant_API_NonEmptyString.min(1) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps = z.union([
   Security_AI_Assistant_API_DocumentEntryCreateFields,
   Security_AI_Assistant_API_IndexEntryCreateFields,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptType = z.enum(['system', 'quick']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptCreateProps = z
   .object({
     categories: z.array(z.string()).optional(),
@@ -8612,6 +9421,7 @@ export const Security_AI_Assistant_API_PromptCreateProps = z
     promptType: Security_AI_Assistant_API_PromptType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptUpdateProps = z
   .object({
     categories: z.array(z.string()).optional(),
@@ -8623,6 +9433,7 @@ export const Security_AI_Assistant_API_PromptUpdateProps = z
     isNewConversationDefault: z.boolean().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PerformPromptsBulkAction_Body = z
   .object({
     create: z.array(Security_AI_Assistant_API_PromptCreateProps),
@@ -8634,9 +9445,11 @@ export const PerformPromptsBulkAction_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptDetailsInError = z
   .object({ id: z.string(), name: z.string().optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_NormalizedPromptError = z
   .object({
     err_code: z.string().optional(),
@@ -8645,6 +9458,7 @@ export const Security_AI_Assistant_API_NormalizedPromptError = z
     status_code: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptResponse = z
   .object({
     categories: z.array(z.string()).optional(),
@@ -8665,9 +9479,11 @@ export const Security_AI_Assistant_API_PromptResponse = z
     users: z.array(Security_AI_Assistant_API_User).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptsBulkActionSkipReason = z.literal(
   'PROMPT_FIELD_NOT_MODIFIED'
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptsBulkActionSkipResult = z
   .object({
     id: z.string(),
@@ -8675,6 +9491,7 @@ export const Security_AI_Assistant_API_PromptsBulkActionSkipResult = z
     skip_reason: Security_AI_Assistant_API_PromptsBulkActionSkipReason,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptsBulkCrudActionResults = z
   .object({
     created: z.array(Security_AI_Assistant_API_PromptResponse),
@@ -8683,6 +9500,7 @@ export const Security_AI_Assistant_API_PromptsBulkCrudActionResults = z
     updated: z.array(Security_AI_Assistant_API_PromptResponse),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_PromptsBulkCrudActionResponse = z
   .object({
     attributes: z
@@ -8698,6 +9516,7 @@ export const Security_AI_Assistant_API_PromptsBulkCrudActionResponse = z
     success: z.boolean().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_security_role_query_Body = z
   .object({
     filters: z.object({ showReservedRoles: z.boolean() }).partial(),
@@ -8707,6 +9526,7 @@ export const post_security_role_query_Body = z
     sort: z.object({ direction: z.enum(['asc', 'desc']), field: z.string() }),
   })
   .partial();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_security_role_name_Body = z.object({
   description: z.string().max(2048).optional(),
   elasticsearch: z
@@ -8751,6 +9571,7 @@ export const put_security_role_name_Body = z.object({
     .optional(),
   metadata: z.object({}).partial().passthrough().optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_security_roles_Body = z.object({
   roles: z.record(
     z.object({
@@ -8802,6 +9623,7 @@ export const post_security_roles_Body = z.object({
     })
   ),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_security_session_invalidate_Body = z
   .object({
     match: z.enum(['all', 'query']),
@@ -8814,6 +9636,7 @@ export const post_security_session_invalidate_Body = z
       .optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_url_Body = z
   .object({
     humanReadableSlug: z.boolean().optional(),
@@ -8822,6 +9645,7 @@ export const post_url_Body = z
     slug: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Short_URL_APIs_urlResponse = z
   .object({
     accessCount: z.number().int(),
@@ -8836,6 +9660,7 @@ export const Short_URL_APIs_urlResponse = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_spaces_copy_saved_objects_Body = z.object({
   compatibilityMode: z.boolean().optional().default(false),
   createNewCopies: z.boolean().optional().default(true),
@@ -8844,14 +9669,17 @@ export const post_spaces_copy_saved_objects_Body = z.object({
   overwrite: z.boolean().optional().default(false),
   spaces: z.array(z.string()),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_spaces_disable_legacy_url_aliases_Body = z.object({
   aliases: z.array(
     z.object({ sourceId: z.string(), targetSpace: z.string(), targetType: z.string() })
   ),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_spaces_get_shareable_references_Body = z.object({
   objects: z.array(z.object({ id: z.string(), type: z.string() })),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_spaces_resolve_copy_saved_objects_errors_Body = z.object({
   compatibilityMode: z.boolean().optional().default(false),
   createNewCopies: z.boolean().optional().default(true),
@@ -8870,12 +9698,15 @@ export const post_spaces_resolve_copy_saved_objects_errors_Body = z.object({
     )
   ),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_spaces_update_objects_spaces_Body = z.object({
   objects: z.array(z.object({ id: z.string(), type: z.string() })),
   spacesToAdd: z.array(z.string()),
   spacesToRemove: z.array(z.string()),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const include_authorized_purposes = z.union([z.literal(false), z.boolean()]).nullable();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_spaces_space_Body = z.object({
   _reserved: z.boolean().optional(),
   color: z.string().optional(),
@@ -8887,6 +9718,7 @@ export const post_spaces_space_Body = z.object({
   name: z.string().min(1),
   solution: z.enum(['security', 'oblt', 'es', 'classic']).optional(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Kibana_HTTP_APIs_core_status_response = z.object({
   metrics: z.object({
     collection_interval_in_millis: z.number(),
@@ -8951,12 +9783,15 @@ export const Kibana_HTTP_APIs_core_status_response = z.object({
     number: z.string(),
   }),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Kibana_HTTP_APIs_core_status_redactedResponse = z.object({
   status: z.object({
     overall: z.object({ level: z.enum(['available', 'degraded', 'unavailable', 'critical']) }),
   }),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const get_streams_Body = z.union([z.object({}).partial(), z.unknown(), z.unknown()]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_streams_name_Body = z.union([
   z.union([
     z
@@ -11510,6 +12345,7 @@ export const put_streams_name_Body = z.union([
     )
     .and(z.object({}).partial().passthrough()),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_streams_name_fork_Body = z.object({
   status: z.enum(['enabled', 'disabled']).optional(),
   stream: z.object({ name: z.string() }),
@@ -11545,6 +12381,7 @@ export const post_streams_name_fork_Body = z.object({
     z.object({ always: z.object({}).partial() }),
   ]),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_streams_name_group_Body = z.object({
   group: z.object({
     members: z.array(z.string()),
@@ -11552,6 +12389,7 @@ export const put_streams_name_group_Body = z.object({
     tags: z.array(z.string()),
   }),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_streams_name_ingest_Body = z.object({
   ingest: z.union([
     z
@@ -12465,6 +13303,7 @@ export const put_streams_name_ingest_Body = z.object({
       ),
   ]),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_streams_name_content_export_Body = z.object({
   description: z.string(),
   include: z.union([
@@ -12479,6 +13318,7 @@ export const post_streams_name_content_export_Body = z.object({
   name: z.string(),
   version: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_streams_name_dashboards_bulk_Body = z.object({
   operations: z.array(
     z.union([
@@ -12487,6 +13327,7 @@ export const post_streams_name_dashboards_bulk_Body = z.object({
     ])
   ),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_streams_name_queries_bulk_Body = z.object({
   operations: z.array(
     z.union([
@@ -12500,21 +13341,28 @@ export const post_streams_name_queries_bulk_Body = z.object({
     ])
   ),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_streams_name_queries_queryid_Body = z.object({
   kql: z.object({ query: z.string() }),
   title: z.string().min(1),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_streams_name_significant_events_preview_Body = z.object({
   query: z.object({ kql: z.object({ query: z.string() }) }),
 });
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const locations = z.union([z.string(), z.array(z.any())]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const monitorTypes = z
   .union([z.enum(['browser', 'http', 'icmp', 'tcp']), z.array(z.any())])
   .optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const schedules = z.union([z.array(z.any()), z.string()]).optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const useLogicalAndFor = z
   .union([z.enum(['tags', 'locations']), z.array(z.enum(['tags', 'locations']))])
   .optional();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_commonMonitorFields = z
   .object({
     alert: z.object({}).partial().passthrough().optional(),
@@ -12532,6 +13380,7 @@ export const Synthetics_commonMonitorFields = z
     timeout: z.number().optional().default(16),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_browserMonitorFields = Synthetics_commonMonitorFields.and(
   z
     .object({
@@ -12544,6 +13393,7 @@ export const Synthetics_browserMonitorFields = Synthetics_commonMonitorFields.an
     })
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_httpMonitorFields = Synthetics_commonMonitorFields.and(
   z
     .object({
@@ -12583,11 +13433,13 @@ export const Synthetics_httpMonitorFields = Synthetics_commonMonitorFields.and(
     })
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_icmpMonitorFields = Synthetics_commonMonitorFields.and(
   z
     .object({ host: z.string(), type: z.literal('icmp'), wait: z.number().optional().default(1) })
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_tcpMonitorFields = Synthetics_commonMonitorFields.and(
   z
     .object({
@@ -12599,13 +13451,16 @@ export const Synthetics_tcpMonitorFields = Synthetics_commonMonitorFields.and(
     })
     .passthrough()
 );
-export const post_synthetic_monitors_Body = z.union([
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const post_synthetic_monitors_Body = z.union( [
   Synthetics_browserMonitorFields,
   Synthetics_httpMonitorFields,
   Synthetics_icmpMonitorFields,
   Synthetics_tcpMonitorFields,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const delete_synthetic_monitors_Body = z.object({ ids: z.array(z.string()) }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_getParameterResponse = z
   .object({
     description: z.string(),
@@ -12617,6 +13472,7 @@ export const Synthetics_getParameterResponse = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_parameterRequest = z
   .object({
     description: z.string().optional(),
@@ -12626,10 +13482,12 @@ export const Synthetics_parameterRequest = z
     value: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_parameters_Body = z.union([
   z.array(Synthetics_parameterRequest),
   Synthetics_parameterRequest,
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_postParameterResponse = z
   .object({
     description: z.string(),
@@ -12641,6 +13499,7 @@ export const Synthetics_postParameterResponse = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_parameter_Body = z
   .object({
     description: z.string(),
@@ -12650,6 +13509,7 @@ export const put_parameter_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Synthetics_getPrivateLocation = z
   .object({
     agentPolicyId: z.string(),
@@ -12661,6 +13521,7 @@ export const Synthetics_getPrivateLocation = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const post_private_location_Body = z
   .object({
     agentPolicyId: z.string(),
@@ -12670,8 +13531,11 @@ export const post_private_location_Body = z
     tags: z.array(z.string()).optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Task_manager_health_APIs_configuration = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Task_manager_health_APIs_workload = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Task_manager_health_APIs_health_response = z
   .object({
     id: z.string(),
@@ -12690,9 +13554,11 @@ export const Task_manager_health_APIs_health_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const DeleteTimelines_Body = z
   .object({ savedObjectIds: z.array(z.string()), searchIds: z.array(z.string()).optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_ColumnHeaderResult = z
   .object({
     aggregatable: z.boolean().nullable(),
@@ -12709,6 +13575,7 @@ export const Security_Timeline_API_ColumnHeaderResult = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_QueryMatchResult = z
   .object({
     displayField: z.string().nullable(),
@@ -12719,7 +13586,9 @@ export const Security_Timeline_API_QueryMatchResult = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_DataProviderType = z.enum(['default', 'template']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_DataProviderQueryMatch = z
   .object({
     enabled: z.boolean().nullable(),
@@ -12732,6 +13601,7 @@ export const Security_Timeline_API_DataProviderQueryMatch = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_DataProviderResult = z
   .object({
     and: z.array(Security_Timeline_API_DataProviderQueryMatch).nullable(),
@@ -12745,6 +13615,7 @@ export const Security_Timeline_API_DataProviderResult = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_RowRendererId = z.enum([
   'alert',
   'alerts',
@@ -12765,6 +13636,7 @@ export const Security_Timeline_API_RowRendererId = z.enum([
   'threat_match',
   'zeek',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_FavoriteTimelineResult = z
   .object({
     favoriteDate: z.number().nullable(),
@@ -12773,6 +13645,7 @@ export const Security_Timeline_API_FavoriteTimelineResult = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_FilterTimelineResult = z
   .object({
     exists: z.string().nullable(),
@@ -12801,6 +13674,7 @@ export const Security_Timeline_API_FilterTimelineResult = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SerializedFilterQueryResult = z
   .object({
     filterQuery: z
@@ -12818,6 +13692,7 @@ export const Security_Timeline_API_SerializedFilterQueryResult = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SortObject = z
   .object({
     columnId: z.string().nullable(),
@@ -12826,12 +13701,16 @@ export const Security_Timeline_API_SortObject = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_Sort = z.union([
   Security_Timeline_API_SortObject,
   z.array(Security_Timeline_API_SortObject),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_TimelineStatus = z.enum(['active', 'draft', 'immutable']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_TimelineType = z.enum(['default', 'template']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SavedTimeline = z
   .object({
     columns: z.array(Security_Timeline_API_ColumnHeaderResult).nullable(),
@@ -12876,10 +13755,12 @@ export const Security_Timeline_API_SavedTimeline = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SavedTimelineWithSavedObjectId =
   Security_Timeline_API_SavedTimeline.and(
     z.object({ savedObjectId: z.string(), version: z.string() }).passthrough()
   );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_TimelineResponse = Security_Timeline_API_SavedTimeline.and(
   Security_Timeline_API_SavedTimelineWithSavedObjectId
 ).and(
@@ -12894,6 +13775,7 @@ export const Security_Timeline_API_TimelineResponse = Security_Timeline_API_Save
     .partial()
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PatchTimeline_Body = z
   .object({
     timeline: Security_Timeline_API_SavedTimeline,
@@ -12901,6 +13783,7 @@ export const PatchTimeline_Body = z
     version: z.string().nullable(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CreateTimelines_Body = z
   .object({
     status: Security_Timeline_API_TimelineStatus.optional(),
@@ -12912,16 +13795,20 @@ export const CreateTimelines_Body = z
     version: z.string().nullish(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CopyTimeline_Body = z
   .object({ timeline: Security_Timeline_API_SavedTimeline, timelineIdToCopy: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const CleanDraftTimelines_Body = z
   .object({ timelineType: Security_Timeline_API_TimelineType })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ExportTimelines_Body = z
   .object({ ids: z.array(z.string()).nullable() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const PersistFavoriteRoute_Body = z
   .object({
     templateTimelineId: z.string().nullable(),
@@ -12930,6 +13817,7 @@ export const PersistFavoriteRoute_Body = z
     timelineType: Security_Timeline_API_TimelineType,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_FavoriteTimelineResponse = z
   .object({
     favorite: z.array(Security_Timeline_API_FavoriteTimelineResult).optional(),
@@ -12940,9 +13828,11 @@ export const Security_Timeline_API_FavoriteTimelineResponse = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ImportTimelines_Body = z
   .object({ file: z.unknown(), isImmutable: z.enum(['true', 'false']).optional() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_ImportTimelineResult = z
   .object({
     errors: z.array(
@@ -12961,20 +13851,21 @@ export const Security_Timeline_API_ImportTimelineResult = z
   })
   .partial()
   .passthrough();
-export const Security_Timeline_API_TimelineSavedToReturnObject =
-  Security_Timeline_API_SavedTimeline.and(
-    z
-      .object({
-        eventIdToNoteIds: z.array(Security_Timeline_API_Note).nullish(),
-        noteIds: z.array(z.string()).nullish(),
-        notes: z.array(Security_Timeline_API_Note).nullish(),
-        pinnedEventIds: z.array(z.string()).nullish(),
-        pinnedEventsSaveObject: z.array(Security_Timeline_API_PinnedEvent).nullish(),
-        savedObjectId: z.string(),
-        version: z.string(),
-      })
-      .passthrough()
-  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Timeline_API_TimelineSavedToReturnObject = Security_Timeline_API_SavedTimeline.and(
+  z
+    .object({
+      eventIdToNoteIds: z.array(Security_Timeline_API_Note).nullish(),
+      noteIds: z.array(z.string()).nullish(),
+      notes: z.array(Security_Timeline_API_Note).nullish(),
+      pinnedEventIds: z.array(z.string()).nullish(),
+      pinnedEventsSaveObject: z.array(Security_Timeline_API_PinnedEvent).nullish(),
+      savedObjectId: z.string(),
+      version: z.string(),
+    })
+    .passthrough()
+);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_ImportTimelines = Security_Timeline_API_SavedTimeline.and(
   z
     .object({
@@ -12986,6 +13877,7 @@ export const Security_Timeline_API_ImportTimelines = Security_Timeline_API_Saved
     })
     .passthrough()
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const InstallPrepackedTimelines_Body = z
   .object({
     prepackagedTimelines: z.array(Security_Timeline_API_TimelineSavedToReturnObject.nullable()),
@@ -12993,15 +13885,18 @@ export const InstallPrepackedTimelines_Body = z
     timelinesToUpdate: z.array(Security_Timeline_API_ImportTimelines.nullable()),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SavedObjectResolveAliasPurpose = z.enum([
   'savedObjectConversion',
   'savedObjectImport',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SavedObjectResolveOutcome = z.enum([
   'exactMatch',
   'aliasMatch',
   'conflict',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_ResolvedTimeline = z
   .object({
     alias_purpose: Security_Timeline_API_SavedObjectResolveAliasPurpose.optional(),
@@ -13010,6 +13905,7 @@ export const Security_Timeline_API_ResolvedTimeline = z
     timeline: Security_Timeline_API_TimelineSavedToReturnObject,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const put_uptime_settings_Body = z
   .object({
     certAgeThreshold: z.number().default(730),
@@ -13027,8 +13923,11 @@ export const put_uptime_settings_Body = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_budgeting_method = z.enum(['occurrences', 'timeslices']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_group_by = z.union([z.string(), z.array(z.string())]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_filter_meta = z
   .object({
     alias: z.string().nullable(),
@@ -13046,10 +13945,12 @@ export const SLOs_filter_meta = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_filter = z
   .object({ meta: SLOs_filter_meta, query: z.object({}).partial().passthrough() })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_kql_with_filters = z.union([
   z.string(),
   z
@@ -13057,6 +13958,7 @@ export const SLOs_kql_with_filters = z.union([
     .partial()
     .passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_kql_with_filters_good = z.union([
   z.string(),
   z
@@ -13064,6 +13966,7 @@ export const SLOs_kql_with_filters_good = z.union([
     .partial()
     .passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_kql_with_filters_total = z.union([
   z.string(),
   z
@@ -13071,6 +13974,7 @@ export const SLOs_kql_with_filters_total = z.union([
     .partial()
     .passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_indicator_properties_custom_kql = z
   .object({
     params: z
@@ -13086,6 +13990,7 @@ export const SLOs_indicator_properties_custom_kql = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_indicator_properties_apm_availability = z
   .object({
     params: z
@@ -13101,6 +14006,7 @@ export const SLOs_indicator_properties_apm_availability = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_indicator_properties_apm_latency = z
   .object({
     params: z
@@ -13117,6 +14023,7 @@ export const SLOs_indicator_properties_apm_latency = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_indicator_properties_custom_metric = z
   .object({
     params: z
@@ -13178,6 +14085,7 @@ export const SLOs_indicator_properties_custom_metric = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_indicator_properties_histogram = z
   .object({
     params: z
@@ -13209,6 +14117,7 @@ export const SLOs_indicator_properties_histogram = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_timeslice_metric_basic_metric_with_field = z
   .object({
     aggregation: z.enum(['sum', 'avg', 'min', 'max', 'std_deviation', 'last_value', 'cardinality']),
@@ -13217,6 +14126,7 @@ export const SLOs_timeslice_metric_basic_metric_with_field = z
     name: z.string().regex(/^[A-Z]$/),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_timeslice_metric_percentile_metric = z
   .object({
     aggregation: z.literal('percentile'),
@@ -13226,6 +14136,7 @@ export const SLOs_timeslice_metric_percentile_metric = z
     percentile: z.number(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_timeslice_metric_doc_count_metric = z
   .object({
     aggregation: z.literal('doc_count'),
@@ -13233,6 +14144,7 @@ export const SLOs_timeslice_metric_doc_count_metric = z
     name: z.string().regex(/^[A-Z]$/),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_indicator_properties_timeslice_metric = z
   .object({
     params: z
@@ -13260,6 +14172,7 @@ export const SLOs_indicator_properties_timeslice_metric = z
     type: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_objective = z
   .object({
     target: z.number().gt(0).lt(100),
@@ -13267,6 +14180,7 @@ export const SLOs_objective = z
     timesliceWindow: z.string().optional(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_settings = z
   .object({
     frequency: z.string().default('1m'),
@@ -13276,6 +14190,7 @@ export const SLOs_settings = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_error_budget = z
   .object({
     consumed: z.number(),
@@ -13284,13 +14199,17 @@ export const SLOs_error_budget = z
     remaining: z.number(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_summary_status = z.enum(['NO_DATA', 'HEALTHY', 'DEGRADING', 'VIOLATED']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_summary = z
   .object({ errorBudget: SLOs_error_budget, sliValue: z.number(), status: SLOs_summary_status })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_time_window = z
   .object({ duration: z.string(), type: z.enum(['rolling', 'calendarAligned']) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_slo_with_summary_response = z
   .object({
     budgetingMethod: SLOs_budgeting_method,
@@ -13299,7 +14218,7 @@ export const SLOs_slo_with_summary_response = z
     enabled: z.boolean(),
     groupBy: SLOs_group_by,
     id: z.string(),
-    indicator: z.union([
+    indicator: z.union( [
       SLOs_indicator_properties_custom_kql,
       SLOs_indicator_properties_apm_availability,
       SLOs_indicator_properties_apm_latency,
@@ -13319,6 +14238,7 @@ export const SLOs_slo_with_summary_response = z
     version: z.number(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_find_slo_response = z
   .object({
     page: z.number(),
@@ -13330,18 +14250,23 @@ export const SLOs_find_slo_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_400_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_401_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_403_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_404_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_create_slo_request = z
   .object({
     budgetingMethod: SLOs_budgeting_method,
@@ -13363,12 +14288,17 @@ export const SLOs_create_slo_request = z
     timeWindow: SLOs_time_window,
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_create_slo_response = z.object({ id: z.string() }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_409_response = z
   .object({ error: z.string(), message: z.string(), statusCode: z.number() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_bulk_delete_request = z.object({ list: z.array(z.string()) }).passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_bulk_delete_response = z.object({ taskId: z.string() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_bulk_delete_status_response = z
   .object({
     error: z.string(),
@@ -13379,6 +14309,7 @@ export const SLOs_bulk_delete_status_response = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_bulk_purge_rollup_request = z
   .object({
     list: z.array(z.string()),
@@ -13394,13 +14325,13 @@ export const SLOs_bulk_purge_rollup_request = z
     ]),
   })
   .passthrough();
-export const SLOs_bulk_purge_rollup_response = z
-  .object({ taskId: z.string() })
-  .partial()
-  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const SLOs_bulk_purge_rollup_response = z.object({ taskId: z.string() }).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_delete_slo_instances_request = z
   .object({ list: z.array(z.object({ instanceId: z.string(), sloId: z.string() }).passthrough()) })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_update_slo_request = z
   .object({
     budgetingMethod: SLOs_budgeting_method,
@@ -13422,6 +14353,7 @@ export const SLOs_update_slo_request = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_slo_definition_response = z
   .object({
     budgetingMethod: SLOs_budgeting_method,
@@ -13430,7 +14362,7 @@ export const SLOs_slo_definition_response = z
     enabled: z.boolean(),
     groupBy: SLOs_group_by,
     id: z.string(),
-    indicator: z.union([
+    indicator: z.union( [
       SLOs_indicator_properties_custom_kql,
       SLOs_indicator_properties_apm_availability,
       SLOs_indicator_properties_apm_latency,
@@ -13448,6 +14380,7 @@ export const SLOs_slo_definition_response = z
     version: z.number(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const SLOs_find_slo_definitions_response = z.union([
   z
     .object({
@@ -13470,11 +14403,17 @@ export const SLOs_find_slo_definitions_response = z.union([
     .partial()
     .passthrough(),
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_ChatCompleteRequestExample = z.unknown();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Observability_AI_Assistant_API_ChatCompleteResponseExample = z.unknown();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Saved_objects_attributes = z.object({}).partial().passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Saved_objects_initial_namespaces = z.array(z.any());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Saved_objects_references = z.array(z.any());
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_FindAnonymizationFieldsSortField = z.enum([
   'created_at',
   'anonymized',
@@ -13482,33 +14421,40 @@ export const Security_AI_Assistant_API_FindAnonymizationFieldsSortField = z.enum
   'field',
   'updated_at',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_FindConversationsSortField = z.enum([
   'created_at',
   'title',
   'updated_at',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField = z.enum([
   'created_at',
   'is_default',
   'title',
   'updated_at',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_FindPromptsSortField = z.enum([
   'created_at',
   'is_default',
   'name',
   'updated_at',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_AI_Assistant_API_SortOrder = z.enum(['asc', 'desc']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsIndexMigrationError = z
   .object({
     error: z.object({ message: z.string(), status_code: z.string() }).passthrough(),
     index: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsIndexMigrationSuccess = z
   .object({ index: z.string(), migration_id: z.string(), migration_index: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertsReindexOptions = z
   .object({
     requests_per_second: z.number().int().gte(1),
@@ -13517,9 +14463,11 @@ export const Security_Detections_API_AlertsReindexOptions = z
   })
   .partial()
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_AlertVersion = z
   .object({ count: z.number().int(), version: z.number().int() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_FindRulesSortField = z.enum([
   'created_at',
   'createdAt',
@@ -13536,6 +14484,7 @@ export const Security_Detections_API_FindRulesSortField = z.enum([
   'updated_at',
   'updatedAt',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MigrationStatus = z
   .object({
     id: Security_Detections_API_NonEmptyString.min(1),
@@ -13544,6 +14493,7 @@ export const Security_Detections_API_MigrationStatus = z
     version: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_IndexMigrationStatus = z
   .object({
     index: Security_Detections_API_NonEmptyString.min(1),
@@ -13553,6 +14503,7 @@ export const Security_Detections_API_IndexMigrationStatus = z
     version: z.number().int(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MigrationCleanupResult = z
   .object({
     destinationIndex: z.string(),
@@ -13567,6 +14518,7 @@ export const Security_Detections_API_MigrationCleanupResult = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_MigrationFinalizationResult = z
   .object({
     completed: z.boolean(),
@@ -13582,25 +14534,35 @@ export const Security_Detections_API_MigrationFinalizationResult = z
     version: z.string(),
   })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SkippedAlertsIndexMigration = z
   .object({ index: z.string() })
   .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Detections_API_SortOrder = z.enum(['asc', 'desc']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_EndpointListItem =
   Security_Endpoint_Exceptions_API_ExceptionListItem;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter =
   Security_Endpoint_Exceptions_API_NonEmptyString;
-export const Security_Endpoint_Management_API_Commands = z.array(
-  Security_Endpoint_Management_API_Command
-);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Commands = z.array(Security_Endpoint_Management_API_Command);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_EndDate = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_HostStatuses = z.array(
   z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])
 );
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Kuery = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Page = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_PageSize = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_SortDirection = z.enum(['asc', 'desc']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_SortField = z.enum([
   'enrolled_at',
   'metadata.host.hostname',
@@ -13612,32 +14574,42 @@ export const Security_Endpoint_Management_API_SortField = z.enum([
   'metadata.agent.version',
   'last_checkin',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_StartDate = z.string();
-export const Security_Endpoint_Management_API_Types = z.array(
-  Security_Endpoint_Management_API_Type
-);
-export const Security_Endpoint_Management_API_UserIds = z.union([
-  z.array(z.string().min(1)),
-  z.string(),
-]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Types = z.array(Security_Endpoint_Management_API_Type);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_UserIds = z.union([z.array(z.string().min(1)), z.string()]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_WithOutputs = z.union([
   z.array(z.string().min(1)),
   z.string(),
 ]);
-export const Security_Entity_Analytics_API_Metadata =
-  Security_Entity_Analytics_API_TransformStatsMetadata;
-export const Security_Exceptions_API_FindExceptionListItemsFilter =
-  Security_Exceptions_API_NonEmptyString;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Entity_Analytics_API_Metadata = Security_Entity_Analytics_API_TransformStatsMetadata;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Exceptions_API_FindExceptionListItemsFilter = Security_Exceptions_API_NonEmptyString;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_FindExceptionListsFilter = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_UUID = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Exceptions_API_RuleId = Security_Exceptions_API_UUID;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_FindListItemsFilter = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Lists_API_FindListsFilter = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_KueryOrUndefined = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PageOrUndefined = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_PageSizeOrUndefined = z.number();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SortOrderOrUndefined = z.enum(['asc', 'desc']);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Osquery_API_SortOrUndefined = z.string();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_AssociatedFilterType = z.enum([
   'all',
   'document_only',
@@ -13645,12 +14617,17 @@ export const Security_Timeline_API_AssociatedFilterType = z.enum([
   'document_and_saved_object',
   'orphan',
 ]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_DocumentIds = z.union([z.array(z.string()), z.string()]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_PersistTimelineResponse = Security_Timeline_API_TimelineResponse;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SavedObjectIds = z.union([z.array(z.string()), z.string()]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Timeline_API_SortFieldTimeline = z.enum([
   'title',
   'description',
   'updated',
   'created',
 ]);
+

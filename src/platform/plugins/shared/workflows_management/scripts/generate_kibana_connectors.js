@@ -885,6 +885,9 @@ function copyClientAsSchemas() {
       // This is the start of a const declaration - mark it and continue
       let processedLine = line.replace(/^const\s+/, 'export const ');
       processedLine = applyPatches(processedLine);
+      
+      // Add ESLint ignore comment for naming convention before each schema export
+      schemaLines.push('// eslint-disable-next-line @typescript-eslint/naming-convention');
       schemaLines.push(processedLine);
     } else if (
       line.trim() !== '' &&
@@ -1081,7 +1084,7 @@ function generateKibanaConnectors() {
 
     const schemaImportsSection =
       existingSchemas.length > 0
-        ? `\n// Import schemas from generated schemas file\nimport {\n  ${existingSchemas.join(
+        ? `\n// Import schemas from generated schemas file\n// eslint-disable-next-line @typescript-eslint/naming-convention\nimport {\n  ${existingSchemas.join(
             ',\n  '
           )}\n} from './generated_kibana_schemas';\n`
         : '';
