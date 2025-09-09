@@ -1,0 +1,14 @@
+{
+  "id": "chatDataRegistry",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "lorena.balan@elastic.co",
+    "githubTeam": ""
+  },
+  "description": "A way to provide various data sources to the solutions built on top of the Agent Builder platform.",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}

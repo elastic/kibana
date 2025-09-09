@@ -1,0 +1,7 @@
+{
+  "prefix": "chatDataRegistry",
+  "paths": {
+    "chatDataRegistry": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
