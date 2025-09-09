@@ -36,26 +36,39 @@ streamlangApiTest.describe(
       expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
     });
 
-    streamlangApiTest('should set a field using template', async ({ testBed }) => {
-      const indexName = 'stream-e2e-test-set-template';
+    [
+      {
+        templateValue: '{{value}}',
+        templateTo: '{{templated_to}}',
+        description: 'should set a field using {{ }} template',
+      },
+      {
+        templateValue: '{{{value}}}',
+        templateTo: '{{templated_to}}',
+        description: 'should set a field using {{{ }}} template',
+      },
+    ].forEach(({ templateValue, templateTo, description }) => {
+      streamlangApiTest(description, async ({ testBed }) => {
+        const indexName = 'stream-e2e-test-set-template';
 
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'set',
-            to: 'attributes.status',
-            value: '{{value}}',
-          } as SetProcessor,
-        ],
-      };
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: templateTo,
+              value: templateValue,
+            } as SetProcessor,
+          ],
+        };
 
-      const { processors } = transpile(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
 
-      const docs = [{ value: 'templated-value' }];
-      await testBed.ingest(indexName, docs, processors);
+        const docs = [{ value: 'templated-value', templated_to: 'attributes.status' }];
+        await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'templated-value');
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'templated-value');
+      });
     });
 
     streamlangApiTest('should set a field by copying from another field', async ({ testBed }) => {

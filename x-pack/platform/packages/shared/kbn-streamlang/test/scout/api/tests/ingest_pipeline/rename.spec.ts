@@ -39,6 +39,46 @@ streamlangApiTest.describe(
       expect(source).not.toHaveProperty('host.original');
     });
 
+    [
+      {
+        templateFrom: 'host.{{source_field}}',
+        templateTo: 'host.{{target_field}}',
+        description: 'should rename a field using a {{ }} template for the target',
+      },
+      {
+        templateFrom: 'host.{{{source_field}}}',
+        templateTo: 'host.{{{target_field}}}',
+        description: 'should rename a field using a {{{ }}} template for the target',
+      },
+    ].forEach(({ templateFrom, templateTo, description }) => {
+      streamlangApiTest(description, async ({ testBed }) => {
+        const indexName = 'streams-e2e-test-rename-template';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'rename',
+              from: templateFrom,
+              to: templateTo,
+            } as RenameProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
+          { host: { original: 'test-host' }, source_field: 'original', target_field: 'renamed' },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs.length).toBe(1);
+        const source = ingestedDocs[0];
+        expect(source).toHaveProperty('host.renamed', 'test-host');
+        expect(source).not.toHaveProperty('host.original');
+      });
+    });
+
     streamlangApiTest(
       'should rename a field using a template for the target',
       async ({ testBed }) => {
