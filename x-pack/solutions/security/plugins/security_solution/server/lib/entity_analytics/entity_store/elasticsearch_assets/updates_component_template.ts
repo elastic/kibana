@@ -11,6 +11,10 @@ import type {
   MappingTypeMapping,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  EngineComponentResourceEnum,
+  type EngineComponentStatus,
+} from '../../../../../common/api/entity_analytics/entity_store';
 import type { EntityEngineInstallationDescriptor, FieldDescription } from '../installation/types';
 
 const DEFAULT_MAPPINGS: Record<PropertyName, MappingProperty> = {
@@ -30,6 +34,20 @@ export const createEntityUpdatesIndexComponentTemplate = (
   return esClient.cluster.putComponentTemplate(buildUpdatesComponentTemplate(description));
 };
 
+export const deleteEntityUpdatesIndexComponentTemplate = (
+  description: EntityEngineInstallationDescriptor,
+  esClient: ElasticsearchClient
+) => {
+  return esClient.cluster.deleteComponentTemplate(
+    {
+      name: getComponentTemplateName(description.id),
+    },
+    {
+      ignore: [404],
+    }
+  );
+};
+
 export function buildUpdatesComponentTemplate(description: EntityEngineInstallationDescriptor) {
   return {
     name: getComponentTemplateName(description.id),
@@ -46,7 +64,6 @@ function buildMappings({
   fields,
   identityField,
   identityFieldMapping,
-  entityType,
 }: EntityEngineInstallationDescriptor): MappingTypeMapping {
   const properties: Record<PropertyName, MappingProperty> = {};
   for (let i = 0; i < fields.length; i++) {
@@ -66,3 +83,24 @@ function buildMappings({
 function shouldMapField(field: FieldDescription) {
   return FIELDS_TO_IGNORE.indexOf(field.source) < 0;
 }
+
+export const getEntityUpdatesIndexComponentTemplateStatus = async (
+  definitionId: string,
+  esClient: ElasticsearchClient
+): Promise<EngineComponentStatus> => {
+  const name = getComponentTemplateName(definitionId);
+  const componentTemplate = await esClient.cluster.getComponentTemplate(
+    {
+      name,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  return {
+    id: name,
+    installed: componentTemplate?.component_templates?.length > 0,
+    resource: EngineComponentResourceEnum.component_template,
+  };
+};

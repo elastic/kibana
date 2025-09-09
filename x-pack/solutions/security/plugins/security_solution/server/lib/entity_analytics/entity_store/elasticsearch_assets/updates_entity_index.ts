@@ -11,7 +11,7 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema/src/schema/v1/patterns';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
+import { type EntityType } from '../../../../../common/api/entity_analytics/entity_store';
 import { createEntityIndex, deleteEntityIndex } from './entity_index';
 
 export const createEntityUpdatesIndex = async (
