@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { cleanup, screen } from '@testing-library/react';
 import { OpenSearchPanel } from './open_search_panel';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 jest.mock('../../../../hooks/use_discover_services');
@@ -29,10 +29,6 @@ const mockUseDiscoverServicesMock = (capabilitiesOptions: object) => {
 describe('OpenSearchPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    cleanup();
   });
 
   it('renders "manage discover sessions" button if user has permission', async () => {

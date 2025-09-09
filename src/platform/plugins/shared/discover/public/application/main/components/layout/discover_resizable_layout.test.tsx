@@ -62,7 +62,7 @@ jest.mock('@elastic/eui', () => {
 
 import { useIsWithinBreakpoints as useIsWithinBreakpointsImport } from '@elastic/eui';
 
-const useIsWithinBreakpoints = useIsWithinBreakpointsImport as jest.Mock;
+const useIsWithinBreakpoints = jest.mocked(useIsWithinBreakpointsImport);
 
 useIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
   if (!isEqual(breakpoints, ['xs', 's'])) {
@@ -82,10 +82,6 @@ describe('DiscoverResizableLayout', () => {
     mockSidebarWidth = undefined;
     mockIsMobile = false;
     lastResizableLayoutProps = null;
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('should render sidebarPanel and mainPanel', () => {
