@@ -32,26 +32,25 @@ export class ReferencedPanelManager {
 
   constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
 
-  async fetchReferencedPanels(): Promise<void> {
+  async fetchReferencedPanels(): Promise<number> {
     if (this.panelsTypeById.size === 0) {
-      return;
+      return 0;
     }
 
     const panelsToFetch = [...this.panelsTypeById.entries()].map(([id, type]) => ({ id, type }));
 
-    try {
-      const { saved_objects: savedObjects } =
-        await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
+    const { saved_objects: savedObjects } = await this.soClient.bulkGet<ReferencedPanelAttributes>(
+      panelsToFetch
+    );
 
-      savedObjects.forEach((so) => {
-        this.panelsById.set(so.id, {
-          ...so.attributes,
-          references: so.references,
-        });
+    savedObjects.forEach((so) => {
+      this.panelsById.set(so.id, {
+        ...so.attributes,
+        references: so.references,
       });
-    } catch (error) {
-      this.logger.error(`Error fetching ${panelsToFetch.length} panels : ${error.message}`);
-    }
+    });
+
+    return savedObjects.length;
   }
 
   getByIndex(panelIndex: string): ReferencedPanelAttributesWithReferences | undefined {
@@ -67,8 +66,10 @@ export class ReferencedPanelManager {
     if (!references && panel.panelIndex) {
       references = this.getByIndex(panel.panelIndex)?.references;
     }
+
+    const idxPatternMatcher = /indexpattern/;
     references
-      ?.filter((r) => r.name.match(`indexpattern`))
+      ?.filter((r) => idxPatternMatcher.test(r.name))
       .forEach((reference) => {
         res.add(reference.id);
       });
