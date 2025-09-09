@@ -47,7 +47,7 @@ export const bulkUpsertBatch =
           {
             script: {
               source: /* java */ `
-                def userModified = false;
+                boolean userModified = false;
 
                 if (ctx._source.labels == null) {
                   ctx._source.labels = new HashMap();
