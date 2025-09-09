@@ -600,6 +600,7 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="queryCancelSplitButton"
             color="text"
             secondaryButtonIcon="clock"
+            secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
             isSecondaryButtonDisabled={!canSendToBackground}
           >
@@ -663,6 +664,7 @@ export const QueryBarTopRow = React.memo(
           color={props.isDirty ? 'success' : 'primary'}
           secondaryButtonIcon="clock"
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
+          secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           isSecondaryButtonDisabled={!canSendToBackground}
         >
           {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
