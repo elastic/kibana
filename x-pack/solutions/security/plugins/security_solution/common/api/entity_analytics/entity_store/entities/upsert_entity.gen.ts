@@ -29,7 +29,6 @@ export type UpsertEntityRequestQueryInput = z.input<typeof UpsertEntityRequestQu
 export type UpsertEntityRequestParams = z.infer<typeof UpsertEntityRequestParams>;
 export const UpsertEntityRequestParams = z.object({
   entityType: EntityType,
-  entityId: z.string(),
 });
 export type UpsertEntityRequestParamsInput = z.input<typeof UpsertEntityRequestParams>;
 

@@ -21,7 +21,7 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
   router.versioned
     .put({
       access: 'public',
-      path: '/api/entity_store/entities/{entityType}/{entityId}',
+      path: '/api/entity_store/entities/{entityType}',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -41,11 +41,11 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
       },
       async (context, request, response): Promise<IKibanaResponse<UpsertEntityResponse>> => {
         const secSol = await context.securitySolution;
-        // todo implement force
+
         try {
           await secSol
             .getEntityStoreCrudClient()
-            .upsertEntity(request.params.entityType, request.params.entityId, request.body);
+            .upsertEntity(request.params.entityType, request.body, request.query.force);
 
           return response.ok();
         } catch (error) {

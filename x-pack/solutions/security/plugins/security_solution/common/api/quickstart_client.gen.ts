@@ -3074,7 +3074,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
     return this.kbnClient
       .request<UpsertEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },

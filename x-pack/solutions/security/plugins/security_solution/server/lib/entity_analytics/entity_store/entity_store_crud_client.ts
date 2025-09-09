@@ -44,16 +44,15 @@ export class EntityStoreCrudClient {
     this.dataClient = dataClient;
   }
 
-  public async upsertEntity(type: EntityType, entityId: string, doc: Entity, force = false) {
+  public async upsertEntity(type: EntityType, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
     const flatProps = flattenProps(doc);
 
-    assertIdsMatch(doc, entityId);
     if (!force) {
       assertOnlyNonForcedAttributesInReq(flatProps);
     }
 
-    this.logger.info(`Updating entity '${entityId}' (type ${type})`);
+    this.logger.info(`Updating entity '${doc.entity.id}' (type ${type})`);
 
     const painlessUpdate = buildUpdateEntityPainlessScript(flatProps);
     if (!painlessUpdate) {
@@ -64,7 +63,7 @@ export class EntityStoreCrudClient {
       index: getEntitiesIndexName(type, this.namespace),
       query: {
         term: {
-          'entity.id': entityId,
+          'entity.id': doc.entity.id,
         },
       },
       script: {
@@ -83,7 +82,7 @@ export class EntityStoreCrudClient {
       document: {
         '@timestamp': new Date().toISOString(),
         [type]: {
-          name: entityId,
+          name: doc.entity.id,
           entity: {
             ...doc.entity,
           },
@@ -111,13 +110,6 @@ export class EntityStoreCrudClient {
   }
 }
 
-function assertIdsMatch(doc: Entity, entityId: string) {
-  if (entityId !== doc.entity.id) {
-    throw new BadCRUDRequestError(
-      `The id provided in the path, and the id provided in the body doesn't match`
-    );
-  }
-}
 function assertOnlyNonForcedAttributesInReq(flatProps: FlattenProps[]) {
   const notAllowedProps = [];
   for (let i = 0; i < flatProps.length; i++) {
