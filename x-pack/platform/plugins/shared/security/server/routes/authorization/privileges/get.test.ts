@@ -52,8 +52,8 @@ describe('GET privileges', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      mockRouteDefinitionParams.authz.privileges.getWithActions.mockImplementation(() =>
-        Promise.resolve(createRawKibanaPrivileges())
+      mockRouteDefinitionParams.authz.privileges.get.mockImplementation(() =>
+        createRawKibanaPrivileges()
       );
 
       defineGetPrivilegesRoutes(mockRouteDefinitionParams);

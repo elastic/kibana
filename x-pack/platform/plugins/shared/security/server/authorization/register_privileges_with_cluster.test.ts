@@ -134,7 +134,6 @@ const registerPrivilegesWithClusterTest = (
         mockLogger,
         {
           get: jest.fn().mockReturnValue(privilegeMap),
-          getWithActions: jest.fn().mockReturnValue(privilegeMap),
         },
         application,
         mockClusterClient

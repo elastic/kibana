@@ -7,7 +7,6 @@
 
 import { uniq } from 'lodash';
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
 import { ApiOperation } from '@kbn/core-security-server';
 import type {
   FeatureKibanaPrivileges,
@@ -28,7 +27,6 @@ import type { Actions } from '../actions';
 
 export interface PrivilegesService {
   get(respectLicenseLevel?: boolean): RawKibanaPrivileges;
-  getWithActions(respectLicenseLevel?: boolean): Promise<RawKibanaPrivileges>;
 }
 
 interface ComposablePrivilege {
@@ -47,14 +45,12 @@ function getFeaturePrivileges({
   respectLicenseLevel,
   featurePrivilegeBuilder,
   actions,
-  savedObjectTypesSupportingAccessControl = [],
 }: {
   featuresService: FeaturesPluginSetup;
   licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>;
   featurePrivilegeBuilder: FeaturePrivilegeBuilder;
   actions: Actions;
   respectLicenseLevel: boolean;
-  savedObjectTypesSupportingAccessControl?: string[];
 }) {
   const features = featuresService.getKibanaFeatures();
   const { allowSubFeaturePrivileges } = licenseService.getFeatures();
@@ -220,9 +216,7 @@ function getFeaturePrivileges({
 
   const allActions = [...allActionsSet];
   const readActions = [...readActionsSet];
-  const allSavedObjectsManageOwnershipActions = savedObjectTypesSupportingAccessControl.map(
-    (type) => actions.savedObject.get(type, 'manage_access_control')
-  );
+
   return {
     features: featurePrivileges,
     global: {
@@ -239,7 +233,6 @@ function getFeaturePrivileges({
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
         actions.ui.get('globalSettings', 'show'),
-        ...allSavedObjectsManageOwnershipActions,
         ...allActions,
       ],
       read: [
@@ -269,8 +262,7 @@ function getFeaturePrivileges({
 export function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
-  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>,
-  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>
+  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
@@ -282,21 +274,6 @@ export function privilegesFactory(
         respectLicenseLevel,
         featurePrivilegeBuilder,
         actions,
-      });
-    },
-    async getWithActions(respectLicenseLevel: boolean = true) {
-      const typeRegistry = await getTypeRegistry();
-      const savedObjectTypesSupportingAccessControl = typeRegistry
-        .getAllTypes()
-        .filter((type) => typeRegistry.supportsAccessControl(type.name))
-        .map((type) => type.name);
-      return getFeaturePrivileges({
-        featuresService,
-        licenseService,
-        respectLicenseLevel,
-        featurePrivilegeBuilder,
-        actions,
-        savedObjectTypesSupportingAccessControl,
       });
     },
   };
