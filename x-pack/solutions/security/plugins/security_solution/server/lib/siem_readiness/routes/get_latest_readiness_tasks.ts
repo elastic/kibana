@@ -7,8 +7,8 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { GET_LATEST_SIEM_READINESS_TASKS_API_PATH } from '../../../../common/api/siem_readiness/constants';
 import { API_VERSIONS } from '../../../../common/constants';
-import { GET_SIEM_READINESS_TASKS_API_PATH } from '../../../../common/api/siem_readiness/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 
 const SIEM_READINESS_INDEX = 'security_solution-siem_readiness';
@@ -19,8 +19,8 @@ export const getLatestReadinessTaskRoute = (
 ) => {
   router.versioned
     .get({
+      path: GET_LATEST_SIEM_READINESS_TASKS_API_PATH,
       access: 'public',
-      path: GET_SIEM_READINESS_TASKS_API_PATH,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -43,20 +43,44 @@ export const getLatestReadinessTaskRoute = (
           const searchResult = await esClient.search({
             index: SIEM_READINESS_INDEX,
             body: {
-              query: { match_all: {} },
-              sort: [{ '@timestamp': { order: 'desc' } }],
+              size: 0,
+              aggs: {
+                latest_tasks: {
+                  terms: {
+                    field: 'task_id.keyword',
+                    size: 1000,
+                  },
+                  aggs: {
+                    latest_doc: {
+                      top_hits: {
+                        size: 1,
+                        sort: [
+                          {
+                            '@timestamp': {
+                              order: 'desc',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
             },
           });
 
+          // Extract the latest document for each task_id from aggregation results
+          const latestTasks =
+            searchResult.aggregations?.latest_tasks?.buckets?.map(
+              (bucket: any) => bucket.latest_doc.hits.hits[0]._source
+            ) || [];
+
           logger.info(
-            `Retrieved ${searchResult.hits.hits.length} SIEM readiness tasks from ${SIEM_READINESS_INDEX}`
+            `Retrieved ${latestTasks.length} latest SIEM readiness tasks from ${SIEM_READINESS_INDEX}`
           );
 
           return response.ok({
-            body: {
-              hits: searchResult.hits.hits,
-              total: searchResult.hits.total,
-            },
+            body: latestTasks,
           });
         } catch (e) {
           const error = transformError(e);

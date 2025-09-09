@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiSplitPanel,
+  EuiLoadingElastic,
 } from '@elastic/eui';
 import type { SiemReadinessTask, ReadinessTaskConfig } from '@kbn/siem-readiness';
 import { useLogReadinessTask, READINESS_TASKS } from '@kbn/siem-readiness';
@@ -56,7 +57,20 @@ export const ReadinessTasksPanel: React.FC = () => {
       action: () => handleLogTask({ task_id: 'enable-endpoint-visibility', status: 'completed' }),
       buttonLabel: 'Complete Demo Task',
     },
+    'ingest-cloud-audit-logs': {
+      action: () =>
+        handleLogTask({
+          task_id: 'ingest-cloud-audit-logs',
+          status: 'completed',
+          meta: { test: 'demo' },
+        }),
+      buttonLabel: 'try to log invalid task',
+    },
   };
+
+  if (getLatestTasks.isLoading) {
+    return <EuiLoadingElastic />;
+  }
 
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} style={{ height: PANEL_HEIGHT }}>
@@ -79,15 +93,13 @@ export const ReadinessTasksPanel: React.FC = () => {
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner grow color="subdued" style={{ overflowY: 'auto' }}>
-        {/* <EuiFlexGroup*/}
-        {/*  direction="column"*/}
-        {/*  style={{ height: '80%', overflowY: 'auto', padding: '16px' }}*/}
-        {/* >*/}
         {filteredTasks.map((task: ReadinessTaskConfig) => {
           const taskContent = readinessTasksContentMap[task.id] || {};
+          const taskData = getLatestTasks.data?.find(
+            (latestTaskData) => latestTaskData.task_id === task.id
+          );
 
           return (
-            // <EuiFlexItem key={task.id}>
             <EuiAccordion
               css={{
                 backgroundColor: 'white',
@@ -108,7 +120,9 @@ export const ReadinessTasksPanel: React.FC = () => {
               extraAction={
                 <div style={{ paddingRight: '16px' }}>
                   <EuiBadge>{task.pillar}</EuiBadge>
-                  <EuiBadge>{'completed'}</EuiBadge>
+                  <EuiBadge color={taskData?.status === 'completed' ? 'success' : 'warning'}>
+                    {taskData?.status || 'incomplete'}
+                  </EuiBadge>
                 </div>
               }
             >
@@ -123,10 +137,8 @@ export const ReadinessTasksPanel: React.FC = () => {
                 </div>
               )}
             </EuiAccordion>
-            // </EuiFlexItem>
           );
         })}
-        {/* </EuiFlexGroup>*/}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

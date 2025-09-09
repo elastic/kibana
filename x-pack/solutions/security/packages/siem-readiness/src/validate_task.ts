@@ -73,4 +73,6 @@ export const validateTask = (task: SiemReadinessTask): void => {
       );
     }
   }
+
+  // If no errors were thrown, the task is valid
 };
