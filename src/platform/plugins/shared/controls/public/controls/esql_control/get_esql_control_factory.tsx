@@ -16,6 +16,7 @@ import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { openESQLControlFlyout } from '@kbn/esql/public';
 import type { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { coreServices, dataService } from '../../services/kibana_services';
@@ -95,8 +96,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             defaultControlManager.reinitializeState(updatedState);
             selections.reinitializeState(updatedState);
           };
-          const { openESQLControlFlyout } = await import('@kbn/esql/public/flyout');
-
           openESQLControlFlyout({
             core: coreServices,
             search: dataService.search.search,
