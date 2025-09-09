@@ -139,9 +139,9 @@ export const ESQLDataCascade = ({
   defaultFilters = DEFAULT_FILTERS,
   viewModeToggle,
 }: ESQLDataCascadeProps) => {
-  const globalState = stateContainer.globalState.get();
+  const globalState = stateContainer.getCurrentTab().globalState;
   const globalFilters = globalState?.filters;
-  const globalTimeRange = globalState?.time;
+  const globalTimeRange = globalState?.timeRange;
   const { euiTheme } = useEuiTheme();
   const [query] = useAppStateSelector((state) => [state.query]);
   const { data, expressions } = useDiscoverServices();
