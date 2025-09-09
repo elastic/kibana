@@ -7,7 +7,13 @@
 
 import omit from 'lodash/omit';
 
-import { type AgentPolicy, type Output, type DownloadSource, type PackageInfo, FullAgentPolicyInput } from '../../types';
+import type {
+  AgentPolicy,
+  Output,
+  DownloadSource,
+  PackageInfo,
+  FullAgentPolicyInput,
+} from '../../types';
 import {
   createAppContextStartContractMock,
   createMessageSigningServiceMock,
