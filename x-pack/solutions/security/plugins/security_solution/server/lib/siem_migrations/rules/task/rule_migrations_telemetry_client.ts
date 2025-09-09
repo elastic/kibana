@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
@@ -19,8 +18,7 @@ import {
 import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
 import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
-// import type { MigrateRuleState } from './agent/types';
-import type { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
+import { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
 interface IntegrationMatchEvent {
   preFilterIntegrations: RuleMigrationIntegration[];
@@ -32,54 +30,7 @@ interface PrebuiltRuleMatchEvent {
   postFilterRule?: RuleSemanticSearchResult;
 }
 
-export class RuleMigrationTelemetryClient
-  implements SiemMigrationTelemetryClient<RuleMigrationRule>
-{
-  constructor(
-    private readonly telemetry: AnalyticsServiceSetup,
-    private readonly logger: Logger,
-    private readonly migrationId: string,
-    private readonly modelName: string = ''
-  ) {}
-
-  private reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {
-    try {
-      this.telemetry.reportEvent(eventTypeOpts.eventType, data);
-    } catch (e) {
-      this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${e.message}`);
-    }
-  }
-
-  public reportIntegrationsMatch({
-    preFilterIntegrations,
-    postFilterIntegration,
-  }: IntegrationMatchEvent): void {
-    this.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH, {
-      model: this.modelName,
-      migrationId: this.migrationId,
-      preFilterIntegrationNames: preFilterIntegrations.map((integration) => integration.id) || [],
-      preFilterIntegrationCount: preFilterIntegrations.length,
-      postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
-      postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.IntegrationsMatch],
-    });
-  }
-
-  public reportPrebuiltRulesMatch({
-    preFilterRules,
-    postFilterRule,
-  }: PrebuiltRuleMatchEvent): void {
-    this.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH, {
-      model: this.modelName,
-      migrationId: this.migrationId,
-      preFilterRuleNames: preFilterRules.map((rule) => rule.rule_id) || [],
-      preFilterRuleCount: preFilterRules.length,
-      postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
-      postFilterRuleCount: postFilterRule ? 1 : 0,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.PrebuiltRulesMatch],
-    });
-  }
-
+export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<RuleMigrationRule> {
   public startSiemMigrationTask() {
     const startTime = Date.now();
     const stats = { completed: 0, failed: 0 };
@@ -149,5 +100,35 @@ export class RuleMigrationTelemetryClient
         });
       },
     };
+  }
+
+  public reportIntegrationsMatch({
+    preFilterIntegrations,
+    postFilterIntegration,
+  }: IntegrationMatchEvent): void {
+    this.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH, {
+      model: this.modelName,
+      migrationId: this.migrationId,
+      preFilterIntegrationNames: preFilterIntegrations.map((integration) => integration.id) || [],
+      preFilterIntegrationCount: preFilterIntegrations.length,
+      postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
+      postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.IntegrationsMatch],
+    });
+  }
+
+  public reportPrebuiltRulesMatch({
+    preFilterRules,
+    postFilterRule,
+  }: PrebuiltRuleMatchEvent): void {
+    this.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH, {
+      model: this.modelName,
+      migrationId: this.migrationId,
+      preFilterRuleNames: preFilterRules.map((rule) => rule.rule_id) || [],
+      preFilterRuleCount: preFilterRules.length,
+      postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
+      postFilterRuleCount: postFilterRule ? 1 : 0,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.PrebuiltRulesMatch],
+    });
   }
 }
