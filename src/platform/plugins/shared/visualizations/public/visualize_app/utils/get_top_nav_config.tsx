@@ -17,10 +17,15 @@ import { parse } from 'query-string';
 
 import type { Capabilities } from '@kbn/core/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { SavedObjectSaveOpts, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type {
+  SavedObjectSaveOpts,
+  OnSaveProps,
+  ShowSaveModalMinimalSaveModalProps,
+  SaveResult,
+} from '@kbn/saved-objects-plugin/public';
 import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
@@ -72,7 +77,9 @@ export interface TopNavConfigParams {
   eventEmitter?: EventEmitter;
 }
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
+  LazySavedObjectSaveModalDashboardWithSaveResult
+);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize_v2) return false;
@@ -580,7 +587,7 @@ export const getTopNavConfig = (
               }: OnSaveProps & { returnToOrigin?: boolean } & {
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
-              }) => {
+              }): Promise<SaveResult> => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -616,7 +623,7 @@ export const getTopNavConfig = (
                   });
 
                   // TODO: Saved Object Modal requires `id` to be defined so this is a workaround
-                  return { id: true };
+                  return { id: 'true' };
                 }
 
                 // We're adding the viz to a library so we need to save it and then
@@ -653,7 +660,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              let saveModal;
+              let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
               if (originatingApp) {
                 saveModal = (
@@ -684,7 +691,7 @@ export const getTopNavConfig = (
                 );
               } else {
                 saveModal = (
-                  <SavedObjectSaveModalDashboard
+                  <SavedObjectSaveModalDashboardWithSaveResult
                     documentInfo={{
                       id: visualizeCapabilities.save ? savedVis?.id : undefined,
                       title: savedVis?.title || '',

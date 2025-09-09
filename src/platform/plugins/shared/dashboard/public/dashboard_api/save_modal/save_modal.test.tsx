@@ -16,11 +16,14 @@ jest.mock('@kbn/saved-objects-plugin/public', () => ({
 
 import { DashboardSaveModal } from './save_modal';
 
+const mockSave = jest.fn();
+const mockClose = jest.fn();
+
 test('renders DashboardSaveModal', () => {
   const component = shallowWithI18nProvider(
     <DashboardSaveModal
-      onSave={() => {}}
-      onClose={() => {}}
+      onSave={mockSave}
+      onClose={mockClose}
       title="dash title"
       description="dash description"
       timeRestore={true}
