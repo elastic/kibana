@@ -11,8 +11,13 @@ import type { EuiThemeShape } from '@elastic/eui';
 import type { Row, CellContext } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
-import type { VirtualizerHelperProps } from '../../lib/core/virtualizer';
+import type { CascadeVirtualizerProps } from '../../lib/core/virtualizer';
 import type { SelectionDropdownProps } from './group_selection_combobox/selection_dropdown';
+
+/**
+ * Sizing options for the cascade components, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
+ */
+export type CascadeSizing = keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 
 interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
   row: Row<G>;
@@ -31,7 +36,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
   /**
    * Size of the row cell
    */
-  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
+  size: CascadeSizing;
   /**
    * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
    */
@@ -60,11 +65,7 @@ export interface CascadeRowActionProps<G extends GroupNode> {
   rowHeaderActions: (params: { row: Row<G> }) => React.ReactNode[];
 }
 
-/**
- * @internal
- * @description Internal cascade row primitive component props.
- */
-export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode> {
+export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends LeafNode> {
   /**
    * Whether to enable row selection. Default is false.
    */
@@ -73,8 +74,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Whether to enable secondary expansion for nodes. Default is false.
    */
   enableSecondaryExpansionAction?: boolean;
-  isActiveSticky: boolean;
-  innerRef: React.LegacyRef<HTMLDivElement>;
+  /**
+   * Denotes if the row is a group node or a leaf node.
+   */
+  isGroupNode: boolean;
   /**
    * @description Callback function that is called when a cascade node is expanded.
    */
@@ -99,6 +102,20 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
   size: CascadeRowCellPrimitiveProps<G, L>['size'];
+}
+
+/**
+ * @internal
+ * @description Internal cascade row primitive component props.
+ */
+export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
+  extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
+  /**
+   * ref used to portal the active sticky header.
+   */
+  activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
+  isActiveSticky: boolean;
+  innerRef: React.LegacyRef<HTMLDivElement>;
   /**
    * @description The virtual row for the cascade row.
    */
@@ -129,7 +146,7 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 };
 
 export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<VirtualizerHelperProps<G>, 'overscan'>,
+  extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
    * The data to be displayed in the cascade. It should be an array of group nodes.

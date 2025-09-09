@@ -8,7 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import type { EuiThemeShape, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { CascadeSizing } from '../types';
 
 export const rootRowAttribute = 'root' as const;
 export const childRowAttribute = 'sub-group' as const;
@@ -17,13 +18,23 @@ export const styles = (
   euiTheme: UseEuiTheme['euiTheme'],
   isExpandedChildRow: boolean,
   rowDepth: number,
-  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>
+  size: CascadeSizing
 ) => ({
-  rowHeaderSlotWrapper: css({
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+  rowStickyHeaderInner: css({
+    padding: euiTheme.size[size],
+    position: 'absolute',
+    width: '100%',
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderWidth: `0 ${euiTheme.border.width.thin} ${euiTheme.border.width.thin} ${euiTheme.border.width.thin}`,
+    borderStyle: 'solid',
+    borderColor: euiTheme.border.color,
+    display: 'none',
+
+    // make sticky header visible only when the parent has the data attribute
+    '[data-scrolled="true"] &': {
+      // TODO: add transition animation
+      display: 'initial',
+    },
   }),
   rowWrapper: css({
     display: 'flex',
@@ -47,12 +58,17 @@ export const styles = (
       borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
       borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     },
-    [`&[data-row-type="${rootRowAttribute}"]:not([data-active-sticky]):before`]: {
+    [`&[data-row-type="${rootRowAttribute}"]:before`]: {
       borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     },
-    [`&[data-row-type="${rootRowAttribute}"]:first-of-type:not([data-active-sticky]):before`]: {
+    // only apply rounded corner to first row when not scrolled since setting the curved inset border is handled by the header when scrolled
+    [`[data-scrolled="false"] + * &[data-row-type="${rootRowAttribute}"]:first-of-type:before`]: {
       borderTopLeftRadius: euiTheme.border.radius.small,
       borderTopRightRadius: euiTheme.border.radius.small,
+    },
+    [`[data-scrolled="true"] + * &[data-row-type="${rootRowAttribute}"]:first-of-type:before`]: {
+      // Remove border radius when scrolled so transition is smooth with the header border radius
+      borderTop: 'unset',
     },
     [`&[data-row-type="${rootRowAttribute}"]:last-of-type:not([data-active-sticky]):before`]: {
       borderBottomLeftRadius: euiTheme.border.radius.small,
