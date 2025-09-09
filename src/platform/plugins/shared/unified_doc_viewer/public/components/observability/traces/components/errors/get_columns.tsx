@@ -15,13 +15,7 @@ import React from 'react';
 import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
 import { ERROR_GROUP_ID } from '@kbn/apm-types';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
-
-const NOT_AVAILABLE_LABEL = i18n.translate(
-  'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.na',
-  {
-    defaultMessage: 'N/A',
-  }
-);
+import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
 export const getColumns = (
   generateDiscoverLink: GenerateDiscoverLink
