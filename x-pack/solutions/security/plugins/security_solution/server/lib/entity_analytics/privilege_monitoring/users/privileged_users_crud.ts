@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
   UpdatePrivMonUserRequestBody,
@@ -14,7 +15,6 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
-import { findUserByUsername, createUserDocument, updateUserWithSource } from './utils';
 
 export const createPrivilegedUsersCrudService = ({
   deps,
@@ -23,31 +23,43 @@ export const createPrivilegedUsersCrudService = ({
   const esClient = deps.clusterClient.asCurrentUser;
 
   const create = async (
-    userInput: CreatePrivMonUserRequestBody,
+    user: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource,
-    opts?: {
-      refresh?: boolean;
-    }
+    maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
-    const username = userInput.user?.name;
+    const currentUserCount = await esClient.count({
+      index,
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
 
-    if (!username) {
-      throw new Error('Username is required');
+    if (currentUserCount.count >= maxUsersAllowed) {
+      throw new Error(`Cannot create user: Maximum user limit of ${maxUsersAllowed} reached`);
     }
 
-    // Try to create user with deterministic ID first (atomic operation)
-    try {
-      return await createUserDocument(esClient, index, userInput, source, get);
-    } catch (error) {
-      // If document already exists (conflict), try to update it
-      if (error.statusCode === 409) {
-        const existingUser = await findUserByUsername(esClient, index, username);
-        if (existingUser) {
-          return updateUserWithSource(esClient, index, existingUser, source, userInput, get);
-        }
-      }
-      throw error; // Re-throw other errors
+    const doc = merge(user, {
+      user: {
+        is_privileged: true,
+      },
+      labels: {
+        sources: [source],
+      },
+    });
+
+    const res = await esClient.index({
+      index,
+      refresh: 'wait_for',
+      document: doc,
+    });
+
+    const newUser = await get(res._id);
+    if (!newUser) {
+      throw new Error(`Failed to create user: ${res._id}`);
     }
+    return newUser;
   };
 
   const get = async (id: string): Promise<MonitoredUserDoc | undefined> => {
