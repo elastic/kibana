@@ -14,9 +14,9 @@ import {
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
-  siemMigrationEventNames,
-  SiemMigrationsEventTypes,
-} from '../../../telemetry/event_based/events/siem_migrations';
+} from '../../../telemetry/event_based/events';
+import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
+import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
 import { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
@@ -47,7 +47,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
               duration: Date.now() - ruleStartTime,
               model: this.modelName,
               prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationSuccess],
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSuccess],
             });
           },
           failure: (error: Error) => {
@@ -56,7 +56,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
               migrationId: this.migrationId,
               error: error.message,
               model: this.modelName,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationFailure],
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationFailure],
             });
           },
         };
@@ -65,7 +65,6 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
         const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS, {
           migrationId: this.migrationId,
-          type: 'rules',
           model: this.modelName || '',
           completed: stats.completed,
           failed: stats.failed,
@@ -78,7 +77,6 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
         const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE, {
           migrationId: this.migrationId,
-          type: 'rules',
           model: this.modelName || '',
           completed: stats.completed,
           failed: stats.failed,
@@ -92,7 +90,6 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
         const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_ABORTED, {
           migrationId: this.migrationId,
-          type: 'rules',
           model: this.modelName || '',
           completed: stats.completed,
           failed: stats.failed,
@@ -116,7 +113,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
       preFilterIntegrationCount: preFilterIntegrations.length,
       postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
       postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationIntegrationsMatch],
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.IntegrationsMatch],
     });
   }
 
@@ -131,8 +128,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
       preFilterRuleCount: preFilterRules.length,
       postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
       postFilterRuleCount: postFilterRule ? 1 : 0,
-      eventName:
-        siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationPrebuiltRulesMatch],
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.PrebuiltRulesMatch],
     });
   }
 }
