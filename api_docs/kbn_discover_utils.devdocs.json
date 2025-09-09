@@ -7755,7 +7755,7 @@
         "label": "RESOURCE_FIELDS",
         "description": [],
         "signature": [
-          "readonly [\"service.name\", \"container.name\", \"host.name\", \"orchestrator.resource.id\", \"orchestrator.cluster.name\", \"orchestrator.cluster.id\", \"container.id\", \"agent.name\"]"
+          "readonly [\"service.name\", \"container.name\", \"host.name\", \"orchestrator.resource.id\", \"orchestrator.cluster.name\", \"orchestrator.cluster.id\", \"container.id\", \"agent.name\", \"resource.attributes.telemetry.sdk.language\"]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,

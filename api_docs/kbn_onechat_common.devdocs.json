@@ -2260,6 +2260,19 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ConversationRound.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "unique id for this round"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ConversationRound.input",
             "type": "Object",
             "tags": [],

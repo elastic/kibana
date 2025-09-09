@@ -3637,14 +3637,6 @@
         "references": [
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/solutions/security/packages/data-table/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/solutions/security/packages/data-table/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx"
           },
           {
