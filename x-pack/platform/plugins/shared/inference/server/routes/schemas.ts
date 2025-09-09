@@ -17,7 +17,7 @@ export const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
     toolCallId: schema.string(),
     function: schema.object({
       name: schema.string(),
-      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+      arguments: schema.recordOf(schema.string(), schema.any()),
     }),
   })
 );
