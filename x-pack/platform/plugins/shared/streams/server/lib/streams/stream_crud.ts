@@ -8,6 +8,7 @@
 import type {
   ClusterComponentTemplate,
   IndicesDataStream,
+  IndicesGetDataStreamSettingsDataStreamSettings,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -47,24 +48,24 @@ export function getDataStreamLifecycle(
   };
 }
 
-export function getDataStreamSettings(dataStream: IndicesDataStream | null) {
+export function getDataStreamSettings(dataStream?: IndicesGetDataStreamSettingsDataStreamSettings) {
   const settings: IngestStreamSettings = {};
 
-  if (dataStream?.settings.index?.number_of_replicas) {
+  if (dataStream?.effective_settings.index?.number_of_replicas) {
     settings['index.number_of_replicas'] = {
-      value: Number(dataStream.settings.index.number_of_replicas),
+      value: Number(dataStream.effective_settings.index.number_of_replicas),
     };
   }
 
-  if (dataStream?.settings.index?.number_of_shards) {
+  if (dataStream?.effective_settings.index?.number_of_shards) {
     settings['index.number_of_shards'] = {
-      value: Number(dataStream.settings.index.number_of_shards),
+      value: Number(dataStream.effective_settings.index.number_of_shards),
     };
   }
 
-  if (dataStream?.settings.index?.refresh_interval) {
+  if (dataStream?.effective_settings.index?.refresh_interval) {
     settings['index.refresh_interval'] = {
-      value: dataStream.settings.index.refresh_interval,
+      value: dataStream.effective_settings.index.refresh_interval,
     };
   }
 

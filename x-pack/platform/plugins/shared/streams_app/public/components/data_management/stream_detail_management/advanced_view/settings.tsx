@@ -30,9 +30,9 @@ import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
 import { LinkToStream } from '../../stream_detail_lifecycle/general_data/modal';
 
 interface Setting {
-  default: boolean;
   invalid: boolean;
   value: string;
+  override: boolean;
   from?: string;
 }
 
@@ -43,7 +43,7 @@ function toStringValues(settings: IngestStreamSettings, effectiveSettings: Inges
         ...setting,
         value: String(setting.value),
         invalid: false,
-        default: !settings[key as keyof IngestStreamSettings] && !('from' in setting),
+        override: !!settings[key as keyof IngestStreamSettings],
       };
       return acc;
     },
@@ -88,7 +88,7 @@ export function Settings({
       if (value.length === 0) {
         setSettings((prev) => omit(prev, name));
       } else {
-        const setting: Setting = { value, invalid, default: false };
+        const setting: Setting = { value, invalid, override: true };
         if (!isClassicStream) {
           setting.from = definition.stream.name;
         }
@@ -338,15 +338,12 @@ function SettingRow({
   label: string;
   inputLabel: string;
   description: string;
-  setting?: { value: string; default: boolean; from?: string };
+  setting?: Setting;
   valueDescription?: string;
   isInvalid: boolean;
   onChange: (value: string) => void;
   onReset: () => void;
 }) {
-  const isOverride =
-    (!!setting?.value && Streams.ClassicStream.GetResponse.is(definition)) ||
-    setting?.from === definition.stream.name;
   return (
     <Row
       left={<RowMetadata label={label} description={description} />}
@@ -357,8 +354,7 @@ function SettingRow({
               <EuiFieldText
                 name={label}
                 isInvalid={isInvalid}
-                placeholder={setting?.default ? `${setting.value} (default)` : ''}
-                value={!setting?.default ? setting?.value ?? '' : ''}
+                value={setting?.value ?? ''}
                 onChange={(e) => onChange(e.target.value)}
               />
             </EuiFormRow>
@@ -373,7 +369,7 @@ function SettingRow({
 
             <EuiFlexItem>
               <EuiText color="subdued" size="xs">
-                {isOverride ? (
+                {setting?.override ? (
                   <p>
                     {i18n.translate('xpack.streams.streamDetailView.override', {
                       defaultMessage: 'Override.',

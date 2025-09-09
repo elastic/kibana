@@ -74,7 +74,7 @@ export async function readStream({
   }
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, privileges] = await Promise.all([
+  const [ancestors, dataStream, privileges, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name).catch((e) => {
       if (e.statusCode === 404) {
@@ -83,6 +83,12 @@ export async function readStream({
       throw e;
     }),
     streamsClient.getPrivileges(name),
+    scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
+      if (e.statusCode === 404) {
+        return null;
+      }
+      throw e;
+    }),
   ]);
 
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {
@@ -98,7 +104,7 @@ export async function readStream({
           : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
-      effective_settings: getDataStreamSettings(dataStream),
+      effective_settings: getDataStreamSettings(dataStreamSettings?.data_streams[0]),
       dashboards,
       rules,
       queries,
