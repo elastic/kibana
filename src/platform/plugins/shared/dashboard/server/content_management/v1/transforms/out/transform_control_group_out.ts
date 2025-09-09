@@ -10,8 +10,10 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import type { LegacyStoredControlGroupOptions } from '../../types';
+import type {
+  DashboardSavedObjectAttributes,
+  StoredControlGroupInput,
+} from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
 
 export function transformControlGroupOut(
@@ -24,7 +26,7 @@ export function transformControlGroupOut(
     : [];
 
   /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
-  const legacyControlGroupOptions: LegacyStoredControlGroupOptions | undefined =
+  const legacyControlGroupOptions: StoredControlGroupInput['ignoreParentSettings'] | undefined =
     ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
   const ignoreFilters =
     legacyControlGroupOptions?.ignoreFilters || legacyControlGroupOptions?.ignoreQuery;

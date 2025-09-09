@@ -13,9 +13,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import { embeddableService, logger } from '../../../../kibana_services';
-import type { StoredControlState } from '../../types';
 import { prefixReferencesFromPanel } from '../../../../../common';
+import type { StoredControlState } from '../../../../dashboard_saved_object';
+import { embeddableService, logger } from '../../../../kibana_services';
 
 export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) {
   if (!controlGroupInput) return { references: [] };

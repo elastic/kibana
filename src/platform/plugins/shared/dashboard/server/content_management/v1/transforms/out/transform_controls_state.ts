@@ -13,8 +13,11 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import type {
+  StoredControlGroupInput,
+  StoredControlState,
+} from '../../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../../kibana_services';
-import type { StoredControlState } from '../../types';
 
 /**
  * Transform functions for serialized controls state.
@@ -32,7 +35,7 @@ export const transformControlsState: (
 };
 
 export function transformControlObjectToArray(
-  controls: Record<string, SerializableRecord>
+  controls: StoredControlGroupInput['panels']
 ): Array<SerializableRecord> {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }

@@ -15,7 +15,6 @@ import type {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import type { controlsGroupSchema } from '@kbn/controls-schemas';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { WithRequiredProperty } from '@kbn/utility-types';
 import type { CONTENT_ID } from '../../../common/content_management';
@@ -58,26 +57,6 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
   attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
 };
-
-export type StoredControlState = Pick<
-  TypeOf<typeof controlsGroupSchema>['controls'][number],
-  'grow' | 'type' | 'width'
-> & {
-  order: number; // order is generated from the array order
-  id: string; // id is required
-  dataViewRefName?: string;
-  explicitInput: Omit<
-    TypeOf<typeof controlsGroupSchema>['controls'][number],
-    'grow' | 'type' | 'width'
-  >;
-};
-
-export interface LegacyStoredControlGroupOptions {
-  ignoreFilters?: boolean;
-  ignoreQuery?: boolean;
-  ignoreTimerange?: boolean;
-  ignoreValidations?: boolean;
-}
 
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
