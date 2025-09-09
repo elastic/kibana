@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams } from './helpers/requests';
@@ -50,9 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     members: ['logs'],
                   },
                 },
-                dashboards: [],
-                queries: [],
-                rules: [],
+                ...emptyAssets,
               },
             },
           })
@@ -106,9 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -134,9 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 members: ['logs'],
               },
             },
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
           });
         });
 
@@ -154,9 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs.test'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -180,9 +173,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 members: ['logs.test'],
               },
             },
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
           });
         });
 
@@ -212,9 +203,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs', 'logs.test'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -233,9 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['test-group'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -280,9 +267,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['test-group'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -303,9 +288,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['non-existent-stream'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -330,9 +313,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: [unmanagedStreamName],
                     },
                   },
-                  dashboards: [],
-                  rules: [],
-                  queries: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -359,9 +340,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs', 'logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -386,9 +365,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })
@@ -409,9 +386,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: ['logs'],
                     },
                   },
-                  dashboards: [],
-                  queries: [],
-                  rules: [],
+                  ...emptyAssets,
                 },
               },
             })

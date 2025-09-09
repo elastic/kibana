@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { RoutingStatus, Streams } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -49,9 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Place processing steps', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
