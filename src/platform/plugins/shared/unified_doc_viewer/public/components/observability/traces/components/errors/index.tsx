@@ -25,6 +25,8 @@ import { getColumns } from './get_columns';
 import { useFetchErrors } from './use_fetch_errors';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
+import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 
 export interface Props {
   traceId: string;
@@ -49,6 +51,9 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
   });
 
   const columns = useMemo(() => getColumns(generateDiscoverLink), [generateDiscoverLink]);
+  const openInDiscoverLink = useMemo(() => {
+    return generateDiscoverLink(createTraceContextWhereClause({ traceId, spanId, transactionId }));
+  }, [generateDiscoverLink, traceId, spanId, transactionId]);
 
   if (loading || (!error && response.errorGroups.length === 0)) {
     return null;
@@ -65,6 +70,19 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
         { defaultMessage: 'Errors that occurred during this span and their causes' }
       )}
+      actions={
+        openInDiscoverLink
+          ? [
+              {
+                icon: 'discoverApp',
+                label: OPEN_IN_DISCOVER_LABEL,
+                ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+                href: openInDiscoverLink,
+                dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
+              },
+            ]
+          : undefined
+      }
     >
       <EuiSpacer size="s" />
       {error ? (

@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
-import { ERROR_GROUP_ID } from '@kbn/apm-types';
+import { ERROR_GROUP_ID, TRACE_ID } from '@kbn/apm-types';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
@@ -28,7 +28,10 @@ export const getColumns = (
     ),
     sortable: (item) => item.name || '',
     render: (_, item) => {
-      const href = generateDiscoverLink({ [ERROR_GROUP_ID]: item.groupId });
+      const href = generateDiscoverLink({
+        [ERROR_GROUP_ID]: item.groupId,
+        [TRACE_ID]: item.traceId,
+      });
 
       const content = (
         <EuiTextTruncate

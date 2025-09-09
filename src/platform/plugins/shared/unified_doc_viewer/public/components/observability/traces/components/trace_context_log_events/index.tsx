@@ -14,7 +14,7 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { useLogsQuery } from '../../hooks/use_logs_query';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
-import { getEsqlQuery } from './get_esql_query';
+import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
@@ -55,7 +55,7 @@ export function TraceContextLogEvents({
   );
 
   const openInDiscoverLink = useMemo(() => {
-    return generateDiscoverLink(getEsqlQuery({ traceId, spanId, transactionId }));
+    return generateDiscoverLink(createTraceContextWhereClause({ traceId, spanId, transactionId }));
   }, [generateDiscoverLink, traceId, spanId, transactionId]);
 
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
