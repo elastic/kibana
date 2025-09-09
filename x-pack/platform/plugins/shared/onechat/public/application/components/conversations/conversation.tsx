@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiResizableContainer, useEuiScrollBar, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
@@ -32,11 +32,22 @@ export const Conversation: React.FC<{}> = () => {
   const { isResponseLoading } = useSendMessage();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const { showScrollButton, scrollToMostRecentRound } = useConversationScrollActions({
-    isResponseLoading,
-    conversationId: conversationId || '',
-    scrollContainer: scrollContainerRef.current,
-  });
+  const { showScrollButton, scrollToMostRecentRound, stickToBottom } = useConversationScrollActions(
+    {
+      isResponseLoading,
+      conversationId: conversationId || '',
+      scrollContainer: scrollContainerRef.current,
+    }
+  );
+
+  useEffect(() => {
+    // TODO: Replace {setTimeout} with a more robust solution for calling stickToBottom()
+    // Consider exposing loading states from {useConversationRounds} hook (e.g., {fetched, isLoading})
+    // to ensure we only scroll after all dynamic content has fully loaded and rendered.
+    setTimeout(() => {
+      stickToBottom();
+    }, 2000);
+  }, [stickToBottom]);
 
   const scrollContainerStyles = css`
     overflow-y: auto;

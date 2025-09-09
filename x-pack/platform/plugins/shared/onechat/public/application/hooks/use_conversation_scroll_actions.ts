@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const scrollToMostRecentRound = (
   position: ScrollLogicalPosition,
@@ -67,8 +67,17 @@ export const useConversationScrollActions = ({
     };
   }, [isResponseLoading, conversationId, scrollContainer]);
 
+  const stickToBottom = useCallback(() => {
+    const parent = scrollContainer?.parentElement;
+    if (!parent) {
+      return;
+    }
+    parent.scrollTop = parent.scrollHeight;
+  }, [scrollContainer]);
+
   return {
     showScrollButton,
     scrollToMostRecentRound,
+    stickToBottom,
   };
 };
