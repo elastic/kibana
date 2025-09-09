@@ -9,8 +9,9 @@
 
 import { get } from 'lodash';
 import { expectType } from 'tsd';
+import type { TypeOf } from './type_of';
 import { offeringBasedSchema, schema } from '../..';
-import type { Props, TypeOf } from './object_type';
+import type { Props } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
