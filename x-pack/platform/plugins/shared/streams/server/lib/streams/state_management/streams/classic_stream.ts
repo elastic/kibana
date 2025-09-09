@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
-import _, { cloneDeep, isEmpty } from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import { StatusError } from '../../errors/status_error';
@@ -224,22 +224,20 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
-    if (!isEmpty(this._definition.ingest.settings)) {
-      actions.push({
-        type: 'update_ingest_settings',
-        request: {
-          name: this._definition.name,
-          settings: {
-            'index.number_of_replicas':
-              this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
-            'index.number_of_shards':
-              this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
-            'index.refresh_interval':
-              this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
-          },
+    actions.push({
+      type: 'update_ingest_settings',
+      request: {
+        name: this._definition.name,
+        settings: {
+          'index.number_of_replicas':
+            this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
+          'index.number_of_shards':
+            this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
+          'index.refresh_interval':
+            this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
         },
-      });
-    }
+      },
+    });
 
     if (
       this._definition.ingest.classic.field_overrides &&
