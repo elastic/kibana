@@ -147,7 +147,6 @@ export async function fetchEsQuery({
       params: {
         ...sortedQuery,
         keep_alive: '10m',
-        wait_for_completion_timeout: '2s',
       },
     },
   });
