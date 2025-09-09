@@ -26,6 +26,8 @@ import {
   setValueFilters,
   selectDimensions,
   toggleFullscreen,
+  selectSearchTerm,
+  setSearchTerm,
 } from '../store/slices';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
@@ -45,13 +47,13 @@ export const MetricsExperienceGrid = ({
   // Get grid-specific state from Redux store
   const dispatch = useAppDispatch();
   const currentPage = useAppSelector(selectCurrentPage);
+  const searchTerm = useAppSelector(selectSearchTerm);
   const dimensions = useAppSelector(selectDimensions);
   const valueFilters = useAppSelector(selectValueFilters);
   const isFullscreen = useAppSelector(selectIsFullscreen);
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
 
   const [showSearchInput, setShowSearchInput] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   useDebounce(
@@ -62,15 +64,23 @@ export const MetricsExperienceGrid = ({
     [searchTerm]
   );
 
-  const handleShowSearch = useCallback(() => {
+  const onShowSearch = useCallback(() => {
     setShowSearchInput(true);
   }, []);
 
-  const handleClearSearch = useCallback(() => {
+  const onClearSearch = useCallback(() => {
     setShowSearchInput(false);
-    setSearchTerm('');
+    dispatch(setSearchTerm(''));
     setDebouncedSearchTerm('');
   }, []);
+
+  const onSearchTermChange = useCallback(
+    (value: string) => {
+      dispatch(setSearchTerm(value));
+    },
+    [dispatch]
+  );
+
 
   const timeRange = useMemo(() => getTimeRange(), [getTimeRange]);
 
@@ -128,7 +138,7 @@ export const MetricsExperienceGrid = ({
             label: i18n.translate('metricsExperience.searchButton', {
               defaultMessage: 'Search',
             }),
-            onClick: handleShowSearch,
+            onClick: onShowSearch,
             'data-test-subj': 'metricsExperienceToolbarSearch',
           },
         ]
@@ -213,7 +223,7 @@ export const MetricsExperienceGrid = ({
       result = result.filter(
         (field) =>
           field.name?.toLowerCase().includes(search) ||
-          field.description?.toLowerCase().includes(search)
+          field.description?.toLowerCase().includes(search) 
       );
     }
     return result;
@@ -247,8 +257,8 @@ export const MetricsExperienceGrid = ({
           rightSideAppend: showSearchInput ? (
             <MetricsGridSearchControl
               searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onClear={handleClearSearch}
+              onSearchTermChange={onSearchTermChange}
+              onClear={onClearSearch}
               data-test-subj="metricsExperienceToolbarSearchInput"
             />
           ) : undefined,

@@ -21,6 +21,9 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MetricInsightsFlyout } from '../metric_flyout/metrics_insights_flyout';
+import { MetricTermWithHighlight } from './metric_term_with_highlight';
+import { useAppSelector } from '../../store/hooks';
+import { selectSearchTerm } from '../../store/slices/metrics_grid_slice';
 
 interface ChartHeaderProps {
   title: string;
@@ -38,6 +41,7 @@ export const ChartHeader = ({
   esqlQuery,
 }: ChartHeaderProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const searchTerm = useAppSelector(selectSearchTerm);
 
   // Get title sizes based on display density
   const getTitleSize = () => {
@@ -140,14 +144,22 @@ export const ChartHeader = ({
             >
               <EuiTitle size={getTitleSize()}>
                 <h3 style={{ fontFamily: 'monospace' }}>
-                  <EuiTextTruncate text={title} truncation="middle" />
+                  <MetricTermWithHighlight
+                    searchTerm={searchTerm}
+                    text={title}
+                    truncation="middle"
+                  />
                 </h3>
               </EuiTitle>
             </EuiToolTip>
             {metric.description ? (
               <EuiText size={getDescriptionSize()} color="subdued">
                 <p style={{ fontFamily: 'monospace' }}>
-                  <EuiTextTruncate text={metric.description} truncation="end" />
+                  <MetricTermWithHighlight
+                    searchTerm={searchTerm}
+                    text={metric.description}
+                    truncation="end"
+                  />
                 </p>
               </EuiText>
             ) : (

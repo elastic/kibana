@@ -14,22 +14,22 @@ import { i18n } from '@kbn/i18n';
 
 interface MetricsGridSearchControlProps {
   searchTerm: string;
-  setSearchTerm: (value: string) => void;
+  onSearchTermChange: (value: string) => void;
   onClear: () => void;
   'data-test-subj'?: string;
 }
 
 export const MetricsGridSearchControl: React.FC<MetricsGridSearchControlProps> = ({
   searchTerm,
-  setSearchTerm,
+  onSearchTermChange,
   onClear,
   'data-test-subj': dataTestSubj = 'metricsGridSearchControl',
 }) => {
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
+      onSearchTermChange(e.target.value);
     },
-    [setSearchTerm]
+    [onSearchTermChange]
   );
 
   const onKeyDown = useCallback(
