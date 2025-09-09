@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const PLUGIN_ID = 'data_quality';
-export const PLUGIN_FEATURE_ID = 'dataQuality';
-export const PLUGIN_NAME = i18n.translate('xpack.dataQuality.name', {
-  defaultMessage: 'Data Set Quality',
-});
+export * from './dataset_quality';
+export * from './dataset_quality_details';
