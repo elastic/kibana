@@ -50,8 +50,9 @@ export class ServiceManager {
     logger,
     security,
     elasticsearch,
-    actions,
     inference,
+    uiSettings,
+    savedObjects,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -84,7 +85,6 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
-      actions,
       inference,
       toolsService: tools,
       agentsService: agents,
@@ -99,10 +99,11 @@ export class ServiceManager {
 
     const chat = createChatService({
       logger: logger.get('chat'),
-      actions,
       inference,
       conversationService: conversations,
       agentService: agents,
+      uiSettings,
+      savedObjects,
     });
 
     this.internalStart = {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
-type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'queries'> & {
+type StreamPutItem = Streams.WiredStream.UpsertRequest & {
   name: string;
 };
 
@@ -88,6 +88,7 @@ const streams: StreamPutItem[] = [
                   },
                 ],
               },
+              status: 'enabled',
             },
             {
               destination: 'logs.test2',
@@ -99,11 +100,13 @@ const streams: StreamPutItem[] = [
                   },
                 ],
               },
+              status: 'enabled',
             },
           ],
         },
       },
     },
+    ...emptyAssets,
   },
   {
     name: 'logs.test',
@@ -124,6 +127,7 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
   {
     name: 'logs.test2',
@@ -151,6 +155,7 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
   {
     name: 'logs.deeply.nested.streamname',
@@ -171,6 +176,7 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
 ];
 
@@ -179,11 +185,7 @@ export async function createStreams(apiClient: StreamsSupertestRepositoryClient)
     await apiClient
       .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
-          body: {
-            ...stream,
-            dashboards: [],
-            queries: [],
-          },
+          body: stream,
           path: { name },
         },
       })

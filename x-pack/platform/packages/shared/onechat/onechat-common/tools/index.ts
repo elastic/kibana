@@ -6,8 +6,13 @@
  */
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
-export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
-export { builtinToolIds, builtinTags, builtInToolIdPrefix, defaultAgentToolIds } from './constants';
+export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
+export {
+  platformCoreTools,
+  activeToolsCountWarningThreshold,
+  defaultAgentToolIds,
+  editableToolTypes,
+} from './constants';
 export {
   type ByIdsToolSelection,
   type ToolSelection,
@@ -28,6 +33,12 @@ export {
   isEsqlTool,
 } from './esql';
 export {
+  isIndexSearchTool,
+  type IndexSearchToolDefinition,
+  type IndexSearchToolDefinitionWithSchema,
+  type IndexSearchToolConfig,
+} from './index_search';
+export {
   ToolResultType,
   type ToolResult,
   type ErrorResult,
@@ -36,3 +47,9 @@ export {
   type TabularDataResult,
   type OtherResult,
 } from './tool_result';
+export {
+  internalNamespaces,
+  protectedNamespaces,
+  isInProtectedNamespace,
+  hasProtectedNamespaceName,
+} from './namespaces';

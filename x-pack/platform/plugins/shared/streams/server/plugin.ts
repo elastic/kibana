@@ -42,6 +42,7 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -202,7 +203,13 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
-    registerFeatureFlags(core, plugins, this.logger);
+    registerFeatureFlags(core, this.logger);
+
+    if (plugins.globalSearch) {
+      plugins.globalSearch.registerResultProvider(
+        createStreamsGlobalSearchResultProvider(core, this.logger)
+      );
+    }
 
     return {};
   }

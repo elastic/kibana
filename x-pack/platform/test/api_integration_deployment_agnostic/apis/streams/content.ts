@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 import type { ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -34,7 +34,7 @@ const upsertRequest = ({
   routing?: RoutingDefinition[];
   queries?: StreamQuery[];
 }) => ({
-  dashboards: [],
+  ...emptyAssets,
   queries,
   stream: {
     description: 'Test stream',
@@ -79,6 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               destination: 'logs.branch_a.child1.nested',
               where: { field: 'resource.attributes.hello', eq: 'yes' },
+              status: 'enabled',
             },
           ],
         })
@@ -97,10 +98,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               destination: 'logs.branch_a.child1',
               where: { field: 'resource.attributes.foo', eq: 'bar' },
+              status: 'enabled',
             },
             {
               destination: 'logs.branch_a.child2',
               where: { field: 'resource.attributes.bar', eq: 'foo' },
+              status: 'enabled',
             },
           ],
         })
@@ -113,10 +116,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               destination: 'logs.branch_b.child1',
               where: { field: 'resource.attributes.foo', eq: 'bar' },
+              status: 'enabled',
             },
             {
               destination: 'logs.branch_b.child2',
               where: { field: 'resource.attributes.bar', eq: 'foo' },
+              status: 'enabled',
             },
           ],
         })
@@ -225,6 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             destination: 'branch_a',
             where: { never: {} },
+            status: 'disabled',
           },
         ]);
         const leafEntry = contentPack.entries.find(
@@ -291,8 +297,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
             {
@@ -309,8 +314,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
           ]
@@ -368,6 +372,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_c.nested',
+            status: 'enabled',
             where: {
               field: 'resource.attributes.hello',
               eq: 'yes',
@@ -439,6 +444,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             destination: 'logs.branch_d.branch_b',
             where: { never: {} },
+            status: 'disabled',
           },
         ]);
       });
@@ -469,8 +475,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       lifecycle: { inherit: {} },
                     },
                   },
-                  dashboards: [],
-                  queries: [],
+                  ...emptyAssets,
                 },
               },
             ]
@@ -562,14 +567,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         {
                           destination: 'child',
                           where: { never: {} },
+                          status: 'disabled',
                         },
                       ],
                     },
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
             {
@@ -586,8 +591,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
           ]
@@ -634,10 +638,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
+                ...emptyAssets,
                 queries: [
                   { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
                 ],
+                rules: [],
               },
             },
           ]

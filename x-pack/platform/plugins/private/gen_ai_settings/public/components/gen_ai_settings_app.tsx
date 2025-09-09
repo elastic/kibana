@@ -17,19 +17,24 @@ import {
   EuiIcon,
   EuiTitle,
   EuiLink,
-  EuiButton,
   useEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import { isEmpty } from 'lodash';
+import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '../../common/constants';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
 import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
+import { useSettingsContext } from '../contexts/settings_context';
+import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
+import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -37,9 +42,10 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks } = services;
+  const { application, http, docLinks, notifications, featureFlags } = services;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
+  const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
   const hasConnectorsAllPrivilege =
     application.capabilities.actions?.show === true &&
@@ -82,6 +88,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     });
   }, [application, http.basePath, isPermissionsBased]);
 
+  const showDefaultLlmSetting = featureFlags.getBooleanValue(
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+    false
+  );
+
   const connectorDescription = useMemo(() => {
     if (!hasElasticManagedLlm) {
       return (
@@ -90,7 +101,24 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             id="genAiSettings.aiConnectorDescription"
             defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must ${
               hasConnectorsAllPrivilege ? 'set up' : 'have'
-            } a Generative AI connector.`}
+            } a Generative AI connector. {manageConnectors}`}
+            values={{
+              manageConnectors: showDefaultLlmSetting ? (
+                <EuiLink
+                  href={application.getUrlForApp('management', {
+                    path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                  })}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="genAiSettings.manage.connectors"
+                    defaultMessage={
+                      hasConnectorsAllPrivilege ? 'Manage connectors' : 'View connectors'
+                    }
+                  />
+                </EuiLink>
+              ) : null,
+            }}
           />
         </p>
       );
@@ -106,7 +134,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             showSpacesNote
               ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
               : ''
-          }`}
+          } {manageConnectors}`}
           values={{
             link: (
               <EuiLink
@@ -119,6 +147,19 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 />
               </EuiLink>
             ),
+            manageConnectors: showDefaultLlmSetting ? (
+              <EuiLink
+                href={application.getUrlForApp('management', {
+                  path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                })}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="genAiSettings.manage.connectors"
+                  defaultMessage="Manage connectors"
+                />
+              </EuiLink>
+            ) : null,
             elasticManagedLlm: (
               <strong>
                 <FormattedMessage
@@ -147,156 +188,197 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showSpacesIntegration,
     canManageSpaces,
     docLinks,
+    application,
+    showDefaultLlmSetting,
   ]);
 
-  return (
-    <div data-test-subj="genAiSettingsPage">
-      <EuiTitle size="l">
-        <h2 data-test-subj="genAiSettingsTitle">
-          <FormattedMessage id="xpack.genAiSettings.pageTitle" defaultMessage="GenAI Settings" />
-        </h2>
-      </EuiTitle>
+  async function handleSave() {
+    try {
+      await saveAll();
+    } catch (e) {
+      const error = e as Error;
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
+          defaultMessage: 'An error occurred while saving the settings',
+        }),
+        text: error.message,
+      });
+      throw error;
+    }
+  }
 
-      <EuiPageSection
-        paddingSize="none"
-        css={{
-          paddingTop: euiTheme.size.l,
+  const manageConnectorsButton = useMemo(() => {
+    return (
+      <EuiButton
+        iconType="popout"
+        iconSide="right"
+        data-test-subj="manageConnectorsLink"
+        onClick={() => {
+          application.navigateToApp('management', {
+            path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+            openInNewTab: true,
+          });
         }}
       >
-        <EuiPanel hasBorder grow={false}>
-          <EuiDescribedFormGroup
-            data-test-subj="connectorsSection"
-            fullWidth
-            title={
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="sparkles" size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h3 data-test-subj="connectorsTitle">
+        {hasConnectorsAllPrivilege ? (
+          <FormattedMessage
+            id="genAiSettings.goToConnectorsButtonLabel"
+            defaultMessage="Manage connectors"
+          />
+        ) : (
+          <FormattedMessage
+            id="genAiSettings.viewConnectorsButtonLabel"
+            defaultMessage="View connectors"
+          />
+        )}
+      </EuiButton>
+    );
+  }, [application, hasConnectorsAllPrivilege]);
+
+  return (
+    <>
+      <div data-test-subj="genAiSettingsPage">
+        <EuiTitle size="l">
+          <h2 data-test-subj="genAiSettingsTitle">
+            <FormattedMessage id="xpack.genAiSettings.pageTitle" defaultMessage="GenAI Settings" />
+          </h2>
+        </EuiTitle>
+
+        <EuiPageSection
+          paddingSize="none"
+          css={{
+            paddingTop: euiTheme.size.l,
+          }}
+        >
+          <EuiPanel hasBorder grow={false}>
+            <EuiDescribedFormGroup
+              data-test-subj="connectorsSection"
+              fullWidth
+              title={
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="sparkles" size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h3 data-test-subj="connectorsTitle">
+                        <FormattedMessage
+                          id="genAiSettings.aiConnectorLabel"
+                          defaultMessage="Default AI Connector"
+                        />
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              description={connectorDescription}
+            >
+              <EuiFormRow fullWidth>
+                <EuiFlexGroup gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    {showDefaultLlmSetting ? (
+                      <DefaultAIConnector connectors={connectors} />
+                    ) : (
+                      manageConnectorsButton
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+
+            {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+
+            {showSpacesIntegration && canManageSpaces && (
+              <EuiDescribedFormGroup
+                fullWidth
+                data-test-subj="aiFeatureVisibilitySection"
+                title={
+                  <h3 data-test-subj="aiFeatureVisibilityTitle">
+                    <FormattedMessage
+                      id="genAiSettings.aiFeatureVisibilityLabel"
+                      defaultMessage="AI feature visibility"
+                    />
+                  </h3>
+                }
+                description={
+                  <p>
+                    {isPermissionsBased ? (
                       <FormattedMessage
-                        id="genAiSettings.aiConnectorLabel"
-                        defaultMessage="AI Connector"
-                      />
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            description={connectorDescription}
-          >
-            <EuiFormRow fullWidth>
-              <EuiFlexGroup gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="popout"
-                    iconSide="right"
-                    data-test-subj="manageConnectorsLink"
-                    onClick={() => {
-                      application.navigateToApp('management', {
-                        path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
-                        openInNewTab: true,
-                      });
-                    }}
-                  >
-                    {hasConnectorsAllPrivilege ? (
-                      <FormattedMessage
-                        id="genAiSettings.goToConnectorsButtonLabel"
-                        defaultMessage="Manage connectors"
+                        id="genAiSettings.solutionViewDescriptionLabel"
+                        defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
+                        values={{
+                          permissionsTab: (
+                            <strong>
+                              <FormattedMessage
+                                id="genAiSettings.permissionsTab"
+                                defaultMessage="Permissions tab"
+                              />
+                            </strong>
+                          ),
+                          spaces: (
+                            <strong>
+                              <FormattedMessage
+                                id="genAiSettings.spacesLabel"
+                                defaultMessage="Spaces"
+                              />
+                            </strong>
+                          ),
+                          rolesLink: (
+                            <EuiLink
+                              href={application.getUrlForApp('management', {
+                                path: '/security/roles',
+                              })}
+                            >
+                              <FormattedMessage
+                                id="genAiSettings.rolesLink"
+                                defaultMessage="Stack Management > Roles"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
                       />
                     ) : (
                       <FormattedMessage
-                        id="genAiSettings.viewConnectorsButtonLabel"
-                        defaultMessage="View connectors"
+                        id="genAiSettings.showAIAssistantDescriptionLabel"
+                        defaultMessage="Enable or disable AI-powered features in {space} settings."
+                        values={{
+                          space: (
+                            <strong>
+                              <FormattedMessage
+                                id="genAiSettings.spacesLabel"
+                                defaultMessage="Space"
+                              />
+                            </strong>
+                          ),
+                        }}
                       />
                     )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-
-          {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
-
-          {showSpacesIntegration && canManageSpaces && (
-            <EuiDescribedFormGroup
-              fullWidth
-              data-test-subj="aiFeatureVisibilitySection"
-              title={
-                <h3 data-test-subj="aiFeatureVisibilityTitle">
-                  <FormattedMessage
-                    id="genAiSettings.aiFeatureVisibilityLabel"
-                    defaultMessage="AI feature visibility"
+                  </p>
+                }
+              >
+                <EuiFormRow fullWidth>
+                  <GoToSpacesButton
+                    onNavigateToSpaces={handleNavigateToSpaces}
+                    navigateToPermissions={isPermissionsBased}
                   />
-                </h3>
-              }
-              description={
-                <p>
-                  {isPermissionsBased ? (
-                    <FormattedMessage
-                      id="genAiSettings.solutionViewDescriptionLabel"
-                      defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
-                      values={{
-                        permissionsTab: (
-                          <strong>
-                            <FormattedMessage
-                              id="genAiSettings.permissionsTab"
-                              defaultMessage="Permissions tab"
-                            />
-                          </strong>
-                        ),
-                        spaces: (
-                          <strong>
-                            <FormattedMessage
-                              id="genAiSettings.spacesLabel"
-                              defaultMessage="Spaces"
-                            />
-                          </strong>
-                        ),
-                        rolesLink: (
-                          <EuiLink
-                            href={application.getUrlForApp('management', {
-                              path: '/security/roles',
-                            })}
-                          >
-                            <FormattedMessage
-                              id="genAiSettings.rolesLink"
-                              defaultMessage="Stack Management > Roles"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="genAiSettings.showAIAssistantDescriptionLabel"
-                      defaultMessage="Enable or disable AI-powered features in {space} settings."
-                      values={{
-                        space: (
-                          <strong>
-                            <FormattedMessage
-                              id="genAiSettings.spacesLabel"
-                              defaultMessage="Space"
-                            />
-                          </strong>
-                        ),
-                      }}
-                    />
-                  )}
-                </p>
-              }
-            >
-              <EuiFormRow fullWidth>
-                <GoToSpacesButton
-                  onNavigateToSpaces={handleNavigateToSpaces}
-                  navigateToPermissions={isPermissionsBased}
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-          )}
-        </EuiPanel>
-      </EuiPageSection>
-    </div>
+                </EuiFormRow>
+              </EuiDescribedFormGroup>
+            )}
+          </EuiPanel>
+        </EuiPageSection>
+      </div>
+      {!isEmpty(unsavedChanges) && (
+        <BottomBarActions
+          isLoading={isSaving}
+          onDiscardChanges={cleanUnsavedChanges}
+          onSave={handleSave}
+          saveLabel={i18n.translate('xpack.gen_ai_settings.settings.saveButton', {
+            defaultMessage: 'Save changes',
+          })}
+          unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="genAiSettingsSaveBar"
+        />
+      )}
+    </>
   );
 };

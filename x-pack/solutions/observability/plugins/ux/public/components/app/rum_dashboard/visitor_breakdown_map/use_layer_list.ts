@@ -12,6 +12,7 @@ import type {
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
+  LAYER_STYLE_TYPE,
 } from '@kbn/maps-plugin/common';
 import {
   AGG_TYPE,
@@ -100,7 +101,7 @@ export function useLayerList() {
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
-      type: 'VECTOR',
+      type: 'VECTOR' as LAYER_STYLE_TYPE.VECTOR,
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
         fillColor: {
@@ -170,7 +171,6 @@ export function useLayerList() {
     } as EMSFileSourceDescriptor,
     style: getLayerStyle(TRANSACTION_DURATION_COUNTRY),
     id: 'e8d1d974-eed8-462f-be2c-f0004b7619b2',
-    label: null,
     minZoom: 0,
     maxZoom: 24,
     alpha: 0.75,
@@ -194,7 +194,6 @@ export function useLayerList() {
     } as EMSFileSourceDescriptor,
     style: getLayerStyle(TRANSACTION_DURATION_REGION),
     id: '0e936d41-8765-41c9-97f0-05e166391366',
-    label: null,
     minZoom: 3,
     maxZoom: 24,
     alpha: 0.75,

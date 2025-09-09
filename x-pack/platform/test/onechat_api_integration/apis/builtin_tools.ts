@@ -6,21 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import { builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const searchTool = platformCoreTools.search;
 
-  // Failing: See https://github.com/elastic/kibana/issues/232991
-  describe.skip('Builtin Tools API', () => {
-    describe('DELETE /api/chat/tools/.nl_search', () => {
+  describe('Builtin Tools API', () => {
+    describe(`DELETE /api/chat/tools/{toolName}`, () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
-        for (const toolId of Object.values(builtinToolIds) as string[]) {
-          if (toolId === '.researcher_agent') {
-            continue;
-          }
+        for (const toolId of Object.values(platformCoreTools) as string[]) {
           const response = await supertest
             .delete(`/api/chat/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')
@@ -33,21 +31,24 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when builtin tools API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.delete('/api/chat/tools/.nl_search').set('kbn-xsrf', 'kibana').expect(404);
+        await supertest
+          .delete(`/api/chat/tools/${searchTool}`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });
 
-    describe('PUT /api/chat/tools/.nl_search', () => {
+    describe(`PUT /api/chat/tools/${searchTool}`, () => {
       it('should return 400 when attempting to update a builtin system tool', async () => {
         await supertest
-          .put('/api/chat/tools/.nl_search')
+          .put(`/api/chat/tools/${searchTool}`)
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated description' })
           .expect(400);
@@ -57,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('POST /api/chat/tools', () => {
       it('should return 400 when attempting to create a tool under an existing builtin tool ID', async () => {
         const toolData = {
-          id: '.nl_search',
+          id: searchTool,
           type: 'esql',
           description: 'Attempting to create tool with builtin ID',
           configuration: {
@@ -73,14 +74,16 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.contain('Tool id .nl_search is reserved');
+        expect(response.body.message).to.contain(
+          `Invalid tool id: "${searchTool}": Tool id is using a protected namespaces`
+        );
       });
     });
 
     describe('POST /api/chat/tools/_execute', () => {
       it('should execute a builtin tool successfully', async () => {
         const executeRequest = {
-          tool_id: '.list_indices',
+          tool_id: platformCoreTools.listIndices,
           tool_params: {},
         };
 
@@ -95,11 +98,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when tools API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         const executeRequest = {
-          tool_id: '.nl_search',
+          tool_id: searchTool,
           tool_params: {
             query: 'test query',
           },
@@ -112,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });
