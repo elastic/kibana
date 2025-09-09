@@ -47,6 +47,7 @@ export interface CloudConfigType {
     project_type?: KibanaSolution;
     product_tier?: KibanaProductTier;
     orchestrator_target?: string;
+    in_trial?: boolean;
   };
 }
 
@@ -124,6 +125,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier: this.config.serverless?.product_tier,
+        organizationInTrial: this.config.serverless?.in_trial,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -182,6 +184,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        organizationInTrial: this.config.serverless?.in_trial,
       },
       performanceUrl,
       usersAndRolesUrl,
