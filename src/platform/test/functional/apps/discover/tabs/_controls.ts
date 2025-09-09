@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Make a change in the controls
       const controlId = (await dashboardControls.getAllControlIds())[0];
-      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListOpenPopover(controlId, true);
       await dashboardControls.optionsListPopoverSelectOption('CN');
 
       await header.waitUntilLoadingHasFinished();
