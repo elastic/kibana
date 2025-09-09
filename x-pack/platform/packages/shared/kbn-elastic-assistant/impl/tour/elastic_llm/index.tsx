@@ -67,7 +67,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   const { data: aiConnectors } = useLoadConnectors({
     http,
     inferenceEnabled,
-    settings
+    settings,
   });
   const isElasticLLMConnectorSelected = useMemo(
     () =>

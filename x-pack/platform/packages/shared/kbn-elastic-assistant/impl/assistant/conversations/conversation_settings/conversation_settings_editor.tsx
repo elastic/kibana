@@ -57,10 +57,10 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     selectedConversation,
     setConversationsSettingsBulkActions,
   }) => {
-    const {settings} = useAssistantContext();
+    const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
-      settings
+      settings,
     });
     const [conversationUpdates, setConversationUpdates] =
       useState<Conversation>(selectedConversation);

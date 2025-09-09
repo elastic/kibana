@@ -56,7 +56,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
       navigateToApp,
       assistantAvailability: { isAssistantManagementEnabled, hasConnectorsAllPrivilege },
-      settings
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -68,7 +68,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
-      settings
+      settings,
     });
     const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
 

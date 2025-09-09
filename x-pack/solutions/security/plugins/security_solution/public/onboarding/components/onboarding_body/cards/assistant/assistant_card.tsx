@@ -49,7 +49,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    settings
+    settings,
   } = useAssistantContext();
 
   const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);

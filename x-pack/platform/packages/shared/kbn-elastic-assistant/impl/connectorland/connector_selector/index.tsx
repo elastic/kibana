@@ -21,6 +21,7 @@ import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugi
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
@@ -28,7 +29,6 @@ import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 import { AddConnectorModal } from '../add_connector_modal';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -71,7 +71,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({
       http,
       inferenceEnabled,
-      settings
+      settings,
     });
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
@@ -189,9 +189,12 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
     );
 
-    const defaultLlm = settings.client.get<string | undefined>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, undefined);
+    const defaultLlm = settings.client.get<string | undefined>(
+      GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+      undefined
+    );
 
-    console.log(selectedConnectorId, defaultLlm)
+    console.log(selectedConnectorId, defaultLlm);
     return (
       <>
         {!connectorExists && !connectorOptions.length ? (

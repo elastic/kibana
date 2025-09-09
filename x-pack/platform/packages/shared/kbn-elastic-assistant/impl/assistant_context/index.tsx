@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -49,7 +50,6 @@ import {
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import type { ModalSettingsTabs } from '../assistant/settings/types';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 export type SelectedConversation = { id: string } | { title: string };
 
@@ -89,7 +89,7 @@ export interface AssistantProviderProps {
   nameSpace?: string;
   navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
-  settings: SettingsStart
+  settings: SettingsStart;
   toasts?: IToasts;
   currentAppId: string;
   productDocBase: ProductDocBasePluginStart;
@@ -131,7 +131,7 @@ export interface UseAssistantContext {
   selectedSettingsTab: ModalSettingsTabs | null;
   contentReferencesVisible: boolean;
   showAnonymizedValues: boolean;
-  settings: SettingsStart
+  settings: SettingsStart;
   setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
   setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
@@ -336,7 +336,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
       assistantStreamingEnabled: localStorageStreaming ?? true,
-      
+
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       contentReferencesVisible: contentReferencesVisible ?? true,

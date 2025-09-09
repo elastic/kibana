@@ -76,7 +76,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
-    settings
+    settings,
   });
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =
     useGetAttackDiscoverySchedule({

@@ -12,10 +12,13 @@ import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugi
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
 
 /**
  * Cache expiration in ms -- 1 minute, useful if connector is deleted/access removed
@@ -27,7 +30,7 @@ export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
   inferenceEnabled?: boolean;
-  settings: SettingsStart
+  settings: SettingsStart;
 }
 
 const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
@@ -36,7 +39,7 @@ export const useLoadConnectors = ({
   http,
   toasts,
   inferenceEnabled = false,
-  settings
+  settings,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
   useEffect(() => {
     if (inferenceEnabled && !actionTypes.includes('.inference')) {
@@ -44,15 +47,18 @@ export const useLoadConnectors = ({
     }
   }, [inferenceEnabled]);
 
-  const defaultAiConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR)
-  const defaultAiConnectorOnly = settings.client.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY, false)
+  const defaultAiConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultAiConnectorOnly = settings.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
 
   return useQuery(
     QUERY_KEY,
     async () => {
       const connectors = await loadConnectors({ http });
 
-      const allAiConnectors =  connectors.flatMap(connector => {
+      const allAiConnectors = connectors.flatMap((connector) => {
         if (!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)) {
           const aiConnector: AIConnector = {
             ...connector,
@@ -62,23 +68,23 @@ export const useLoadConnectors = ({
               connector?.config?.apiProvider
                 ? (connector?.config?.apiProvider as OpenAiProviderType)
                 : undefined,
-          }
+          };
           return [aiConnector];
         }
         return [];
       });
 
-      const availableConnectors = allAiConnectors.filter(connector => {
-        if(defaultAiConnectorOnly){
+      const availableConnectors = allAiConnectors.filter((connector) => {
+        if (defaultAiConnectorOnly) {
           return connector.id === defaultAiConnectorId;
         }
         return true;
-      })
+      });
 
       if (availableConnectors.length === 0) {
-        return allAiConnectors
+        return allAiConnectors;
       }
-      return availableConnectors
+      return availableConnectors;
     },
     {
       retry: false,

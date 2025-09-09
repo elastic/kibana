@@ -47,7 +47,7 @@ export const WorkflowInsightsScanSection = ({
   const { http, settings } = useKibana().services;
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    settings
+    settings,
   });
   const { canWriteWorkflowInsights } = useUserPrivileges().endpointPrivileges;
   const { inferenceEnabled } = useAssistantContext();

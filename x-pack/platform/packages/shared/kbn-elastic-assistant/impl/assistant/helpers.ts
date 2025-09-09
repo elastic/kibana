@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
@@ -45,13 +45,18 @@ export const getDefaultConnector = (
   connectors: AIConnector[] | undefined,
   settings: SettingsStart
 ): AIConnector | undefined => {
-  const defaultAiConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, undefined);
+  const defaultAiConnectorId = settings.client.get<string>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    undefined
+  );
 
   const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
-  const defaultConnector = validConnectors?.find(connector => connector.id === defaultAiConnectorId)
+  const defaultConnector = validConnectors?.find(
+    (connector) => connector.id === defaultAiConnectorId
+  );
 
   if (defaultConnector) {
-    return defaultConnector
+    return defaultConnector;
   }
 
   if (validConnectors?.length) {

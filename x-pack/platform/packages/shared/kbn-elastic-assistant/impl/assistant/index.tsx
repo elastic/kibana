@@ -91,7 +91,7 @@ const AssistantComponent: React.FC<Props> = ({
     showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
-    settings
+    settings,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -124,7 +124,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
     http,
-    settings
+    settings,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
   const spaceId = useAssistantSpaceId();

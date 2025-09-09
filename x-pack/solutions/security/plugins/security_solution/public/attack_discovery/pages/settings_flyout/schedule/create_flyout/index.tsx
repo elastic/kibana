@@ -61,7 +61,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
-    settings
+    settings,
   });
 
   const { sourcererDataView } = useSourcererDataView();
