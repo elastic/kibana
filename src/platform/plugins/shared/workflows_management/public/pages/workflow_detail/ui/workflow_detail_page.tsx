@@ -20,13 +20,13 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 
 const WorkflowYAMLEditor = React.lazy(() =>
@@ -99,6 +99,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       },
       {
         onError: (err: unknown) => {
+          // Extract message from HTTP error body and update the error message
+          if (
+            err &&
+            typeof err === 'object' &&
+            'body' in err &&
+            err.body &&
+            typeof err.body === 'object' &&
+            'message' in err.body &&
+            typeof err.body.message === 'string'
+          ) {
+            (err as any).message = err.body.message;
+          }
           notifications?.toasts.addError(err as Error, {
             toastLifeTimeMs: 3000,
             title: 'Failed to save workflow',
