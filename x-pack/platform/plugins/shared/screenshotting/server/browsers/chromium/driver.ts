@@ -30,6 +30,8 @@ declare module 'puppeteer' {
   }
 }
 
+const allowedProtocols = new Set(['data:', 'http:', 'https:']);
+
 export type Context = Record<string, unknown>;
 
 export interface ElementPosition {
@@ -373,7 +375,8 @@ export class HeadlessChromiumDriver {
         request: { url: interceptedUrl },
       } = interceptedRequest;
 
-      const allowed = !interceptedUrl.startsWith('file://');
+      const interceptedUrlParsed = new URL(interceptedUrl);
+      const allowed = allowedProtocols.has(interceptedUrlParsed.protocol);
       const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
@@ -423,7 +426,8 @@ export class HeadlessChromiumDriver {
 
     this.page.on('response', (interceptedResponse: HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
-      const allowed = !interceptedUrl.startsWith('file://');
+      const interceptedUrlParsed = new URL(interceptedUrl);
+      const allowed = allowedProtocols.has(interceptedUrlParsed.protocol);
       const status = interceptedResponse.status();
 
       if (status >= 400 && !interceptedResponse.ok()) {
