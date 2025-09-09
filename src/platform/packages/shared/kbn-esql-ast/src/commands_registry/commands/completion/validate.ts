@@ -39,17 +39,6 @@ export const validate = (
     messages.push(errors.byId('inferenceIdRequired', command.location, { command: 'COMPLETION' }));
   }
 
-  const targetName = targetField?.name || 'completion';
-
-  // Sets the target field so the column is recognized after the command is applied
-  // @TODO can we remove now?
-  context?.columns.set(targetName, {
-    name: targetName,
-    location: targetField?.location || command.location,
-    type: 'keyword',
-    userDefined: true,
-  });
-
   messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
