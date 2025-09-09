@@ -7,21 +7,32 @@
 
 import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import moment, { type Moment } from 'moment';
 import {
   syntheticsMonitorStatusAlertParamsToKqlQuery,
   syntheticsTlsAlertParamsToKqlQuery,
 } from './synthetics_alert_params_to_kql';
 
 describe('synthetics_alert_params_to_kql', () => {
-  const FIXED_DATE = new Date('2025-09-04T20:52:38.662Z').getTime();
-  let dateNowSpy: jest.SpyInstance<number, []>;
+  const FIXED_DATE_ISO = '2025-09-04T20:52:38.662Z';
+  const DAYS_TO_MS = 1000 * 60 * 60 * 24;
 
   beforeAll(() => {
-    dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(FIXED_DATE);
+    jest
+      .spyOn(moment.prototype, 'subtract')
+      .mockImplementation(function (this: Moment, ...args: unknown[]) {
+        return new Date(new Date(FIXED_DATE_ISO).valueOf() - (args[0] as number) * DAYS_TO_MS);
+      });
+    jest
+      .spyOn(moment.prototype, 'add')
+      .mockImplementation(function (this: Moment, ...args: unknown[]) {
+        return new Date(new Date(FIXED_DATE_ISO).valueOf() + (args[0] as number) * DAYS_TO_MS);
+      });
   });
 
   afterAll(() => {
-    dateNowSpy.mockRestore();
+    // dateNowSpy.mockRestore();
+    jest.restoreAllMocks();
   });
   describe('syntheticsMonitorStatusAlertParamsToKqlQuery', () => {
     it('should return a valid KQL query string for given params', () => {
@@ -118,7 +129,8 @@ describe('synthetics_alert_params_to_kql', () => {
     });
 
     it('returns empty object for empty params', () => {
-      expect(syntheticsTlsAlertParamsToKqlQuery({})).toBe({});
+      const result = syntheticsTlsAlertParamsToKqlQuery({});
+      expect(result).toBe('');
     });
   });
 });

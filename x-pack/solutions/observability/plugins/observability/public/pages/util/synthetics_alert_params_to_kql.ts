@@ -8,8 +8,7 @@
 import { fromKueryExpression, type KueryNode, nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-
-const MS_TO_DAYS = 1000 * 60 * 60 * 24;
+import moment from 'moment';
 
 const supportedAlertParams = [
   'tags',
@@ -92,7 +91,7 @@ export function syntheticsTlsAlertParamsToKqlQuery(params: TLSRuleParams): strin
       nodeBuilder.range(
         'tls.server.x509.not_after',
         'lt',
-        new Date(Date.now() + certExpirationThreshold * MS_TO_DAYS).toISOString()
+        moment().add(certExpirationThreshold, 'days').toISOString()
       )
     );
   }
@@ -102,7 +101,7 @@ export function syntheticsTlsAlertParamsToKqlQuery(params: TLSRuleParams): strin
       nodeBuilder.range(
         'tls.server.x509.not_before',
         'lt',
-        new Date(Date.now() - certAgeThreshold * MS_TO_DAYS).toISOString()
+        moment().subtract(certAgeThreshold, 'days').toISOString()
       )
     );
   }
@@ -112,6 +111,8 @@ export function syntheticsTlsAlertParamsToKqlQuery(params: TLSRuleParams): strin
   }
 
   filters.push(...mapExtraSyntheticsFilters(rest, kqlQuery));
+
+  if (filters.length === 0) return '';
 
   return toKqlExpression(nodeBuilder.and(filters));
 }
