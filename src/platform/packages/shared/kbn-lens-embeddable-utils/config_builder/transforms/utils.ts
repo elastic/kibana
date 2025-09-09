@@ -250,9 +250,6 @@ export const buildDatasourceStates = async (
     const layerId = `layer_${i}`;
     const dataset = layer.dataset || mainDataset;
 
-    // if (!dataset && 'type' in layer && layer.type !== 'annotation') {
-    //   throw Error('dataset must be defined');
-    // }
     if (!dataset) {
       throw Error('dataset must be defined');
     }
