@@ -13,7 +13,13 @@ import getosAsync from 'getos';
 import { promisify } from 'util';
 import type { Logger } from '@kbn/logging';
 import type { MetricsCollector, OpsOsMetrics } from '@kbn/core-metrics-server';
-import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
+import {
+  type Attributes,
+  type BatchObservableResult,
+  type Observable,
+  metrics,
+  ValueType,
+} from '@opentelemetry/api';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 const getos = promisify(getosAsync);
@@ -146,7 +152,7 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
       const used = limit - free;
       result.observe(memoryMetrics.limit, limit, attributes);
       result.observe(memoryMetrics.usage, used, { ...attributes, 'system.memory.state': 'used' });
-      result.observe(memoryMetrics.usage, used, { ...attributes, 'system.memory.state': 'free' });
+      result.observe(memoryMetrics.usage, free, { ...attributes, 'system.memory.state': 'free' });
     }, Object.values(memoryMetrics));
 
     const cgroupMetrics = {
@@ -176,13 +182,36 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
         unit: '1',
         valueType: ValueType.INT,
       }),
-      cgroupThrottled: meter.createObservableGauge('system.cgroup.throttled', {
-        description: 'OS CPU cgroup: number of times the cgroup has been throttled',
-        unit: '1',
+      cgroupThrottled: meter.createObservableGauge('system.cgroup.throttled.time', {
+        description:
+          'OS CPU cgroup: total amount of time the cgroup has been throttled for in nanoseconds',
+        unit: 'ns',
         valueType: ValueType.INT,
       }),
-      // TODO: Continue here
+      cgroupMemory: meter.createObservableGauge('system.cgroup.memory.usage', {
+        description:
+          'OS CPU cgroup: total amount of memory currently being used by the cgroup and its descendants',
+        unit: 'By',
+        valueType: ValueType.INT,
+      }),
+      cgroupSwap: meter.createObservableGauge('system.cgroup.swap.usage', {
+        description:
+          'OS CPU cgroup: total amount of swap currently being used by the cgroup and its descendants',
+        unit: 'By',
+        valueType: ValueType.INT,
+      }),
     };
+
+    function observeMetricIfSet(
+      result: BatchObservableResult,
+      metric: Observable,
+      value: number | undefined,
+      attrs: Attributes
+    ) {
+      if (value !== undefined) {
+        result.observe(metric, value, attrs);
+      }
+    }
 
     meter.addBatchObservableCallback(async (result) => {
       const collectedMetrics = await this.cgroupCollector.collect();
@@ -190,29 +219,52 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
         ...attributes,
         'system.cgroup.name': collectedMetrics.cpuacct?.control_group,
       };
-      result.observe(
+      observeMetricIfSet(
+        result,
         cgroupMetrics.accountingUsage,
-        collectedMetrics.cpuacct?.usage_nanos ?? 0,
+        collectedMetrics.cpuacct?.usage_nanos,
         cgroupAttributes
       );
-      result.observe(
+      observeMetricIfSet(
+        result,
         cgroupMetrics.cfsPeriod,
-        collectedMetrics.cpu?.cfs_period_micros ?? 0,
+        collectedMetrics.cpu?.cfs_period_micros,
         cgroupAttributes
       );
-      result.observe(
+      observeMetricIfSet(
+        result,
         cgroupMetrics.cfsQuota,
-        collectedMetrics.cpu?.cfs_quota_micros ?? 0,
+        collectedMetrics.cpu?.cfs_quota_micros,
         cgroupAttributes
       );
-      result.observe(
+      observeMetricIfSet(
+        result,
         cgroupMetrics.cfsElapsed,
-        collectedMetrics.cpu?.cfs_quota_micros ?? 0,
+        collectedMetrics.cpu?.stat.number_of_elapsed_periods,
         cgroupAttributes
       );
-      result.observe(
+      observeMetricIfSet(
+        result,
         cgroupMetrics.cfsThrottled,
-        collectedMetrics.cpu?.cfs_quota_micros ?? 0,
+        collectedMetrics.cpu?.stat.number_of_times_throttled,
+        cgroupAttributes
+      );
+      observeMetricIfSet(
+        result,
+        cgroupMetrics.cgroupThrottled,
+        collectedMetrics.cpu?.stat.time_throttled_nanos,
+        cgroupAttributes
+      );
+      observeMetricIfSet(
+        result,
+        cgroupMetrics.cgroupMemory,
+        collectedMetrics.cgroup_memory?.current_in_bytes,
+        cgroupAttributes
+      );
+      observeMetricIfSet(
+        result,
+        cgroupMetrics.cgroupSwap,
+        collectedMetrics.cgroup_memory?.swap_current_in_bytes,
         cgroupAttributes
       );
     }, Object.values(cgroupMetrics));
