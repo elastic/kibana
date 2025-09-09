@@ -322,7 +322,7 @@ class OverridesUI extends Component {
     );
 
     return (
-      <EuiForm>
+      <EuiForm fullWidth>
         <SectionTitle>
           <FormattedMessage
             id="xpack.dataVisualizer.file.editFlyout.overrides.generalSettingsTitle"
@@ -331,6 +331,7 @@ class OverridesUI extends Component {
         </SectionTitle>
 
         <EuiFormRow
+          display="columnCompressed"
           error={this.linesToSampleErrors}
           isInvalid={linesToSampleValid === false}
           label={
@@ -344,10 +345,12 @@ class OverridesUI extends Component {
             value={linesToSample}
             onChange={this.onLinesToSampleChange}
             isInvalid={linesToSampleValid === false}
+            compressed
           />
         </EuiFormRow>
 
         <EuiFormRow
+          display="columnCompressed"
           label={
             <FormattedMessage
               id="xpack.dataVisualizer.file.editFlyout.overrides.dataFormatFormRowLabel"
@@ -361,11 +364,13 @@ class OverridesUI extends Component {
             onChange={this.onFormatChange}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
+            compressed
           />
         </EuiFormRow>
         {format === FILE_FORMATS.DELIMITED && (
           <>
             <EuiFormRow
+              display="columnCompressed"
               label={
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.editFlyout.overrides.delimiterFormRowLabel"
@@ -379,10 +384,12 @@ class OverridesUI extends Component {
                 onChange={this.onDelimiterChange}
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
+                compressed
               />
             </EuiFormRow>
             {delimiter === CUSTOM_DROPDOWN_OPTION && (
               <EuiFormRow
+                display="columnCompressed"
                 label={
                   <FormattedMessage
                     id="xpack.dataVisualizer.file.editFlyout.overrides.customDelimiterFormRowLabel"
@@ -390,11 +397,16 @@ class OverridesUI extends Component {
                   />
                 }
               >
-                <EuiFieldText value={customDelimiter} onChange={this.onCustomDelimiterChange} />
+                <EuiFieldText
+                  value={customDelimiter}
+                  onChange={this.onCustomDelimiterChange}
+                  compressed
+                />
               </EuiFormRow>
             )}
 
             <EuiFormRow
+              display="columnCompressed"
               label={
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.editFlyout.overrides.quoteCharacterFormRowLabel"
@@ -408,10 +420,11 @@ class OverridesUI extends Component {
                 onChange={this.onQuoteChange}
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
+                compressed
               />
             </EuiFormRow>
 
-            <EuiFormRow>
+            <EuiFormRow display="columnCompressed">
               <EuiSwitch
                 id={'hasHeaderRow'}
                 label={
@@ -422,10 +435,11 @@ class OverridesUI extends Component {
                 }
                 checked={hasHeaderRow}
                 onChange={this.onHasHeaderRowChange}
+                compressed
               />
             </EuiFormRow>
 
-            <EuiFormRow>
+            <EuiFormRow display="columnCompressed">
               <EuiSwitch
                 id={'shouldTrimFields'}
                 label={
@@ -436,6 +450,7 @@ class OverridesUI extends Component {
                 }
                 checked={shouldTrimFields}
                 onChange={this.onShouldTrimFieldsChange}
+                compressed
               />
             </EuiFormRow>
           </>
@@ -443,6 +458,7 @@ class OverridesUI extends Component {
         {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && (
           <>
             <EuiFormRow
+              display="columnCompressed"
               label={
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.editFlyout.overrides.grokPatternFormRowLabel"
@@ -454,6 +470,7 @@ class OverridesUI extends Component {
                 placeholder={grokPattern}
                 value={grokPattern}
                 onChange={this.grokPatternChange}
+                compressed
               />
             </EuiFormRow>
           </>
@@ -470,7 +487,7 @@ class OverridesUI extends Component {
               />
             </SectionTitle>
 
-            <EuiFormRow>
+            <EuiFormRow display="columnCompressed">
               <EuiSwitch
                 id={'containsTimeField'}
                 label={
@@ -481,12 +498,14 @@ class OverridesUI extends Component {
                 }
                 checked={containsTimeField}
                 onChange={this.onContainsTimeFieldChange}
+                compressed
               />
             </EuiFormRow>
 
             {containsTimeField ? (
               <>
                 <EuiFormRow
+                  display="columnCompressed"
                   helpText={timestampFormatHelp}
                   label={
                     <FormattedMessage
@@ -501,10 +520,12 @@ class OverridesUI extends Component {
                     onChange={this.onTimestampFormatChange}
                     singleSelection={{ asPlainText: true }}
                     isClearable={false}
+                    compressed
                   />
                 </EuiFormRow>
                 {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
                   <EuiFormRow
+                    display="columnCompressed"
                     error={timestampFormatErrorsList}
                     isInvalid={timestampFormatValid === false}
                     label={
@@ -518,10 +539,12 @@ class OverridesUI extends Component {
                       value={customTimestampFormat}
                       onChange={this.onCustomTimestampFormatChange}
                       isInvalid={timestampFormatValid === false}
+                      compressed
                     />
                   </EuiFormRow>
                 )}
                 <EuiFormRow
+                  display="columnCompressed"
                   label={
                     <FormattedMessage
                       id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
@@ -535,6 +558,7 @@ class OverridesUI extends Component {
                     onChange={this.onTimestampFieldChange}
                     singleSelection={{ asPlainText: true }}
                     isClearable={false}
+                    compressed
                   />
                 </EuiFormRow>
               </>
@@ -553,14 +577,39 @@ class OverridesUI extends Component {
               />
             </SectionTitle>
 
-            {originalColumnNames.map((f, i) => (
-              <EuiFormRow label={f} key={f}>
-                <EuiFieldText
-                  value={columnNames[i]}
-                  onChange={(e) => this.onColumnNameChange(e, i)}
-                />
-              </EuiFormRow>
-            ))}
+            {originalColumnNames.map((f, i) => {
+              const fieldName = columnNames[i];
+              const isTimeField = fieldName === timestampField;
+              let value = fieldName;
+              if (isTimeField) {
+                value = i18n.translate(
+                  'xpack.dataVisualizer.file.editFlyout.overrides.timestampFieldInfo',
+                  {
+                    defaultMessage: 'Timestamp field cannot be renamed',
+                  }
+                );
+              } else if (fieldName === f) {
+                value = '';
+              }
+              return (
+                <EuiFormRow key={f} fullWidth>
+                  <EuiFieldText
+                    value={value}
+                    onChange={(e) => this.onColumnNameChange(e, i)}
+                    compressed
+                    disabled={isTimeField}
+                    prepend={f}
+                    placeholder={i18n.translate(
+                      'xpack.dataVisualizer.file.editFlyout.overrides.fieldNamePlaceholder',
+                      {
+                        defaultMessage: 'Change field name',
+                      }
+                    )}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              );
+            })}
           </>
         )}
 
@@ -575,14 +624,26 @@ class OverridesUI extends Component {
               />
             </SectionTitle>
 
-            {originalGrokFieldNames.map((f, i) => (
-              <EuiFormRow label={f} key={f}>
-                <EuiFieldText
-                  value={grokFieldNames[i]}
-                  onChange={(e) => this.onGrokPatternFieldChange(e, i, grokPattern)}
-                />
-              </EuiFormRow>
-            ))}
+            {originalGrokFieldNames.map((f, i) => {
+              const fieldName = grokFieldNames[i];
+              const value = fieldName === f ? '' : fieldName;
+              return (
+                <EuiFormRow key={f}>
+                  <EuiFieldText
+                    value={value}
+                    onChange={(e) => this.onGrokPatternFieldChange(e, i, grokPattern)}
+                    compressed
+                    prepend={f}
+                    placeholder={i18n.translate(
+                      'xpack.dataVisualizer.file.editFlyout.overrides.fieldNamePlaceholder',
+                      {
+                        defaultMessage: 'Change field name',
+                      }
+                    )}
+                  />
+                </EuiFormRow>
+              );
+            })}
           </>
         )}
       </EuiForm>

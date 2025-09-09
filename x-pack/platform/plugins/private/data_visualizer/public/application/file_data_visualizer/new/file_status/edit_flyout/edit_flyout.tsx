@@ -59,7 +59,7 @@ export const EditFlyout: FC<Props> = ({
   }
 
   return (
-    <EuiFlyout onClose={closeEditFlyout} size="m" aria-labelledby={flyoutTitleId}>
+    <EuiFlyout onClose={closeEditFlyout} size="500px" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle id={flyoutTitleId}>
           <h2>

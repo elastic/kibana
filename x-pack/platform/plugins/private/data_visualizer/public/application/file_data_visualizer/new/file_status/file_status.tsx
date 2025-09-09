@@ -114,7 +114,7 @@ export const FileStatus: FC<Props> = ({
           </>
         ) : (
           <>
-            {showResults === false ? (
+            {fileStatus.results === null && fileStatus.analysisError === undefined ? (
               <EuiProgress size="xs" color="primary" position="absolute" />
             ) : null}
 
