@@ -8,13 +8,12 @@
 import { browserFieldsManager } from './security_browser_fields_manager';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
-import { DataViewManagerScopeName } from '../constants';
 
-const createDataView = (fields: Array<Partial<FieldSpec>>, title = 'test-title'): DataView => {
+const createDataView = (fields: Array<Partial<FieldSpec>>, id = 'test-id'): DataView => {
   // DataView expects a spec with a fields object keyed by field name
   const spec: DataViewSpec = {
-    id: 'test-id',
-    title,
+    id,
+    title: 'test-title',
     fields: fields.reduce((acc, f) => {
       if (f.name !== undefined) {
         acc[f.name] = {
@@ -34,6 +33,10 @@ const createDataView = (fields: Array<Partial<FieldSpec>>, title = 'test-title')
 };
 
 describe('browserFieldsManager', () => {
+  beforeEach(() => {
+    browserFieldsManager.clearCache();
+  });
+
   it('returns empty browserFields for empty array', () => {
     const dataView = createDataView([]);
     const result = browserFieldsManager.getBrowserFields(dataView);
@@ -73,111 +76,43 @@ describe('browserFieldsManager', () => {
   });
 
   describe('memoization', () => {
-    it('should not memoize when different fields are provided with the same title', () => {
+    it('should memoize browserFields for the same dataView', () => {
+      const dataView = createDataView([{ name: 'host.name' }]);
+      const result1 = browserFieldsManager.getBrowserFields(dataView);
+      const result2 = browserFieldsManager.getBrowserFields(dataView);
+      expect(result1).toBe(result2);
+    });
+
+    it('should return different cached browserfields for dataViews with different ids', () => {
       const dataView1 = createDataView([{ name: 'host.name' }]);
-      const dataView2 = createDataView([{ name: 'user.name' }]);
+      const dataView2 = createDataView([{ name: 'host.name' }], 'new-id');
       const result1 = browserFieldsManager.getBrowserFields(dataView1);
       const result2 = browserFieldsManager.getBrowserFields(dataView2);
       expect(result1).not.toBe(result2);
-    });
-
-    it('should memoize browserFields for the same dataView title', () => {
-      const dataView = createDataView([{ name: 'host.name' }]);
-      const result1 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      const result2 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      expect(result1).toBe(result2);
-    });
-
-    it('should return the same browserFields for different scopes if the dataView is the same', () => {
-      const dataView = createDataView([{ name: 'host.name' }]);
-      const result1 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      const result2 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.default
-      );
-      expect(result1).toBe(result2);
       expect(result1.browserFields).toEqual(result2.browserFields);
+      expect(result1.browserFields.host).toEqual(result2.browserFields.host);
     });
 
-    it('should return different browserFields for different scopes with different dataViews', () => {
+    it('should remove from the cache correctly', () => {
       const dataView1 = createDataView([{ name: 'host.name' }]);
-      const dataView2 = createDataView([{ name: 'user.name' }], 'other-title');
-      const result1 = browserFieldsManager.getBrowserFields(
-        dataView1,
-        DataViewManagerScopeName.detections
-      );
-      const result2 = browserFieldsManager.getBrowserFields(
-        dataView2,
-        DataViewManagerScopeName.default
-      );
-      expect(result1).not.toBe(result2);
-      expect(result1.browserFields).not.toEqual(result2.browserFields);
-      expect(result1.browserFields.host).toBeDefined();
-      expect(result2.browserFields.user).toBeDefined();
-    });
-
-    it('should clear cache correctly', () => {
-      const dataView = createDataView([{ name: 'host.name' }]);
-      const result1 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      browserFieldsManager.clearCache();
-      const result2 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      expect(result1).not.toBe(result2);
-    });
-
-    it('should return cached value if it still exists in cache for another scope', () => {
-      const dataView = createDataView([{ name: 'host.name' }]);
-      const result1 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      const result2 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.default
-      );
-      browserFieldsManager.removeFromCache(DataViewManagerScopeName.detections);
-      const result3 = browserFieldsManager.getBrowserFields(
-        dataView,
-        DataViewManagerScopeName.detections
-      );
-      expect(result1).toBe(result3);
-      expect(result2).toBe(result3);
+      const dataView2 = createDataView([{ name: 'host.name' }], 'still-cached-id');
+      const result1 = browserFieldsManager.getBrowserFields(dataView1);
+      const result2 = browserFieldsManager.getBrowserFields(dataView2);
+      browserFieldsManager.removeFromCache(dataView1.id);
+      const newResult1 = browserFieldsManager.getBrowserFields(dataView1);
+      const sameResult2 = browserFieldsManager.getBrowserFields(dataView2);
+      expect(result1).not.toBe(newResult1);
+      expect(result2).toBe(sameResult2);
     });
 
     it('should clear the entire cache when clearCache is called', () => {
       const dataView1 = createDataView([{ name: 'host.name' }]);
-      const dataView2 = createDataView([{ name: 'user.name' }], 'other-title');
-      const result1 = browserFieldsManager.getBrowserFields(
-        dataView1,
-        DataViewManagerScopeName.detections
-      );
-      const result2 = browserFieldsManager.getBrowserFields(
-        dataView2,
-        DataViewManagerScopeName.default
-      );
+      const dataView2 = createDataView([{ name: 'user.name' }], 'other-id');
+      const result1 = browserFieldsManager.getBrowserFields(dataView1);
+      const result2 = browserFieldsManager.getBrowserFields(dataView2);
       browserFieldsManager.clearCache();
-      const result3 = browserFieldsManager.getBrowserFields(
-        dataView1,
-        DataViewManagerScopeName.detections
-      );
-      const result4 = browserFieldsManager.getBrowserFields(
-        dataView2,
-        DataViewManagerScopeName.default
-      );
+      const result3 = browserFieldsManager.getBrowserFields(dataView1);
+      const result4 = browserFieldsManager.getBrowserFields(dataView2);
       expect(result1).not.toBe(result3);
       expect(result2).not.toBe(result4);
     });

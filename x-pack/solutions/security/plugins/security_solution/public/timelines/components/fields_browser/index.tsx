@@ -114,7 +114,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             // Fetch the updated list of fields
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
             if (newDataViewPickerEnabled) {
-              browserFieldsManager.removeFromCache(sourcererScope);
+              browserFieldsManager.removeFromCache(selectedDataViewId);
               dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
@@ -159,7 +159,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
       editorActionsRef,
       startTransaction,
       newDataViewPickerEnabled,
-      sourcererScope,
       dataViews,
       indexFieldsSearch,
       upsertColumn,
@@ -177,7 +176,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             startTransaction({ name: FIELD_BROWSER_ACTIONS.FIELD_DELETED });
 
             if (newDataViewPickerEnabled) {
-              browserFieldsManager.removeFromCache(sourcererScope);
+              browserFieldsManager.removeFromCache(selectedDataViewId);
               dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
@@ -194,7 +193,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
       startTransaction,
       newDataViewPickerEnabled,
       removeColumn,
-      sourcererScope,
       dataViews,
       indexFieldsSearch,
     ]
