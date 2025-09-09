@@ -14,7 +14,7 @@ import { extractControlsReferences } from './controls_references';
 import { extractTimeSeriesReferences } from './timeseries_references';
 import type { StoredVis } from '../embeddable/transforms/types';
 
-const DISCOVER_SESSION_REF_NAME = 'discoverSessionRef';
+export const DISCOVER_SESSION_REF_NAME = 'search_0';
 
 export function extractVisReferences(savedVis: SerializedVis) {
   const { searchSource, savedSearchId, ...restOfData } = savedVis.data;

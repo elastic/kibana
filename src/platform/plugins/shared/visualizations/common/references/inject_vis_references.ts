@@ -8,26 +8,36 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { injectReferences as injectSearchSourceReferences } from '@kbn/data-plugin/common';
+import {
+  extractReferences as extractSearchSourceReferences,
+  injectReferences as injectSearchSourceReferences,
+} from '@kbn/data-plugin/common';
 import type { StoredVis } from '../embeddable/transforms/types';
 import { injectControlsReferences } from './controls_references';
 import { injectTimeSeriesReferences } from './timeseries_references';
 import type { SerializedVis } from '../types';
+import { DISCOVER_SESSION_REF_NAME } from './extract_vis_references';
 
 export function injectVisReferences(savedVis: StoredVis, references: Reference[]): SerializedVis {
   const { searchSource, savedSearchRefName, ...restOfData } = savedVis.data;
+
   let injectedSearchSource = searchSource;
   if (searchSource) {
     try {
-      injectedSearchSource = injectSearchSourceReferences(searchSource, references);
+      // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
+      if (searchSource.index && !searchSource.indexRefName) {
+        const extractResults = extractSearchSourceReferences(searchSource);
+        injectedSearchSource = injectSearchSourceReferences(extractResults[0], [
+          ...references,
+          ...extractResults[1],
+        ]);
+      } else {
+        injectedSearchSource = injectSearchSourceReferences(searchSource, references);
+      }
     } catch (e) {
       // Allow missing index pattern error to surface in vis
     }
   }
-
-  const savedSearchRef = savedSearchRefName
-    ? references.find((reference) => reference.name === savedSearchRefName)
-    : undefined;
 
   if (savedVis.params) {
     // side effect mutates savedVis.params
@@ -35,6 +45,10 @@ export function injectVisReferences(savedVis: StoredVis, references: Reference[]
     // side effect mutates savedVis.params
     injectTimeSeriesReferences(savedVis.type, savedVis.params, references);
   }
+
+  const savedSearchRef = references.find(
+    (reference) => reference.name === DISCOVER_SESSION_REF_NAME
+  );
 
   return {
     ...savedVis,

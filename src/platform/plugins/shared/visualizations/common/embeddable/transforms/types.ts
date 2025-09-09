@@ -15,7 +15,7 @@ export type StoredVisualizeByReferenceState = VisualizeEmbeddableBaseState &
   Omit<VisualizeByReferenceState, 'savedObjectId'>;
 
 export type StoredVis = Omit<SerializedVis, 'data'> & {
-  data: Omit<SerializedVisData, 'savedSearchId' | 'searchSource'> & {
+  data: Omit<SerializedVisData, 'searchSource'> & {
     savedSearchRefName?: string;
     searchSource: SerializedSearchSourceFields & { indexRefName?: string };
   };
