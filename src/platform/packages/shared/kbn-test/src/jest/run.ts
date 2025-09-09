@@ -148,7 +148,7 @@ export async function runJest(configName = 'jest.config.js') {
     }
 
     log.verbose(`no config provided, found ${configPath}`);
-    resolvedConfigPath = configPath;
+    process.argv.push('--config', configPath);
 
     if (!testFilesProvided) {
       log.verbose(`no test files provided, setting to current directory`);
