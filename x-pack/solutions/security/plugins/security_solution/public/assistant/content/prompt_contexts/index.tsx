@@ -10,11 +10,13 @@ import * as i18nDataQuality from '@kbn/ecs-data-quality-dashboard';
 import * as i18n from './translations';
 import * as i18nDetections from '../../../detection_engine/common/translations';
 import * as i18nEventDetails from '../../../common/components/event_details/translations';
+import * as i18nEntityDetails from '../../../flyout/entity_details/generic_right/translations';
 
 export const PROMPT_CONTEXT_ALERT_CATEGORY = 'alert';
 export const PROMPT_CONTEXT_EVENT_CATEGORY = 'event';
 export const PROMPT_CONTEXT_DETECTION_RULES_CATEGORY = 'detection-rules';
 export const DATA_QUALITY_DASHBOARD_CATEGORY = 'data-quality-dashboard';
+export const PROMPT_CONTEXT_ENTITY_CATEGORY = 'entity';
 
 /**
  * Global list of PromptContexts intended to be used throughout Security Solution.
@@ -60,5 +62,14 @@ export const getPromptContexts = (
     suggestedUserPrompt: prompts[PROMPT_CONTEXT_DETECTION_RULES_CATEGORY],
     description: i18nDetections.RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
     tooltip: i18nDetections.RULE_MANAGEMENT_CONTEXT_TOOLTIP,
+  },
+  /**
+   * Entity context, made available on the Asset Inventory entity flyout
+   */
+  [PROMPT_CONTEXT_ENTITY_CATEGORY]: {
+    category: PROMPT_CONTEXT_ENTITY_CATEGORY,
+    suggestedUserPrompt: prompts[PROMPT_CONTEXT_ENTITY_CATEGORY],
+    description: i18nEntityDetails.ENTITY_CONTEXT_DESCRIPTION,
+    tooltip: i18nEntityDetails.ENTITY_CONTEXT_TOOLTIP,
   },
 });

@@ -79,8 +79,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   toolsInvoked: {
     AlertCountsTool?: number;
+    AssetInventory?: number;
+    AssetComplianceTool?: number;
+    AssetVulnerabilityTool?: number;
+    AssetSecurityIncidentTool?: number;
     GenerateESQLTool?: number;
     AskAboutESQLTool?: number;
+    GenerateAssetESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
     KnowledgeBaseWriteTool?: number;
     OpenAndAcknowledgedAlertsTool?: number;
@@ -140,6 +145,34 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
             optional: true,
           },
         },
+        AssetInventory: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AssetComplianceTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AssetVulnerabilityTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AssetSecurityIncidentTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
         GenerateESQLTool: {
           type: 'long',
           _meta: {
@@ -148,6 +181,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
           },
         },
         AskAboutESQLTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        GenerateAssetESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',

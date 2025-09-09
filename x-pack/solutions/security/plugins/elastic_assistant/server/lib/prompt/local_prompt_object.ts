@@ -29,6 +29,7 @@ import {
   RULE_ANALYSIS,
   DATA_QUALITY_ANALYSIS,
   ALERT_EVALUATION,
+  ENTITY_ANALYSIS,
   starterPromptTitle1,
   starterPromptDescription1,
   starterPromptIcon1,
@@ -99,6 +100,7 @@ export const promptDictionary = {
   alertEvaluation: `alertEvaluation`,
   dataQualityAnalysis: 'dataQualityAnalysis',
   ruleAnalysis: 'ruleAnalysis',
+  entityAnalysis: 'entityAnalysis',
   // starter prompts
   starterPromptDescription1: 'starterPromptDescription1',
   starterPromptTitle1: 'starterPromptTitle1',
@@ -410,6 +412,13 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
       default: RULE_ANALYSIS,
+    },
+  },
+  {
+    promptId: promptDictionary.entityAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ENTITY_ANALYSIS,
     },
   },
   {
