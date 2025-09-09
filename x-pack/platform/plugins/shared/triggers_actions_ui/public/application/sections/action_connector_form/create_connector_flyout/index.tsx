@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -39,6 +39,7 @@ import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
+import { DeprecatedCallOut } from './deprecated_callout';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -215,6 +216,34 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     };
   }, []);
 
+  const banner = useMemo(() => {
+    const openAiConnector = () => {
+      if (allActionTypes) {
+        setActionType(allActionTypes['.inference']);
+      }
+    };
+
+    const banners = [];
+    if (!actionType && hasActionsUpgradeableByTrial) {
+      banners.push(<UpgradeLicenseCallOut />);
+    }
+
+    if (actionTypeModel?.isDeprecated && actionTypeModel?.actionTypeTitle) {
+      banners.push(
+        banners.length ? <EuiSpacer /> : null,
+        <DeprecatedCallOut name={actionTypeModel?.actionTypeTitle} onClick={openAiConnector} />
+      );
+    }
+
+    return banners;
+  }, [
+    allActionTypes,
+    actionType,
+    actionTypeModel?.isDeprecated,
+    actionTypeModel?.actionTypeTitle,
+    hasActionsUpgradeableByTrial,
+  ]);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -230,9 +259,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
       />
-      <EuiFlyoutBody
-        banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
-      >
+      <EuiFlyoutBody banner={banner}>
         {!hasConnectorTypeSelected && (
           <>
             <CreateConnectorFilter
