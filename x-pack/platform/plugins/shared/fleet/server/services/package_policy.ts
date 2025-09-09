@@ -3554,7 +3554,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 
   if (inputs) {
     for (const input of inputs) {
-      const oldInput = oldPackagePolicy.inputs.find((i) => i.id === input.id);
+      const oldInput = oldPackagePolicy.inputs.find((i) => i.type === input.type);
       if (oldInput) {
         for (const stream of input.streams || []) {
           const oldStream = oldInput.streams.find(
