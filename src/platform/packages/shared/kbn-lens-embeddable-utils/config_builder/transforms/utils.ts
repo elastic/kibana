@@ -306,7 +306,7 @@ export const addLayerColumn = (
   if (first) {
     layer.columnOrder.unshift(name);
     if (referenceColumn) {
-      layer.columnOrder.unshift(`${name}_reference`);
+      layer.columnOrder.unshift(referenceColumnId);
     }
   } else {
     layer.columnOrder.push(name);
