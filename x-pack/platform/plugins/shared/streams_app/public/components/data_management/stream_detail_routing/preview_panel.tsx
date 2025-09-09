@@ -183,7 +183,7 @@ const SamplePreviewPanel = () => {
         <DocumentMatchFilterControls
           initialFilter={samplesSnapshot.context.documentMatchFilter}
           onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
+          matchedDocumentPercentage={Math.ceil(matchedDocumentPercentage)}
           isDisabled={!!documentsError || !condition}
         />
         {content}
