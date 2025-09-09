@@ -18,6 +18,10 @@ import { OnechatPlugin } from './plugin';
 export type { OnechatPluginSetup, OnechatPluginStart };
 export { OnechatServicesContext } from './application/context/onechat_services_context';
 export { OnechatConversationsView } from './application/components/conversations/conversations_view';
+export { ConversationsFlyout } from './application/components/conversations/conversations_flyout';
+export type { ConversationsFlyoutProps } from './application/components/conversations/conversations_flyout';
+export { ConversationsNavLink } from './application/components/conversations/conversations_nav_link';
+export type { ConversationsNavLinkProps } from './application/components/conversations/conversations_nav_link';
 
 export const plugin: PluginInitializer<
   OnechatPluginSetup,

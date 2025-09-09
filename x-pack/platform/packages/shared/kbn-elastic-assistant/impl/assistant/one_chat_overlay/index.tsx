@@ -6,11 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { EuiFlyoutResizable } from '@elastic/eui';
 
-import useEvent from 'react-use/lib/useEvent';
-import { css } from '@emotion/react';
-import { OnechatServicesContext, OnechatConversationsView } from '@kbn/onechat-plugin/public';
+import { ConversationsFlyout, OnechatServicesContext } from '@kbn/onechat-plugin/public';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { createGlobalStyle } from 'styled-components';
@@ -24,13 +21,6 @@ import type { ShowOneChatOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { EMPTY_SCREEN_DESCRIPTION } from '../translations';
 import { useConversationMenuItems } from '../settings/settings_context_menu/use_conversation_menu_items';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-/**
- * Modal container for One Chat conversations, receiving the page contents as context, plus whatever
- * component currently has focus and any specific context it may provide through the SAssInterface.
- */
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
@@ -117,18 +107,6 @@ export const OneChatOverlay = React.memo(() => {
     }
   }, [handleOpenFromUrlState, isModalVisible]);
 
-  // Register keyboard listener to show the modal when cmd + ; is pressed
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === ';' && (isMac ? event.metaKey : event.ctrlKey)) {
-        event.preventDefault();
-        handleShortcutPress();
-      }
-    },
-    [handleShortcutPress]
-  );
-  useEvent('keydown', onKeyDown);
-
   // Modal control functions
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
@@ -138,8 +116,6 @@ export const OneChatOverlay = React.memo(() => {
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();
   }, [cleanupAndCloseModal]);
-
-  const flyoutRef = useRef<HTMLDivElement>();
 
   const {
     data: { prompts: actualPrompts },
@@ -185,7 +161,7 @@ export const OneChatOverlay = React.memo(() => {
 
   // Move setConversationSettings to useEffect to avoid setState during render
   useEffect(() => {
-    if (onechatServices && isModalVisible) {
+    if (onechatServices) {
       onechatServices.conversationSettingsService.setConversationSettings({
         isFlyoutMode: true,
         newConversationSubtitle: EMPTY_SCREEN_DESCRIPTION,
@@ -203,7 +179,6 @@ export const OneChatOverlay = React.memo(() => {
     }
   }, [
     onechatServices,
-    isModalVisible,
     fetchedPromptGroups,
     commentActionsMounter,
     alertsIndexPattern,
@@ -213,32 +188,18 @@ export const OneChatOverlay = React.memo(() => {
     conversationMenuItems,
   ]);
 
-  if (!isModalVisible || !OnechatConversationsView || !onechatServices) return null;
+  if (!onechatServices) return null;
 
   return (
-    <>
-      <EuiFlyoutResizable
-        ref={flyoutRef}
-        css={css`
-          max-inline-size: calc(100% - 20px);
-          min-inline-size: 400px;
-          > div {
-            height: 100%;
-          }
-        `}
+    <OnechatServicesContext.Provider value={onechatServices}>
+      <ConversationsFlyout
+        isVisible={isModalVisible}
         onClose={handleCloseModal}
-        data-test-subj="onechat-flyout"
-        paddingSize="none"
-        hideCloseButton
-        aria-label="One Chat Assistant"
-      >
-        <OnechatServicesContext.Provider value={onechatServices}>
-          <OnechatConversationsView />
-        </OnechatServicesContext.Provider>
-      </EuiFlyoutResizable>
+        handleShortcutPress={handleShortcutPress}
+      />
       <UnifiedTimelineGlobalStyles />
       {conversationModals}
-    </>
+    </OnechatServicesContext.Provider>
   );
 });
 
