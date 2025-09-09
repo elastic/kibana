@@ -14,6 +14,20 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { AddFilter } from './add_filter';
 
+const mockMakeRegExTest = jest.fn(() => true);
+
+jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/common/field_wildcard');
+  return {
+    ...originalModule,
+    makeRegEx: () => {
+      return {
+        test: mockMakeRegExTest,
+      } as unknown as RegExp;
+    },
+  };
+});
+
 const renderAddFilterComponent = (
   { onAddFilter }: React.ComponentProps<typeof AddFilter> = { onAddFilter: jest.fn() }
 ) => {
@@ -56,6 +70,36 @@ describe('AddFilter', () => {
     await user.click(screen.getByTestId('addFieldFilterButton'));
     await waitFor(() => {
       expect(onAddFilter).not.toBeCalled();
+    });
+  });
+
+  test('should handle errors with invalid filter patterns', async () => {
+    const user = userEvent.setup();
+
+    // Simulate makeRegEx throwing an error for invalid regex
+    mockMakeRegExTest.mockImplementationOnce(() => {
+      throw new Error('Invalid regex');
+    });
+
+    renderAddFilterComponent();
+
+    // Set a value in the input field, we know this will be regarded as invalid because of the mock above
+    await user.type(screen.getByTestId('fieldFilterInput'), '*//foo');
+    // Trigger the blur event to validate the input
+    await user.tab();
+
+    await waitFor(async () => {
+      expect(await screen.findByTestId('fieldFilterInput')).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByTestId('addFieldFilterButton')).toBeDisabled();
+    });
+
+    // This would be regarded as a valid regex
+    await user.type(screen.getByTestId('fieldFilterInput'), '*//foo');
+    await user.tab();
+
+    await waitFor(async () => {
+      expect(await screen.findByTestId('fieldFilterInput')).not.toHaveAttribute('aria-invalid');
+      expect(screen.getByTestId('addFieldFilterButton')).not.toBeDisabled();
     });
   });
 });
