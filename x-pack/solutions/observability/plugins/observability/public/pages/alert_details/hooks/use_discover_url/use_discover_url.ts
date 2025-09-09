@@ -24,13 +24,13 @@ import {
   toElasticsearchQuery,
   type Filter,
 } from '@kbn/es-query';
-import { getViewInAppLocatorParams } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
-import type { TopAlert } from '../../../typings/alerts';
-import { useKibana } from '../../../utils/kibana_react';
+import { getViewInAppLocatorParams } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import type { TopAlert } from '../../../../typings/alerts';
+import { useKibana } from '../../../../utils/kibana_react';
 import {
   syntheticsMonitorStatusAlertParamsToKqlQuery,
   syntheticsTlsAlertParamsToKqlQuery,
-} from '../../util/synthetics_alert_params_to_kql';
+} from './synthetics_alert_params_to_kql';
 
 const viewInDiscoverSupportedRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,

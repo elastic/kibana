@@ -8,16 +8,16 @@
 import { renderHook } from '@testing-library/react';
 import moment from 'moment';
 import { useDiscoverUrl } from './use_discover_url';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../../utils/kibana_react';
 import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
-import type { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../../typings/alerts';
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../../../../utils/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
 
@@ -123,7 +123,7 @@ describe('useDiscoverUrl', () => {
         query: {
           language: 'kuery',
           query:
-            '(tags: tag1 AND observer.name: us-east-1 AND monitor.id: monitor-1 AND monitor.type: browser AND monitor.status: down)',
+            '(observer.name: us-east-1 AND monitor.id: monitor-1 AND monitor.type: browser AND tags: tag1 AND monitor.status: down)',
         },
         dataViewSpec: {
           title: 'synthetics-*',
