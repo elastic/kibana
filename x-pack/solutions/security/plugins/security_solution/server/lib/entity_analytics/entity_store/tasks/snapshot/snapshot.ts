@@ -138,6 +138,36 @@ export async function removeEntityStoreSnapshotTask({
   }
 }
 
+// removeAllFieldsAndResetTimestamp returns a painless function that takes a document,
+// strips it of all its fields (except for identity fields, like host.name or entity.id),
+// and sets the timestamps to @now. The result is used as a script in reindex operation.
+const removeAllFieldsAndResetTimestamp = (entityType: EntityType): string => {
+  return `
+    // Create a new map to hold the filtered fields
+    Map newDoc = new HashMap();
+
+    // Keep the entity.id field
+    if (ctx._source.entity?.id != null) {
+      newDoc.entity = new HashMap();
+      newDoc.entity.id = ctx._source.entity.id;
+    }
+    // Keep host/user/service identity fields if present
+    if (ctx._source.${entityType}?.name != null) {
+      newDoc.${entityType} = new HashMap();
+      newDoc.${entityType}.name = ctx._source.${entityType}?.name;
+    }
+
+    // Set the @timestamp field to the current time
+    newDoc['@timestamp'] = new Date();
+
+    // Set the entity.last_seen_timestamp field to the current time
+    newDoc.entity.last_seen_timestamp = new Date();
+
+    // Replace the existing document with the new filtered document
+    ctx._source = newDoc;
+    `;
+};
+
 export async function runTask({
   logger,
   telemetry,
@@ -211,30 +241,7 @@ export async function runTask({
       },
       conflicts: 'proceed',
       script: {
-        source: `
-          // Create a new map to hold the filtered fields
-          Map newDoc = new HashMap();
-
-          // Keep the entity.id field
-          if (ctx._source.entity?.id != null) {
-            newDoc.entity = new HashMap();
-            newDoc.entity.id = ctx._source.entity.id;
-          }
-          // Keep host/user/service identity fields if present
-          if (ctx._source.${entityType}?.name != null) {
-            newDoc.${entityType} = new HashMap();
-            newDoc.${entityType}.name = ctx._source.${entityType}?.name;
-          }
-
-          // Set the @timestamp field to the current time
-          newDoc['@timestamp'] = new Date();
-
-          // Set the entity.last_seen_timestamp field to the current time
-          newDoc.entity.last_seen_timestamp = new Date();
-
-          // Replace the existing document with the new filtered document
-          ctx._source = newDoc;
-        `,
+        source: removeAllFieldsAndResetTimestamp(entityType),
         lang: 'painless',
       },
     });

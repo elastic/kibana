@@ -103,7 +103,6 @@ import {
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
   buildEntityDefinitionId,
-  buildIndexPatterns,
   buildIndexPatternsByEngine,
   getEntitiesIndexName,
   isPromiseFulfilled,
@@ -887,8 +886,9 @@ export class EntityStoreDataClient {
           );
         }
 
-        const defaultIndexPatterns = await buildIndexPatterns(
+        const defaultIndexPatterns = await buildIndexPatternsByEngine(
           this.options.namespace,
+          engine.type,
           this.options.appClient,
           this.options.dataViewsService
         );
