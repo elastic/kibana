@@ -40,7 +40,6 @@ export {
   type TabularDataResult,
   type OtherResult,
   type IndexSearchToolDefinitionWithSchema,
-  isPersistedTool,
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,

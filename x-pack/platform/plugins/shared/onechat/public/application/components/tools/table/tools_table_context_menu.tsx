@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isPersistedTool } from '@kbn/onechat-common/tools';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_table_provider';
@@ -101,7 +100,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     </EuiContextMenuItem>
   );
 
-  const menuItems = isPersistedTool(tool)
+  const menuItems = !tool.readonly
     ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
     : [testMenuItem, viewMenuItem];
 
