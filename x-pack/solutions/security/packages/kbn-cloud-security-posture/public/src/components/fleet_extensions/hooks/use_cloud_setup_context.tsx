@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useMemo } from 'react';
+import { useContext, useRef } from 'react';
 import semverGte from 'semver/functions/gte';
 import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +21,12 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import type { CloudProviderConfig, CloudProviders, CloudSetupConfig } from '../types';
+import type {
+  AwsInputFieldMapping,
+  CloudProviderConfig,
+  CloudProviders,
+  CloudSetupConfig,
+} from '../types';
 import {
   AWS_PROVIDER,
   GCP_PROVIDER,
@@ -170,81 +175,87 @@ const getProviderCloudConnectorState = ({
   };
 };
 
-interface ICloudSetupProviderOptions {
-  type: CloudProviders;
-  name: string;
-  icon: string;
-  label?: string;
-}
+const buildCloudSetupState = ({
+  config,
+  cloud,
+  packageInfo,
+  newPolicy,
+  cloudConnectorsFeatureEnabled,
+}: {
+  config: CloudSetupConfig;
+  cloud: CloudSetup;
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  cloudConnectorsFeatureEnabled: boolean;
+}): CloudSetupContextValue => {
+  const getProviderDetails = (provider: CloudProviders) => {
+    const providerConfig = config.providers[provider];
+    return {
+      enabled: providerConfig.enabled !== undefined ? providerConfig.enabled : true,
+      organizationEnabled:
+        providerConfig.enableOrganization !== undefined ? providerConfig.enableOrganization : true,
+      policyType: providerConfig.type,
+      overviewPath: providerConfig.getStartedPath,
+    };
+  };
 
-export function useCloudSetup() {
-  const context = useContext(CloudSetupContext);
-  if (context === undefined) {
-    throw new Error('useCloudSetup must be used within a CloudSetupProvider');
-  }
+  const getCloudSetupProviders = (): CloudProviders[] =>
+    Object.keys(config.providers) as CloudProviders[];
 
-  const config = context.config;
-  const cloud = context.cloud;
-  const uiSettings = context.uiSettings;
-  const newPolicy = context.packagePolicy;
-  const packageInfo = context.packageInfo;
+  const getCloudSetupProviderConfig = (providerType: CloudProviders): CloudProviderConfig => {
+    return config.providers[providerType];
+  };
 
-  const getCloudSetupProviders = React.useCallback(
-    (): CloudProviders[] => Object.keys(config.providers) as CloudProviders[],
-    [config.providers]
-  );
-
-  const getCloudSetupProviderConfig = React.useCallback(
-    (providerType: CloudProviders): CloudProviderConfig => {
-      return config.providers[providerType];
+  const CloudSetupProviderOptions = [
+    {
+      type: AWS_PROVIDER,
+      name: i18n.translate('securitySolutionPackages.integrations.awsOption.nameTitle', {
+        defaultMessage: 'AWS',
+      }),
+      icon: 'logoAWS',
     },
-    [config.providers]
-  );
-
-  const getCloudSetupProviderByInputType = React.useCallback(
-    (inputType: string) => {
-      const provider = getCloudSetupProviders().find(
-        (prov) => getCloudSetupProviderConfig(prov).type === inputType
-      );
-
-      if (!provider) {
-        throw new Error(`Unknown cloud setup provider for input type: ${inputType}`);
-      }
-      return provider;
+    {
+      type: GCP_PROVIDER,
+      name: i18n.translate('securitySolutionPackages.integrations.gcpOption.nameTitle', {
+        defaultMessage: 'GCP',
+      }),
+      icon: 'logoGCP',
     },
-    [getCloudSetupProviders, getCloudSetupProviderConfig]
-  );
+    {
+      type: AZURE_PROVIDER,
+      name: i18n.translate('securitySolutionPackages.integrations.azureOption.nameTitle', {
+        defaultMessage: 'Azure',
+      }),
+      icon: 'logoAzure',
+    },
+  ];
 
-  const CloudSetupProviderOptions = React.useMemo<ICloudSetupProviderOptions[]>(
-    () => [
-      {
-        type: AWS_PROVIDER,
-        name: i18n.translate('securitySolutionPackages.integrations.awsOption.nameTitle', {
-          defaultMessage: 'AWS',
-        }),
-        icon: 'logoAWS',
-      },
-      {
-        type: GCP_PROVIDER,
-        name: i18n.translate('securitySolutionPackages.integrations.gcpOption.nameTitle', {
-          defaultMessage: 'GCP',
-        }),
-        icon: 'logoGCP',
-      },
-      {
-        type: AZURE_PROVIDER,
-        name: i18n.translate('securitySolutionPackages.integrations.azureOption.nameTitle', {
-          defaultMessage: 'Azure',
-        }),
-        icon: 'logoAzure',
-      },
-    ],
-    []
-  );
-  const cloudConnectorsFeatureEnabled =
-    uiSettings.get<boolean>(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+  const templateInputOptions = getCloudSetupProviders().map((provider) => ({
+    value: provider,
+    id: provider,
+    label: CloudSetupProviderOptions.find((o) => o.type === provider)?.name ?? provider,
+    icon: CloudSetupProviderOptions.find((o) => o.type === provider)?.icon ?? '',
+    testId:
+      provider === AWS_PROVIDER
+        ? AWS_PROVIDER_TEST_SUBJ
+        : provider === GCP_PROVIDER
+        ? GCP_PROVIDER_TEST_SUBJ
+        : provider === AZURE_PROVIDER
+        ? AZURE_PROVIDER_TEST_SUBJ
+        : '',
+  }));
 
-  // Example usage for AWS:
+  const getCloudSetupProviderByInputType = (inputType: string) => {
+    const provider = getCloudSetupProviders().find(
+      (prov) => getCloudSetupProviderConfig(prov).type === inputType
+    );
+
+    if (!provider) {
+      throw new Error(`Unknown cloud setup provider for input type: ${inputType}`);
+    }
+    return provider;
+  };
+
   const {
     remoteRoleTemplate: awsCloudConnectorRemoteRoleTemplate,
     showCloudConnectors: awsCloudConnectors,
@@ -281,83 +292,94 @@ export function useCloudSetup() {
     cloudConnectorsFeatureEnabled,
   });
 
-  const getCloudSetupTemplateInputOptions = React.useCallback(
-    () =>
-      getCloudSetupProviders().map((provider) => ({
-        value: provider,
-        id: provider,
-        label: CloudSetupProviderOptions.find((o) => o.type === provider)?.name ?? provider,
-        icon: CloudSetupProviderOptions.find((o) => o.type === provider)?.icon ?? '',
-        testId:
-          provider === AWS_PROVIDER
-            ? AWS_PROVIDER_TEST_SUBJ
-            : provider === GCP_PROVIDER
-            ? GCP_PROVIDER_TEST_SUBJ
-            : provider === AZURE_PROVIDER
-            ? AZURE_PROVIDER_TEST_SUBJ
-            : '',
-      })),
-    [getCloudSetupProviders, CloudSetupProviderOptions]
-  );
+  return {
+    getCloudSetupProviderByInputType,
+    config,
+    showCloudTemplates: config.showCloudTemplates,
+    defaultProvider: config.defaultProvider,
+    defaultProviderType: config.providers[config.defaultProvider].type,
+    awsInputFieldMapping: config.providers[AWS_PROVIDER].inputFieldMapping,
+    awsPolicyType: getProviderDetails(AWS_PROVIDER).policyType,
+    awsOrganizationEnabled: getProviderDetails(AWS_PROVIDER).organizationEnabled,
+    awsOverviewPath: getProviderDetails(AWS_PROVIDER).overviewPath,
+    awsCloudConnectorRemoteRoleTemplate,
+    awsCloudConnectors,
+    azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
+    azureCloudConnectorRemoteRoleTemplate,
+    azureCloudConnectors,
+    azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
+    azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
+    azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
+    azurePolicyType: getProviderDetails(AZURE_PROVIDER).policyType,
+    gcpEnabled: getProviderDetails(GCP_PROVIDER).enabled,
+    gcpOrganizationEnabled: getProviderDetails(GCP_PROVIDER).organizationEnabled,
+    gcpCloudConnectorRemoteRoleTemplate,
+    gcpCloudConnectors,
+    gcpOverviewPath: getProviderDetails(GCP_PROVIDER).overviewPath,
+    gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,
+    shortName: config.shortName,
+    templateInputOptions,
+    templateName: config.policyTemplate,
+  };
+};
 
-  // To reduce repetition and improve maintainability, extract provider-specific logic into a helper function.
-  const getProviderDetails = React.useCallback(
-    (provider: CloudProviders) => {
-      const providerConfig = config.providers[provider];
-      return {
-        enabled: providerConfig.enabled !== undefined ? providerConfig.enabled : true,
-        organizationEnabled:
-          providerConfig.enableOrganization !== undefined
-            ? providerConfig.enableOrganization
-            : true,
-        policyType: providerConfig.type,
-        overviewPath: providerConfig.getStartedPath,
-      };
-    },
-    [config.providers]
-  );
+interface CloudSetupContextValue {
+  getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
+  config: CloudSetupConfig;
+  showCloudTemplates: boolean;
+  defaultProvider: CloudProviders;
+  defaultProviderType: string;
+  awsInputFieldMapping: AwsInputFieldMapping | undefined;
+  awsPolicyType: string;
+  awsOrganizationEnabled: boolean;
+  awsOverviewPath: string;
+  awsCloudConnectorRemoteRoleTemplate?: string;
+  awsCloudConnectors: boolean;
+  azureEnabled: boolean;
+  azureCloudConnectorRemoteRoleTemplate?: string;
+  azureCloudConnectors: boolean;
+  azureManualFieldsEnabled?: boolean;
+  azureOrganizationEnabled: boolean;
+  azureOverviewPath: string;
+  azurePolicyType: string;
+  gcpEnabled: boolean;
+  gcpOrganizationEnabled: boolean;
+  gcpCloudConnectorRemoteRoleTemplate?: string;
+  gcpCloudConnectors: boolean;
+  gcpOverviewPath: string;
+  gcpPolicyType: string;
+  shortName?: string;
+  templateInputOptions: Array<{
+    value: CloudProviders;
+    id: CloudProviders;
+    label: string;
+    icon: string;
+    testId: string;
+  }>;
+  templateName: string;
+}
 
-  return useMemo(
-    () => ({
-      getCloudSetupProviderByInputType,
-      config,
-      showCloudTemplates: config.showCloudTemplates,
-      defaultProvider: config.defaultProvider,
-      defaultProviderType: config.providers[config.defaultProvider].type,
-      awsInputFieldMapping: config.providers[AWS_PROVIDER].inputFieldMapping,
-      awsPolicyType: getProviderDetails(AWS_PROVIDER).policyType,
-      awsOrganizationEnabled: getProviderDetails(AWS_PROVIDER).organizationEnabled,
-      awsOverviewPath: getProviderDetails(AWS_PROVIDER).overviewPath,
-      awsCloudConnectorRemoteRoleTemplate,
-      awsCloudConnectors,
-      azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
-      azureCloudConnectorRemoteRoleTemplate,
-      azureCloudConnectors,
-      azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
-      azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
-      azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
-      azurePolicyType: getProviderDetails(AZURE_PROVIDER).policyType,
-      gcpEnabled: getProviderDetails(GCP_PROVIDER).enabled,
-      gcpOrganizationEnabled: getProviderDetails(GCP_PROVIDER).organizationEnabled,
-      gcpCloudConnectorRemoteRoleTemplate,
-      gcpCloudConnectors,
-      gcpOverviewPath: getProviderDetails(GCP_PROVIDER).overviewPath,
-      gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,
-      shortName: config.shortName,
-      templateInputOptions: getCloudSetupTemplateInputOptions(),
-      templateName: config.policyTemplate,
-    }),
-    [
-      getCloudSetupProviderByInputType,
-      config,
-      getProviderDetails,
-      awsCloudConnectorRemoteRoleTemplate,
-      awsCloudConnectors,
-      azureCloudConnectorRemoteRoleTemplate,
-      azureCloudConnectors,
-      gcpCloudConnectorRemoteRoleTemplate,
-      gcpCloudConnectors,
-      getCloudSetupTemplateInputOptions,
-    ]
-  );
+export function useCloudSetup(): CloudSetupContextValue {
+  const context = useContext(CloudSetupContext);
+  if (context === undefined) {
+    throw new Error('useCloudSetup must be used within a CloudSetupProvider');
+  }
+
+  const cloudConnectorsFeatureEnabled =
+    context.uiSettings.get<boolean>(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+
+  const processedCloudSetupValues = useRef<CloudSetupContextValue | null>(null);
+
+  // Only rebuild the state if we don't have it yet or if critical dependencies change
+  if (!processedCloudSetupValues.current) {
+    processedCloudSetupValues.current = buildCloudSetupState({
+      config: context.config,
+      cloud: context.cloud,
+      newPolicy: context.packagePolicy,
+      packageInfo: context.packageInfo,
+      cloudConnectorsFeatureEnabled,
+    });
+  }
+
+  return processedCloudSetupValues.current;
 }

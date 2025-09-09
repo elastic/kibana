@@ -273,7 +273,7 @@ export const getPackageInfoMock = () => {
       },
     ],
     format_version: '3.0.0',
-    version: '1.9.0-preview109',
+    version: '3.0.0',
     name: 'cloud_security_posture',
     description: 'Identify & remediate configuration risks in your Cloud infrastructure',
     owner: {
@@ -281,7 +281,7 @@ export const getPackageInfoMock = () => {
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
     title: 'Security Posture Management',
-    latestVersion: '1.9.0',
+    latestVersion: '3.0.0',
     assets: {
       kibana: {},
     },
@@ -377,19 +377,19 @@ export const mockConfig: CloudSetupConfig = {
   showCloudTemplates: true,
   providers: {
     aws: {
-      type: 'aws-input-type',
+      type: 'cloudbeat/cis_aws',
       enableOrganization: true,
       getStartedPath: '/aws/start',
       cloudConnectorEnabledVersion: '3.0.0',
     },
     gcp: {
-      type: 'gcp-input-type',
+      type: 'cloudbeat/cis_gcp',
       enabled: true,
       enableOrganization: true,
       getStartedPath: '/gcp/start',
     },
     azure: {
-      type: 'azure-input-type',
+      type: 'cloudbeat/cis_azure',
       enableOrganization: true,
       getStartedPath: '/azure/start',
     },

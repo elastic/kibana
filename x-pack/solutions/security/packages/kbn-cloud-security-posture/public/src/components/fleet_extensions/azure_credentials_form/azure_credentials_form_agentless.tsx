@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +17,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import { AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import { ARM_TEMPLATE_EXTERNAL_DOC_URL, AZURE_PROVIDER } from '../constants';
 import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
 import type { AzureOptions } from './get_azure_credentials_form_options';
@@ -64,7 +65,12 @@ export const AzureCredentialsFormAgentless = ({
   hasInvalidRequiredVars,
   setupTechnology,
 }: AzureCredentialsFormProps) => {
-  const { azureOverviewPath, azurePolicyType, azureCloudConnectors } = useCloudSetup();
+  const {
+    azureOverviewPath,
+    azurePolicyType,
+    azureCloudConnectors,
+    azureCloudConnectorRemoteRoleTemplate,
+  } = useCloudSetup();
 
   const azureCredentialsType = getAgentlessCredentialsType(input, azureCloudConnectors);
 
@@ -99,6 +105,19 @@ export const AzureCredentialsFormAgentless = ({
               });
             }}
           />
+          <EuiSpacer size="l" />
+          <EuiButton
+            data-test-subj={AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ}
+            target="_blank"
+            iconSide="left"
+            iconType="launch"
+            href={azureCloudConnectorRemoteRoleTemplate}
+          >
+            <FormattedMessage
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.armTemplate.launchCloudConnectorButton"
+              defaultMessage="Launch ARM Template"
+            />
+          </EuiButton>
           <EuiSpacer size="m" />
         </>
       )}

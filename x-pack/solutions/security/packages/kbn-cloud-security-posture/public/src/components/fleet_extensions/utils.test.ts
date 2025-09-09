@@ -256,7 +256,7 @@ describe('getDefaultAzureCredentialsType', () => {
       false
     );
 
-    expect(result).toBe('service_principal_with_client_secret');
+    expect(result['azure.credentials.type'].value).toBe('service_principal_with_client_secret');
   });
 
   it('should return "arm_template" for agent-based, when arm_template is available', () => {
@@ -268,7 +268,7 @@ describe('getDefaultAzureCredentialsType', () => {
       false
     );
 
-    expect(result).toBe('arm_template');
+    expect(result['azure.credentials.type'].value).toBe('arm_template');
   });
 
   it('should return "managed_identity" for agent-based, when arm_template is not available', () => {
@@ -298,7 +298,7 @@ describe('getDefaultAzureCredentialsType', () => {
       false
     );
 
-    expect(result).toBe('managed_identity');
+    expect(result['azure.credentials.type'].value).toBe('managed_identity');
   });
 });
 
