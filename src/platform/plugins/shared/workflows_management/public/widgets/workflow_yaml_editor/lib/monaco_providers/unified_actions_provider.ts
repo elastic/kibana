@@ -202,7 +202,6 @@ export class UnifiedActionsProvider {
       const stepContext = this.detectStepContext(yamlDocument, yamlPath, position);
 
       // console.log('🔍 buildActionContext stepContext result:', stepContext);
-      
 
       if (!stepContext?.stepType) {
         // console.log('❌ buildActionContext: No stepContext or stepType, returning null');
@@ -524,7 +523,7 @@ export class UnifiedActionsProvider {
           // Go back to the previous line and use its end
           adjustedEndLine = Math.max(startPos.lineNumber, adjustedEndLine - 1);
           adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
-          //console.log('🔍 Found next step marker, adjusting to previous line', adjustedEndLine);
+          // console.log('🔍 Found next step marker, adjusting to previous line', adjustedEndLine);
           break;
         }
 

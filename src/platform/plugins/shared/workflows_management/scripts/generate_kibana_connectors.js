@@ -885,7 +885,7 @@ function copyClientAsSchemas() {
       // This is the start of a const declaration - mark it and continue
       let processedLine = line.replace(/^const\s+/, 'export const ');
       processedLine = applyPatches(processedLine);
-      
+
       // Add ESLint ignore comment for naming convention before each schema export
       schemaLines.push('// eslint-disable-next-line @typescript-eslint/naming-convention');
       schemaLines.push(processedLine);
