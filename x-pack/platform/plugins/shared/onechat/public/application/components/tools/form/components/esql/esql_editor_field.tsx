@@ -12,8 +12,8 @@ import { noop } from 'lodash';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { promisify } from 'util';
-import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
-import type { EsqlToolFormData } from '../types/tool_form_types';
+import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
+import type { EsqlToolFormData } from '../../types/tool_form_types';
 
 export const EsqlEditorField = React.memo(() => {
   const { euiTheme } = useEuiTheme();
