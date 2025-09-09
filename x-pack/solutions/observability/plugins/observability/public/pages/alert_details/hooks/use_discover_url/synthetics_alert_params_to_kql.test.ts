@@ -128,7 +128,7 @@ describe('synthetics_alert_params_to_kql', () => {
       );
     });
 
-    it('returns empty object for empty params', () => {
+    it('returns empty string for empty params', () => {
       const result = syntheticsTlsAlertParamsToKqlQuery({});
       expect(result).toBe('');
     });
