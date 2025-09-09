@@ -437,6 +437,23 @@ export default ({ getService }: FtrProviderContext) => {
         expect(user1After?.labels?.sources).toEqual(['api', 'index']);
         privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
       });
+
+      it('should not update timestamps when re-syncing the same user', async () => {
+        const user1 = { name: 'user1' };
+        await indexSyncUtils.addUsersToIndex([user1.name]);
+        await indexSyncUtils.createEntitySourceForIndex();
+
+        const usersAfterFirstSync = await privmonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1AfterFirstSync = privmonUtils.findUser(usersAfterFirstSync, user1.name);
+        log.info(`User 1 after first sync: ${JSON.stringify(user1AfterFirstSync)}`);
+
+        const usersAfterSecondSync = await privmonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1AfterSecondSync = privmonUtils.findUser(usersAfterSecondSync, user1.name);
+        log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
+
+        expect(user1AfterSecondSync?.['@timestamp']).toEqual(user1AfterFirstSync?.['@timestamp']);
+        expect(user1AfterSecondSync?.event.ingested).toEqual(user1AfterFirstSync?.event.ingested);
+      });
     });
 
     describe('default entity sources', () => {
