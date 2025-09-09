@@ -19,7 +19,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { LensRootStore } from '../../../state_management';
-import { setUserChartTypeToLocalStorage } from '../../../settings_storage';
+import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
 import {
   makeConfigureStore,
   loadInitial,
@@ -82,7 +82,7 @@ export const updatingMiddleware =
       }
       // The user is updating the Visualization parameters,
       // this means he is choosing this chart
-      setUserChartTypeToLocalStorage(visualization.activeId);
+      saveUserChartTypeToSessionStorage(visualization.activeId);
 
       updater(
         datasourceStates[activeDatasourceId].state,
