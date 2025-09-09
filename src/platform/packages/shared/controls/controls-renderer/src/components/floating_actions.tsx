@@ -30,7 +30,6 @@ export interface FloatingActionsProps {
   api?: unknown;
   viewMode?: ViewMode;
   disabledActions?: string[];
-  isTwoLine?: boolean;
 }
 
 export type FloatingActionItem = AnyApiAction & {
@@ -44,7 +43,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   api,
   className = '',
   disabledActions,
-  isTwoLine,
 }) => {
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
@@ -133,7 +131,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           }`}
           className={classNames(
             'presentationUtil__floatingActions',
-            `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
+            `controlFrameFloatingActions`,
             className
           )}
           css={styles.floatingActions}
@@ -174,14 +172,11 @@ const floatingActionsStyles = {
       right: euiTheme.size.xs,
       top: `-${euiTheme.size.l}`,
       zIndex: euiTheme.levels.toast,
-      '&.controlFrameFloatingActions--oneLine': {
+      '&.controlFrameFloatingActions': {
         padding: euiTheme.size.xs,
         borderRadius: euiTheme.border.radius.medium,
         backgroundColor: euiTheme.colors.emptyShade,
         boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
-      },
-      '&.controlFrameFloatingActions--twoLine': {
-        top: `-${euiTheme.size.xs} !important`,
       },
     }),
 };

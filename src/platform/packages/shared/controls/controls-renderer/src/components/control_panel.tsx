@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import React, { useState } from 'react';
 
-import { css } from '@emotion/react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -20,27 +20,28 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { HasSerializedChildState } from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import classNames from 'classnames';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import { FloatingActions } from './floating_actions';
 
 import { ControlError } from './control_error';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
+import { FloatingActions } from './floating_actions';
 
 export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi>({
   parentApi,
   uuid,
   type,
 }: {
-  parentApi: DefaultEmbeddableApi['parentApi'];
+  parentApi: HasSerializedChildState<object>;
   uuid: string;
   type: string;
 }) => {
@@ -76,7 +77,6 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
     defaultPanelTitle,
     // grow,
     // width,
-    labelPosition,
     disabledActionIds,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
@@ -86,11 +86,9 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
     api?.defaultTitle$,
     // api?.grow$,
     // api?.width$,
-    api?.parentApi?.labelPosition,
     api?.parentApi?.disabledActionIds$,
     viewModeSubject
   );
-  const isTwoLine = labelPosition === 'twoLine';
   const controlType = api ? api.type : undefined;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
@@ -102,7 +100,7 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
   const isEditable = viewMode === 'edit';
   const controlWidth = DEFAULT_CONTROL_WIDTH;
   const controlGrow = DEFAULT_CONTROL_GROW;
-  const controlLabel = isTwoLine ? panelTitle || defaultPanelTitle || '...' : undefined;
+  const controlLabel = undefined;
   // const hasRoundedBorders = !api?.CustomPrependComponent && !isEditable && isTwoLine;
   // const shouldHideComponent = Boolean(blockingError);
 
@@ -133,7 +131,6 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
-        isTwoLine={isTwoLine}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
         isEnabled={true}
@@ -149,7 +146,6 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
             fullWidth
             isLoading={Boolean(dataLoading)}
             className={classNames('controlFrame__formControlLayout', {
-              'controlFrame__formControlLayout--twoLine': isTwoLine,
               'controlFrame__formControlLayout--edit': isEditable,
               'controlFrame_formControlAfter--insertBefore': insertBefore,
               'controlFrame_formControlAfter--insertAfter': insertAfter,
@@ -167,20 +163,19 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
                 {/* {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : */}
-                {isTwoLine ? null : (
-                  <EuiToolTip
-                    content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ css: styles.tooltipAnchor, className: 'eui-textTruncate' }}
-                  >
-                    <EuiFormLabel className="controlPanel--label">
-                      {panelTitle || defaultPanelTitle}
-                    </EuiFormLabel>
-                  </EuiToolTip>
-                )}
+                <EuiToolTip
+                  content={panelTitle || defaultPanelTitle}
+                  anchorProps={{ css: styles.tooltipAnchor, className: 'eui-textTruncate' }}
+                >
+                  <EuiFormLabel className="controlPanel--label">
+                    {panelTitle || defaultPanelTitle}
+                  </EuiFormLabel>
+                </EuiToolTip>
                 {/* )} */}
               </>
             }
             // compressed={isCompressed(api)}
+            compressed={true}
           >
             <>
               {blockingError && <ControlError error={blockingError} />}
@@ -192,7 +187,7 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
                 onApiAvailable={(api) => {
                   console.log('REFIST', api);
                   setApi(api);
-                  parentApi.registerChildApi(api);
+                  api.parentApi.registerChildApi(api);
                 }}
                 hidePanelChrome
               />

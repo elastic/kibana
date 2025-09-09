@@ -113,9 +113,14 @@ export function initializeLayoutManager(
   const childrenLoading$ = combineLatest([children$, layout$]).pipe(
     map(([children, layout]) => {
       // filter out panels that are in collapsed sections, since the APIs will never be available
-      const expectedChildCount = Object.values(layout.panels).filter((panel) => {
-        return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
-      }).length;
+      const expectedChildCount =
+        Object.values(layout.panels).filter((panel) => {
+          return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
+        }).length +
+        Object.values(layout.controls).filter((control) => {
+          // TODO: Remove this filtering
+          return control.type === 'optionsListControl'; // temporarily filter out range slider controls so that count is accurate
+        }).length;
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
     }),
@@ -444,6 +449,7 @@ export function initializeLayoutManager(
     api: {
       layout$,
       registerChildApi: (api: DefaultEmbeddableApi) => {
+        // console.log('register', api.type, api);
         children$.next({
           ...children$.value,
           [api.uuid]: api,
