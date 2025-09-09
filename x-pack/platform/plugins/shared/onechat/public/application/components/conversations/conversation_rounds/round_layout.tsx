@@ -11,20 +11,13 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-// A new round should have a min-height equal to the scroll container height
-const getScrollContainerHeight = () => {
-  const container = document.querySelector(
-    '[id="onechatConversationScrollContainer"]'
-  ) as HTMLDivElement;
-  return container?.clientHeight || 0;
-};
-
 interface RoundLayoutProps {
   input: ReactNode;
   outputIcon: ReactNode;
   output: ReactNode;
   isResponseLoading: boolean;
   isCurrentRound: boolean;
+  scrollContainerHeight: number;
 }
 
 const labels = {
@@ -42,16 +35,17 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   output,
   isResponseLoading,
   isCurrentRound,
+  scrollContainerHeight,
 }) => {
-  const [viewportOffset, setViewportOffset] = useState(0);
+  const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
 
   useEffect(() => {
     if (isCurrentRound && isResponseLoading) {
-      setViewportOffset(getScrollContainerHeight());
+      setRoundContainerMinHeight(scrollContainerHeight);
     } else if (!isCurrentRound) {
-      setViewportOffset(0);
+      setRoundContainerMinHeight(0);
     }
-  }, [isCurrentRound, isResponseLoading]);
+  }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
 
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
@@ -62,7 +56,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   `;
 
   const roundContainerStyles = css`
-    ${viewportOffset > 0 ? `min-height: ${viewportOffset}px;` : ''}
+    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : ''}
   `;
 
   return (

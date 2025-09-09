@@ -41,11 +41,10 @@ export const useConversationScrollActions = ({
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   useEffect(() => {
-    const parent = scrollContainer?.parentElement;
-    if (!parent) return;
+    if (!scrollContainer) return;
 
     const checkScrollPosition = () => {
-      const { scrollTop, scrollHeight, clientHeight } = parent;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
       const threshold = 50;
 
@@ -53,7 +52,7 @@ export const useConversationScrollActions = ({
     };
 
     // Set up scroll listener
-    parent.addEventListener('scroll', checkScrollPosition);
+    scrollContainer.addEventListener('scroll', checkScrollPosition);
 
     // Set up interval for streaming check (only when response is loading)
     let interval: NodeJS.Timeout | undefined;
@@ -62,17 +61,16 @@ export const useConversationScrollActions = ({
     }
 
     return () => {
-      parent.removeEventListener('scroll', checkScrollPosition);
+      scrollContainer.removeEventListener('scroll', checkScrollPosition);
       if (interval) clearInterval(interval);
     };
   }, [isResponseLoading, conversationId, scrollContainer]);
 
   const stickToBottom = useCallback(() => {
-    const parent = scrollContainer?.parentElement;
-    if (!parent) {
+    if (!scrollContainer) {
       return;
     }
-    parent.scrollTop = parent.scrollHeight;
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
   }, [scrollContainer]);
 
   return {

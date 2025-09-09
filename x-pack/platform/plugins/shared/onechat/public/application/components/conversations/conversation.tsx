@@ -42,6 +42,8 @@ export const Conversation: React.FC<{}> = () => {
     }
   );
 
+  const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
+
   // Stick to bottom only on initial conversation load (not when new rounds are added)
   useEffect(() => {
     if (isFetched && conversationId) {
@@ -74,10 +76,8 @@ export const Conversation: React.FC<{}> = () => {
           <>
             {hasActiveConversation ? (
               <EuiResizablePanel initialSize={80}>
-                <div css={scrollContainerStyles} id="onechatConversationScrollContainer">
-                  <div ref={scrollContainerRef}>
-                    <ConversationRounds />
-                  </div>
+                <div ref={scrollContainerRef} css={scrollContainerStyles}>
+                  <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
                 </div>
                 {showScrollButton && (
                   <EuiButtonIcon
