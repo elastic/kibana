@@ -31,11 +31,6 @@
     "@kbn/ai-assistant-icon",
     "@kbn/ml-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/management-settings-field-definition",
-    "@kbn/management-settings-types",
-    "@kbn/management-settings-utilities",
-    "@kbn/test-jest-helpers",
-    "@kbn/inference-common",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-default-llm-setting"
