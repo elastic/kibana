@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataTableRecord, TRACE_ID_FIELD, getFieldValue } from '@kbn/discover-utils';
-import type { ContextWithProfileId } from '../../../../profile_service';
+import {
+  type DataTableRecord,
+  TRACE_ID_FIELD,
+  getFieldValue,
+  INDEX_FIELD,
+  DATASTREAM_TYPE_FIELD,
+} from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
-import type { DataSourceContext, DocumentProfileProvider } from '../../../../profiles';
+import type { DocumentProfileProvider } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
@@ -33,10 +38,13 @@ export const createObservabilityTracesDocumentProfileProvider = ({
       logs: logsContextService.getAllLogsIndexPattern(),
     }),
   },
-  resolve: ({ record, rootContext, dataSourceContext }) => {
+  resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
-    if (isObservabilitySolutionView && isTraceDocument(record, dataSourceContext)) {
+    if (
+      isObservabilitySolutionView &&
+      isTraceDocument(record, tracesContextService.isTracesIndexPattern)
+    ) {
       return {
         isMatch: true,
         context: {
@@ -51,11 +59,22 @@ export const createObservabilityTracesDocumentProfileProvider = ({
 
 function isTraceDocument(
   record: DataTableRecord,
-  dataSourceContext: ContextWithProfileId<DataSourceContext>
+  isTracesIndexPattern: ProfileProviderServices['tracesContextService']['isTracesIndexPattern']
 ): boolean {
   const traceId = getFieldValue(record, TRACE_ID_FIELD);
+  const index = getFieldValues(record, INDEX_FIELD);
+  const dataStream = getFieldValues(record, DATASTREAM_TYPE_FIELD);
 
-  // TODO: Relying on this data source check is a hack, this should be refactored to use
-  // _index field once ES|QL queries return default metadata.
-  return dataSourceContext.category === DataSourceCategory.Traces && !!traceId;
+  return (
+    (index.some(isTracesIndexPattern) || dataStream.includes(DataSourceCategory.Traces)) &&
+    !!traceId
+  );
 }
+
+const getFieldValues = <TRecord extends DataTableRecord, TField extends string>(
+  record: TRecord,
+  field: TField & keyof TRecord['flattened']
+): TRecord['flattened'][TField][] => {
+  const value = record.flattened[field];
+  return Array.isArray(value) ? value : [value];
+};
