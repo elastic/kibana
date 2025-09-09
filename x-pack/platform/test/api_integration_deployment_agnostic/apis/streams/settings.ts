@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
-import {
+import type {
   IngestStreamSettings,
   WiredIngestStreamEffectiveSettings,
 } from '@kbn/streams-schema/src/models/ingest/settings';
