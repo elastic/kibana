@@ -111,6 +111,31 @@ export function isWithinLonRange(
   );
 }
 
+export function getLatLonFields(results: FindFileStructureResponse | undefined) {
+  const latFields: string[] = [];
+  const lonFields: string[] = [];
+  if (results !== undefined) {
+    getFieldNames(results).forEach((columnName: string) => {
+      if (isWithinLatRange(columnName, results!.field_stats)) {
+        latFields.push(columnName);
+      }
+      if (isWithinLonRange(columnName, results!.field_stats)) {
+        lonFields.push(columnName);
+      }
+    });
+  }
+  return { latFields, lonFields };
+}
+
+export function isLatLonCompatible(results: FindFileStructureResponse | undefined) {
+  if (!results) {
+    return false;
+  }
+
+  const { latFields, lonFields } = getLatLonFields(results);
+  return latFields.length > 0 && lonFields.length > 0;
+}
+
 export function createGeoPointCombinedField(
   latField: string,
   lonField: string,

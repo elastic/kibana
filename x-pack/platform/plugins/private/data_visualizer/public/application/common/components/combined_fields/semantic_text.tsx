@@ -26,6 +26,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { createSemanticTextCombinedField, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';
@@ -47,9 +48,11 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   const fieldOptions = useMemo(
     () =>
-      getFieldsFromMappings(mappings).map(({ name }) => {
-        return { value: name, text: name };
-      }),
+      getFieldsFromMappings(mappings, [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.TEXT]).map(
+        ({ name }) => {
+          return { value: name, text: name };
+        }
+      ),
     [mappings]
   );
 

@@ -24,10 +24,15 @@ import type { IngestPipeline } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { FileAnalysis } from '@kbn/file-upload';
 import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { CombinedFieldLabel } from './combined_field_label';
-import { removeCombinedFieldsFromMappings, removeCombinedFieldsFromPipeline } from './utils';
+import {
+  isLatLonCompatible,
+  removeCombinedFieldsFromMappings,
+  removeCombinedFieldsFromPipeline,
+} from './utils';
 import { SemanticTextForm } from './semantic_text';
 
 interface Props {
@@ -132,6 +137,19 @@ export class CombinedFieldsForm extends Component<Props, State> {
     return Object.hasOwn(this.props.mappings?.properties ?? {}, name);
   };
 
+  isLatLonCompatible = () => {
+    return isLatLonCompatible(
+      this.props.filesStatus ? this.props.filesStatus[0].results! : undefined
+    );
+  };
+
+  isSemanticTextCompatible = () => {
+    return (
+      getFieldsFromMappings(this.props.mappings, [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD])
+        .length > 0
+    );
+  };
+
   render() {
     return (
       <>
@@ -166,7 +184,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                   size="s"
                   color="text"
                   iconType="plusInCircleFilled"
-                  isDisabled={this.props.isDisabled}
+                  isDisabled={this.isSemanticTextCompatible() === false}
                 >
                   <FormattedMessage
                     id="xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel"
@@ -192,7 +210,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                   size="s"
                   color="text"
                   iconType="plusInCircleFilled"
-                  isDisabled={this.props.isDisabled}
+                  isDisabled={this.isLatLonCompatible() === false}
                 >
                   <FormattedMessage
                     id="xpack.dataVisualizer.file.geoFieldLabel"

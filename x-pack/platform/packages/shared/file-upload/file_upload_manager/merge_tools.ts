@@ -359,7 +359,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
   });
 }
 
-export function getFieldsFromMappings(mappings: MappingTypeMapping) {
+export function getFieldsFromMappings(mappings: MappingTypeMapping, allowedTypes: string[] = []) {
   const fields: Array<{ name: string; value: { type: string } }> = [];
 
   function traverseProperties(properties: MappingPropertyBase, parentKey: string = '') {
@@ -369,7 +369,9 @@ export function getFieldsFromMappings(mappings: MappingTypeMapping) {
       if (value.properties) {
         traverseProperties(value.properties, fullKey);
       } else if (value.type) {
-        fields.push({ name: fullKey, value });
+        if (allowedTypes.length === 0 || allowedTypes.includes(value.type)) {
+          fields.push({ name: fullKey, value });
+        }
       }
     }
   }
