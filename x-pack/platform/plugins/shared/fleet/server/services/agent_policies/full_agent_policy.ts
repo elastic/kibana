@@ -17,16 +17,16 @@ import {
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
 
-import {
-  type FullAgentPolicy,
-  type PackagePolicy,
-  type Output,
-  type ShipperOutput,
-  type FullAgentPolicyOutput,
-  type FleetProxy,
-  type FleetServerHost,
-  type AgentPolicy,
-  type TemplateAgentPolicyInput,
+import type {
+  FullAgentPolicy,
+  PackagePolicy,
+  Output,
+  ShipperOutput,
+  FullAgentPolicyOutput,
+  FleetProxy,
+  FleetServerHost,
+  AgentPolicy,
+  TemplateAgentPolicyInput,
 } from '../../types';
 import type {
   DownloadSource,
