@@ -333,6 +333,8 @@ export default function (providerContext: FtrProviderContext) {
 
       it('returns knowledge base content for an installed package', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        //  since KB indexing is async, wait a bit to make sure it's done before trying to fetch
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
