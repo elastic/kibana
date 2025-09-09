@@ -36,6 +36,7 @@ const NODE_SHAPE_WIDTH = 87;
 const NODE_SHAPE_HEIGHT = 105;
 const NODE_SHAPE_Y_POS_DELTA = 3;
 const NODE_SHAPE_ON_HOVER_Y_POS_DELTA = 3;
+const NODE_SHAPE_ON_HOVER_STACKED_Y_POS_DELTA = 4;
 
 export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -64,7 +65,11 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
             width={NODE_SHAPE_WIDTH}
             height={NODE_SHAPE_HEIGHT}
             viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
-            yPosDelta={NODE_SHAPE_ON_HOVER_Y_POS_DELTA}
+            yPosDelta={
+              showStackedShape(count)
+                ? NODE_SHAPE_ON_HOVER_STACKED_Y_POS_DELTA
+                : NODE_SHAPE_ON_HOVER_Y_POS_DELTA
+            }
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -85,7 +90,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeMiddleShape(strokeColor)}
+              css={styleEntityNodeBottomShape(strokeColor)}
             />
           )}
           {showStackedShape(count) && (
@@ -93,7 +98,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={styleEntityNodeBottomShape(strokeColor)}
+              css={styleEntityNodeMiddleShape(strokeColor)}
             />
           )}
           <HexagonShape fill={fillColor} stroke={strokeColor} />
