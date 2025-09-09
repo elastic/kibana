@@ -62,7 +62,6 @@ export const links: LinkItem = {
     defaultMessage: 'Migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
-  globalNavPosition: 7,
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
