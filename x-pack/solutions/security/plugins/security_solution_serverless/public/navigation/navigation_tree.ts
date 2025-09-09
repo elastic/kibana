@@ -53,7 +53,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             defaultNavigationTree.cases(),
           ],
         },
-        defaultNavigationTree.migrations(),
         {
           breadcrumbStatus: 'hidden',
           children: [

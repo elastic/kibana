@@ -13,7 +13,6 @@ import { createExploreNavigationTree } from './explore_navigation_tree';
 import { createAssetsNavigationTree } from './assets_navigation_tree';
 import { createEntityAnalyticsNavigationTree } from './entity_analytics_navigation_tree';
 import { createMachineLearningNavigationTree } from './ml_navigation_tree';
-import { createMigrationsNavigationTree } from './migrations_navigation_tree';
 
 export const defaultNavigationTree = {
   dashboards: createDashboardsNavigationTree,
@@ -24,6 +23,5 @@ export const defaultNavigationTree = {
   assets: createAssetsNavigationTree,
   entityAnalytics: createEntityAnalyticsNavigationTree,
   ml: createMachineLearningNavigationTree,
-  migrations: createMigrationsNavigationTree,
 };
 export type DefaultNavigationTree = typeof defaultNavigationTree;
