@@ -36,7 +36,7 @@ import type {
 
 import { useMlLink } from '../../application/contexts/kibana';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
+import { getDefaultSwimlanePanelTitle } from './get_default_swimlane_panel_title';
 import { getJobSelectionErrors } from '../utils';
 
 export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;
