@@ -13,3 +13,20 @@ export const GET_MIGRATION_DASHBOARDS_FAILURE = i18n.translate(
     defaultMessage: 'Failed to fetch migration dashboards',
   }
 );
+
+export const INSTALL_MIGRATION_DASHBOARDS_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.installMigrationDashboardsFailDescription',
+  {
+    defaultMessage: 'Failed to install migration dashboards',
+  }
+);
+
+export const INSTALL_MIGRATION_DASHBOARDS_SUCCESS = (succeeded: number) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.dashboards.installMigrationDashboardsSuccess',
+    {
+      defaultMessage:
+        '{succeeded, plural, one {# dashboard} other {# dashboards}} installed successfully.',
+      values: { succeeded },
+    }
+  );

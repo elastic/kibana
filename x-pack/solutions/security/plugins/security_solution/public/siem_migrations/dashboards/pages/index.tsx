@@ -7,8 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiTitle } from '@elastic/eui';
+import {
+  EuiSkeletonLoading,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -70,7 +77,31 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       }
       return (
         <>
-          <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
+          {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
+            <>
+              {/* TODO: uncomment once panels are merged */}
+              {/* <DashboardMigrationsUploadMissingPanel
+                migrationStats={migrationStats}
+                topSpacerSize="s"
+              /> */}
+              <EuiSpacer size="m" />
+              <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
+            </>
+          )}
+          {[
+            SiemMigrationTaskStatus.READY,
+            SiemMigrationTaskStatus.INTERRUPTED,
+            SiemMigrationTaskStatus.STOPPED,
+          ].includes(migrationStats.status) && (
+            // TODO: uncomment once panels are merged
+            // <MigrationReadyPanel migrationStats={migrationStats} />
+            <>{'Migration read panel...'}</>
+          )}
+          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+            // TODO: uncomment once panels are merged
+            // <MigrationProgressPanel migrationStats={migrationStats} />
+            <>{'Migration progress panel...'}</>
+          )}
         </>
       );
     }, [dashboardMigrationsStats, migrationId, refetchData]);

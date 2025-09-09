@@ -7,11 +7,11 @@
 
 import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ReprocessFailedRulesButton } from './reprocess_failed_rules';
-import { InstallTranslatedButton } from './install_translated';
+import { InstallTranslatedButton } from '../../../../common/components/bulk_actions';
 import { UpdateMissingIndex } from './update_missing_index';
 import { type RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { useReprocessFailedButton } from './use_reprocess_failed_button';
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
@@ -51,6 +51,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     const installSelectedRulesCallback = useCallback(() => {
       installSelectedRule?.();
     }, [installSelectedRule]);
+    const { reprocessButton: ReprocessFailedRulesButton } = useReprocessFailedButton();
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showUpdateMissingIndexPatternButton && (
@@ -64,23 +65,23 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
         {showRetryFailedRulesButton && (
           <EuiFlexItem grow={false}>
             <ReprocessFailedRulesButton
-              onClick={reprocessFailedRulesCallback}
               isDisabled={isTableLoading}
               isLoading={isTableLoading}
-              translationStats={translationStats}
-              selectedRules={selectedRules}
+              numberOfFailedItems={numberOfFailedRules}
+              onClick={reprocessFailedRulesCallback}
+              selectedItems={selectedRules}
             />
           </EuiFlexItem>
         )}
         {showInstallSelectedRulesButton && (
           <EuiFlexItem grow={false}>
             <InstallTranslatedButton
-              installTranslatedRule={installTranslatedRulesCallback}
-              isTableLoading={isTableLoading}
-              disableInstallTranslatedRulesButton={isTableLoading}
-              installSelectedRule={installSelectedRulesCallback}
-              selectedRules={selectedRules}
-              translationStats={translationStats}
+              disableInstallTranslatedItemsButton={isTableLoading}
+              installSelectedItem={installSelectedRulesCallback}
+              installTranslatedItems={installTranslatedRulesCallback}
+              isLoading={isTableLoading}
+              numberOfTranslatedItems={numberOfTranslatedRules}
+              selectedItems={selectedRules}
             />
           </EuiFlexItem>
         )}

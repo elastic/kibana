@@ -11,6 +11,7 @@ import type { LangSmithOptions } from '../../../../common/siem_migrations/model/
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import {
   SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH,
+  SIEM_DASHBOARD_MIGRATION_INSTALL_PATH,
   SIEM_DASHBOARD_MIGRATION_PATH,
   SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH,
@@ -34,6 +35,7 @@ import type {
   StartDashboardsMigrationResponse,
   UpdateDashboardMigrationRequestBody,
   GetDashboardMigrationDashboardsResponse,
+  InstallMigrationDashboardsResponse,
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { DashboardMigrationStats } from '../types';
@@ -161,6 +163,26 @@ export const addDashboardsToDashboardMigration = async ({
       body: JSON.stringify(body),
       signal,
     }
+  );
+};
+
+export interface InstallDashboardsParams {
+  /** `id` of the migration to install dashboards for */
+  migrationId: string;
+  /** The dashboard ids to install */
+  ids?: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Installs the provided dashboard ids for a specific migration. */
+export const installMigrationDashboards = async ({
+  migrationId,
+  ids,
+  signal,
+}: InstallDashboardsParams): Promise<InstallMigrationDashboardsResponse> => {
+  return KibanaServices.get().http.post<InstallMigrationDashboardsResponse>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify({ ids }), signal }
   );
 };
 

@@ -11,3 +11,21 @@ import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/co
 export interface DashboardMigrationStats extends DashboardMigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
 }
+
+// TODO: Remove this type once Translation Stats endpoint and types are implemented
+export interface MigrationTranslationStats {
+  id: string;
+  dashboards: {
+    total: number;
+    success: {
+      total: number;
+      result: {
+        full: number;
+        partial: number;
+        untranslatable: number;
+      };
+      installable: number;
+    };
+    failed: number;
+  };
+}
