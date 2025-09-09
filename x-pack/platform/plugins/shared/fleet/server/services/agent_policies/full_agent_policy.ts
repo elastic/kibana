@@ -933,7 +933,7 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput
       return otelInputs;
     });
 
-  if (otelConfigs.length == 0) {
+  if (otelConfigs.length === 0) {
     return {};
   }
 
@@ -947,19 +947,19 @@ function generateOTelAttributesTransform(
   namespace: string,
   suffix: string
 ) {
-  let signalType: string;
+  let otelType: string;
   let context: string;
   switch (type) {
     case 'logs':
-      signalType = 'log';
+      otelType = 'log';
       context = 'log';
       break;
     case 'metrics':
-      signalType = 'metric';
+      otelType = 'metric';
       context = 'datapoint';
       break;
     case 'traces':
-      signalType = 'trace';
+      otelType = 'trace';
       context = 'span';
       break;
     default:
@@ -967,7 +967,7 @@ function generateOTelAttributesTransform(
   }
   return {
     [`transform/${suffix}-routing`]: {
-      [`${signalType}_statements`]: [
+      [`${otelType}_statements`]: [
         {
           context,
           statements: [
