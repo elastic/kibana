@@ -13,7 +13,7 @@ export const LoadingGroup = () => {
   return (
     <EuiSkeletonTitle size="s" isLoading={true}>
       <FormattedMessage
-        id="kbn.cloudSecurityGrouping.loadingGroupPanelTitle"
+        id="securitySolutionPackages.cloudSecurityGrouping.loadingGroupPanelTitle"
         defaultMessage="Loading"
       />
     </EuiSkeletonTitle>

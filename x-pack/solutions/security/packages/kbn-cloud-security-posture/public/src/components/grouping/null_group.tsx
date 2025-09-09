@@ -24,13 +24,13 @@ export const NullGroup = ({ title, field, unit }: NullGroupProps) => {
         content={
           <>
             <FormattedMessage
-              id="kbn.cloudSecurityGrouping.nullGroupTooltip"
+              id="securitySolutionPackages.cloudSecurityGrouping.nullGroupTooltip"
               defaultMessage="The selected {groupingTitle} field, {field} is missing a value for this group of {unit}."
               values={{
                 groupingTitle: (
                   <strong>
                     <FormattedMessage
-                      id="kbn.cloudSecurityGrouping.nullGroupTooltip.groupingTitle"
+                      id="securitySolutionPackages.cloudSecurityGrouping.nullGroupTooltip.groupingTitle"
                       defaultMessage="group by"
                     />
                   </strong>
