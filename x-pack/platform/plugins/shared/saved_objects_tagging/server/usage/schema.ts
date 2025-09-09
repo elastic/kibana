@@ -26,5 +26,6 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
     'osquery-pack': perTypeSchema,
     'osquery-pack-asset': perTypeSchema,
     'osquery-saved-query': perTypeSchema,
+    alerting_rule_template: perTypeSchema,
   },
 };

@@ -19,6 +19,8 @@ import { queryKeys } from '../query_keys';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
 
+const pendingRoundId = '__pending__';
+
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
@@ -63,6 +65,7 @@ export const useConversationActions = () => {
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
+            id: pendingRoundId,
             input: { message: userMessage },
             response: { message: '' },
             steps: [],
