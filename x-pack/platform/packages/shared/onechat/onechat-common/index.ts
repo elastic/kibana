@@ -10,12 +10,10 @@ export {
   ToolType,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
-  builtInToolIdPrefix,
-  builtinToolIds,
-  builtinTags,
+  platformCoreTools,
   defaultAgentToolIds,
+  editableToolTypes,
   isReservedToolId,
-  isBuiltInToolId,
   type ByIdsToolSelection,
   type ToolSelection,
   isByIdsToolSelection,
@@ -30,8 +28,10 @@ export {
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
-  idRegexp,
+  toolIdRegexp,
+  toolIdMaxLength,
   activeToolsCountWarningThreshold,
+  validateToolId,
   ToolResultType,
   type ToolResult,
   type ErrorResult,
@@ -39,6 +39,10 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  type IndexSearchToolDefinitionWithSchema,
+  internalNamespaces as toolNamespaces,
+  protectedNamespaces as toolReservedNamespaces,
+  isInProtectedNamespace,
 } from './tools';
 export {
   OnechatErrorCode,
@@ -67,6 +71,7 @@ export {
   type SerializedOnechatError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
+export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,
@@ -96,6 +101,8 @@ export {
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
   type ChatAgentEvent,
+  type ToolProgressEvent,
+  type ToolProgressEventData,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -108,6 +115,7 @@ export {
   type MessageCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
+  type ToolCallProgress,
   isToolCallEvent,
   isToolResultEvent,
   isReasoningEvent,
@@ -116,4 +124,5 @@ export {
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isToolProgressEvent,
 } from './chat';

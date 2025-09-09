@@ -10,14 +10,10 @@ import expect from 'expect';
 import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  createHistoricalPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
-  deleteAllPrebuiltRuleAssets,
   getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
-  installPrebuiltRules,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
@@ -27,7 +23,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
-  const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless @serverlessQA patch_rules', () => {
@@ -230,26 +225,6 @@ export default ({ getService }: FtrProviderContext) => {
           status_code: 404,
           message: 'rule_id: "fake_id" not found',
         });
-      });
-
-      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        await deleteAllPrebuiltRuleAssets(es, log);
-        // Install base prebuilt detection rule
-        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),
-        ]);
-        await installPrebuiltRules(es, supertest);
-
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: 'rule-1',
-              author: ['new user'],
-            },
-          })
-          .expect(400);
-
-        expect(body.message).toEqual('Cannot update "author" field for prebuilt rules');
       });
 
       describe('max signals', () => {

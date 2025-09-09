@@ -499,19 +499,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'onechat:mcp:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'onechat:a2a:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'onechat:ui:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'onechat:api:enabled': {
+  'agentBuilder:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -672,12 +660,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
-  'observability:enableStreamsUI': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams UI.',
-    },
-  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
@@ -694,6 +676,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable diagnostic mode',
+    },
+  },
+  'genAiSettings:defaultAIConnector': {
+    type: 'keyword',
+    _meta: {
+      description: 'Default AI connector',
+    },
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    type: 'boolean',
+    _meta: {
+      description: 'Restrict to default AI connector only',
     },
   },
 };

@@ -29,4 +29,7 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
     frequency: number; // in minutes
     syncField: string | null;
   };
+  artifacts?: {
+    dashboards?: { id: string }[];
+  };
 }

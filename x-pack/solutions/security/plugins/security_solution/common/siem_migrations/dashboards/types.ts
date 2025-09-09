@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { DashboardMigrationDashboard } from '../model/dashboard_migration.gen';
+import type { SiemMigrationGetItemsOptions } from '../../../server/lib/siem_migrations/common/data/types';
+import type { SiemMigrationFilters } from '../types';
 
-export type CreateDashboardsInput = Omit<
-  DashboardMigrationDashboard,
-  '@timestamp' | 'id' | 'status' | 'created_by' | 'updated_by' | 'updated_at'
->;
+export type DashboardMigrationFilters = SiemMigrationFilters;
+
+export type DashboardMigrationGetDashboardOptions =
+  SiemMigrationGetItemsOptions<DashboardMigrationFilters>;
