@@ -10,10 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import {
-  OnSaveProps,
-  SaveResult,
-} from '@kbn/saved-objects-plugin/public';
+import { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
   SavedObjectSaveModalWithSaveResult,
   showSaveModal,
