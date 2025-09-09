@@ -349,6 +349,51 @@ export default ({ getService }: FtrProviderContext) => {
         expect(listRes.body.length).to.be(1);
       });
 
+      it('should not update a user if nothing has changed', async () => {
+        log.info(`Uploading a user via CSV`);
+        const csv = ['csv_user_1'].join('\n');
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
+        if (res.status !== 200) {
+          log.error(`Failed to upload users via CSV`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+        expect(res.body.stats.successful).to.be(1);
+        expect(res.body.stats.total).to.be(1);
+
+        const {
+          body: [userBefore],
+        } = await api.listPrivMonUsers({
+          query: { kql: `user.name: csv_user_1` },
+        });
+        log.info(`User before second upload: ${JSON.stringify(userBefore)}`);
+
+        // wait for 1 second to ensure that if the document is updated, the timestamp would be different
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        log.info(`Uploading the same user via CSV again`);
+        const res2 = await privmonUtils.bulkUploadUsersCsv(csv);
+        if (res2.status !== 200) {
+          log.error(`Failed to upload users via CSV`);
+          log.error(JSON.stringify(res2.body));
+        }
+
+        expect(res2.status).eql(200);
+        expect(res2.body.stats.successful).to.be(1);
+        expect(res2.body.stats.total).to.be(1);
+
+        const {
+          body: [userAfter],
+        } = await api.listPrivMonUsers({
+          query: { kql: `user.name: csv_user_1` },
+        });
+        log.info(`User after second upload: ${JSON.stringify(userAfter)}`);
+
+        expect(userAfter['@timestamp']).to.be(userBefore['@timestamp']);
+        expect(userAfter.event.ingested).to.be(userBefore.event.ingested);
+      });
+
       describe('CSV with labels', () => {
         it('should add labels to the uploaded users', async () => {
           const csv = ['csv_user_1,label1'].join('\n');
