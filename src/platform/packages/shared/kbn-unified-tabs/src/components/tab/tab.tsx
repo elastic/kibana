@@ -32,6 +32,7 @@ import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../
 import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 import { TabPreview } from '../tab_preview';
+
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
