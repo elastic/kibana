@@ -215,10 +215,6 @@ export async function getFieldsOrFunctionsSuggestions(
           activeProduct
         )
       : [],
-    // FIXME
-    // userDefinedColumns
-    //   ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
-    //   : [],
     literals ? getCompatibleLiterals(types) : []
   );
 

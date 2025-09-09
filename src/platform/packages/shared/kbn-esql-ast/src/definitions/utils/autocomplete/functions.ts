@@ -450,14 +450,6 @@ async function getListArgsSuggestions(
       }
     }
 
-    // FIXME
-    // const anyUserDefinedColumns = collectUserDefinedColumns(commands, columnMap, innerText);
-    // // extract the current node from the userDefinedColumns inferred
-    // anyUserDefinedColumns.forEach((values, key) => {
-    //   if (values.some((v) => v.location === node.location)) {
-    //     anyUserDefinedColumns.delete(key);
-    //   }
-    // });
     const [firstArg] = node.args;
     if (isColumn(firstArg)) {
       const argType = extractTypeFromASTArg(firstArg, {
