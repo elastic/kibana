@@ -44,6 +44,42 @@ export function prepareCallbacks(
     ),
     onData: (_data: unknown, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       addLog(`onData$`);
+
+      if (api.isTextBasedLanguage() && adapters?.tables?.tables) {
+        const table = adapters.tables.tables[0];
+        if (table && table.columns.length > 2) {
+          const dateColumns = table.columns.filter((c) => c.meta.type === 'date');
+          const numberColumns = table.columns.filter((c) => c.meta.type === 'number');
+          const stringColumns = table.columns.filter((c) => c.meta.type === 'string');
+
+          if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
+            const newColumnName = stringColumns.map((c) => c.name).join(' > ');
+            const stringColumnNames = stringColumns.map((c) => c.name);
+
+            table.rows = table.rows.map((row) => {
+              const newRow = { ...row };
+              newRow[newColumnName] = stringColumnNames
+                .map((name) => row[name] ?? '(empty)')
+                .join(' > ');
+              stringColumnNames.forEach((name) => {
+                delete newRow[name];
+              });
+              return newRow;
+            });
+
+            table.columns = [
+              ...dateColumns,
+              ...numberColumns,
+              {
+                id: newColumnName,
+                name: newColumnName,
+                meta: { type: 'string', esqlType: 'keyword' },
+              },
+            ];
+          }
+        }
+      }
+
       onDataUpdate(adapters);
     },
     handleEvent: prepareEventHandler(api, getState, callbacks, services, disableTriggers),

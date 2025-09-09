@@ -58,7 +58,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
-          const columns = table.columns.map((col) => {
+          let columns = table.columns.map((col) => {
             return {
               id: col.variable ?? col.id,
               name: col.variable ? `??${col.variable}` : col.name,
@@ -74,6 +74,32 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   : true,
             };
           });
+
+          if (columns.length > 2) {
+            const dateColumns = columns.filter((c) => c.meta.type === 'date');
+            const numberColumns = columns.filter((c) => c.meta.type === 'number');
+            const stringColumns = columns.filter((c) => c.meta.type === 'string');
+
+            if (
+              dateColumns.length === 1 &&
+              numberColumns.length === 1 &&
+              stringColumns.length >= 2
+            ) {
+              const newColumnName = stringColumns.map((c) => c.name).join(' > ');
+              columns = [
+                ...dateColumns,
+                ...numberColumns,
+                {
+                  id: newColumnName,
+                  name: newColumnName,
+                  meta: { type: 'string' },
+                  variable: undefined,
+                  compatible: true,
+                },
+              ];
+            }
+          }
+
           setAllColumns(columns);
         }
       }

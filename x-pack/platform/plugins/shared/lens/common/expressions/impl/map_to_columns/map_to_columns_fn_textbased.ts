@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type {
   OriginalColumn,
   MapToColumnsExpressionFunction,
@@ -15,6 +15,38 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
   data,
   { idMap: encodedIdMap }
 ) => {
+  const table: Datatable = { ...data };
+
+  if (table && table.columns.length > 2) {
+    const dateColumns = table.columns.filter((c) => c.meta.type === 'date');
+    const numberColumns = table.columns.filter((c) => c.meta.type === 'number');
+    const stringColumns = table.columns.filter((c) => c.meta.type === 'string');
+
+    if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
+      const newColumnName = stringColumns.map((c) => c.name).join(' > ');
+      const stringColumnNames = stringColumns.map((c) => c.name);
+
+      table.rows = table.rows.map((row) => {
+        const newRow = { ...row };
+        newRow[newColumnName] = stringColumnNames.map((name) => row[name] ?? '(empty)').join(' > ');
+        stringColumnNames.forEach((name) => {
+          delete newRow[name];
+        });
+        return newRow;
+      });
+
+      table.columns = [
+        ...dateColumns,
+        ...numberColumns,
+        {
+          id: newColumnName,
+          name: newColumnName,
+          meta: { type: 'string', esqlType: 'keyword' },
+        },
+      ];
+    }
+  }
+
   const isOriginalColumn = (item: OriginalColumn | undefined): item is OriginalColumn => {
     return !!item;
   };
@@ -23,7 +55,7 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
   // extract all the entries once
   const idMapColEntries = Object.entries(idMap);
   // create a lookup id => column
-  const colLookups = new Map<string, DatatableColumn>(data.columns.map((c) => [c.id, c]));
+  const colLookups = new Map<string, DatatableColumn>(table.columns.map((c) => [c.id, c]));
 
   // now create a lookup to get the original columns for each variable
   const colVariableLookups = new Map<string, OriginalColumn[]>(
@@ -33,8 +65,8 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
   );
 
   return {
-    ...data,
-    rows: data.rows.map((row) => {
+    ...table,
+    rows: table.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
 
       for (const id in row) {
@@ -57,7 +89,7 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
 
       return mappedRow;
     }),
-    columns: data.columns.flatMap((column) => {
+    columns: table.columns.flatMap((column) => {
       if (!(column.id in idMap) && !column.variable) {
         return [];
       }
