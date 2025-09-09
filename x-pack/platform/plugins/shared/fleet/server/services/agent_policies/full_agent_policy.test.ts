@@ -13,6 +13,7 @@ import type {
   DownloadSource,
   PackageInfo,
   FullAgentPolicyInput,
+  TemplateAgentPolicyInput,
 } from '../../types';
 import {
   createAppContextStartContractMock,
@@ -2369,7 +2370,7 @@ describe('generateOtelcolConfig', () => {
     name: 'test-1',
     revision: 0,
     data_stream: {
-      namespace: 'default',
+      namespace: 'testing',
     },
     use_output: 'default',
     package_policy_id: 'somepolicy',
@@ -2428,6 +2429,42 @@ describe('generateOtelcolConfig', () => {
             targets: [
               {
                 endpoints: ['https://www.elastic.co'],
+              },
+            ],
+          },
+        },
+        processors: {
+          transform: {
+            metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+          },
+        },
+        service: {
+          pipelines: {
+            metrics: {
+              receivers: ['httpcheck'],
+              processors: ['transform'],
+            },
+          },
+        },
+      },
+    ],
+  };
+
+  const otelInputTemplate: TemplateAgentPolicyInput = {
+    type: OTEL_COLLECTOR_INPUT_TYPE,
+    id: 'test-1',
+    streams: [
+      {
+        id: 'stream-id-1',
+        data_stream: {
+          dataset: 'somedataset',
+          type: 'metrics',
+        },
+        receivers: {
+          httpcheck: {
+            targets: [
+              {
+                endpoints: ['https://epr.elastic.co'],
               },
             ],
           },
@@ -2535,7 +2572,7 @@ describe('generateOtelcolConfig', () => {
               statements: [
                 'set(attributes["data_stream.type"], "metrics")',
                 'set(attributes["data_stream.dataset"], "somedataset")',
-                'set(attributes["data_stream.namespace"], "default")',
+                'set(attributes["data_stream.namespace"], "testing")',
               ],
             },
           ],
@@ -2588,7 +2625,7 @@ describe('generateOtelcolConfig', () => {
               statements: [
                 'set(attributes["data_stream.type"], "metrics")',
                 'set(attributes["data_stream.dataset"], "somedataset")',
-                'set(attributes["data_stream.namespace"], "default")',
+                'set(attributes["data_stream.namespace"], "testing")',
               ],
             },
           ],
@@ -2612,6 +2649,47 @@ describe('generateOtelcolConfig', () => {
           metrics: {
             receivers: ['forward'],
             exporters: ['elasticsearch/default'],
+          },
+        },
+      },
+    });
+  });
+
+
+  it('should also work for templates', () => {
+    const inputs: TemplateAgentPolicyInput[] = [otelInputTemplate];
+    expect(generateOtelcolConfig(inputs)).toEqual({
+      receivers: {
+        'httpcheck/test-1-stream-id-1': {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
+            },
+          ],
+        },
+      },
+      processors: {
+        'transform/test-1-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/test-1-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "somedataset")',
+                'set(attributes["data_stream.namespace"], "default")',
+              ],
+            },
+          ],
+        },
+      },
+      service: {
+        pipelines: {
+          'metrics/test-1-stream-id-1': {
+            receivers: ['httpcheck/test-1-stream-id-1'],
+            processors: ['transform/test-1-stream-id-1', 'transform/test-1-stream-id-1-routing'],
           },
         },
       },
@@ -2651,7 +2729,7 @@ describe('generateOtelcolConfig', () => {
               statements: [
                 'set(attributes["data_stream.type"], "metrics")',
                 'set(attributes["data_stream.dataset"], "somedataset")',
-                'set(attributes["data_stream.namespace"], "default")',
+                'set(attributes["data_stream.namespace"], "testing")',
               ],
             },
           ],

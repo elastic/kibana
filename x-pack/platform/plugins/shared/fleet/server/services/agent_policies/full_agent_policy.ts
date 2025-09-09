@@ -26,6 +26,7 @@ import type {
   FleetProxy,
   FleetServerHost,
   AgentPolicy,
+  TemplateAgentPolicyInput,
 } from '../../types';
 import type {
   DownloadSource,
@@ -892,7 +893,10 @@ export function getBinarySourceSettings(
 }
 
 // Generate OTel Collector policy
-export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput: Output) {
+export function generateOtelcolConfig(
+  inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
+  dataOutput?: Output
+) {
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
     .flatMap((input) => {
@@ -902,7 +906,9 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput
         const attributesTransform = generateOTelAttributesTransform(
           stream.data_stream.type ? stream.data_stream.type : 'logs',
           stream.data_stream.dataset,
-          input.data_stream.namespace,
+          'data_stream' in input
+            ? (input as FullAgentPolicyInput).data_stream.namespace
+            : 'default',
           suffix
         );
         return appendOtelComponents(
@@ -1085,7 +1091,11 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {
   });
 }
 
-function attachExporter(config: OTelCollectorConfig, dataOutput: Output) {
+function attachExporter(config: OTelCollectorConfig, dataOutput?: Output) {
+  if (!dataOutput) {
+    return config;
+  }
+
   const exporter = generateExporter(dataOutput);
   config.connectors = {
     ...config.connectors,
