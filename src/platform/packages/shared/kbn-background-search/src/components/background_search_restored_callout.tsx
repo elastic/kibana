@@ -21,10 +21,22 @@ const STICKY_SESSION_STATES = new Set<SearchSessionState>([
 ]);
 
 interface BackgroundSearchRestoredCalloutProps {
+  /**
+   * Observable that emits the current SearchSessionState to drive the callout visibility.
+   */
   state$: Observable<SearchSessionState>;
 }
 
-export function BackgroundSearchRestoredCallout({ state$ }: BackgroundSearchRestoredCalloutProps) {
+/**
+ * Displays a sticky callout when a search session was restored (cached background search).
+ *
+ * The callout becomes visible when the session transitions to Restored and remains visible
+ * for the Restored / BackgroundLoading states until a non-background state appears.
+ *
+ * @param props Component props.
+ */
+export function BackgroundSearchRestoredCallout(props: BackgroundSearchRestoredCalloutProps) {
+  const { state$ } = props;
   const { euiTheme } = useEuiTheme();
 
   const show$ = state$
