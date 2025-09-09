@@ -49,7 +49,6 @@ import { createProductFeaturesServiceMock } from '../../../product_features_serv
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -94,8 +93,6 @@ export const createMockClients = () => {
     assetInventoryDataClient: AssetInventoryDataClientMock.create(),
     productFeaturesService: createProductFeaturesServiceMock(),
     logger: loggerMock.create(),
-    contentManagement: contentManagementMock.createSetupContract(),
-    contentClient: contentManagementMock.createStartContract().client,
   };
 };
 
