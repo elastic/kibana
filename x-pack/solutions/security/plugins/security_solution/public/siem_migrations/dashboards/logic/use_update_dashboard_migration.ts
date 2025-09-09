@@ -11,29 +11,19 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { updateDashboardMigration } from '../api';
 import * as i18n from '../service/translations';
 
-export interface UseUpdateDashboardMigrationProps {
-  onError?: (error: Error) => void;
-  onSuccess?: () => void;
-}
-
 /**
  * Hook to update a dashboard migration (e.g. rename) and show user feedback toasts.
  */
-export const useUpdateDashboardMigration = (
-  migrationId: string,
-  { onError, onSuccess }: UseUpdateDashboardMigrationProps = {}
-) => {
+export const useUpdateDashboardMigration = (migrationId: string) => {
   const { addError, addSuccess } = useAppToasts();
   return useMutation({
     mutationFn: (body: UpdateDashboardMigrationRequestBody) =>
       updateDashboardMigration({ migrationId, body }),
     onError: (error: Error) => {
       addError(error, { title: i18n.UPDATE_DASHBOARD_MIGRATION_FAILURE });
-      onError?.(error);
     },
     onSuccess: () => {
       addSuccess(i18n.UPDATE_DASHBOARD_MIGRATION_SUCCESS);
-      onSuccess?.();
     },
   });
 };
