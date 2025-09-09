@@ -25,9 +25,9 @@ const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.netw
 
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
   '^' +
-    ADDITIONAL_CONTEXT_BLOCKED_LIST.map((p) => p.replace(/\./g, '\\.').replace(/\*/g, '.*')).join(
-      '|'
-    ) +
+    ADDITIONAL_CONTEXT_BLOCKED_LIST.map((p) =>
+      p.replace(/\\/g, '\\\\').replace(/\./g, '\\.').replace(/\*/g, '.*')
+    ).join('|') +
     '$'
 );
 
