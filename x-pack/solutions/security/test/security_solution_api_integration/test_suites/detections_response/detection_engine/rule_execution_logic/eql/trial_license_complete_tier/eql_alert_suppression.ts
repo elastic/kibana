@@ -2993,20 +2993,23 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('does not suppress alerts outside of duration', async () => {
         const id = uuidv4();
-        // this timestamp is 1 minute in the past
-        const firstTimestamp = new Date(Date.now() - 5000).toISOString();
-        const firstTimestamp2 = new Date(Date.now() - 5500).toISOString();
+        const firstRunTimestamp1 = '2020-10-28T05:45:00.000Z';
+        const firstRunTimestamp2 = '2020-10-28T05:46:00.000Z';
+        const secondRunTimestamp1 = '2020-10-28T06:10:00.000Z';
+        const secondRunTimestamp2 = '2020-10-28T06:11:00.000Z';
 
         const firstDocument = {
           id,
-          '@timestamp': firstTimestamp,
+          '@timestamp': firstRunTimestamp1,
           host: {
             name: 'host-a',
           },
         };
         await indexListOfSourceDocuments([
           firstDocument,
-          { ...firstDocument, '@timestamp': firstTimestamp2 },
+          { ...firstDocument, '@timestamp': firstRunTimestamp2 },
+          { ...firstDocument, '@timestamp': secondRunTimestamp1 },
+          { ...firstDocument, '@timestamp': secondRunTimestamp2 },
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -3015,23 +3018,31 @@ export default ({ getService }: FtrProviderContext) => {
           alert_suppression: {
             group_by: ['host.name'],
             duration: {
-              value: 7,
-              unit: 's',
+              value: 20,
+              unit: 'm',
             },
             missing_fields_strategy: 'suppress',
           },
-          from: 'now-10s',
-          interval: '5s',
+          from: 'now-35m',
+          interval: '30m',
         };
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits).toHaveLength(3);
-        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
-          alerts.hits.hits
-        );
-        expect(buildingBlockAlerts).toHaveLength(2);
-        expect(sequenceAlert).toHaveLength(1);
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+        });
+
+        expect(previewAlerts).toHaveLength(6);
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
+        expect(buildingBlockAlerts).toHaveLength(4);
+        expect(sequenceAlert).toHaveLength(2);
 
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
@@ -3044,58 +3055,15 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
 
-        const secondTimestamp = new Date(Date.now() - 1000).toISOString();
-        const secondTimestamp2 = new Date(Date.now()).toISOString();
-        const secondDocument = {
-          id,
-          '@timestamp': secondTimestamp,
-          host: {
-            name: 'host-a',
-          },
-        };
-
-        // Add a new document, then disable and re-enable to trigger another rule run.
-        // the second rule run should generate a new alert
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
-
-        await indexListOfSourceDocuments([
-          secondDocument,
-          { ...secondDocument, '@timestamp': secondTimestamp2 },
-        ]);
-        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp = new Date(Date.now() + 5000);
-        const secondAlerts = await getOpenAlerts(
-          supertest,
-          log,
-          es,
-          createdRule,
-          RuleExecutionStatusEnum.succeeded,
-          undefined,
-          afterTimestamp
-        );
-
-        const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
-
-        expect(sequenceAlert2).toHaveLength(2);
-        expect(sequenceAlert2[0]._source).toEqual({
-          ...sequenceAlert2[0]?._source,
+        expect(sequenceAlert[1]._source).toEqual({
+          ...sequenceAlert[1]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
               value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // 1 alert from second rule run, that's why 1 suppressed
-        });
-        expect(sequenceAlert2[1]._source).toEqual({
-          ...sequenceAlert2[1]?._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: 'host-a',
-            },
-          ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // 1 alert from second rule run, that's why 1 suppressed
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
       });
 
