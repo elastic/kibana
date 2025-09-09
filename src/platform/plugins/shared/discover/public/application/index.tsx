@@ -10,17 +10,24 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverRouter } from './discover_router';
 import type { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {
   element: HTMLElement;
+  onAppLeave: AppMountParameters['onAppLeave'];
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
 }
 
-export const renderApp = ({ element, services, customizationContext }: RenderAppProps) => {
+export const renderApp = ({
+  element,
+  onAppLeave,
+  services,
+  customizationContext,
+}: RenderAppProps) => {
   const { capabilities, chrome, data, core } = services;
 
   if (!capabilities.discover_v2.save) {
@@ -36,7 +43,11 @@ export const renderApp = ({ element, services, customizationContext }: RenderApp
   }
 
   const unmount = toMountPoint(
-    <DiscoverRouter services={services} customizationContext={customizationContext} />,
+    <DiscoverRouter
+      onAppLeave={onAppLeave}
+      services={services}
+      customizationContext={customizationContext}
+    />,
     core
   )(element);
 

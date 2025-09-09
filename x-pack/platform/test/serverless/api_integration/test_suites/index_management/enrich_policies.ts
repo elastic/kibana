@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');

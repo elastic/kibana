@@ -10,8 +10,8 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { TableVisParams } from '../../common';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { TableVisParams } from '../../common';
 
 const TableOptionsComponent = lazy(() => import('./table_vis_options'));
 

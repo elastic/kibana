@@ -12,6 +12,7 @@ export const ERROR_STATE_PATH = '/error_state';
 export const SEARCH_INDICES_PATH = `${ROOT_PATH}search_indices`;
 export const CONNECTORS_PATH = `${ROOT_PATH}connectors`;
 export const CRAWLERS_PATH = `${ROOT_PATH}crawlers`;
+export const CRAWLERS_NEW_PATH = `${CRAWLERS_PATH}/new_crawler`;
 export const CRAWLERS_ELASTIC_MANAGED_PATH = `${CRAWLERS_PATH}/elastic_managed`;
 export const SETTINGS_PATH = `${ROOT_PATH}settings`;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ISavedObjectsRepository,
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { getCspBenchmarkRulesStatesHandler } from '../../../routes/benchmark_rules/get_states/v1';
-import { MutedRulesStats } from './types';
+import type { MutedRulesStats } from './types';
 
 export const getMutedRulesStats = async (
   soClient: SavedObjectsClientContract,

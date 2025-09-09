@@ -8,8 +8,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { RangeFieldMeta } from '../../../../../../../common/descriptor_types';
-import { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
+import type { RangeFieldMeta } from '../../../../../../../common/descriptor_types';
+import type { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
 import { getMaxLabel, getMinLabel } from './get_ordinal_label';
 import { type Marker, MarkerList } from './marker_list';
 import { MapMarker } from './map_marker';

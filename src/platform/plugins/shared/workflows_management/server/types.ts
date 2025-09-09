@@ -7,32 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import {
-  TaskManagerStartContract,
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
+import type {
   TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPluginSetup {}
-
-export interface WorkflowsPluginStart {
-  runWorkflow(workflow: WorkflowExecutionEngineModel, params: Record<string, any>): Promise<string>;
+export interface WorkflowsPluginSetup {
+  management: WorkflowsManagementApi;
 }
+
+export type WorkflowsPluginStart = Record<string, never>;
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {
   features?: FeaturesPluginSetup;
   taskManager?: TaskManagerSetupContract;
+  actions?: ActionsPluginSetupContract;
+  alerting?: AlertingServerSetup;
+  spaces?: SpacesPluginStart;
 }

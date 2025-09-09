@@ -8,6 +8,7 @@
 import { useState, useCallback, useEffect, useReducer } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { isPending, isFailure, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
@@ -169,6 +170,7 @@ export const useMetricsHostsAnomaliesResults = (
     search,
     hostName,
     metric,
+    schema,
   }: {
     endTime: number;
     startTime: number;
@@ -180,6 +182,7 @@ export const useMetricsHostsAnomaliesResults = (
     search?: string;
     hostName?: string;
     metric?: Metric;
+    schema?: DataSchemaFormat;
   },
   {
     request$,
@@ -204,7 +207,7 @@ export const useMetricsHostsAnomaliesResults = (
   const [metricsHostsAnomalies, setMetricsHostsAnomalies] = useState<MetricsHostsAnomalies>([]);
 
   const mlCapabilities = application.capabilities.ml as { canGetJobs: boolean } | undefined;
-  const canGetAnomalies = mlCapabilities?.canGetJobs;
+  const canGetAnomalies = mlCapabilities?.canGetJobs && schema !== 'semconv';
 
   const {
     data: response,

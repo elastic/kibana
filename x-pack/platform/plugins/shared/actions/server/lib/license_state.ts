@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Observable, Subscription } from 'rxjs';
 import { assertNever } from '@kbn/std';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PLUGIN } from '../constants/plugin';
 import type { ActionType } from '../types';

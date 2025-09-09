@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { FlagOptions, Flags, mergeFlagOptions, run } from '@kbn/dev-cli-runner';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { FlagOptions, Flags } from '@kbn/dev-cli-runner';
+import { mergeFlagOptions, run } from '@kbn/dev-cli-runner';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
-import { createKibanaClient, KibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
-import { LogLevelId } from '@kbn/logging';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import { createKibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
+import type { LogLevelId } from '@kbn/logging';
 import { setDiagLogger } from '@kbn/telemetry';
-import { ToolingLog } from '@kbn/tooling-log';
-import { InferenceCliClient } from './client';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { InferenceCliClient } from './client';
 import { createInferenceClient } from './create_inference_client';
 
 type RunRecipeCallback = (options: {

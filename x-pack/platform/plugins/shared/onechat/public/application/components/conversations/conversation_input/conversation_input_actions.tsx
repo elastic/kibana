@@ -13,11 +13,11 @@ import { useAgentId, useHasActiveConversation } from '../../../hooks/use_convers
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
-import { useMessages } from '../../../context/messages_context';
-
+import { useSendMessage } from '../../../context/send_message_context';
 interface ConversationInputActionsProps {
-  handleSubmit: () => void;
-  submitDisabled: boolean;
+  onSubmit: () => void;
+  isSubmitDisabled: boolean;
+  resetToPendingMessage: () => void;
 }
 
 const labels = {
@@ -30,13 +30,14 @@ const labels = {
 };
 
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
-  handleSubmit,
-  submitDisabled,
+  onSubmit,
+  isSubmitDisabled,
+  resetToPendingMessage,
 }) => {
   const { setAgentId } = useConversationActions();
   const agentId = useAgentId();
   const hasActiveConversation = useHasActiveConversation();
-  const { canCancel, cancel } = useMessages();
+  const { canCancel, cancel } = useSendMessage();
   const { euiTheme } = useEuiTheme();
   const cancelButtonStyles = css`
     background-color: ${euiTheme.colors.backgroundLightText};
@@ -65,7 +66,12 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               size="m"
               color="text"
               css={cancelButtonStyles}
-              onClick={cancel}
+              onClick={() => {
+                if (canCancel) {
+                  cancel();
+                  resetToPendingMessage();
+                }
+              }}
             />
           ) : (
             <EuiButtonIcon
@@ -74,8 +80,8 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               iconType="sortUp"
               display="fill"
               size="m"
-              disabled={submitDisabled}
-              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+              onClick={onSubmit}
             />
           )}
         </EuiFlexItem>

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import {
   flashAPIErrors,
@@ -19,11 +21,11 @@ import {
   flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
-import {
-  AddAnalyticsCollectionsAPILogic,
+import type {
   AddAnalyticsCollectionApiLogicArgs,
   AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
+import { AddAnalyticsCollectionsAPILogic } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_OVERVIEW_PATH } from '../../routes';
 
 const SERVER_ERROR_CODE = 500;

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../../../common';
 
 export function setupBookEmbeddable(

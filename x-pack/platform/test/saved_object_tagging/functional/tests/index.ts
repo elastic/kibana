@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { createUsersAndRoles } from '../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

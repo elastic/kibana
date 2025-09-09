@@ -10,12 +10,12 @@ import type {
   IScopedClusterClient,
   AuthenticatedUser,
 } from '@kbn/core/server';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { RuleMigrationIntegration } from '../types';
 import type { PackageList, PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 const createMockPackage = (overrides: Partial<PackageListItem> = {}): PackageListItem =>
   ({

@@ -12,8 +12,8 @@ import {
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
 } from '../../common/constants';
-import { Privileges } from '../shared_imports';
-import { RouteDependencies } from '../types';
+import type { Privileges } from '../shared_imports';
+import type { RouteDependencies } from '../types';
 
 const extractMissingIndexPrivileges = (
   privilegesObject: { [key: string]: Record<string, boolean> } = {}

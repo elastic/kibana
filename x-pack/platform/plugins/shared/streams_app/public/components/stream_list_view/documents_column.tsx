@@ -105,6 +105,16 @@ export function DocumentsColumn({
     <EuiIcon type="visLine" size="m" />
   );
 
+  const cellAriaLabel = hasData
+    ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
+        defaultMessage: '{docCount} documents in {indexPattern}',
+        values: { docCount, indexPattern },
+      })
+    : i18n.translate('xpack.streams.documentsColumn.cellNoDataLabel', {
+        defaultMessage: 'No documents found in {indexPattern}',
+        values: { indexPattern },
+      });
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -113,6 +123,8 @@ export function DocumentsColumn({
         height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
+      role="group"
+      aria-label={cellAriaLabel}
     >
       {histogramQueryFetch.loading ? (
         <LoadingPlaceholder />
@@ -120,6 +132,7 @@ export function DocumentsColumn({
         <>
           <EuiFlexItem
             grow={2}
+            aria-hidden="true"
             className={css`
               text-align: right;
             `}
@@ -128,6 +141,7 @@ export function DocumentsColumn({
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
+            aria-hidden="true"
             className={css`
               border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;

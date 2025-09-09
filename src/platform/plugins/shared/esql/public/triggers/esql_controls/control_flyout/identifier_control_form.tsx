@@ -18,14 +18,14 @@ import {
   type EuiSwitchEvent,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   EsqlControlType,
   type ESQLControlState,
   type ControlWidthOptions,
-  ESQLControlVariable,
 } from '@kbn/esql-types';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
@@ -60,7 +60,7 @@ export function IdentifierControlForm({
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,

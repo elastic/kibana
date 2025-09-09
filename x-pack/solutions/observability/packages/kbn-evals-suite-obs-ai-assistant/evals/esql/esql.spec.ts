@@ -6,7 +6,8 @@
  */
 
 import { evaluate as base } from '../../src/evaluate';
-import { EvaluateEsqlDataset, createEvaluateEsqlDataset } from './evaluate_esql_dataset';
+import type { EvaluateEsqlDataset } from './evaluate_esql_dataset';
+import { createEvaluateEsqlDataset } from './evaluate_esql_dataset';
 import {
   generateApacheErrorSpikeLogs,
   generateCorrelationIdLog,
@@ -740,23 +741,21 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             metadata: {},
           },
-          // This results in a timeout because the NL-to-ESQL tasks goes into a loop
-          //  See trace: https://35-187-109-62.sslip.io/projects/UHJvamVjdDo5/traces/630f92adcb3620295794180f71ccb37a?selectedSpanNodeId=U3BhbjozODYxNTQ%3D
-          // {
-          //   input: {
-          //     question:
-          //       "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
-          //   },
-          //   output: {
-          //     expected: `FROM logs-auth_service-*
-          //     | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
-          //     | LOOKUP JOIN users_metadata ON user.id
-          //     | KEEP @timestamp, user.id, full_name, department
-          //     | LIMIT 20`,
-          //     execute: false,
-          //   },
-          //   metadata: {},
-          // },
+          {
+            input: {
+              question:
+                "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
+            },
+            output: {
+              expected: `FROM logs-auth_service-*
+              | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
+              | LOOKUP JOIN users_metadata ON user.id
+              | KEEP @timestamp, user.id, full_name, department
+              | LIMIT 20`,
+              execute: false,
+            },
+            metadata: {},
+          },
         ],
       },
     });
@@ -979,7 +978,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               expected: [
                 `FROM main
                 | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
-                `FROM main 
+                `FROM main
                 | LOOKUP JOIN suspicious_users ON user_id`,
               ],
               execute: false,

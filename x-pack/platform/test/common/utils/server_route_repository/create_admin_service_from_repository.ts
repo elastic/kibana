@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import {
-  formatRequest,
+import type {
   ServerRouteRepository,
   EndpointOf,
   ReturnOf,
   ClientRequestParamsOf,
 } from '@kbn/server-route-repository';
-import { Subtract, RequiredKeys } from 'utility-types';
+import { formatRequest } from '@kbn/server-route-repository';
+import type { Subtract, RequiredKeys } from 'utility-types';
 import { format } from 'url';
-import supertest from 'supertest';
-import {
+import type supertest from 'supertest';
+import type {
   RoleScopedSupertestProvider,
   SupertestWithRoleScope,
 } from '../../../api_integration_deployment_agnostic/services/role_scoped_supertest';
-import { CustomRoleScopedSupertestProvider } from '../../../api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
+import type { CustomRoleScopedSupertestProvider } from '../../../api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
   ? [TArgs] | []

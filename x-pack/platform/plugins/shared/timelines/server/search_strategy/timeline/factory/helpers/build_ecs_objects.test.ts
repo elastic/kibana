@@ -6,7 +6,7 @@
  */
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
-import { EventHit } from '../../../../../common/search_strategy';
+import type { EventHit } from '../../../../../common/search_strategy';
 import { buildEcsObjects } from './build_ecs_objects';
 
 describe('buildEcsObjects', () => {

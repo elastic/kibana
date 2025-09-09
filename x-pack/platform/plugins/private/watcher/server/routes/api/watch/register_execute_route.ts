@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { ExecuteDetails } from '../../../models/execute_details';
 // @ts-ignore

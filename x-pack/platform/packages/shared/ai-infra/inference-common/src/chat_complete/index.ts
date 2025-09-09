@@ -41,15 +41,25 @@ export {
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {
   ToolChoiceType,
-  type ToolCallbacksOf,
   type ToolCallback,
   type ToolOptions,
   type ToolDefinition,
   type ToolCall,
-  type ToolCallsOf,
   type UnvalidatedToolCall,
   type ToolChoice,
+  type CustomToolChoice,
+  type ToolCallArguments,
 } from './tools';
+
+export type {
+  ToolCallArgumentsOfToolDefinition,
+  ToolCallOfToolDefinitions,
+  ToolCallOfToolOptions,
+  ToolCallbacksOfToolOptions,
+  ToolNamesOf,
+  ToolsOfChoice,
+} from './tools_of';
+
 export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
 export {
   isChatCompletionChunkEvent,
@@ -80,5 +90,4 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
-  AnonymizationRegexWorkerTaskPayload,
 } from './anonymization';

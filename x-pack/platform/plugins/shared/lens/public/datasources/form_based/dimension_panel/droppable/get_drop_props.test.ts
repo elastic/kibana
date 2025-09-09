@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DragDropOperation, OperationMetadata } from '../../../../types';
-import { TermsIndexPatternColumn } from '../../operations';
+import type { DragDropOperation, OperationMetadata } from '../../../../types';
+import type { TermsIndexPatternColumn } from '../../operations';
 import { getDropProps } from './get_drop_props';
 import {
   mockDataViews,

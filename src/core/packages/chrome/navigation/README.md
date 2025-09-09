@@ -71,10 +71,16 @@ function App() {
     <div className="app">
       <TopBar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <Navigation
-        title="Observability"
-        logo="observabilityApp"
-        items={navigationItems}
+        activeItemId={activeItemId}
         isCollapsed={isCollapsed}
+        items={navigationItems}
+        logo={{
+          label: 'Observability',
+          id: 'observability',
+          iconType: 'observabilityApp',
+          href: '/observability',
+        }}
+        setWidth={setNavigationWidth}
       />
       <main className="app-content">{/* Your application content */}</main>
     </div>
@@ -108,7 +114,7 @@ export const navigationItems = {
           label: 'Reports', // or null for unlabeled sections
           items: [
             {
-              id: 'overview',
+              id: 'analytics', // has the same `id` as the parent item
               label: 'Overview',
               href: '/analytics/reports', // has the same `href` as the parent item
             },
@@ -121,7 +127,7 @@ export const navigationItems = {
               id: 'traffic-report',
               label: 'Traffic report',
               href: '/analytics/traffic',
-              external: true, // opens in new tab and shows an "external resource" icon
+              isExternal: true, // opens in new tab and shows an "external resource" icon
             },
           ],
         },

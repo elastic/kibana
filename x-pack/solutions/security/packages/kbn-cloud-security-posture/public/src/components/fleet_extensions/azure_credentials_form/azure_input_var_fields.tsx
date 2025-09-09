@@ -6,11 +6,11 @@
  */
 import React, { Suspense } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
-import { AzureOptions } from './get_azure_credentials_form_options';
+import type { AzureOptions } from './get_azure_credentials_form_options';
 import { fieldIsInvalid, findVariableDef } from '../utils';
 
 export const AzureInputVarFields = ({
@@ -33,7 +33,7 @@ export const AzureInputVarFields = ({
 
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = i18n.translate(
-          'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.',
           {
             defaultMessage: '{field} is required',
             values: {

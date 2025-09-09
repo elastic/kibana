@@ -5,33 +5,21 @@
  * 2.0.
  */
 
-import {
-  setup,
-  assign,
-  ActorRefFrom,
-  fromObservable,
-  fromEventObservable,
-  MachineImplementationsFrom,
-  SnapshotFrom,
-} from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import {
-  Condition,
-  SampleDocument,
-  Streams,
-  conditionToQueryDsl,
-  getConditionFields,
-  isAlwaysCondition,
-} from '@kbn/streams-schema';
+import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
+import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { i18n } from '@kbn/i18n';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Condition } from '@kbn/streamlang';
+import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import { getPercentageFormatter } from '../../../../../util/formatters';
-import { emptyEqualsToAlways } from '../../../../../util/condition';
+import { processCondition } from '../../utils';
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
@@ -41,9 +29,12 @@ export interface RoutingSamplesMachineDeps {
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
 export type RoutingSamplesActorSnapshot = SnapshotFrom<typeof routingSamplesMachine>;
 
+export type DocumentMatchFilterOptions = 'matched' | 'unmatched';
+
 export interface RoutingSamplesInput {
   condition?: Condition;
   definition: Streams.WiredStream.GetResponse;
+  documentMatchFilter: DocumentMatchFilterOptions;
 }
 
 export interface RoutingSamplesContext {
@@ -53,11 +44,13 @@ export interface RoutingSamplesContext {
   documentsError?: Error;
   approximateMatchingPercentage?: string;
   approximateMatchingPercentageError?: Error;
+  documentMatchFilter: DocumentMatchFilterOptions;
 }
 
 export type RoutingSamplesEvent =
   | { type: 'routingSamples.refresh' }
-  | { type: 'routingSamples.updateCondition'; condition?: Condition };
+  | { type: 'routingSamples.updateCondition'; condition?: Condition }
+  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions };
 
 export interface SearchParams extends RoutingSamplesInput {
   start: number;
@@ -101,6 +94,9 @@ export const routingSamplesMachine = setup({
     storeDocumentCountsError: assign((_, params: { error: Error }) => ({
       approximateMatchingPercentageError: params.error,
     })),
+    setDocumentMatchFilter: assign((_, params: { filter: DocumentMatchFilterOptions }) => ({
+      documentMatchFilter: params.filter,
+    })),
   },
   delays: {
     conditionUpdateDebounceTime: 500,
@@ -119,6 +115,7 @@ export const routingSamplesMachine = setup({
     documents: [],
     documentsError: undefined,
     approximateMatchingPercentageError: undefined,
+    documentMatchFilter: 'matched',
   }),
   initial: 'fetching',
   invoke: {
@@ -134,6 +131,16 @@ export const routingSamplesMachine = setup({
       target: '.debouncingCondition',
       reenter: true,
       actions: [{ type: 'updateCondition', params: ({ event }) => event }],
+    },
+    'routingSamples.setDocumentMatchFilter': {
+      target: '.fetching',
+      reenter: true,
+      actions: [
+        {
+          type: 'setDocumentMatchFilter',
+          params: ({ event }) => event,
+        },
+      ],
     },
   },
   states: {
@@ -156,6 +163,7 @@ export const routingSamplesMachine = setup({
                 input: ({ context }) => ({
                   condition: context.condition,
                   definition: context.definition,
+                  documentMatchFilter: context.documentMatchFilter,
                 }),
                 onSnapshot: {
                   guard: {
@@ -202,6 +210,7 @@ export const routingSamplesMachine = setup({
                 input: ({ context }) => ({
                   condition: context.condition,
                   definition: context.definition,
+                  documentMatchFilter: context.documentMatchFilter,
                 }),
                 onSnapshot: {
                   guard: {
@@ -251,21 +260,23 @@ export const createRoutingSamplesMachineImplementations = ({
 });
 
 export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
-  return fromObservable<SampleDocument[], Pick<SearchParams, 'condition' | 'definition'>>(
-    ({ input }) => {
-      return collectDocuments({ data, input });
-    }
-  );
+  return fromObservable<
+    SampleDocument[],
+    Pick<SearchParams, 'condition' | 'definition' | 'documentMatchFilter'>
+  >(({ input }) => {
+    return collectDocuments({ data, input });
+  });
 }
 
 export function createDocumentsCountCollectorActor({
   data,
 }: Pick<RoutingSamplesMachineDeps, 'data'>) {
-  return fromObservable<string | undefined, Pick<SearchParams, 'condition' | 'definition'>>(
-    ({ input }) => {
-      return collectDocumentCounts({ data, input });
-    }
-  );
+  return fromObservable<
+    string | undefined,
+    Pick<SearchParams, 'condition' | 'definition' | 'documentMatchFilter'>
+  >(({ input }) => {
+    return collectDocumentCounts({ data, input });
+  });
 }
 
 function createTimeUpdatesActor({ timeState$ }: Pick<RoutingSamplesMachineDeps, 'timeState$'>) {
@@ -405,14 +416,6 @@ function getRuntimeMappings(
   );
 }
 
-function processCondition(condition?: Condition): Condition | undefined {
-  if (!condition) return undefined;
-  const convertedCondition = emptyEqualsToAlways(condition);
-  return convertedCondition && isAlwaysCondition(convertedCondition)
-    ? undefined
-    : convertedCondition;
-}
-
 function handleTimeoutError(error: Error) {
   if (error.name === 'TimeoutError') {
     return throwError(
@@ -428,20 +431,29 @@ function handleTimeoutError(error: Error) {
   return throwError(() => error);
 }
 
-function buildDocumentsSearchParams({ condition, start, end, definition }: SearchParams) {
+function buildDocumentsSearchParams({
+  condition,
+  documentMatchFilter,
+  start,
+  end,
+  definition,
+}: SearchParams) {
   const finalCondition = processCondition(condition);
   const runtimeMappings = getRuntimeMappings(definition, finalCondition);
 
+  const isMatched = documentMatchFilter === 'matched';
+  const conditionClause = finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} };
+
+  const query = {
+    bool: {
+      filter: [createTimestampRangeQuery(start, end)],
+      ...(isMatched ? { must: [conditionClause] } : { must_not: [conditionClause] }),
+    },
+  };
+
   return {
     index: definition.stream.name,
-    query: {
-      bool: {
-        must: [
-          finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} },
-          createTimestampRangeQuery(start, end),
-        ],
-      },
-    },
+    query,
     runtime_mappings: runtimeMappings,
     size: SAMPLES_SIZE,
     sort: [{ '@timestamp': { order: 'desc' } }],

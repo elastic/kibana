@@ -6,7 +6,7 @@
  */
 
 import { populateAlertActions } from './alert_actions';
-import { ActionConnector } from './types';
+import type { ActionConnector } from './types';
 import { MONITOR_STATUS } from '../constants/uptime_alerts';
 import { MonitorStatusTranslations } from './legacy_uptime/translations';
 

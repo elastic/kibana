@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 export interface WorkflowLogEvent {
@@ -48,6 +48,7 @@ export interface WorkflowEventLoggerContext {
   stepId?: string;
   stepName?: string;
   stepType?: string;
+  spaceId?: string;
 }
 
 export interface WorkflowEventLoggerOptions {
@@ -77,7 +78,6 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   private context: WorkflowEventLoggerContext;
   private options: WorkflowEventLoggerOptions;
   private eventQueue: Doc[] = [];
-  private flushTimeout: NodeJS.Timeout | null = null;
   private timings: Map<string, Date> = new Map();
 
   constructor(
@@ -250,6 +250,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   private createBaseEvent(): WorkflowLogEvent {
     return {
       '@timestamp': new Date().toISOString(),
+      spaceId: this.context.spaceId,
       workflow: {
         id: this.context.workflowId,
         name: this.context.workflowName,
@@ -312,27 +313,13 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
   private queueEvent(doc: Doc): void {
     this.eventQueue.push(doc);
-
-    // Buffer events and flush them periodically
-    if (this.eventQueue.length >= 10) {
-      void this.flushEvents();
-    } else if (!this.flushTimeout) {
-      this.flushTimeout = setTimeout(() => {
-        void this.flushEvents();
-      }, 5000); // Flush every 5 seconds
-    }
   }
 
-  private async flushEvents(): Promise<void> {
+  public async flushEvents(): Promise<void> {
     if (this.eventQueue.length === 0) return;
 
     const events = [...this.eventQueue];
     this.eventQueue = [];
-
-    if (this.flushTimeout) {
-      clearTimeout(this.flushTimeout);
-      this.flushTimeout = null;
-    }
 
     try {
       const bulkBody: Array<Record<string, unknown>> = [];
@@ -358,15 +345,5 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
       // Re-queue events for retry (optional)
       this.eventQueue.unshift(...events);
     }
-  }
-
-  public async shutdown(): Promise<void> {
-    if (this.flushTimeout) {
-      clearTimeout(this.flushTimeout);
-      this.flushTimeout = null;
-    }
-
-    // Flush any remaining events
-    await this.flushEvents();
   }
 }

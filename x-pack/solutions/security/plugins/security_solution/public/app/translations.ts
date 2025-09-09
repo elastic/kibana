@@ -138,6 +138,10 @@ export const INVENTORY = i18n.translate('xpack.securitySolution.navigation.inven
   defaultMessage: 'Inventory',
 });
 
+export const SIEM_READINESS = i18n.translate('xpack.securitySolution.navigation.siemReadiness', {
+  defaultMessage: 'SIEM Readiness',
+});
+
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
 });
@@ -162,10 +166,22 @@ export const POLICIES = i18n.translate(
     defaultMessage: 'Policies',
   }
 );
+export const ENDPOINT_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.search.administration.endpointExceptions',
+  {
+    defaultMessage: 'Endpoint exceptions',
+  }
+);
 export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.search.administration.trustedApps',
   {
     defaultMessage: 'Trusted applications',
+  }
+);
+export const TRUSTED_DEVICES = i18n.translate(
+  'xpack.securitySolution.search.administration.trustedDevices',
+  {
+    defaultMessage: 'Trusted devices',
   }
 );
 export const EVENT_FILTERS = i18n.translate(

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildToolName, parseToolName, ToolNameAndIntegrationId } from './integration_tools';
+import type { ToolNameAndIntegrationId } from './integration_tools';
+import { buildToolName, parseToolName } from './integration_tools';
 
 describe('integration_tools', () => {
   describe('buildToolName', () => {

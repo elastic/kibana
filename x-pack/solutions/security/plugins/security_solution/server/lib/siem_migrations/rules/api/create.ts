@@ -13,9 +13,9 @@ import {
   CreateRuleMigrationRequestBody,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { authz } from '../../common/utils/authz';
-import { withLicense } from '../../common/utils/with_license';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -38,7 +38,10 @@ export const registerSiemRuleMigrationsCreateRoute = (
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();

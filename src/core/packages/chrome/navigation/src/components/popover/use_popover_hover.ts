@@ -10,8 +10,7 @@
 import { useCallback } from 'react';
 
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
-
-const HOVER_DELAY = 100;
+import { POPOVER_HOVER_DELAY } from '../../constants';
 
 /**
  * Hook for mouse interactions
@@ -35,7 +34,7 @@ export const usePopoverHover = (
 
   const handleMouseLeave = useCallback(() => {
     if (!persistent || !isOpenedByClick) {
-      setTimeout(close, HOVER_DELAY);
+      setTimeout(close, POPOVER_HOVER_DELAY);
     }
   }, [persistent, isOpenedByClick, setTimeout, close]);
 

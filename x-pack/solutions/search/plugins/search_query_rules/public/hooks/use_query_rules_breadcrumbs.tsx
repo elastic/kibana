@@ -13,7 +13,7 @@ import { useKibana } from './use_kibana';
 const QUERY_RULES_BREADCRUMB_TEXT = i18n.translate(
   'xpack.searchQueryRules.breadcrumbs.queryRules',
   {
-    defaultMessage: 'Query Rules',
+    defaultMessage: 'Query rules',
   }
 );
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { WCIExternalServerPlugin } from './plugin';
-import {
+import type {
   WCIExternalServerPluginSetup,
   WCIExternalServerPluginStart,
   WCIExternalServerPluginStartDependencies,

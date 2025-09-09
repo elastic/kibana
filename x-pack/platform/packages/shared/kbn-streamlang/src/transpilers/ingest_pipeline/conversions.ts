@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ElasticsearchProcessorType,
-  elasticsearchProcessorTypes,
-} from '../../../types/processors/manual_ingest_pipeline_processors';
-import {
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchProcessorType } from '../../../types/processors/manual_ingest_pipeline_processors';
+import { elasticsearchProcessorTypes } from '../../../types/processors/manual_ingest_pipeline_processors';
+import type {
   IngestPipelineGrokProcessor,
   IngestPipelineDissectProcessor,
   IngestPipelineDateProcessor,
@@ -19,18 +17,19 @@ import {
   IngestPipelineManualIngestPipelineProcessor,
   IngestPipelineAppendProcessor,
 } from '../../../types/processors/ingest_pipeline_processors';
-import { StreamlangProcessorDefinition } from '../../../types/processors';
+import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
 import type { IngestPipelineTranspilationOptions } from '.';
 
+type WithOptionalTracingTag<T> = T & { tag?: string };
 interface ActionToIngestType {
-  grok: IngestPipelineGrokProcessor;
-  dissect: IngestPipelineDissectProcessor;
-  date: IngestPipelineDateProcessor;
-  rename: IngestPipelineRenameProcessor;
-  set: IngestPipelineSetProcessor;
-  append: IngestPipelineAppendProcessor;
-  manual_ingest_pipeline: IngestPipelineManualIngestPipelineProcessor;
+  grok: WithOptionalTracingTag<IngestPipelineGrokProcessor>;
+  dissect: WithOptionalTracingTag<IngestPipelineDissectProcessor>;
+  date: WithOptionalTracingTag<IngestPipelineDateProcessor>;
+  rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;
+  set: WithOptionalTracingTag<IngestPipelineSetProcessor>;
+  append: WithOptionalTracingTag<IngestPipelineAppendProcessor>;
+  manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }
 
 const processorFieldRenames: Record<string, Record<string, string>> = {
@@ -65,6 +64,18 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       rest,
       renames
     ) as ActionToIngestType[typeof actionStep.action];
+
+    if ('customIdentifier' in processorWithRenames) {
+      if (transpilationOptions?.traceCustomIdentifiers) {
+        // If tracing custom identifiers, we can keep it as is
+        processorWithRenames.tag = processorWithRenames.customIdentifier;
+        delete processorWithRenames.customIdentifier;
+      } else {
+        // Otherwise, we remove it to avoid passing it to Elasticsearch
+        delete processorWithRenames.customIdentifier;
+      }
+    }
+
     const processorWithCompiledConditions =
       'if' in processorWithRenames && processorWithRenames.if
         ? {

@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
-import { GenericObject, MappingsConfiguration } from '../../types';
+import type { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
 import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';

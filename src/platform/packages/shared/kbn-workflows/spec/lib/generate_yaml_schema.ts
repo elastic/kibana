@@ -12,57 +12,50 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
+  getHttpStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
+  getOnFailureStepSchema,
   getParallelStepSchema,
+  getWorkflowSettingsSchema,
+  WaitStepSchema,
   WorkflowSchema,
-  WorkflowYamlSchema,
 } from '../schema';
 
 export interface ConnectorContract {
   type: string;
-  params: Array<{
-    name: string;
-    type: 'string' | 'number' | 'boolean' | 'object';
-  }>;
+  paramsSchema: z.ZodType;
+  connectorIdRequired?: boolean;
+  outputSchema: z.ZodType;
 }
 
-function getZodTypeForParam(param: ConnectorContract['params'][number]) {
-  switch (param.type) {
-    case 'string':
-      return z.string();
-    case 'number':
-      return z.number();
-    case 'boolean':
-      return z.boolean();
-    case 'object':
-      return z.record(z.string(), z.any());
-    default:
-      return z.string();
-  }
-}
-
-function generateStepSchemaForConnector(connector: ConnectorContract) {
-  const paramSchema = connector.params.reduce((acc, param) => {
-    acc[param.name] = getZodTypeForParam(param);
-    return acc;
-  }, {} as Record<string, z.ZodType>);
-
+function generateStepSchemaForConnector(
+  connector: ConnectorContract,
+  stepSchema: z.ZodType,
+  loose: boolean = false
+) {
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
-    with: z.object(paramSchema),
+    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+    with: connector.paramsSchema,
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 }
 
-function createRecursiveStepSchema(connectors: ConnectorContract[]): z.ZodType {
-  const connectorSchemas = connectors.map(generateStepSchemaForConnector);
-
+function createRecursiveStepSchema(
+  connectors: ConnectorContract[],
+  loose: boolean = false
+): z.ZodType {
   const stepSchema: z.ZodType = z.lazy(() => {
     // Create step schemas with the recursive reference
-    const forEachSchema = getForEachStepSchema(stepSchema);
-    const ifSchema = getIfStepSchema(stepSchema);
-    const parallelSchema = getParallelStepSchema(stepSchema);
-    const mergeSchema = getMergeStepSchema(stepSchema);
+    const forEachSchema = getForEachStepSchema(stepSchema, loose);
+    const ifSchema = getIfStepSchema(stepSchema, loose);
+    const parallelSchema = getParallelStepSchema(stepSchema, loose);
+    const mergeSchema = getMergeStepSchema(stepSchema, loose);
+    const httpSchema = getHttpStepSchema(stepSchema, loose);
+    const connectorSchemas = connectors.map((c) =>
+      generateStepSchemaForConnector(c, stepSchema, loose)
+    );
 
     // Return discriminated union with all step types
     return z.discriminatedUnion('type', [
@@ -70,6 +63,8 @@ function createRecursiveStepSchema(connectors: ConnectorContract[]): z.ZodType {
       ifSchema,
       parallelSchema,
       mergeSchema,
+      WaitStepSchema,
+      httpSchema,
       ...connectorSchemas,
     ]);
   });
@@ -81,22 +76,17 @@ export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContract[],
   loose: boolean = false
 ) {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors);
+  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
-    return z.object({
-      version: WorkflowYamlSchema.shape.version,
-      workflow: WorkflowSchema.partial().extend({
-        steps: z.array(recursiveStepSchema).optional(),
-      }),
+    return WorkflowSchema.partial().extend({
+      steps: z.array(recursiveStepSchema).optional(),
     });
   }
 
-  return z.object({
-    version: WorkflowYamlSchema.shape.version,
-    workflow: WorkflowSchema.extend({
-      steps: z.array(recursiveStepSchema),
-    }),
+  return WorkflowSchema.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    steps: z.array(recursiveStepSchema),
   });
 }
 
@@ -104,4 +94,8 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
   return zodToJsonSchema(yamlSchema, {
     name: 'WorkflowSchema',
   });
+}
+
+export function getStepId(stepName: string): string {
+  return stepName.toLowerCase().replace(/\s+/g, '-');
 }

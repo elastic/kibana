@@ -10,11 +10,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
-import {
-  convertWorkflowScheduleToTaskSchedule,
-  getScheduledTriggers,
-  WorkflowTrigger,
-} from '../lib/schedule_utils';
+import type { WorkflowTrigger } from '../lib/schedule_utils';
+import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -32,7 +29,7 @@ export class WorkflowTaskScheduler {
    * Schedules tasks for all enabled scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(workflow: EsWorkflow, spaceId: string): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.workflow.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
@@ -97,7 +94,7 @@ export class WorkflowTaskScheduler {
           bool: {
             must: [
               { term: { 'task.taskType': 'workflow:scheduled' } },
-              { term: { _id: `task:workflow:${workflowId}:triggers.elastic.scheduled` } },
+              { ids: { values: [`task:workflow:${workflowId}:scheduled`] } },
             ],
           },
         },

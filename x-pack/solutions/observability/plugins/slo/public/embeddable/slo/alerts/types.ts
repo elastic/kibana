@@ -4,29 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
-  type CoreStart,
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import {
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type {
   SerializedTitles,
   PublishesWritableTitle,
   PublishesTitle,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface SloItem {
   id: string;

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
@@ -21,10 +21,6 @@ export interface RunToolReturn {
    * The result value as returned by the tool.
    */
   results: ToolResult[];
-  /**
-   * ID of this run
-   */
-  runId: string;
 }
 
 /**

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
-import { ISuggestionItem } from '../../commands_registry/types';
+import type { ISuggestionItem } from '../../commands_registry/types';
 
 export const buildValueDefinitions = (
   values: string[],

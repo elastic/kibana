@@ -7,15 +7,19 @@
 
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
+import { registerInternalToolsRoutes } from './internal/tools';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
 import { registerMCPRoutes } from './mcp';
+import { registerA2ARoutes } from './a2a';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
+  registerInternalToolsRoutes(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
   registerMCPRoutes(dependencies);
+  registerA2ARoutes(dependencies);
 };

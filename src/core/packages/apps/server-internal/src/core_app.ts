@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'querystring';
-import { Env, IConfigService } from '@kbn/config';
+import type { Env, IConfigService } from '@kbn/config';
 import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
@@ -425,7 +425,7 @@ export class CoreAppsService {
     });
   }
 
-  // After the package is built and bootstrap extracts files to bazel-bin,
+  // After the package is built and bootstrap extracts files to target/build,
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
     // Expose @elastic/charts' pre-compiled CSS themes

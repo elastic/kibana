@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
+import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
+import type {
   TriggersAndActionsUIPublicPluginStart,
   RuleStatusFilterProps,
 } from '@kbn/triggers-actions-ui-plugin/public';

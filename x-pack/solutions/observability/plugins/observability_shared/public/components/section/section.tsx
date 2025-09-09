@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiText,
   EuiListGroup,
   EuiSpacer,
   EuiListGroupItem,
-  EuiListGroupItemProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { EuiListGroupProps } from '@elastic/eui';
+import type { EuiListGroupProps } from '@elastic/eui';
 
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (

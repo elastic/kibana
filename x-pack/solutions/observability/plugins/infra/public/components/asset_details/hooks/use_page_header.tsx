@@ -16,6 +16,7 @@ import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingPluginSetting } from '../../../hooks/use_profiling_integration_setting';
@@ -110,16 +111,19 @@ const useRightSideItems = (links?: LinkOptions[]) => {
   return { rightSideItems };
 };
 
-const useFeatureFlagTabs = () => {
+const useConditionalTabs = () => {
+  const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   const { featureFlags } = usePluginConfig();
   const isProfilingPluginEnabled = useProfilingPluginSetting();
+  const { schema } = useAssetDetailsRenderPropsContext();
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled),
+      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled) && schema === 'ecs',
       [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
+      [ContentTabIds.ANOMALIES]: isTopbarMenuVisible,
     }),
-    [featureFlags.osqueryEnabled, isProfilingPluginEnabled]
+    [featureFlags.osqueryEnabled, isProfilingPluginEnabled, isTopbarMenuVisible, schema]
   );
 
   const isTabEnabled = useCallback(
@@ -136,7 +140,7 @@ const useFeatureFlagTabs = () => {
 
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
-  const { isTabEnabled } = useFeatureFlagTabs();
+  const { isTabEnabled } = useConditionalTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {

@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { DocumentEntry } from '@kbn/elastic-assistant-common';
+import type { DocumentEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
 

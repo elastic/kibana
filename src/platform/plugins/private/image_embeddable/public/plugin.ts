@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import {
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import {

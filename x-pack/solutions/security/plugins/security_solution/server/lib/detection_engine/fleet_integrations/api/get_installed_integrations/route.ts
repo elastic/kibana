@@ -66,6 +66,7 @@ export const getInstalledIntegrationsRoute = (
 
           return response.ok({ body });
         } catch (err) {
+          logger.error(`getInstalledIntegrationsRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

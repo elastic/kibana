@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React from 'react';
 import { ConversationSections } from './conversation_sections';
 

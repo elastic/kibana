@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { PutSLOSettingsParams, sloSettingsSchema } from '@kbn/slo-schema';
+import type { PutSLOSettingsParams } from '@kbn/slo-schema';
+import { sloSettingsSchema } from '@kbn/slo-schema';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../common/constants';
 import { getSLOSummaryIndices } from '../../common/get_slo_summary_indices';
-import { SLOSettings, StoredSLOSettings } from '../domain/models';
+import type { SLOSettings, StoredSLOSettings } from '../domain/models';
 import { SO_SLO_SETTINGS_TYPE, sloSettingsObjectId } from '../saved_objects/slo_settings';
 
 export const getSloSettings = async (

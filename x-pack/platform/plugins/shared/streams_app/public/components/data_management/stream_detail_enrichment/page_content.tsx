@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
-  DragDropContextProps,
   EuiAccordion,
   EuiButton,
   EuiCode,
@@ -23,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -238,6 +238,7 @@ const ProcessorsEditor = React.memo(() => {
           <EuiButton
             size="s"
             iconType="plus"
+            data-test-subj="streamsAppStreamDetailEnrichmentAddProcessorButton"
             onClick={() => addProcessor()}
             disabled={!canAddProcessor}
           >

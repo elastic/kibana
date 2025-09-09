@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../../mappings_state_context';
-import { NormalizedField } from '../../../types';
+import type { NormalizedField } from '../../../types';
 import { getAllDescendantAliases } from '../../../lib';
 import { ModalConfirmationDeleteFields } from './modal_confirmation_delete_fields';
 

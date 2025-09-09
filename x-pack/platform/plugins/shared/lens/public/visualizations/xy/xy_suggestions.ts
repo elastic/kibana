@@ -18,15 +18,8 @@ import type {
   TableChangeType,
 } from '../../types';
 import { getColorMappingDefaults } from '../../utils';
-import {
-  State,
-  XYState,
-  visualizationSubtypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  SeriesType,
-  defaultSeriesType,
-} from './types';
+import type { State, XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
+import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 

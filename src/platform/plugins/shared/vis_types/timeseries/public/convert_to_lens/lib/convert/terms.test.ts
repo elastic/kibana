@@ -8,14 +8,11 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import {
-  Operations,
-  TermsColumn,
-  TermsParams,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { TermsColumn, TermsParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { createSeries } from '../__mocks__';
 import { convertToTermsColumn, convertToTermsParams } from './terms';
-import { Column } from './types';
+import type { Column } from './types';
 
 describe('convertToTermsParams', () => {
   const dataView = stubLogstashDataView;

@@ -37,9 +37,11 @@ export const storybookAliases = {
     'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
   expression_tagcloud:
     'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
+  failure_store_modal: 'x-pack/platform/packages/shared/kbn-failure-store-modal/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/platform/plugins/shared/home/.storybook',
+  index_management: 'x-pack/platform/plugins/shared/index_management/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
@@ -59,7 +61,7 @@ export const storybookAliases = {
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   ['response-ops']: 'src/platform/packages/shared/response-ops/.storybook',
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
-  // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
@@ -69,4 +71,5 @@ export const storybookAliases = {
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
   upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/public/.storybook',
+  workflows_management: 'src/platform/plugins/shared/workflows_management/.storybook',
 };

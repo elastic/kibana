@@ -125,14 +125,15 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
 
 export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   prompt: ESQLAstExpression;
-  inferenceId: ESQLIdentifierOrParam;
+  inferenceId: ESQLLiteral;
   targetField?: ESQLColumn;
 }
 
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
-  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
+  inferenceId: ESQLLiteral | undefined;
 }
 
 export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;

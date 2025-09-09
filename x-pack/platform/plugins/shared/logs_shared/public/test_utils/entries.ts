@@ -6,8 +6,8 @@
  */
 
 import { faker } from '@faker-js/faker';
-import { LogEntry } from '../../common/log_entry';
-import { LogViewColumnConfiguration } from '../../common/log_views';
+import type { LogEntry } from '../../common/log_entry';
+import type { LogViewColumnConfiguration } from '../../common/log_views';
 
 export const ENTRIES_EMPTY = {
   data: {

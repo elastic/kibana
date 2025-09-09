@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import { TYPE_DEFINITION } from '../../../../../constants';
-import { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
+import type { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
 
 import { AliasTypeRequiredParameters } from './alias_type';
 import { TokenCountTypeRequiredParameters } from './token_count_type';

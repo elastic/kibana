@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin, AppMountParameters } from '@kbn/core/public';
-import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
-import { AppPluginDependencies } from './types';
+import type { CoreSetup, Plugin, AppMountParameters } from '@kbn/core/public';
+import type { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
+import type { AppPluginDependencies } from './types';
 
 export class TopNavTestPlugin implements Plugin<TopNavTestPluginSetup, TopNavTestPluginStart> {
   public setup(core: CoreSetup, { navigation }: { navigation: NavigationPublicPluginSetup }) {

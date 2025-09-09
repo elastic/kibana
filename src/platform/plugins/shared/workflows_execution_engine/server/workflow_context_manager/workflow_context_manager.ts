@@ -7,85 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import { graphlib } from '@dagrejs/dagre';
-import {
-  WorkflowEventLogger,
-  IWorkflowEventLogger,
-  WorkflowLogEvent,
-} from '../workflow_event_logger/workflow_event_logger';
-import { RunStepResult } from '../step/step_base';
-import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { graphlib } from '@dagrejs/dagre';
+import type { StepContext, WorkflowContext } from '@kbn/workflows';
+import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
-  workflowRunId: string;
-  workflow: z.infer<typeof WorkflowSchema>;
-  previousExecution?: Record<string, any>;
-  connectorSecrets?: Record<string, any>;
-  stepResults: Record<string, RunStepResult>;
-  event: any;
-  esApiKey: string;
   // New properties for logging
-  logger?: Logger;
-  workflowEventLoggerIndex?: string;
-  esClient?: ElasticsearchClient;
-  enableConsoleLogging?: boolean;
   workflowExecutionGraph: graphlib.Graph;
-  workflowState: WorkflowExecutionRuntimeManager;
+  workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 }
 
 export class WorkflowContextManager {
-  private context: Record<string, any>; // Make it strongly typed
-  private esClient: IScopedClusterClient;
   private workflowExecutionGraph: graphlib.Graph;
-  private workflowState: WorkflowExecutionRuntimeManager;
-  private workflowLogger: IWorkflowEventLogger | null = null;
+  private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(init: ContextManagerInit) {
-    this.context = {
-      workflowRunId: init.workflowRunId,
-      workflow: init.workflow,
-      previousExecution: init.previousExecution ?? {},
-      connectorSecrets: init.connectorSecrets ?? {},
-      stepResults: init.stepResults ?? {}, // we might start from previous execution with some results
-      event: init.event,
-    };
-
-    this.esClient = this.createEsClient(init.esApiKey);
     this.workflowExecutionGraph = init.workflowExecutionGraph;
-    this.workflowState = init.workflowState;
-
-    // Initialize workflow event logger if provided
-    if (init.logger && init.workflowEventLoggerIndex && init.esClient) {
-      this.workflowLogger = new WorkflowEventLogger(
-        init.esClient,
-        init.logger,
-        init.workflowEventLoggerIndex,
-        {
-          workflowId: init.workflowRunId,
-          workflowName: init.workflow.name,
-          executionId: init.workflowRunId,
-        },
-        {
-          enableConsoleLogging: init.enableConsoleLogging || false,
-        }
-      );
-    }
+    this.workflowExecutionRuntime = init.workflowExecutionRuntime;
   }
 
-  private createEsClient(apiKey: string): IScopedClusterClient {
-    return {} as IScopedClusterClient; // Placeholder
-  }
-
-  public getEsClient(): IScopedClusterClient {
-    return this.esClient;
-  }
-
-  public getContext(): Record<string, any> {
-    const stepContex: Record<string, any> = {
-      ...this.context,
+  public getContext(): StepContext {
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
     };
 
     const visited = new Set<string>();
@@ -93,137 +37,82 @@ export class WorkflowContextManager {
       if (visited.has(nodeId)) return;
       visited.add(nodeId);
 
-      stepContex[nodeId] = {};
-      const stepResult = this.workflowState.getStepResult(nodeId);
+      stepContext.steps[nodeId] = {};
+      const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
       if (stepResult) {
-        stepContex[nodeId] = stepResult.output;
+        stepContext.steps[nodeId] = {
+          ...stepContext.steps[nodeId],
+          ...stepResult,
+        };
       }
 
-      const stepState = this.workflowState.getStepState(nodeId);
+      const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
       if (stepState) {
-        stepContex[nodeId] = stepState;
+        stepContext.steps[nodeId] = {
+          ...stepContext.steps[nodeId],
+          ...stepState,
+        };
       }
 
       const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
       preds.forEach((predId) => collectPredecessors(predId));
     };
 
-    const currentNodeId = this.workflowState.getCurrentStep()?.id;
+    const currentNode = this.workflowExecutionRuntime.getCurrentStep();
+    const currentNodeId = currentNode?.id ?? currentNode?.name;
     const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
     directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
 
-    return stepContex;
+    return this.enrichStepContextAccordingToStepScope(stepContext);
   }
 
-  public updateContext(updates: Record<string, any>): void {
-    Object.assign(this.context, updates);
-  }
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
+    const propertyPathSegments = propertyPath.split('.');
+    let result: any = this.getContext();
 
-  public appendStepResult(stepId: string, result: RunStepResult): void {
-    this.context.stepResults[stepId] = result;
-  }
-
-  public getContextKey(key: string): any {
-    return this.context[key];
-  }
-
-  public getStepResults(): { [stepId: string]: RunStepResult } {
-    return this.context.stepResults;
-  }
-
-  // ======================
-  // Workflow Event Logging Methods
-  // ======================
-
-  /**
-   * Get the workflow-level logger (execution scoped)
-   */
-  public get logger(): IWorkflowEventLogger | null {
-    return this.workflowLogger;
-  }
-
-  /**
-   * Convenience logging methods that automatically include workflow/execution/step context
-   */
-  public logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logInfo(message, additionalData);
-  }
-
-  public logError(
-    message: string,
-    error?: Error,
-    additionalData?: Partial<WorkflowLogEvent>
-  ): void {
-    this.workflowLogger?.logError(message, error, additionalData);
-  }
-
-  public logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logWarn(message, additionalData);
-  }
-
-  public logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logDebug(message, additionalData);
-  }
-
-  public startTiming(event: WorkflowLogEvent): void {
-    this.workflowLogger?.startTiming(event);
-  }
-
-  public stopTiming(event: WorkflowLogEvent): void {
-    this.workflowLogger?.stopTiming(event);
-  }
-
-  /**
-   * Log workflow execution start
-   */
-  public logWorkflowStart(): void {
-    this.workflowLogger?.logInfo('Workflow execution started', {
-      event: { action: 'workflow-start', category: ['workflow'] },
-      tags: ['workflow', 'execution', 'start'],
-    });
-  }
-
-  /**
-   * Log workflow execution completion
-   */
-  public logWorkflowComplete(success: boolean = true): void {
-    this.workflowLogger?.logInfo(
-      `Workflow execution ${success ? 'completed successfully' : 'failed'}`,
-      {
-        event: {
-          action: 'workflow-complete',
-          category: ['workflow'],
-          outcome: success ? 'success' : 'failure',
-        },
-        tags: ['workflow', 'execution', 'complete'],
+    for (const segment of propertyPathSegments) {
+      if (!(segment in result)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
       }
-    );
+
+      result = result[segment];
+    }
+
+    return { pathExists: true, value: result };
   }
 
-  /**
-   * Log step execution start
-   */
-  public logStepStart(stepId: string, stepName?: string): void {
-    this.workflowLogger?.logInfo(`Step '${stepName || stepId}' started`, {
-      event: { action: 'step-start', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'start'],
-    });
+  private buildWorkflowContext(): WorkflowContext {
+    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
+
+    return {
+      execution: {
+        id: workflowExecution.id,
+        isTestRun: !!workflowExecution.isTestRun,
+        startedAt: new Date(workflowExecution.startedAt),
+      },
+      workflow: {
+        id: workflowExecution.workflowId,
+        name: workflowExecution.workflowDefinition.name,
+        enabled: workflowExecution.workflowDefinition.enabled,
+        spaceId: workflowExecution.spaceId,
+      },
+      consts: workflowExecution.workflowDefinition.consts || {},
+      event: workflowExecution.context?.event,
+      inputs: workflowExecution.context?.inputs,
+    };
   }
 
-  /**
-   * Log step execution completion
-   */
-  public logStepComplete(stepId: string, stepName?: string, success: boolean = true): void {
-    this.workflowLogger?.logInfo(
-      `Step '${stepName || stepId}' ${success ? 'completed' : 'failed'}`,
-      {
-        event: {
-          action: 'step-complete',
-          category: ['workflow', 'step'],
-          outcome: success ? 'success' : 'failure',
-        },
-        tags: ['workflow', 'step', 'complete'],
+  private enrichStepContextAccordingToStepScope(stepContext: StepContext): StepContext {
+    for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
+      const node = this.workflowExecutionGraph.node(nodeId) as any;
+      const nodeType = node?.type;
+      switch (nodeType) {
+        case 'enter-foreach':
+          stepContext.foreach = this.workflowExecutionRuntime.getStepState(nodeId) as any;
+          break;
       }
-    );
+    }
+
+    return stepContext;
   }
 }

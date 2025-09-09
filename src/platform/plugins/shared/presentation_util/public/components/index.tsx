@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
+import type { ComponentType, ReactElement, Ref } from 'react';
+import React, { Suspense } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
 /**
@@ -37,6 +38,13 @@ export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/d
 
 export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
+);
+
+/**
+ * Used with `showSaveModal` to pass `SaveResult` back from `onSave`
+ */
+export const LazySavedObjectSaveModalDashboardWithSaveResult = React.lazy(
+  () => import('./saved_object_save_modal_dashboard_with_save_result')
 );
 
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 describe('getHeight', () => {

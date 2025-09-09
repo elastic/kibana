@@ -9,7 +9,7 @@
 
 import datemath from '@kbn/datemath';
 import type { Moment } from 'moment';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { GaussianEvents } from './gaussian_events';
 import { Interval } from './interval';
 import { PoissonEvents } from './poisson_events';

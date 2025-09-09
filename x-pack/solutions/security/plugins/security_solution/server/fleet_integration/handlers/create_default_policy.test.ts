@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';

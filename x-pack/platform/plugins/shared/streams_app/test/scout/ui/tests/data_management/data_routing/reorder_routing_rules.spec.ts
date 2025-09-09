@@ -11,7 +11,7 @@
 import { test } from '../../../fixtures';
 
 test.describe(
-  'Stream data routing - error handling and recovery',
+  'Stream data routing - reordering routing rules',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -27,8 +27,7 @@ test.describe(
       for (const streamName of streamNames) {
         await apiServices.streams.forkStream('logs', streamName, {
           field: 'service.name',
-          value: streamName.split('.')[1],
-          operator: 'eq',
+          eq: streamName.split('.')[1],
         });
       }
 
@@ -57,7 +56,7 @@ test.describe(
 
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
 
-      await pageObjects.streams.cancelRuleOrder();
+      await pageObjects.streams.cancelChanges();
 
       await pageObjects.streams.expectRoutingOrder(['logs.first', 'logs.second', 'logs.third']);
     });

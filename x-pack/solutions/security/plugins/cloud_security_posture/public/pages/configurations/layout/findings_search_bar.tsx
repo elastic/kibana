@@ -6,7 +6,8 @@
  */
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';

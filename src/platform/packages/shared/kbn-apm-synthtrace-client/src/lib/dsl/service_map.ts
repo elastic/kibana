@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AgentName } from '../../types/agent_names';
+import type { AgentName } from '../../types/agent_names';
 import { apm } from '../apm';
-import { Instance } from '../apm/instance';
-import { elasticsearchSpan, redisSpan, sqliteSpan, Span, kafkaSpan } from '../apm/span';
-import { Transaction } from '../apm/transaction';
+import type { Instance } from '../apm/instance';
+import type { Span } from '../apm/span';
+import { elasticsearchSpan, redisSpan, sqliteSpan, kafkaSpan } from '../apm/span';
+import type { Transaction } from '../apm/transaction';
 import { generateShortId } from '../utils/generate_id';
 
 const ENVIRONMENT = 'Synthtrace: service_map';

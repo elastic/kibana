@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { sendRequest, RequestArgs } from './send_request';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { RequestArgs } from './send_request';
+import { sendRequest } from './send_request';
 import { send } from '../../../lib/es/es';
 
 jest.mock('../../../lib/es/es');

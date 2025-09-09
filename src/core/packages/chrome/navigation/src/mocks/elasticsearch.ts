@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import type { MenuItem } from '../../types';
 
 export const LOGO = {
+  href: '/elasticsearch',
+  id: 'elasticsearch',
   label: 'Elasticsearch',
-  logoType: 'logoElasticsearch',
+  type: 'logoElasticsearch',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
@@ -166,13 +168,13 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'access-org-members',
             label: 'Org members',
             href: '/settings/access/org-members',
-            external: true,
+            isExternal: true,
           },
           {
             id: 'access-billing',
             label: 'Billing and subscriptions',
             href: '/settings/access/billing',
-            external: true,
+            isExternal: true,
           },
           {
             id: 'access-api-keys',

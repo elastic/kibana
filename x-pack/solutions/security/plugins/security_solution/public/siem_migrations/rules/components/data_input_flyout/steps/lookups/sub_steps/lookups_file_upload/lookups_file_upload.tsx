@@ -11,19 +11,19 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import type { RuleMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { FILE_UPLOAD_ERROR } from '../../../../translations';
 import * as i18n from './translations';
 import { UploadFileButton } from '../../../common/upload_file_button';
 
 export interface LookupsFileUploadProps {
-  createResources: (resources: RuleMigrationResourceData[]) => void;
+  createResources: (resources: SiemMigrationResourceData[]) => void;
   apiError?: string;
   isLoading?: boolean;
 }
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
-    const [lookupResources, setLookupResources] = useState<RuleMigrationResourceData[]>([]);
+    const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createLookups = useCallback(() => {
@@ -48,7 +48,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
         const lookups = await Promise.all(
           Array.from(files).map((file) => {
-            return new Promise<RuleMigrationResourceData>((resolve) => {
+            return new Promise<SiemMigrationResourceData>((resolve) => {
               const reader = new FileReader();
 
               reader.onloadstart = () => setIsParsing(true);

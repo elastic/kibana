@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { uniqBy } from 'lodash';
 import { handleFragment, columnExists } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils/functions';
-import { ICommand } from '../../registry';
-import { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
-import {
+import type { ICommand } from '../../registry';
+import type { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
+import type {
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
   ISuggestionItem,
   ICommandContext,
 } from '../../types';
-import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
+import type { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { isColumn } from '../../../ast/is';
 
@@ -110,11 +111,10 @@ export const getFieldSuggestions = async (
     }),
   ]);
 
-  const supportsControls = context?.supportsControls ?? false;
   const joinFields = buildFieldsDefinitionsWithMetadata(
     lookupIndexFields.filter((f) => !ignoredFields.includes(f.name)),
     [],
-    { supportsControls },
+    { supportsControls: false }, // Controls are being added as part of the sourceFields, no need to add them again as joinFields.
     context?.variables
   );
 
@@ -143,7 +143,7 @@ export const getFieldSuggestions = async (
   }
 
   return {
-    suggestions: [...intersection, ...union],
+    suggestions: uniqBy([...intersection, ...union], 'label'),
     lookupIndexFieldExists: (field: string) =>
       lookupIndexFieldSet.set.has(unescapeColumnName(field)),
   };

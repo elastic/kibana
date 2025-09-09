@@ -13,7 +13,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { RUNTIME_FIELD_TYPES } from './constants';
+import type { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
 export type { SavedObject };
@@ -485,6 +485,11 @@ export type FieldSpec = DataViewFieldBase & {
   parentName?: string;
 
   defaultFormatter?: string;
+
+  /**
+   * Indicates whether the field is a metadata field.
+   */
+  metadata_field?: boolean;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

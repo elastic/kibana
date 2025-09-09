@@ -14,6 +14,8 @@ import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
+import { ConsoleTutorialsGroup } from './console_tutorials_group';
+import { CONNECT_TO_ELASTICSEARCH_TITLE, ELASTICSEARCH_ENDPOINT_LABEL } from './shared/i18n';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
@@ -25,12 +27,8 @@ export const ConnectToElasticsearch = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2>
-                    {i18n.translate('xpack.searchHomepage.connectToElasticsearch.title', {
-                      defaultMessage: 'Connect to Elasticsearch',
-                    })}
-                  </h2>
+                <EuiTitle size="s">
+                  <h3>{CONNECT_TO_ELASTICSEARCH_TITLE}</h3>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -51,14 +49,7 @@ export const ConnectToElasticsearch = () => {
                 <EuiFlexGroup direction="column" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
-                      <span>
-                        {i18n.translate(
-                          'xpack.searchHomepage.connectToElasticsearch.elasticSearchEndpointLabel',
-                          {
-                            defaultMessage: 'Elasticsearch endpoint',
-                          }
-                        )}
-                      </span>
+                      <span>{ELASTICSEARCH_ENDPOINT_LABEL}</span>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -75,6 +66,12 @@ export const ConnectToElasticsearch = () => {
                 <ApiKeyForm />
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ConsoleTutorialsGroup />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule />

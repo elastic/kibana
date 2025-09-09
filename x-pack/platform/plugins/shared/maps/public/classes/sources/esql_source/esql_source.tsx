@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
+  getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   getStartEndParams,
@@ -22,13 +23,21 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
-import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { GeoJsonProperties } from 'geojson';
+import { asyncMap } from '@kbn/std';
+import {
+  FIELD_ORIGIN,
+  GEOJSON_FEATURE_ID_PROPERTY_NAME,
+  SOURCE_TYPES,
+  VECTOR_SHAPE_TYPE,
+} from '../../../../common/constants';
 import type {
   ESQLSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { DataRequest } from '../../util/data_request';
+import type { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
@@ -36,10 +45,12 @@ import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_sou
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
-import { getData, getUiSettings } from '../../../kibana_services';
+import { getData, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
 import { getFieldType, isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { ESDocField } from '../../fields/es_doc_field';
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
@@ -50,13 +61,25 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
+export type NormalizedESQLSourceDescriptor = ESQLSourceDescriptor &
+  Required<
+    Pick<
+      ESQLSourceDescriptor,
+      'narrowByGlobalSearch' | 'narrowByGlobalTime' | 'narrowByMapBounds' | 'applyForceRefresh'
+    >
+  >;
+
 export class ESQLSource
   extends AbstractVectorSource
-  implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
+  implements
+    IVectorSource,
+    Pick<IESSource, 'getIndexPattern' | 'getIndexPatternId' | 'getGeoFieldName'>
 {
-  readonly _descriptor: ESQLSourceDescriptor;
+  readonly _descriptor: NormalizedESQLSourceDescriptor;
 
-  static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESQLSourceDescriptor>
+  ): NormalizedESQLSourceDescriptor {
     if (!isValidStringConfig(descriptor.esql)) {
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }
@@ -103,6 +126,46 @@ export class ESQLSource
     const pattern: string = getIndexPatternFromESQLQuery(this._descriptor.esql);
     return pattern ? pattern : 'ES|QL';
   }
+
+  hasTooltipProperties() {
+    return true;
+  }
+
+  getTooltipProperties = async (mbProperties: GeoJsonProperties): Promise<ITooltipProperty[]> => {
+    if (!mbProperties) return [];
+
+    let adhocDataView: DataView | undefined;
+    try {
+      adhocDataView = await this.getIndexPattern();
+    } catch (e) {
+      // fall back to displaying raw feature properties in tooltip
+      // when unable to create adhoc data view
+    }
+
+    const keys = Object.keys(mbProperties).filter(
+      (key) => key !== GEOJSON_FEATURE_ID_PROPERTY_NAME
+    );
+
+    return asyncMap(keys, async (key) => {
+      if (adhocDataView?.getFieldByName(key) !== undefined) {
+        const esDocField = new ESDocField({
+          fieldName: key,
+          source: this,
+          origin: FIELD_ORIGIN.SOURCE,
+        });
+        return await esDocField.createTooltipProperty(mbProperties[key]);
+      }
+
+      return {
+        getPropertyKey: () => key,
+        getPropertyName: () => key,
+        getHtmlDisplayValue: () => mbProperties[key],
+        getRawValue: () => mbProperties[key],
+        isFilterable: () => false,
+        getESFilters: async () => [],
+      };
+    });
+  };
 
   async supportsFitToBounds(): Promise<boolean> {
     return false;
@@ -340,6 +403,10 @@ export class ESQLSource
 
   getIndexPatternId() {
     return this._descriptor.dataViewId;
+  }
+
+  getIndexPattern() {
+    return getESQLAdHocDataview(this._descriptor.esql, getIndexPatternService());
   }
 
   getGeoFieldName() {

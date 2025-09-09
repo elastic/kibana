@@ -141,6 +141,22 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.ApmConfiguration.getMonitoringCollectionConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getMonitoringCollectionConfig",
+            "description": [],
+            "signature": [
+              "() => Readonly<{} & { enabled: boolean; opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }>"
+            ],
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
             "id": "def-server.ApmConfiguration.isUsersRedactionEnabled",
             "type": "Function",
             "tags": [],

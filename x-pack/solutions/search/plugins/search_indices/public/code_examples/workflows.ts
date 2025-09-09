@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
 
 export interface Workflow {
   title: string;
