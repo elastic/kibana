@@ -45,8 +45,3 @@ export function checkTargetVersionsValidity(
     return `sum of percentages cannot exceed 100`;
   }
 }
-
-export const getFipsAgentsCount = (agents: Agent[]) => {
-  const fipsAgents = agents.filter((agent) => agent.local_metadata?.elastic?.agent?.fips === true);
-  return fipsAgents.length;
-};
