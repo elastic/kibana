@@ -33,13 +33,13 @@ import { addSubFeatureReplacements } from '../../utils';
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
   [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.trustedApplications]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.trustedDevices]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.blocklist]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.eventFilters]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V4 }],
@@ -67,7 +67,6 @@ export const getSecurityV3SubFeaturesMap = ({
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
     [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
-    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
       globalArtifactManagementSubFeature(experimentalFeatures),
@@ -77,6 +76,7 @@ export const getSecurityV3SubFeaturesMap = ({
     [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature()],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature()],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature()],
+    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],

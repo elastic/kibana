@@ -29,12 +29,6 @@ import {
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
   [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.endpointExceptions]: [
-    {
-      feature: SECURITY_FEATURE_ID_V4,
-      additionalPrivileges: { endpoint_exceptions_all: ['global_artifact_management_all'] },
-    },
-  ],
   [SecuritySubFeatureId.trustedApplications]: [
     {
       feature: SECURITY_FEATURE_ID_V4,
@@ -57,6 +51,12 @@ const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>
     {
       feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { event_filters_all: ['global_artifact_management_all'] },
+    },
+  ],
+  [SecuritySubFeatureId.endpointExceptions]: [
+    {
+      feature: SECURITY_FEATURE_ID_V4,
+      additionalPrivileges: { endpoint_exceptions_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
@@ -85,11 +85,11 @@ export const getSecuritySubFeaturesMap = ({
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
-    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature()],
     [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature()],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature()],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature()],
+    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],
