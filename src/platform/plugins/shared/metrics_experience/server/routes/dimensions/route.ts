@@ -39,11 +39,11 @@ export const getDimensionsRoute = createRoute({
     }),
   }),
   handler: async ({ context, params, logger }) => {
-    const services = await context.resolve(['core']);
-    await throwNotFoundIfMetricsExperienceDisabled(services);
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const { dimensions, indices, from, to } = params.query;
-    const esClient = services.core.elasticsearch.client.asCurrentUser;
+    const esClient = elasticsearch.client.asCurrentUser;
 
     const values = await getDimensions({
       esClient: createTracedEsClient({

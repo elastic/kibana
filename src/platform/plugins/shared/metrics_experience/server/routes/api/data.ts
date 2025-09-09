@@ -36,10 +36,10 @@ export const metricDataApi = createRoute({
     }),
   }),
   handler: async ({ context, params }) => {
-    const services = await context.resolve(['core']);
-    await throwNotFoundIfMetricsExperienceDisabled(services);
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
-    const esClient = services.core.elasticsearch.client.asCurrentUser;
+    const esClient = elasticsearch.client.asCurrentUser;
     const { esql, from, to, filters } = params.body;
 
     const startTimestamp = new Date(from).toISOString();

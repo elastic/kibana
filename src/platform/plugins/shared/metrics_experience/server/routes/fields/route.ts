@@ -27,10 +27,10 @@ export const getFieldsRoute = createRoute({
     }),
   }),
   handler: async ({ context, params, logger, response }) => {
-    const services = await context.resolve(['core']);
-    await throwNotFoundIfMetricsExperienceDisabled(services);
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
-    const esClient = services.core.elasticsearch.client.asCurrentUser;
+    const esClient = elasticsearch.client.asCurrentUser;
     const page = params.query.page;
     const size = params.query.size;
 
