@@ -21,7 +21,7 @@ import type {
 } from '../../schema/bucket_ops';
 import { fromBucketLensApiToLensState, fromBucketLensStateToAPI } from './buckets';
 import type { AnyLensStateColumn, AnyMetricLensStateColumn } from './types';
-import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE, isAPIColumnOfType } from './utils';
 
 describe('Buckets Transforms', () => {
   describe('fromBucketLensApiToLensState', () => {
@@ -137,6 +137,9 @@ describe('Buckets Transforms', () => {
         },
       };
       const result = fromBucketLensStateToAPI(input, metricColumns);
+      if (!isAPIColumnOfType<LensApiFiltersOperation>('filters', result)) {
+        fail();
+      }
       expect(result.operation).toBe('filters');
       expect(result.filters[0].label).toBe('Active');
     });
@@ -157,6 +160,9 @@ describe('Buckets Transforms', () => {
         },
       };
       const result = fromBucketLensStateToAPI(input, metricColumns);
+      if (!isAPIColumnOfType<LensApiDateHistogramOperation>('date_histogram', result)) {
+        fail();
+      }
       expect(result.operation).toBe('date_histogram');
       expect(result.field).toBe('@timestamp');
       expect(result.suggested_interval).toBe('1d');
@@ -179,6 +185,9 @@ describe('Buckets Transforms', () => {
         },
       };
       const result = fromBucketLensStateToAPI(input, metricColumns);
+      if (!isAPIColumnOfType<LensApiRangeOperation>('range', result)) {
+        fail();
+      }
       expect(result.operation).toBe('range');
       expect(result.field).toBe('price');
       expect(result.ranges[0].label).toBe('Low');
@@ -208,6 +217,9 @@ describe('Buckets Transforms', () => {
         },
       };
       const result = fromBucketLensStateToAPI(input, metricColumns);
+      if (!isAPIColumnOfType<LensApiTermsOperation>('terms', result)) {
+        fail();
+      }
       expect(result.operation).toBe('terms');
       expect(result.fields).toEqual(['status']);
       expect(result.size).toBe(5);
