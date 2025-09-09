@@ -2655,7 +2655,6 @@ describe('generateOtelcolConfig', () => {
     });
   });
 
-
   it('should also work for templates', () => {
     const inputs: TemplateAgentPolicyInput[] = [otelInputTemplate];
     expect(generateOtelcolConfig(inputs)).toEqual({
