@@ -8,7 +8,6 @@
  */
 
 import React, { Children, isValidElement, useEffect, useRef, useMemo, useCallback } from 'react';
-import ReactDOM from 'react-dom';
 import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import { CascadeRowPrimitive } from './data_cascade_row';
@@ -16,7 +15,7 @@ import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
 import { TableHeader, useTableHelper, type Table, type CellContext } from '../../lib/core/table';
 import {
-  useRowVirtualizerHelper,
+  useCascadeVirtualizer,
   getGridHeaderPositioningStyle,
   getGridRowPositioningStyle,
 } from '../../lib/core/virtualizer';
@@ -25,12 +24,7 @@ import {
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
 import { dataCascadeImplStyles, relativePosition, overflowYAuto } from './data_cascade_impl.styles';
-import type {
-  DataCascadeImplProps,
-  DataCascadeRowProps,
-  DataCascadeRowCellProps,
-  CascadeRowPrimitiveProps,
-} from './types';
+import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
 /**
  * @description Public Component for configuring the rendering of a data cascade row cell
@@ -134,11 +128,14 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   });
 
   const {
+    items: virtualItems,
+    totalSize,
     activeStickyIndex,
-    rowVirtualizer,
+    scrollOffset: virtualizerScrollOffset,
+    measureElement,
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
-  } = useRowVirtualizerHelper<G>({
+  } = useCascadeVirtualizer<G>({
     rows,
     overscan,
     getScrollElement: () => scrollElementRef.current,
@@ -167,7 +164,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               <EuiFlexItem
                 css={styles.cascadeTreeGridHeader}
                 style={getGridHeaderPositioningStyle(virtualizedRowComputedTranslateValue)}
-                data-scrolled={Boolean(rowVirtualizer.scrollOffset ?? 0)}
+                data-scrolled={
+                  // mark the header as scrolled if the first row has been scrolled out of view
+                  (virtualizerScrollOffset ?? 0) > virtualizedRowComputedTranslateValue.get(0)!
+                }
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem>
@@ -184,56 +184,42 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
-                <div
-                  css={styles.cascadeTreeGridWrapper}
-                  style={{ height: rowVirtualizer.getTotalSize() }}
-                >
+                <div css={styles.cascadeTreeGridWrapper} style={{ height: totalSize }}>
                   <div
                     {...treeGridContainerARIAAttributes}
                     aria-labelledby="treegrid-label"
                     css={relativePosition}
                   >
-                    {rowVirtualizer
-                      .getVirtualItems()
-                      .map(function buildCascadeRows(virtualItem, renderIndex) {
-                        const row = rows[virtualItem.index];
+                    {virtualItems.map(function buildCascadeRows(virtualItem, renderIndex) {
+                      const row = rows[virtualItem.index];
 
-                        // CONSIDERATION: maybe use the sticky index as a marker for accessibility announcements
-                        const isActiveSticky =
-                          enableStickyGroupHeader && activeStickyIndex === virtualItem.index;
+                      // CONSIDERATION: maybe use the sticky index as a marker for accessibility announcements
+                      const isActiveSticky =
+                        enableStickyGroupHeader && activeStickyIndex === virtualItem.index;
 
-                        virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
+                      virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
 
-                        const rowToRender = React.createElement<CascadeRowPrimitiveProps<G, L>>(
-                          CascadeRowPrimitive,
-                          {
-                            size,
-                            innerRef: rowVirtualizer.measureElement,
-                            isActiveSticky,
-                            enableRowSelection,
-                            rowInstance: row,
-                            virtualRow: virtualItem,
-                            virtualRowStyle: getGridRowPositioningStyle(
-                              renderIndex,
+                      return (
+                        <React.Fragment key={row.id}>
+                          <CascadeRowPrimitive<G, L>
+                            {...{
+                              size,
                               isActiveSticky,
-                              virtualizedRowComputedTranslateValue
-                            ),
-                            ...rowElement.props,
-                          }
-                        );
-
-                        return (
-                          <React.Fragment key={row.id}>
-                            {isActiveSticky && activeStickyRenderSlotRef.current
-                              ? ReactDOM.createPortal(
-                                  rowToRender,
-                                  activeStickyRenderSlotRef.current,
-                                  row.id
-                                )
-                              : rowToRender}
-                          </React.Fragment>
-                        );
-                      })}
+                              enableRowSelection,
+                              rowInstance: row,
+                              virtualRow: virtualItem,
+                              virtualRowStyle: getGridRowPositioningStyle(
+                                renderIndex,
+                                virtualizedRowComputedTranslateValue
+                              ),
+                              innerRef: measureElement,
+                              activeStickyRenderSlotRef,
+                              ...rowElement.props,
+                            }}
+                          />
+                        </React.Fragment>
+                      );
+                    })}
                   </div>
                 </div>
               </EuiFlexItem>
