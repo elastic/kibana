@@ -44,7 +44,7 @@ streamlangApiTest.describe(
       },
       {
         templateValue: '{{{value}}}',
-        templateTo: '{{templated_to}}',
+        templateTo: '{{{templated_to}}}',
         description: 'should set a field using {{{ }}} template',
       },
     ].forEach(({ templateValue, templateTo, description }) => {
@@ -63,11 +63,16 @@ streamlangApiTest.describe(
 
         const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ value: 'templated-value', templated_to: 'attributes.status' }];
+        const docs = [{ value: 'substituted-value', templated_to: 'attributes.status' }];
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'templated-value');
+
+        expect(ingestedDocs[0]).toMatchObject({
+          [templateTo]: templateValue, // Not escaped and assigned literally
+          templated_to: 'attributes.status', // original fields unchanged
+          value: 'substituted-value', // original fields unchanged
+        });
       });
     });
 

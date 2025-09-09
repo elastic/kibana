@@ -67,45 +67,30 @@ streamlangApiTest.describe(
         const { processors } = transpile(streamlangDSL);
 
         const docs = [
-          { host: { original: 'test-host' }, source_field: 'original', target_field: 'renamed' },
+          {
+            host: {
+              original: 'test-host',
+              '{{source_field}}': 'curly-braces',
+              '{{{source_field}}}': 'curly-braces',
+            },
+            source_field: 'original',
+            target_field: 'renamed',
+          },
         ];
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs.length).toBe(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('host.renamed', 'test-host');
-        expect(source).not.toHaveProperty('host.original');
+
+        // Template should not be parsed/substituted, hence original properties should remain as is
+        expect(source).not.toHaveProperty('host.renamed', 'test-host'); // Shouldn't rename a substituted field
+        expect(source).toHaveProperty('host.original', 'test-host');
+
+        expect(source).not.toHaveProperty(templateFrom); // Renamed the literal templated field (no parsing)
+        expect(source).toHaveProperty(templateTo, 'curly-braces'); // Renamed a literal templated field (no parsing)
       });
     });
-
-    streamlangApiTest(
-      'should rename a field using a template for the target',
-      async ({ testBed }) => {
-        const indexName = 'streams-e2e-test-rename-template';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: 'host.original',
-              to: 'host.{{new_name_field}}',
-            } as RenameProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [{ host: { original: 'test-host' }, new_name_field: 'renamed' }];
-        await testBed.ingest(indexName, docs, processors);
-
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
-        const source = ingestedDocs[0];
-        expect(source).toHaveProperty('host.renamed', 'test-host');
-        expect(source).not.toHaveProperty('host.original');
-      }
-    );
 
     streamlangApiTest(
       'should ignore missing field when ignore_missing is true',

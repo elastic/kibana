@@ -121,11 +121,11 @@ streamlangApiTest.describe(
         description: 'should append a {{ }} templated value',
       },
       {
-        templateTo: '{{tags_field}}',
-        templateValue: '{{value_field}}',
+        templateTo: '{{{tags_field}}}',
+        templateValue: '{{{value_field}}}',
         description: 'should append a {{{ ]}} templated value',
       },
-    ].forEach(({ templateValue, description }) => {
+    ].forEach(({ templateTo, templateValue, description }) => {
       streamlangApiTest(description, async ({ testBed }) => {
         const indexName = 'stream-e2e-test-append-templated';
 
@@ -133,7 +133,7 @@ streamlangApiTest.describe(
           steps: [
             {
               action: 'append',
-              to: 'tags',
+              to: templateTo,
               value: [templateValue],
             } as AppendProcessor,
           ],
@@ -141,12 +141,22 @@ streamlangApiTest.describe(
 
         const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ tags: ['existing_tag'], tags_field: 'tags', value_field: 'new_tag' }];
-        await testBed.ingest(indexName, docs, processors);
+        const docs = [
+          {
+            tags: ['existing_tag'],
+            tags_field: 'tags',
+            value_field: 'new_tag',
+            '{{tags_field}}': ['existing-01'],
+            '{{{tags_field}}}': ['existing-01'],
+          },
+        ];
 
+        await testBed.ingest(indexName, docs, processors);
         const ingestedDocs = await testBed.getDocs(indexName);
+
         expect(ingestedDocs.length).toBe(1);
-        expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'new_tag']);
+        expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag']); // Should not append
+        expect(ingestedDocs[0]).toHaveProperty(templateTo, ['existing-01', templateValue]);
       });
     });
   }
