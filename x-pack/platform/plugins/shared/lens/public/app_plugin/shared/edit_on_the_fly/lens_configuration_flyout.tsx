@@ -271,6 +271,8 @@ export function LensEditConfigurationFlyout({
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
       setIsInlineFlyoutVisible(false);
+      // Remove the user's preferred chart type from sessionStorage
+      deleteUserChartTypeFromSessionStorage();
     }
   };
 
