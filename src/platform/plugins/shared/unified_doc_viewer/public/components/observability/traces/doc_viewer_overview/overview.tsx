@@ -27,7 +27,6 @@ import {
 } from '@kbn/apm-types';
 import { SpanLinks } from '../components/span_links';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
-import { Trace } from '../components/trace';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
@@ -37,6 +36,7 @@ import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { SimilarSpans } from '../components/similar_spans';
 import { isTransaction } from '../helpers';
 import { TraceRootItemProvider } from './hooks/use_fetch_trace_root_item';
+import { TraceWaterfall } from '../components/trace_waterfall';
 
 export type OverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -105,7 +105,7 @@ export function Overview({
             duration={duration || 0}
           />
           {showWaterfall && docId ? (
-            <Trace
+            <TraceWaterfall
               dataView={dataView}
               traceId={traceId}
               serviceName={serviceName || ''}

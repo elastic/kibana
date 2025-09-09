@@ -78,6 +78,7 @@ export const FullScreenWaterfall = ({
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
           },
+          mode: 'full',
         },
       }),
     }),

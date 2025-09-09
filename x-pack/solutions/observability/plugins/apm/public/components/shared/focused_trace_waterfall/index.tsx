@@ -11,7 +11,7 @@ import { TraceWaterfall } from '../trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TraceSummary } from './trace_summary';
 
-type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
+type FocusedTrace = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>;
 
 interface Props {
   items: FocusedTrace;
