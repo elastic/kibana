@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.clickNewSearchButton();
       await discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await discover.getHitCount()).to.be('1,000');
     });
   });
 }
