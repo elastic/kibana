@@ -166,7 +166,7 @@ function buildDatasourceStatesLayer(
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
-    config: TextBasedLayer,
+    config: LensApiState,
     ds: NarrowByType<LensApiState['dataset'], 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
@@ -188,7 +188,7 @@ function buildDatasourceStatesLayer(
   }
 
   function buildESQLLayer(
-    config: TextBasedLayer,
+    config: LensApiState,
     ds: NarrowByType<LensApiState['dataset'], 'esql'>
   ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(config, i);
@@ -205,15 +205,8 @@ function buildDatasourceStatesLayer(
   }
 
   if (dataset.type === 'esql') {
-    if (!isTextBasedLayer(layer)) {
-      throw new Error('Expected TextBasedLayer for esql dataset');
-    }
     return ['textBased', buildESQLLayer(layer, dataset)];
-  }
-  if (dataset.type === 'table') {
-    if (!isTextBasedLayer(layer)) {
-      throw new Error('Expected TextBasedLayer for esql dataset');
-    }
+  } else if (dataset.type === 'table') {
     return ['textBased', buildValueLayer(layer, dataset)];
   }
   return ['formBased', buildDataLayers(layer, i, index)];
@@ -297,7 +290,7 @@ export const addLayerColumn = (
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
   const name = columnName + postfix;
-const referenceColumnId = `${name}_reference`;
+  const referenceColumnId = `${name}_reference`;
   layer.columns = {
     ...layer.columns,
     [name]: column,

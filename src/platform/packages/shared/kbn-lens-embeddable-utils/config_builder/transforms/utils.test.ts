@@ -221,6 +221,7 @@ describe('operationFromColumn', () => {
           operationType: 'terms',
           sourceField: 'category',
           label: 'Top values of category',
+          isBucketed: true,
           params: {
             size: 10,
             orderBy: { type: 'alphabetical' },
