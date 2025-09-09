@@ -209,7 +209,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       value: option,
       toolTipContent: isIndependentAgentReleaseVersion(option)
         ? i18n.translate('xpack.fleet.upgradeAgents.iarVersionOptionTooltip', {
-            defaultMessage: 'Independent Elastic Agent Release version',
+            defaultMessage: 'Independent Elastic Agent release version',
           })
         : undefined,
     }));
@@ -568,14 +568,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             title={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.iarVersionSelectedCalloutTitle"
-                defaultMessage="Independent Elastic Agent Release version selected"
+                defaultMessage="Independent Elastic Agent release version selected"
               />
             }
             data-test-subj="iarVersionSelectedCallout"
           >
             <FormattedMessage
               id="xpack.fleet.settings.iarVersionSelected.description"
-              defaultMessage="For more information, see the {documentationLink}."
+              defaultMessage="For more information, refer to {documentationLink}."
               values={{
                 documentationLink: (
                   <EuiLink external={true} href={docLinks.links.fleet.agentReleaseProcess}>
