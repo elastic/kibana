@@ -21,7 +21,6 @@ export const useConversationList = ({ agentId }: { agentId?: string } = {}) => {
     queryFn: () => {
       return conversationsService.list({ agentId });
     },
-    initialData: () => [],
   });
 
   return {

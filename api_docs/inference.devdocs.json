@@ -423,23 +423,9 @@
         "signature": [
           "({\n  query,\n  client,\n}: { query: string; client: ",
           "ElasticsearchClient",
-          "; }) => Promise<{ columns?: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[] | undefined; rows?: ",
-          {
-            "pluginId": "@kbn/es-types",
-            "scope": "common",
-            "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-common.ESQLRow",
-            "text": "ESQLRow"
-          },
-          "[] | undefined; error?: Error | undefined; errorMessages?: string[] | undefined; }>"
+          "; }) => Promise<",
+          "QueryValidateRunOutput",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
         "deprecated": false,

@@ -18,6 +18,7 @@ import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import YAML, { isPair, isScalar, visit } from 'yaml';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
@@ -184,13 +185,41 @@ export const WorkflowYAMLEditor = ({
 
     onMount?.(editor, monaco);
 
-    setIsEditorMounted(true);
+    // Parse initial YAML content immediately if available
+    const model = editor.getModel();
+    if (model) {
+      const value = model.getValue();
+      if (value && value.trim() !== '') {
+        validateVariables(editor);
+        try {
+          const parsedDocument = YAML.parseDocument(value);
+          // Use flushSync to ensure yamlDocument is set synchronously
+          // before isEditorMounted is set, preventing race conditions
+          flushSync(() => {
+            setYamlDocument(parsedDocument);
+          });
+        } catch (error) {
+          flushSync(() => {
+            setYamlDocument(null);
+          });
+        }
+      }
+    }
+
+    // Use flushSync here too to ensure isEditorMounted is set synchronously
+    // after yamlDocument, guaranteeing the decoration effect has both values
+    flushSync(() => {
+      setIsEditorMounted(true);
+    });
   };
 
   useEffect(() => {
     // After editor is mounted or workflowId changes, validate the initial content
-    if (isEditorMounted && editorRef.current && editorRef.current.getModel()?.getValue() !== '') {
-      changeSideEffects();
+    if (isEditorMounted && editorRef.current) {
+      const model = editorRef.current.getModel();
+      if (model && model.getValue() !== '') {
+        changeSideEffects();
+      }
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
@@ -287,8 +316,8 @@ export const WorkflowYAMLEditor = ({
       alertTriggerDecorationCollectionRef.current.clear();
     }
 
-    // Don't show alert dots when in executions view
-    if (!model || !yamlDocument || !isEditorMounted || readOnly) {
+    // Don't show alert dots when in executions view or when prerequisites aren't met
+    if (!model || !yamlDocument || !isEditorMounted || readOnly || !editorRef.current) {
       return;
     }
 
@@ -373,8 +402,24 @@ export const WorkflowYAMLEditor = ({
       .flat()
       .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
 
-    alertTriggerDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(decorations) ?? null;
+    // Ensure we have a valid editor reference before creating decorations
+    if (decorations.length > 0 && editorRef.current) {
+      // Small delay to ensure Monaco editor is fully ready for decorations
+      // This addresses race conditions where the editor is mounted but not fully initialized
+      const createDecorations = () => {
+        if (editorRef.current) {
+          alertTriggerDecorationCollectionRef.current =
+            editorRef.current.createDecorationsCollection(decorations);
+        }
+      };
+
+      // Try immediately, and if that fails, try again with a small delay
+      try {
+        createDecorations();
+      } catch (error) {
+        setTimeout(createDecorations, 10);
+      }
+    }
   }, [isEditorMounted, yamlDocument, readOnly]);
 
   const completionProvider = useMemo(() => {

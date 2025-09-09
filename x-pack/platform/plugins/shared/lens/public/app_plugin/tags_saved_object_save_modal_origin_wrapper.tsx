@@ -20,7 +20,7 @@ export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?:
 export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalProps, 'onSave'> & {
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: OriginSaveProps) => void;
+  onSave: (props: OriginSaveProps) => Promise<void>;
 };
 
 export const TagEnhancedSavedObjectSaveModalOrigin: FC<
@@ -57,11 +57,12 @@ export const TagEnhancedSavedObjectSaveModalOrigin: FC<
     );
 
   const tagEnhancedOnSave: OriginSaveModalProps['onSave'] = useCallback(
-    (saveOptions) => {
-      onSave({
+    async (saveOptions) => {
+      await onSave({
         ...saveOptions,
         newTags: selectedTags,
       });
+      return {}; // SaveResult return type not needed here
     },
     [onSave, selectedTags]
   );

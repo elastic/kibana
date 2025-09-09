@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
@@ -41,11 +41,17 @@ export const CustomSamplesDataSourceCard = ({
     dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
   };
 
-  const editorValue = useMemo(
-    () => serializeXJson(dataSource.documents, '[]'),
-    [dataSource.documents]
+  /**
+   * To have the editor properly handle the set xjson language
+   * we need to avoid the continuous parsing/serialization of the editor value
+   * using a parallel state always setting a string make the editor format well the content.
+   */
+  const [editorValue, setEditorValue] = React.useState(() =>
+    serializeXJson(dataSource.documents, '[]')
   );
+
   const handleEditorChange = (value: string) => {
+    setEditorValue(value);
     const documents = deserializeJson(value);
     if (isSchema(customSamplesDataSourceDocumentsSchema, documents)) {
       handleChange({ documents });

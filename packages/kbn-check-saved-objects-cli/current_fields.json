@@ -86,6 +86,11 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_rule_template": [
+    "name",
+    "ruleTypeId",
+    "tags"
+  ],
   "api_key_pending_invalidation": [
     "apiKeyId",
     "createdAt"
@@ -1284,18 +1289,6 @@
     "name",
     "type",
     "updated_at"
-  ],
-  "workflow": [
-    "createdBy",
-    "definition",
-    "deleted_at",
-    "description",
-    "enabled",
-    "lastUpdatedBy",
-    "name",
-    "tags",
-    "valid",
-    "yaml"
   ],
   "workplace_search_telemetry": []
 }

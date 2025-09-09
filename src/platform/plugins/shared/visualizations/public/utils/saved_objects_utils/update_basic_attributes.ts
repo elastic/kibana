@@ -7,32 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+
 import { extractReferences } from '../saved_visualization_references';
 import { visualizationsClient } from '../../content_management';
-import type { TypesStart } from '../../vis_types';
+import type { BasicVisualizationClient, TypesStart } from '../../vis_types';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   overlays: OverlayStart;
   typesService: TypesStart;
   contentManagement: ContentManagementPublicStart;
+  http: HttpStart;
 }
 
 function getClientForType(
   type: string,
   typesService: TypesStart,
-  contentManagement: ContentManagementPublicStart
-) {
+  contentManagement: ContentManagementPublicStart,
+  http: HttpStart
+): BasicVisualizationClient {
   const visAliases = typesService.getAliases();
-  return (
-    visAliases
-      .find((v) => v.appExtensions?.visualizations.docTypes.includes(type))
-      ?.appExtensions?.visualizations.client(contentManagement) || visualizationsClient
-  );
+  return (visAliases
+    .find((v) => v.appExtensions?.visualizations.docTypes.includes(type))
+    ?.appExtensions?.visualizations.client(contentManagement, http) ||
+    visualizationsClient) as BasicVisualizationClient;
 }
 
 function getAdditionalOptionsForUpdate(
@@ -58,7 +60,12 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
-  const client = getClientForType(type, dependencies.typesService, dependencies.contentManagement);
+  const client = getClientForType(
+    type,
+    dependencies.typesService,
+    dependencies.contentManagement,
+    dependencies.http
+  );
 
   const so = await client.get(soId);
   const extractedReferences = extractReferences({

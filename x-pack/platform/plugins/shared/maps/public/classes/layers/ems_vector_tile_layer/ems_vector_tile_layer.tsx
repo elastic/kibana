@@ -11,6 +11,7 @@ import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-cl
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
+import type { Writable } from '@kbn/utility-types';
 import { RGBAImage } from './image_utils';
 import { AbstractLayer, type LayerIcon } from '../layer';
 import {
@@ -39,13 +40,14 @@ interface SourceRequestData {
 
 export class EmsVectorTileLayer extends AbstractLayer {
   private readonly _style: EMSVectorTileStyle;
+  protected readonly _descriptor: EMSVectorTileLayerDescriptor;
 
   static createDescriptor(
     options: Partial<EMSVectorTileLayerDescriptor>
   ): EMSVectorTileLayerDescriptor {
     const emsVectorTileLayerDescriptor = super.createDescriptor(
       options
-    ) as EMSVectorTileLayerDescriptor;
+    ) as Writable<EMSVectorTileLayerDescriptor>;
     emsVectorTileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     emsVectorTileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     emsVectorTileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
@@ -61,6 +63,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     layerDescriptor: EMSVectorTileLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
+    this._descriptor = layerDescriptor;
     if (!layerDescriptor.style) {
       const defaultStyle = EMSVectorTileStyle.createDescriptor();
       this._style = new EMSVectorTileStyle(defaultStyle);

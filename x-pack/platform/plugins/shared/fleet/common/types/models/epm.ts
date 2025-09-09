@@ -97,6 +97,7 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   transform = 'transform',
   mlModel = 'ml_model',
+  knowledgeBase = 'knowledge_base',
 }
 export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
@@ -654,6 +655,7 @@ export enum INSTALL_STATES {
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
   UPDATE_SO = 'update_so',
 }
@@ -811,6 +813,22 @@ export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
+}
+
+export interface KnowledgeBaseItem {
+  fileName: string;
+  content: string;
+  path?: string;
+  installed_at?: string;
+  version?: string;
+}
+
+export interface PackageKnowledgeBase {
+  package: {
+    name: string;
+  };
+
+  items: KnowledgeBaseItem[];
 }
 
 // Experimental support for Otel integrations

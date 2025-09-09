@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PUBLIC_API_PATH, PUBLIC_API_VERSION } from '@kbn/lens-plugin/server';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -16,9 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('validation', () => {
     it('should return error if using unknown params', async () => {
       const response = await supertest
-        .get(`${PUBLIC_API_PATH}/visualizations`)
+        .get(LENS_VIS_API_PATH)
         .query({ xyz: 'unknown param' })
-        .set(ELASTIC_HTTP_VERSION_HEADER, PUBLIC_API_VERSION)
+        .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send({});
 
       expect(response.status).to.be(400);

@@ -13,7 +13,6 @@ import {
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { isEmpty } from 'lodash';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +31,7 @@ interface BaseProps {
 
 export interface ApmTraceWaterfallEmbeddableFocusedProps extends BaseProps, SerializedTitles {
   docId: string;
+  mode: 'summary';
 }
 
 export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, SerializedTitles {
@@ -40,6 +40,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  mode: 'full';
 }
 
 export type ApmTraceWaterfallEmbeddableProps =
@@ -59,6 +60,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const traceId$ = new BehaviorSubject(state.traceId);
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
+      const mode$ = new BehaviorSubject(state.mode);
       const displayLimit$ = new BehaviorSubject('displayLimit' in state ? state.displayLimit : 0);
       const docId$ = new BehaviorSubject('docId' in state ? state.docId : '');
       const scrollElement$ = new BehaviorSubject(
@@ -84,6 +86,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement: scrollElement$.getValue(),
             onNodeClick: onNodeClick$.getValue(),
             getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
+            mode: mode$.getValue(),
           },
         };
       }
@@ -102,7 +105,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           docId$,
           scrollElement$,
           onNodeClick$,
-          getRelatedErrorsHref$
+          getRelatedErrorsHref$,
+          mode$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
@@ -116,6 +120,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement: 'referenceEquality',
             onNodeClick: 'referenceEquality',
             getRelatedErrorsHref: 'referenceEquality',
+            mode: 'referenceEquality',
           };
         },
         onReset: (lastSaved) => {
@@ -124,7 +129,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           // reset base state
           traceId$.next(lastSaved?.rawState.traceId ?? '');
           rangeFrom$.next(lastSaved?.rawState.rangeFrom ?? '');
-          rangeFrom$.next(lastSaved?.rawState.rangeTo ?? '');
+          rangeTo$.next(lastSaved?.rawState.rangeTo ?? '');
+          mode$.next(lastSaved?.rawState.mode ?? 'summary');
 
           // reset entry state
           const entryState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableEntryProps;
@@ -159,6 +165,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement,
             onNodeClick,
             getRelatedErrorsHref,
+            mode,
           ] = useBatchedPublishingSubjects(
             serviceName$,
             traceId$,
@@ -168,27 +175,29 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             docId$,
             scrollElement$,
             onNodeClick$,
-            getRelatedErrorsHref$
+            getRelatedErrorsHref$,
+            mode$
           );
-          const content = isEmpty(docId) ? (
-            <TraceWaterfallEmbeddable
-              serviceName={serviceName}
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              displayLimit={displayLimit}
-              onNodeClick={onNodeClick}
-              scrollElement={scrollElement}
-              getRelatedErrorsHref={getRelatedErrorsHref}
-            />
-          ) : (
-            <FocusedTraceWaterfallEmbeddable
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              docId={docId}
-            />
-          );
+          const content =
+            mode === 'full' ? (
+              <TraceWaterfallEmbeddable
+                serviceName={serviceName}
+                traceId={traceId}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                displayLimit={displayLimit}
+                onNodeClick={onNodeClick}
+                scrollElement={scrollElement}
+                getRelatedErrorsHref={getRelatedErrorsHref}
+              />
+            ) : (
+              <FocusedTraceWaterfallEmbeddable
+                traceId={traceId}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                docId={docId}
+              />
+            );
 
           return (
             <KibanaSectionErrorBoundary

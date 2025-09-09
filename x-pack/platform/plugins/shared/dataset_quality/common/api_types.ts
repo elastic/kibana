@@ -10,6 +10,7 @@ import * as rt from 'io-ts';
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
   canReadFailureStore: rt.boolean,
+  canManageFailureStore: rt.boolean,
 });
 
 const datasetPrivilegeRt = rt.record(

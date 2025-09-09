@@ -22,9 +22,12 @@ const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof 
 describe('GenAiSettingsApp', () => {
   const coreStart = coreMock.createStart();
   const setBreadcrumbs = jest.fn();
+  const featureFlagsGetBooleanValueMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    featureFlagsGetBooleanValueMock.mockReturnValue(true);
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -33,6 +36,11 @@ describe('GenAiSettingsApp', () => {
           spaces: true,
         },
       },
+    };
+
+    coreStart.featureFlags = {
+      ...coreStart.featureFlags,
+      getBooleanValue: featureFlagsGetBooleanValueMock,
     };
 
     // Default mock for enabled features
@@ -103,6 +111,15 @@ describe('GenAiSettingsApp', () => {
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
+    });
+
+    it('does not render default llm setting when feature is disabled', () => {
+      featureFlagsGetBooleanValueMock.mockReturnValue(false);
+
+      renderComponent();
+
+      expect(screen.queryByTestId('defaultAiConnectorComboBox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('defaultAiConnectorCheckbox')).not.toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {

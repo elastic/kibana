@@ -6,9 +6,9 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/common/content_management';
-import { CONTENT_ID as LENS_CONTENT } from '@kbn/lens-plugin/common/content_management';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-plugin/common/constants';
 
 const SUGGESTED_DASHBOARDS_VALID_RULE_TYPE_IDS = [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID] as const;
 
@@ -25,7 +25,7 @@ export const isSuggestedDashboardsValidRuleTypeId = (
 };
 
 // When adding a new panel type TS will make sure we update ReferencedPanelAttributes, getPanelIndicesMap and getPanelFieldsMap
-const SUGGESTED_DASHBOARDS_VALID_PANEL_TYPES = [LENS_CONTENT] as const;
+const SUGGESTED_DASHBOARDS_VALID_PANEL_TYPES = [LENS_CONTENT_TYPE] as const;
 
 export type SuggestedDashboardsValidPanelType =
   (typeof SUGGESTED_DASHBOARDS_VALID_PANEL_TYPES)[number];

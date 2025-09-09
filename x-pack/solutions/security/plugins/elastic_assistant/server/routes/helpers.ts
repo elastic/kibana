@@ -234,6 +234,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  threadId: string;
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
@@ -267,6 +268,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  threadId,
   contentReferencesStore,
   inferenceChatModelDisabled,
   isOssModel,
@@ -332,6 +334,7 @@ export const langChainExecute = async ({
     actionsClient,
     assistantTools,
     conversationId,
+    threadId,
     connectorId,
     contentReferencesStore,
     esClient,
