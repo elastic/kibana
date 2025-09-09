@@ -19,9 +19,10 @@ import { contentRoutes } from './content/route';
 import { internalDashboardRoutes } from './internal/dashboards/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
-import { significantEventsRoutes } from './streams/significant_events/route';
+import { significantEventsRoutes } from './significant_events/route';
 import { queryRoutes } from './queries/route';
 import { ruleRoutes } from './rules/route';
+import { descriptionRoutes } from './description/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -42,6 +43,7 @@ export const streamsRouteRepository = {
   ...contentRoutes,
   ...significantEventsRoutes,
   ...queryRoutes,
+  ...descriptionRoutes,
   ...ruleRoutes,
 };
 
