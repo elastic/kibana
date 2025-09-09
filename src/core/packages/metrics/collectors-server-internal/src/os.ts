@@ -107,31 +107,18 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
         result.observe(os.cpus().length, attributes);
       });
 
-    const load1m = meter.createObservableGauge('system.cpu.load.1m', {
-      description: 'The 1-minute load average.',
-      unit: '1',
-      valueType: ValueType.DOUBLE,
-    });
-    const load5m = meter.createObservableGauge('system.cpu.load.5m', {
-      description: 'The 5-minute load average.',
-      unit: '1',
-      valueType: ValueType.DOUBLE,
-    });
-    const load15m = meter.createObservableGauge('system.cpu.load.15m', {
-      description: 'The 15-minute load average.',
-      unit: '1',
-      valueType: ValueType.DOUBLE,
-    });
-
-    meter.addBatchObservableCallback(
-      (result) => {
+    meter
+      .createObservableGauge('system.cpu.load', {
+        description: 'The CPU load average.',
+        unit: '1',
+        valueType: ValueType.DOUBLE,
+      })
+      .addCallback((result) => {
         const load = os.loadavg();
-        result.observe(load1m, load[0], attributes);
-        result.observe(load5m, load[1], attributes);
-        result.observe(load15m, load[2], attributes);
-      },
-      [load1m, load5m, load15m]
-    );
+        result.observe(load[0], { ...attributes, 'system.cpu.load.window': '1m' });
+        result.observe(load[1], { ...attributes, 'system.cpu.load.window': '5m' });
+        result.observe(load[2], { ...attributes, 'system.cpu.load.window': '15m' });
+      });
 
     const memoryMetrics = {
       limit: meter.createObservableUpDownCounter('system.memory.limit', {
