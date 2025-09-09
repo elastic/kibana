@@ -42,8 +42,7 @@ export const bulkUpsertOperationsFactory =
           {
             script: {
               source: `
-              ctx._source['@timestamp'] = params.now;
-              ctx._source.event.ingested = params.now;
+              boolean userModified = false;
               if (ctx._source.labels == null) {
                 ctx._source.labels = new HashMap();
               }
@@ -52,12 +51,25 @@ export const bulkUpsertOperationsFactory =
               }
               if (!ctx._source.labels.source_ids.contains(params.source_id)) {
                 ctx._source.labels.source_ids.add(params.source_id);
+                userModified = true;
+              }
+              if (ctx._source.labels.sources == null) {
+                ctx._source.labels.sources = new ArrayList();
               }
               if (!ctx._source.labels.sources.contains("index")) {
                 ctx._source.labels.sources.add("index");
+                userModified = true;
               }
 
-              ctx._source.user.is_privileged = true;
+              if (ctx._source.user.is_privileged != true) {
+                ctx._source.user.is_privileged = true;
+                userModified = true;
+              }
+              
+              if (userModified) {
+                ctx._source['@timestamp'] = params.now;
+                ctx._source.event.ingested = params.now;
+              }
             `,
               params: {
                 source_id: user.sourceId,
