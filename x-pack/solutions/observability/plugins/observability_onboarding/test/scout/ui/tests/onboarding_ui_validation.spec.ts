@@ -8,14 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
-const TEST_TIMEOUT = 3 * 60 * 1000;
-
 test.describe('Onboarding UI Validation', () => {
-  test.describe.configure({
-    timeout: TEST_TIMEOUT,
-    mode: 'parallel',
-  });
-
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.onboarding.goto();
