@@ -15,16 +15,17 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
+import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
-  DashboardMigrationTaskStats,
   DashboardMigrationTranslationStats,
+  DashboardMigrationTaskStats,
   DashboardMigration,
+  DashboardMigrationDashboard,
   DashboardMigrationTaskExecutionSettings,
   DashboardMigrationRetryFilter,
 } from '../../dashboard_migration.gen';
-import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
 import {
   LangSmithOptions,
@@ -73,10 +74,10 @@ export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
 
-export type GetAllStatsDashboardMigrationResponse = z.infer<
-  typeof GetAllStatsDashboardMigrationResponse
+export type GetAllDashboardMigrationsStatsResponse = z.infer<
+  typeof GetAllDashboardMigrationsStatsResponse
 >;
-export const GetAllStatsDashboardMigrationResponse = z.array(DashboardMigrationTaskStats);
+export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
 
 export type GetAllTranslationStatsDashboardMigrationRequestParams = z.infer<
   typeof GetAllTranslationStatsDashboardMigrationRequestParams
@@ -103,6 +104,46 @@ export type GetDashboardMigrationRequestParamsInput = z.input<
 
 export type GetDashboardMigrationResponse = z.infer<typeof GetDashboardMigrationResponse>;
 export const GetDashboardMigrationResponse = DashboardMigration;
+export type GetDashboardMigrationDashboardsRequestQuery = z.infer<
+  typeof GetDashboardMigrationDashboardsRequestQuery
+>;
+export const GetDashboardMigrationDashboardsRequestQuery = z.object({
+  page: z.coerce.number().optional(),
+  per_page: z.coerce.number().optional(),
+  sort_field: NonEmptyString.optional(),
+  sort_direction: z.enum(['asc', 'desc']).optional(),
+  search_term: z.string().optional(),
+  ids: ArrayFromString(NonEmptyString).optional(),
+  is_installed: BooleanFromString.optional(),
+  is_fully_translated: BooleanFromString.optional(),
+  is_partially_translated: BooleanFromString.optional(),
+  is_untranslatable: BooleanFromString.optional(),
+  is_failed: BooleanFromString.optional(),
+});
+export type GetDashboardMigrationDashboardsRequestQueryInput = z.input<
+  typeof GetDashboardMigrationDashboardsRequestQuery
+>;
+
+export type GetDashboardMigrationDashboardsRequestParams = z.infer<
+  typeof GetDashboardMigrationDashboardsRequestParams
+>;
+export const GetDashboardMigrationDashboardsRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetDashboardMigrationDashboardsRequestParamsInput = z.input<
+  typeof GetDashboardMigrationDashboardsRequestParams
+>;
+
+export type GetDashboardMigrationDashboardsResponse = z.infer<
+  typeof GetDashboardMigrationDashboardsResponse
+>;
+export const GetDashboardMigrationDashboardsResponse = z.object({
+  /**
+   * The total number of rules in migration.
+   */
+  total: z.number(),
+  data: z.array(DashboardMigrationDashboard),
+});
 export type GetDashboardMigrationResourcesRequestQuery = z.infer<
   typeof GetDashboardMigrationResourcesRequestQuery
 >;

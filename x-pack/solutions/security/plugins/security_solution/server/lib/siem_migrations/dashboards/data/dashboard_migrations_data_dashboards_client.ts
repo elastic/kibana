@@ -9,22 +9,44 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AggregationsFilterAggregate,
   AggregationsStringTermsAggregate,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   DashboardMigrationDashboard,
   DashboardMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { SiemMigrationItemSort } from '../../common/data/siem_migrations_data_item_client';
 import { SiemMigrationsDataItemClient } from '../../common/data/siem_migrations_data_item_client';
-import { dsl } from '../../common/data/dsl_queries';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import type { DashboardMigrationFilters } from '../../../../../common/siem_migrations/dashboards/types';
+import type { SiemMigrationSort } from '../../common/data/types';
+import { dsl } from './dsl_queries';
+import { getSortingOptions } from './sort';
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataItemClient<DashboardMigrationDashboard> {
   protected type = 'dashboard' as const;
 
-  protected getSortOptions(sort: SiemMigrationItemSort = {}): estypes.Sort {
-    // TODO: implement sorting logic similar to getSortOptions in the rules client
-    return [];
+  protected getSortOptions(sort: SiemMigrationSort = {}): estypes.Sort {
+    return getSortingOptions(sort);
+  }
+
+  protected getFilterQuery(
+    migrationId: string,
+    filters: DashboardMigrationFilters = {}
+  ): { bool: { filter: QueryDslQueryContainer[] } } {
+    const { filter } = super.getFilterQuery(migrationId, filters).bool;
+
+    if (filters.searchTerm?.length) {
+      filter.push(dsl.matchTitle(filters.searchTerm));
+    }
+
+    if (filters.installed != null) {
+      filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
+    }
+    if (filters.installable != null) {
+      filter.push(...(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable()));
+    }
+
+    return { bool: { filter } };
   }
 
   /** Retrieves the translation stats for the dashboard migrations with the provided id */
