@@ -16,6 +16,7 @@ import type {
 import type { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { buildPhrasesFilter } from '@kbn/es-query';
+import type { Writable } from '@kbn/utility-types';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import type { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
 import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
@@ -54,7 +55,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     descriptor: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(descriptor, mapColors);
+    const layerDescriptor = super.createDescriptor(
+      descriptor,
+      mapColors
+    ) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type = LAYER_TYPE.MVT_VECTOR;
 
     if (!layerDescriptor.style) {
