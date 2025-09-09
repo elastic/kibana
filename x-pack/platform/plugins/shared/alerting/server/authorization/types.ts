@@ -23,6 +23,7 @@ export enum ReadOperations {
   GetBackfill = 'getBackfill',
   FindBackfill = 'findBackfill',
   FindGaps = 'findGaps',
+  GetGapFillAutoScheduler = 'getGapFillAutoScheduler',
 }
 
 export enum WriteOperations {
@@ -47,4 +48,5 @@ export enum WriteOperations {
   DeleteBackfill = 'deleteBackfill',
   FillGaps = 'fillGaps',
   CreateGapFillAutoScheduler = 'createGapFillAutoScheduler',
+  UpdateGapFillAutoScheduler = 'updateGapFillAutoScheduler',
 }
