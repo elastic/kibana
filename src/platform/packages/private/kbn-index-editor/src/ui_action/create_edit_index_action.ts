@@ -20,14 +20,14 @@ export function createEditLookupIndexContentAction(
   dependencies: EditLookupIndexFlyoutDeps
 ): UiActionsActionDefinition<EditLookupIndexContentContext> {
   return {
-    id: 'create-open-file-upload-lite-action',
+    id: 'create-open-edit-lookup-index-action',
     type: EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
     getIconType(context): string {
       return 'indexEdit';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.dataVisualizer.file.lite.actions.displayName', {
-        defaultMessage: 'Open file upload UI',
+      i18n.translate('indexEditor.actions.displayName', {
+        defaultMessage: 'Open lookup index editor UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
       const { coreStart, data, fileUpload } = dependencies;
