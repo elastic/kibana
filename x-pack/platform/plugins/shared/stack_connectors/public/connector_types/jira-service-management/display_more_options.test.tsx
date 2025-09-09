@@ -26,10 +26,11 @@ describe('DisplayMoreOptions', () => {
     expect(screen.getByText('More options')).toBeInTheDocument();
   });
 
-  it('renders the hide options text', () => {
+  it('shows close aria label when the additional options are shown', () => {
     render(<DisplayMoreOptions {...{ ...options, showingMoreOptions: true }} />);
 
-    expect(screen.getByText('Hide options')).toBeInTheDocument();
+    const button = screen.getByTestId('jsm-display-more-options');
+    expect(button).toHaveAttribute('aria-label', 'Hide options');
   });
 
   it('calls toggleShowingMoreOptions when clicked', async () => {

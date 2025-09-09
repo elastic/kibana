@@ -9077,15 +9077,8 @@ Object {
   "keys": Object {
     "apiUrl": Object {
       "flags": Object {
-        "default": [Function],
         "error": [Function],
-        "presence": "optional",
       },
-      "metas": Array [
-        Object {
-          "x-oas-optional": true,
-        },
-      ],
       "rules": Array [
         Object {
           "args": Object {

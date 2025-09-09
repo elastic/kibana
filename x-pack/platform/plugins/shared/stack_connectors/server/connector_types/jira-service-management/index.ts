@@ -10,6 +10,8 @@ import {
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID } from '../../../common/jira-service-management/constants';
 import { JiraServiceManagementConnector } from './connector';
@@ -28,6 +30,7 @@ export const getJiraServiceManagementConnectorType = (): SubActionConnectorType<
     name: i18n.JIRA_SERVICE_MANAGEMENT_NAME,
     id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
     schema: { config: ConfigSchema, secrets: SecretsSchema },
+    validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

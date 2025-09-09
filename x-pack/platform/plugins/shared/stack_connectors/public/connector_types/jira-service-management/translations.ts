@@ -82,6 +82,13 @@ export const MORE_OPTIONS = i18n.translate(
   }
 );
 
+export const HIDE_OPTIONS = i18n.translate(
+  'xpack.stackConnectors.components.jiraServiceManagement.hideOptions',
+  {
+    defaultMessage: 'Hide options',
+  }
+);
+
 export const USER_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.jiraServiceManagement.userLabel',
   {

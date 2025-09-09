@@ -30,6 +30,7 @@ const DisplayMoreOptionsComponent: React.FC<DisplayMoreOptionsProps> = ({
       css={css`
         align-self: start;
       `}
+      aria-label={showingMoreOptions ? i18n.HIDE_OPTIONS : i18n.MORE_OPTIONS}
     >
       {i18n.MORE_OPTIONS}
     </EuiButtonEmpty>

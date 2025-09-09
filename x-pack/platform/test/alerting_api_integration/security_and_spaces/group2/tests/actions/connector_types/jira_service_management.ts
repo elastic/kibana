@@ -671,7 +671,7 @@ const createCloseAlertUrl = (baseUrl: string, path: string) => {
 };
 
 const createUrlString = (baseUrl: string, path: string, queryParams?: Record<string, string>) => {
-  const fullURL = new URL(path, baseUrl);
+  const fullURL = new URL(path, baseUrl + '/jsm/ops/integration/v2/');
 
   for (const [key, value] of Object.entries(queryParams ?? {})) {
     fullURL.searchParams.set(key, value);
