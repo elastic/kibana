@@ -212,6 +212,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onReorder={onReorder}
             onClose={onClose}
             getPreviewData={getPreviewData}
+            onMaxItemsReached={() => onEvent('tabsLimitReached')}
           />
         </EuiFlexItem>
       )}

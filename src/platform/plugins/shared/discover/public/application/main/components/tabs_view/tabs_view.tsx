@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import React, { useCallback, useMemo } from 'react';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
