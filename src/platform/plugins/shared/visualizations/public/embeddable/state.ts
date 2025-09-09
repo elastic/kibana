@@ -47,8 +47,8 @@ export const deserializeState = async (
 
   const { savedVis, ...rest } = state.rawState as VisualizeByValueState;
   return {
-    serializedVis: savedVis,
     ...rest,
+    serializedVis: savedVis,
   };
 };
 
