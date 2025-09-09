@@ -17,6 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
+import { withExistingDashboardMigration } from '../util/with_existing_dashboard_migration';
 
 export const registerSiemDashboardMigrationsResourceGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -39,37 +40,39 @@ export const registerSiemDashboardMigrationsResourceGetRoute = (
         },
       },
       withLicense(
-        async (
-          context,
-          req,
-          res
-        ): Promise<IKibanaResponse<GetDashboardMigrationResourcesResponse>> => {
-          const migrationId = req.params.migration_id;
-          const { type, names, from, size } = req.query;
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
-            context.securitySolution,
-            'dashboards'
-          );
-          try {
-            const ctx = await context.resolve(['securitySolution']);
-            const dashboardMigrationsClient =
-              ctx.securitySolution.siemMigrations.getDashboardsClient();
-
-            const options = { filters: { type, names }, from, size };
-            const resources = await dashboardMigrationsClient.data.resources.get(
-              migrationId,
-              options
+        withExistingDashboardMigration(
+          async (
+            context,
+            req,
+            res
+          ): Promise<IKibanaResponse<GetDashboardMigrationResourcesResponse>> => {
+            const migrationId = req.params.migration_id;
+            const { type, names, from, size } = req.query;
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'dashboards'
             );
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const dashboardMigrationsClient =
+                ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-            await siemMigrationAuditLogger.logGetResources({ migrationId });
+              const options = { filters: { type, names }, from, size };
+              const resources = await dashboardMigrationsClient.data.resources.get(
+                migrationId,
+                options
+              );
 
-            return res.ok({ body: resources });
-          } catch (error) {
-            logger.error(error);
-            await siemMigrationAuditLogger.logGetResources({ migrationId, error });
-            return res.badRequest({ body: error.message });
+              await siemMigrationAuditLogger.logGetResources({ migrationId });
+
+              return res.ok({ body: resources });
+            } catch (error) {
+              logger.error(error);
+              await siemMigrationAuditLogger.logGetResources({ migrationId, error });
+              return res.badRequest({ body: error.message });
+            }
           }
-        }
+        )
       )
     );
 };

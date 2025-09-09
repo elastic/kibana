@@ -31,5 +31,3 @@ export const SIEM_DASHBOARD_MIGRATION_START_PATH =
   `${SIEM_DASHBOARD_MIGRATION_PATH}/start` as const;
 
 export const SIEM_DASHBOARD_MIGRATION_STOP_PATH = `${SIEM_DASHBOARD_MIGRATION_PATH}/stop` as const;
-  `${SIEM_DASHBOARD_MIGRATION_PATH}/resources/missing` as const;
-

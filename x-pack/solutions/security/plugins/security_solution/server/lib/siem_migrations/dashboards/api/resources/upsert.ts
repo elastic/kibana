@@ -21,6 +21,7 @@ import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 import { processLookups } from '../../../rules/api/util/lookups';
+import { withExistingDashboardMigration } from '../util/with_existing_dashboard_migration';
 
 export const registerSiemDashboardMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -44,61 +45,63 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
         },
       },
       withLicense(
-        async (
-          context,
-          req,
-          res
-        ): Promise<IKibanaResponse<UpsertDashboardMigrationResourcesResponse>> => {
-          const resources = req.body;
-          const migrationId = req.params.migration_id;
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
-            context.securitySolution,
-            'dashboards'
-          );
-          try {
-            const ctx = await context.resolve(['securitySolution']);
-            const dashboardMigrationsClient =
-              ctx.securitySolution.siemMigrations.getDashboardsClient();
+        withExistingDashboardMigration(
+          async (
+            context,
+            req,
+            res
+          ): Promise<IKibanaResponse<UpsertDashboardMigrationResourcesResponse>> => {
+            const resources = req.body;
+            const migrationId = req.params.migration_id;
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'dashboards'
+            );
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const dashboardMigrationsClient =
+                ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-            await siemMigrationAuditLogger.logUploadResources({ migrationId });
+              await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
-            // Check if the migration exists
-            const { data } = await dashboardMigrationsClient.data.items.get(migrationId, {
-              size: 1,
-            });
-            const [dashboard] = data;
-            if (!dashboard) {
-              return res.notFound({ body: { message: 'Migration not found' } });
-            }
+              // Check if the migration exists
+              const { data } = await dashboardMigrationsClient.data.items.get(migrationId, {
+                size: 1,
+              });
+              const [dashboard] = data;
+              if (!dashboard) {
+                return res.notFound({ body: { message: 'Migration not found' } });
+              }
 
-            const [lookups, macros] = partition(resources, { type: 'lookup' });
-            const processedLookups = await processLookups(lookups, dashboardMigrationsClient);
-            // Add migration_id to all resources
-            const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
-              ...resource,
-              migration_id: migrationId,
-            }));
-
-            // Upsert the resources
-            await dashboardMigrationsClient.data.resources.upsert(resourcesUpsert);
-
-            // Create identified resource documents to keep track of them (without content)
-            const resourceIdentifier = new DashboardResourceIdentifier('splunk');
-            const resourcesToCreate = resourceIdentifier
-              .fromResources(resources)
-              .map<CreateSiemMigrationResourceInput>((resource) => ({
+              const [lookups, macros] = partition(resources, { type: 'lookup' });
+              const processedLookups = await processLookups(lookups, dashboardMigrationsClient);
+              // Add migration_id to all resources
+              const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
                 ...resource,
                 migration_id: migrationId,
               }));
-            await dashboardMigrationsClient.data.resources.create(resourcesToCreate);
 
-            return res.ok({ body: { acknowledged: true } });
-          } catch (error) {
-            logger.error(error);
-            await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
-            return res.customError({ statusCode: 500, body: error.message });
+              // Upsert the resources
+              await dashboardMigrationsClient.data.resources.upsert(resourcesUpsert);
+
+              // Create identified resource documents to keep track of them (without content)
+              const resourceIdentifier = new DashboardResourceIdentifier('splunk');
+              const resourcesToCreate = resourceIdentifier
+                .fromResources(resources)
+                .map<CreateSiemMigrationResourceInput>((resource) => ({
+                  ...resource,
+                  migration_id: migrationId,
+                }));
+              await dashboardMigrationsClient.data.resources.create(resourcesToCreate);
+
+              return res.ok({ body: { acknowledged: true } });
+            } catch (error) {
+              logger.error(error);
+              await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
+              return res.customError({ statusCode: 500, body: error.message });
+            }
           }
-        }
+        )
       )
     );
 };
