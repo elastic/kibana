@@ -9,7 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 
 import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
-import type { DocumentsDataWriter } from '../../lib/data_stream/documents_data_writer';
+import type {
+  DocumentsDataWriter,
+  BulkOperationError,
+} from '../../lib/data_stream/documents_data_writer';
 import { transformESToConversations } from './transforms';
 import type { EsConversationSchema } from './types';
 import type { UpdateConversationSchema } from './update_conversation';
@@ -37,19 +40,20 @@ export const appendConversationMessages = async ({
     existingConversation
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { errors, docs_updated: docsUpdated } = await (dataWriter.bulk as unknown as any)({
+  const { errors, docs_updated: docsUpdated } = await dataWriter.bulk<
+    UpdateConversationSchema,
+    never
+  >({
     documentsToUpdate: [params],
-    getUpdateScript: (document: unknown) =>
-      getUpdateScript({ conversation: document as UpdateConversationSchema }),
+    getUpdateScript: (document: UpdateConversationSchema) =>
+      getUpdateScript({ conversation: document }),
     authenticatedUser,
   });
 
   if (errors && errors.length > 0) {
     logger.error(
       `Error appending conversation messages: ${errors.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (err: any) => err.message
+        (err: BulkOperationError) => err.message
       )} for conversation by ID: ${existingConversation.id}`
     );
     return null;
