@@ -78,7 +78,7 @@ export const Chart: React.FC<ChartProps> = ({
   ]);
 
   const lensProps = useLensProps({
-    title: metric.name,
+    title: '',
     query: esqlQuery,
     timeRange: getTimeRange(),
     color,
@@ -105,6 +105,7 @@ export const Chart: React.FC<ChartProps> = ({
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
           abortController={abortController}
+          metricName={metric.name}
         />
       )}
     </div>

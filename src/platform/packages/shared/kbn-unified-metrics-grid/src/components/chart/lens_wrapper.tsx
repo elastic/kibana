@@ -13,9 +13,12 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useBoolean } from '@kbn/react-hooks';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { MetricTermWithHighlight } from '../metric_chart/metric_term_with_highlight';
+import { useMetricsGridState } from '../../hooks/use_metrics_grid_state';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
+  metricName: string;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
 const DEFAULT_DISABLED_ACTIONS = [
@@ -31,9 +34,11 @@ export function LensWrapper({
   onBrushEnd,
   onFilter,
   abortController,
+  metricName,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
+  const { searchTerm } = useMetricsGridState();
 
   const { EmbeddableComponent, SaveModalComponent } = services.lens;
 
@@ -47,10 +52,22 @@ export function LensWrapper({
       width: 100%;
     }
 
+    & > h3 {
+      min-height: 24px;
+      max-height: 24px;
+      max-width: 90%;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      z-index: 9000;
+      padding: ${euiTheme.size.s};
+    }
+
     & .lnsExpressionRenderer {
       width: 100%;
       margin: auto;
       box-shadow: none;
+      padding-top: ${euiTheme.size.l};
     }
 
     & .echLegend .echLegendList {
@@ -72,6 +89,9 @@ export function LensWrapper({
   return (
     <>
       <div css={chartCss}>
+        <h3 style={{ fontFamily: 'monospace' }}>
+          <MetricTermWithHighlight searchTerm={searchTerm} text={metricName} truncation="end" />
+        </h3>
         <EmbeddableComponent
           {...lensProps}
           extraActions={extraActions}
