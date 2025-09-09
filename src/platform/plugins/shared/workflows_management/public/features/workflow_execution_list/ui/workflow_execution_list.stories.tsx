@@ -50,7 +50,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1m28s'),
-          workflowDefinition: {},
         },
         {
           id: '1',
@@ -59,7 +58,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1h2m'),
-          workflowDefinition: {},
         },
         {
           id: '2',
@@ -68,7 +66,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1d2h'),
-          workflowDefinition: {},
         },
         {
           id: '4',
@@ -77,7 +74,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1w2d'),
           spaceId: 'default',
-          workflowDefinition: {},
         },
         {
           id: '5',
@@ -86,7 +82,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1m28s'),
           spaceId: 'default',
-          workflowDefinition: {},
         },
         {
           id: '6',
@@ -95,7 +90,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('280ms'),
           spaceId: 'default',
-          workflowDefinition: {},
         },
         {
           id: '7',
@@ -104,7 +98,6 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('28s'),
           spaceId: 'default',
-          workflowDefinition: {},
         },
       ],
       _pagination: {

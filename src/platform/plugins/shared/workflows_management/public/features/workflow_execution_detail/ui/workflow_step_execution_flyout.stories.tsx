@@ -44,7 +44,6 @@ export const Default: StoryObj<typeof WorkflowStepExecutionFlyout> = {
       completedAt: '2025-09-01T17:34:54.965Z',
       executionTimeMs: 423,
       error: 'HTTP Error: 422 Unprocessable Entity',
-      spaceId: 'default',
     },
     closeFlyout: () => {},
     goNext: () => {},
