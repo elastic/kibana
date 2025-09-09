@@ -155,13 +155,20 @@ function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): Typ
 /**
  * Create an optional type
  *
- * @note wrapping with `maybe` ignores `defaultValue` on `type`.
+ * @note wrapping with `maybe` ignores the `defaultValue` on `type` when validating.
  */
 function maybe<V, D extends DefaultValue<V> = never>(type: Type<V, D>): Type<V | undefined, D> {
   return new MaybeType(type);
 }
 
-function nullable<V>(type: Type<V>): Type<V | null> {
+/**
+ * Create an nullable type
+ *
+ * @note wrapping with `nullable` ignores the `defaultValue` on `type` when validating.
+ */
+function nullable<V, D extends DefaultValue<V> = never>(
+  type: Type<V, D>
+): Type<V | null, D | null> {
   return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
