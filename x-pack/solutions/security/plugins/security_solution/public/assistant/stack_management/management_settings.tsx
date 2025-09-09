@@ -23,6 +23,7 @@ import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/sett
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
+import { DefaultAiConnectorSettingsContextProvider } from '@kbn/ai-assistant-default-llm-setting/src/context/default_ai_connector_context';
 import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 
@@ -36,16 +37,16 @@ export const ManagementSettings = React.memo(() => {
   } = useAssistantContext();
   const spaceId = useSpaceId();
   const {
-    application: {
-      navigateToApp,
-      capabilities: {
-        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
-      },
-    },
+    application,
     data: { dataViews },
     chrome: { docTitle, setBreadcrumbs },
     serverless,
+    settings,
+    docLinks,
+    featureFlags,
+    notifications,
   } = useKibana().services;
+
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -66,6 +67,12 @@ export const ManagementSettings = React.memo(() => {
       getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
     [conversations, getDefaultConversation]
   );
+  const {
+    navigateToApp,
+    capabilities: {
+      securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+    },
+  } = application;
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
@@ -135,12 +142,20 @@ export const ManagementSettings = React.memo(() => {
   if (conversations) {
     return spaceId ? (
       <AssistantSpaceIdProvider spaceId={spaceId}>
+        <DefaultAiConnectorSettingsContextProvider
+        toast={notifications.toasts}
+        application={application}
+        docLinks={docLinks}
+        featureFlags={featureFlags}
+      >
         <AssistantSettingsManagement
+          settings={settings}
           selectedConversation={currentConversation}
           dataViews={dataViews}
           onTabChange={handleTabChange}
           currentTab={currentTab}
         />
+        </DefaultAiConnectorSettingsContextProvider>
       </AssistantSpaceIdProvider>
     ) : null;
   }
