@@ -154,12 +154,11 @@ export class SuggestedDashboardsClient {
         }
       });
 
-      this.referencedPanelManager
-        .getPanelIndices(panel)
-        .forEach(
-          (index) =>
-            alertIndex === index && !matchedBy.index.includes(index) && matchedBy.index?.push(index)
-        );
+      this.referencedPanelManager.getPanelIndices(panel).forEach((index) => {
+        if (alertIndex === index && !matchedBy.index.includes(index)) {
+          matchedBy.index?.push(index);
+        }
+      });
     }
 
     return matchedBy;
