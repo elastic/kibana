@@ -226,6 +226,7 @@ describe('provides correct series naming', () => {
       layers: [
         {
           ...args.layers[0],
+          xScaleType: XScaleTypes.ORDINAL,
           xAccessor: 'c',
           accessors: ['a'],
           splitAccessors: ['d'],
@@ -257,6 +258,7 @@ describe('provides correct series naming', () => {
       layers: [
         {
           ...args.layers[0],
+          xScaleType: XScaleTypes.ORDINAL,
           accessors: ['a', 'b'],
           splitAccessors: ['d'],
           columnToLabel: '{"a": "Label A","b": "Label B"}',
@@ -281,6 +283,7 @@ describe('provides correct series naming', () => {
       layers: [
         {
           ...args.layers[0],
+          xScaleType: XScaleTypes.ORDINAL,
           accessors: ['a', 'b'],
           splitAccessors: ['d'],
           columnToLabel: '{"a": "Label A","b": "Label B"}',
