@@ -8,6 +8,8 @@
 }
 
 .indexPatternEditor__footer {
-  margin-left: -$euiSizeL;
-  margin-right: -$euiSizeL;
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-left: -$euiSizeL;
+    margin-right: -$euiSizeL;
+  }
 }
