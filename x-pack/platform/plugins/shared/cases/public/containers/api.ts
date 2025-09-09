@@ -486,14 +486,14 @@ export const removeAlertFromComment = async ({
   caseAttachments: AlertAttachmentUI[];
   signal?: AbortSignal;
 }): Promise<PromiseSettledResult<Attachment | void>[]> => {
-  const attachmentMap = new Map<string, AlertAttachmentUI & { alertIndices: number[] }>();
+  const attachmentMap = new Map<string, AlertAttachmentUI & { alertIndices: Set<number> }>();
 
   alertIdsToRemove.forEach((alertIdToRemove) => {
-    let alertIndicesToRemove: number[] = [];
+    const alertIndicesToRemove = new Set<number>();
     const alertAttachment = caseAttachments.find((attachment) => {
-      const idx = attachment.alertId.indexOf(alertIdToRemove.toString());
+      const idx = attachment.alertId.indexOf(alertIdToRemove);
       if (idx > -1) {
-        alertIndicesToRemove = [idx];
+        alertIndicesToRemove.add(idx);
         return attachment;
       }
       return undefined;
@@ -505,7 +505,9 @@ export const removeAlertFromComment = async ({
 
     const existingAttachment = attachmentMap.get(alertAttachment.id);
     if (existingAttachment) {
-      existingAttachment.alertIndices.push(...alertIndicesToRemove);
+      for (const idx of alertIndicesToRemove) {
+        existingAttachment.alertIndices.add(idx);
+      }
       attachmentMap.set(alertAttachment.id, existingAttachment);
     } else {
       attachmentMap.set(alertAttachment.id, {
@@ -520,8 +522,8 @@ export const removeAlertFromComment = async ({
       const { alertId, index, id, version, rule, owner } = alertAttachment;
 
       if (Array.isArray(alertId) && Array.isArray(index)) {
-        const newAlertId = alertId.filter((_, i) => !alertAttachment.alertIndices?.includes(i));
-        const newIndex = index.filter((_, i) => !alertAttachment?.alertIndices?.includes(i));
+        const newAlertId = alertId.filter((_, i) => !alertAttachment.alertIndices?.has(i));
+        const newIndex = index.filter((_, i) => !alertAttachment?.alertIndices?.has(i));
 
         if (newAlertId.length > 0 && newIndex.length > 0) {
           return patchComment({
