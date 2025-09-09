@@ -16,6 +16,7 @@ import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 import { useConversationId } from '../../hooks/use_conversation_id';
 import { useSendMessage } from '../../context/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
+import { useConversation } from '../../hooks/use_conversation';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -30,6 +31,7 @@ export const Conversation: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
+  const { isFetched } = useConversation();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const { showScrollButton, scrollToMostRecentRound, stickToBottom } = useConversationScrollActions(
@@ -40,14 +42,15 @@ export const Conversation: React.FC<{}> = () => {
     }
   );
 
+  // Stick to bottom only on initial conversation load (not when new rounds are added)
   useEffect(() => {
-    // TODO: Replace {setTimeout} with a more robust solution for calling stickToBottom()
-    // Consider exposing loading states from {useConversationRounds} hook (e.g., {fetched, isLoading})
-    // to ensure we only scroll after all dynamic content has fully loaded and rendered.
-    setTimeout(() => {
-      stickToBottom();
-    }, 2000);
-  }, [stickToBottom]);
+    if (isFetched && conversationId) {
+      // Uses {requestAnimationFrame} to ensure DOM is rendered
+      requestAnimationFrame(() => {
+        stickToBottom();
+      });
+    }
+  }, [stickToBottom, isFetched, conversationId]);
 
   const scrollContainerStyles = css`
     overflow-y: auto;
