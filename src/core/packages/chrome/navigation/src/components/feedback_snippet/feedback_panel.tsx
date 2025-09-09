@@ -146,6 +146,7 @@ export const FeedbackPanel = ({
       onClick={handleOpenSurveyAndDismissPanel}
       fill
       fullWidth
+      size="s"
       iconType="popout"
       iconSide="right"
       id="sideNavigationFeedbackPanelSurveyLink"

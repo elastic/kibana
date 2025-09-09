@@ -27,27 +27,35 @@ export const FeedbackButton = ({ handleOpenSurvey }: FeedbackButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiButtonEmpty
-      onClick={handleOpenSurvey}
+    <div
       css={css`
-        margin: ${euiTheme.size.m};
-        padding: ${euiTheme.size.s};
+        border-top: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+        padding: ${euiTheme.size.m};
       `}
-      color="text"
-      iconType="popout"
-      iconSide="right"
-      id="sideNavigationFeedbackButtonSurveyLink"
-      aria-label={i18n.translate(
-        'core.ui.chrome.sideNavigation.sideNavigation.feedbackButtonLabel',
-        {
-          defaultMessage: 'Navigation feedback',
-        }
-      )}
     >
-      <FormattedMessage
-        id="core.ui.chrome.sideNavigation.sideNavigation.feedbackButtonText"
-        defaultMessage="Navigation feedback"
-      />
-    </EuiButtonEmpty>
+      <EuiButtonEmpty
+        onClick={handleOpenSurvey}
+        css={css`
+          padding: ${euiTheme.size.s};
+          width: 100%;
+        `}
+        color="text"
+        iconType="popout"
+        iconSide="right"
+        size="s"
+        id="sideNavigationFeedbackButtonSurveyLink"
+        aria-label={i18n.translate(
+          'core.ui.chrome.sideNavigation.sideNavigation.feedbackButtonLabel',
+          {
+            defaultMessage: 'Navigation feedback',
+          }
+        )}
+      >
+        <FormattedMessage
+          id="core.ui.chrome.sideNavigation.sideNavigation.feedbackButtonText"
+          defaultMessage="Navigation feedback"
+        />
+      </EuiButtonEmpty>
+    </div>
   );
 };
