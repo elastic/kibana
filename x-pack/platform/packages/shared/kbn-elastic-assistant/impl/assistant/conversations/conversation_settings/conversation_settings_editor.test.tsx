@@ -91,7 +91,6 @@ const baseProps: ConversationSettingsEditorProps = {
   conversationSettings: { [welcomeConvo.id]: welcomeConvo },
   conversationsSettingsBulkActions: {},
   http: { basePath: { get: jest.fn(() => 'http://localhost:5601') } } as unknown as HttpSetup,
-  isAssistantSharingEnabled: true,
   isDisabled: false,
   selectedConversation: welcomeConvo,
   setConversationSettings: mockSetConversationSettings,

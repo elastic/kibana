@@ -55,7 +55,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 }) => {
   const {
     actionTypeRegistry,
-    assistantAvailability: { isAssistantEnabled, isAssistantSharingEnabled },
+    assistantAvailability: { isAssistantEnabled },
     http,
     nameSpace,
     toasts,
@@ -250,7 +250,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     onCancelClick();
   }, [closeConfirmModal, handleUnselectAll, onCancelClick]);
 
-  const { getConversationsList, getColumns } = useConversationsTable(isAssistantSharingEnabled);
+  const { getConversationsList, getColumns } = useConversationsTable();
 
   const conversationOptions = getConversationsList({
     allSystemPrompts,
@@ -373,7 +373,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
               conversationSettings={conversations}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               http={http}
-              isAssistantSharingEnabled={isAssistantSharingEnabled}
               isDisabled={isDisabled}
               selectedConversation={selectedConversation}
               setConversationSettings={setConversationSettings}
