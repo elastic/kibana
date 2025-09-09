@@ -6,7 +6,7 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { RULES_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
   // IMPORTANT
@@ -79,6 +79,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             'scan_operations_all',
             'workflow_insights_all',
           ],
+          [RULES_FEATURE_ID]: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
