@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import globby from 'globby';
 import { Logger } from '@kbn/core/server';
+=======
+import { glob } from 'fs/promises';
+import type { Logger } from '@kbn/core/server';
+>>>>>>> 5573d9356bd (Replaced globby with native glob (#233481))
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { resolve } from 'path';
 import { Document } from 'langchain/document';
@@ -73,9 +78,14 @@ export const loadSecurityLabs = async (
 
 export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
-    return await globby(ENCODED_FILE_MICROMATCH_PATTERN, {
-      cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
-    }).then((files) => files.length);
+    // @ts-expect-error incorrect type for Array.fromAsync
+    const files = await Array.fromAsync(
+      glob(ENCODED_FILE_MICROMATCH_PATTERN, {
+        cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
+      })
+    );
+
+    return files.length;
   } catch (e) {
     logger.error(`Failed to get Security Labs source docs count\n${e}`);
     return 0;
