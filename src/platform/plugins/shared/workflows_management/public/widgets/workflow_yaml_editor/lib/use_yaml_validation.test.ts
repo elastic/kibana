@@ -14,9 +14,14 @@ import { useYamlValidation } from './use_yaml_validation';
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
+  const lines = value.split('\n');
   const model = {
     getValue: () => value,
     getPositionAt: (offset: number) => ({ lineNumber: 1, column: offset + 1 }),
+    getLineMaxColumn: (lineNumber: number) => {
+      const line = lines[lineNumber - 1];
+      return line ? line.length + 1 : 1;
+    },
     uri: { path: '/test.yaml' },
   };
 
@@ -33,15 +38,22 @@ const mockSetModelMarkers = jest.fn();
 (monaco.editor as any).setModelMarkers = mockSetModelMarkers;
 
 describe('useYamlValidation - Step Name Uniqueness', () => {
-  const mockSchema = z.object({
-    name: z.string(),
-    steps: z.array(
-      z.object({
-        name: z.string(),
-        type: z.string(),
-      })
-    ),
-  });
+  const mockSchema = z
+    .object({
+      version: z.string().optional(),
+      name: z.string(),
+      enabled: z.boolean().optional(),
+      triggers: z.array(z.any()).optional(),
+      steps: z
+        .array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+          })
+        )
+        .optional(),
+    })
+    .passthrough();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,7 +67,12 @@ describe('useYamlValidation - Step Name Uniqueness', () => {
     );
 
     const yamlContent = `
+version: "1"
 name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
 steps:
   - name: step1
     type: console
@@ -84,7 +101,12 @@ steps:
     );
 
     const yamlContent = `
+version: "1"
 name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
 steps:
   - name: step1
     type: console

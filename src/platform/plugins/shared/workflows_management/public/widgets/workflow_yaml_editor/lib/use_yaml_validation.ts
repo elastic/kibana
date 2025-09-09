@@ -197,15 +197,18 @@ export function useYamlValidation({
                 source: 'step-name-validation',
               });
 
+              // Add full line highlighting with red background
               decorations.push({
                 range: new monaco.Range(
                   occurrence.startLineNumber,
-                  occurrence.startColumn,
-                  occurrence.endLineNumber,
-                  occurrence.endColumn
+                  1,
+                  occurrence.startLineNumber,
+                  model.getLineMaxColumn(occurrence.startLineNumber)
                 ),
                 options: {
-                  inlineClassName: 'template-variable-error',
+                  className: 'duplicate-step-name-error',
+                  marginClassName: 'duplicate-step-name-error-margin',
+                  isWholeLine: true,
                   stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
                 },
               });

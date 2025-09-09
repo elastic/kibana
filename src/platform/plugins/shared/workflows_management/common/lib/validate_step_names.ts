@@ -35,33 +35,34 @@ function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
       stepNames.push(step.name);
     }
 
-    // Handle nested steps in different step types
-    if (step.type === 'foreach' && 'steps' in step && step.steps) {
-      stepNames.push(...collectAllStepNames(step.steps as WorkflowYaml['steps']));
-    }
+    // Collect nested step names using a generic approach
+    stepNames.push(...collectNestedStepNames(step));
+  }
 
-    if (step.type === 'if' && 'steps' in step && step.steps) {
-      stepNames.push(...collectAllStepNames(step.steps as WorkflowYaml['steps']));
+  return stepNames;
+}
 
-      // Handle else branch
-      if ('else' in step && step.else) {
-        stepNames.push(...collectAllStepNames(step.else as WorkflowYaml['steps']));
-      }
-    }
+/**
+ * Helper function to collect step names from nested structures
+ */
+function collectNestedStepNames(step: any): string[] {
+  const stepNames: string[] = [];
 
-    if (step.type === 'atomic' && 'steps' in step && step.steps) {
-      stepNames.push(...collectAllStepNames(step.steps as WorkflowYaml['steps']));
-    }
+  // Handle steps property (foreach, if, atomic, merge)
+  if (step.steps && Array.isArray(step.steps)) {
+    stepNames.push(...collectAllStepNames(step.steps));
+  }
 
-    if (step.type === 'merge' && 'steps' in step && step.steps) {
-      stepNames.push(...collectAllStepNames(step.steps as WorkflowYaml['steps']));
-    }
+  // Handle else branch for if steps
+  if (step.else && Array.isArray(step.else)) {
+    stepNames.push(...collectAllStepNames(step.else));
+  }
 
-    if (step.type === 'parallel' && 'branches' in step && step.branches) {
-      for (const branch of step.branches) {
-        if (branch.steps) {
-          stepNames.push(...collectAllStepNames(branch.steps as WorkflowYaml['steps']));
-        }
+  // Handle branches for parallel steps
+  if (step.branches && Array.isArray(step.branches)) {
+    for (const branch of step.branches) {
+      if (branch.steps && Array.isArray(branch.steps)) {
+        stepNames.push(...collectAllStepNames(branch.steps));
       }
     }
   }
