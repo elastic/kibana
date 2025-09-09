@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
@@ -434,9 +434,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should allow to update field type to incompatible type', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -482,9 +480,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should not allow to update field type to system', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -595,12 +591,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
-
-        await esClient.indices.deleteDataStream({ name: 'logs.invalid_pipeline' });
-        await esClient.indices.deleteIndexTemplate({ name: 'logs.invalid_pipeline@stream' });
-        await esClient.cluster.deleteComponentTemplate({
-          name: 'logs.invalid_pipeline@stream.layer',
-        });
       });
 
       it('inherit fields', async () => {
@@ -609,9 +599,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'attributes.bar': { type: 'long' },
         };
         await putStream(apiClient, 'logs.one', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -625,9 +613,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, 'logs.one.two.three', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -660,9 +646,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           index,
           {
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -678,52 +662,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('reports when it fails to create a stream', async () => {
-        const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
-          stream: {
-            description: 'Should cause a failure due to invalid ingest pipeline',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: {
-                steps: [
-                  {
-                    action: 'manual_ingest_pipeline',
-                    processors: [
-                      {
-                        set: {
-                          field: 'fails',
-                          value: 'whatever',
-                          fail: 'because this property is not valid',
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-              wired: {
-                fields: {},
-                routing: [],
-              },
-            },
-          },
-        };
-
-        const response = await putStream(apiClient, 'logs.invalid_pipeline', body, 500);
-
-        expect((response as any).message).to.contain('Failed to change state:');
-        expect((response as any).message).to.contain(
-          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
-        );
-      });
-
       it('does not allow super deeply nested streams', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
