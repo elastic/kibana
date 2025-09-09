@@ -9,9 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
-interface SecretHeadersResponse {
-  secretHeaders: Array<{ key: string; value: string }>;
-}
 interface SecretHeader {
   key: string;
   value: string;
@@ -29,12 +26,12 @@ export function useSecretHeaders(connectorId?: string) {
     ['secretHeaders', connectorId], // queryKey
     async () => {
       // query fn
-      const response = await http.get<SecretHeadersResponse>(
+      const response = await http.get<string[]>(
         `/internal/stack_connectors/${connectorId}/secret_headers`
       );
 
-      return response.secretHeaders.map((header) => ({
-        key: header.key,
+      return response.map((key) => ({
+        key,
         value: '',
         type: 'secret' as const,
       }));
