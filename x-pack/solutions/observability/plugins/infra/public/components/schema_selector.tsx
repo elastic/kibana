@@ -247,7 +247,7 @@ export const SchemaSelector = ({
           <EuiSuperSelect
             onClickCapture={handleSchemaSelectorClick}
             data-test-subj="infraSchemaSelect"
-            id={'infraSchemaSelectorSelect'}
+            id="infraSchemaSelectorSelect"
             options={displayOptions}
             compressed={isHostsView}
             valueOfSelected={isInvalid ? 'unknown' : value ?? 'semconv'}
