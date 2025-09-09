@@ -105,7 +105,9 @@ export function WiredStreamDetailManagement({
   }
 
   if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
+    );
   }
 
   return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
