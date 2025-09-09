@@ -289,7 +289,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       nameTooltip: {
         content: datasetQualityColumnTooltip,
-        type: 'question',
+        icon: 'question',
       },
       field: 'quality',
       sortable: true,
@@ -309,7 +309,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       nameTooltip: {
         content: degradedDocsColumnTooltip,
-        type: 'question',
+        icon: 'question',
       },
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -343,7 +343,7 @@ export const getDatasetQualityTableColumns = ({
             ),
             nameTooltip: {
               content: failedDocsColumnTooltip,
-              type: 'question',
+              icon: 'question',
             },
             field: 'failedDocs.percentage',
             sortable: true,
