@@ -592,7 +592,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const isSearchable = count >= expectedCount;
 
           return response.ok({
-            body: { isSearchable },
+            body: { isSearchable, count },
           });
         } catch (e) {
           return response.customError(wrapError(e));

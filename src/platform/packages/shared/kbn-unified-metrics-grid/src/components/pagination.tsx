@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -23,21 +23,18 @@ export const Pagination = ({ totalPages, currentPage, onPageChange }: Pagination
   }
 
   return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiPagination
-            aria-label={i18n.translate(
-              'metricsExperience.pagination.euiPagination.metricsPaginationLabel',
-              { defaultMessage: 'Metrics pagination' }
-            )}
-            pageCount={totalPages}
-            activePage={currentPage}
-            onPageClick={onPageChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiPagination
+          aria-label={i18n.translate(
+            'metricsExperience.pagination.euiPagination.metricsPaginationLabel',
+            { defaultMessage: 'Metrics pagination' }
+          )}
+          pageCount={totalPages}
+          activePage={currentPage}
+          onPageClick={onPageChange}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
