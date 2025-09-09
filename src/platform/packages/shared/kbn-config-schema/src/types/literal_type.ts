@@ -8,10 +8,9 @@
  */
 
 import { internals } from '../internals';
-import type { DefaultValue } from './type';
 import { Type } from './type';
 
-export class LiteralType<T, D extends DefaultValue<T>> extends Type<T, D> {
+export class LiteralType<T> extends Type<T, T> {
   private expectedValue: T;
 
   constructor(value: T) {
