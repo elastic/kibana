@@ -31,7 +31,7 @@ const mockActionTypeRegistry: ActionTypeRegistryContract = {
 
 describe('useConversationsTable', () => {
   it('should return columns', () => {
-    const { result } = renderHook(() => useConversationsTable(true));
+    const { result } = renderHook(() => useConversationsTable());
     const columns = result.current.getColumns({
       conversationOptions: [],
       deletedConversationsIds: [],
