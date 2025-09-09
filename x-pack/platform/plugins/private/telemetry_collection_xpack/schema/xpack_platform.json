@@ -5899,6 +5899,16 @@
                   "type": "integer"
                 }
               }
+            },
+            "alerting_rule_template": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
