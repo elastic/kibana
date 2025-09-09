@@ -171,7 +171,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Triggers',
-        render: (value: string[], item: WorkflowListItemDto) => (
+        render: (value: any, item: WorkflowListItemDto) => (
           <WorkflowsTriggersList triggers={item.definition.triggers} />
         ),
       },
