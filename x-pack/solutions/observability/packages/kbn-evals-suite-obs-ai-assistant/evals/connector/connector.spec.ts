@@ -6,10 +6,10 @@
  */
 
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
+import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateConnectorDataset } from './evaluate_connector_dataset';
 import { createEvaluateConnectorDataset } from './evaluate_connector_dataset';
-import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
 
 const EMAIL_PROMPT =
   'Send an email to user@test.com with the subject "Test Email" and body "This is a test email."';
@@ -85,7 +85,7 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
           },
           connector_type_id: '.email',
         }),
-      });      
+      });
       log.success('Email connector created successfully');
 
       emailConnectorId = res.id;
