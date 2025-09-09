@@ -81,6 +81,7 @@ const getLocatorParamsMap: Record<
         language: 'kuery',
         query,
       },
+      dataViewSpec: getCustomDataViewParams(rule),
     };
   },
   [SYNTHETICS_TLS_RULE]: (rule) => {
@@ -91,6 +92,7 @@ const getLocatorParamsMap: Record<
         language: 'kuery',
         query,
       },
+      dataViewSpec: getCustomDataViewParams(rule),
     };
   },
   [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: (rule) => {
@@ -151,7 +153,6 @@ export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?:
         from: moment(alert.start).subtract(30, 'minutes').toISOString(),
         to: moment(alert.start).add(30, 'minutes').toISOString(),
       },
-      dataViewSpec: getCustomDataViewParams(rule),
     }),
   };
 };
