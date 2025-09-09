@@ -48661,7 +48661,17 @@
                                                     "additionalProperties": false,
                                                     "properties": {
                                                       "value": {
-                                                        "type": "string"
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "enum": [
+                                                              -1
+                                                            ],
+                                                            "type": "number"
+                                                          }
+                                                        ]
                                                       }
                                                     },
                                                     "required": [
@@ -51986,7 +51996,17 @@
                                                 "additionalProperties": false,
                                                 "properties": {
                                                   "value": {
-                                                    "type": "string"
+                                                    "anyOf": [
+                                                      {
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "enum": [
+                                                          -1
+                                                        ],
+                                                        "type": "number"
+                                                      }
+                                                    ]
                                                   }
                                                 },
                                                 "required": [
@@ -54908,7 +54928,17 @@
                                                     "additionalProperties": false,
                                                     "properties": {
                                                       "value": {
-                                                        "type": "string"
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "enum": [
+                                                              -1
+                                                            ],
+                                                            "type": "number"
+                                                          }
+                                                        ]
                                                       }
                                                     },
                                                     "required": [
@@ -57929,7 +57959,17 @@
                                                 "additionalProperties": false,
                                                 "properties": {
                                                   "value": {
-                                                    "type": "string"
+                                                    "anyOf": [
+                                                      {
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "enum": [
+                                                          -1
+                                                        ],
+                                                        "type": "number"
+                                                      }
+                                                    ]
                                                   }
                                                 },
                                                 "required": [
@@ -61435,7 +61475,17 @@
                                     "additionalProperties": false,
                                     "properties": {
                                       "value": {
-                                        "type": "string"
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "enum": [
+                                              -1
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
@@ -64615,7 +64665,17 @@
                                     "additionalProperties": false,
                                     "properties": {
                                       "value": {
-                                        "type": "string"
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "enum": [
+                                              -1
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
