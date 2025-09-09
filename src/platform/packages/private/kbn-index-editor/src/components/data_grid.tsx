@@ -204,6 +204,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     ];
   }, [indexUpdateService]);
 
+  const onSort = useCallback(
+    (newSort: string[][]) => indexUpdateService.setSort(newSort as SortOrder[]),
+    [indexUpdateService]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
@@ -237,7 +242,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           dataView={props.dataView}
           onSetColumns={onSetColumns}
           onUpdateRowsPerPage={setRowsPerPage}
-          onSort={(newSort) => indexUpdateService.setSort(newSort as SortOrder[])}
+          onSort={onSort}
           sort={sortOrder}
           ariaLabelledBy="lookupIndexDataGrid"
           maxDocFieldsDisplayed={100}
