@@ -26,7 +26,6 @@ import type {
   FleetProxy,
   FleetServerHost,
   AgentPolicy,
-  TemplateAgentPolicyInput,
 } from '../../types';
 import type {
   DownloadSource,
@@ -64,7 +63,6 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
-import { isSiemSignalsRuleType } from '@kbn/alerting-plugin/server/saved_objects/migrations/utils';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -895,35 +893,45 @@ export function getBinarySourceSettings(
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput: Output) {
-  const otelConfigs : OTelCollectorConfig[] = inputs.
-    filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE).
-    flatMap((input) => {
+  const otelConfigs: OTelCollectorConfig[] = inputs
+    .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
+    .flatMap((input) => {
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
-        const suffix = (input.id + "-" + stream.id).replaceAll(".", "-");
+        const suffix = (input.id + '-' + stream.id).replaceAll('.', '-');
         const attributesTransform = generateOTelAttributesTransform(
-          stream.data_stream.type? stream.data_stream.type: 'logs',
+          stream.data_stream.type ? stream.data_stream.type : 'logs',
           stream.data_stream.dataset,
           input.data_stream.namespace,
-          suffix,
+          suffix
         );
-        return appendOtelComponents({
-          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
-          ...addSuffixToOtelcolComponentsConfig('receivers',  suffix, stream?.receivers),
-          ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
-          ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
-          ...addSuffixToOtelcolComponentsConfig('exporters',  suffix, stream?.exporters),
-          ...(stream?.service ? { service: {
-            ...stream.service,
-            ...addSuffixToOtelcolComponentsConfig('pipelines', suffix,
-                addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)),
-          }} : {}),
-        }, 'processors', [attributesTransform]);
+        return appendOtelComponents(
+          {
+            ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
+            ...addSuffixToOtelcolComponentsConfig('receivers', suffix, stream?.receivers),
+            ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
+            ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
+            ...addSuffixToOtelcolComponentsConfig('exporters', suffix, stream?.exporters),
+            ...(stream?.service
+              ? {
+                  service: {
+                    ...stream.service,
+                    ...addSuffixToOtelcolComponentsConfig(
+                      'pipelines',
+                      suffix,
+                      addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
+                    ),
+                  },
+                }
+              : {}),
+          },
+          'processors',
+          [attributesTransform]
+        );
       });
 
       return otelInputs;
-    }
-  );
+    });
 
   if (otelConfigs.length == 0) {
     return {};
@@ -933,30 +941,35 @@ export function generateOtelcolConfig(inputs: FullAgentPolicyInput[], dataOutput
   return attachExporter(config, dataOutput);
 }
 
-function generateOTelAttributesTransform(type: string, dataset: string, namespace: string, suffix: string) {
-  let signalType : string;
-  let context : string;
+function generateOTelAttributesTransform(
+  type: string,
+  dataset: string,
+  namespace: string,
+  suffix: string
+) {
+  let signalType: string;
+  let context: string;
   switch (type) {
-    case "logs":
-      signalType = "log"
-      context = "log"
+    case 'logs':
+      signalType = 'log';
+      context = 'log';
       break;
-    case "metrics":
-      signalType = "metric"
-      context = "datapoint"
+    case 'metrics':
+      signalType = 'metric';
+      context = 'datapoint';
       break;
-    case "traces":
-      signalType = "trace"
-      context = "span"
+    case 'traces':
+      signalType = 'trace';
+      context = 'span';
       break;
     default:
       throw new Error(`unexpected data stream type ${type}`);
-  };
+  }
   return {
     [`transform/${suffix}-routing`]: {
       [`${signalType}_statements`]: [
         {
-          context: context,
+          context,
           statements: [
             `set(attributes["data_stream.type"], "${type}")`,
             `set(attributes["data_stream.dataset"], "${dataset}")`,
@@ -965,10 +978,14 @@ function generateOTelAttributesTransform(type: string, dataset: string, namespac
         },
       ],
     },
-  }
+  };
 }
 
-function appendOtelComponents(config: OTelCollectorConfig, type: string, components: Record<string, Record<string, any>>[]): OTelCollectorConfig {
+function appendOtelComponents(
+  config: OTelCollectorConfig,
+  type: string,
+  components: Record<string, Record<string, any>>[]
+): OTelCollectorConfig {
   components.forEach((component) => {
     Object.assign(config, config, {
       [type]: {
@@ -979,79 +996,91 @@ function appendOtelComponents(config: OTelCollectorConfig, type: string, compone
     if (config.service?.pipelines) {
       Object.values(config.service.pipelines).forEach((pipeline) => {
         Object.keys(component).forEach((id) => {
-          pipeline.processors = (pipeline.processors? pipeline.processors: []).concat([id]);
-        })
+          pipeline.processors = (pipeline.processors ? pipeline.processors : []).concat([id]);
+        });
       });
     }
   });
 
-  return config
+  return config;
 }
 
-function addSuffixToOtelcolComponentsConfig(type: string, suffix: string, components: Record<string, any>) {
+function addSuffixToOtelcolComponentsConfig(
+  type: string,
+  suffix: string,
+  components: Record<string, any>
+) {
   if (!components) {
-    return {}
+    return {};
   }
 
-  let generated : Record<string, any> = {};
+  const generated: Record<string, any> = {};
   Object.entries(components).forEach(([id, config]) => {
-    generated[id + "/" + suffix] = { ...config};
-  })
+    generated[id + '/' + suffix] = { ...config };
+  });
 
-  return { [type]: generated }
+  return { [type]: generated };
 }
 
 function addSuffixToOtelcolPipelinesComponents(pipelines: any, suffix: string) {
-  let result : Record<string, any> = {};
-  Object.entries(pipelines as Record<string, Record<string, string[]>>).forEach(([pipelineID,pipeline]) => {
-    let newPipeline : Record<string, any> = {};
-    Object.entries(pipeline).forEach(([type,componentIDs]) => {
-      newPipeline[type] = componentIDs.map((id) => id + "/" + suffix);
-    });
-    result[pipelineID] = newPipeline;
-  });
+  const result: Record<string, any> = {};
+  Object.entries(pipelines as Record<string, Record<string, string[]>>).forEach(
+    ([pipelineID, pipeline]) => {
+      const newPipeline: Record<string, any> = {};
+      Object.entries(pipeline).forEach(([type, componentIDs]) => {
+        newPipeline[type] = componentIDs.map((id) => id + '/' + suffix);
+      });
+      result[pipelineID] = newPipeline;
+    }
+  );
   return result;
 }
 
 function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {
   return otelConfigs.reduce((merged, next) => {
     if (!next) {
-      return merged
-    };
+      return merged;
+    }
     const extensions = {
       ...merged.extensions,
       ...next.extensions,
-    }
+    };
     const receivers = {
       ...merged.receivers,
       ...next.receivers,
-    }
+    };
     const processors = {
       ...merged.processors,
       ...next.processors,
-    }
+    };
     const connectors = {
       ...merged.connectors,
       ...next.connectors,
-    }
+    };
     const exporters = {
       ...merged.exporters,
       ...next.exporters,
-    }
+    };
     return {
-      ...(Object.keys(extensions).length > 0? { extensions: extensions } : {}),
-      ...(Object.keys(receivers).length > 0? { receivers: receivers }: {}),
-      ...(Object.keys(processors).length > 0? { processors: processors }: {}),
-      ...(Object.keys(connectors).length > 0? { connectors: connectors }: {}),
-      ...(Object.keys(exporters).length > 0? { exporters: exporters }: {}),
+      ...(Object.keys(extensions).length > 0 ? { extensions } : {}),
+      ...(Object.keys(receivers).length > 0 ? { receivers } : {}),
+      ...(Object.keys(processors).length > 0 ? { processors } : {}),
+      ...(Object.keys(connectors).length > 0 ? { connectors } : {}),
+      ...(Object.keys(exporters).length > 0 ? { exporters } : {}),
       service: {
         ...merged.service,
-        ...(next.service?.extensions? { extensions: (merged.service?.extensions? merged.service.extensions : []).concat(next.service.extensions) } : {}),
+        ...(next.service?.extensions
+          ? {
+              extensions: (merged.service?.extensions ? merged.service.extensions : []).concat(
+                next.service.extensions
+              ),
+            }
+          : {}),
         pipelines: {
           ...merged.service?.pipelines,
           ...next.service?.pipelines,
-        }
-      }
+        },
+      },
     };
   });
 }
@@ -1061,22 +1090,19 @@ function attachExporter(config: OTelCollectorConfig, dataOutput: Output) {
   config.connectors = {
     ...config.connectors,
     forward: {},
-  }
+  };
   config.exporters = {
     ...config.exporters,
     ...exporter,
-  }
+  };
 
   if (config.service?.pipelines) {
-    let signalTypes = new Set<string>();
+    const signalTypes = new Set<string>();
     Object.entries(config.service.pipelines).forEach(([id, pipeline]) => {
       config.service!.pipelines![id] = {
         ...pipeline,
-        exporters: [
-          ...pipeline.exporters || [],
-          'forward',
-        ],
-      }
+        exporters: [...(pipeline.exporters || []), 'forward'],
+      };
       signalTypes.add(signalType(id));
     });
 
@@ -1084,26 +1110,28 @@ function attachExporter(config: OTelCollectorConfig, dataOutput: Output) {
       config.service!.pipelines![id] = {
         receivers: ['forward'],
         exporters: Object.keys(exporter),
-      }
+      };
     });
   }
 
-  return config
+  return config;
 }
 
 function generateExporter(dataOutput: Output) {
   switch (dataOutput.type) {
-  case outputType.Elasticsearch:
-    return {
-      [`elasticsearch/${dataOutput.id}`]: {
-        "endpoints": dataOutput.hosts,
-      },
-    };
-  default:
-    throw new Error(`output type ${dataOutput.type} not supported when policy contains OTel inputs`)
+    case outputType.Elasticsearch:
+      return {
+        [`elasticsearch/${dataOutput.id}`]: {
+          endpoints: dataOutput.hosts,
+        },
+      };
+    default:
+      throw new Error(
+        `output type ${dataOutput.type} not supported when policy contains OTel inputs`
+      );
   }
 }
 
-function signalType(id : string) : string {
+function signalType(id: string): string {
   return id.substring(0, id.indexOf('/'));
 }
