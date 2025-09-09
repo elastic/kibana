@@ -13928,7 +13928,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.3":
+"@xyflow/react@^12.8.4":
   version "12.8.4"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.4.tgz#db0eabd9e356c25f5ebf427413a8c5dd46113394"
   integrity sha512-bqUu4T5QSHiCFPkoH+b+LROKwQJdLvcjhGbNW9c1dLafCBRjmH1IYz0zPE+lRDXCtQ9kRyFxz3tG19+8VORJ1w==
@@ -25162,7 +25162,7 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.11.0:
+msw@~2.11.1:
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.11.1.tgz#77f7c5c60ffd08e4bc351cca4608418db15e5ac2"
   integrity sha512-dGSRx0AJmQVQfpGXTsAAq4JFdwdhOBdJ6sJS/jnN0ac3s0NZB6daacHF1z5Pefx+IejmvuiLWw260RlyQOf3sQ==
