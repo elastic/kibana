@@ -28,9 +28,14 @@ export async function createEntitySnapshotIndex({
   snapshotDate,
   namespace,
 }: Options) {
-  return esClient.indices.create({
-    index: getEntitiesSnapshotIndexName(entityType, snapshotDate, namespace),
-  });
+  return esClient.indices.create(
+    {
+      index: getEntitiesSnapshotIndexName(entityType, snapshotDate, namespace),
+    },
+    {
+      ignore: [409],
+    }
+  );
 }
 
 export async function deleteEntitySnapshotIndex({
