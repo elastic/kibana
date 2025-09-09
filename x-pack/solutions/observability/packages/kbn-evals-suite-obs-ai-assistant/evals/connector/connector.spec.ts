@@ -9,6 +9,7 @@ import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateConnectorDataset } from './evaluate_connector_dataset';
 import { createEvaluateConnectorDataset } from './evaluate_connector_dataset';
+import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
 
 const EMAIL_PROMPT =
   'Send an email to user@test.com with the subject "Test Email" and body "This is a test email."';
@@ -69,8 +70,8 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
   evaluate.describe('with email connector', () => {
     let emailConnectorId: string;
 
-    evaluate.beforeAll(async ({ fetch }) => {
-      const res = await fetch<{ id: string }>('/api/actions/connector', {
+    evaluate.beforeAll(async ({ fetch, log }) => {
+      const res = await fetch<ActionConnector>('/api/actions/connector', {
         method: 'POST',
         body: JSON.stringify({
           name: 'email-connector-test',
@@ -84,7 +85,9 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
           },
           connector_type_id: '.email',
         }),
-      });
+      });      
+      log.success('Email connector created successfully');
+
       emailConnectorId = res.id;
     });
 
@@ -154,13 +157,15 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
       }
     );
 
-    evaluate.afterAll(async ({ fetch }) => {
+    evaluate.afterAll(async ({ fetch, log }) => {
       // Delete the email connector
       await fetch(`/api/actions/connector/${emailConnectorId}`, { method: 'DELETE' });
+      log.success('Email connector deleted');
       // Delete the user instructions
       await fetch('/internal/observability_ai_assistant/kb/entries/send_email', {
         method: 'DELETE',
       });
+      log.success('User instructions deleted');
     });
   });
 });
