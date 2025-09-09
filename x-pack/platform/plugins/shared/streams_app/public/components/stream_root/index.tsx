@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { getAncestorsAndSelf, getSegments } from '@kbn/streams-schema';
 import { StreamDetailContextProvider } from '../../hooks/use_stream_detail';
-import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -18,17 +16,6 @@ export function StreamDetailRoot({ children }: { children: React.ReactNode }) {
   const {
     path: { key },
   } = useStreamsAppParams('/{key}', true);
-
-  useStreamsAppBreadcrumbs(() => {
-    // Build breadcrumbs for each segment in the hierarchy
-    const ids = getAncestorsAndSelf(key);
-    const segments = getSegments(key);
-    return ids.map((id, idx) => ({
-      title: segments[idx],
-      path: `/{key}`,
-      params: { path: { key: id } },
-    }));
-  }, [key]);
 
   return (
     <StreamDetailContextProvider name={key} streamsRepositoryClient={streamsRepositoryClient}>
