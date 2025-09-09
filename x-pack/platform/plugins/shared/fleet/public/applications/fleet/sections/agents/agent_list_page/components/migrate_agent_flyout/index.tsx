@@ -534,43 +534,44 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       >
                         <EuiFieldText
                           fullWidth
-                          onChange={(e) =>
-                            {
-                              if ('id' in formContent) {
-                                setFormContent({
-                                  ...formContent,
-                                  settings: { ...formContent.settings, replace_token: e.target.value },
-                                })
-                              }
+                          onChange={(e) => {
+                            if ('id' in formContent) {
+                              setFormContent({
+                                ...formContent,
+                                settings: {
+                                  ...formContent.settings,
+                                  replace_token: e.target.value,
+                                },
+                              });
                             }
-                          }
+                          }}
                         />
                       </EuiFormRow>
                     )}
-                    
-                    {agents.length === 1 && (<EuiSpacer size="m" />)}
+
+                    {agents.length === 1 && <EuiSpacer size="m" />}
 
                     <EuiFormRow
-                        label={
-                          <FormattedMessage
-                            id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
-                            defaultMessage="Staging"
-                          />
-                        }
-                        fullWidth
-                      >
-                        <EuiFieldText
-                          fullWidth
-                          onChange={(e) =>
-                            setFormContent({
-                              ...formContent,
-                              settings: { ...formContent.settings, staging: e.target.value },
-                            })
-                          }
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
+                          defaultMessage="Staging"
                         />
+                      }
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        fullWidth
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, staging: e.target.value },
+                          })
+                        }
+                      />
                     </EuiFormRow>
                     <EuiSpacer size="m" />
-                    
+
                     <EuiFormRow fullWidth>
                       <EuiFlexGroup alignItems="flexStart">
                         <EuiFlexItem>
