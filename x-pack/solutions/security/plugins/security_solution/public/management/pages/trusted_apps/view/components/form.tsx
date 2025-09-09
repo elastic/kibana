@@ -677,7 +677,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     useEffect(() => {
       processChanged();
     }, [processChanged]);
-    
+
     if (isIndexPatternLoading || !trustedApp) {
       return <Loader size="xl" />;
     }
