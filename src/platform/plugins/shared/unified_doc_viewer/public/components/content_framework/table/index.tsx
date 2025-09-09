@@ -14,7 +14,6 @@ import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
@@ -190,14 +189,7 @@ export function ContentFrameworkTable({
   }
 
   return (
-    <div
-      ref={setContainerRef}
-      css={css`
-        .euiDataGridRow:last-of-type .euiDataGridRowCell {
-          border-bottom: none;
-        }
-      `}
-    >
+    <div ref={setContainerRef}>
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"
         id={id}
