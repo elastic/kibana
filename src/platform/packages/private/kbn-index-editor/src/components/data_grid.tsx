@@ -12,7 +12,11 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  CustomGridColumnProps,
+  CustomGridColumnsConfiguration,
+} from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -68,34 +72,17 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
-  const hiddenColumns = useRef<string[]>([]);
+
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback(
-    (columns: string[]) => {
-      setActiveColumns(columns);
-
-      const columnsDiff = props.columns
-        .map((c) => c.name)
-        .filter((name) => !columns.includes(name));
-      if (columnsDiff.length !== hiddenColumns.current.length) {
-        hiddenColumns.current = columnsDiff;
-      }
-    },
-    [props.columns]
-  );
-
   // These are the columns that are currently rendered in the grid.
   // The columns data is taken from the props.columns. It has all the available columns, including placeholders.
   // The order of the columns is determined by the activeColumns state.
   const renderedColumns = useMemo(() => {
-    // Filter the columns that are currently hidden
-    const currentColumnNames = props.columns
-      .map((c) => c.name)
-      .filter((name) => !hiddenColumns.current.includes(name));
+    const currentColumnNames = props.columns.map((c) => c.name);
 
     // Order the columns based on the activeColumns
     const preservedOrder = intersection(activeColumns, currentColumnNames);
@@ -178,6 +165,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return renderedColumns.reduce((acc, columnName) => {
       if (!props.dataView.fields.getByName(columnName)) {
         acc[columnName] = getColumnInputRenderer(columnName, indexUpdateService);
+      } else {
+        acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
+          ...customGridColumnProps.column,
+          actions: { showHide: false },
+        });
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
@@ -240,7 +232,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           canDragAndDropColumns
           loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
           dataView={props.dataView}
-          onSetColumns={onSetColumns}
+          onSetColumns={setActiveColumns}
           onUpdateRowsPerPage={setRowsPerPage}
           onSort={onSort}
           sort={sortOrder}
