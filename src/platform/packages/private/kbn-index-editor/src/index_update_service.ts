@@ -441,12 +441,6 @@ export class IndexUpdateService {
       throw new Error('Index name is not set');
     }
 
-    const dataView: DataView | undefined = (await this.data.dataViews.find(indexName, 1))[0];
-
-    if (dataView) {
-      return dataView;
-    }
-
     const esqlQuery = esql`FROM ${indexName}`.print();
 
     const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, true);
