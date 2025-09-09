@@ -49,7 +49,7 @@ import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
-import type { VisualizeApi, VisualizeSerializedState } from './types';
+import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
@@ -170,7 +170,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       });
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<VisualizeSerializedState>({
+    const unsavedChangesApi = initializeUnsavedChanges<VisualizeEmbeddableState>({
       uuid,
       parentApi,
       serializeState: () => {

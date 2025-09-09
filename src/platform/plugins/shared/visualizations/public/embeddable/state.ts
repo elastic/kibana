@@ -29,13 +29,7 @@ import {
 } from '../services';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
-import type {
-  VisualizeSavedObjectInputState,
-  VisualizeSerializedState,
-  VisualizeRuntimeState,
-  VisualizeSavedVisInputState,
-  ExtraSavedObjectProperties,
-} from './types';
+import type { VisualizeRuntimeState, ExtraSavedObjectProperties } from './types';
 
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeEmbeddableState> | { rawState: undefined }
@@ -66,7 +60,7 @@ export const deserializeSavedObjectState = async ({
   title: embeddableTitle,
   description: embeddableDescription,
   hidePanelTitles,
-}: VisualizeSavedObjectInputState) => {
+}: VisualizeByReferenceState) => {
   // Load a saved visualization from the library
   const {
     title,
@@ -126,7 +120,7 @@ export const serializeState: (props: {
   linkedToLibrary?: boolean;
   getDynamicActionsState?: (() => DynamicActionsSerializedState) | undefined;
   timeRange?: VisualizeRuntimeState['timeRange'];
-}) => Required<SerializedPanelState<VisualizeSerializedState>> = ({
+}) => Required<SerializedPanelState<VisualizeEmbeddableState>> = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
   id,
@@ -145,7 +139,7 @@ export const serializeState: (props: {
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
         ...(timeRange ? { timeRange } : {}),
         savedObjectId: id,
-      } as VisualizeSavedObjectInputState,
+      } as VisualizeByReferenceState,
       references: [],
     };
   }
@@ -160,7 +154,7 @@ export const serializeState: (props: {
         ...serializedVis,
         id,
       },
-    } as VisualizeSavedVisInputState,
+    } as VisualizeByValueState,
     references: [],
   };
 };
