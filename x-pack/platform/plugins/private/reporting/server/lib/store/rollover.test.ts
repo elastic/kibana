@@ -136,7 +136,7 @@ describe('rollDataStreamIfRequired', () => {
       },
     };
     mockEsClient.indices.getMapping.mockResponse(mappings);
-    const err = `${msgPrefix} has newer mappings than the template` ;
+    const err = `${msgPrefix} has newer mappings than the template`;
     await expect(rollDataStreamIfRequired(mockLogger, mockEsClient)).rejects.toThrow(err);
 
     expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
