@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { IContentClient } from '@kbn/content-management-plugin/server/content_client/types';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
-import { getVendorTag } from '../../../rules/api/util/tags';
+import { getVendorTag } from '../../../common/api/util/tags';
+import { findTagsByName } from '../../../../tags/saved_objects/find_tags_by_name';
+import { createTag } from '../../../../tags/saved_objects/create_tag';
 
 const MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL = 10;
 
@@ -33,16 +34,22 @@ interface InstallTranslatedProps {
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext;
 
   /**
-   * The content management setup
+   * The saved objects client
    */
-  dashboardClient: IContentClient<DashboardAttributes>;
+  savedObjectsClient: SavedObjectsClientContract;
+
+  /**
+   * The space id
+   */
+  spaceId: string;
 }
 
 export const installTranslated = async ({
   migrationId,
   ids,
-  dashboardClient,
+  savedObjectsClient,
   securitySolutionContext,
+  spaceId,
 }: InstallTranslatedProps): Promise<number> => {
   const dashboardMigrationsClient = securitySolutionContext.siemMigrations.getDashboardsClient();
 
@@ -58,7 +65,8 @@ export const installTranslated = async ({
   while (dashboardsToInstall.length) {
     const { dashboardsToUpdate, errors } = await installDashboards(
       dashboardsToInstall,
-      dashboardClient
+      savedObjectsClient,
+      spaceId
     );
     installedCount += dashboardsToUpdate.length;
     installationErrors.push(...errors);
@@ -76,7 +84,8 @@ export const installTranslated = async ({
 
 const installDashboards = async (
   dashboardsToInstall: DashboardMigrationDashboard[],
-  dashboardClient: IContentClient<DashboardAttributes>
+  savedObjectsClient: SavedObjectsClientContract,
+  spaceId: string
 ): Promise<{
   dashboardsToUpdate: Array<DashboardMigrationDashboard>;
   errors: Error[];
@@ -96,9 +105,47 @@ const installDashboards = async (
 
         // Parse the dashboard data (assuming it's JSON)
         const dashboardData = JSON.parse(dashboard.elastic_dashboard.data);
-        const tags = [getVendorTag(dashboard.original_dashboard)];
+        const tagNames = [getVendorTag(dashboard.original_dashboard.vendor)];
 
-        const { result } = await dashboardClient.create(
+        // Find or create tag IDs by name
+        const tagReferences = [];
+        for (const tagName of tagNames) {
+          let tagResults = await findTagsByName({
+            savedObjectsClient,
+            tagName,
+          });
+
+          // If tag doesn't exist, create it
+          if (tagResults.length === 0) {
+            try {
+              const createdTag = await createTag({
+                savedObjectsClient,
+                tagName,
+                description: `Auto-created tag for ${tagName}`,
+              });
+              // Convert SavedObject to SavedObjectsFindResult format
+              tagResults = [
+                {
+                  ...createdTag,
+                  score: 0,
+                },
+              ];
+            } catch (createError) {
+              // For now, we'll skip the tag silently
+            }
+          }
+
+          if (tagResults.length > 0) {
+            tagReferences.push({
+              id: tagResults[0].id,
+              name: `tag-ref-${tagName}`,
+              type: 'tag',
+            });
+          }
+        }
+
+        const result = await savedObjectsClient.create(
+          'dashboard',
           {
             title: dashboard.original_dashboard.title,
             description: dashboard.original_dashboard.description,
@@ -107,18 +154,8 @@ const installDashboards = async (
           },
           {
             id: dashboard.id,
-            references: [
-              {
-                type: 'tag',
-                id: `Migration ID: ${dashboard.migration_id}`,
-              },
-              // Add tag references if tags are provided
-              ...(tags?.map((tagId) => ({
-                type: 'tag',
-                id: tagId,
-              })) || []),
-            ],
-            initialNamespaces: [],
+            references: tagReferences,
+            initialNamespaces: [spaceId],
           }
         );
 
@@ -128,7 +165,7 @@ const installDashboards = async (
             id: dashboard.id,
             title: dashboard.original_dashboard.title,
             description: dashboard.original_dashboard.description,
-            data: JSON.stringify(result.item),
+            data: JSON.stringify(result),
           },
         });
       } catch (error) {

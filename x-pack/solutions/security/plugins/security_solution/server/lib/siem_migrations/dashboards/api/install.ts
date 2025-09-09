@@ -55,20 +55,20 @@ export const registerSiemDashboardMigrationsInstallRoute = (
             );
 
             try {
-              const ctx = await context.resolve(['core', 'contentManagement', 'securitySolution']);
+              const ctx = await context.resolve(['core', 'securitySolution']);
 
               const securitySolutionContext = ctx.securitySolution;
-              const contentClient = ctx.securitySolution.getContentClient();
+              const savedObjectsClient = ctx.core.savedObjects.client;
+              const spaceId = ctx.securitySolution.getSpaceId();
 
-              // Get a specific content type client (e.g., for dashboards)
-              const dashboardClient = contentClient.for('dashboard');
               await siemMigrationAuditLogger.logInstallDashboards({ ids, migrationId });
 
               const installed = await installTranslated({
                 migrationId,
                 ids,
                 securitySolutionContext,
-                dashboardClient,
+                savedObjectsClient,
+                spaceId,
               });
 
               return res.ok({ body: { installed } });

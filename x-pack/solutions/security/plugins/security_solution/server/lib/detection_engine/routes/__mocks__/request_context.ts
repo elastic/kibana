@@ -50,8 +50,6 @@ import type { EndpointAppContextService } from '../../../../endpoint/endpoint_ap
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -132,8 +130,6 @@ const createRequestContextMock = (
       getExtensionPointClient: jest.fn(),
       getInternalListClient: jest.fn(),
     },
-    contentManagement:
-      clients.contentManagement as unknown as jest.Mocked<ContentManagementServerSetup>,
   };
 };
 
@@ -216,7 +212,6 @@ const createSecuritySolutionRequestContextMock = (
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
-    getContentClient: jest.fn(() => clients.contentClient as unknown as IContentClient<unknown>),
   };
 };
 
