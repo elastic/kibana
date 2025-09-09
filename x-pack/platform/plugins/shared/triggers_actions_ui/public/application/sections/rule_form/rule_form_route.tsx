@@ -8,11 +8,13 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { useLocation, useParams } from 'react-router-dom';
+import { getCreateRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
+import { useRuleTemplate } from '../../hooks/use_rule_template';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 
 export const RuleFormRoute = () => {
   const {
@@ -33,6 +35,7 @@ export const RuleFormRoute = () => {
     ...startServices
   } = useKibana().services;
 
+  const history = useHistory();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const { id, ruleTypeId } = useParams<{
     id?: string;
@@ -59,6 +62,36 @@ export const RuleFormRoute = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [searchParams] = useSearchParams();
+  const templateId = searchParams.get('fromTemplate') ?? undefined;
+
+  const {
+    data: ruleTemplate,
+    isLoading,
+    isError,
+  } = useRuleTemplate({
+    templateId,
+    enabled: !!templateId,
+  });
+
+  useEffect(() => {
+    if (ruleTemplate && ruleTypeId !== ruleTemplate.ruleTypeId) {
+      application.navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(
+          ruleTemplate.ruleTypeId
+        )}?fromTemplate=${templateId}`,
+      });
+    }
+  }, [history, ruleTypeId, ruleTemplate, templateId, application]);
+
+  if (isLoading) {
+    return <>loading</>; // TODO
+  }
+
+  if (isError) {
+    return <>error</>; // TODO
+  }
+
   return (
     <IntlProvider locale="en">
       <RuleForm
@@ -77,6 +110,7 @@ export const RuleFormRoute = () => {
           contentManagement,
           ...startServices,
         }}
+        initialValues={ruleTemplate}
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {
