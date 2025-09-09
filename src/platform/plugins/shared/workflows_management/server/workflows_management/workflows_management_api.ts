@@ -257,7 +257,7 @@ export class WorkflowsManagementApi {
     params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.getWorkflowExecutions(workflowId, spaceId);
+    return await this.workflowsService.getWorkflowExecutions(params, spaceId);
   }
 
   public async getWorkflowExecution(

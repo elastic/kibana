@@ -24,8 +24,9 @@ import {
   InvalidYamlSyntaxError,
   isWorkflowValidationError,
 } from '../../common/lib/errors';
-import type { SearchWorkflowExecutionsParams, WorkflowsManagementApi } from './workflows_management_api';
+import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
+import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
 
 export function defineRoutes(
   router: IRouter,
