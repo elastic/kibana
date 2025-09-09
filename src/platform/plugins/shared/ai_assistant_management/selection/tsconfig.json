@@ -20,8 +20,6 @@
     "@kbn/config",
     "@kbn/doc-links",
     "@kbn/licensing-plugin",
-    "@kbn/core-ui-settings-common",
-    "@kbn/cloud-plugin",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-ids"
   ],
