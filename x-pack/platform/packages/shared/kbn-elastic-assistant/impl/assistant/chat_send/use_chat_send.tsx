@@ -64,7 +64,7 @@ export const useChatSend = ({
   const { setLastConversation } = useAssistantLastConversation({ spaceId });
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
-  const { isLoading, sendMessage, abortStream } = useSendMessage();
+  const { sendMessage, abortStream } = useSendMessage();
   const { clearConversation, createConversation, getConversation, removeLastMessage } =
     useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
