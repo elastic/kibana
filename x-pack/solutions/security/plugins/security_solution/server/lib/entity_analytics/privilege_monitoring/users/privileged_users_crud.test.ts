@@ -18,15 +18,6 @@ import type { PrivilegeMonitoringGlobalDependencies } from '../engine/data_clien
 import type { CreatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/monitoring/users/create.gen';
 import type { PrivMonUserSource } from '../types';
 
-// Mock the helper functions
-jest.mock('./utils', () => ({
-  findUserByUsername: jest.fn(),
-  createUserDocument: jest.fn(),
-  updateUserWithSource: jest.fn(),
-}));
-
-import { findUserByUsername, createUserDocument, updateUserWithSource } from './utils';
-
 describe('createPrivilegedUsersCrudService', () => {
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let crudService: ReturnType<typeof createPrivilegedUsersCrudService>;
@@ -38,18 +29,7 @@ describe('createPrivilegedUsersCrudService', () => {
     },
   };
   const mockSource: PrivMonUserSource = 'api';
-
-  const mockExistingUser = {
-    id: 'existing-user-id',
-    user: {
-      name: 'test-user',
-      is_privileged: true,
-    },
-    labels: {
-      sources: ['csv'],
-    },
-    '@timestamp': '2025-08-25T00:00:00.000Z',
-  };
+  const maxUsersAllowed = 100;
 
   const mockNewUser = {
     id: 'new-user-id',
@@ -83,94 +63,119 @@ describe('createPrivilegedUsersCrudService', () => {
   });
 
   describe('create', () => {
-    it('should throw error when username is missing', async () => {
+    it('should create user even with empty user object', async () => {
       const invalidUserInput = { user: {} };
 
-      await expect(crudService.create(invalidUserInput, mockSource)).rejects.toThrow(
-        'Username is required'
-      );
-    });
-
-    it('should update existing user with new source when user already exists', async () => {
-      const mockUpdateResponse = {
-        created: false,
-        user: { ...mockExistingUser, labels: { sources: ['csv', 'api'] } },
-      };
-
-      // Mock createUserDocument to throw 409 conflict (document already exists)
-      const conflictError = { statusCode: 409, message: 'Document already exists' };
-      (createUserDocument as jest.Mock).mockRejectedValue(conflictError);
-      (findUserByUsername as jest.Mock).mockResolvedValue(mockExistingUser);
-      (updateUserWithSource as jest.Mock).mockResolvedValue(mockUpdateResponse);
-
-      const result = await crudService.create(mockUserInput, mockSource);
-
-      // Should try to create first, then fall back to find and update on conflict
-      expect(createUserDocument).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockUserInput,
-        mockSource,
-        expect.any(Function)
-      );
-      expect(findUserByUsername).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        'test-user'
-      );
-      expect(updateUserWithSource).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockExistingUser,
-        mockSource,
-        mockUserInput,
-        expect.any(Function)
-      );
-      expect(result).toEqual(mockUpdateResponse);
-    });
-
-    it('should create new user when user does not exist', async () => {
-      const mockCreateResponse = {
-        created: true,
-        user: mockNewUser,
-      };
-
-      // Mock successful creation (no conflict)
-      (createUserDocument as jest.Mock).mockResolvedValue(mockCreateResponse);
-
-      const result = await crudService.create(mockUserInput, mockSource);
-
-      // Should only call createUserDocument (optimistic create)
-      expect(createUserDocument).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockUserInput,
-        mockSource,
-        expect.any(Function)
-      );
-      // Should NOT call findUserByUsername since create succeeded
-      expect(findUserByUsername).not.toHaveBeenCalled();
-      expect(updateUserWithSource).not.toHaveBeenCalled();
-      expect(result).toEqual(mockCreateResponse);
-    });
-
-    it('should pass refresh option to helper functions', async () => {
-      const refreshOptions = { refresh: true };
-
-      (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
-      (createUserDocument as jest.Mock).mockResolvedValue({
-        created: true,
-        user: mockNewUser,
+      // Mock count to return under limit
+      mockEsClient.asCurrentUser.count.mockResolvedValue({
+        count: 5,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       });
 
-      await crudService.create(mockUserInput, mockSource, refreshOptions);
+      // Mock successful index
+      mockEsClient.asCurrentUser.index.mockResolvedValue({
+        _id: 'new-user-id',
+        _index: TEST_INDEX,
+        _version: 1,
+        result: 'created',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
 
-      expect(createUserDocument).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockUserInput,
-        mockSource,
-        expect.any(Function)
+      // Mock get response for created user (without username)
+      mockEsClient.asCurrentUser.get.mockResolvedValue({
+        _id: 'new-user-id',
+        _index: TEST_INDEX,
+        _source: {
+          user: { is_privileged: true },
+          labels: { sources: ['api'] },
+          '@timestamp': '2025-08-25T00:00:00.000Z',
+        },
+        found: true,
+        _version: 1,
+      });
+
+      const result = await crudService.create(invalidUserInput, mockSource, maxUsersAllowed);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'new-user-id',
+          user: expect.objectContaining({
+            is_privileged: true,
+          }),
+        })
+      );
+    });
+
+    it('should throw error when max users limit is reached', async () => {
+      // Mock count to return limit reached
+      mockEsClient.asCurrentUser.count.mockResolvedValue({
+        count: 100,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      });
+
+      await expect(crudService.create(mockUserInput, mockSource, maxUsersAllowed)).rejects.toThrow(
+        'Cannot create user: Maximum user limit of 100 reached'
+      );
+
+      expect(mockEsClient.asCurrentUser.count).toHaveBeenCalledWith({
+        index: TEST_INDEX,
+        query: {
+          term: {
+            'user.is_privileged': true,
+          },
+        },
+      });
+    });
+
+    it('should create new user when under limit', async () => {
+      // Mock count to return under limit
+      mockEsClient.asCurrentUser.count.mockResolvedValue({
+        count: 5,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      });
+
+      // Mock successful index
+      mockEsClient.asCurrentUser.index.mockResolvedValue({
+        _id: 'new-user-id',
+        _index: TEST_INDEX,
+        _version: 1,
+        result: 'created',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+
+      // Mock get response for created user
+      mockEsClient.asCurrentUser.get.mockResolvedValue({
+        _id: 'new-user-id',
+        _index: TEST_INDEX,
+        _source: mockNewUser,
+        found: true,
+        _version: 1,
+      });
+
+      const result = await crudService.create(mockUserInput, mockSource, maxUsersAllowed);
+
+      expect(mockEsClient.asCurrentUser.count).toHaveBeenCalled();
+      expect(mockEsClient.asCurrentUser.index).toHaveBeenCalledWith({
+        index: TEST_INDEX,
+        refresh: 'wait_for',
+        document: expect.objectContaining({
+          user: expect.objectContaining({
+            name: 'test-user',
+            is_privileged: true,
+          }),
+          labels: {
+            sources: ['api'],
+          },
+        }),
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'new-user-id',
+          user: expect.objectContaining({
+            name: 'test-user',
+            is_privileged: true,
+          }),
+        })
       );
     });
   });
@@ -378,11 +383,16 @@ describe('createPrivilegedUsersCrudService', () => {
 
   describe('error handling', () => {
     it('should propagate elasticsearch errors on create', async () => {
-      const esError = new Error('Elasticsearch connection failed');
-      // Mock createUserDocument to throw non-409 error (should be propagated)
-      (createUserDocument as jest.Mock).mockRejectedValue(esError);
+      // Mock count to pass the limit check
+      mockEsClient.asCurrentUser.count.mockResolvedValue({
+        count: 5,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      });
 
-      await expect(crudService.create(mockUserInput, mockSource)).rejects.toThrow(
+      const esError = new Error('Elasticsearch connection failed');
+      mockEsClient.asCurrentUser.index.mockRejectedValue(esError);
+
+      await expect(crudService.create(mockUserInput, mockSource, maxUsersAllowed)).rejects.toThrow(
         'Elasticsearch connection failed'
       );
     });
@@ -415,67 +425,6 @@ describe('createPrivilegedUsersCrudService', () => {
       mockEsClient.asCurrentUser.delete.mockRejectedValue(esError);
 
       await expect(crudService.delete('test-id')).rejects.toThrow('Delete failed');
-    });
-  });
-
-  describe('integration with helper functions', () => {
-    it('should call helper functions with correct parameters for user creation flow', async () => {
-      // Mock successful creation (no conflict)
-      (createUserDocument as jest.Mock).mockResolvedValue({
-        created: true,
-        user: mockNewUser,
-      });
-
-      await crudService.create(mockUserInput, mockSource);
-
-      // Verify createUserDocument called with correct parameters (optimistic create)
-      expect(createUserDocument).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockUserInput,
-        mockSource,
-        expect.any(Function)
-      );
-      // findUserByUsername should NOT be called for successful creation
-      expect(findUserByUsername).not.toHaveBeenCalled();
-      expect(updateUserWithSource).not.toHaveBeenCalled();
-    });
-
-    it('should call helper functions with correct parameters for user update flow', async () => {
-      const mockUpdateResponse = {
-        created: false,
-        user: { ...mockExistingUser, labels: { sources: ['csv', 'api'] } },
-      };
-
-      // Mock 409 conflict then successful find and update
-      const conflictError = { statusCode: 409, message: 'Document already exists' };
-      (createUserDocument as jest.Mock).mockRejectedValue(conflictError);
-      (findUserByUsername as jest.Mock).mockResolvedValue(mockExistingUser);
-      (updateUserWithSource as jest.Mock).mockResolvedValue(mockUpdateResponse);
-
-      await crudService.create(mockUserInput, mockSource);
-
-      // Should try to create first, then fall back to find and update on conflict
-      expect(createUserDocument).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockUserInput,
-        mockSource,
-        expect.any(Function)
-      );
-      expect(findUserByUsername).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        'test-user'
-      );
-      expect(updateUserWithSource).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        mockExistingUser,
-        mockSource,
-        mockUserInput,
-        expect.any(Function)
-      );
     });
   });
 });
