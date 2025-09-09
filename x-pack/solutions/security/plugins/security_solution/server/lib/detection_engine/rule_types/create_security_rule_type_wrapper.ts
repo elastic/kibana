@@ -435,6 +435,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const exceptionItems = await getExceptions({
               client: exceptionsClient,
               lists: params.exceptionsList,
+              experimentalFeatures,
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
