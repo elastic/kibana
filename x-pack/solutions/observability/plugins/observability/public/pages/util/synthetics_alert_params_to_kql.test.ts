@@ -52,7 +52,7 @@ describe('synthetics_alert_params_to_kql', () => {
 
       const kqlQuery = syntheticsMonitorStatusAlertParamsToKqlQuery(params);
       expect(kqlQuery).toMatchInlineSnapshot(
-        `"(monitor.status: \\"down\\" AND (tags: tag1 OR tags: tag2) AND (observer.name: us-east-1 OR observer.name: us-west-2) AND (monitor.id: monitor-1 OR monitor.id: monitor-2) AND (monitor.type: browser OR monitor.type: http) AND project.id: project-1 AND monitor.status: down)"`
+        `"(monitor.status: \\"down\\" AND (observer.name: us-east-1 OR observer.name: us-west-2) AND (monitor.id: monitor-1 OR monitor.id: monitor-2) AND (monitor.type: browser OR monitor.type: http) AND project.id: project-1 AND (tags: tag1 OR tags: tag2) AND monitor.status: down)"`
       );
     });
 
@@ -72,7 +72,7 @@ describe('synthetics_alert_params_to_kql', () => {
 
       const kqlQuery = syntheticsMonitorStatusAlertParamsToKqlQuery(params);
       expect(kqlQuery).toMatchInlineSnapshot(
-        `"(tags: tag1 AND monitor.id: monitor-1 AND monitor.status: down)"`
+        `"(monitor.id: monitor-1 AND tags: tag1 AND monitor.status: down)"`
       );
     });
 
@@ -104,7 +104,7 @@ describe('synthetics_alert_params_to_kql', () => {
 
       const kqlQuery = syntheticsTlsAlertParamsToKqlQuery(params);
       expect(kqlQuery).toMatchInlineSnapshot(
-        `"((tls.server.x509.not_after < 2025-09-14T20\\\\:52\\\\:38.662Z OR tls.server.x509.not_before < 2025-08-30T20\\\\:52\\\\:38.662Z) AND tls.server.x509.not_after: now+10d AND tags: tag1 AND observer.name: us-east-1 AND monitor.id: monitor-1)"`
+        `"((tls.server.x509.not_after < 2025-09-14T20\\\\:52\\\\:38.662Z OR tls.server.x509.not_before < 2025-08-30T20\\\\:52\\\\:38.662Z) AND tls.server.x509.not_after: now+10d AND observer.name: us-east-1 AND monitor.id: monitor-1 AND tags: tag1)"`
       );
     });
 

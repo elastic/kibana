@@ -6,28 +6,44 @@
  */
 
 import { fromKueryExpression, type KueryNode, nodeBuilder, toKqlExpression } from '@kbn/es-query';
-import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import {
+  syntheticsMonitorStatusRuleParamsSchema,
+  type SyntheticsMonitorStatusRuleParams,
+} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import {
+  tlsRuleParamsSchema,
+  type TLSRuleParams,
+} from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
 
-const supportedAlertParams = [
-  'tags',
-  'locations',
-  'monitorIds',
-  'monitorTypes',
-  'projects',
-] as const;
+const supportedAlertParams = Array.from(
+  new Set(
+    [
+      ...syntheticsMonitorStatusRuleParamsSchema.getSchemaStructure(),
+      ...tlsRuleParamsSchema.getSchemaStructure(),
+    ]
+      .filter(
+        (s) =>
+          s.path.length > 0 &&
+          s.path[0] !== 'kqlQuery' &&
+          s.path[0] !== 'condition' &&
+          s.path[0] !== 'certAgeThreshold' &&
+          s.path[0] !== 'certExpirationThreshold' &&
+          s.path[0] !== 'search'
+      )
+      .map((s) => s.path[0])
+      .sort()
+  )
+);
 
-type SupportedAlertParam = (typeof supportedAlertParams)[number];
-
-const fieldMap: Record<SupportedAlertParam, string> = {
+const fieldMap: Record<string, string> = {
   locations: 'observer.name',
   monitorIds: 'monitor.id',
   monitorTypes: 'monitor.type',
   projects: 'project.id',
   tags: 'tags',
 };
-function getFieldnameForKey(key: SupportedAlertParam): string {
+function getFieldnameForKey(key: string): string {
   return fieldMap[key];
 }
 
@@ -39,7 +55,7 @@ function listToKqlNode(fieldname: string, list: string[]): KueryNode {
 }
 
 function mapExtraSyntheticsFilters(
-  extraFilters: Partial<Record<SupportedAlertParam, string[] | undefined>>,
+  extraFilters: Partial<Record<string, string[] | undefined>>,
   kqlQuery?: string
 ): KueryNode[] {
   const filters: KueryNode[] = [];
