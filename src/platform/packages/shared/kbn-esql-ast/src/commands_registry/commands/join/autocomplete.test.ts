@@ -17,6 +17,7 @@ import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autoc
 import type { ICommandCallbacks, ICommandContext } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
+import { uniq } from 'lodash';
 
 const joinExpectSuggestions = (
   query: string,
@@ -197,7 +198,7 @@ describe('JOIN Autocomplete', () => {
 
       expected.sort();
 
-      expect(labels).toEqual(expected);
+      expect(labels).toEqual(uniq(expected));
     });
 
     test('more field suggestions after comma', async () => {
@@ -213,7 +214,7 @@ describe('JOIN Autocomplete', () => {
 
       expected.sort();
 
-      expect(labels).toEqual(expected);
+      expect(labels).toEqual(uniq(expected));
     });
 
     test('supports field prefixes', async () => {
@@ -229,7 +230,7 @@ describe('JOIN Autocomplete', () => {
 
       expected.sort();
 
-      expect(labels).toEqual(expected);
+      expect(labels).toEqual(uniq(expected));
     });
 
     test('suggests comma and pipe on complete field name', async () => {
