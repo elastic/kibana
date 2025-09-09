@@ -96,7 +96,7 @@ describe('getTransformIn', () => {
             },
             Object {
               "id": "abcd",
-              "name": "discoverSessionRef",
+              "name": "search_0",
               "type": "search",
             },
             Object {
@@ -111,7 +111,7 @@ describe('getTransformIn', () => {
             },
             "savedVis": Object {
               "data": Object {
-                "savedSearchRefName": "discoverSessionRef",
+                "savedSearchRefName": "search_0",
                 "searchSource": Object {
                   "index": undefined,
                   "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",
