@@ -12,21 +12,28 @@ import type { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  FieldValue,
+  QueryDslQueryContainer,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
-import { FindSLO } from './find_slo';
-import type { SLORepository } from './slo_repository';
-import { DefaultSummarySearchClient } from './summary_search_client/summary_search_client';
 
-const SLO_PAGESIZE_LIMIT = 1000;
+const ES_PAGESIZE_LIMIT = 5000;
+
+function getAfterKey(agg: unknown): Record<string, FieldValue> | undefined {
+  if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
+    return agg.after_key as Record<string, FieldValue>;
+  }
+  return undefined;
+}
 
 export class GetSLOStatsOverview {
   constructor(
     private soClient: SavedObjectsClientContract,
-    private repository: SLORepository,
     private scopedClusterClient: IScopedClusterClient,
     private spaceId: string,
     private logger: Logger,
@@ -41,13 +48,6 @@ export class GetSLOStatsOverview {
     const kqlQuery = params?.kqlQuery ?? '';
     const filters = params?.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
-
-    const summarySearchClient = new DefaultSummarySearchClient(
-      this.scopedClusterClient,
-      this.soClient,
-      this.logger,
-      this.spaceId
-    );
 
     let ruleFilters: string = '';
     let burnRateFilters: QueryDslQueryContainer[] = [];
@@ -67,50 +67,120 @@ export class GetSLOStatsOverview {
       this.logger.error(`Error parsing filters: ${error}`);
     }
 
-    if (querySLOsForIds) {
-      const findSLO = new FindSLO(this.repository, summarySearchClient);
-      const sloIds = new Set<string>();
+    let sloKeysFromES: QueryDslQueryContainer[] = [];
+    const sloRuleKeysFromES: string[] = [];
+    let afterKey: Record<string, FieldValue> | undefined;
 
-      const findSLOQueryParams = {
-        filters: params?.filters,
-        kqlQuery: params?.kqlQuery,
-        perPage: String(SLO_PAGESIZE_LIMIT),
-      };
+    let totalHits = 0;
 
-      const findSLOResponse = await findSLO.execute(findSLOQueryParams);
-      const total = findSLOResponse.total;
-      const numCalls = Math.ceil(total / SLO_PAGESIZE_LIMIT);
-      findSLOResponse.results.forEach((slo) => sloIds.add(slo.id));
+    const boolFilters = JSON.parse(params.filters || '{}');
+    if (params.kqlQuery) {
+      boolFilters.must.push({
+        kql: { query: params.kqlQuery },
+      });
+    }
 
-      for (let i = 1; i < numCalls; i++) {
-        const additionalCallResponse = await findSLO.execute({
-          ...findSLOQueryParams,
-          page: String(i + 1),
-        });
-        additionalCallResponse.results.forEach((slo) => sloIds.add(slo.id));
-      }
+    const instanceIdIncluded = Object.values(params).find(
+      (value) => typeof value === 'string' && value.includes('slo.instanceId')
+    );
 
-      const sloIdsArray = Array.from(sloIds);
+    try {
+      if (querySLOsForIds) {
+        do {
+          const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
+            size: ES_PAGESIZE_LIMIT,
+            aggs: {
+              sloIds: {
+                composite: {
+                  after: afterKey,
+                  size: ES_PAGESIZE_LIMIT,
+                  sources: [
+                    {
+                      sloId: { terms: { field: 'slo.id' } },
+                    },
+                    ...(instanceIdIncluded
+                      ? [
+                          {
+                            sloInstanceId: { terms: { field: 'slo.instanceId' } },
+                          },
+                        ]
+                      : []),
+                  ],
+                },
+              },
+            },
+            index: '.slo-observability.summary-*',
+            _source: ['slo.id', 'slo.instanceId'],
+            ...(Object.values(boolFilters).some((value) => Array.isArray(value) && value.length > 0)
+              ? {
+                  query: {
+                    bool: boolFilters,
+                  },
+                }
+              : {}),
+          });
 
-      const resultString = sloIdsArray.length
-        ? sloIdsArray.reduce((accumulator, currentValue, index) => {
-            const conditionString = `alert.attributes.params.sloId:${currentValue}`;
-            if (index === 0) {
-              return conditionString;
-            } else {
-              return accumulator + ' OR ' + conditionString;
+          totalHits = (sloIdCompositeQueryResponse.hits?.total as SearchTotalHits).value || 0;
+          afterKey = getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
+
+          const buckets = (
+            sloIdCompositeQueryResponse.aggregations?.sloIds as {
+              buckets?: Array<{ key: { sloId: string; sloInstanceId: string } }>;
             }
-          }, '')
-        : 'alert.attributes.params.sloId:NO_MATCHES';
+          )?.buckets;
+          if (buckets && buckets.length > 0) {
+            sloKeysFromES = sloKeysFromES.concat(
+              ...buckets.map((bucket) => {
+                sloRuleKeysFromES.push(bucket.key.sloId);
+                return {
+                  bool: {
+                    must: [
+                      { term: { 'kibana.alert.rule.parameters.sloId': bucket.key.sloId } },
+                      ...(instanceIdIncluded
+                        ? [
+                            {
+                              term: {
+                                'kibana.alert.instance.id': bucket.key.sloInstanceId,
+                              },
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                };
+              })
+            );
+          }
+        } while (afterKey);
 
-      ruleFilters = resultString;
-      burnRateFilters = [
-        {
-          terms: {
-            'kibana.alert.rule.parameters.sloId': sloIdsArray,
+        const sloIdsArray = Array.from(sloRuleKeysFromES);
+
+        const resultString = sloIdsArray.length
+          ? sloIdsArray.reduce((accumulator, currentValue, index) => {
+              const conditionString = `(alert.attributes.params.sloId:${currentValue} )`;
+              if (index === 0 || ruleFilters.length === 0) {
+                return conditionString;
+              } else {
+                return accumulator + ' OR ' + conditionString;
+              }
+            }, ruleFilters)
+          : 'alert.attributes.params.sloId:NO_MATCHES';
+
+        ruleFilters = resultString;
+
+        burnRateFilters = [
+          {
+            bool: {
+              should: [...sloKeysFromES],
+            },
           },
-        },
-      ];
+        ];
+      } else {
+        totalHits = -1;
+      }
+    } catch (error) {
+      this.logger.error(`Error querying SLOs for IDs: ${error}`);
+      throw error;
     }
 
     const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
@@ -213,8 +283,8 @@ export class GetSLOStatsOverview {
       noData: aggs?.not_stale?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
       burnRateRules: rules.total,
-      burnRateActiveAlerts: alerts.activeAlertCount,
-      burnRateRecoveredAlerts: alerts.recoveredAlertCount,
+      burnRateActiveAlerts: totalHits ? alerts.activeAlertCount : 0,
+      burnRateRecoveredAlerts: totalHits ? alerts.recoveredAlertCount : 0,
     };
   }
 }
