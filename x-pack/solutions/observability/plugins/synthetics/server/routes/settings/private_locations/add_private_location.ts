@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -49,7 +50,11 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     const location = request.body as PrivateLocationObject;
     const agentPolicy = await server.fleet?.agentPolicyService.get(
       internalSOClient,
-      location.agentPolicyId
+      location.agentPolicyId,
+      false,
+      {
+        spaceId: ALL_SPACES_ID,
+      }
     );
 
     if (!agentPolicy) {

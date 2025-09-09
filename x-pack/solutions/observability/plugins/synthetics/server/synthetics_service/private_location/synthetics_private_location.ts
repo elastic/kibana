@@ -205,7 +205,7 @@ export class SyntheticsPrivateLocation {
     }
 
     try {
-      const result = await this.createPolicyBulk(newPolicies);
+      const result = await this.createPolicyBulk(newPolicies, spaceId);
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
         void scheduleCleanUpTask(this.server);
@@ -330,7 +330,7 @@ export class SyntheticsPrivateLocation {
     );
 
     const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-      this.createPolicyBulk(policiesToCreate),
+      this.createPolicyBulk(policiesToCreate, spaceId),
       this.updatePolicyBulk(policiesToUpdate),
       this.deletePolicyBulk(policiesToDelete),
     ]);
@@ -378,8 +378,10 @@ export class SyntheticsPrivateLocation {
     );
   }
 
-  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[], spaceId: string) {
+    const soClient = this.server.coreStart.savedObjects
+      .getUnsafeInternalClient()
+      .asScopedToNamespace(spaceId);
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (esClient && newPolicies.length > 0) {
       return await this.server.fleet.packagePolicyService.bulkCreate(
