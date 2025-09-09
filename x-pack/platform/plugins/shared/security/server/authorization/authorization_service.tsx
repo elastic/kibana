@@ -116,6 +116,7 @@ export class AuthorizationService {
     const mode = authorizationModeFactory(license);
     const actions = new Actions();
     this.privileges = privilegesFactory(actions, features, license);
+
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
