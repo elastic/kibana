@@ -8,7 +8,17 @@
 import { Streams } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
+import type {
+  AppendProcessor,
+  Condition,
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  ProcessorType,
+  RenameProcessor,
+  SetProcessor,
+  StreamlangProcessorDefinition,
+} from '@kbn/streamlang';
 import {
   isActionBlock,
   isAndCondition,
@@ -85,6 +95,33 @@ function validateCondition(condition: Condition) {
   }
 }
 
+const actionStepValidators: {
+  [K in ProcessorType]: (step: Extract<StreamlangProcessorDefinition, { action: K }>) => void;
+} = {
+  append: (step: AppendProcessor) => checkFieldName(step.to),
+  date: (step: DateProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  dissect: (step: DissectProcessor) => checkFieldName(step.from),
+  grok: (step: GrokProcessor) => checkFieldName(step.from),
+  rename: (step: RenameProcessor) => {
+    checkFieldName(step.from);
+    checkFieldName(step.to);
+  },
+  set: (step: SetProcessor) => {
+    checkFieldName(step.to);
+    if (step.copy_from) {
+      checkFieldName(step.copy_from);
+    }
+  },
+  // fields referenced in manual ingest pipelines are not validated here because
+  // the interface is Elasticsearch directly here, which has its own validation
+  manual_ingest_pipeline: () => {},
+};
+
 function validateSteps(steps: StreamlangStep[]) {
   for (const step of steps) {
     if ('where' in step && step.where && 'steps' in step.where) {
@@ -94,29 +131,10 @@ function validateSteps(steps: StreamlangStep[]) {
       if (step.where) {
         validateCondition(step.where);
       }
-      switch (step.action) {
-        case 'grok':
-        case 'dissect':
-        case 'date':
-          checkFieldName(step.from);
-          if ('to' in step && step.to) {
-            checkFieldName(step.to);
-          }
-          break;
-        case 'rename':
-          checkFieldName(step.from);
-          checkFieldName(step.to);
-          break;
-        case 'set':
-          checkFieldName(step.to);
-          if (step.copy_from) {
-            checkFieldName(step.copy_from);
-          }
-          break;
-        case 'append':
-          checkFieldName(step.to);
-          break;
-      }
+      const validateStep = actionStepValidators[step.action] as (
+        s: StreamlangProcessorDefinition
+      ) => void;
+      validateStep(step);
     }
   }
 }
