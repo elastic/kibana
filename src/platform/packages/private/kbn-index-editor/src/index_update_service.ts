@@ -8,7 +8,7 @@
  */
 
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -43,6 +43,7 @@ import type { SortOrder } from '@kbn/unified-data-table';
 import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
@@ -115,6 +116,7 @@ export class IndexUpdateService {
   constructor(
     private readonly http: HttpStart,
     private readonly data: DataPublicPluginStart,
+    private readonly notifications: NotificationsStart,
     public readonly canEditIndex: boolean
   ) {
     this.listenForUpdates();
@@ -964,6 +966,11 @@ export class IndexUpdateService {
           first()
         )
         .subscribe(() => {
+          this.notifications.toasts.addSuccess({
+            title: i18n.translate('indexEditor.indexManagement.dataAppendedNotificationTitle', {
+              defaultMessage: 'File data has been appended to the index.',
+            }),
+          });
           this._isSaving$.next(false);
         });
     } else {

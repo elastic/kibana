@@ -32,7 +32,12 @@ export function createEditLookupIndexContentAction(
     async execute(context: EditLookupIndexContentContext) {
       const { coreStart, data, fileUpload } = dependencies;
 
-      const indexUpdateService = new IndexUpdateService(coreStart.http, data, context.canEditIndex);
+      const indexUpdateService = new IndexUpdateService(
+        coreStart.http,
+        data,
+        coreStart.notifications,
+        context.canEditIndex
+      );
 
       const { indexName, doesIndexExist } = context;
 
