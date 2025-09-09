@@ -54,7 +54,7 @@ export const findMaintenanceWindowsRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Find a maintenance window.',
+        summary: 'Search for a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
         availability: {
           since: '9.2.0',

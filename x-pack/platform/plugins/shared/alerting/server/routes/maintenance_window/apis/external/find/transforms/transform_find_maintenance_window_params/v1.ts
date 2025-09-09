@@ -29,6 +29,6 @@ export const transformFindMaintenanceWindowParams = (
     ...(params.per_page ? { perPage: params.per_page } : {}),
     ...(params.status ? { status } : {}),
     ...(search.length ? { search: search.join(' ') } : {}),
-    searchFields,
+    ...(searchFields.length ? { searchFields } : {}),
   };
 };

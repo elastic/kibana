@@ -13,7 +13,7 @@ import { maintenanceWindowClientMock } from '../../../../../maintenance_window_c
 import { findMaintenanceWindowsRoute } from './find_maintenance_windows_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { rewriteMaintenanceWindowRes } from '../../../../lib';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -48,7 +48,7 @@ describe('findMaintenanceWindowsRoute', () => {
     jest.resetAllMocks();
   });
 
-  test('should find the maintenance windows', async () => {
+  it('should find the maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -58,10 +58,18 @@ describe('findMaintenanceWindowsRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
 
-    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_find');
+    expect(config.path).toEqual('/api/maintenance_window/_find');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "access": "internal",
+        "access": "public",
+        "availability": Object {
+          "since": "9.2.0",
+          "stability": "stable",
+        },
+        "summary": "Search for a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 
@@ -80,7 +88,9 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({});
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+        data: mockMaintenanceWindows.data.map((data) =>
+          transformInternalMaintenanceWindowToExternalV1(data)
+        ),
         total: 2,
         page: 1,
         per_page: 3,
@@ -88,7 +98,7 @@ describe('findMaintenanceWindowsRoute', () => {
     });
   });
 
-  test('should find the maintenance windows with query', async () => {
+  it('should find the maintenance windows with query', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -102,16 +112,25 @@ describe('findMaintenanceWindowsRoute', () => {
         query: {
           page: 1,
           per_page: 3,
-          search: 'mw name',
+          title: 'foobar',
+          created_by: 'elastic',
           status: ['running'],
         },
       }
     );
 
-    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_find');
+    expect(config.path).toEqual('/api/maintenance_window/_find');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "access": "internal",
+        "access": "public",
+        "availability": Object {
+          "since": "9.2.0",
+          "stability": "stable",
+        },
+        "summary": "Search for a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 
@@ -130,12 +149,16 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({
       page: 1,
       perPage: 3,
-      search: 'mw name',
+      search: 'foobar elastic',
+      searchFields: ['title', 'createdBy'],
       status: ['running'],
     });
+
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+        data: mockMaintenanceWindows.data.map((data) =>
+          transformInternalMaintenanceWindowToExternalV1(data)
+        ),
         total: 2,
         page: 1,
         per_page: 3,
@@ -143,7 +166,7 @@ describe('findMaintenanceWindowsRoute', () => {
     });
   });
 
-  test('ensures the license allows for finding maintenance windows', async () => {
+  it('ensures the license allows for finding maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -156,7 +179,7 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents for finding maintenance windows', async () => {
+  it('ensures the license check prevents for finding maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -170,7 +193,7 @@ describe('findMaintenanceWindowsRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
-  test('ensures only platinum license can access API', async () => {
+  it('ensures only platinum license can access API', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
