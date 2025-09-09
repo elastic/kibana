@@ -42,7 +42,7 @@ describe('EntityStoreCrudClient', () => {
       );
 
       expect(async () =>
-        client.upsertEntity('host', 'host-id', {
+        client.upsertEntity('host', {
           entity: {
             id: 'host-id',
           },
@@ -64,7 +64,7 @@ describe('EntityStoreCrudClient', () => {
       );
 
       expect(async () =>
-        client.upsertEntity('user', 'user-id', {
+        client.upsertEntity('user', {
           entity: {
             id: 'user-id',
           },
@@ -72,21 +72,6 @@ describe('EntityStoreCrudClient', () => {
       ).rejects.toThrow(new EngineNotRunningError('user'));
 
       expect(dataClientMock.status).toBeCalledWith({ include_components: true });
-    });
-
-    it('when not id different in body and path throw error', async () => {
-      mockStatusRunning(dataClientMock, 'generic');
-      const entity = {
-        entity: {
-          id: 'db-1',
-        },
-      };
-
-      expect(async () => client.upsertEntity('generic', 'db-2', entity)).rejects.toThrow(
-        new BadCRUDRequestError(
-          `The id provided in the path, and the id provided in the body doesn't match`
-        )
-      );
     });
 
     it('when not allowed attributes are updated, throw error', async () => {
@@ -106,7 +91,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.upsertEntity('host', 'host-1', doc)).rejects.toThrow(
+      expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
             `updated without forcing it (?force=true): user.name, user.id, entity.type, entity.sub_type`
@@ -131,7 +116,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.upsertEntity('host', 'host-1', doc)).rejects.toThrow(
+      expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
         new DocumentNotFoundError()
       );
     });
@@ -161,7 +146,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      await client.upsertEntity('host', 'host-1', doc);
+      await client.upsertEntity('host', doc);
 
       expect(dataClientMock.status).toBeCalledWith({ include_components: true });
       expect(esClientMock.updateByQuery).toBeCalledWith({
@@ -229,7 +214,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      await client.upsertEntity('host', 'host-1', doc, true);
+      await client.upsertEntity('host', doc, true);
 
       expect(dataClientMock.status).toBeCalledWith({ include_components: true });
       expect(esClientMock.updateByQuery).toBeCalledWith({
