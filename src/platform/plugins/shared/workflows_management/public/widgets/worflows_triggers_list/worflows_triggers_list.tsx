@@ -53,14 +53,14 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
             <EuiBadge
               iconType="cross"
               onClick={() => setShowAllTriggers(false)}
-              onClickAriaLabel="show less triggers"
+              onClickAriaLabel="Show less triggers"
             />
           </>
         ) : (
           <EuiBadge
             color="hollow"
             onClick={() => setShowAllTriggers(true)}
-            onClickAriaLabel="show more triggers"
+            onClickAriaLabel="Show more triggers"
           >
             +{rest.length}
           </EuiBadge>
