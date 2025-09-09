@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -68,9 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: TEST_STREAM_NAME,
             },
             body: {
-              dashboards: [],
-              queries: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -194,9 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             path: { name: TEST_STREAM_NAME },
             body: {
-              queries: [],
-              dashboards: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -240,9 +236,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await indexDocument(esClient, 'logs-invalid_pipeline-default', doc);
         expect(response.result).to.eql('created');
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
@@ -290,9 +284,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             path: { name: TEST_STREAM_NAME },
             body: {
-              queries: [],
-              dashboards: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -321,9 +313,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             path: { name: TEST_STREAM_NAME },
             body: {
-              queries: [],
-              dashboards: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -459,9 +449,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, FIRST_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -523,9 +511,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, SECOND_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -559,9 +545,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the ingest pipeline when the processing is removed from the first stream', async () => {
         await putStream(apiClient, FIRST_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -583,9 +567,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('clears the pipeline when processing is removed from the second stream', async () => {
         await putStream(apiClient, SECOND_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -618,9 +600,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
         });
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -696,9 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('fails to store non-existing processor', async () => {
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -746,9 +724,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ORPHANED_STREAM_NAME,
             },
             body: {
-              dashboards: [],
-              queries: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
