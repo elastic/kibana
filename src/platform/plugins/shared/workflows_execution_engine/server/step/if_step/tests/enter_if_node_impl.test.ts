@@ -63,12 +63,12 @@ describe('EnterIfNodeImpl', () => {
     getDirectSuccessors.mockReturnValue([
       {
         id: 'thenNode',
-        type: 'enter-condition-branch',
+        type: 'enter-then-branch',
         condition: 'true',
       } as EnterConditionBranchNode,
       {
         id: 'elseNode',
-        type: 'enter-condition-branch',
+        type: 'enter-else-branch',
       } as EnterConditionBranchNode,
     ]);
   });
@@ -80,7 +80,17 @@ describe('EnterIfNodeImpl', () => {
 
   it('should enter scope', async () => {
     await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith();
     expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be called after startStep', async () => {
+    await impl.run();
+    expect(startStep).toHaveBeenCalled();
+    expect(enterScope).toHaveBeenCalled();
+    expect(startStep.mock.invocationCallOrder[0]).toBeLessThan(
+      enterScope.mock.invocationCallOrder[0]
+    );
   });
 
   describe('then branch', () => {
@@ -88,12 +98,12 @@ describe('EnterIfNodeImpl', () => {
       getDirectSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:alert',
         } as EnterConditionBranchNode,
         {
           id: 'elseNode',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
         } as EnterConditionBranchNode,
       ]);
     });
@@ -116,12 +126,12 @@ describe('EnterIfNodeImpl', () => {
       getDirectSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:rule',
         } as EnterConditionBranchNode,
         {
           id: 'elseNode',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
         } as EnterConditionBranchNode,
       ]);
     });
@@ -144,7 +154,7 @@ describe('EnterIfNodeImpl', () => {
       getDirectSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:rule',
         } as EnterConditionBranchNode,
       ]);
@@ -167,7 +177,7 @@ describe('EnterIfNodeImpl', () => {
   it('should throw an error if successors are not enter-condition-branch', async () => {
     getDirectSuccessors.mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${step.id} must have only 'enter-condition-branch' successors, but found: some-other-type.`
+      `EnterIfNode with id ${step.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
     );
   });
 
@@ -175,7 +185,7 @@ describe('EnterIfNodeImpl', () => {
     getDirectSuccessors.mockReturnValueOnce([
       {
         id: 'thenNode',
-        type: 'enter-condition-branch',
+        type: 'enter-then-branch',
         condition: 'invalid""condition',
       } as EnterConditionBranchNode,
     ]);

@@ -20,17 +20,7 @@ export type { TableState, DataTableState, TableById } from './store/data_table/t
 export type { DataTableModel, SubsetDataTableModel } from './store/data_table/model';
 
 export { Direction, tableEntity, FILTER_OPEN, TableId, TableEntityType } from './common/types';
-export type {
-  TableIdLiteral,
-  ViewSelection,
-  SortDirectionTable,
-  SortColumnTable,
-} from './common/types';
+export type { TableIdLiteral, ViewSelection, SortColumnTable } from './common/types';
 
-export { getColumnHeaders } from './components/data_table/column_headers/helpers';
-export {
-  getEventIdToDataMapping,
-  addBuildingBlockStyle,
-  isEventBuildingBlockType,
-} from './components/data_table/helpers';
+export { getEventIdToDataMapping, addBuildingBlockStyle } from './components/data_table/helpers';
 export { getPageRowIndex } from './components/data_table/pagination';

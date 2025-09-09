@@ -25,7 +25,7 @@ describe('ExitConditionBranchNodeImpl', () => {
     getDirectSuccessors = jest.fn();
     step = {
       id: 'testStep',
-      type: 'exit-condition-branch',
+      type: 'exit-then-branch',
       startNodeId: 'startBranchNode',
     };
     wfExecutionRuntimeManagerMock = {
@@ -74,5 +74,11 @@ describe('ExitConditionBranchNodeImpl', () => {
   it('should go to the exitIfNode after running', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
+  });
+
+  it('should exit scope after running', async () => {
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.exitScope).toHaveBeenCalled();
+    expect(wfExecutionRuntimeManagerMock.exitScope).toHaveBeenCalledTimes(1);
   });
 });

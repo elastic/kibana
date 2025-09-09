@@ -25,16 +25,16 @@ export type EnterIfNode = z.infer<typeof EnterIfNodeSchema>;
 
 export const EnterConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  type: z.literal('enter-condition-branch'),
   stepId: z.string(),
+  type: z.union([z.literal('enter-then-branch'), z.literal('enter-else-branch')]),
   condition: z.union([z.string(), z.undefined()]),
 });
 export type EnterConditionBranchNode = z.infer<typeof EnterConditionBranchNodeSchema>;
 
 export const ExitConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  type: z.literal('exit-condition-branch'),
   stepId: z.string(),
+  type: z.union([z.literal('exit-then-branch'), z.literal('exit-else-branch')]),
   startNodeId: z.string(),
 });
 export type ExitConditionBranchNode = z.infer<typeof ExitConditionBranchNodeSchema>;

@@ -196,7 +196,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
   };
   const enterThenBranchNode: EnterConditionBranchNode = {
     id: `enterThen_${stepId}`,
-    type: 'enter-condition-branch',
+    type: 'enter-then-branch',
     condition: ifElseStep.condition,
     stepId,
   };
@@ -206,7 +206,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
 
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen_${stepId}`,
-    type: 'exit-condition-branch',
+    type: 'exit-then-branch',
     startNodeId: enterThenBranchNode.id,
     stepId,
   };
@@ -218,14 +218,14 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
   if (falseSteps?.length > 0) {
     const enterElseBranchNode: EnterConditionBranchNode = {
       id: `enterElse_${stepId}`,
-      type: 'enter-condition-branch',
+      type: 'enter-else-branch',
       stepId,
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse_${stepId}`,
-      type: 'exit-condition-branch',
+      type: 'exit-else-branch',
       startNodeId: enterElseBranchNode.id,
       stepId,
     };
