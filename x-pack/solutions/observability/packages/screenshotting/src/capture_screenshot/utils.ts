@@ -13,7 +13,7 @@ export const scrollAndLoadFullyIframe = (iframe: HTMLIFrameElement): Promise<voi
     if (!doc || !win) return resolve();
 
     const totalHeight = doc.body.scrollHeight;
-    const scrollStep = win.innerHeight / 6;
+    const scrollStep = win.innerHeight / 2;
     let currentY = 0;
 
     function scrollDown() {
@@ -129,6 +129,42 @@ export const waitForNoLoadingCharts = async (
       });
 
       if (hasLoadingCharts) {
+        lastChange = Date.now();
+      }
+
+      if (Date.now() - lastChange > stableFor) {
+        return resolve();
+      }
+
+      if (Date.now() - start > timeout) {
+        // timeout: elements did not finish loading
+        return resolve();
+      }
+
+      setTimeout(poll, 300);
+    };
+
+    poll();
+  });
+};
+
+export const waitForNoGlobalLoadingIndicator = async (
+  doc: Document | null = document,
+  timeout = 180000,
+  stableFor = 2000
+): Promise<void> => {
+  const start = Date.now();
+  let lastChange = Date.now();
+
+  return new Promise((resolve) => {
+    const poll = () => {
+      if (!doc) return resolve();
+
+      const hasGlobalLoadingIndicator = doc.querySelector(
+        '[data-test-subj="globalLoadingIndicator"]'
+      );
+
+      if (hasGlobalLoadingIndicator) {
         lastChange = Date.now();
       }
 

@@ -8,10 +8,16 @@
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiImage, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { captureScreenshot, saveScreenshot } from '..';
+import { captureScreenshot, captureScreenshotFromUrl, saveScreenshot } from '..';
 import type { SaveScreenshotOptions } from '../src/types';
 
-export const CaptureScreenshotExample = ({ options }: { options: SaveScreenshotOptions }) => {
+export const CaptureScreenshotExample = ({
+  fromUrl,
+  options,
+}: {
+  fromUrl?: boolean;
+  options?: SaveScreenshotOptions;
+}) => {
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
   const [url, setUrl] = useState<string>('');
@@ -20,9 +26,12 @@ export const CaptureScreenshotExample = ({ options }: { options: SaveScreenshotO
     setIsTakingScreenshot(true);
     setScreenshot(null);
 
-    const captureResult = await captureScreenshot(url);
+    const captureResult = fromUrl ? await captureScreenshotFromUrl(url) : await captureScreenshot();
+
     if (captureResult) {
-      await saveScreenshot(url, captureResult.blob, { ...options });
+      if (options && options.save) {
+        await saveScreenshot(url, captureResult.blob, { ...options });
+      }
       setScreenshot(captureResult.image);
     }
 

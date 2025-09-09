@@ -23,11 +23,17 @@ interface SaveScreenshotDeps {
 }
 
 export interface SaveScreenshotOptions {
+  save: boolean;
   caseId: string;
-  owner: string[];
+  owner: string;
   appName?: string;
   pageName?: string;
-  dependencies: SaveScreenshotDeps;
+  dependencies?: SaveScreenshotDeps;
+}
+
+export interface ScreenshotUploadSuccess {
+  ok: true;
+  size: number;
 }
 
 export const FILE_KIND_DELIMITER = 'FilesCases';

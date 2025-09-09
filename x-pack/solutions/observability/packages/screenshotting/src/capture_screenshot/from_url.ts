@@ -11,17 +11,15 @@ import type { CaptureResult, CaptureScreenshotOptions } from '../types';
 import {
   getSelectorForUrl,
   waitForSelector,
-  waitForDomStability,
-  waitForIdle,
-  waitForNoLoadingCharts,
   canvasToBlob,
+  waitForNoGlobalLoadingIndicator,
 } from './utils';
 
-export const captureScreenshot = async (
+export const captureScreenshotFromUrl = async (
   url: string,
   options: CaptureScreenshotOptions = {}
 ): Promise<CaptureResult | null> => {
-  const { timeout = 90000, idleFor = 4000, stableFor = 4000 } = options;
+  const { timeout = 90000 } = options;
 
   const iframe = document.createElement('iframe');
 
@@ -45,9 +43,7 @@ export const captureScreenshot = async (
         return resolve(null);
       }
 
-      await waitForDomStability(iframe, idleFor, timeout);
-      await waitForIdle(iframe, timeout);
-      await waitForNoLoadingCharts(iframe, timeout, stableFor);
+      await waitForNoGlobalLoadingIndicator(iframe.contentDocument);
 
       try {
         const canvas = await domtoimage.toCanvas(element);
@@ -56,13 +52,15 @@ export const captureScreenshot = async (
         cleanup();
         resolve({ image, blob });
       } catch (err) {
-        // html2canvas failed
         cleanup();
         resolve(null);
       }
     };
 
-    iframe.src = url;
+    const iframeSrc = url.includes('?')
+      ? `${url}&disableIntersection=true`
+      : `${url}?disableIntersection=true`;
+    iframe.src = iframeSrc;
 
     const cleanup = () => {
       document.body.removeChild(iframe);

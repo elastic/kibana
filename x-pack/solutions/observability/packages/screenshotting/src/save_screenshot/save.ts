@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SaveScreenshotOptions } from '../types';
+import type { SaveScreenshotOptions, ScreenshotUploadSuccess } from '../types';
 import { FILE_KIND_DELIMITER } from '../types';
 import { getFileName } from './utils';
 
@@ -13,30 +13,19 @@ export const saveScreenshot = async (
   url: string,
   blob: Blob,
   options: SaveScreenshotOptions
-): Promise<
-  | {
-      ok: true;
-      size: number;
-    }
-  | undefined
-> => {
-  const {
-    caseId,
-    owner,
-    appName,
-    pageName,
-    dependencies: { filesClient },
-  } = options;
+): Promise<ScreenshotUploadSuccess | undefined> => {
+  const { caseId, owner, appName, pageName, dependencies } = options;
 
+  const filesClient = dependencies?.filesClient;
   if (!filesClient) return;
 
   const createResult = await filesClient.create({
     name: getFileName(url, appName, pageName),
-    kind: `${owner[0]}${FILE_KIND_DELIMITER}`,
+    kind: `${owner}${FILE_KIND_DELIMITER}`,
     mimeType: 'image/png',
     meta: {
       caseIds: [caseId],
-      owner: owner[0],
+      owner,
     },
   });
 

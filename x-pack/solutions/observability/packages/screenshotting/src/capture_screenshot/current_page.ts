@@ -7,17 +7,17 @@
 
 // @ts-expect-error - this module has no exported types
 import domtoimage from 'dom-to-image-more';
-import { canvasToBlob, scrollAndLoadFully, wait } from './utils';
+import { canvasToBlob, getSelectorForUrl, waitForNoGlobalLoadingIndicator } from './utils';
 import type { CaptureResult } from '../types';
 
-export const takeScreenshot = async (): Promise<CaptureResult | null> => {
+export const captureScreenshot = async (): Promise<CaptureResult | null> => {
   try {
-    const element = document.querySelector('main');
+    const selector = getSelectorForUrl(window.location.href);
+    const element = document.querySelector(selector);
 
     if (!element) return null;
 
-    await scrollAndLoadFully();
-    await wait(5000);
+    await waitForNoGlobalLoadingIndicator();
 
     const canvas = await domtoimage.toCanvas(element as HTMLElement);
     const image = canvas.toDataURL('image/png');
