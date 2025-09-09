@@ -293,8 +293,8 @@ describe('DiscoverSavedSearchContainer', () => {
     it('should initially return false', () => {
       const container = getSavedSearchContainer({
         services,
-        globalStateContainer,
         internalState,
+        getCurrentTab,
       });
       expect(container.getHasReset$().getValue()).toBe(false);
     });
@@ -302,8 +302,8 @@ describe('DiscoverSavedSearchContainer', () => {
     it('should return a BehaviorSubject that can be subscribed to', () => {
       const container = getSavedSearchContainer({
         services,
-        globalStateContainer,
         internalState,
+        getCurrentTab,
       });
       const hasReset$ = container.getHasReset$();
 
@@ -315,8 +315,8 @@ describe('DiscoverSavedSearchContainer', () => {
     it('should allow updating the reset state', () => {
       const container = getSavedSearchContainer({
         services,
-        globalStateContainer,
         internalState,
+        getCurrentTab,
       });
       const hasReset$ = container.getHasReset$();
 
@@ -335,8 +335,8 @@ describe('DiscoverSavedSearchContainer', () => {
     it('should notify subscribers when reset state changes', () => {
       const container = getSavedSearchContainer({
         services,
-        globalStateContainer,
         internalState,
+        getCurrentTab,
       });
       const hasReset$ = container.getHasReset$();
       const mockSubscriber = jest.fn();
