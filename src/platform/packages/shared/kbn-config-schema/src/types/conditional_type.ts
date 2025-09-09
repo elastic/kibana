@@ -46,6 +46,7 @@ export class ConditionalType<
     });
 
     super(schema, options);
+
     this.leftOperand = leftOperand;
     this.rightOperand = rightOperand;
     this.equalType = equalType;
