@@ -21,27 +21,6 @@ describe('useControllableState', () => {
     expect(result.current[0]).toBe('defaultValue');
   });
 
-  it('should initialize the value to `prop` if it is defined', () => {
-    const { result } = renderHook(() =>
-      useControllableState({
-        prop: 'propValue',
-      })
-    );
-
-    expect(result.current[0]).toBe('propValue');
-  });
-
-  it('should prefer `prop` (if defined) as default value over `defaultValue`', () => {
-    const { result } = renderHook(() =>
-      useControllableState({
-        prop: 'propValue',
-        defaultValue: 'defaultValue',
-      })
-    );
-
-    expect(result.current[0]).toBe('propValue');
-  });
-
   it('should call onChange with the correct value with when the state is controlled (prop and onChange both defined)', () => {
     let controlledState = 'propValue';
     const onChange = jest.fn((newValue) => {

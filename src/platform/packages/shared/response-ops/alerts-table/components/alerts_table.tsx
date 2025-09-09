@@ -219,12 +219,12 @@ const AlertsTableContent = typedForwardRef(
     const [pageIndex, setPageIndex] = useControllableState({
       prop: pageIndexProp,
       onChange: onPageIndexChange,
-      defaultValue: 0,
+      defaultValue: pageIndexProp ?? 0,
     });
     const [pageSize, setPageSize] = useControllableState({
       prop: pageSizeProp,
       onChange: onPageSizeChange,
-      defaultValue: DEFAULT_ALERTS_PAGE_SIZE,
+      defaultValue: pageSizeProp ?? DEFAULT_ALERTS_PAGE_SIZE,
     });
     const [sort, setSort] = useControllableState({
       prop: sortProp,
@@ -234,7 +234,7 @@ const AlertsTableContent = typedForwardRef(
     const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
       prop: expandedAlertIndexProp,
       onChange: onExpandedAlertIndexChange,
-      defaultValue: null,
+      defaultValue: expandedAlertIndexProp ?? null,
     });
 
     const columnsLocal = useMemo(
