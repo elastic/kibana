@@ -92,7 +92,7 @@ export const indexMigrationDashboards = async (
 ): Promise<string[]> => {
   const createdAt = new Date().toISOString();
   const addDashboardOperations = dashboards.flatMap((ruleMigration) => [
-    { create: { _index: DASHBOARDS_INDEX_PATTERN } },
+    { create: { _index: DASHBOARD_MIGRATIONS_DASHBOARDS_INDEX_PATTERN } },
     {
       ...ruleMigration,
       '@timestamp': createdAt,
@@ -102,7 +102,7 @@ export const indexMigrationDashboards = async (
 
   const migrationIdsToBeCreated = new Set(dashboards.map((rule) => rule.migration_id));
   const createMigrationOperations = Array.from(migrationIdsToBeCreated).flatMap((migrationId) => [
-    { create: { _index: MIGRATIONS_INDEX_PATTERN, _id: migrationId } },
+    { create: { _index: DASHBOARD_MIGRATIONS_MIGRATIONS_INDEX_PATTERN, _id: migrationId } },
     {
       ...getDefaultDashboardMigrationDoc(),
     },
@@ -114,7 +114,7 @@ export const indexMigrationDashboards = async (
   });
 
   const ids = res.items.reduce((acc, item) => {
-    if (item.create?._id && item.create._index === DASHBOARDS_INDEX_PATTERN) {
+    if (item.create?._id && item.create._index === DASHBOARD_MIGRATIONS_DASHBOARDS_INDEX_PATTERN) {
       acc.push(item.create._id);
     }
     return acc;
