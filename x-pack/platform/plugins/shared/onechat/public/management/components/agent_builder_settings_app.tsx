@@ -42,7 +42,7 @@ export const AgentBuilderSettingsApp: React.FC<{}> = () => {
     <>
       <div data-test-subj="agentBuilderSettingsPage">
         <EuiTitle size="l">
-          <h2>{labels.management.agentBuilder}</h2>
+          <h1>{labels.management.agentBuilder}</h1>
         </EuiTitle>
 
         <EuiSpacer size="l" />
