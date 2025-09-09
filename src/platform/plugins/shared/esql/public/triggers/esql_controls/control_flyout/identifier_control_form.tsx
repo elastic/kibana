@@ -12,24 +12,14 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import {
-  EuiComboBox,
-  EuiFormRow,
-  type EuiSwitchEvent,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import {
-  ESQLVariableType,
-  EsqlControlType,
-  type ESQLControlState,
-  type ControlWidthOptions,
-} from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import { ControlWidth, ControlLabel } from './shared_form_components';
+import { ControlLabel } from './shared_form_components';
 import { getQueryForFields } from './helpers';
 
 interface IdentifierControlFormProps {
@@ -71,8 +61,8 @@ export function IdentifierControlForm({
       : []
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
-  const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
-  const [grow, setGrow] = useState(initialState?.grow ?? false);
+  const [minimumWidth] = useState(initialState?.width ?? 'medium');
+  const [grow] = useState(initialState?.grow ?? false);
 
   useEffect(
     function initAvailableIdentifiersOptions() {
@@ -125,16 +115,6 @@ export function IdentifierControlForm({
 
   const onLabelChange = useCallback((e: { target: { value: React.SetStateAction<string> } }) => {
     setLabel(e.target.value);
-  }, []);
-
-  const onMinimumSizeChange = useCallback((optionId: string) => {
-    if (optionId) {
-      setMinimumWidth(optionId as ControlWidthOptions);
-    }
-  }, []);
-
-  const onGrowChange = useCallback((e: EuiSwitchEvent) => {
-    setGrow(e.target.checked);
   }, []);
 
   const onCreateOption = useCallback(
@@ -227,13 +207,6 @@ export function IdentifierControlForm({
       </EuiFormRow>
 
       <ControlLabel label={label} onLabelChange={onLabelChange} />
-
-      <ControlWidth
-        minimumWidth={minimumWidth}
-        grow={grow}
-        onMinimumSizeChange={onMinimumSizeChange}
-        onGrowChange={onGrowChange}
-      />
     </>
   );
 }
