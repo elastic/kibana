@@ -12,6 +12,7 @@ export type ConnectorWithOptionalDeprecation = Omit<InMemoryConnector, 'isDeprec
   Pick<Partial<InMemoryConnector>, 'isDeprecated'>;
 
 const isObject = (obj: unknown): obj is Record<string, unknown> => isPlainObject(obj);
+const deprecatedActionTypeIds = ['.bedrock', '.gemini', '.gen-ai'];
 
 export const isConnectorDeprecated = (
   connector: RawAction | ConnectorWithOptionalDeprecation
@@ -56,6 +57,8 @@ export const isConnectorDeprecated = (
      */
     return !!connector.config.usesTableApi;
   }
+
+  if (deprecatedActionTypeIds.includes(connector.actionTypeId)) return true;
 
   return false;
 };
