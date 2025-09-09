@@ -26,7 +26,7 @@ import {
 } from '../../common/lib/errors';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
-import { SearchWorkflowExecutionsParams } from './workflows_management_service';
+import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
 
 export function defineRoutes(
   router: IRouter,
