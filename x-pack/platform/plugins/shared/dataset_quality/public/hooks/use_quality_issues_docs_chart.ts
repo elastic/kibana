@@ -177,7 +177,7 @@ export const useQualityIssuesDocsChart = () => {
   });
 
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails.rawName,
+    dataStreamStat: datasetDetails,
     query: { language: 'kuery', query },
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,
