@@ -284,18 +284,13 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
-          <span>
-            {`${datasetQualityColumnName} `}
-            <EuiIconTip
-              content={datasetQualityColumnTooltip}
-              type="question"
-              size="s"
-              color="subdued"
-              className="eui-alignTop"
-            />
-          </span>
+          <span>{datasetQualityColumnName}</span>
         </EuiTableHeader>
       ),
+      nameTooltip: {
+        content: datasetQualityColumnTooltip,
+        type: 'question',
+      },
       field: 'quality',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -309,18 +304,13 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
-          <span>
-            {`${degradedDocsColumnName} `}
-            <EuiIconTip
-              content={degradedDocsColumnTooltip}
-              type="question"
-              size="s"
-              color="subdued"
-              className="eui-alignTop"
-            />
-          </span>
+          <span>{degradedDocsColumnName}</span>
         </EuiTableHeader>
       ),
+      nameTooltip: {
+        content: degradedDocsColumnTooltip,
+        type: 'question',
+      },
       field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -348,18 +338,13 @@ export const getDatasetQualityTableColumns = ({
           {
             name: (
               <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-                <span>
-                  {`${failedDocsColumnName} `}
-                  <EuiIconTip
-                    content={failedDocsColumnTooltip}
-                    type="question"
-                    size="s"
-                    color="subdued"
-                    className="eui-alignTop"
-                  />
-                </span>
+                <span>{failedDocsColumnName}</span>
               </EuiTableHeader>
             ),
+            nameTooltip: {
+              content: failedDocsColumnTooltip,
+              type: 'question',
+            },
             field: 'failedDocs.percentage',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
