@@ -27,6 +27,8 @@ import { getFunctionDefinition } from './functions';
 import { getColumnForASTNode } from './shared';
 import { isArrayType } from './operators';
 
+// #region type detection
+
 /**
  * Determines the type of the expression
  */
@@ -141,14 +143,14 @@ export function getExpressionType(
 
     const returnTypes = uniq(matchingSignatures.map((sig) => sig.returnType));
 
-    if (
-      // no signature matched the provided arguments
-      returnTypes.length === 0 ||
-      // ambiguous return type (i.e. we can't always identify the true
-      // matching signature because we don't always know the types of the parameters)
-      returnTypes.length > 1 ||
-      returnTypes[0] === 'any'
-    ) {
+    // no signature matched the provided arguments
+    if (returnTypes.length === 0) return 'unknown';
+
+    // ambiguous return type (i.e. we can't always identify the true
+    // matching signature because we don't always know the types of the parameters)
+    if (returnTypes.length > 1) return 'unknown';
+
+    if (returnTypes[0] === 'any') {
       return 'unknown';
     }
 
@@ -158,7 +160,9 @@ export function getExpressionType(
   return 'unknown';
 }
 
-// #region function signature matching
+// #endregion type detection
+
+// #region signature matching
 
 export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
   'date',
@@ -277,6 +281,10 @@ function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+// #endregion signature matching
+
+// #region expression completeness
+
 /**
  * Builds a regex that matches partial strings starting
  * from the beginning of the string.
@@ -337,3 +345,5 @@ export function isExpressionComplete(
     !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
   );
 }
+
+// #endregion expression completeness
