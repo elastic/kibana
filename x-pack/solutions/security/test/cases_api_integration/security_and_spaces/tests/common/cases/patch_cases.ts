@@ -42,17 +42,6 @@ import {
   getConfigurationRequest,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-  getRuleForAlertTesting,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-  getAlertsByIds,
-  createRule,
-  getQueryAlertIds,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
-import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
@@ -62,6 +51,17 @@ import {
   secOnlyRead,
   superUser,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/users';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  createRule,
+  getQueryAlertIds,
+} from '../../../../../common/utils/detections_response';
 import { getSignalsWithES } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
