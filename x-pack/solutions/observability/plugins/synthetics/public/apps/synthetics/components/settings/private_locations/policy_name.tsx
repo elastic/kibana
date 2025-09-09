@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiBadge, EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
@@ -29,9 +28,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       currentSpace && policy?.spaceIds && policy.spaceIds.includes(currentSpace.id)
         ? currentSpace.id
         : policy?.spaceIds[0];
-    const appPath = `/app/fleet/policies/${agentPolicyId}`;
-
-    return spaceId === DEFAULT_SPACE_ID ? appPath : `${basePath}${appPath}`;
+    return `${basePath}/app/fleet/policies/${agentPolicyId}`;
   }, [agentPolicyId, basePath, currentSpace, policy?.spaceIds]);
 
   if (loading) {
@@ -39,7 +36,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   }
 
   return (
-    <EuiText size="s">
+    <EuiText size="s" className="eui-displayInlineBlock">
       {canReadAgentPolicies ? (
         <EuiTextColor color="subdued">
           {policy ? (
