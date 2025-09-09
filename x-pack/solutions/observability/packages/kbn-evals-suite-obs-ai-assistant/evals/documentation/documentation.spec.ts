@@ -1,0 +1,160 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { RETRIEVE_ELASTIC_DOC_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
+import type {
+  InstallationStatusResponse,
+  PerformInstallResponse,
+  UninstallResponse,
+} from '@kbn/product-doc-base-plugin/common/http_api/installation';
+import { evaluate as base } from '../../src/evaluate';
+import type { EvaluateDocumentationDataset } from './evaluate_documentation_dataset';
+import { createEvaluateDocumentationDataset } from './evaluate_documentation_dataset';
+
+const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
+const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
+const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
+const inferenceId = defaultInferenceEndpoints.ELSER;
+
+const evaluate = base.extend<{
+  evaluateDocumentationDataset: EvaluateDocumentationDataset;
+}>({
+  evaluateDocumentationDataset: [
+    ({ chatClient, evaluators, phoenixClient }, use) => {
+      use(
+        createEvaluateDocumentationDataset({
+          chatClient,
+          evaluators,
+          phoenixClient,
+        })
+      );
+    },
+    { scope: 'test' },
+  ],
+});
+
+evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => {
+  evaluate.beforeAll(async ({ fetch, log }) => {
+    const status = await fetch<InstallationStatusResponse>(
+      `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(inferenceId)}`
+    );
+    if (status.overall === 'installed') {
+      log.success('Elastic documentation is already installed');
+    } else {
+      log.info('Installing Elastic documentation');
+      const installResponse = await fetch<PerformInstallResponse>(
+        ELASTIC_DOCS_INSTALL_ALL_API_PATH,
+        {
+          method: 'POST',
+          body: JSON.stringify({ inferenceId }),
+        }
+      );
+
+      if (!installResponse.installed) {
+        log.error('Could not install Elastic documentation');
+        throw new Error('Documentation did not install successfully before running tests.');
+      }
+
+      const installStatus = await fetch<InstallationStatusResponse>(
+        `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
+          inferenceId
+        )}`
+      );
+      if (installStatus.overall !== 'installed') {
+        throw new Error('Documentation is not fully installed, cannot proceed with tests.');
+      }
+    }
+  });
+
+  evaluate('retrieves ES documentation', async ({ evaluateDocumentationDataset }) => {
+    await evaluateDocumentationDataset({
+      dataset: {
+        name: 'documentation: elasticsearch https',
+        description: 'Validates retrieve_elastic_doc usage for configuring HTTPS in Elasticsearch.',
+        examples: [
+          {
+            input: { prompt: 'How can I configure HTTPS in Elasticsearch?' },
+            output: {
+              criteria: [
+                `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
+                'The assistant provides guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
+                `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+                'Mentions Elasticsearch and HTTPS configuration steps consistent with the documentation',
+              ],
+            },
+            metadata: {},
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate('retrieves Kibana documentation', async ({ evaluateDocumentationDataset }) => {
+    await evaluateDocumentationDataset({
+      dataset: {
+        name: 'documentation: kibana lens',
+        description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
+        examples: [
+          {
+            input: {
+              prompt: 'What is Kibana Lens and how do I create a bar chart visualization with it?',
+            },
+            output: {
+              criteria: [
+                `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
+                'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
+                `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+              ],
+            },
+            metadata: {},
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate('retrieves Observability documentation', async ({ evaluateDocumentationDataset }) => {
+    await evaluateDocumentationDataset({
+      dataset: {
+        name: 'documentation: observability nodejs apm',
+        description: 'Validates retrieve_elastic_doc usage for Observability APM instructions.',
+        examples: [
+          {
+            input: {
+              prompt:
+                'How can I set up APM instrumentation for my Node.js service in Elastic Observability?',
+            },
+            output: {
+              criteria: [
+                `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Observability`,
+                'Provides instructions based on the Observability docs for setting up APM instrumentation',
+                'Mentions steps like installing the APM agent, configuring it with the service name and APM Server URL, etc.',
+                `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+              ],
+            },
+            metadata: {},
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate.afterAll(async ({ fetch, log }) => {
+    log.info('Uninstalling Elastic documentation');
+    const uninstallResponse = await fetch<UninstallResponse>(ELASTIC_DOCS_UNINSTALL_ALL_API_PATH, {
+      method: 'POST',
+      body: JSON.stringify({ inferenceId }),
+    });
+
+    if (uninstallResponse.success) {
+      log.success('Uninstalled Elastic documentation');
+    } else {
+      log.error('Could not uninstall Elastic documentation');
+    }
+  });
+});
