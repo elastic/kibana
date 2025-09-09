@@ -166,6 +166,7 @@ describe('es_query executor', () => {
         },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
       expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
     });
@@ -205,6 +206,7 @@ describe('es_query executor', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
     });
@@ -242,6 +244,7 @@ describe('es_query executor', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
       expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
