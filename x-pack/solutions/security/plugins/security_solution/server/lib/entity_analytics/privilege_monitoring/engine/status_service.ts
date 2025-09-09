@@ -40,9 +40,7 @@ export const createEngineStatusService = (
         'info',
         'Privilege Monitoring Engine is not in STARTED state, skipping disable operation'
       );
-      return {
-        status: currentEngineStatus.status,
-      };
+      return currentEngineStatus;
     }
     if (!deps.taskManager) {
       throw new Error('Task Manager is not available');
@@ -70,9 +68,7 @@ export const createEngineStatusService = (
         'Privilege Monitoring Engine disabled'
       );
       dataClient.log('info', 'Privileged Monitoring Engine disabled successfully');
-      return {
-        status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
-      };
+      return descriptorClient.get(); // return the updated state
     } catch (e) {
       const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
       dataClient.log('error', msg);

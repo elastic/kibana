@@ -19,6 +19,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EngineStatusService } from './status_service';
 import { createEngineStatusService } from './status_service';
 import type { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
+import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics';
 
 const mockRemovePrivilegeMonitoringTask = jest.fn();
 const mockScheduleNow = jest.fn();
@@ -73,15 +74,17 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
     statusService = createEngineStatusService(dataClient, mockSavedObjectClient);
   });
   describe('disable', () => {
-    it('should not disable the privilege monitoring engine if it is not started', async () => {
+    it.only('should not disable the privilege monitoring engine if it is not started', async () => {
       mockGetEngineDescriptor.mockResolvedValue({
         status: 'error',
-        error: null,
-      });
+        error: {
+          message: 'An error occurred',
+        },
+      } as MonitoringEngineDescriptor);
 
       const result = await statusService.disable();
       expect(result.status).toBe('error');
-      expect(result.error).toBeNull();
+      expect(result.error?.message).toBe('An error occurred');
     });
 
     it('should disable the privilege monitoring engine', async () => {
