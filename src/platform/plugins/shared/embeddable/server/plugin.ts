@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type {
@@ -15,7 +16,13 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
+import type {
+  EmbeddableFactoryRegistry,
+  EnhancementsRegistry,
+  EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
+  EmbeddableRegistryDefinition,
+} from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
   getExtractFunction,
@@ -25,18 +32,12 @@ import {
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
-import { EnhancementsRegistry } from '../common/enhancements/registry';
-import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
-  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
   getAllMigrations: () => MigrateFunctionsObject;
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
-  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
@@ -45,15 +46,12 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private enhancementsRegistry = new EnhancementsRegistry();
+  private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
 
   public setup(core: CoreSetup) {
-    this.migrateFn = getMigrateFunction(
-      this.getEmbeddableFactory,
-      this.enhancementsRegistry.getEnhancement
-    );
+    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory, this.getEnhancement);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
@@ -63,25 +61,14 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
         this.transformsRegistry[type] = transforms;
       },
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
+      registerEnhancement: this.registerEnhancement,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
+      extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
+      inject: getInjectFunction(this.getEmbeddableFactory, this.getEnhancement),
       getAllMigrations: () =>
         getAllMigrations(
           Array.from(this.embeddableFactories.values()),
-          this.enhancementsRegistry.getEnhancements(),
+          Array.from(this.enhancements.values()),
           this.migrateFn!
         ),
     };
@@ -92,28 +79,50 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
+      extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
+      inject: getInjectFunction(this.getEmbeddableFactory, this.getEnhancement),
       getAllMigrations: () =>
         getAllMigrations(
           Array.from(this.embeddableFactories.values()),
-          this.enhancementsRegistry.getEnhancements(),
+          Array.from(this.enhancements.values()),
           this.migrateFn!
         ),
     };
   }
 
   public stop() {}
+
+  private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
+    if (this.enhancements.has(enhancement.id)) {
+      throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
+    }
+    this.enhancements.set(enhancement.id, {
+      id: enhancement.id,
+      telemetry: enhancement.telemetry || ((state, stats) => stats),
+      inject: enhancement.inject || identity,
+      extract:
+        enhancement.extract ||
+        ((state: SerializableRecord) => {
+          return { state, references: [] };
+        }),
+      migrations: enhancement.migrations || {},
+    });
+  };
+
+  private getEnhancement = (id: string): EnhancementRegistryItem => {
+    return (
+      this.enhancements.get(id) || {
+        id: 'unknown',
+        telemetry: (state, stats) => stats,
+        inject: identity,
+        extract: (state: SerializableRecord) => {
+          return { state, references: [] };
+        },
+        migrations: {},
+      }
+    );
+  };
 
   private registerEmbeddableFactory = (factory: EmbeddableRegistryDefinition) => {
     if (this.embeddableFactories.has(factory.id)) {
