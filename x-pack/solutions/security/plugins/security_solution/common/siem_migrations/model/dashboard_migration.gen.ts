@@ -210,6 +210,25 @@ export const DashboardMigrationTaskExecutionSettings = z.object({
 });
 
 /**
+ * The dashboard migration data object for dashboard update operation
+ */
+export type UpdateMigrationDashboard = z.infer<typeof UpdateMigrationDashboard>;
+export const UpdateMigrationDashboard = z.object({
+  /**
+   * The dashboard migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The migrated elastic dashboard attributes to update.
+   */
+  elastic_dashboard: ElasticDashboard.optional(),
+  /**
+   * The comments for the migration including a summary from the LLM in markdown.
+   */
+  comments: MigrationComments.optional(),
+});
+
+/**
  * Indicates the filter to retry the migrations dashboards translation
  */
 export type DashboardMigrationRetryFilter = z.infer<typeof DashboardMigrationRetryFilter>;
