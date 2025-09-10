@@ -22,29 +22,22 @@ interface Options {
   esClient: ElasticsearchClient;
   namespace: string;
   logger: Logger;
-  indexName?: string;
 }
 
-export const createEntityIndex = async ({
-  entityType,
-  esClient,
-  namespace,
-  logger,
-  indexName,
-}: Options) => {
+export const createEntityIndex = async ({ entityType, esClient, namespace, logger }: Options) => {
   await createOrUpdateIndex({
     esClient,
     logger,
     options: {
-      index: indexName || getEntitiesIndexName(entityType, namespace),
+      index: getEntitiesIndexName(entityType, namespace),
     },
   });
 };
 
-export const deleteEntityIndex = ({ entityType, esClient, namespace, indexName }: Options) =>
+export const deleteEntityIndex = ({ entityType, esClient, namespace }: Options) =>
   esClient.indices.delete(
     {
-      index: indexName || getEntitiesIndexName(entityType, namespace),
+      index: getEntitiesIndexName(entityType, namespace),
     },
     {
       ignore: [404],
@@ -55,12 +48,8 @@ export const getEntityIndexStatus = async ({
   entityType,
   esClient,
   namespace,
-  indexName,
-}: Pick<
-  Options,
-  'entityType' | 'namespace' | 'esClient' | 'indexName'
->): Promise<EngineComponentStatus> => {
-  const index = indexName || getEntitiesIndexName(entityType, namespace);
+}: Pick<Options, 'entityType' | 'namespace' | 'esClient'>): Promise<EngineComponentStatus> => {
+  const index = getEntitiesIndexName(entityType, namespace);
   const exists = await esClient.indices.exists(
     {
       index,
