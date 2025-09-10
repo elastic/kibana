@@ -11,8 +11,6 @@ export class DiscoverValidation {
   constructor(private page: Page) {}
 
   async waitForDiscoverToLoad() {
-    await this.page.waitForURL('**/app/discover*');
-    
     await this.page.waitForLoadState('networkidle');
     
     await this.page.waitForSelector('[data-test-subj="unifiedHistogramRendered"]', { timeout: 60000 });

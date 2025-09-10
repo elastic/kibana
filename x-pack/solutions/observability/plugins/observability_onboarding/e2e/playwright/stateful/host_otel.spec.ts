@@ -7,7 +7,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
@@ -53,7 +52,12 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await otelHostFlowPage.clickHostsOverviewCTA();
     await hostsOverviewPage.assertCpuPercentageNotEmpty();
   } else {
-    await otelHostFlowPage.assertLogsExplorationButtonVisible();
+    await page.waitForTimeout(3 * 60000);
+    
     await otelHostFlowPage.clickLogsExplorationCTA();
+    
+    const discoverValidation = new (await import('./pom/pages/discover_validation')).DiscoverValidation(page);
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
   }
 });
