@@ -16,13 +16,23 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
   data,
   { idMap: encodedIdMap }
 ) => {
-  const { columns, rows } = transformEsqlMultiTermBreakdown(data);
+  const { columns, rows, transformed, newColumnName, originalStringColumns } =
+    transformEsqlMultiTermBreakdown(data);
   const table = { ...data, columns, rows };
 
   const isOriginalColumn = (item: OriginalColumn | undefined): item is OriginalColumn => {
     return !!item;
   };
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn[]>;
+
+  if (transformed && newColumnName) {
+    for (const originalCol of originalStringColumns) {
+      if (idMap[originalCol.id]) {
+        idMap[newColumnName] = idMap[originalCol.id];
+        delete idMap[originalCol.id];
+      }
+    }
+  }
 
   // extract all the entries once
   const idMapColEntries = Object.entries(idMap);

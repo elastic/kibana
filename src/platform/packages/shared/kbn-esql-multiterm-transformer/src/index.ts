@@ -17,6 +17,9 @@ interface EsqlMultiTermTransformInput {
 interface EsqlMultiTermTransformOutput {
   columns: DatatableColumn[];
   rows: DatatableRow[];
+  transformed: boolean;
+  newColumnName: string | null;
+  originalStringColumns: DatatableColumn[];
 }
 
 /**
@@ -32,7 +35,7 @@ export function transformEsqlMultiTermBreakdown({
   rows,
 }: EsqlMultiTermTransformInput): EsqlMultiTermTransformOutput {
   if (columns.length <= 2) {
-    return { columns, rows };
+    return { columns, rows, transformed: false, newColumnName: null, originalStringColumns: [] };
   }
 
   const dateColumns = columns.filter((c) => c.meta.type === 'date');
@@ -62,8 +65,14 @@ export function transformEsqlMultiTermBreakdown({
       },
     ];
 
-    return { columns: newColumns, rows: newRows };
+    return {
+      columns: newColumns,
+      rows: newRows,
+      transformed: true,
+      newColumnName,
+      originalStringColumns: stringColumns,
+    };
   }
 
-  return { columns, rows };
+  return { columns, rows, transformed: false, newColumnName: null, originalStringColumns: [] };
 }

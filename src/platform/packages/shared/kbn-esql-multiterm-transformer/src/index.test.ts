@@ -21,7 +21,9 @@ describe('transformEsqlMultiTermBreakdown', () => {
       rows: [{ date: 1, metric: 100 }],
     };
     const result = transformEsqlMultiTermBreakdown(datatable);
-    expect(result).toEqual(datatable);
+    expect(result.transformed).toBe(false);
+    expect(result.columns).toEqual(datatable.columns);
+    expect(result.rows).toEqual(datatable.rows);
   });
 
   it('should not transform the datatable if it does not match the shape', () => {
@@ -35,7 +37,9 @@ describe('transformEsqlMultiTermBreakdown', () => {
       rows: [{ date: 1, metric1: 100, metric2: 200 }],
     };
     const result = transformEsqlMultiTermBreakdown(datatable);
-    expect(result).toEqual(datatable);
+    expect(result.transformed).toBe(false);
+    expect(result.columns).toEqual(datatable.columns);
+    expect(result.rows).toEqual(datatable.rows);
   });
 
   it('should transform the datatable if it matches the shape', () => {
@@ -54,6 +58,12 @@ describe('transformEsqlMultiTermBreakdown', () => {
       ],
     };
     const result = transformEsqlMultiTermBreakdown(datatable);
+    expect(result.transformed).toBe(true);
+    expect(result.newColumnName).toBe('host.name > region');
+    expect(result.originalStringColumns).toEqual([
+      { id: 'host', name: 'host.name', meta: { type: 'string' } },
+      { id: 'region', name: 'region', meta: { type: 'string' } },
+    ]);
     expect(result.columns).toHaveLength(3);
     expect(result.columns[2].name).toBe('host.name > region');
     expect(result.rows).toEqual([
@@ -76,6 +86,8 @@ describe('transformEsqlMultiTermBreakdown', () => {
       rows: [{ date: 1, metric: 100, host: 'host-a', region: 'us-east-1', cloud: 'aws' }],
     };
     const result = transformEsqlMultiTermBreakdown(datatable);
+    expect(result.transformed).toBe(true);
+    expect(result.newColumnName).toBe('host.name > region > cloud.provider');
     expect(result.columns).toHaveLength(3);
     expect(result.columns[2].name).toBe('host.name > region > cloud.provider');
     expect(result.rows).toEqual([
