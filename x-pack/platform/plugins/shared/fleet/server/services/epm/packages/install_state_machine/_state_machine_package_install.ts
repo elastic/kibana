@@ -43,6 +43,7 @@ import {
   stepInstallTransforms,
   stepDeletePreviousPipelines,
   stepSaveArchiveEntries,
+  stepSaveKnowledgeBase,
   stepResolveKibanaPromise,
   stepSaveSystemObject,
   updateLatestExecutedState,
@@ -54,6 +55,7 @@ import {
   cleanupIndexTemplatePipelinesStep,
   cleanupTransformsStep,
   cleanupArchiveEntriesStep,
+  cleanupKnowledgeBaseStep,
   stepInstallKibanaAssetsWithStreaming,
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
@@ -140,6 +142,12 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   save_archive_entries_from_assets_map: {
     onPreTransition: cleanupArchiveEntriesStep,
     onTransition: stepSaveArchiveEntries,
+    nextState: INSTALL_STATES.SAVE_KNOWLEDGE_BASE,
+    onPostTransition: updateLatestExecutedState,
+  },
+  save_knowledge_base: {
+    onPreTransition: cleanupKnowledgeBaseStep,
+    onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.RESOLVE_KIBANA_PROMISE,
     onPostTransition: updateLatestExecutedState,
   },
@@ -169,6 +177,12 @@ const streamingStatesDefinition: StateMachineStates<string> = {
   save_archive_entries_from_assets_map: {
     onPreTransition: cleanupArchiveEntriesStep,
     onTransition: stepSaveArchiveEntries,
+    nextState: INSTALL_STATES.SAVE_KNOWLEDGE_BASE,
+    onPostTransition: updateLatestExecutedState,
+  },
+  save_knowledge_base: {
+    onPreTransition: cleanupKnowledgeBaseStep,
+    onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

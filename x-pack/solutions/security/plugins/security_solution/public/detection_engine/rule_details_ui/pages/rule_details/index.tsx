@@ -22,7 +22,7 @@ import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -47,7 +47,7 @@ import {
   defaultGroupTitleRenderers,
 } from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
-import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -128,8 +128,8 @@ import { RuleDetailsContextProvider } from './rule_details_context';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
+import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
@@ -549,7 +549,7 @@ export const RuleDetailsPage = connector(
     const renderGroupedAlertTable = useCallback(
       (groupingFilters: Filter[]) => {
         return (
-          <DetectionEngineAlertsTable
+          <AlertsTable
             tableType={TableId.alertsOnRuleDetailsPage}
             inputFilters={[...alertMergedFilters, ...groupingFilters]}
             onRuleChange={refreshRule}
@@ -645,7 +645,9 @@ export const RuleDetailsPage = connector(
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={oldSourcererDataViewSpec} // Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec
+              }
             />
           </FiltersGlobal>
           <RuleDetailsContextProvider>
