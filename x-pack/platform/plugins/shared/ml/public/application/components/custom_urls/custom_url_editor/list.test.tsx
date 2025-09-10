@@ -15,7 +15,7 @@ import type { CustomUrlListProps } from './list';
 import { CustomUrlList } from './list';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../contexts/kibana');
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 
 jest.mock('../../../services/toast_notification_service', () => ({
   useToastNotificationService: () => {
