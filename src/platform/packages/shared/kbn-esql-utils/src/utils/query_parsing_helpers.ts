@@ -182,12 +182,7 @@ export const getSearchQueries = (esql: string) => {
   const queryStringFunctions = ['kql', 'qstr'];
   const searchFunctions = functions.filter(({ name }) => queryStringFunctions.includes(name));
 
-  if (!searchFunctions.length) {
-    return [];
-  }
-
-  // Extract query strings from all search functions
-  const searchQueries = searchFunctions
+  return searchFunctions
     .map((func) => {
       if (func.args.length > 0 && isStringLiteral(func.args[0])) {
         return func.args[0].valueUnquoted.trim();
@@ -195,12 +190,6 @@ export const getSearchQueries = (esql: string) => {
       return '';
     })
     .filter((query) => query !== '');
-
-  if (!searchQueries.length) {
-    return [];
-  }
-
-  return searchQueries;
 };
 
 export const isQueryWrappedByPipes = (query: string): boolean => {
