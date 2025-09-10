@@ -14,6 +14,7 @@ import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_ch
 import { useRouteResolver } from './use_resolver';
 
 jest.mock('../contexts/kibana');
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 jest.mock('@kbn/ml-hooks/capabilities/use_permission_check');
 
 describe('useResolver', () => {
