@@ -15,7 +15,7 @@ import { withLicense } from '../../common/api/util/with_license';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
 
-export const registerSiemDashboardMigrationDeleteRoute = (
+export const registerSiemDashboardMigrationsDeleteRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
