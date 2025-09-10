@@ -123,7 +123,6 @@ const useTableListViewProps = (
     services: {
       application,
       history,
-      savedObjects,
       savedObjectsTagging,
       toastNotifications,
       visualizeCapabilities,
@@ -259,6 +258,7 @@ const useTableListViewProps = (
   const deleteItems = useCallback(
     async (selectedItems: object[]) => {
       await Promise.all(
+        // @ts-expect-error
         selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
       ).catch((error) => {
         toastNotifications.addError(error, {
@@ -268,6 +268,8 @@ const useTableListViewProps = (
         });
       });
     },
+    // @ts-expect-error
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [savedObjects.client, toastNotifications]
   );
 

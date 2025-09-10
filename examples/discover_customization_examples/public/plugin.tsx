@@ -9,6 +9,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+// @ts-expect-error
 import type { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
@@ -186,8 +187,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >([]);
 
           useEffect(() => {
+            // @ts-expect-error
             core.savedObjects.client
               .find<{ title: string }>({ type: 'search' })
+              // @ts-expect-error
               .then((response) => {
                 setSavedSearches(response.savedObjects);
               });
