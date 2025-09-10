@@ -13,7 +13,7 @@ import type { Field, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service';
 
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
 

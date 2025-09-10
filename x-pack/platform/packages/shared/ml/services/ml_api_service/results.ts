@@ -30,11 +30,11 @@ import type {
   GetTopInfluencersRequest,
   InfluencersByFieldResponse,
 } from '@kbn/ml-common-types/results';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
-import type { PartitionFieldsDefinition } from '../results_service_2/result_service_rx';
+import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 import type { HttpService } from '../http_service';
-import type { CriteriaField } from '../results_service';
 
 export interface CategoryDefinition {
   categoryId: number;
