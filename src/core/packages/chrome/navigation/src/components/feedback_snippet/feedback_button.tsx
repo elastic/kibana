@@ -28,6 +28,7 @@ export const FeedbackButton = ({ handleOpenSurvey }: FeedbackButtonProps) => {
 
   return (
     <EuiButtonEmpty
+      data-test-subj="sideNavFeedbackButton"
       onClick={handleOpenSurvey}
       css={css`
         margin: ${euiTheme.size.m};
