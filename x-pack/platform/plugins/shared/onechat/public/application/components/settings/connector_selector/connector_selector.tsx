@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState, useEffect } from 'react';
 
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
@@ -23,6 +23,7 @@ import { some } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useLoadConnectors } from '../../../hooks/use_load_connectors';
 import { useLoadActionTypes } from '../../../hooks/use_load_action_types';
+import { useDefaultConnector } from '../../../hooks/use_default_connector';
 import * as i18n from './translations';
 import { getActionTypeTitle, getGenAiConfig } from './helpers';
 import { AddConnectorModal } from './add_connector_modal';
@@ -77,6 +78,22 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       http,
       toasts,
     });
+
+    // Load default connector
+    const { data: defaultConnector } = useDefaultConnector();
+
+    // Auto-select default connector when no connector is selected and default connector is available
+    useEffect(() => {
+      if (!selectedConnectorId && defaultConnector && aiConnectors && onConnectorSelectionChange) {
+        // Find the corresponding connector in the loaded connectors
+        const matchingConnector = aiConnectors.find(
+          (connector) => connector.id === defaultConnector.connectorId
+        );
+        if (matchingConnector) {
+          onConnectorSelectionChange(matchingConnector);
+        }
+      }
+    }, [selectedConnectorId, defaultConnector, aiConnectors, onConnectorSelectionChange]);
 
     const addNewConnectorOption = useMemo(() => {
       return {
