@@ -10,11 +10,11 @@ import {
   SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
-  SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
-  SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
-} from '../../../telemetry/event_based/events';
-import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
-import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
+  SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_FAILURE,
+  SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_SUCCESS,
+  siemMigrationEventNames,
+  SiemMigrationsEventTypes,
+} from '../../../telemetry/event_based/events/siem_migrations';
 import { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
 export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryClient<DashboardMigrationDashboard> {
@@ -28,22 +28,23 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
         return {
           success: (migrationResult: DashboardMigrationDashboard) => {
             stats.completed++;
-            this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
+            this.reportEvent(SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_SUCCESS, {
               migrationId: this.migrationId,
               translationResult: migrationResult.translation_result || '',
               duration: Date.now() - dashboardStartTime,
               model: this.modelName,
-              prebuiltMatch: false,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSuccess],
+              eventName:
+                siemMigrationEventNames[SiemMigrationsEventTypes.DashboardTranslationSuccess],
             });
           },
           failure: (error: Error) => {
             stats.failed++;
-            this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE, {
+            this.reportEvent(SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_FAILURE, {
               migrationId: this.migrationId,
               error: error.message,
               model: this.modelName,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationFailure],
+              eventName:
+                siemMigrationEventNames[SiemMigrationsEventTypes.DashboardTranslationFailure],
             });
           },
         };
@@ -52,6 +53,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
         const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS, {
           migrationId: this.migrationId,
+          type: 'dashboards',
           model: this.modelName || '',
           completed: stats.completed,
           failed: stats.failed,
@@ -64,6 +66,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
         const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE, {
           migrationId: this.migrationId,
+          type: 'dashboards',
           model: this.modelName || '',
           completed: stats.completed,
           failed: stats.failed,
@@ -77,6 +80,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
         const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_ABORTED, {
           migrationId: this.migrationId,
+          type: 'dashboards',
           model: this.modelName || '',
           completed: stats.completed,
           failed: stats.failed,
