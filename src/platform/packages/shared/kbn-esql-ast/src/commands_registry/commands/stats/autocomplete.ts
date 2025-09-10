@@ -108,7 +108,14 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
-          ...(!isNewMultipleExpression ? [byCompleteItem] : []),
+          ...(!isNewMultipleExpression
+            ? [
+                {
+                  ...byCompleteItem,
+                  sortText: 'D',
+                },
+              ]
+            : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
         ],
         afterCompleteSuggestions: [
