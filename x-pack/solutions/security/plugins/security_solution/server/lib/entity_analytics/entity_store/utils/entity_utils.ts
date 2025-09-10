@@ -120,9 +120,7 @@ export const getEntityUpdatesIndexPatterns = (
   space: string,
   onlyForType?: EntityTypeOpenAPI
 ): string[] => {
-  const types = Object.values(EntityTypeOpenAPI.enum).filter(
-    (type) => !onlyForType || type === onlyForType
-  );
+  const types = onlyForType ? [onlyForType] : Object.values(EntityTypeOpenAPI.enum);
   const patterns = [];
   for (let i = 0; i < types.length; i++) {
     patterns.push(getEntityUpdatesIndexName(types[i], space));
