@@ -67,7 +67,7 @@ export const command = {
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
-    const runRuler = args.getBooleanValue('ruler') ?? true;
+    const runRuler = !IS_CI && (args.getBooleanValue('ruler') ?? true);
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
