@@ -69,7 +69,7 @@ export const registerSiemDashboardMigrationsResourceGetRoute = (
             } catch (error) {
               logger.error(error);
               await siemMigrationAuditLogger.logGetResources({ migrationId, error });
-              return res.badRequest({ body: error.message });
+              return res.customError({ statusCode: 500, body: error.message });
             }
           }
         )

@@ -26,7 +26,7 @@ export const processLookups = async (
       try {
         lookupsData[resource.name] = { ...resource, data: parseContent(resource.content) };
       } catch (error) {
-        throw new Error(`Invalid content for lookup ${name}: ${error.message}`);
+        throw new Error(`Invalid content for lookup ${resource.name}: ${error.message}`);
       }
     }
   });
