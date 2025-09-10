@@ -7,18 +7,18 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import {
+import type {
   ActionExecutionContext,
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import type { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
@@ -48,25 +48,22 @@ function getLayerReferenceName(layerId: string) {
 }
 
 export function extractReferences({ layers }: FormBasedPrivateState) {
-  const savedObjectReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
   const persistableState: FormBasedPersistedState = {
     layers: {},
   };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
     persistableState.layers[layerId] = persistableLayer;
-    savedObjectReferences.push({
+    references.push({
       type: 'index-pattern',
       id: indexPatternId,
       name: getLayerReferenceName(layerId),
     });
   });
-  return { savedObjectReferences, state: persistableState };
+  return { references, state: persistableState };
 }
 
-export function injectReferences(
-  state: FormBasedPersistedState,
-  references: SavedObjectReference[]
-) {
+export function injectReferences(state: FormBasedPersistedState, references: Reference[]) {
   const layers: Record<string, FormBasedLayer> = {};
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     const indexPatternId = references.find(
@@ -90,7 +87,7 @@ function createStateFromPersisted({
   references,
 }: {
   persistedState?: FormBasedPersistedState;
-  references?: SavedObjectReference[];
+  references?: Reference[];
 }) {
   return persistedState && references ? injectReferences(persistedState, references) : undefined;
 }
@@ -144,7 +141,7 @@ export function loadInitialState({
   indexPatterns = {},
 }: {
   persistedState?: FormBasedPersistedState;
-  references?: SavedObjectReference[];
+  references?: Reference[];
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;

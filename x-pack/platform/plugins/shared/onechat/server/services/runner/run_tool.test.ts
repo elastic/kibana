@@ -5,38 +5,43 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
+import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
-  CreateScopedRunnerDepsMock,
-  MockedTool,
+  createToolRegistryMock,
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
+  let registry: ToolRegistryMock;
   let tool: MockedTool;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
 
+    registry = createToolRegistryMock();
     const {
-      toolsService: { registry },
+      toolsService: { getRegistry },
     } = runnerDeps;
+    getRegistry.mockResolvedValue(registry);
 
-    tool = createMockedTool({});
+    tool = createMockedTool({
+      schema: z.object({
+        foo: z.string(),
+      }),
+    });
     registry.get.mockResolvedValue(tool);
   });
 
   it('calls the tool registry with the expected parameters', async () => {
-    const {
-      toolsService: { registry },
-    } = runnerDeps;
-
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
       toolParams: { foo: 'bar' },
@@ -48,10 +53,28 @@ describe('runTool', () => {
     });
 
     expect(registry.get).toHaveBeenCalledTimes(1);
-    expect(registry.get).toHaveBeenCalledWith({
-      toolId: params.toolId,
-      request: runnerDeps.request,
+    expect(registry.get).toHaveBeenCalledWith(params.toolId);
+  });
+
+  it('throws if the tool parameters do not match the schema', async () => {
+    tool = createMockedTool({
+      schema: z.object({
+        bar: z.string(),
+      }),
     });
+    registry.get.mockResolvedValue(tool);
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await expect(
+      runTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      })
+    ).rejects.toThrowError(/Tool test-tool was called with invalid parameters/);
   });
 
   it('calls the tool handler with the expected parameters', async () => {
@@ -69,33 +92,53 @@ describe('runTool', () => {
     expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
   });
 
-  it('returns the expected value', async () => {
+  it('truncates the parameters not defined on the schema', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: { foo: 'bar', extra: true },
     };
 
-    tool.handler.mockReturnValue({ test: true, over: 9000 });
-
-    const result = await runTool({
+    await runTool({
       toolExecutionParams: params,
       parentManager: runnerManager,
     });
 
-    expect(result).toEqual({
-      runId: expect.any(String),
-      result: { test: true, over: 9000 },
+    expect(tool.handler).toHaveBeenCalledTimes(1);
+    expect(tool.handler).toHaveBeenCalledWith({ foo: 'bar' }, expect.any(Object));
+  });
+
+  it('returns the expected value', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: {
+        foo: 'bar',
+      },
+    };
+
+    tool.handler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
+    });
+
+    const results = await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(results).toEqual({
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
   });
 
   it('exposes a context with the expected shape to the tool handler', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
     };
 
-    tool.handler.mockImplementation((toolParams, context) => {
-      return 'foo';
+    tool.handler.mockImplementation(() => {
+      return { results: [{ type: ToolResultType.other, data: { value: 42 } }] };
     });
 
     await runTool({
@@ -121,18 +164,17 @@ describe('runTool', () => {
 
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
       onEvent: (event) => {
         emittedEvents.push(event);
       },
     };
 
     tool.handler.mockImplementation((toolParams, { events }) => {
-      events.emit({
-        type: 'test-event',
-        data: { foo: 'bar' },
-      });
-      return 42;
+      events.reportProgress('some progress');
+      return { results: [{ type: ToolResultType.other, data: { foo: 'bar' } }] };
     });
 
     await runTool({
@@ -142,9 +184,9 @@ describe('runTool', () => {
 
     expect(emittedEvents).toHaveLength(1);
     expect(emittedEvents[0]).toEqual({
-      type: 'test-event',
+      type: 'tool_progress',
       data: {
-        foo: 'bar',
+        message: 'some progress',
       },
     });
   });

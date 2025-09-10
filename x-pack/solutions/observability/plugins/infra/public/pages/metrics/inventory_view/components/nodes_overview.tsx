@@ -10,7 +10,9 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
   InfraWaffleMapBounds,
   InfraWaffleMapOptions,
@@ -25,6 +27,7 @@ import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
+import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -37,7 +40,7 @@ interface Props {
   nodes: SnapshotNode[];
   loading: boolean;
   reload: () => void;
-  onDrilldown: (filter: KueryFilterQuery) => void;
+  onDrilldown: (filter: string) => void;
   currentTime: number;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
@@ -67,8 +70,14 @@ export const NodesOverview = ({
   isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const [{ detailsItemId, assetType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+  const { preferredSchema } = useWaffleOptionsContext();
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata?.schemas]
+  );
 
   const nodeName = useMemo(
     () => nodes.find((node) => node.path[0].value === detailsItemId)?.name,
@@ -79,23 +88,33 @@ export const NodesOverview = ({
     () =>
       setFlyoutUrlState({
         detailsItemId: null,
-        assetType: null,
+        entityType: null,
       }),
     [setFlyoutUrlState]
   );
 
   const handleDrilldown = useCallback(
     (filter: string) => {
-      onDrilldown({
-        kind: 'kuery',
-        expression: filter,
-      });
+      onDrilldown(filter);
       return;
     },
     [onDrilldown]
   );
 
   const noData = !loading && nodes && nodes.length === 0;
+
+  const hasDataOnAnotherSchema = schemas.length === 1 && preferredSchema !== schemas[0];
+  const refetchProps = hasDataOnAnotherSchema
+    ? {}
+    : {
+        refetchText: i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+          defaultMessage: 'Check for new data',
+        }),
+        onRefetch: () => {
+          reload();
+        },
+      };
+
   if (loading && showLoading) {
     // Don't show loading screen when we're auto-reloading
     return (
@@ -113,15 +132,16 @@ export const NodesOverview = ({
         titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
           defaultMessage: 'There is no data to display.',
         })}
-        bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
-          defaultMessage: 'Try adjusting your time or filter.',
-        })}
-        refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-          defaultMessage: 'Check for new data',
-        })}
-        onRefetch={() => {
-          reload();
-        }}
+        bodyText={
+          hasDataOnAnotherSchema ? (
+            <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
+          ) : (
+            i18n.translate('xpack.infra.waffle.noDataDescription', {
+              defaultMessage: 'Try adjusting your time or filter.',
+            })
+          )
+        }
+        {...refetchProps}
         testString="noMetricsDataPrompt"
       />
     );
@@ -145,11 +165,11 @@ export const NodesOverview = ({
           currentTime={currentTime}
           onFilter={handleDrilldown}
         />
-        {nodeType === assetType && detailsItemId && (
+        {nodeType === entityType && detailsItemId && (
           <AssetDetailsFlyout
-            assetId={detailsItemId}
-            assetName={nodeName}
-            assetType={nodeType}
+            entityId={detailsItemId}
+            entityName={nodeName}
+            entityType={nodeType}
             closeFlyout={closeFlyout}
             currentTime={currentTime}
             isAutoReloading={isAutoReloading}
@@ -174,11 +194,11 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
-      {nodeType === assetType && detailsItemId && (
+      {nodeType === entityType && detailsItemId && (
         <AssetDetailsFlyout
-          assetId={detailsItemId}
-          assetName={nodeName}
-          assetType={nodeType}
+          entityId={detailsItemId}
+          entityName={nodeName}
+          entityType={nodeType}
           closeFlyout={closeFlyout}
           currentTime={currentTime}
           isAutoReloading={isAutoReloading}

@@ -8,8 +8,10 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
-import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   CONSUMER_SELECT_TITLE,
   FEATURE_NAME_MAP,
@@ -98,8 +100,10 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
       isInvalid={!!baseErrors?.consumer?.length}
       error={baseErrors?.consumer}
       data-test-subj="ruleConsumerSelection"
+      aria-label={CONSUMER_SELECT_TITLE}
     >
       <EuiComboBox
+        isInvalid={!!baseErrors?.consumer?.length}
         fullWidth
         data-test-subj="ruleConsumerSelectionInput"
         aria-label={CONSUMER_SELECT_COMBO_BOX_TITLE}

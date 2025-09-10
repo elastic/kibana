@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { useFindProximalAlerts } from './hooks/use_find_proximal_alerts';
-import { AlertData } from '../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 
 interface Props {
   alertDetail: AlertData;
@@ -30,7 +30,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
     <EuiCallOut>
       {i18n.translate('xpack.observability.alertDetails.proximalAlert.description', {
         defaultMessage:
-          '{count, plural, one {# alert was} other {# alerts were}} created around the same time.',
+          '{count, plural, one {# alert was} other {# alerts were}} triggered around the same time.',
         values: {
           count,
         },

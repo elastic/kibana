@@ -95,7 +95,7 @@ describe('Ingest pipeline locator', () => {
 
       expect(location).toMatchObject({
         app: 'management',
-        path: '/ingest/ingest_pipelines/create',
+        path: '/ingest/ingest_pipelines/create?name=pipeline_name',
       });
     });
   });

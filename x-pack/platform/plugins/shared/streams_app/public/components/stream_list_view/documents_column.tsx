@@ -30,6 +30,8 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
+import { getFormattedError } from '../../util/errors';
 
 export function DocumentsColumn({
   indexPattern,
@@ -38,51 +40,9 @@ export function DocumentsColumn({
   indexPattern: string;
   numDataPoints: number;
 }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
-
-  const LoadingPlaceholder: React.FC = React.useCallback(
-    () => (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="flexEnd"
-        gutterSize="m"
-        className={css`
-          height: ${euiTheme.size.xl};
-          white-space: nowrap;
-          padding-right: ${euiTheme.size.xl};
-        `}
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem
-            className={css`
-              text-align: center;
-            `}
-          >
-            -
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            className={css`
-              display: flex;
-              padding-right: ${euiTheme.size.xl};
-              justify-content: center;
-            `}
-          >
-            <EuiLoadingChart size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    ),
-    [euiTheme]
-  );
 
   const { timeState } = useTimefilter();
 
@@ -105,6 +65,7 @@ export function DocumentsColumn({
     [streamsRepositoryClient, indexPattern, minInterval],
     {
       withTimeRange: true,
+      disableToastOnError: true,
     }
   );
 
@@ -130,6 +91,30 @@ export function DocumentsColumn({
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
+  const noDocCountData = histogramQueryFetch.error ? '' : '-';
+
+  const noHistogramData = histogramQueryFetch.error ? (
+    <TooltipOrPopoverIcon
+      dataTestSubj="streamsDocCount-error"
+      icon="warning"
+      title={getFormattedError(histogramQueryFetch.error).message}
+      mode="popover"
+      iconColor="danger"
+    />
+  ) : (
+    <EuiIcon type="visLine" size="m" />
+  );
+
+  const cellAriaLabel = hasData
+    ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
+        defaultMessage: '{docCount} documents in {indexPattern}',
+        values: { docCount, indexPattern },
+      })
+    : i18n.translate('xpack.streams.documentsColumn.cellNoDataLabel', {
+        defaultMessage: 'No documents found in {indexPattern}',
+        values: { indexPattern },
+      });
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -138,6 +123,8 @@ export function DocumentsColumn({
         height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
+      role="group"
+      aria-label={cellAriaLabel}
     >
       {histogramQueryFetch.loading ? (
         <LoadingPlaceholder />
@@ -145,20 +132,17 @@ export function DocumentsColumn({
         <>
           <EuiFlexItem
             grow={2}
+            aria-hidden="true"
             className={css`
               text-align: right;
+              font-family: 'Roboto mono', sans-serif;
             `}
           >
-            {hasData ? (
-              <EuiI18nNumber value={docCount} />
-            ) : (
-              i18n.translate('xpack.streams.documentsColumn.noDataLabel', {
-                defaultMessage: 'N/A',
-              })
-            )}
+            {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
+            aria-hidden="true"
             className={css`
               border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;
@@ -192,7 +176,7 @@ export function DocumentsColumn({
                 ))}
               </Chart>
             ) : (
-              <EuiIcon type="visLine" size="m" />
+              noHistogramData
             )}
           </EuiFlexItem>
         </>
@@ -200,3 +184,39 @@ export function DocumentsColumn({
     </EuiFlexGroup>
   );
 }
+
+const LoadingPlaceholder = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
+      gutterSize="m"
+      className={css`
+        height: ${euiTheme.size.xl};
+        white-space: nowrap;
+        padding-right: ${euiTheme.size.xl};
+      `}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem
+          className={css`
+            text-align: center;
+          `}
+        >
+          -
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          className={css`
+            display: flex;
+            padding-right: ${euiTheme.size.xl};
+            justify-content: center;
+          `}
+        >
+          <EuiLoadingChart size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  );
+};

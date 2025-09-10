@@ -8,12 +8,8 @@
  */
 
 export type {
-  ControlGroupChainingSystem,
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
-  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
 } from './types';
-
-export { CONTROL_GROUP_TYPE } from './types';

@@ -19,7 +19,7 @@ import {
 } from '@kbn/test';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ScoutServerConfig } from '../../types';
+import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
@@ -168,6 +168,8 @@ export const defaultConfig: ScoutServerConfig = {
       // configure security reponse header report-to settings to mimic MKI configuration
       `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
+      // Allow dynamic config overrides in tests
+      `--coreApp.allowDynamicConfigOverrides=true`,
     ],
   },
 };

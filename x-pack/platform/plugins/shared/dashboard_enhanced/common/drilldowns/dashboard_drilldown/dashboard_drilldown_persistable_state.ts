@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
-import { DashboardDrilldownConfig } from './types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import type { DashboardDrilldownConfig } from './types';
 
 type DashboardDrilldownPersistableState = PersistableStateService<SerializedEvent>;
 

@@ -58,14 +58,14 @@ describe('createPlaywrightConfig', () => {
     expect(config.globalSetup).toBeUndefined();
     expect(config.globalTeardown).toBeUndefined();
     expect(config.reporter).toEqual([
-      ['html', { open: 'never', outputFolder: './output/reports' }],
-      ['json', { outputFile: './output/reports/test-results.json' }],
+      ['html', { open: 'never', outputFolder: './.scout/reports' }],
+      ['json', { outputFile: './.scout/reports/test-results.json' }],
       ['null'],
       ['null'],
     ]);
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);
-    expect(config.outputDir).toBe('./output/test-artifacts');
+    expect(config.outputDir).toBe('./.scout/test-artifacts');
     expect(config.projects).toHaveLength(3);
     expect(config.projects![0].name).toEqual('local');
   });
@@ -86,8 +86,8 @@ describe('createPlaywrightConfig', () => {
 
     expect(mockGenerateTestRunId).toHaveBeenCalledTimes(1);
     expect(config.reporter).toEqual([
-      ['html', { open: 'never', outputFolder: './output/reports' }],
-      ['json', { outputFile: './output/reports/test-results.json' }],
+      ['html', { open: 'never', outputFolder: './.scout/reports' }],
+      ['json', { outputFile: './.scout/reports/test-results.json' }],
       [
         '@kbn/scout-reporting/src/reporting/playwright/events',
         { name: 'scout-playwright', runId: mockedRunId },

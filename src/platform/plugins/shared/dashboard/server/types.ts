@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
@@ -20,7 +20,7 @@ export interface DashboardPluginStart {
    * ```ts
    * // dashboardClient is scoped to the current user
    * // specifying the version is recommended to return a consistent result
-   * const dashboardClient = plugins.dashboard.getContentClient().getForRequest({ requestHandlerContext, request, version: 3 });
+   * const dashboardClient = plugins.dashboard.getContentClient().getForRequest({ requestHandlerContext, request, version: 1 });
    * ```
    *
    * @example

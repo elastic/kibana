@@ -9,8 +9,8 @@
 
 import { buildRangeFilter } from '@kbn/es-query';
 import { CidrMask } from '../lib/cidr_mask';
-import { IBucketAggConfig } from '../bucket_agg_type';
-import { IpPrefixKey } from '../lib/ip_prefix';
+import type { IBucketAggConfig } from '../bucket_agg_type';
+import type { IpPrefixKey } from '../lib/ip_prefix';
 
 export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, key: IpPrefixKey) => {
   let ipAddress = key.address;

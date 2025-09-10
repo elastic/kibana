@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '..';
-import { ScoutLogger } from '../../common';
-import { ScoutTestConfig } from '../../types';
+import type { ScoutPage } from '..';
+import type { ScoutLogger } from '../../common';
+import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';

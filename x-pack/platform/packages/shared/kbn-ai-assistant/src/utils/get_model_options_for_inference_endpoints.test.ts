@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import type { ModelOptionsData } from './get_model_options_for_inference_endpoints';
 import {
   e5SmallDescription,
   e5SmallTitle,
   elserDescription,
   elserTitle,
   getModelOptionsForInferenceEndpoints,
-  ModelOptionsData,
 } from './get_model_options_for_inference_endpoints';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
-  E5_LARGE_IN_EIS_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 describe('getModelOptionsForInferenceEndpoints', () => {
@@ -46,25 +45,10 @@ describe('getModelOptionsForInferenceEndpoints', () => {
     ]);
   });
 
-  it('shows only ELSER in EIS when both ELSER models are available', () => {
-    const endpoints = [
-      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
-      { inference_id: ELSER_IN_EIS_INFERENCE_ID },
-      { inference_id: E5_SMALL_INFERENCE_ID },
-    ] as InferenceAPIConfigResponse[];
-
-    const options = getModelOptionsForInferenceEndpoints({
-      endpoints,
-    });
-
-    expect(options.map((o) => o.key)).toEqual([ELSER_IN_EIS_INFERENCE_ID, E5_SMALL_INFERENCE_ID]);
-  });
-
-  it('shows only E5-large in EIS when both E5 (small and large) models are available', () => {
+  it('does not show any EIS models if EIS pre-configured endpoints are not available', () => {
     const endpoints = [
       { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
-      { inference_id: E5_LARGE_IN_EIS_INFERENCE_ID },
     ] as InferenceAPIConfigResponse[];
 
     const options = getModelOptionsForInferenceEndpoints({
@@ -73,30 +57,13 @@ describe('getModelOptionsForInferenceEndpoints', () => {
 
     expect(options.map((o) => o.key)).toEqual([
       ELSER_ON_ML_NODE_INFERENCE_ID,
-      E5_LARGE_IN_EIS_INFERENCE_ID,
+      E5_SMALL_INFERENCE_ID,
     ]);
   });
 
-  it('shows only EIS models when both ELSER and E5-large pre-configured endpoints are available in EIS', () => {
+  it('does not show any EIS models even if EIS pre-configured endpoints are available', () => {
     const endpoints = [
-      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: ELSER_IN_EIS_INFERENCE_ID },
-      { inference_id: E5_SMALL_INFERENCE_ID },
-      { inference_id: E5_LARGE_IN_EIS_INFERENCE_ID },
-    ] as InferenceAPIConfigResponse[];
-
-    const options = getModelOptionsForInferenceEndpoints({
-      endpoints,
-    });
-
-    expect(options.map((o) => o.key)).toEqual([
-      ELSER_IN_EIS_INFERENCE_ID,
-      E5_LARGE_IN_EIS_INFERENCE_ID,
-    ]);
-  });
-
-  it('does not show any EIS models if EIS pre-configured endpoints are not available', () => {
-    const endpoints = [
       { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
     ] as InferenceAPIConfigResponse[];

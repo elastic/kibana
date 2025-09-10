@@ -16,6 +16,7 @@ import { produce } from 'immer';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -217,20 +218,25 @@ jest.mock('./secrets', () => ({
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
-const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
+const mockAgentPolicyGet = (spaceIds: string[] = ['default'], additionalProps?: any) => {
+  const basePolicy = {
+    name: 'Test Agent Policy',
+    namespace: 'test',
+    status: 'active',
+    is_managed: false,
+    updated_at: new Date().toISOString(),
+    updated_by: 'test',
+    revision: 1,
+    is_protected: false,
+    space_ids: spaceIds,
+    ...additionalProps,
+  };
+
   mockAgentPolicyService.get.mockImplementation(
     (_soClient: SavedObjectsClientContract, id: string, _force = false, _options) => {
       return Promise.resolve({
         id,
-        name: 'Test Agent Policy',
-        namespace: 'test',
-        status: 'active',
-        is_managed: false,
-        updated_at: new Date().toISOString(),
-        updated_by: 'test',
-        revision: 1,
-        is_protected: false,
-        space_ids: spaceIds,
+        ...basePolicy,
       });
     }
   );
@@ -240,15 +246,7 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
       return Promise.resolve(
         ids.map((id) => ({
           id,
-          name: 'Test Agent Policy',
-          namespace: 'test',
-          status: 'active',
-          is_managed: false,
-          updated_at: new Date().toISOString(),
-          updated_by: 'test',
-          revision: 1,
-          is_protected: false,
-          space_ids: spaceIds,
+          ...basePolicy,
         }))
       );
     }
@@ -352,6 +350,48 @@ describe('Package policy service', () => {
       ).rejects.toThrowError(
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
+    });
+
+    it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      // Mock an agentless agent policy
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [
+              {
+                type: 'tcp', // tcp input is in the blocklist for agentless
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
     });
   });
 
@@ -2143,6 +2183,55 @@ describe('Package policy service', () => {
           expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
           expect(call[3]).toMatchObject({ removeProtection: false });
         });
+      });
+
+      it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Mock existing package policy
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'test',
+              type: 'abcd',
+              references: [],
+              version: 'test',
+              attributes: createPackagePolicyMock(),
+            },
+          ],
+        });
+
+        // Mock agentless agent policy
+        mockAgentPolicyGet(undefined, { supports_agentless: true });
+
+        await expect(
+          packagePolicyService.update(
+            savedObjectsClient,
+            elasticsearchClient,
+            'the-package-policy-id',
+            {
+              name: 'test-policy',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'test',
+              policy_ids: ['test'],
+              inputs: [
+                {
+                  type: 'tcp', // tcp input is in the blocklist for agentless
+                  enabled: true,
+                  streams: [],
+                },
+              ],
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+            }
+          )
+        ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
       });
     });
   });
@@ -5561,67 +5650,6 @@ describe('Package policy service', () => {
       });
     });
 
-    it('should disable inputs if supports_agentless == true if inputs are not allowed', async () => {
-      const newPolicy = {
-        name: 'apache-1',
-        inputs: [
-          { type: 'logfile', enabled: false },
-          { type: 'tcp', enabled: true },
-        ],
-        package: { name: 'apache', version: '0.3.3' },
-        policy_id: '1',
-        policy_ids: ['1'],
-        supports_agentless: true,
-      } as NewPackagePolicy;
-      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        createSavedObjectClientMock(),
-        newPolicy
-      );
-      expect(result).toEqual({
-        name: 'apache-1',
-        namespace: '',
-        description: '',
-        output_id: undefined,
-        package: {
-          name: 'apache',
-          title: 'Apache',
-          version: '1.0.0',
-          experimental_data_stream_features: undefined,
-        },
-        enabled: true,
-        policy_id: '1',
-        policy_ids: ['1'],
-        supports_agentless: true,
-        inputs: [
-          {
-            enabled: false,
-            type: 'logfile',
-            policy_template: 'log',
-            streams: [
-              {
-                enabled: false,
-                data_stream: {
-                  type: 'logs',
-                  dataset: 'apache.access',
-                },
-              },
-            ],
-          },
-          {
-            enabled: false,
-            type: 'tcp',
-            streams: undefined,
-          },
-        ],
-        vars: {
-          paths: {
-            value: ['/var/log/apache2/access.log*'],
-            type: 'text',
-          },
-        },
-      });
-    });
-
     it('should enrich from epm with defaults using policy template', async () => {
       (packageToPackagePolicy as jest.Mock).mockReturnValueOnce({
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
@@ -5804,7 +5832,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: undefined,
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
         })
       );
     });
@@ -5824,7 +5852,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: 'one=two',
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
         })
       );
     });
@@ -5878,7 +5906,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: undefined,
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
         })
       );
     });
@@ -5896,7 +5924,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: undefined,
+          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
         })
       );
     });
@@ -5917,7 +5945,7 @@ describe('Package policy service', () => {
           perPage: 12,
           sortField: 'updated_by',
           sortOrder: 'desc',
-          filter: 'one=two',
+          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
         })
       );
     });
@@ -5964,6 +5992,19 @@ describe('Package policy service', () => {
 
         return Promise.resolve({ saved_objects: [] });
       });
+
+      soClient.get.mockResolvedValue({
+        id: 'package-policy-1',
+        attributes: {
+          name: 'policy1',
+          enabled: true,
+          policy_ids: ['agent-policy-1'],
+          output_id: 'output-id-123',
+          inputs: [],
+          package: { name: 'test-package', version: '1.0.0' },
+        },
+      } as any);
+
       appContextService.start(
         createAppContextStartContractMock(undefined, false, {
           internal: soClient,
@@ -5985,11 +6026,616 @@ describe('Package policy service', () => {
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],
+          package: { name: 'test-package', version: '1.0.0' },
         },
         {
           force: undefined,
         }
       );
+    });
+  });
+
+  describe('Package policy rollback', () => {
+    const mockSoClient = createSavedObjectClientMock();
+    const id = 'test-package-policy';
+    const mockPackagePolicySO: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'default',
+          policy_id: '12345',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.3.2' },
+          revision: 3,
+          latest_revision: true,
+          created_at: '2025-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2025-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}:prev`,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'default',
+          policy_id: '12345',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.2.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-myspace`,
+        namespaces: ['myspace'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'myspace',
+          policy_id: '6789',
+          policy_ids: ['6789'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.3.2' },
+          revision: 3,
+          latest_revision: true,
+          created_at: '2025-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2025-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-myspace:prev`,
+        namespaces: ['myspace'],
+        attributes: {
+          name: 'system-1',
+          description: '',
+          namespace: 'myspace',
+          policy_id: '6789',
+          policy_ids: ['6789'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.2.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+    ];
+    const mockRollbackResult = {
+      updatedPolicies: {
+        default: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id,
+            namespaces: ['default'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'default',
+              policy_id: '12345',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 4,
+              latest_revision: true,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+        myspace: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}-myspace`,
+            namespaces: ['myspace'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'myspace',
+              policy_id: '6789',
+              policy_ids: ['6789'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 4,
+              latest_revision: true,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      copiedPolicies: {
+        default: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}:copy`,
+            namespaces: ['default'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'default',
+              policy_id: '12345',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.3.2' },
+              revision: 3,
+              latest_revision: true,
+              created_at: '2025-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2025-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+        myspace: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}-myspace:copy`,
+            namespaces: ['myspace'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'myspace',
+              policy_id: '6789',
+              policy_ids: ['6789'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.3.2' },
+              revision: 3,
+              latest_revision: true,
+              created_at: '2025-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2025-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+      previousVersionPolicies: {
+        default: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}:prev`,
+            namespaces: ['default'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'default',
+              policy_id: '12345',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 1,
+              latest_revision: false,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+        myspace: [
+          {
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: `${id}-myspace:prev`,
+            namespaces: ['myspace'],
+            attributes: {
+              name: 'system-1',
+              description: '',
+              namespace: 'myspace',
+              policy_id: '6789',
+              policy_ids: ['6789'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'system', title: 'System', version: '2.2.0' },
+              revision: 1,
+              latest_revision: false,
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      },
+    };
+
+    describe('rollback', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should create temporary saved objects to back up package policies before updating them', async () => {
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        expect(mockSoClient.bulkCreate).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}:copy`,
+              namespaces: ['default'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'default',
+                policy_id: '12345',
+                policy_ids: ['12345'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+          action: 'create',
+          id: `${id}:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkCreate).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}-myspace:copy`,
+              namespaces: ['myspace'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'myspace',
+                policy_id: '6789',
+                policy_ids: ['6789'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+          action: 'create',
+          id: `${id}-myspace:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should update package policies', async () => {
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id,
+              namespaces: ['default'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'default',
+                policy_id: '12345',
+                policy_ids: ['12345'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.2.0' },
+                revision: 4,
+                latest_revision: true,
+                created_at: '2024-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2024-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(3, {
+          action: 'update',
+          id,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}-myspace`,
+              namespaces: ['myspace'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'myspace',
+                policy_id: '6789',
+                policy_ids: ['6789'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.2.0' },
+                revision: 4,
+                latest_revision: true,
+                created_at: '2024-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2024-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(4, {
+          action: 'update',
+          id: `${id}-myspace`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should return the updated and backed up package policies, and the old previous revisions', async () => {
+        const rollbackResult = await packagePolicyService.rollback(
+          mockSoClient,
+          mockPackagePolicySO
+        );
+        expect(rollbackResult).toStrictEqual(mockRollbackResult);
+      });
+    });
+
+    describe('restoreRollback', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockSoClient.bulkDelete.mockResolvedValue({
+          statuses: [{ id, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true }],
+        });
+      });
+
+      it('should update package policies to their status before rollback', async () => {
+        await packagePolicyService.restoreRollback(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id,
+              namespaces: ['default'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'default',
+                policy_id: '12345',
+                policy_ids: ['12345'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+          action: 'update',
+          id,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              id: `${id}-myspace`,
+              namespaces: ['myspace'],
+              attributes: {
+                name: 'system-1',
+                description: '',
+                namespace: 'myspace',
+                policy_id: '6789',
+                policy_ids: ['6789'],
+                enabled: true,
+                inputs: [],
+                package: { name: 'system', title: 'System', version: '2.3.2' },
+                revision: 3,
+                latest_revision: true,
+                created_at: '2025-12-22T21:28:05.380Z',
+                created_by: 'elastic',
+                updated_at: '2025-12-22T21:28:05.380Z',
+                updated_by: 'elastic',
+              },
+              references: [],
+              score: 0,
+            },
+          ],
+          { namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(3, {
+          action: 'update',
+          id: `${id}-myspace`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should delete the temporary package policy copies', async () => {
+        await packagePolicyService.restoreRollback(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              id: `${id}:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+          action: 'delete',
+          id: `${id}:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              id: `${id}-myspace:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(4, {
+          action: 'delete',
+          id: `${id}-myspace:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+    });
+
+    describe('cleanupRollbackSavedObjects', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should delete the temporary package policy copies', async () => {
+        await packagePolicyService.cleanupRollbackSavedObjects(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          1,
+          [
+            {
+              id: `${id}:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+          action: 'delete',
+          id: `${id}:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          2,
+          [
+            {
+              id: `${id}-myspace:copy`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+          action: 'delete',
+          id: `${id}-myspace:copy`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should delete the package policy previous revisions', async () => {
+        await packagePolicyService.cleanupRollbackSavedObjects(mockSoClient, mockRollbackResult);
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          3,
+          [
+            {
+              id: `${id}:prev`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'default' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(3, {
+          action: 'delete',
+          id: `${id}:prev`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(mockSoClient.bulkDelete).toHaveBeenNthCalledWith(
+          4,
+          [
+            {
+              id: `${id}-myspace:prev`,
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+          { force: true, namespace: 'myspace' }
+        );
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(4, {
+          action: 'delete',
+          id: `${id}-myspace:prev`,
+          savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
     });
   });
 });

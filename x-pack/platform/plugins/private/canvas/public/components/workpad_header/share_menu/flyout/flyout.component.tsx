@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -20,6 +21,7 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +30,7 @@ import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/typ
 import { useDownloadRenderedWorkpad } from '../../../hooks';
 import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
-import { OnCloseFn } from '../share_menu.component';
+import type { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
@@ -184,12 +186,14 @@ export const ShareWebsiteFlyout: FC<Props> = ({
     ];
   }
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={() => onClose('share')} maxWidth>
+    <EuiFlyout onClose={() => onClose('share')} maxWidth aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <EuiFlexGroup alignItems="center">
-            <h2 id="flyoutTitle">
+            <h2 id={flyoutTitleId}>
               <EuiFlexItem grow={false}>{strings.getTitle()}</EuiFlexItem>
             </h2>
             <EuiFlexItem grow={false}>

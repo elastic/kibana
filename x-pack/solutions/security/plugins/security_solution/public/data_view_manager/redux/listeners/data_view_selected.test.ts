@@ -40,6 +40,10 @@ const mockedState: RootState = {
       dataViewId: null,
       status: 'pristine',
     },
+    explore: {
+      dataViewId: null,
+      status: 'pristine',
+    },
     shared: {
       adhocDataViews: [
         {
@@ -158,30 +162,6 @@ describe('createDataViewSelectedListener', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: 'adhoc_test-*',
-      })
-    );
-  });
-
-  it('should dispatch an error if both fetching and creation fail', async () => {
-    jest
-      .mocked(mockDataViewsService)
-      .getDataViewLazy.mockRejectedValueOnce(new Error('some random get data view failure'));
-
-    jest
-      .mocked(mockDataViewsService)
-      .create.mockRejectedValueOnce(new Error('some random create data view failure'));
-
-    await listener.effect(
-      selectDataViewAsync({
-        fallbackPatterns: ['test-*'],
-        scope: DataViewManagerScopeName.default,
-      }),
-      mockListenerApi
-    );
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'x-pack/security_solution/dataViewManager/default/dataViewSelectionError',
       })
     );
   });

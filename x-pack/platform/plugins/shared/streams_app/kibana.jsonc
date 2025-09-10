@@ -25,9 +25,12 @@
       "savedObjectsTagging",
       "share",
       "streams",
-      "unifiedSearch"
+      "unifiedSearch",
+      "unifiedDocViewer",
+      "dashboard",
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],
+    "extraPublicDirs": ["common"]
   }
 }

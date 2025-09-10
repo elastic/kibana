@@ -7,7 +7,11 @@
 
 import { Frequency } from '@kbn/rrule';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { BaseParamsV2, ReportApiJSON, ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type {
+  BaseParamsV2,
+  ReportApiJSON,
+  ScheduledReportApiJSON,
+} from '@kbn/reporting-common/types';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({

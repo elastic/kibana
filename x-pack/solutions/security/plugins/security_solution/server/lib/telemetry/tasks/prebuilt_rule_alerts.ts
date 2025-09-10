@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
+import { TELEMETRY_CHANNEL_DETECTION_ALERTS, DETECTION_RULE_TYPE_ESQL } from '../constants';
 import {
   batchTelemetryRecords,
   processK8sUsernames,
   newTelemetryLogger,
   getPreviousDailyTaskTimestamp,
   safeValue,
+  unflatten,
 } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
+import type { AllowlistFields } from '../filterlists/types';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
@@ -44,7 +46,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
@@ -65,6 +67,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           return 0;
         }
 
+        const unflattenedFilterList = unflatten<AllowlistFields>(filterList.prebuiltRulesAlerts);
         for await (const alerts of receiver.fetchPrebuiltRuleAlertsBatch(
           index,
           taskExecutionPeriod.last ?? 'now-1h',
@@ -77,7 +80,9 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
           const processedAlerts = alerts.map(
             (event: TelemetryEvent): TelemetryEvent =>
-              copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
+              event['kibana.alert.rule.type'] === DETECTION_RULE_TYPE_ESQL
+                ? copyAllowlistedFields(unflattenedFilterList, unflatten<TelemetryEvent>(event))
+                : copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
           );
 
           const sanitizedAlerts = processedAlerts.map(
@@ -96,7 +101,9 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             })
           );
 
-          log.l('sending elastic prebuilt alerts', { length: enrichedAlerts.length });
+          log.debug('sending elastic prebuilt alerts', {
+            length: enrichedAlerts.length,
+          } as LogMeta);
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
 
           const promises = batches.map(async (batch) => {
@@ -108,9 +115,9 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         await taskMetricsService.end(trace);
         return 0;
-      } catch (err) {
-        logger.error('could not complete task', { error: err });
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        logger.error('could not complete task', { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

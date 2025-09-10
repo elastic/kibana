@@ -298,26 +298,7 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
             "integrations": true,
           },
         },
-        "navigateToUrl": [MockFunction] {
-          "calls": Array [
-            Array [
-              "./home#/getting_started",
-            ],
-            Array [
-              "./home#/getting_started",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "navigateToUrl": [MockFunction],
       }
     }
     isCloudEnabled={false}
@@ -332,26 +313,7 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
             "integrations": true,
           },
         },
-        "navigateToUrl": [MockFunction] {
-          "calls": Array [
-            Array [
-              "./home#/getting_started",
-            ],
-            Array [
-              "./home#/getting_started",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={Array []}
@@ -392,26 +354,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             "integrations": true,
           },
         },
-        "navigateToUrl": [MockFunction] {
-          "calls": Array [
-            Array [
-              "./home#/getting_started",
-            ],
-            Array [
-              "./home#/getting_started",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "navigateToUrl": [MockFunction],
       }
     }
     isCloudEnabled={false}
@@ -426,26 +369,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             "integrations": true,
           },
         },
-        "navigateToUrl": [MockFunction] {
-          "calls": Array [
-            Array [
-              "./home#/getting_started",
-            ],
-            Array [
-              "./home#/getting_started",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={Array []}
@@ -459,7 +383,12 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 </_KibanaPageTemplate>
 `;
 
-exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `""`;
+exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
+<Welcome
+  onSkip={[Function]}
+  urlBasePath="goober"
+/>
+`;
 
 exports[`home should render home component 1`] = `
 <_KibanaPageTemplate

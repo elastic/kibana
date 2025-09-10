@@ -15,6 +15,8 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiSpacer,
+  isDOMNode,
+  keys,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -24,9 +26,11 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
+import { ConfirmationModal } from '../confirmation_modal';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
@@ -39,6 +43,7 @@ import { ScheduleDefinition } from './definition';
 import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
+import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
 
 interface Props {
   scheduleId: string;
@@ -46,6 +51,19 @@ interface Props {
 }
 
 export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose }) => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const onFormMutated = useCallback(() => setHasUnsavedChanges(true), []);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const onCancel = useCallback(() => {
+    setShowConfirmModal(false); // just close the modal
+  }, []);
+
+  const onDiscard = useCallback(() => {
+    setShowConfirmModal(false);
+    onClose();
+  }, [onClose]);
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryScheduleDetailsFlyoutTitle',
   });
@@ -65,6 +83,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     });
 
   const { sourcererDataView } = useSourcererDataView();
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -84,7 +103,8 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           alertsIndexPattern ?? '',
           connector,
           sourcererDataView,
-          uiSettings
+          uiSettings,
+          experimentalDataView
         );
         await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
         setIsEditing(false);
@@ -94,11 +114,12 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     },
     [
       aiConnectors,
-      uiSettings,
-      sourcererDataView,
-      scheduleId,
       alertsIndexPattern,
+      sourcererDataView,
+      uiSettings,
+      experimentalDataView,
       updateAttackDiscoverySchedule,
+      scheduleId,
     ]
   );
 
@@ -125,6 +146,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   const { editForm, actionButtons: editingActionButtons } = useEditForm({
     initialValue: formInitialValue,
     isLoading,
+    onFormMutated,
     onSave: onUpdateSchedule,
     saveButtonTitle: i18n.SCHEDULE_SAVE_BUTTON_TITLE,
   });
@@ -160,8 +182,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="edit"
-              fill
-              size="s"
+              size="m"
               onClick={() => setIsEditing(true)}
               disabled={isLoading}
             >
@@ -178,43 +199,62 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   }, [editButton, editingActionButtons, isEditing]);
 
   const handleCloseButtonClick = useCallback(() => {
-    if (isEditing) {
-      setIsEditing(false);
+    if (hasUnsavedChanges) {
+      setShowConfirmModal(true);
     } else {
       onClose();
+
+      setIsEditing(false);
     }
-  }, [isEditing, onClose]);
+  }, [hasUnsavedChanges, onClose]);
+
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        handleCloseButtonClick();
+      }
+    },
+    [handleCloseButtonClick]
+  );
 
   return (
-    <EuiFlyoutResizable
-      aria-labelledby={flyoutTitleId}
-      data-test-subj="scheduleDetailsFlyout"
-      minWidth={MIN_FLYOUT_WIDTH}
-      onClose={handleCloseButtonClick}
-      outsideClickCloses={!isEditing}
-      paddingSize="m"
-      side="right"
-      size="m"
-      type="overlay"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <Header
-          isEditing={isEditing}
-          isLoading={isLoading}
-          schedule={schedule}
-          titleId={flyoutTitleId}
-        />
-      </EuiFlyoutHeader>
+    <>
+      <EuiFlyoutResizable
+        aria-labelledby={flyoutTitleId}
+        data-test-subj="scheduleDetailsFlyout"
+        minWidth={MIN_FLYOUT_WIDTH}
+        onClose={handleCloseButtonClick}
+        onKeyDown={onKeyDown}
+        outsideClickCloses={!isEditing}
+        paddingSize="m"
+        side="right"
+        size="m"
+        type="overlay"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <Header
+            isEditing={isEditing}
+            isLoading={isLoading}
+            schedule={schedule}
+            titleId={flyoutTitleId}
+          />
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiSpacer size="s" />
-        {content}
-      </EuiFlyoutBody>
+        <EuiFlyoutBody>
+          <EuiSpacer size="s" />
+          {content}
+        </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <Footer closeModal={handleCloseButtonClick} actionButtons={actionButtons} />
-      </EuiFlyoutFooter>
-    </EuiFlyoutResizable>
+        <EuiFlyoutFooter>
+          <Footer closeModal={handleCloseButtonClick} actionButtons={actionButtons} />
+        </EuiFlyoutFooter>
+      </EuiFlyoutResizable>
+
+      {showConfirmModal && <ConfirmationModal onCancel={onCancel} onDiscard={onDiscard} />}
+    </>
   );
 });
 DetailsFlyout.displayName = 'DetailsFlyout';

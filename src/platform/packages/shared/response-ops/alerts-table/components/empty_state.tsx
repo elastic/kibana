@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
@@ -15,6 +16,7 @@ import { css } from '@emotion/react';
 import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import { ALERTS_TABLE_TITLE } from '../translations';
+import type { AlertsTableProps } from '../types';
 
 const heights = {
   tall: 490,
@@ -24,16 +26,22 @@ const heights = {
 const panelStyle = {
   maxWidth: 500,
 };
+type EmptyState = NonNullable<AlertsTableProps['emptyState']>;
+type EmptyStateMessage = Pick<EmptyState, 'messageTitle' | 'messageBody'>;
 
-export const EmptyState: React.FC<{
-  height?: keyof typeof heights | 'flex';
-  variant?: 'subdued' | 'transparent';
-  additionalToolbarControls?: ReactNode;
-  alertsQuerySnapshot?: EsQuerySnapshot;
-  showInspectButton?: boolean;
-}> = ({
+export const EmptyState: React.FC<
+  {
+    height?: keyof typeof heights | 'flex';
+    variant?: 'subdued' | 'transparent';
+    additionalToolbarControls?: ReactNode;
+    alertsQuerySnapshot?: EsQuerySnapshot;
+    showInspectButton?: boolean;
+  } & EmptyStateMessage
+> = ({
   height = 'tall',
   variant = 'subdued',
+  messageTitle,
+  messageBody,
   additionalToolbarControls,
   alertsQuerySnapshot,
   showInspectButton,
@@ -76,17 +84,27 @@ export const EmptyState: React.FC<{
                     <EuiText size="s">
                       <EuiTitle>
                         <h3>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.empty.title"
-                            defaultMessage="No results match your search criteria"
-                          />
+                          {messageTitle ? (
+                            messageTitle
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.triggersActionsUI.empty.title"
+                              defaultMessage={'No results match your search criteria'}
+                            />
+                          )}
                         </h3>
                       </EuiTitle>
                       <p>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.empty.description"
-                          defaultMessage="Try searching over a longer period of time or modifying your search"
-                        />
+                        {messageBody ? (
+                          messageBody
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.empty.description"
+                            defaultMessage={
+                              'Try searching over a longer period of time or modifying your search'
+                            }
+                          />
+                        )}
                       </p>
                     </EuiText>
                   </EuiFlexItem>

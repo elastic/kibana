@@ -10,14 +10,15 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  getConversationSharedState,
+  getIsConversationOwner,
 } from '@kbn/elastic-assistant-common';
-import {
-  ConversationResponse,
-  ReadConversationRequestParams,
-} from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { SHARED_CONVERSATION_ACCESSED_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../utils';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { performChecks } from '../helpers';
 
 export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
@@ -44,7 +45,6 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
         const assistantResponse = buildResponse(response);
 
         const { id } = request.params;
-
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           const checkResponse = await performChecks({
@@ -64,6 +64,20 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
               statusCode: 404,
+            });
+          }
+          const isConversationOwner = getIsConversationOwner(conversation, {
+            name: checkResponse.currentUser?.username,
+            id: checkResponse.currentUser?.profile_uid,
+          });
+
+          if (!isConversationOwner) {
+            const telemetry = ctx.elasticAssistant.telemetry;
+            telemetry.reportEvent(SHARED_CONVERSATION_ACCESSED_EVENT.eventType, {
+              sharing: getConversationSharedState({
+                users: conversation.users,
+                id: conversation.id,
+              }),
             });
           }
           return response.ok({ body: conversation });

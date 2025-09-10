@@ -139,8 +139,9 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../../../../../services/setup_technology_selector';
+
 import { CreatePackagePolicySinglePage } from '.';
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from './components/setup_technology_selector';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;

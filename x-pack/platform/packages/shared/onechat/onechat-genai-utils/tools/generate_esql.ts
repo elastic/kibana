@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { filter, toArray, firstValueFrom } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/inference-common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
-import { getIndexMappings } from './steps/get_mappings';
 import { extractEsqlQueries } from './utils/esql';
+import {
+  resolveResourceWithSamplingStats,
+  formatResourceWithSampledValues,
+} from './utils/resources';
 
 export interface GenerateEsqlResponse {
   answer: string;
@@ -21,59 +23,69 @@ export interface GenerateEsqlResponse {
 }
 
 export const generateEsql = async ({
-  query,
-  context,
+  nlQuery,
   index,
+  context,
   model,
   esClient,
 }: {
-  query: string;
+  nlQuery: string;
   context?: string;
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<GenerateEsqlResponse> => {
-  let selectedIndex: string | undefined;
-  let mappings: MappingTypeMapping;
+  let selectedTarget = index;
 
-  if (index) {
-    selectedIndex = index;
-    const indexMappings = await getIndexMappings({
-      indices: [index],
-      esClient,
-    });
-    mappings = indexMappings[index].mappings;
-  } else {
+  if (!selectedTarget) {
     const {
-      indices: [firstIndex],
+      resources: [selectedResource],
     } = await indexExplorer({
-      query,
+      nlQuery,
       esClient,
       limit: 1,
       model,
     });
-    selectedIndex = firstIndex.indexName;
-    mappings = firstIndex.mappings;
+    selectedTarget = selectedResource.name;
   }
+
+  const resolvedResource = await resolveResourceWithSamplingStats({
+    resourceName: selectedTarget,
+    samplingSize: 100,
+    esClient,
+  });
 
   const esqlEvents$ = naturalLanguageToEsql({
     // @ts-expect-error using a scoped inference client
     connectorId: undefined,
     client: model.inferenceClient,
     logger: { debug: () => undefined },
-    input: `
-        Your task is to generate an ES|QL query.
+    input: `Your task is to write a single, valid ES|QL query based on the provided information.
 
-        - User query: "${query}",
-        - Additional context: "${context ?? 'N/A'}
-        - Index to use: "${selectedIndex}"
-        - Mapping of this index:
-        \`\`\`json
-        ${JSON.stringify(mappings, undefined, 2)}
-        \`\`\`
+<user_query>
+${nlQuery}
+</user_query>
 
-        Given those info, please generate an ES|QL query to address the user request
-        `,
+<context>
+${context ?? 'No additional context provided.'}
+</context>
+
+${formatResourceWithSampledValues({ resource: resolvedResource, indentLevel: 0 })}
+
+<directives>
+## ES|QL Safety Rules
+
+1. **LIMIT is Mandatory:** All multi-row queries **must** end with a \`LIMIT\`. The only exception is for single-row aggregations (e.g., \`STATS\` without a \`GROUP BY\`).
+
+2. **Applying Limits:**
+    * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the \`LIMIT\`.
+    * **Default:** If no number is given, default to \`LIMIT 100\` for both raw events and \`GROUP BY\` results. Notify the user when you apply this default (e.g., "I've added a \`LIMIT 100\` for safety.").
+
+3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety \`LIMIT 250\` and state that this limit was added to protect the system.
+</directives>
+
+Based on all the information above, generate the ES|QL query.
+`,
   });
 
   const messages = await firstValueFrom(

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { Serializable } from '../serializable';
 
 export class Event extends Serializable<ApmFields> {

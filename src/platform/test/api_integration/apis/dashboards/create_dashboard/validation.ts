@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

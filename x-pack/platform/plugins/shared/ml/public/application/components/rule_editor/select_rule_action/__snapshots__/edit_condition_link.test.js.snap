@@ -1,148 +1,139 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditConditionLink renders for a condition using actual 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="s"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiText
-      size="s"
+    <div
+      class="euiText emotion-euiText-s"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="Update rule condition from {conditionValue} to"
-        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
-        values={
-          Object {
-            "conditionValue": 5,
-          }
-        }
-      />
-    </EuiText>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+      Update rule condition from 5 to
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiFieldNumber
-      aria-label="Enter numeric value for condition"
-      compressed={true}
-      onChange={[Function]}
-      placeholder="Enter value"
-      value={210}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiLink
-      onClick={[Function]}
-      size="s"
+    <div
+      class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="Update"
-        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
-      />
-    </EuiLink>
-  </EuiFlexItem>
-</EuiFlexGroup>
+      <div
+        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      >
+        <input
+          aria-label="Enter numeric value for condition"
+          class="euiFieldNumber emotion-euiFieldNumber-compressed"
+          placeholder="Enter value"
+          step="any"
+          type="number"
+          value="210"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiLink emotion-euiLink-primary"
+      type="button"
+    >
+      Update
+    </button>
+  </div>
+</div>
 `;
 
 exports[`EditConditionLink renders for a condition using diff from typical 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="s"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiText
-      size="s"
+    <div
+      class="euiText emotion-euiText-s"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="Update rule condition from {conditionValue} to"
-        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
-        values={
-          Object {
-            "conditionValue": 5,
-          }
-        }
-      />
-    </EuiText>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+      Update rule condition from 5 to
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiFieldNumber
-      aria-label="Enter numeric value for condition"
-      compressed={true}
-      onChange={[Function]}
-      placeholder="Enter value"
-      value={208.8}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiLink
-      onClick={[Function]}
-      size="s"
+    <div
+      class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="Update"
-        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
-      />
-    </EuiLink>
-  </EuiFlexItem>
-</EuiFlexGroup>
+      <div
+        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      >
+        <input
+          aria-label="Enter numeric value for condition"
+          class="euiFieldNumber emotion-euiFieldNumber-compressed"
+          placeholder="Enter value"
+          step="any"
+          type="number"
+          value="208.8"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiLink emotion-euiLink-primary"
+      type="button"
+    >
+      Update
+    </button>
+  </div>
+</div>
 `;
 
 exports[`EditConditionLink renders for a condition using typical 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="s"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiText
-      size="s"
+    <div
+      class="euiText emotion-euiText-s"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="Update rule condition from {conditionValue} to"
-        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
-        values={
-          Object {
-            "conditionValue": 5,
-          }
-        }
-      />
-    </EuiText>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+      Update rule condition from 5 to
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiFieldNumber
-      aria-label="Enter numeric value for condition"
-      compressed={true}
-      onChange={[Function]}
-      placeholder="Enter value"
-      value={1.23}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiLink
-      onClick={[Function]}
-      size="s"
+    <div
+      class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="Update"
-        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
-      />
-    </EuiLink>
-  </EuiFlexItem>
-</EuiFlexGroup>
+      <div
+        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      >
+        <input
+          aria-label="Enter numeric value for condition"
+          class="euiFieldNumber emotion-euiFieldNumber-compressed"
+          placeholder="Enter value"
+          step="any"
+          type="number"
+          value="1.23"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiLink emotion-euiLink-primary"
+      type="button"
+    >
+      Update
+    </button>
+  </div>
+</div>
 `;

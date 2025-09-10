@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import type { AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
 import { TemplateEdit } from '../../../public/application/sections/template_edit';
 import { WithAppDependencies } from '../helpers';
 
-import { formSetup, TestSubjects } from './template_form.helpers';
+import type { TestSubjects } from './template_form.helpers';
+import { formSetup } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 
 const testBedConfig: AsyncTestBedConfig = {

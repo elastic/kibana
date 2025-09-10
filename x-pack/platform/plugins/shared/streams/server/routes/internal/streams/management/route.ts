@@ -41,9 +41,9 @@ export const unmanagedAssetDetailsRoute = createServerRoute({
 
     const stream = await streamsClient.getStream(params.path.name);
 
-    if (!Streams.UnwiredStream.Definition.is(stream)) {
+    if (!Streams.ClassicStream.Definition.is(stream)) {
       throw new WrongStreamTypeError(
-        `Stream definition for ${params.path.name} is not an unwired stream`
+        `Stream definition for ${params.path.name} is not an classic stream`
       );
     }
 

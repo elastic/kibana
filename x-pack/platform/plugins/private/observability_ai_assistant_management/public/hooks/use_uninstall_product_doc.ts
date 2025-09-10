@@ -21,12 +21,13 @@ export function useUninstallProductDoc() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  return useMutation<UninstallResponse, ServerError, void>(
+  return useMutation<UninstallResponse, ServerError, string>(
     [REACT_QUERY_KEYS.UNINSTALL_PRODUCT_DOC],
-    () => {
-      return productDocBase!.installation.uninstall();
+    (inferenceId: string) => {
+      return productDocBase!.installation.uninstall({ inferenceId });
     },
     {
+      networkMode: 'always',
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(

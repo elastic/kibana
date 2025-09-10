@@ -7,17 +7,18 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Form,
-  FormHook,
   useForm,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
-import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
+import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import { ConnectorFormSchema } from './types';
+import type { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
+import { connectorOverrides } from './connector_overrides';
 
 export interface ConnectorFormState {
   isValid: boolean | undefined;
@@ -47,6 +48,7 @@ interface Props {
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
 }
+
 /**
  * The serializer and deserializer are needed to transform the headers of
  * the webhook connectors. The webhook connector uses the UseArray component
@@ -61,6 +63,11 @@ interface Props {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
+  const overrides = connectorOverrides(data.actionTypeId);
+  if (overrides?.formDeserializer) {
+    return overrides.formDeserializer(data);
+  }
+
   if (
     data.actionTypeId !== '.webhook' &&
     data.actionTypeId !== '.cases-webhook' &&
@@ -86,6 +93,11 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
+  const overrides = connectorOverrides(formData.actionTypeId);
+  if (overrides?.formSerializer) {
+    return overrides.formSerializer(formData);
+  }
+
   if (
     formData.actionTypeId !== '.webhook' &&
     formData.actionTypeId !== '.cases-webhook' &&

@@ -25,7 +25,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { ActionConnector } from '../../../common/types/domain';
-import type { CaseUI, CasesSettings } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -40,7 +40,6 @@ import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { IncrementalIdText } from '../incremental_id';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -64,10 +63,10 @@ export interface GetCasesColumn {
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   selectedColumns: CasesColumnSelection[];
-  settings: CasesSettings;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
+  disabledCases?: Set<string>;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -83,7 +82,7 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
-  settings,
+  disabledCases,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -113,14 +112,9 @@ export const useCasesColumns = ({
             const caseDetailsLinkComponent = isSelectorView ? (
               theCase.title
             ) : (
-              <div>
-                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                  <TruncatedText text={theCase.title} />
-                </CaseDetailsLink>
-                {settings.displayIncrementalCaseId && typeof theCase.incrementalId === 'number' ? (
-                  <IncrementalIdText incrementalId={theCase.incrementalId} />
-                ) : null}
-              </div>
+              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                <TruncatedText text={theCase.title} />
+              </CaseDetailsLink>
             );
 
             return caseDetailsLinkComponent;
@@ -319,15 +313,16 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
+            const disabled = disabledCases?.has(theCase.id) ?? false;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
-                onClick={() => {
-                  assignCaseAction(theCase);
-                }}
+                onClick={() => assignCaseAction(theCase)}
                 size="s"
+                iconType={disabled ? 'check' : undefined}
+                disabled={disabled}
               >
-                {i18n.SELECT}
+                {disabled ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }
@@ -336,7 +331,7 @@ export const useCasesColumns = ({
         width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, settings]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
   );
 
   // we need to extend the columnsDict with the columns of

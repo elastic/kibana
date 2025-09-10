@@ -72,7 +72,10 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
         query,
         version: API_VERSIONS.public.v1,
       }),
-    { retry: (_, error) => !isRegistryConnectionError(error), refetchOnWindowFocus: false }
+    {
+      retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
+      refetchOnWindowFocus: false,
+    }
   );
 }
 
@@ -108,7 +111,7 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
-    retry: (_, error) => !isRegistryConnectionError(error),
+    retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
     refetchOnWindowFocus: false,
   });
 };
@@ -184,7 +187,7 @@ export const useGetPackageInfoByKeyQuery = (
       suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
-      retry: (_, error) => !isRegistryConnectionError(error),
+      retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
   );
@@ -499,4 +502,8 @@ export function useGetInputsTemplatesQuery(
 
 function isRegistryConnectionError(error: RequestError) {
   return error.statusCode === 502;
+}
+
+function isUserError(error: RequestError) {
+  return error.statusCode && error.statusCode >= 400 && error.statusCode < 500;
 }

@@ -7,12 +7,9 @@
 
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import {
-  ENRICHMENT_URL_STATE_KEY,
-  EnrichmentDataSource,
-  enrichmentUrlSchema,
-} from '../../../../../../common/url_schema';
-import { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
+import type { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
 import { defaultEnrichmentUrlState, defaultRandomSamplesDataSource } from './utils';
 
 export function createUrlInitializerActor({
@@ -35,7 +32,7 @@ export function createUrlInitializerActor({
     if (urlState.success) {
       // Always add default random samples data source
       if (!hasDefaultRandomSamplesDataSource(urlState.data.dataSources)) {
-        urlState.data.dataSources.unshift(defaultRandomSamplesDataSource);
+        urlState.data.dataSources.push(defaultRandomSamplesDataSource);
       }
 
       sendBack({

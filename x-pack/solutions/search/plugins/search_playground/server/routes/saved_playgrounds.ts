@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, ROUTE_VERSIONS, PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 
-import {
-  APIRoutes,
+import type {
   DefineRoutesOptions,
   PlaygroundListResponse,
   PlaygroundResponse,
   PlaygroundSavedObject,
 } from '../types';
+import { APIRoutes } from '../types';
 import { errorHandler } from '../utils/error_handler';
 import { parsePlaygroundSO, parsePlaygroundSOList, validatePlayground } from '../utils/playgrounds';
 import { playgroundAttributesSchema } from '../playground_saved_object/schema/v1/v1';
@@ -44,7 +44,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
               page: schema.number({ defaultValue: 1, min: 1 }),
               size: schema.number({ defaultValue: 10, min: 1, max: 1000 }),
               sortField: schema.string({
-                defaultValue: 'created_at',
+                defaultValue: 'updated_at',
               }),
               sortOrder: schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
                 defaultValue: 'desc',

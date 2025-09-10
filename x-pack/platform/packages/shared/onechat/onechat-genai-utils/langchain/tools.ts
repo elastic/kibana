@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { StructuredTool, tool as toTool } from '@langchain/core/tools';
-import { Logger } from '@kbn/logging';
+import type { StructuredTool } from '@langchain/core/tools';
+import { tool as toTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  toSerializedToolIdentifier,
-  type SerializedToolIdentifier,
-  type StructuredToolIdentifier,
-  toStructuredToolIdentifier,
-  unknownToolProviderId,
-} from '@kbn/onechat-common';
-import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
+import type { ChatAgentEvent } from '@kbn/onechat-common';
+import { ChatEventType } from '@kbn/onechat-common';
+import type {
+  AgentEventEmitterFn,
+  ExecutableTool,
+  OnechatToolEvent,
+  RunToolReturn,
+  ToolProvider,
+  ToolEventHandlerFn,
+} from '@kbn/onechat-server';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolCall } from './messages';
 
-export type ToolIdMapping = Map<string, SerializedToolIdentifier>;
+export type ToolIdMapping = Map<string, string>;
 
 export interface ToolsAndMappings {
   /**
@@ -26,7 +30,7 @@ export interface ToolsAndMappings {
    */
   tools: StructuredTool[];
   /**
-   * ID mapping that can be used to retrieve the full identifier from the langchain tool id.
+   * ID mapping that can be used to retrieve the onechat tool id from the langchain tool id.
    */
   idMappings: ToolIdMapping;
 }
@@ -35,46 +39,52 @@ export const toolsToLangchain = async ({
   request,
   tools,
   logger,
+  sendEvent,
 }: {
   request: KibanaRequest;
   tools: ToolProvider | ExecutableTool[];
   logger: Logger;
+  sendEvent?: AgentEventEmitterFn;
 }): Promise<ToolsAndMappings> => {
   const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
-  const mappings = createToolIdMappings(allTools);
-
-  const reverseMappings = reverseMap(mappings);
+  const onechatToLangchainIdMap = createToolIdMappings(allTools);
 
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
-      const toolId = reverseMappings.get(
-        toSerializedToolIdentifier({ toolId: tool.id, providerId: tool.meta.providerId })
-      );
-      return toolToLangchain({ tool, logger, toolId });
+      const toolId = onechatToLangchainIdMap.get(tool.id);
+      return toolToLangchain({ tool, logger, toolId, sendEvent });
     })
   );
 
+  const reverseMappings = reverseMap(onechatToLangchainIdMap);
+
   return {
     tools: convertedTools,
-    idMappings: mappings,
+    idMappings: reverseMappings,
   };
 };
 
-export const createToolIdMappings = (tools: ExecutableTool[]): ToolIdMapping => {
+export const sanitizeToolId = (toolId: string): string => {
+  return toolId.replace('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
+};
+
+/**
+ * Create a [onechat tool id] -> [langchain tool id] mapping.
+ *
+ * Handles id sanitization (e.g. removing dot prefixes), and potential id conflict.
+ */
+export const createToolIdMappings = <T extends { id: string }>(tools: T[]): ToolIdMapping => {
   const toolIds = new Set<string>();
   const mapping: ToolIdMapping = new Map();
 
   for (const tool of tools) {
-    let toolId = tool.id;
+    let toolId = sanitizeToolId(tool.id);
     let index = 1;
     while (toolIds.has(toolId)) {
       toolId = `${toolId}_${index++}`;
     }
     toolIds.add(toolId);
-    mapping.set(
-      toolId,
-      toSerializedToolIdentifier({ toolId: tool.id, providerId: tool.meta.providerId })
-    );
+    mapping.set(tool.id, toolId);
   }
 
   return mapping;
@@ -84,45 +94,65 @@ export const toolToLangchain = ({
   tool,
   toolId,
   logger,
+  sendEvent,
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
+  sendEvent?: AgentEventEmitterFn;
 }): StructuredTool => {
+  const description = tool.llmDescription
+    ? tool.llmDescription({ description: tool.description, config: tool.configuration })
+    : tool.description;
+
   return toTool(
-    async (input) => {
+    async (input, config): Promise<[string, RunToolReturn]> => {
+      let onEvent: ToolEventHandlerFn | undefined;
+      if (sendEvent) {
+        const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
+        const convertEvent = getToolEventConverter({ toolCallId });
+        onEvent = (event) => {
+          sendEvent(convertEvent(event));
+        };
+      }
+
       try {
-        const toolReturn = await tool.execute({ toolParams: input });
-        return JSON.stringify(toolReturn.result);
+        logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
+        const toolReturn = await tool.execute({ toolParams: input, onEvent });
+        const content = JSON.stringify({ results: toolReturn.results });
+        logger.debug(`Tool ${tool.id} returned reply of length ${content.length}`);
+        return [content, toolReturn];
       } catch (e) {
-        logger.warn(`error calling tool ${tool.id}: ${e.message}`);
-        throw e;
+        logger.warn(`error calling tool ${tool.id}: ${e}`);
+        logger.debug(e.stack);
+
+        const errorToolReturn: RunToolReturn = {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: e.message },
+            },
+          ],
+        };
+
+        return [`${e}`, errorToolReturn];
       }
     },
     {
       name: toolId ?? tool.id,
-      description: tool.description,
       schema: tool.schema,
+      description,
+      verboseParsingErrors: true,
+      responseFormat: 'content_and_artifact',
       metadata: {
-        serializedToolId: toSerializedToolIdentifier({
-          toolId: tool.id,
-          providerId: tool.meta.providerId,
-        }),
+        toolId: tool.id,
       },
     }
   );
 };
 
-export const toolIdentifierFromToolCall = (
-  toolCall: ToolCall,
-  mapping: ToolIdMapping
-): StructuredToolIdentifier => {
-  return toStructuredToolIdentifier(
-    mapping.get(toolCall.toolName) ?? {
-      toolId: toolCall.toolName,
-      providerId: unknownToolProviderId,
-    }
-  );
+export const toolIdentifierFromToolCall = (toolCall: ToolCall, mapping: ToolIdMapping): string => {
+  return mapping.get(toolCall.toolName) ?? toolCall.toolName;
 };
 
 function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
@@ -135,3 +165,18 @@ function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
   }
   return reversed;
 }
+
+const getToolEventConverter = ({ toolCallId }: { toolCallId: string }) => {
+  return (toolEvent: OnechatToolEvent): ChatAgentEvent => {
+    if (toolEvent.type === ChatEventType.toolProgress) {
+      return {
+        type: ChatEventType.toolProgress,
+        data: {
+          ...toolEvent.data,
+          tool_call_id: toolCallId,
+        },
+      };
+    }
+    throw new Error(`Invalid tool call type ${toolEvent.type}`);
+  };
+};

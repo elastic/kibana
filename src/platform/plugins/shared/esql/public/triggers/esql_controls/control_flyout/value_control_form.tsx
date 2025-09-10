@@ -11,14 +11,8 @@ import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiCallOut,
-  type EuiSwitchEvent,
-  EuiPanel,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiCallOut, type EuiSwitchEvent, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -84,7 +78,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -259,32 +253,28 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
-          <EuiFormRow
-            label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+          <ESQLLangEditor
+            query={{ esql: valuesQuery }}
+            onTextLangQueryChange={(q) => {
+              setValuesQuery(q.esql);
+            }}
+            hideTimeFilterInfo={true}
+            disableAutoFocus={true}
+            errors={esqlQueryErrors}
+            editorIsInline
+            hideRunQueryText
+            onTextLangQuerySubmit={async (q, a) => {
+              if (q) {
+                await onValuesQuerySubmit(q.esql);
+              }
+            }}
+            isDisabled={false}
+            isLoading={false}
+            hasOutline
+            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
               defaultMessage: 'Values query',
             })}
-            fullWidth
-          >
-            <ESQLLangEditor
-              query={{ esql: valuesQuery }}
-              onTextLangQueryChange={(q) => {
-                setValuesQuery(q.esql);
-              }}
-              hideTimeFilterInfo={true}
-              disableAutoFocus={true}
-              errors={esqlQueryErrors}
-              editorIsInline
-              hideRunQueryText
-              onTextLangQuerySubmit={async (q, a) => {
-                if (q) {
-                  await onValuesQuerySubmit(q.esql);
-                }
-              }}
-              isDisabled={false}
-              isLoading={false}
-              hasOutline
-            />
-          </EuiFormRow>
+          />
           {queryColumns.length > 0 && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {

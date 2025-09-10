@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { SlmPolicyPayload } from '../../../../../common/types';
+import type { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
-import { StepProps } from '.';
+import type { StepProps } from '.';
 import { textService } from '../../../services/text';
 import { useCore } from '../../../app_context';
 
@@ -170,6 +170,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             fullWidth
           >
             <EuiFieldNumber
+              isInvalid={touched.minCount && Boolean(errors.minCount)}
               fullWidth
               value={retention.minCount || ''}
               onBlur={() => setTouched({ ...touched, minCount: true })}
@@ -197,6 +198,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             fullWidth
           >
             <EuiFieldNumber
+              isInvalid={touched.maxCount && Boolean(errors.maxCount)}
               fullWidth
               value={retention.maxCount || ''}
               onBlur={() => setTouched({ ...touched, maxCount: true })}

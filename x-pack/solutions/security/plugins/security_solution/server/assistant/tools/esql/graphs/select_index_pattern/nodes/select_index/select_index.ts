@@ -27,7 +27,6 @@ export const getSelectIndexPattern = () => {
 
     if (candidateIndexPatterns.length === 1) {
       // Exactly one index pattern contains the required data
-      // We can skip the LLM and return the index pattern directly
       return new Command({
         update: {
           selectedIndexPattern: candidateIndexPatterns[0].indexPattern,
@@ -35,12 +34,18 @@ export const getSelectIndexPattern = () => {
       });
     }
 
-    // More than one index pattern contains the required data, we will pick the shortest one (this is likely to be the least specific)
+    // Sort the candidate index patterns based on the order of shortlisted index patterns
+    // This ensures that the most relevant index pattern (as decided by the LLM) is selected first
+    const sortedShortlistedIndexPatterns = state.shortlistedIndexPatterns;
+    const sortedCandidateIndexPatterns = candidateIndexPatterns.sort(
+      (a, b) =>
+        sortedShortlistedIndexPatterns.indexOf(a.indexPattern) -
+        sortedShortlistedIndexPatterns.indexOf(b.indexPattern)
+    );
+
     return new Command({
       update: {
-        selectedIndexPattern: candidateIndexPatterns.sort(
-          (a, b) => a.indexPattern.length - b.indexPattern.length
-        )[0].indexPattern,
+        selectedIndexPattern: sortedCandidateIndexPatterns[0].indexPattern,
       },
     });
   };

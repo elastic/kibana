@@ -40,7 +40,7 @@ export const CUSTOMIZE_THE_CONNECTOR_AND_ALERTS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customizeTheConnectorAndAlertsLabel',
   {
     defaultMessage:
-      'Customize the connector and alerts that will be analyzed when generating Attack discoveries on the fly. Scheduled Attack discoveries are set up independently.',
+      'Customize the connector and alerts that will be analyzed when generating Attack discoveries on the fly, which are private to you. Scheduled Attack discoveries are set up independently.',
   }
 );
 

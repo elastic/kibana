@@ -68,6 +68,7 @@ export const searchSessionsUpdateSchema = () =>
     id: schema.string(),
     type: schema.string(),
     updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     references: schema.maybe(referencesSchema),

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { QualityIssueSortField } from '../../hooks';
-import {
-  DatasetQualityDetailsControllerContext,
-  DEFAULT_CONTEXT,
-} from '../../state_machines/dataset_quality_details_controller';
-import { DatasetQualityDetailsPublicState, DatasetQualityDetailsPublicStateUpdate } from './types';
+import type { QualityIssueSortField } from '../../hooks';
+import type { DatasetQualityDetailsControllerContext } from '../../state_machines/dataset_quality_details_controller';
+import { DEFAULT_CONTEXT } from '../../state_machines/dataset_quality_details_controller';
+import type {
+  DatasetQualityDetailsPublicState,
+  DatasetQualityDetailsPublicStateUpdate,
+} from './types';
 
 export const getPublicStateFromContext = (
   context: DatasetQualityDetailsControllerContext
@@ -25,6 +26,9 @@ export const getPublicStateFromContext = (
     integration: context.integration,
     expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
+    view: context.view,
+    selectedIssueTypes: context.selectedIssueTypes,
+    selectedFields: context.selectedFields,
   };
 };
 
@@ -58,4 +62,7 @@ export const getContextFromPublicState = (
   expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
+  view: publicState.view ?? DEFAULT_CONTEXT.view,
+  selectedIssueTypes: publicState.selectedIssueTypes ?? DEFAULT_CONTEXT.selectedIssueTypes,
+  selectedFields: publicState.selectedFields ?? DEFAULT_CONTEXT.selectedFields,
 });

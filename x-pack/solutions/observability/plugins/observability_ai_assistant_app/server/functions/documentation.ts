@@ -6,32 +6,29 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
+  getInferenceIdFromWriteIndex,
+} from '@kbn/observability-ai-assistant-plugin/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { FunctionRegistrationParameters } from '.';
-
-export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
 
 export async function registerDocumentationFunction({
   functions,
   resources,
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
-  const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
-
-  if (isProductDocAvailable) {
-    functions.registerInstruction(({ availableFunctionNames }) => {
-      return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
-        ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
-      to retrieve documentation related to the question. Consider that the documentation returned by the function
-      is always more up to date and accurate than any own internal knowledge you might have.`
-        : undefined;
-    });
-  }
+  const esClient = (await resources.context.core).elasticsearch.client;
+  const inferenceId =
+    (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
+    defaultInferenceEndpoints.ELSER;
+  const isProductDocAvailable =
+    (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
 
   functions.registerFunction(
     {
-      name: RETRIEVE_DOCUMENTATION_NAME,
-      visibility: isProductDocAvailable ? FunctionVisibility.All : FunctionVisibility.Internal,
+      name: RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
+      isInternal: !isProductDocAvailable,
       description: `Use this function to retrieve documentation about Elastic products.
       You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
       or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search
@@ -71,6 +68,7 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        inferenceId,
       });
 
       return {

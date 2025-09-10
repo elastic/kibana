@@ -26,7 +26,10 @@ import type {
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
-import { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
+import type {
+  SideNavigationSection,
+  SideNavVersion,
+} from '@kbn/core-chrome-browser/src/project_navigation';
 import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
@@ -368,7 +371,15 @@ const isRecentlyAccessedDefinition = (
 export const parseNavigationTree = (
   id: SolutionId,
   navigationTreeDef: NavigationTreeDefinition,
-  { deepLinks, cloudLinks }: { deepLinks: Record<string, ChromeNavLink>; cloudLinks: CloudLinks }
+  {
+    deepLinks,
+    cloudLinks,
+    sideNavVersion,
+  }: {
+    deepLinks: Record<string, ChromeNavLink>;
+    cloudLinks: CloudLinks;
+    sideNavVersion?: SideNavVersion;
+  }
 ): {
   navigationTree: ChromeProjectNavigationNode[];
   navigationTreeUI: NavigationTreeDefinitionUI;
@@ -387,6 +398,16 @@ export const parseNavigationTree = (
   ): ChromeProjectNavigationNode | RecentlyAccessedDefinition | null => {
     if (isRecentlyAccessedDefinition(node)) {
       return node;
+    }
+
+    if (sideNavVersion === 'v1' && node.sideNavVersion === 'v2') {
+      // If the node is v2 and we are in v1 mode, skip it
+      return null;
+    }
+
+    if (sideNavVersion === 'v2' && node.sideNavVersion === 'v1') {
+      // If the node is v1 and we are in v2 mode, skip it
+      return null;
     }
 
     let nodeSerialized: NodeDefinition | GroupDefinition | ItemDefinition = node;

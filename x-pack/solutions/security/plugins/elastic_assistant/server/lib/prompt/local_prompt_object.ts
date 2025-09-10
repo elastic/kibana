@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Prompt } from '@kbn/security-ai-prompts';
+import type { Prompt } from '@kbn/security-ai-prompts';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -45,6 +45,8 @@ import {
   starterPromptTitle4,
   starterPromptIcon4,
   starterPromptPrompt4,
+  costSavingsInsightPart1,
+  costSavingsInsightPart2,
 } from './prompts';
 
 export const promptGroupId = {
@@ -52,6 +54,7 @@ export const promptGroupId = {
   aiAssistant: 'aiAssistant',
   defendInsights: {
     incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
+    policyResponseFailure: 'defendInsights-policyResponseFailure',
   },
   aiForSoc: 'aiForSoc',
 };
@@ -59,6 +62,8 @@ export const promptGroupId = {
 export const promptDictionary = {
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
+  costSavingsInsightPart1: `costSavingsInsightPart1`,
+  costSavingsInsightPart2: `costSavingsInsightPart2`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -80,6 +85,20 @@ export const promptDictionary = {
   defendInsightsIncompatibleAntivirusEventsEndpointId:
     'defendInsights-incompatibleAntivirusEventsEndpointId',
   defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
+  defendInsightsPolicyResponseFailureDefault: `defendInsights-policyResponseFailureDefault`,
+  defendInsightsPolicyResponseFailureRefine: `defendInsights-policyResponseFailureRefine`,
+  defendInsightsPolicyResponseFailureContinue: `defendInsights-policyResponseFailureContinue`,
+  defendInsightsPolicyResponseFailureGroup: 'defendInsights-policyResponseFailureGroup',
+  defendInsightsPolicyResponseFailureEvents: 'defendInsights-policyResponseFailureEvents',
+  defendInsightsPolicyResponseFailureEventsId: 'defendInsights-policyResponseFailureEventsId',
+  defendInsightsPolicyResponseFailureEventsEndpointId:
+    'defendInsights-policyResponseFailureEventsEndpointId',
+  defendInsightsPolicyResponseFailureEventsValue: 'defendInsights-policyResponseFailureEventsValue',
+  defendInsightsPolicyResponseFailureRemediation: 'defendInsights-policyResponseFailureRemediation',
+  defendInsightsPolicyResponseFailureRemediationMessage:
+    'defendInsights-policyResponseFailureRemediationMessage',
+  defendInsightsPolicyResponseFailureRemediationLink:
+    'defendInsights-policyResponseFailureRemediationLink',
   // context prompts
   alertEvaluation: `alertEvaluation`,
   dataQualityAnalysis: 'dataQualityAnalysis',
@@ -286,6 +305,83 @@ export const localPrompts: Prompt[] = [
     },
   },
   {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureDefault,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.DEFAULT,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRefine,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REFINE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureContinue,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.CONTINUE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureGroup,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.GROUP,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEvents,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEventsId,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEventsEndpointId,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS_ENDPOINT_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEventsValue,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS_VALUE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRemediation,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REMEDIATION,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRemediationMessage,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REMEDIATION_MESSAGE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRemediationLink,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REMEDIATION_LINK,
+    },
+  },
+  {
     promptId: promptDictionary.alertSummary,
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
@@ -297,6 +393,20 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
       default: ALERT_SUMMARY_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart1,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart1,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart2,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart2,
     },
   },
   {

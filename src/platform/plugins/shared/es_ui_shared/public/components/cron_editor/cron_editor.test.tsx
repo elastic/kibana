@@ -12,7 +12,7 @@ import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
-import { Frequency } from './types';
+import type { Frequency } from './types';
 import { CronEditor } from './cron_editor';
 
 describe('CronEditor', () => {

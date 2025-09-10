@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Fields } from '@kbn/apm-synthtrace-client';
-import { Logger } from '../../lib/utils/create_logger';
-import { Scenario } from '../scenario';
+import type { Fields } from '@kbn/apm-synthtrace-client';
+import type { Logger } from '../../lib/utils/create_logger';
+import type { Scenario } from '../scenario';
 
 export function getScenario({ file, logger }: { file: string; logger: Logger }) {
   logger.debug(`Loading scenario from ${file}`);

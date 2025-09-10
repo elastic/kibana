@@ -20,7 +20,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type {
   KibanaAssetReference,
@@ -77,7 +77,10 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
-import { getFilteredInstallPackages } from '../filtered_packages';
+import {
+  getAllowedSearchAiLakeInstallPackagesIfEnabled,
+  getFilteredInstallPackages,
+} from '../filtered_packages';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
@@ -96,6 +99,7 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -404,6 +408,8 @@ interface InstallRegistryPackageParams {
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   keepFailedInstallation?: boolean;
+  useStreaming?: boolean;
+  automaticInstall?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -468,12 +474,14 @@ async function installPackageFromRegistry({
   skipDataStreamRollover = false,
   retryFromLastState = false,
   keepFailedInstallation = false,
+  useStreaming = false,
+  automaticInstall = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
   let pkgVersion = version ?? '';
-  const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
+  useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName) || useStreaming;
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -516,6 +524,9 @@ async function installPackageFromRegistry({
       paths,
       archiveIterator,
     };
+    telemetryEvent.packageType = packageInfo.type;
+    telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
+    telemetryEvent.automaticInstall = automaticInstall;
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -569,6 +580,7 @@ async function installPackageFromRegistry({
       retryFromLastState,
       useStreaming,
       keepFailedInstallation,
+      automaticInstall,
     });
   } catch (e) {
     sendEvent({
@@ -610,6 +622,7 @@ export async function installPackageWithStateMachine(options: {
   retryFromLastState?: boolean;
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
+  automaticInstall?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -631,6 +644,7 @@ export async function installPackageWithStateMachine(options: {
     retryFromLastState,
     useStreaming,
     keepFailedInstallation,
+    automaticInstall,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -649,6 +663,9 @@ export async function installPackageWithStateMachine(options: {
     telemetryEvent = getTelemetryEvent(pkgName, pkgVersion);
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
+    telemetryEvent.packageType = packageInfo.type;
+    telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
+    telemetryEvent.automaticInstall = automaticInstall;
   }
 
   try {
@@ -660,6 +677,12 @@ export async function installPackageWithStateMachine(options: {
 
     const filteredPackages = getFilteredInstallPackages();
     if (filteredPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
+
+    const allowlistPackages = getAllowedSearchAiLakeInstallPackagesIfEnabled();
+    // This will only trigger if xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
+    if (allowlistPackages && !allowlistPackages.includes(pkgName)) {
       throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
     }
 
@@ -688,6 +711,22 @@ export async function installPackageWithStateMachine(options: {
     if (!licenseService.hasAtLeast(elasticSubscription)) {
       logger.error(`Installation requires ${elasticSubscription} license`);
       const err = new FleetError(`Installation requires ${elasticSubscription} license`);
+      sendEvent({
+        ...telemetryEvent,
+        errorMessage: err.message,
+      });
+      return { error: err, installType, installSource, pkgName };
+    }
+
+    const excludeDataStreamTypes =
+      appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+    if (!shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)) {
+      logger.error(
+        `Installation package: ${pkgName} is not allowed due to data stream type exclusions`
+      );
+      const err = new FleetError(
+        `Installation package: ${pkgName} is not allowed due to data stream type exclusions`
+      );
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,
@@ -928,6 +967,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -971,6 +1012,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
 
     return response;
@@ -1129,7 +1172,7 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
-  previousVersion?: string;
+  previousVersion?: string | null;
 }) {
   const {
     savedObjectsClient,
@@ -1145,6 +1188,7 @@ export async function restartInstallation(options: {
     install_status: 'installing',
     install_started_at: new Date().toISOString(),
     install_source: installSource,
+    previous_version: previousVersion,
   };
 
   if (verificationResult) {
@@ -1153,10 +1197,6 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
-  }
-
-  if (previousVersion) {
-    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({

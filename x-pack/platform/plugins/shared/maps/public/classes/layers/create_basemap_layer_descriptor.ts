@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { LayerDescriptor } from '../../../common/descriptor_types';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
 import { getKibanaTileMap } from '../../util';
 import { getEMSSettings } from '../../kibana_services';
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';

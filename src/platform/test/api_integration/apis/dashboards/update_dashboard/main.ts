@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const updatedDashboard = {
   attributes: {
@@ -21,7 +21,6 @@ const updatedDashboard = {
         type: 'visualization',
         gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
         panelIndex: '1',
-        panelRefName: 'panel_1',
         version: '7.3.0',
       },
     ],

@@ -34,8 +34,12 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   // prevents auto-refresh from cancelling ongoing requests to fetch the data for the tooltip
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
-  const { customMetrics } = useWaffleOptionsContext();
-  const requestMetrics = model.tooltipMetrics
+  const { customMetrics, preferredSchema } = useWaffleOptionsContext();
+
+  const requestMetrics = model.metrics
+    .getWaffleMapTooltipMetrics({
+      schema: preferredSchema ?? 'ecs',
+    })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
     | {
@@ -43,15 +47,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       }
     | SnapshotCustomMetricInput
   >;
-  const query = JSON.stringify({
-    bool: {
-      filter: {
-        match_phrase: { [model.fields.id]: node.id },
-      },
-    },
-  });
+
   const { nodes, loading } = useSnapshot({
-    filterQuery: query,
+    kuery: `"${model.fields.id}": ${node.id}`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -59,6 +57,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
+    schema: preferredSchema,
   });
 
   const dataNode = first(nodes);

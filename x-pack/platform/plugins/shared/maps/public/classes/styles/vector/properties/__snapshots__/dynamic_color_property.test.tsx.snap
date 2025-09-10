@@ -195,7 +195,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="0"
     >
       <Category
-        color="#e4eefd"
+        color="#d8e7ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 13_format"
@@ -206,7 +206,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="1"
     >
       <Category
-        color="#d3e3fe"
+        color="#c8ddff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="13_format up to 25_format"
@@ -217,7 +217,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="2"
     >
       <Category
-        color="#c1d8fe"
+        color="#b8d4ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="25_format up to 38_format"
@@ -228,7 +228,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="3"
     >
       <Category
-        color="#afceff"
+        color="#a8caff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="38_format up to 50_format"
@@ -239,7 +239,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="4"
     >
       <Category
-        color="#9dc3ff"
+        color="#98c0ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="50_format up to 63_format"
@@ -250,7 +250,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="5"
     >
       <Category
-        color="#8bb8ff"
+        color="#87b6ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="63_format up to 75_format"
@@ -261,7 +261,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="6"
     >
       <Category
-        color="#77adff"
+        color="#75acff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="75_format up to 88_format"
@@ -326,7 +326,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="0"
     >
       <Category
-        color="#dfebfd"
+        color="#d3e4ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 50th: 5572_format"
@@ -337,7 +337,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="1"
     >
       <Category
-        color="#c7dcfe"
+        color="#bdd7ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="50th: 5572_format up to 75th: 8079_format"
@@ -348,7 +348,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="2"
     >
       <Category
-        color="#afceff"
+        color="#a8caff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="75th: 8079_format up to 90th: 9607_format"
@@ -359,7 +359,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="3"
     >
       <Category
-        color="#97bfff"
+        color="#92bcff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="90th: 9607_format up to 95th: 10439_format"
@@ -370,7 +370,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="4"
     >
       <Category
-        color="#7eb1ff"
+        color="#7bafff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="95th: 10439_format up to 99th: 16857_format"

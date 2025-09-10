@@ -27,7 +27,6 @@ async function createAlert(
   return createdAlert;
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

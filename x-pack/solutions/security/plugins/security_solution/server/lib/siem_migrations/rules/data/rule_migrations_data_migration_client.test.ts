@@ -6,13 +6,13 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
 import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -25,7 +25,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
   } as unknown as AuthenticatedUser;
-  const dependencies = {} as unknown as SiemRuleMigrationsClientDependencies;
+  const dependencies = {} as unknown as SiemMigrationsClientDependencies;
 
   beforeEach(() => {
     ruleMigrationsDataMigrationClient = new RuleMigrationsDataMigrationClient(
@@ -91,7 +91,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
       ).mockResolvedValueOnce(response);
 
-      const result = await ruleMigrationsDataMigrationClient.get({ id });
+      const result = await ruleMigrationsDataMigrationClient.get(id);
 
       expect(result).toEqual({
         ...response._source,
@@ -112,7 +112,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         message: JSON.stringify(response),
       });
 
-      const result = await ruleMigrationsDataMigrationClient.get({ id });
+      const result = await ruleMigrationsDataMigrationClient.get(id);
 
       expect(result).toBeUndefined();
     });
@@ -123,7 +123,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(ruleMigrationsDataMigrationClient.get({ id })).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.get(id)).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.get).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(`Error getting migration ${id}: Error: Test error`);
@@ -137,9 +137,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
       const migrationId = 'testId';
       const index = '.kibana-siem-rule-migrations';
 
-      const operations = await ruleMigrationsDataMigrationClient.prepareDelete({
-        id: migrationId,
-      });
+      const operations = await ruleMigrationsDataMigrationClient.prepareDelete(migrationId);
 
       expect(operations).toMatchObject([
         {

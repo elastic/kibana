@@ -102,7 +102,7 @@ finished.
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an
 Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section),
-and then executes cypress against this stack. You can find this configuration in `x-pack/test/defend_workflows_cypress`
+and then executes cypress against this stack. You can find this configuration in `x-pack/solutions/security/test/defend_workflows_cypress`
 
 ### Test Execution: Examples
 

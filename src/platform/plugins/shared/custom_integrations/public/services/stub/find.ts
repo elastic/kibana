@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';
-import { PluginServiceFactory } from '../types';
-import { CustomIntegrationsStartDependencies } from '../../types';
+import type { CustomIntegrationsFindService } from '../find';
+import { filterCustomIntegrations } from '../find';
+import type { PluginServiceFactory } from '../types';
+import type { CustomIntegrationsStartDependencies } from '../../types';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsFindService` with stubbed output.

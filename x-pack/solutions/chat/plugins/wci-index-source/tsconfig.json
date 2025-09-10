@@ -22,7 +22,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/wc-integration-utils",
     "@kbn/wc-index-schema-builder",
-    "@kbn/wc-genai-utils",
     "@kbn/inference-plugin",
     "@kbn/actions-plugin",
     "@kbn/i18n"

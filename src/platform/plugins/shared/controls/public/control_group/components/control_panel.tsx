@@ -12,13 +12,13 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiToolTip,
-  UseEuiTheme,
 } from '@elastic/eui';
 import {
   apiHasParentApi,
@@ -27,10 +27,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classNames from 'classnames';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import { FloatingActions } from './floating_actions';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
-import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
+import type { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 import { isCompressed } from '../utils/is_compressed';
 import { controlWidthStyles } from './control_panel.styles';
@@ -98,6 +98,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const isEditable = viewMode === 'edit';
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
+  const controlLabel = isTwoLine ? panelTitle || defaultPanelTitle || '...' : undefined;
   const hasRoundedBorders = !api?.CustomPrependComponent && !isEditable && isTwoLine;
   const shouldHideComponent = Boolean(blockingError);
 
@@ -108,6 +109,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   return (
     <EuiFlexItem
+      component="li"
       ref={setNodeRef}
       style={{
         transition,
@@ -135,7 +137,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          label={isTwoLine ? panelTitle || defaultPanelTitle || '...' : undefined}
+          label={controlLabel}
+          id={`control-title-${uuid}`}
+          aria-label={`Control for ${controlLabel}`}
         >
           <EuiFormControlLayout
             fullWidth

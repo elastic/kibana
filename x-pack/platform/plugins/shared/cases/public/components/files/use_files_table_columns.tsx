@@ -7,13 +7,14 @@
 
 import React from 'react';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import * as i18n from './translations';
 import { parseMimeType } from './utils';
 import { FileNameLink } from './file_name_link';
 import { FileActionsPopoverButton } from './file_actions_popover_button';
+import { FileIcon } from './file_icon';
 
 export interface FilesTableColumnsProps {
   caseId: string;
@@ -30,7 +31,12 @@ export const useFilesTableColumns = ({
       field: 'name',
       'data-test-subj': 'cases-files-table-filename',
       render: (name: string, file: FileJSON) => (
-        <FileNameLink file={file} showPreview={() => showPreview(file)} />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <FileIcon file={file} />
+          </EuiFlexItem>
+          <FileNameLink file={file} showPreview={() => showPreview(file)} />
+        </EuiFlexGroup>
       ),
       width: '60%',
     },

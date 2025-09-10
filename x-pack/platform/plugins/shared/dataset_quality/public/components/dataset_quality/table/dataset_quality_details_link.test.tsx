@@ -6,7 +6,7 @@
  */
 
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 import { screen, render } from '@testing-library/react';

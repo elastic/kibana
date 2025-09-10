@@ -11,13 +11,15 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import type { IAggConfigs, IAggConfig } from '@kbn/data-plugin/public';
-import { ISchemas } from '@kbn/visualizations-plugin/public';
+import type { ISchemas } from '@kbn/visualizations-plugin/public';
 import { createMockedVisEditorSchemas } from '@kbn/visualizations-plugin/public/mocks';
 
-import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
+import type { DefaultEditorAggGroupProps } from './agg_group';
+import { DefaultEditorAggGroup } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import type { EditorVisState } from './sidebar/state/reducers';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -125,7 +127,11 @@ describe('DefaultEditorAgg component', () => {
   });
 
   it('should call setTouched with false', () => {
-    mount(<DefaultEditorAggGroup {...defaultProps} />);
+    mount(
+      <EuiThemeProvider>
+        <DefaultEditorAggGroup {...defaultProps} />
+      </EuiThemeProvider>
+    );
 
     expect(setTouched).toBeCalledWith(false);
   });
@@ -133,7 +139,11 @@ describe('DefaultEditorAgg component', () => {
   it('should last bucket has truthy isLastBucket prop', () => {
     defaultProps.groupName = 'buckets';
     defaultProps.schemas = schemas.buckets;
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
+    const comp = mount(
+      <EuiThemeProvider>
+        <DefaultEditorAggGroup {...defaultProps} />
+      </EuiThemeProvider>
+    );
     const lastAgg = comp.find(DefaultEditorAgg).last();
 
     expect(lastAgg.props()).toHaveProperty('isLastBucket', true);

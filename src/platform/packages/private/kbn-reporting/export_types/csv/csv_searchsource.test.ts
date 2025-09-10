@@ -26,10 +26,10 @@ import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mo
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { setFieldFormats } from '@kbn/reporting-server';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
-import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 const fakeRawRequest: FakeRawRequest = {
   headers: {

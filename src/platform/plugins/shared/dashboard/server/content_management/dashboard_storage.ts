@@ -9,18 +9,22 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
-import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObjectWithTags, savedObjectToItem } from './latest';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -31,7 +35,6 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
-  ReplaceTagReferencesByNameParams,
 } from './latest';
 
 const getRandomColor = (): string => {
@@ -211,6 +214,7 @@ export class DashboardStorage {
       DashboardGetOut,
       DashboardGetOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -258,15 +262,15 @@ export class DashboardStorage {
     const {
       attributes: soAttributes,
       references: soReferences,
-      error: attributesError,
-    } = await itemAttrsToSavedObjectWithTags({
-      attributes: dataToLatest,
-      replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
+      error: transformDashboardError,
+    } = await transformDashboardIn({
+      dashboardState: dataToLatest,
+      replaceTagReferencesByName: ({ references, newTagNames }) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
-    if (attributesError) {
-      throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
+    if (transformDashboardError) {
+      throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
     }
 
     // Save data in DB
@@ -297,6 +301,7 @@ export class DashboardStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<DashboardItem>
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -340,15 +345,15 @@ export class DashboardStorage {
     const {
       attributes: soAttributes,
       references: soReferences,
-      error: attributesError,
-    } = await itemAttrsToSavedObjectWithTags({
-      attributes: dataToLatest,
-      replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
+      error: transformDashboardError,
+    } = await transformDashboardIn({
+      dashboardState: dataToLatest,
+      replaceTagReferencesByName: ({ references, newTagNames }) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
-    if (attributesError) {
-      throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
+    if (transformDashboardError) {
+      throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
     }
 
     // Save data in DB
@@ -381,6 +386,7 @@ export class DashboardStorage {
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -426,20 +432,18 @@ export class DashboardStorage {
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
-    const hits = await Promise.all(
-      soResponse.saved_objects
-        .map(async (so) => {
-          const { item } = savedObjectToItem(so, false, {
-            allowedAttributes: soQuery.fields,
-            allowedReferences: optionsToLatest?.includeReferences,
-            getTagNamesFromReferences: (references: SavedObjectReference[]) =>
-              this.getTagNamesFromReferences(references, allTags),
-          });
-          return item;
-        })
-        // Ignore any saved objects that failed to convert to items.
-        .filter((item) => item !== null)
-    );
+    const hits = soResponse.saved_objects
+      .map((so) => {
+        const { item } = savedObjectToItem(so, false, {
+          allowedAttributes: soQuery.fields,
+          allowedReferences: optionsToLatest?.includeReferences,
+          getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+            this.getTagNamesFromReferences(references, allTags),
+        });
+        return item;
+      })
+      // Ignore any saved objects that failed to convert to items.
+      .filter((item) => item !== null);
     const response = {
       hits,
       pagination: {
@@ -461,6 +465,7 @@ export class DashboardStorage {
       DashboardSearchOut,
       DashboardSearchOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above

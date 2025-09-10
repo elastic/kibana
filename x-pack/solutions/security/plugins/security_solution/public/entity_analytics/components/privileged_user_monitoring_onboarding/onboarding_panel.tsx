@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddDataSourcePanel } from './components/add_data_source';
 import privilegedUserMonitoringOnboardingPageIllustration from '../../../common/images/information_light.png';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface PrivilegedUserMonitoringOnboardingPanelProps {
   onComplete: (userCount: number) => void;
@@ -29,8 +30,10 @@ interface PrivilegedUserMonitoringOnboardingPanelProps {
 export const PrivilegedUserMonitoringOnboardingPanel = ({
   onComplete,
 }: PrivilegedUserMonitoringOnboardingPanelProps) => {
+  const { docLinks } = useKibana().services;
+
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj="privilegedUserMonitoringOnboardingPanel">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
         <EuiFlexGroup
           direction="row"
@@ -62,11 +65,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                   <EuiText size="m">
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageDescription"
-                      defaultMessage="Privileged user monitoring provides visibility into privileged user
-                    activity, helping security teams analyze account usage, track access events, and
-                    spot potential risks. By continuously monitoring high-risk users and detecting anomalous
-                    privileged behaviors, the dashboard enables early detection of potential threats,
-                    such as unauthorized access or lateral movement, before they escalate."
+                      defaultMessage="Gain visibility into privileged user activity to analyze account usage, track access events, and spot potential risks. By continuously monitoring high-risk users and identifying anomalous privileged behaviors, you can detect potential threats, such as unauthorized access or lateral movement, before they escalate."
                     />
                   </EuiText>
                 </EuiFlexItem>
@@ -84,10 +83,11 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                         defaultMessage="Want to learn more?"
                       />
                       <EuiLink
-                        css={{ color: '#FF007F' }} // TODO DELETE THIS WHEN THE HREF LINK IS READY
                         external={true}
                         data-test-subj="learnMoreLink"
-                        href="??????" // TODO Add Link to docs
+                        href={
+                          docLinks?.links.securitySolution.entityAnalytics.privilegedUserMonitoring
+                        }
                         target="_blank"
                       >
                         <FormattedMessage

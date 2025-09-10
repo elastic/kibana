@@ -10,7 +10,7 @@
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 
-import { getAgentsSocketsStats } from './get_agents_sockets_stats';
+import type { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 export const getHttpAgentMock = (overrides: Partial<HttpAgent>) => {
   return Object.assign(new HttpAgent(), overrides);

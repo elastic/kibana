@@ -23,7 +23,7 @@ import {
   HIGHLIGHT_CLASS_NAME,
   BUTTON_PREV_TEST_SUBJ,
 } from './constants';
-import { RenderCellValuePropsWithInTableSearch } from './types';
+import type { RenderCellValuePropsWithInTableSearch } from './types';
 
 describe('useDataGridInTableSearch', () => {
   const testData = generateMockData(100, 2);
@@ -159,6 +159,36 @@ describe('useDataGridInTableSearch', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/200');
+    });
+  });
+
+  it('should initialize correctly when initial state is provided', async () => {
+    const originalRenderCellValue = getRenderCellValueMock(testData);
+    const originalCellContext = { testContext: true };
+    const initialProps = {
+      dataGridWrapper: null,
+      dataGridRef: createRef<null>(),
+      visibleColumns: ['columnA', 'columnB'],
+      rows: testData,
+      cellContext: originalCellContext,
+      renderCellValue: originalRenderCellValue,
+      pagination: undefined,
+      initialState: {
+        searchTerm: 'initial search term',
+      },
+    };
+    const { result } = renderHook((props) => useDataGridInTableSearch(props), {
+      initialProps,
+    });
+
+    const { inTableSearchTermCss, inTableSearchControl, cellContextWithInTableSearchSupport } =
+      result.current;
+
+    expect(inTableSearchControl).toBeDefined();
+    expect(inTableSearchTermCss).toBeUndefined();
+    expect(cellContextWithInTableSearchSupport).toEqual({
+      ...originalCellContext,
+      inTableSearchTerm: 'initial search term',
     });
   });
 });

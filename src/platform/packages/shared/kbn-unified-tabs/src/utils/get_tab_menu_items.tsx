@@ -8,13 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  TabItem,
-  GetTabMenuItems,
-  TabMenuItemWithClick,
-  TabMenuItem,
-  TabMenuItemName,
-} from '../types';
+import type { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
+import { TabMenuItemName } from '../types';
 import { isLastTab, hasSingleTab, type TabsState } from './manage_tabs';
 
 const DividerMenuItem = 'divider';

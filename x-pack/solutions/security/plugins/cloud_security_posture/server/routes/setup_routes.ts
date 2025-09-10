@@ -72,7 +72,7 @@ export function setupRoutes({
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
     async (context, request) => {
-      const [, { security, fleet }] = await core.getStartServices();
+      const [, { security, fleet, spaces }] = await core.getStartServices();
       const coreContext = await context.core;
       await fleet.fleetSetupCompleted();
 
@@ -89,6 +89,7 @@ export function setupRoutes({
         logger,
         esClient: coreContext.elasticsearch.client,
         soClient: coreContext.savedObjects.client,
+        spacesService: spaces?.spacesService,
         encryptedSavedObjects: coreContext.savedObjects.getClient({
           includedHiddenTypes: [INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE],
         }),

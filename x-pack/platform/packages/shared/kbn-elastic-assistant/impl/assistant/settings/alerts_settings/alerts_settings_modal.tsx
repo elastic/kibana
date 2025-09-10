@@ -14,6 +14,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useAssistantContext } from '../../../..';
 import { useKnowledgeBaseUpdater } from '../use_settings_updater/use_knowledge_base_updater';
@@ -31,15 +32,17 @@ export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
   const { knowledgeBaseSettings, saveKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings } =
     useKnowledgeBaseUpdater({ assistantTelemetry, knowledgeBase, setKnowledgeBase });
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const handleSave = useCallback(() => {
     saveKnowledgeBaseSettings();
     onClose();
   }, [onClose, saveKnowledgeBaseSettings]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{ALERTS_LABEL}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{ALERTS_LABEL}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <AlertsSettings

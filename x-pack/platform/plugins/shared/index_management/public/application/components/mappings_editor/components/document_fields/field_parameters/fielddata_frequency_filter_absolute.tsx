@@ -8,14 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFormControlLayoutDelimited,
-  EuiFieldNumber,
-  EuiFieldNumberProps,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFormControlLayoutDelimited, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 
-import { FieldHook } from '../../../shared_imports';
+import type { FieldHook } from '../../../shared_imports';
 
 interface Props {
   min: FieldHook<number>;
@@ -42,6 +38,7 @@ export const FielddataFrequencyFilterAbsolute = ({ min, max }: Props) => {
       }
     >
       <EuiFormControlLayoutDelimited
+        isInvalid={minIsInvalid || maxIsInvalid}
         startControl={
           <EuiFieldNumber
             value={min.value as EuiFieldNumberProps['value']}

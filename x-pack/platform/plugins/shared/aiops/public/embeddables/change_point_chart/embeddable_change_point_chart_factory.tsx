@@ -9,6 +9,7 @@ import {
   CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -125,23 +126,32 @@ export const getChangePointChartEmbeddableFactory = (
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableChangePointUserInput } = await import(
-              './resolve_change_point_config_input'
-            );
-
-            const result = await resolveEmbeddableChangePointUserInput(
-              coreStart,
-              pluginStart,
-              parentApi,
-              uuid,
-              changePointManager.getLatestState()
-            );
-
-            changePointManager.api.updateUserInput(result);
-          } catch (e) {
-            return Promise.reject();
-          }
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+              'aria-labelledby': 'changePointConfig',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const { EmbeddableChangePointUserInput } = await import(
+                './change_point_config_input'
+              );
+              return (
+                <EmbeddableChangePointUserInput
+                  coreStart={coreStart}
+                  pluginStart={pluginStart}
+                  onConfirm={(result) => {
+                    changePointManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={changePointManager.getLatestState()}
+                />
+              );
+            },
+          });
         },
         dataLoading$,
         blockingError$,

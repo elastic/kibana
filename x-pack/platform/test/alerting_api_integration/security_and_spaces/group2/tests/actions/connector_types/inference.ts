@@ -25,7 +25,6 @@ const secrets = {
 
 const defaultConfig = { provider: 'openai' };
 
-// eslint-disable-next-line import/no-default-export
 export default function InferenceConnectorTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);

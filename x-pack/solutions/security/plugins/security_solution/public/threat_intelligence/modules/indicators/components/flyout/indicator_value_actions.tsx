@@ -97,14 +97,14 @@ export const IndicatorValueActions: FC<IndicatorValueActions> = ({
       <EuiPopover
         data-test-subj={popoverTestId}
         button={
-          <EuiToolTip content={MORE_ACTIONS_BUTTON_LABEL}>
+          <EuiToolTip content={MORE_ACTIONS_BUTTON_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={MORE_ACTIONS_BUTTON_LABEL}
               iconType="boxesHorizontal"
               iconSize="s"
               size="xs"
               onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-              style={{ height: '100%' }}
+              css={{ height: '100%' }}
             />
           </EuiToolTip>
         }

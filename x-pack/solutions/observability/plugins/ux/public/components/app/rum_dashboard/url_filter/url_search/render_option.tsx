@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 import styled from '@emotion/styled';
 
 const StyledSpan = styled.span`

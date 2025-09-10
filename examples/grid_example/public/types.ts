@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CanAddNewPanel,
   CanExpandPanels,
   HasSerializedChildState,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { PublishesWritableViewMode } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { PublishesWritableViewMode } from '@kbn/presentation-publishing';
+import type { BehaviorSubject } from 'rxjs';
 
 export interface DashboardGridData {
   w: number;

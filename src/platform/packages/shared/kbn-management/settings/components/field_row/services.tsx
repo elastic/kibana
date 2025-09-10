@@ -11,7 +11,8 @@ import {
   FieldInputKibanaProvider,
   FieldInputProvider,
 } from '@kbn/management-settings-components-field-input/services';
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
 
 import type { FieldRowServices, FieldRowKibanaDependencies, Services } from './types';
 

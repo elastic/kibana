@@ -24,15 +24,28 @@ const fetchMock = jest.requireMock('../../services').securityWorkflowInsightsSer
 
 describe('Get Insights Route Handler', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let callRoute: (params: Record<string, string>, authz?: Record<string, boolean>) => Promise<void>;
+  let callRoute: (
+    params: Record<string, string | string[]>,
+    authz?: Record<string, boolean>
+  ) => Promise<void>;
   let mockEndpointContext: EndpointAppContext;
   let router: SecuritySolutionPluginRouterMock;
 
   beforeEach(() => {
     mockResponse = httpServerMock.createResponseFactory();
     mockEndpointContext = createMockEndpointAppContext();
+
+    // @ts-expect-error write to readonly property
+    mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
     router = httpServiceMock.createRouter();
     registerGetInsightsRoute(router, mockEndpointContext);
+
+    (
+      mockEndpointContext.service.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+
+    fetchMock.mockClear();
 
     callRoute = async (params, authz = { canReadWorkflowInsights: true }) => {
       const mockContext = {
@@ -70,8 +83,8 @@ describe('Get Insights Route Handler', () => {
   describe('with valid privileges', () => {
     it('should fetch insights and return them', async () => {
       const mockInsights = [
-        { _id: 1, _source: { name: 'Insight 1' } },
-        { _id: 2, _source: { name: 'Insight 2' } },
+        { _id: 1, _source: { name: 'Insight 1', target: { ids: ['agent-123', 'agent-456'] } } },
+        { _id: 2, _source: { name: 'Insight 2', target: { ids: ['agent-123', 'agent-456'] } } },
       ];
       fetchMock.mockResolvedValue(mockInsights);
 
@@ -80,9 +93,199 @@ describe('Get Insights Route Handler', () => {
       expect(fetchMock).toHaveBeenCalledWith({ query: 'test-query' });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: [
-          { id: 1, name: 'Insight 1' },
-          { id: 2, name: 'Insight 2' },
+          { id: 1, name: 'Insight 1', target: { ids: ['agent-123', 'agent-456'] } },
+          { id: 2, name: 'Insight 2', target: { ids: ['agent-123', 'agent-456'] } },
         ],
+      });
+    });
+
+    describe('policy_response_failure feature flag validation', () => {
+      it('should accept policy_response_failure types when feature flag is enabled', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = true;
+
+        const mockInsights = [
+          {
+            _id: 1,
+            _source: {
+              type: 'policy_response_failure',
+              name: 'Policy Response Failure Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          },
+        ];
+        fetchMock.mockResolvedValue(mockInsights);
+
+        await callRoute({ types: ['policy_response_failure'] });
+
+        expect(fetchMock).toHaveBeenCalledWith({ types: ['policy_response_failure'] });
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: [
+            {
+              id: 1,
+              type: 'policy_response_failure',
+              name: 'Policy Response Failure Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          ],
+        });
+      });
+
+      it('should reject policy_response_failure types when feature flag is disabled', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        await callRoute({ types: ['policy_response_failure'] });
+
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: 'policy_response_failure insight type requires defendInsightsPolicyResponseFailure feature flag',
+        });
+        expect(fetchMock).not.toHaveBeenCalled();
+      });
+
+      it('should accept mixed types when feature flag is enabled', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = true;
+
+        const mockInsights = [
+          {
+            _id: 1,
+            _source: {
+              type: 'incompatible_antivirus',
+              name: 'Antivirus Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          },
+          {
+            _id: 2,
+            _source: {
+              type: 'policy_response_failure',
+              name: 'Policy Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          },
+        ];
+        fetchMock.mockResolvedValue(mockInsights);
+
+        await callRoute({ types: ['incompatible_antivirus', 'policy_response_failure'] });
+
+        expect(fetchMock).toHaveBeenCalledWith({
+          types: ['incompatible_antivirus', 'policy_response_failure'],
+        });
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: [
+            {
+              id: 1,
+              type: 'incompatible_antivirus',
+              name: 'Antivirus Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+            {
+              id: 2,
+              type: 'policy_response_failure',
+              name: 'Policy Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          ],
+        });
+      });
+
+      it('should reject mixed types when feature flag is disabled and policy_response_failure is included', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        await callRoute({ types: ['incompatible_antivirus', 'policy_response_failure'] });
+
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: 'policy_response_failure insight type requires defendInsightsPolicyResponseFailure feature flag',
+        });
+        expect(fetchMock).not.toHaveBeenCalled();
+      });
+
+      it('should allow incompatible_antivirus types regardless of feature flag state', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        const mockInsights = [
+          {
+            _id: 1,
+            _source: {
+              type: 'incompatible_antivirus',
+              name: 'Antivirus Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          },
+        ];
+        fetchMock.mockResolvedValue(mockInsights);
+
+        await callRoute({ types: ['incompatible_antivirus'] });
+
+        expect(fetchMock).toHaveBeenCalledWith({ types: ['incompatible_antivirus'] });
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: [
+            {
+              id: 1,
+              type: 'incompatible_antivirus',
+              name: 'Antivirus Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          ],
+        });
+      });
+
+      it('should handle array format for types parameter with feature flag validation', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = true;
+
+        const mockInsights = [
+          {
+            _id: 1,
+            _source: {
+              type: 'policy_response_failure',
+              name: 'Policy Insight',
+              target: { ids: ['agent-1'] },
+              category: 'endpoint',
+              message: 'Test message',
+            },
+          },
+        ];
+        fetchMock.mockResolvedValue(mockInsights);
+
+        await callRoute({ types: ['policy_response_failure'] });
+
+        expect(fetchMock).toHaveBeenCalledWith({ types: ['policy_response_failure'] });
+        expect(mockResponse.ok).toHaveBeenCalled();
+      });
+
+      it('should handle empty types parameter without feature flag validation', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        const mockInsights: Array<{ _id: number; _source: { type: string; name: string } }> = [];
+        fetchMock.mockResolvedValue(mockInsights);
+
+        await callRoute({ types: [] });
+
+        expect(fetchMock).toHaveBeenCalledWith({ types: [] });
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: [],
+        });
       });
     });
 

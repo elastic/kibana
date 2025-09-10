@@ -64,6 +64,10 @@ export interface EndpointAuthz {
   canWriteTrustedApplications: boolean;
   /** If the user has read permissions for trusted applications */
   canReadTrustedApplications: boolean;
+  /** If the user has write permissions for trusted devices */
+  canWriteTrustedDevices: boolean;
+  /** If the user has read permissions for trusted devices */
+  canReadTrustedDevices: boolean;
   /** If the user has write permissions for host isolation exceptions */
   canWriteHostIsolationExceptions: boolean;
   /** If the user has read permissions for host isolation exceptions */

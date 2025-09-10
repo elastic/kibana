@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiAvatar,
-  EuiBadge,
-  EuiBasicTableColumn,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiIcon, EuiText, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
-import {
-  DocumentEntryType,
-  IndexEntryType,
-  KnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common';
-import { UserProfileAvatarData } from '@kbn/user-profile-components';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
+import type { UserProfileAvatarData } from '@kbn/user-profile-components';
 import { useQuery } from '@tanstack/react-query';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';

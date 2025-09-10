@@ -23,9 +23,9 @@ import type { StateActionResponse } from '../types';
 import { updateIndexMappings } from './update_index_mappings';
 import { updateIndexMappingsWaitForTask } from './update_index_mappings_wait_for_task';
 import { model } from '../model';
-import { RetryableEsClientError } from '../../actions';
-import { TaskCompletedWithRetriableError } from '../../../actions/wait_for_task';
-import { FatalState } from '../../../state';
+import type { RetryableEsClientError } from '../../actions';
+import type { TaskCompletedWithRetriableError } from '../../../actions/wait_for_task';
+import type { FatalState } from '../../../state';
 
 describe('Stage: updateIndexMappings', () => {
   let context: MockedMigratorContext;

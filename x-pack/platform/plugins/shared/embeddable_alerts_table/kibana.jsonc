@@ -22,8 +22,7 @@
       "data",
       "fieldFormats",
       "licensing",
-      "cases",
-      "security",
+      "security"
     ],
     "requiredBundles": [
       "kibanaReact"

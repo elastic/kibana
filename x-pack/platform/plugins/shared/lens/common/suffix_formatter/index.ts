@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldFormat, FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FormatFactory } from '../types';
 import type { TimeScaleUnit } from '../expressions/defs/time_scale';
 

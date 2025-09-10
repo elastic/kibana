@@ -5,44 +5,58 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiProgress,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { Sample } from '@kbn/grok-ui';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { Sample } from '@kbn/grok-ui';
-import { GrokProcessorDefinition } from '@kbn/streams-schema';
-import { PreviewTable } from '../preview_table';
+import type { GrokProcessor } from '@kbn/streamlang';
+import { getPercentageFormatter } from '../../../util/formatters';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
+import {
+  getSourceField,
+  getTableColumns,
+  getUniqueDetectedFields,
+  previewDocsFilterOptions,
+} from './state_management/simulation_state_machine';
+import {
+  selectHasSimulatedRecords,
+  selectOriginalPreviewRecords,
+  selectPreviewRecords,
+} from './state_management/simulation_state_machine/selectors';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import {
-  PreviewDocsFilterOption,
-  getTableColumns,
-  previewDocsFilterOptions,
-} from './state_management/simulation_state_machine';
-import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
-import { isGrokProcessor } from './utils';
+import { isProcessorUnderEdit } from './state_management/processor_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import { WithUIAttributes } from './types';
-import { AssetImage } from '../../asset_image';
+import { docViewJson } from './doc_viewer_json';
+import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
+import type { DataTableRecordWithIndex } from './preview_flyout';
+import { PreviewFlyout } from './preview_flyout';
+import { MemoProcessingPreviewTable } from './processing_preview_table';
+import {
+  NoPreviewDocumentsEmptyPrompt,
+  NoProcessingDataAvailableEmptyPrompt,
+} from './empty_prompts';
 
 export const ProcessorOutcomePreview = () => {
-  const isLoading = useSimulatorSelector(
-    (snapshot) => snapshot.matches('debouncingChanges') || snapshot.matches('runningSimulation')
-  );
-
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewRecords(snapshot.context)
+  );
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
     state.context.dataSourcesRefs.some((ref) => {
@@ -64,32 +78,7 @@ export const ProcessorOutcomePreview = () => {
       );
     }
 
-    return (
-      <EuiEmptyPrompt
-        color="warning"
-        iconType="warning"
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
-              { defaultMessage: 'No data available to validate processor changes' }
-            )}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
-              {
-                defaultMessage:
-                  'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
-              }
-            )}
-          </p>
-        }
-      />
-    );
+    return <NoProcessingDataAvailableEmptyPrompt />;
   }
 
   return (
@@ -98,24 +87,24 @@ export const ProcessorOutcomePreview = () => {
         <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable />
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {isEmpty(previewDocuments) ? (
+        <NoPreviewDocumentsEmptyPrompt />
+      ) : (
+        <OutcomePreviewTable previewDocuments={previewDocuments} />
+      )}
     </>
   );
 };
 
-const formatter = new Intl.NumberFormat('en-US', {
-  style: 'percent',
-  maximumFractionDigits: 1,
-});
+const formatter = getPercentageFormatter();
 
-const formatRateToPercentage = (rate?: number) =>
-  (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
+const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
   const simulationFailedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
   );
@@ -132,6 +121,7 @@ const PreviewDocumentsGroupBy = () => {
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
     isSelected: previewDocsFilter === filter,
+    disabled: !hasMetrics,
     hasActiveFilters: previewDocsFilter === filter,
     onClick: () => changePreviewDocsFilter(filter),
   });
@@ -152,7 +142,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
-          numFilters={simulationParsedRate}
           numActiveFilters={simulationParsedRate}
         >
           {previewDocsFilterOptions.outcome_filter_parsed.label}
@@ -160,7 +149,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
           badgeColor="accent"
-          numFilters={simulationPartiallyParsedRate}
           numActiveFilters={simulationPartiallyParsedRate}
         >
           {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
@@ -168,7 +156,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
           badgeColor="accent"
-          numFilters={simulationSkippedRate}
           numActiveFilters={simulationSkippedRate}
         >
           {previewDocsFilterOptions.outcome_filter_skipped.label}
@@ -176,7 +163,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
           badgeColor="accent"
-          numFilters={simulationFailedRate}
           numActiveFilters={simulationFailedRate}
         >
           {previewDocsFilterOptions.outcome_filter_failed.label}
@@ -186,8 +172,7 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
-const OutcomePreviewTable = () => {
-  const processors = useSimulatorSelector((state) => state.context.processors);
+const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
@@ -200,9 +185,38 @@ const OutcomePreviewTable = () => {
     (state) => state.context.explicitlyDisabledPreviewColumns
   );
   const previewColumnsOrder = useSimulatorSelector((state) => state.context.previewColumnsOrder);
-  const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+  const originalSamples = useSimulatorSelector((snapshot) =>
+    selectOriginalPreviewRecords(snapshot.context)
   );
+  const hasSimulatedRecords = useSimulatorSelector((snapshot) =>
+    selectHasSimulatedRecords(snapshot.context)
+  );
+
+  const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
+    (state) => state.context.dataSourcesRefs.length >= 2
+  );
+  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
+    const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
+      isProcessorUnderEdit(processorRef.getSnapshot())
+    );
+
+    if (!currentProcessorRef) return undefined;
+
+    return getSourceField(currentProcessorRef.getSnapshot().context.processor);
+  });
+
+  const { dependencies } = useKibana();
+  const { unifiedDocViewer } = dependencies.start;
+
+  const docViewsRegistry = useMemo(() => {
+    const docViewers = unifiedDocViewer.registry.getAll();
+    const myRegistry = new DocViewsRegistry([
+      docViewers.find((docView) => docView.id === 'doc_view_table')!,
+      docViewDiff,
+      docViewJson,
+    ]);
+    return myRegistry;
+  }, [unifiedDocViewer.registry]);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -219,8 +233,12 @@ const OutcomePreviewTable = () => {
         fields.add(key);
       });
     });
-    return Array.from(fields);
-  }, [previewDocuments]);
+    // Keep the detected fields as first columns on the table and sort the rest alphabetically
+    const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
+    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
+
+    return [...uniqDetectedFields, ...otherFields.sort()];
+  }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
     selectDraftProcessor(snapshot.context)
@@ -232,28 +250,32 @@ const OutcomePreviewTable = () => {
 
   const grokMode =
     draftProcessor?.processor &&
-    isGrokProcessor(draftProcessor.processor) &&
-    !isEmpty(draftProcessor.processor.grok.field) &&
+    draftProcessor.processor.action === 'grok' &&
+    !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
     !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
-      const fieldName = draftProcessor.processor?.grok.field;
+      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
+      const fieldName = draftProcessor.processor?.from;
       return Array.from(grokExpression.getFields().values()).some(
         (field) => field.name === fieldName
       );
     });
 
-  const grokField = grokMode
-    ? (draftProcessor.processor as WithUIAttributes<GrokProcessorDefinition>).grok.field
-    : undefined;
+  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
+  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
 
-  const previewColumns = useMemo(() => {
-    let cols = getTableColumns(processors, detectedFields ?? [], previewDocsFilter);
-    if (grokField) {
-      // If we are in Grok mode, we exclude the detected fields and only use the Grok field
-      // sine it is highlighting extracted values
-      cols = [grokField];
-    }
+  const validCurrentProcessorSourceField =
+    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
+      ? currentProcessorSourceField
+      : undefined;
+
+  const availableColumns = useMemo(() => {
+    let cols = getTableColumns({
+      currentProcessorSourceField: validCurrentProcessorSourceField,
+      detectedFields,
+      previewDocsFilter,
+    });
+
     if (cols.length === 0) {
       // If no columns are detected, we fall back to all fields from the preview documents
       cols = allColumns;
@@ -272,90 +294,163 @@ const OutcomePreviewTable = () => {
     detectedFields,
     explicitlyDisabledPreviewColumns,
     explicitlyEnabledPreviewColumns,
-    grokField,
     previewDocsFilter,
-    processors,
+    validCurrentProcessorSourceField,
   ]);
 
-  const setVisibleColumns = (visibleColumns: string[]) => {
-    if (visibleColumns.length === 0) {
-      // If no columns are visible, we reset the explicitly enabled and disabled columns
-      setExplicitlyDisabledPreviewColumns(allColumns);
+  /**
+   * If we are in Grok mode and the field matches an existing field,
+   * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
+   */
+  const grokColumns = useMemo(
+    () => (validGrokField ? [validGrokField] : undefined),
+    [validGrokField]
+  );
+
+  const previewColumns = grokColumns ?? availableColumns;
+
+  const setVisibleColumns = useCallback(
+    (visibleColumns: string[]) => {
+      if (visibleColumns.length === 0) {
+        // If no columns are visible, we reset the explicitly enabled and disabled columns
+        setExplicitlyDisabledPreviewColumns(allColumns);
+        return;
+      }
+      // find which columns got added or removed comparing visibleColumns with the current displayColumns
+      const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
+      if (addedColumns.length > 0) {
+        setExplicitlyEnabledPreviewColumns([
+          ...explicitlyEnabledPreviewColumns,
+          ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
+        ]);
+      }
+      const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
+      if (removedColumns.length > 0) {
+        setExplicitlyDisabledPreviewColumns([
+          ...explicitlyDisabledPreviewColumns,
+          ...removedColumns.filter((col) => !explicitlyDisabledPreviewColumns.includes(col)),
+        ]);
+      }
+      setPreviewColumnsOrder(visibleColumns);
+    },
+    [
+      allColumns,
+      explicitlyDisabledPreviewColumns,
+      explicitlyEnabledPreviewColumns,
+      previewColumns,
+      setExplicitlyDisabledPreviewColumns,
+      setExplicitlyEnabledPreviewColumns,
+      setPreviewColumnsOrder,
+    ]
+  );
+
+  const renderCellValue = useMemo(
+    () =>
+      grokMode
+        ? (document: SampleDocument, columnId: string) => {
+            const value = document[columnId];
+            if (typeof value === 'string' && columnId === validGrokField) {
+              return (
+                <Sample
+                  grokCollection={grokCollection}
+                  draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+                  sample={value}
+                />
+              );
+            } else {
+              return undefined;
+            }
+          }
+        : undefined,
+    [draftProcessor.resources?.grokExpressions, grokCollection, grokMode, validGrokField]
+  );
+
+  const hits = useMemo(() => {
+    return previewDocuments.map((doc, index) =>
+      // make sure the ID is unique when remapping a new batch of preview documents so the document flyout will refresh properly
+      ({
+        raw: doc,
+        flattened: doc,
+        index,
+        id: `${index}-${Date.now()}`,
+      })
+    );
+  }, [previewDocuments]);
+
+  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (currentDoc) {
+      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
+      const hit = hits.find((h) => h.index === currentDoc.index);
+      if (hit && hit !== currentDoc) {
+        setExpandedDoc(hit);
+      } else if (!hit && currentDoc) {
+        // if the current doc is not found in the hits, reset it
+        setExpandedDoc(undefined);
+      }
+    }
+  }, [currentDoc, hits]);
+
+  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
+  currentDocRef.current = currentDoc;
+  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
+  hitsRef.current = hits;
+  const onRowSelected = useCallback((rowIndex: number) => {
+    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
+      // If the same row is clicked, we collapse the flyout
+      setExpandedDoc(undefined);
       return;
     }
-    // find which columns got added or removed comparing visibleColumns with the current displayColumns
-    const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
-    if (addedColumns.length > 0) {
-      setExplicitlyEnabledPreviewColumns([
-        ...explicitlyEnabledPreviewColumns,
-        ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
-      ]);
-    }
-    const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
-    if (removedColumns.length > 0) {
-      setExplicitlyDisabledPreviewColumns([
-        ...explicitlyDisabledPreviewColumns,
-        ...removedColumns.filter((col) => !explicitlyDisabledPreviewColumns.includes(col)),
-      ]);
-    }
-    setPreviewColumnsOrder(visibleColumns);
-  };
+    setExpandedDoc(hitsRef.current[rowIndex]);
+  }, []);
 
-  if (isEmpty(previewDocuments)) {
-    return (
-      <EuiEmptyPrompt
-        icon={<AssetImage type="noResults" />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsTitle',
-              { defaultMessage: 'No documents available' }
-            )}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsBody',
-              {
-                defaultMessage: 'The current filter settings do not match any documents.',
-              }
-            )}
-          </p>
-        }
-      />
-    );
-  }
+  const docViewerContext = useMemo(
+    () => ({
+      originalSample:
+        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
+    }),
+    [currentDoc, originalSamples]
+  );
+
+  useEffect(() => {
+    if (docViewerContext.originalSample && hasSimulatedRecords) {
+      // If the original sample is available, enable the diff tab - otherwise disable it
+      docViewsRegistry.enableById(DOC_VIEW_DIFF_ID);
+    } else {
+      docViewsRegistry.disableById(DOC_VIEW_DIFF_ID);
+    }
+  }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
   return (
-    <PreviewTable
-      documents={previewDocuments}
-      displayColumns={previewColumns}
-      rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
-      toolbarVisibility
-      setVisibleColumns={setVisibleColumns}
-      sorting={previewColumnsSorting}
-      setSorting={setPreviewColumnsSorting}
-      columnOrderHint={previewColumnsOrder}
-      renderCellValue={
-        grokMode
-          ? (document, columnId) => {
-              const value = document[columnId];
-              if (typeof value === 'string' && columnId === grokField) {
-                return (
-                  <Sample
-                    grokCollection={grokCollection}
-                    draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-                    sample={value}
-                  />
-                );
-              } else {
-                return undefined;
-              }
-            }
-          : undefined
-      }
-    />
+    <>
+      <MemoProcessingPreviewTable
+        documents={previewDocuments}
+        originalSamples={originalSamples}
+        showRowSourceAvatars={shouldShowRowSourceAvatars}
+        onRowSelected={onRowSelected}
+        selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
+        displayColumns={previewColumns}
+        rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+        toolbarVisibility
+        setVisibleColumns={setVisibleColumns}
+        sorting={previewColumnsSorting}
+        setSorting={setPreviewColumnsSorting}
+        columnOrderHint={previewColumnsOrder}
+        renderCellValue={renderCellValue}
+      />
+      <DocViewerContext.Provider value={docViewerContext}>
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={setExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+        />
+      </DocViewerContext.Provider>
+    </>
   );
 };
+
+const staticRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };

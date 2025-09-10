@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/public';
 import { Subject } from 'rxjs';
 
 export function useObservabilityAIAssistantChatService() {
@@ -19,7 +18,7 @@ export function useObservabilityAIAssistantChatService() {
           name: 'foo',
           description: 'use this function to foo',
           descriptionForUser: 'a function that functions',
-          visibility: FunctionVisibility.All,
+          isInternal: false,
         },
       ];
     },

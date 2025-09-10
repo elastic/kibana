@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const sampleDashboard = {
   contentTypeId: 'dashboard',
@@ -19,7 +19,7 @@ const sampleDashboard = {
     references: [],
     overwrite: true,
   },
-  version: 2,
+  version: 1,
 };
 
 const sampleIndexPattern = {

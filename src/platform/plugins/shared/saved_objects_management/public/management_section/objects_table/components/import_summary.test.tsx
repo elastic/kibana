@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ImportSummary, ImportSummaryProps } from './import_summary';
-import { FailedImport } from '../../../lib';
+import type { ImportSummaryProps } from './import_summary';
+import { ImportSummary } from './import_summary';
+import type { FailedImport } from '../../../lib';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
@@ -44,13 +45,13 @@ describe('ImportSummary', () => {
 
   const findHeader = (wrapper: ReactWrapper) => wrapper.find('h3');
   const findCountCreated = (wrapper: ReactWrapper) =>
-    wrapper.find('h4.savedObjectsManagementImportSummary__createdCount');
+    wrapper.find('h4[data-test-subj="importSavedObjectsCreatedCount"]');
   const findCountOverwritten = (wrapper: ReactWrapper) =>
-    wrapper.find('h4.savedObjectsManagementImportSummary__overwrittenCount');
+    wrapper.find('h4[data-test-subj="importSavedObjectsOverwrittenCount"]');
   const findCountError = (wrapper: ReactWrapper) =>
-    wrapper.find('h4.savedObjectsManagementImportSummary__errorCount');
+    wrapper.find('h4[data-test-subj="importSavedObjectsErrorsCount"]');
   const findObjectRow = (wrapper: ReactWrapper) =>
-    wrapper.find('.savedObjectsManagementImportSummary__row').hostNodes();
+    wrapper.find('[data-test-subj="importSavedObjectsRow"]').hostNodes();
   const findWarnings = (wrapper: ReactWrapper) => wrapper.find('ImportWarning');
 
   it('should render as expected with no results', async () => {

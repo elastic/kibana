@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import {
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationArgs,
   ManualRangeEventAnnotationArgs,
 } from './manual_event_annotation/types';
-import {
+import type {
   QueryPointEventAnnotationArgs,
   QueryPointEventAnnotationOutput,
 } from './query_point_event_annotation/types';

@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { TopNavMenuItem, TopNavMenuItemProps } from './top_nav_menu_item';
+import type { TopNavMenuItemProps } from './top_nav_menu_item';
+import { TopNavMenuItem } from './top_nav_menu_item';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonIcon } from '@elastic/eui';
 

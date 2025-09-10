@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -17,10 +16,11 @@ import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { SurveySection } from './components/survey_section';
-import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
+import { InventoryViewsProvider } from './hooks/use_inventory_views';
+import { WaffleOptionsProvider } from './hooks/use_waffle_options';
+import { InventoryTimeRangeMetadataProvider } from './providers/inventory_timerange_metadata_provider';
 
 export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
@@ -33,32 +33,34 @@ export const SnapshotPage = () => {
   ]);
 
   return (
-    <EuiErrorBoundary>
+    <InventoryViewsProvider>
       <WaffleOptionsProvider>
         <WaffleTimeProvider>
           <WaffleFiltersProvider>
-            <div className={APP_WRAPPER_CLASS}>
-              <InfraPageTemplate
-                onboardingFlow={OnboardingFlow.Infra}
-                pageHeader={{
-                  pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />, <SurveySection />],
-                }}
-                pageSectionProps={{
-                  contentProps: {
-                    css: css`
-                      ${fullHeightContentStyles};
-                      padding-bottom: 0;
-                    `,
-                  },
-                }}
-              >
-                <SnapshotContainer />
-              </InfraPageTemplate>
-            </div>
+            <InventoryTimeRangeMetadataProvider>
+              <div className={APP_WRAPPER_CLASS}>
+                <InfraPageTemplate
+                  onboardingFlow={OnboardingFlow.Infra}
+                  pageHeader={{
+                    pageTitle: inventoryTitle,
+                    rightSideItems: [<SavedViews />],
+                  }}
+                  pageSectionProps={{
+                    contentProps: {
+                      css: css`
+                        ${fullHeightContentStyles};
+                        padding-bottom: 0;
+                      `,
+                    },
+                  }}
+                >
+                  <SnapshotContainer />
+                </InfraPageTemplate>
+              </div>
+            </InventoryTimeRangeMetadataProvider>
           </WaffleFiltersProvider>
         </WaffleTimeProvider>
       </WaffleOptionsProvider>
-    </EuiErrorBoundary>
+    </InventoryViewsProvider>
   );
 };

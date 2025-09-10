@@ -63,6 +63,10 @@ import {
   CustomIntegrationRequestSchema,
   DeletePackageDatastreamAssetsRequestSchema,
   DeletePackageDatastreamAssetsResponseSchema,
+  RollbackPackageRequestSchema,
+  RollbackPackageResponseSchema,
+  GetKnowledgeBaseRequestSchema,
+  GetKnowledgeBaseResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -87,6 +91,8 @@ import {
   createCustomIntegrationHandler,
   getInputsHandler,
   updateCustomIntegrationHandler,
+  getKnowledgeBaseHandler,
+  rollbackPackageHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -353,6 +359,45 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getInfoHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN,
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN)
+        ).granted,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route uses Fleet authorization via fleetAuthz instead of standard Kibana authorization',
+        },
+      },
+      summary: `Get all knowledge base content for a package`,
+      options: {
+        tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+      },
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetKnowledgeBaseRequestSchema,
+          response: {
+            200: {
+              body: () => GetKnowledgeBaseResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getKnowledgeBaseHandler
     );
 
   router.versioned
@@ -875,4 +920,37 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       deletePackageDatastreamAssetsHandler
     );
+
+  if (experimentalFeatures.enablePackageRollback) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.ROLLBACK_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Rollback a package to previous version`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+          availability: {
+            since: '9.1.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: RollbackPackageRequestSchema,
+            response: {
+              200: {
+                body: () => RollbackPackageResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        rollbackPackageHandler
+      );
+  }
 };

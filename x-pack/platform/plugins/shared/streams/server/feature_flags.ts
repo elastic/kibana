@@ -6,29 +6,61 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
+} from '@kbn/management-settings-ids';
+import type { StreamsPluginStartDependencies } from './types';
+import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
-const technicalPreviewLabel = i18n.translate('xpack.streams.technicalPreviewSettingLabel', {
-  defaultMessage: 'Technical Preview',
-});
+export function registerFeatureFlags(
+  core: CoreSetup<StreamsPluginStartDependencies>,
+  logger: Logger
+) {
+  core.pricing
+    .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
+    .then((isSignificantEventsAvailable) => {
+      if (isSignificantEventsAvailable) {
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.significantEventsSettingsName', {
+              defaultMessage: 'Streams significant events',
+            }) as string,
+            value: false,
+            description: i18n.translate('xpack.streams.significantEventsSettingsDescription', {
+              defaultMessage: 'Enable streams significant events.',
+            }),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: true,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+          },
+        });
+      }
+    })
+    .catch((error) => {
+      logger.error(`Failed to register significant events ui settings: ${error}`);
+    });
 
-export const featureFlagUiSettings: Record<string, UiSettingsParams> = {
-  [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: {
-    category: ['observability'],
-    name: i18n.translate('xpack.streams.significantEventsSettingsName', {
-      defaultMessage: 'Streams significant events',
-    }),
-    value: false,
-    description: i18n.translate('xpack.streams.significantEventsSettingsDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enable streams significant events.',
-
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-    }),
-    type: 'boolean',
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solution: 'oblt',
-  },
-};
+  core.uiSettings.register({
+    [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.groupStreamsSettingsName', {
+        defaultMessage: 'Group streams',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
+        defaultMessage: 'Enable Group streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+    },
+  });
+}

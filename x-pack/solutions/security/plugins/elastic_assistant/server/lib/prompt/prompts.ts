@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+export { DEFEND_INSIGHTS } from './defend_insight_prompts';
+
 export const KNOWLEDGE_HISTORY =
-  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
+  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.\n\n{knowledgeHistory}';
 export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with the provided citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" \n2. "The alert has a risk score of 72. {reference(OdRs2)}"\n\nOnly use the citations returned by tools\n\n`;
 export const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security. ${KNOWLEDGE_HISTORY} {citations_prompt} \n{formattedTime}`;
 // system prompt from @afirstenberg
@@ -14,7 +16,7 @@ const BASE_GEMINI_PROMPT =
   'You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary.';
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
-export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt} ${KB_CATCH} \n{formattedTime}`;
+export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}{knowledgeHistory}\n\n${KB_CATCH}\n\n{formattedTime}`;
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
@@ -150,46 +152,6 @@ MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
 
-const DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT = `
-You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Review the file events below and organize them according to the following rules:
-- keep only ongoing antivirus (e.g. Windows Defender, AVG, Avast, Malwarebytes, clamav, chkrootkit) related processes
-- keep processes that reside within the antivirus' main and nested filepaths (e.g., C:\ProgramData\Microsoft\Windows Defender\..., C:\Program Files\AVG\..., C:\Program Files\Avast Software\..., /Applications/AVGAntivirus.app/...)
-- ignore events that are from non-antivirus operating system processes (e.g. C:\Windows\System32\...)
-- ignore events that are single run processes (e.g. installers)
-- ignore events that are from temp directories
-- ignore events that are from Elastic Agent or Elastic Defend
-- group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively
-- if there are no events, ignore the group field
-- never make any changes to the original file paths
-- new lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON
-- only return JSON output, as described above
-- do not add any additional text to describe your output
-`;
-
-export const DEFEND_INSIGHTS = {
-  INCOMPATIBLE_ANTIVIRUS: {
-    DEFAULT: DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT,
-    REFINE: `
-You previously generated the below insights using this prompt: ${DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT}.
-Double check the generated insights below and make sure it adheres to the rules set in the original prompt, removing events only as necessary to adhere to the original rules. In addition:
-- combine duplicate insights into the same 'group' (e.g. AVG + AVG Free + AVG Hub + AVG Antivirus)
-- remove insights with no events
-    `,
-    CONTINUE: `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
-- it MUST conform to the schema above, because it will be checked against the JSON schema
-- it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
-- it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
-- it MUST NOT restart from the beginning, because that would prevent partial results from being combined
-- it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
-`,
-    GROUP: 'The program which is triggering the events',
-    EVENTS: 'The events that the insight is based on',
-    EVENTS_ID: 'The event ID',
-    EVENTS_ENDPOINT_ID: 'The endpoint ID',
-    EVENTS_VALUE: 'The process.executable value of the event',
-  },
-};
-
 export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
 
 Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
@@ -220,7 +182,7 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
 export const RULE_ANALYSIS =
-  'Please provide a comprehensive analysis of each selected Elastic Security detection rule. For each rule, include:\n' +
+  'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
   '- The rule name and a brief summary of its purpose.\n' +
   '- The full detection query as published in Elastic’s official detection rules repository.\n' +
   '- An in-depth explanation of how the query works, including key fields, logic, and detection techniques.\n' +
@@ -230,9 +192,9 @@ export const RULE_ANALYSIS =
   'Format your response using markdown with clear headers for each rule, code blocks for queries, and concise bullet points for explanations.';
 
 export const DATA_QUALITY_ANALYSIS =
-  'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions.';
+  'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions. Please consider using applicable tools for this request. Make sure you’ve used the right tools for this request.';
 
-export const ALERT_EVALUATION = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Ensure you're using all tools available to you. Your response must include:
+export const ALERT_EVALUATION = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Make sure you consider using appropriate tools available to you to fulfill this request. Your response must include:
 1. Event Description
   - Summarize the event, including user and host risk scores from the provided context.
   - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
@@ -240,7 +202,7 @@ export const ALERT_EVALUATION = `Evaluate the security event described above and
   - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
   - Highlight any relevant detection rules or anomaly findings.
 3. Recommended Actions
-  - Provide prioritized response actions, including:
+  - Provide prioritized response actions, and consider using applicable tools to generate each part of the response, including:
     - Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
     - Example ES|QL queries for further investigation, formatted as code blocks.
     - Example OSQuery Manager queries for further investigation, formatted as code blocks.
@@ -249,6 +211,7 @@ export const ALERT_EVALUATION = `Evaluate the security event described above and
   - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
 5. Documentation Links
   - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+Make sure you’ve used the right tools for this request.
 Formatting Requirements:
   - Use markdown headers, tables, and code blocks for clarity.
   - Organize the response into visually distinct sections.
@@ -277,11 +240,12 @@ Analyzing user and host behavior using Entity Analytics.
 Suggest Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
 📚 Documentation and References
 Include direct links to Elastic Security documentation and relevant MITRE ATT&CK pages for further guidance.
+Make sure you use tools available to you to fulfill this request.
 Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
 export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
 export const starterPromptTitle2 = 'Research';
 export const starterPromptIcon2 = 'launch';
-export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top. Ensure the response includes:
+export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
 Article Summaries
 Title and Link: Provide the title of each article with a hyperlink to the original content.
 Publication Date: Include the date the article was published.
@@ -297,7 +261,7 @@ Additional References: Provide links to any related Elastic documentation or ext
 Formatting Requirements
 Use markdown headers, tables, and code blocks for clarity.
 Organize the response into visually distinct sections.
-Use concise, actionable language.`;
+Use concise, actionable language. Make sure you use tools available to you to fulfill this request.`;
 export const starterPromptDescription3 = 'Generate ES|QL Queries';
 export const starterPromptTitle3 = 'Query';
 export const starterPromptIcon3 = 'esqlVis';
@@ -306,6 +270,7 @@ export const starterPromptPrompt3 =
   'Goal/Requirement:\n' +
   '<Insert your specific requirement or goal here, e.g., "Identify all failed login attempts from a specific IP address within the last 24 hours.">\n' +
   'Please:\n' +
+  'Use all tools available to you to fulfill this request.\n' +
   'Generate the ES|QL Query: Provide a complete ES|QL query tailored to the stated goal.\n' +
   'Explain the Query: Offer a brief explanation of each part of the query, including filters, fields, and logic used.\n' +
   'Optimize for Elastic Security: Suggest additional filters, aggregations, or enhancements to make the query more efficient and actionable within Elastic Security workflows.\n' +
@@ -319,3 +284,16 @@ export const starterPromptTitle4 = 'Suggest';
 export const starterPromptIcon4 = 'sparkles';
 export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
+
+export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+
+\`\`\`
+- Between July 18 and August 18, daily cost savings **averaged around $135K**
+- The lowest point, **just above $70K**, occurred in early August.
+- **Peaks near $160K** appeared in late July and mid-August.
+- After a mid-period decline, savings steadily recovered and grew toward the end of the month.
+- At this pace, projected annual savings **exceed $48M**, confirming strong and predictable ROI.
+\`\`\`
+
+Respond only with the markdown. Do not include any explanation or extra text.`;

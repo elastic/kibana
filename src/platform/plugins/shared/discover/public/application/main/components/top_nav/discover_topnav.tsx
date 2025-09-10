@@ -9,14 +9,14 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
@@ -25,10 +25,14 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useDataViewsForPicker,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -57,6 +61,10 @@ export const DiscoverTopNav = ({
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
+  );
+  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+    TABS_ENABLED_FEATURE_FLAG_KEY,
+    false
   );
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
@@ -143,8 +151,7 @@ export const DiscoverTopNav = ({
         return;
       }
       if (needsSave) {
-        onSaveSearch({
-          savedSearch: stateContainer.savedSearchState.getState(),
+        onSaveDiscoverSession({
           services,
           state: stateContainer,
           onClose: () =>
@@ -211,6 +218,32 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
+  const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
+  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
+  const onSearchDraftChange = useCallback(
+    (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
+      dispatch(
+        setSearchDraftUiState({
+          searchDraftUiState: newSearchDraftUiState,
+        })
+      );
+    },
+    [dispatch, setSearchDraftUiState]
+  );
+
+  const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
+  const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
+  const onEsqlEditorInitialStateChange = useCallback(
+    (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
+      dispatch(
+        setEsqlEditorUiState({
+          esqlEditorUiState: newEsqlEditorUiState,
+        })
+      );
+    },
+    [dispatch, setEsqlEditorUiState]
+  );
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -248,6 +281,10 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+        draft={searchDraftUiState}
+        onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
+        esqlEditorInitialState={esqlEditorUiState}
+        onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

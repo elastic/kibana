@@ -7,10 +7,8 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ClientMessage,
-  AssistantProvider as ElasticAssistantProvider,
-} from '@kbn/elastic-assistant';
+import type { ClientMessage } from '@kbn/elastic-assistant';
+import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
 import type { IToasts } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
@@ -46,6 +44,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
   const inferenceEnabled = useInferenceEnabled();
 
   const basePath = useBasePath();
+  const { isVisible } = useIsNavControlVisible();
   const assistantAvailability = useAssistantAvailability();
 
   const assistantTelemetry = useAssistantTelemetry();
@@ -112,8 +111,6 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
       assistantContextValue
     );
   }, [assistantContextValue, elasticAssistantSharedState.assistantContextValue]);
-
-  const { isVisible } = useIsNavControlVisible();
 
   if (!isVisible) {
     return null;

@@ -7,14 +7,14 @@
 
 import seriesConfig from '../../__mocks__/mock_series_config_filebeat.json';
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 
 describe('ExplorerChartLabelBadge', () => {
-  test('Render entity label badge.', () => {
-    const wrapper = shallow(<ExplorerChartLabelBadge entity={seriesConfig.entityFields[0]} />);
-    expect(wrapper).toMatchSnapshot();
+  test('renders entity label badge', () => {
+    const { container } = render(<ExplorerChartLabelBadge entity={seriesConfig.entityFields[0]} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -10,8 +10,9 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../common/constants';
 
 import { setupEnvironment, pageHelpers } from './helpers';
-import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
-import { Pipeline } from '../../common/types';
+import type { PipelineListTestBed } from './helpers/pipelines_list.helpers';
+import type { Pipeline } from '../../common/types';
+import { waitFor } from '@testing-library/dom';
 
 const { setup } = pageHelpers.pipelinesList;
 
@@ -54,11 +55,16 @@ describe('<PipelinesList />', () => {
             },
           },
         },
+        {
+          pipeline: {
+            name: 'test_pipeline2',
+          },
+        },
       ],
       deprecated: true,
     };
 
-    const pipelines = [pipeline1, pipeline2, pipeline3];
+    const pipelines = [pipeline1, pipeline2, pipeline3] as Pipeline[];
 
     httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
 
@@ -86,7 +92,7 @@ describe('<PipelinesList />', () => {
           pipeline.name,
           '',
           `test_pipeline${i + 1} description`,
-          '0',
+          i === 2 ? '2' : '0',
           'EditDelete',
         ]);
       });
@@ -124,45 +130,6 @@ describe('<PipelinesList />', () => {
       expect(httpSetup.get).toHaveBeenLastCalledWith(API_BASE_PATH, expect.anything());
     });
 
-    test('should show the details of a pipeline', async () => {
-      const { find, exists, actions } = testBed;
-      const { name: pipelineName } = pipeline1;
-      httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
-
-      await actions.clickPipelineAt(0);
-
-      expect(exists('pipelinesTable')).toBe(true);
-      expect(exists('pipelineDetails')).toBe(true);
-      expect(find('pipelineDetails.title').text()).toBe(pipelineName);
-    });
-
-    test('should show load details of a pipeline if added to the url', async () => {
-      const { name: pipelineName } = pipeline1;
-
-      httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
-
-      await act(async () => {
-        testBed = await setup(httpSetup, `?pipeline=${pipelineName}`);
-      });
-
-      testBed.component.update();
-
-      const { find, exists } = testBed;
-
-      expect(exists('pipelinesTable')).toBe(true);
-      expect(exists('pipelineDetails')).toBe(true);
-      expect(find('pipelineDetails.title').text()).toBe(pipelineName);
-    });
-
-    test('Replaces newline characters for spaces in flyout for json blocks', async () => {
-      const { find, actions } = testBed;
-      httpRequestsMockHelpers.setLoadPipelineResponse(pipeline2.name, pipeline2);
-
-      await actions.clickPipelineAt(1);
-
-      expect(find('jsonCodeBlock').text()).not.toContain(`\n`);
-    });
-
     test('should delete a pipeline', async () => {
       const { actions, component } = testBed;
       const { name: pipelineName } = pipeline1;
@@ -196,37 +163,43 @@ describe('<PipelinesList />', () => {
       );
     });
 
-    describe('Pipeline error flyout', () => {
-      const error = {
-        statusCode: 404,
-        message: 'Not Found',
-        error: 'Not Found',
-      };
-      test('should render an error message flyout if error fetching pipeline', async () => {
-        const nonExistingPipeline = 'nonExistingPipeline';
-
-        httpRequestsMockHelpers.setLoadPipelineResponse(nonExistingPipeline, {}, error);
+    describe('Pipeline flyout', () => {
+      beforeEach(async () => {
         await act(async () => {
-          testBed = await setup(httpSetup, `?pipeline=${nonExistingPipeline}`);
+          testBed = await setup(httpSetup);
         });
 
         testBed.component.update();
-
-        const { find, exists } = testBed;
-
-        expect(exists('pipelinesTable')).toBe(true);
-        expect(exists('pipelineErrorFlyout')).toBe(true);
-        expect(find('pipelineErrorFlyout.title').text()).toBe(nonExistingPipeline);
-        expect(exists('pipelineError')).toBe(true);
-        expect(find('pipelineError.cause').text()).toBe('Not Found');
       });
 
-      test('should render a create pipeline warning if @custom pipeline does not exist', async () => {
-        const customPipeline = 'pipeline@custom';
+      test('should show the details of a pipeline', async () => {
+        const { find, exists, actions, component } = testBed;
+        const { name: pipelineName } = pipeline1;
+        httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
 
-        httpRequestsMockHelpers.setLoadPipelineResponse(customPipeline, {}, error);
         await act(async () => {
-          testBed = await setup(httpSetup, `?pipeline=${customPipeline}`);
+          await actions.clickPipelineAt(0);
+        });
+
+        component.update();
+
+        expect(exists('pipelinesTable')).toBe(true);
+        expect(exists('pipelineDetails')).toBe(true);
+
+        await waitFor(() => {
+          expect(exists('detailsPanelTitle')).toBe(true);
+        });
+
+        expect(find('detailsPanelTitle').text()).toBe(pipelineName);
+      });
+
+      test('should show load details of a pipeline if added to the url', async () => {
+        const { name: pipelineName } = pipeline1;
+
+        httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
+
+        await act(async () => {
+          testBed = await setup(httpSetup, `?pipeline=${pipelineName}`);
         });
 
         testBed.component.update();
@@ -234,13 +207,128 @@ describe('<PipelinesList />', () => {
         const { find, exists } = testBed;
 
         expect(exists('pipelinesTable')).toBe(true);
-        expect(exists('pipelineErrorFlyout')).toBe(true);
-        expect(find('pipelineErrorFlyout.title').text()).toBe(customPipeline);
-        expect(exists('missingCustomPipeline')).toBe(true);
-        expect(find('missingCustomPipeline.cause').text()).toBe(
-          `The pipeline ${customPipeline} does not exist.`
-        );
-        expect(exists('createCustomPipeline')).toBe(true);
+        expect(exists('pipelineDetails')).toBe(true);
+        expect(find('detailsPanelTitle').text()).toBe(pipelineName);
+      });
+
+      test('replaces newline characters for spaces in flyout for json blocks', async () => {
+        const { find, actions, component } = testBed;
+        httpRequestsMockHelpers.setLoadPipelineResponse(pipeline2.name, pipeline2);
+
+        await act(async () => {
+          await actions.clickPipelineAt(1);
+        });
+
+        component.update();
+
+        expect(find('jsonCodeBlock').text()).not.toContain(`\n`);
+      });
+
+      describe('Error panel', () => {
+        const error = {
+          statusCode: 404,
+          message: 'Not Found',
+          error: 'Not Found',
+        };
+        test('should render an error message flyout if error fetching pipeline', async () => {
+          const nonExistingPipeline = 'nonExistingPipeline';
+
+          httpRequestsMockHelpers.setLoadPipelineResponse(nonExistingPipeline, {}, error);
+          await act(async () => {
+            testBed = await setup(httpSetup, `?pipeline=${nonExistingPipeline}`);
+          });
+
+          testBed.component.update();
+
+          const { find, exists } = testBed;
+
+          expect(exists('pipelinesTable')).toBe(true);
+          expect(exists('pipelineErrorFlyout')).toBe(true);
+          expect(find('pipelineErrorFlyout.title').text()).toBe(nonExistingPipeline);
+          expect(exists('pipelineError')).toBe(true);
+          expect(find('pipelineError.cause').text()).toBe('Not Found');
+        });
+
+        test('should render a create pipeline warning if @custom pipeline does not exist', async () => {
+          const customPipeline = 'pipeline@custom';
+
+          httpRequestsMockHelpers.setLoadPipelineResponse(customPipeline, {}, error);
+          await act(async () => {
+            testBed = await setup(httpSetup, `?pipeline=${customPipeline}`);
+          });
+
+          testBed.component.update();
+
+          const { find, exists } = testBed;
+
+          expect(exists('pipelinesTable')).toBe(true);
+          expect(exists('pipelineErrorFlyout')).toBe(true);
+          expect(find('pipelineErrorFlyout.title').text()).toBe(customPipeline);
+          expect(exists('missingCustomPipeline')).toBe(true);
+          expect(find('missingCustomPipeline.cause').text()).toBe(
+            `The pipeline ${customPipeline} does not exist.`
+          );
+          expect(exists('createCustomPipeline')).toBe(true);
+        });
+      });
+
+      describe('Tree panel', () => {
+        test('should not display structure tree panel if pipeline has no Pipeline processors', async () => {
+          const { name: pipelineName } = pipeline1;
+
+          httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
+          httpRequestsMockHelpers.setLoadPipelineTreeResponse(pipelineName, {
+            pipelineStructureTree: {
+              pipelineName,
+              isManaged: false,
+              isDeprecated: false,
+              children: [],
+            },
+          });
+          await act(async () => {
+            testBed = await setup(httpSetup, `?pipeline=${pipelineName}`);
+          });
+
+          const { exists, component } = testBed;
+
+          component.update();
+
+          expect(exists('pipelinesTable')).toBe(true);
+          expect(exists('pipelineDetails')).toBe(true);
+          expect(exists('pipelineTreePanel')).toBe(false);
+        });
+
+        test('should display structure tree panel if pipeline has Pipeline processors', async () => {
+          const { name: pipelineName } = pipeline3;
+
+          httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline3);
+          httpRequestsMockHelpers.setLoadPipelineTreeResponse(pipelineName, {
+            pipelineStructureTree: {
+              pipelineName,
+              isManaged: false,
+              isDeprecated: false,
+              children: [
+                {
+                  pipelineName: 'test_pipeline2',
+                  isManaged: false,
+                  isDeprecated: false,
+                  children: [],
+                },
+              ],
+            },
+          });
+          await act(async () => {
+            testBed = await setup(httpSetup, `?pipeline=${pipelineName}`);
+          });
+
+          const { exists, component } = testBed;
+
+          component.update();
+
+          expect(exists('pipelinesTable')).toBe(true);
+          expect(exists('pipelineDetails')).toBe(true);
+          expect(exists('pipelineTreePanel')).toBe(true);
+        });
       });
     });
   });

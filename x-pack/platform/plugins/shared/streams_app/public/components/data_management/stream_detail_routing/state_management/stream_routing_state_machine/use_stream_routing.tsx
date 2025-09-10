@@ -6,15 +6,20 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { createActorContext } from '@xstate5/react';
+import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { waitFor } from 'xstate5';
 import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
 } from './stream_routing_state_machine';
-import { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
-import { RoutingDefinitionWithUIAttributes } from '../../types';
+import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
+import type { RoutingDefinitionWithUIAttributes } from '../../types';
+import type {
+  DocumentMatchFilterOptions,
+  RoutingSamplesActorRef,
+  RoutingSamplesActorSnapshot,
+} from './routing_samples_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
@@ -54,6 +59,9 @@ export const useStreamRoutingEvents = () => {
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
       },
+      setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
+        service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
+      },
     }),
     [service]
   );
@@ -91,4 +99,24 @@ const ListenForDefinitionChanges = ({
   }, [definition, service]);
 
   return children;
+};
+
+export const useStreamSamplesRef = () => {
+  return useStreamsRoutingSelector(
+    (state) => state.children.routingSamplesMachine as RoutingSamplesActorRef | undefined
+  );
+};
+
+export const useStreamSamplesSelector = <T,>(
+  selector: (snapshot: RoutingSamplesActorSnapshot) => T
+): T => {
+  const routingSamplesRef = useStreamSamplesRef();
+
+  if (!routingSamplesRef) {
+    throw new Error(
+      'useStreamSamplesSelector must be used within a StreamEnrichmentContextProvider'
+    );
+  }
+
+  return useSelector(routingSamplesRef, selector);
 };

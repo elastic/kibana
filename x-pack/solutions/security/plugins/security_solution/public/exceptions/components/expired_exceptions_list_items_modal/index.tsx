@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useState } from 'react';
 
-import { EuiConfirmModal, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiSwitch, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from '../../translations';
 
 export const CHECK_EXCEPTION_TTL_ACTION_TYPES = {
@@ -27,6 +27,7 @@ interface IncludeExpiredExceptionsModalProps {
 export const IncludeExpiredExceptionsModal = memo<IncludeExpiredExceptionsModalProps>(
   ({ handleCloseModal, onModalConfirm, action }) => {
     const [includeExpired, setIncludeExpired] = useState(true);
+    const modalTitleId = useGeneratedHtmlId();
 
     const handleSwitchChange = useCallback(() => {
       setIncludeExpired(!includeExpired);
@@ -39,11 +40,13 @@ export const IncludeExpiredExceptionsModal = memo<IncludeExpiredExceptionsModalP
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={
           action === CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT
             ? i18n.EXPIRED_EXCEPTIONS_MODAL_EXPORT_TITLE
             : i18n.EXPIRED_EXCEPTIONS_MODAL_DUPLICATE_TITLE
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={handleCloseModal}
         onConfirm={handleConfirm}
         cancelButtonText={i18n.EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON}

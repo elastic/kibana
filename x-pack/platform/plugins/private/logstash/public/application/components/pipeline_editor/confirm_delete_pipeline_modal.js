@@ -39,8 +39,8 @@ export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDelet
           values={{ id }}
         />
       }
-      titleProps={{ id: modalTitleId }}
       aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       <p>{PIPELINE_EDITOR.DELETE_PIPELINE_MODAL_MESSAGE}</p>
     </EuiConfirmModal>

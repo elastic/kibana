@@ -45,6 +45,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '../types';
+import { KibanaSavedObjectType } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
@@ -203,7 +204,10 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+        KibanaSavedObjectType.alertingRuleTemplate,
+      ],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
@@ -223,7 +227,10 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+        KibanaSavedObjectType.alertingRuleTemplate,
+      ],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
@@ -242,7 +249,10 @@ class AppContextService {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+        KibanaSavedObjectType.alertingRuleTemplate,
+      ],
     });
   }
 

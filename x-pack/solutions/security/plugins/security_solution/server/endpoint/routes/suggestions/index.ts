@@ -58,7 +58,7 @@ export function registerEndpointSuggestionsRoutes(
         },
       },
       withEndpointAuthz(
-        { any: ['canWriteEventFilters'] },
+        { any: ['canWriteEventFilters', 'canWriteTrustedApplications'] },
         endpointContext.logFactory.get('endpointSuggestions'),
         getEndpointSuggestionsRequestHandler(config$, endpointContext)
       )
@@ -76,9 +76,10 @@ export const getEndpointSuggestionsRequestHandler = (
 > => {
   return async (context, request, response) => {
     const logger = endpointContext.logFactory.get('suggestions');
+    const isTrustedAppsAdvancedModeFFEnabled =
+      endpointContext.experimentalFeatures.trustedAppsAdvancedMode;
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
-
     try {
       const config = await firstValueFrom(config$);
       const { savedObjects, elasticsearch } = await context.core;
@@ -92,7 +93,10 @@ export const getEndpointSuggestionsRequestHandler = (
       let suggestionMethod: typeof termsEnumSuggestions | typeof termsAggSuggestions =
         termsEnumSuggestions;
 
-      if (request.params.suggestion_type === 'eventFilters') {
+      if (
+        request.params.suggestion_type === 'eventFilters' ||
+        (isTrustedAppsAdvancedModeFFEnabled && request.params.suggestion_type === 'trustedApps')
+      ) {
         if (!isSpaceAwarenessEnabled) {
           index = eventsIndexPattern;
         } else {

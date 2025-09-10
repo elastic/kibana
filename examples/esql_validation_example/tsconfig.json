@@ -19,5 +19,6 @@
     "@kbn/data-views-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-ast",
   ]
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SimpleSavedObject } from '../simple_saved_object';
+import type { SimpleSavedObject } from '../simple_saved_object';
 
 /**
  * Batch response for simple saved objects

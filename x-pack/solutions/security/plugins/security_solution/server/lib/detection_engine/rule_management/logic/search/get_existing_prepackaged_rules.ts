@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import {
@@ -78,15 +79,23 @@ export const getExistingPrepackagedRules = async ({
   rulesClient,
   page,
   perPage,
+  logger,
 }: {
   rulesClient: RulesClient;
   page?: number;
   perPage?: number;
+  logger: Logger;
 }): Promise<RuleAlertType[]> => {
-  return getRules({
+  logger.debug('getExistingPrepackagedRules: Fetching installed prebuilt rules');
+  const existingPrepackagedRules = await getRules({
     rulesClient,
     page,
     perPage,
     filter: KQL_FILTER_IMMUTABLE_RULES,
   });
+  logger.debug(
+    `getExistingPrepackagedRules: Fetching installed prebuilt rules - done. Fetched: ${existingPrepackagedRules.length} rules.`
+  );
+
+  return existingPrepackagedRules;
 };

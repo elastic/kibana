@@ -30,6 +30,7 @@ import type {
   PostAgentPolicyUpdateCallback,
   PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { ExperimentalFeatures } from '../../common';
 import { updateDeletedPolicyResponseActions } from './handlers/update_deleted_policy_response_actions';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import type { EndpointInternalFleetServicesInterface } from '../endpoint/services/fleet';
@@ -42,6 +43,7 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeDeviceControl,
 } from '../../common/endpoint/models/policy_config_helpers';
 import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
@@ -123,7 +125,8 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
-  telemetryConfigProvider: TelemetryConfigProvider
+  telemetryConfigProvider: TelemetryConfigProvider,
+  experimentalFeatures: ExperimentalFeatures
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -200,7 +203,8 @@ export const getPackagePolicyCreateCallback = (
       cloud,
       esClientInfo,
       productFeatures,
-      telemetryConfigProvider
+      telemetryConfigProvider,
+      experimentalFeatures
     );
 
     return {
@@ -232,7 +236,8 @@ export const getPackagePolicyCreateCallback = (
 export const getPackagePolicyUpdateCallback = (
   endpointServices: EndpointAppContextService,
   cloud: CloudSetup,
-  productFeatures: ProductFeaturesService
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
 ): PutPackagePolicyUpdateCallback => {
   const logger = endpointServices.createLogger('endpointPackagePolicyUpdateCallback');
   const licenseService = endpointServices.getLicenseService();
@@ -254,19 +259,22 @@ export const getPackagePolicyUpdateCallback = (
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
-    // Validate that Endpoint Security policy is valid against current license
-    validatePolicyAgainstLicense(
-      // The cast below is needed in order to ensure proper typing for
-      // the policy configuration specific for endpoint
-      endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
-      licenseService,
-      logger
-    );
-
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
-    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
+    // Validate that Endpoint Security policy is valid against current license
+    if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+      validatePolicyAgainstLicense(
+        // The cast below is needed in order to ensure proper typing for
+        // the policy configuration specific for endpoint
+        endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
+        licenseService,
+        logger
+      );
+    }
+
+    // Make sure policy includes general expected data
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
     if (endpointIntegrationData.id) {
       await notifyProtectionFeatureUsage(
@@ -318,6 +326,13 @@ export const getPackagePolicyUpdateCallback = (
 
       endpointIntegrationData.inputs[0].config.policy.value =
         ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
+    }
+    if (
+      !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointTrustedDevices) ||
+      !experimentalFeatures.trustedDevices
+    ) {
+      endpointIntegrationData.inputs[0].config.policy.value =
+        removeDeviceControl(newEndpointPackagePolicy);
     }
 
     updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);

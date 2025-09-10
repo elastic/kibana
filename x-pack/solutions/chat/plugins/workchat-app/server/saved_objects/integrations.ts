@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
+import type { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
 
 export const integrationTypeName = 'workchat_integration' as const;
 

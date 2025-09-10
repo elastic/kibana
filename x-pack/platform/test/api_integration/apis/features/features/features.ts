@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFeature } from '@kbn/features-plugin/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -110,7 +110,6 @@ export default function ({ getService }: FtrProviderContext) {
             'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
-            'guidedOnboardingFeature',
             'monitoring',
             'observabilityAIAssistant',
             'observabilityCasesV3',
@@ -127,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             'logs',
             'maintenanceWindow',
             'manageReporting',
+            'reportingLegacy',
             'maps_v2',
             'osquery',
             'rulesSettings',
@@ -170,7 +170,6 @@ export default function ({ getService }: FtrProviderContext) {
           'aiAssistantManagementSelection',
           'indexPatterns',
           'graph',
-          'guidedOnboardingFeature',
           'monitoring',
           'observabilityAIAssistant',
           'observabilityCasesV3',
@@ -209,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           'fleet',
           'fleetv2',
           'manageReporting',
+          'reportingLegacy',
         ];
 
         const features = body.filter(

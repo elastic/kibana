@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { TEST_CASES } from './resolve';
 import { SPACES } from '../lib/spaces';
 import {
@@ -15,7 +15,7 @@ import {
   getUrlPrefix,
   getTestTitle,
 } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface BulkResolveTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import globby from 'globby';
-import { Logger } from '@kbn/core/server';
+import { glob } from 'fs/promises';
+import type { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { resolve } from 'path';
-import { Document } from 'langchain/document';
-import { Metadata } from '@kbn/elastic-assistant-common';
+import type { Document } from 'langchain/document';
+import type { Metadata } from '@kbn/elastic-assistant-common';
 import pMap from 'p-map';
 import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
 
 /**
@@ -73,9 +73,14 @@ export const loadSecurityLabs = async (
 
 export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
-    return await globby(ENCODED_FILE_MICROMATCH_PATTERN, {
-      cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
-    }).then((files) => files.length);
+    // @ts-expect-error incorrect type for Array.fromAsync
+    const files = await Array.fromAsync(
+      glob(ENCODED_FILE_MICROMATCH_PATTERN, {
+        cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
+      })
+    );
+
+    return files.length;
   } catch (e) {
     logger.error(`Failed to get Security Labs source docs count\n${e}`);
     return 0;

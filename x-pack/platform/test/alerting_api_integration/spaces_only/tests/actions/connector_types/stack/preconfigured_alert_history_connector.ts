@@ -12,7 +12,6 @@ import { getTestRuleData, ObjectRemover } from '../../../../../common/lib';
 
 const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
 
-// eslint-disable-next-line import/no-default-export
 export default function preconfiguredAlertHistoryConnectorTests({
   getService,
 }: FtrProviderContext) {

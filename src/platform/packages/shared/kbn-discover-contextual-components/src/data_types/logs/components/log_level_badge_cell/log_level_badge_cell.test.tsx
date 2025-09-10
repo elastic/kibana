@@ -13,7 +13,8 @@ import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 import { getLogLevelBadgeCell } from './log_level_badge_cell';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 const renderCell = (logLevelField: string, record: DataTableRecord) => {
   const LogLevelBadgeCell = getLogLevelBadgeCell(logLevelField);
