@@ -413,6 +413,76 @@ server.tool(
   }
 );
 
+const getRemediationPlan = (paths) => {
+  const remediationPlan = paths.reduce((acc, depChain) => {
+    const depToUpgrade = depChain.find((dep) => dep.fixVersion);
+
+    const introducedThrough = depChain
+      .map(({ name, version }) => `${name}@${version}`)
+      .join(' -> ');
+
+    if (!depToUpgrade) {
+      acc.push(`Introduced through: ${introducedThrough}. No upgrade path available;`);
+      return acc;
+    }
+
+    const fix =
+      depToUpgrade.version === depToUpgrade?.fixVersion
+        ? `Dependencies are out of date, otherwise you would be using a newer ${depToUpgrade?.fixVersion}. Try relocking lockfile.`
+        : `Upgrade ${depToUpgrade.name} to version ${depToUpgrade?.fixVersion}`;
+
+    acc.push(`Introduced through: ${introducedThrough}. Fix: ${fix};`);
+
+    return acc;
+  }, []);
+
+  return remediationPlan;
+};
+
+server.prompt(
+  'upgrade_dependencies',
+  'Upgrade dependencies as per the remediation plan from Snyk',
+  {
+    snykIssueNumber: z
+      .string()
+      .min(1, 'Snyk issue number cannot be empty')
+      .describe('Snyk issue number.'),
+  },
+  async (args) => {
+    const { snykIssueNumber } = args;
+
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    headers.append('Authorization', `Token ${config.snykApiKey}`);
+
+    const pathsResponse = await fetch(
+      `https://api.snyk.io/v1/org/${config.snykOrgId}/project/${config.snykProjectId}/history/latest/issue/${snykIssueNumber}/paths`,
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+
+    const { paths } = await pathsResponse.json();
+
+    const remediationPlan = getRemediationPlan(paths);
+
+    return {
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `You need to perform upgrades that do not come with breaking changes for the Snyk issue ${snykIssueNumber}. Follow the remediation plan below carefully. ${remediationPlan.join(
+              '\n'
+            )} Keep in mind that kibana cannot upgrade to esm only modules. After changing the package.json, use 'yarn kbn bootstrap' to update the lockfile.`,
+          },
+        },
+      ],
+    };
+  }
+);
+
 server.tool(
   'triage_snyk_issue',
   'Triage the snyk issue',
@@ -468,27 +538,7 @@ server.tool(
         .map((depChain) => depChain.map(({ name, version }) => `${name}@${version}`).join(' -> '))
         .join(';');
 
-      const remediationPlan = paths.reduce((acc, depChain) => {
-        const depToUpgrade = depChain.find((dep) => dep.fixVersion);
-
-        const introducedThrough = depChain
-          .map(({ name, version }) => `${name}@${version}`)
-          .join(' -> ');
-
-        if (!depToUpgrade) {
-          acc.push(`Introduced through: ${introducedThrough}. No upgrade path available;`);
-          return acc;
-        }
-
-        const fix =
-          depToUpgrade.version === depToUpgrade?.fixVersion
-            ? `Dependencies are out of date, otherwise you would be using a newer ${depToUpgrade?.fixVersion}. Try relocking lockfile.`
-            : `Upgrade ${depToUpgrade.name} to version ${depToUpgrade?.fixVersion}`;
-
-        acc.push(`Introduced through: ${introducedThrough}. Fix: ${fix};`);
-
-        return acc;
-      }, []);
+      const remediationPlan = getRemediationPlan(paths);
 
       const { severity, identifiers } = vulnerability;
       const [cveId] = identifiers.CVE;
