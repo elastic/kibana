@@ -18,6 +18,9 @@ jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
 
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
+  usePermissionCheck: () => [true, true],
+}));
 jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
@@ -105,6 +108,11 @@ const mockKibanaContext = {
 
 const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => {
+    return {
+      services: mockKibanaContext.services,
+    };
+  },
   withKibana: (type) => {
     const EnhancedType = (props) => {
       return mockReact.createElement(type, {
