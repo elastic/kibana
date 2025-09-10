@@ -134,10 +134,9 @@ export class MonitoringEntitySourceDescriptorClient {
    * entity_analytics_integration or index type
    */
   public async findBySourceType(
-    // will find only one and NOT all. Need ALL integration sources, not one.
     type: MonitoringEntitySourceType
   ): Promise<MonitoringEntitySource[]> {
-    const result = await this.find(); // is this always guaranteed to be a list?
+    const result = await this.find();
     return result.saved_objects
       .filter((so) => so.attributes.type === type)
       .map((so) => ({ ...so.attributes, id: so.id }));
