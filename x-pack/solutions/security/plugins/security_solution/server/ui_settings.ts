@@ -49,6 +49,7 @@ import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
   DEFAULT_VALUE_REPORT_MINUTES,
   DEFAULT_VALUE_REPORT_RATE,
+  DEFAULT_VALUE_REPORT_TITLE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -662,6 +663,22 @@ export const getDefaultValueReportSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: true,
     schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [DEFAULT_VALUE_REPORT_TITLE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleLabel', {
+      defaultMessage: 'Value report title',
+    }),
+    value: i18n.translate('xpack.securitySolution.reports.uiSettings.defaultValueTitleTitle', {
+      defaultMessage: 'Elastic AI value report',
+    }),
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleDescription', {
+      defaultMessage: 'The title of the Value report.',
+    }),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.string(),
     solutionViews: ['classic', 'security'],
   },
 });
