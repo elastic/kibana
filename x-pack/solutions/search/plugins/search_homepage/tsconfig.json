@@ -36,7 +36,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
-    "@kbn/try-in-console"
+    "@kbn/try-in-console",
+    "@kbn/management-settings-ids"
   ],
   "exclude": [
     "target/**/*",
