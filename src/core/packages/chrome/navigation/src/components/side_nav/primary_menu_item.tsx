@@ -18,6 +18,7 @@ import type { MenuItem } from '../../../types';
 import { MenuItem as MenuItemComponent } from '../menu_item';
 import { useTooltip } from '../../hooks/use_tooltip';
 import { BetaBadge } from '../beta_badge';
+import { TOOLTIP_OFFSET } from '../../constants';
 
 export interface SideNavPrimaryMenuItemProps extends MenuItem {
   as?: 'a' | 'button';
@@ -116,6 +117,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
           onMouseOut={handleMouseOut}
           position="right"
           repositionOnScroll
+          offset={TOOLTIP_OFFSET}
         >
           {menuItem}
         </EuiToolTip>
