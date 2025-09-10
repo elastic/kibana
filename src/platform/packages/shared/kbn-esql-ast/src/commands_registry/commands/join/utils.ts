@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { uniqBy } from 'lodash';
 import { handleFragment, columnExists } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
@@ -110,11 +111,10 @@ export const getFieldSuggestions = async (
     }),
   ]);
 
-  const supportsControls = context?.supportsControls ?? false;
   const joinFields = buildFieldsDefinitionsWithMetadata(
     lookupIndexFields.filter((f) => !ignoredFields.includes(f.name)),
     [],
-    { supportsControls },
+    { supportsControls: false }, // Controls are being added as part of the sourceFields, no need to add them again as joinFields.
     context?.variables
   );
 
@@ -143,7 +143,7 @@ export const getFieldSuggestions = async (
   }
 
   return {
-    suggestions: [...intersection, ...union],
+    suggestions: uniqBy([...intersection, ...union], 'label'),
     lookupIndexFieldExists: (field: string) =>
       lookupIndexFieldSet.set.has(unescapeColumnName(field)),
   };
