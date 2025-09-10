@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) =>
@@ -36,7 +37,7 @@ const topBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   top: 0;
   z-index: ${euiTheme.levels.header};
-  height: var(--kbn-application--top-bar-height);
+  height: ${layoutVar('application-top-bar-height')};
   flex-shrink: 0;
 `;
 
@@ -44,7 +45,7 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   bottom: 0;
   z-index: ${euiTheme.levels.header};
-  height: var(--kbn-application--bottom-bar-height);
+  height: ${layoutVar('application-bottom-bar-height')};
   flex-shrink: 0;
 `;
 

@@ -70,30 +70,36 @@ Each slot can also be a function: `header={state => <Header expanded={state.hasS
 
 ## CSS Variables
 
-This package exposes layout dimensions and positions as global CSS variables (custom properties) for dynamic theming and consistent styling across the application. You can use these variables in your own CSS to align custom components with the layout or implement advanced theming.
+This package exposes layout dimensions and positions as global CSS variables (custom properties) for dynamic theming and consistent styling across the application.
 
-**Available CSS variables:**
+### Type-Safe Helpers (Recommended)
 
-- **Banner**
-  - `--kbn-layout--banner-[top|left|height|width]`
-- **Header**
-  - `--kbn-layout--header-[top|left|right|height|width]`
-- **Footer**
-  - `--kbn-layout--footer-[height|top|bottom|left|width]`
-- **Navigation**
-  - `--kbn-layout--navigation-[top|bottom|height|width]`
-- **Sidebar**
-  - `--kbn-layout--sidebar-[top|bottom|height|width]`
-- **Application**
-  - `--kbn-layout--application-[top|bottom|left|right|height|width]`
-- **Application Top Bar**
-  - `--kbn-application--top-bar-[height|top|left|width|right|bottom]`
-- **Application Bottom Bar**
-  - `--kbn-application--bottom-bar-[height|top|left|width|right|bottom]`
-- **Application Content**
-  - `--kbn-application--content-[top|bottom|left|right|height|width]`
-- **Common**
-  - `--kbn-layout--aboveFlyoutLevel`
+For the best developer experience, use the type-safe helpers from `@kbn/core-chrome-layout-constants`:
+
+```typescript
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { css } from '@emotion/react';
+
+const myComponentStyles = css`
+  height: ${layoutVar('header-height')};
+  margin-top: ${layoutVar('banner-height', '0px')};
+  z-index: ${layoutVar('aboveFlyoutLevel')};
+`;
+```
+
+See [`@kbn/core-chrome-layout-constants`](../core-chrome-layout-constants) for complete documentation.
+
+### Manual Usage (Legacy)
+
+You can also reference variables directly (though type-safe helpers are recommended):
+
+```css
+/* Manual usage - not recommended */
+.my-component {
+  height: var(--kbn-layout--header-height);
+  margin-top: var(--kbn-layout--banner-height, 0px);
+}
+```
 
 These variables are set at the `:root` level and update automatically based on the current layout state.
 

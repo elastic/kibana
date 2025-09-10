@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
   position: sticky;
@@ -18,8 +19,8 @@ const root = css`
   flex-direction: column;
   align-items: center;
   height: 100%;
-  width: var(--kbn-layout--sidebar-width);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
+  width: ${layoutVar('sidebar-width')};
+  z-index: ${layoutVar('aboveFlyoutLevel')};
 `;
 
 export const styles = {
