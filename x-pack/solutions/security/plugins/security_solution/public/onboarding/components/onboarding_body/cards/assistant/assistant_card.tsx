@@ -52,7 +52,10 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     settings,
   } = useAssistantContext();
 
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
+  const defaultConnector = useMemo(
+    () => getDefaultConnector(connectors, settings),
+    [connectors, settings]
+  );
 
   const { setApiConfig } = useConversation();
 

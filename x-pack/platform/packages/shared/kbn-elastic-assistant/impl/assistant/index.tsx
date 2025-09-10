@@ -126,7 +126,10 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     settings,
   });
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
+  const defaultConnector = useMemo(
+    () => getDefaultConnector(connectors, settings),
+    [connectors, settings]
+  );
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
   const lastConversationFromLocalStorage = useMemo(

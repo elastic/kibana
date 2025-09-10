@@ -70,7 +70,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       http,
       settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');

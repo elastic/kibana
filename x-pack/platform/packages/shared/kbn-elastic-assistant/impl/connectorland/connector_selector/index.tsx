@@ -194,7 +194,6 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       undefined
     );
 
-    console.log(selectedConnectorId, defaultLlm);
     return (
       <>
         {!connectorExists && !connectorOptions.length ? (
