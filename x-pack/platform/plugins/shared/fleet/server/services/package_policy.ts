@@ -2954,8 +2954,6 @@ export function _compilePackagePolicyInputs(
   inputs: PackagePolicyInput[],
   assetsMap: PackagePolicyAssetsMap
 ): PackagePolicyInput[] {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
   return inputs.map((input) => {
     const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
     const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
