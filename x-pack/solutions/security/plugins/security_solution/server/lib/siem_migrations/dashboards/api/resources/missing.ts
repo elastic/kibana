@@ -67,7 +67,7 @@ export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
               return res.ok({ body: missingResources });
             } catch (err) {
               logger.error(err);
-              return res.customError({ statusCode: 500, body: err.message });
+              return res.badRequest({ body: err.message });
             }
           }
         )

@@ -117,7 +117,7 @@ export const upsertDashboardMigrationResources = async ({
 }: WithSignal<GetDashboardMigrationParams> &
   Body<UpsertDashboardMigrationResourcesRequestBody>) => {
   return KibanaServices.get().http.post<UpsertDashboardMigrationResourcesResponse>(
-    replaceParams(SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH, { migration_id: migrationId }),
+    replaceParams(SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH, { migration_id: migrationId }),
     {
       version: VERSION,
       body: JSON.stringify(body),
@@ -129,16 +129,10 @@ export const upsertDashboardMigrationResources = async ({
 export const getDashboardMigrationResources = async ({
   migrationId,
   signal,
-  ...queryParams
-}: WithSignal<GetDashboardMigrationParams> & {
-  type?: string;
-  names?: string[];
-  from?: number;
-  size?: number;
-}) => {
+}: WithSignal<GetDashboardMigrationParams>) => {
   return KibanaServices.get().http.get<GetDashboardMigrationResourcesResponse>(
     replaceParams(SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH, { migration_id: migrationId }),
-    { version: VERSION, signal, query: queryParams }
+    { version: VERSION, signal }
   );
 };
 
