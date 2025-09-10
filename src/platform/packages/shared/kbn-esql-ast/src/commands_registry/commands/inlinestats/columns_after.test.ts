@@ -32,8 +32,8 @@ describe('INLINESTATS', () => {
     const result = columnsAfter(command, previousCommandFields, queryString);
 
     expect(result).toEqual<ESQLColumnData[]>([
-      { name: 'AVG(field1)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },
-      { name: 'buckets', type: 'date', userDefined: true, location: { min: 30, max: 36 } },
+      { name: 'AVG(field1)', type: 'double', userDefined: true, location: { min: 21, max: 31 } },
+      { name: 'buckets', type: 'date', userDefined: true, location: { min: 36, max: 42 } },
       ...previousCommandFields.filter(({ name }) => name !== 'buckets'),
     ]);
   });
