@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StoredVis } from '../embeddable/transforms/types';
 import { injectVisReferences } from './inject_vis_references';
 
 describe('injectVisReferences', () => {
   test('injects data view reference', () => {
     const savedVis = injectVisReferences(
       {
-        type: 'area',
-        params: {},
         data: {
-          aggs: [],
           searchSource: {
             indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
           },
         },
-        title: 'owo',
-      },
+      } as StoredVis,
       [{ name: 'kibanaSavedObjectMeta.searchSourceJSON.index', id: '123', type: 'index-pattern' }]
     );
     expect(savedVis.data.searchSource).toMatchInlineSnapshot(`
@@ -35,16 +32,12 @@ describe('injectVisReferences', () => {
   test('injects data view reference even if it is already injected', () => {
     const savedVis = injectVisReferences(
       {
-        type: 'area',
-        params: {},
         data: {
-          aggs: [],
           searchSource: {
             index: '456',
           },
         },
-        title: 'owo',
-      },
+      } as StoredVis,
       [{ name: 'kibanaSavedObjectMeta.searchSourceJSON.index', id: '123', type: 'index-pattern' }]
     );
     expect(savedVis.data.searchSource).toMatchInlineSnapshot(`
@@ -57,14 +50,10 @@ describe('injectVisReferences', () => {
   test('injects discover session reference', () => {
     const savedVis = injectVisReferences(
       {
-        type: 'area',
-        params: {},
         data: {
-          aggs: [],
           searchSource: {},
         },
-        title: 'owo',
-      },
+      } as StoredVis,
       [{ name: 'search_0', id: '123', type: 'search' }]
     );
     expect(savedVis.data.savedSearchId).toBe('123');
@@ -73,15 +62,11 @@ describe('injectVisReferences', () => {
   test('injects discover session reference even if it is already injected', () => {
     const savedVis = injectVisReferences(
       {
-        type: 'area',
-        params: {},
         data: {
-          aggs: [],
           searchSource: {},
           savedSearchId: '789',
         },
-        title: 'owo',
-      },
+      } as StoredVis,
       [{ name: 'search_0', id: '123', type: 'search' }]
     );
     expect(savedVis.data.savedSearchId).toBe('123');

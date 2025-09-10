@@ -13,7 +13,7 @@ import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plu
 
 describe('getTransformIn', () => {
   const transformEnhancementsInMock = jest.fn().mockReturnValue({
-    enhancementsState: { dynamiceActions: 'transformedValue' },
+    enhancementsState: { dynamiceActions: 'transformedInValue' },
     enhancementsReferences: [
       {
         id: '5678',
@@ -53,7 +53,7 @@ describe('getTransformIn', () => {
           ],
           "state": Object {
             "enhancements": Object {
-              "dynamiceActions": "transformedValue",
+              "dynamiceActions": "transformedInValue",
             },
             "timeRange": Object {
               "from": "15-now",
@@ -76,7 +76,6 @@ describe('getTransformIn', () => {
           } as unknown as DynamicActionsSerializedState['enhancements'],
           savedVis: {
             data: {
-              savedSearchId: 'abcd',
               searchSource: {
                 index: '1234',
               },
@@ -95,11 +94,6 @@ describe('getTransformIn', () => {
               "type": "index-pattern",
             },
             Object {
-              "id": "abcd",
-              "name": "search_0",
-              "type": "search",
-            },
-            Object {
               "id": "5678",
               "name": "someRef",
               "type": "testType",
@@ -107,11 +101,10 @@ describe('getTransformIn', () => {
           ],
           "state": Object {
             "enhancements": Object {
-              "dynamiceActions": "transformedValue",
+              "dynamiceActions": "transformedInValue",
             },
             "savedVis": Object {
               "data": Object {
-                "savedSearchRefName": "search_0",
                 "searchSource": Object {
                   "index": undefined,
                   "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",
