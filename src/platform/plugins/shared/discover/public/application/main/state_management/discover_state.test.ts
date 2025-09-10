@@ -1046,7 +1046,7 @@ describe('Discover state', () => {
       state.appState.set({ query });
       await state.actions.transitionFromDataViewToESQL(dataViewMock);
       expect(state.appState.getState().query).toStrictEqual({
-        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""") | LIMIT 10',
+        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
       });
       expect(state.getCurrentTab().globalState.filters).toStrictEqual([]);
       expect(state.appState.getState().filters).toStrictEqual([]);
@@ -1055,7 +1055,7 @@ describe('Discover state', () => {
     test('transitionFromESQLToDataView', async () => {
       const savedSearchWithQuery = copySavedSearch(savedSearchMock);
       const query = {
-        esql: 'FROM the-data-view-title | LIMIT 10',
+        esql: 'FROM the-data-view-title',
       };
       savedSearchWithQuery.searchSource.setField('query', query);
       const { state } = await getState('/', { savedSearch: savedSearchWithQuery });

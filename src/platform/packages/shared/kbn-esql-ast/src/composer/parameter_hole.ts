@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 export class ParameterHole {
+  constructor(public value: unknown, public name?: string) {}
+}
+
+export class DoubleParameterHole {
   constructor(public value: unknown, public name?: string) {}
 }

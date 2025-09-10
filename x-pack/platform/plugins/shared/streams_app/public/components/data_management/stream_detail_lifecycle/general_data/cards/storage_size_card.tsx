@@ -50,5 +50,5 @@ export const StorageSizeCard = ({
     defaultMessage: 'Storage size',
   });
 
-  return <BaseMetricCard title={title} metrics={metric} />;
+  return <BaseMetricCard title={title} metrics={metric} grow />;
 };
