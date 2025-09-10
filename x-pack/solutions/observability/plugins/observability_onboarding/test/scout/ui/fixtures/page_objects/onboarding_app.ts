@@ -110,8 +110,7 @@ export class OnboardingApp {
   }
 
   async selectHostUseCase() {
-    const hostRadio = this.hostUseCaseTile.getByRole('radio');
-    await hostRadio.click();
+    await this.hostUseCaseTile.getByRole('radio').click();
     await this.autoDetectLogsCard.waitFor({ state: 'visible' });
   }
 
@@ -166,8 +165,8 @@ export class OnboardingApp {
     ];
 
     for (const selector of possibleSelectors) {
-      const description = tile.locator(selector);
-      if ((await description.count()) > 0) {
+      const description = tile.locator(selector).first();
+      if (await description.count() > 0) {
         return await description.textContent();
       }
     }
