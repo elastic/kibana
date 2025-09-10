@@ -6,4 +6,9 @@
  */
 
 export { DataCatalogService } from './data_catalog';
-export type { DataCatalogServiceSetup, DataCatalogServiceStart, DataCatalog, DataTypeDefinition } from './data_catalog';
+export type {
+  DataCatalogServiceSetup,
+  DataCatalogServiceStart,
+  DataCatalog,
+  DataTypeDefinition,
+} from './data_catalog';
