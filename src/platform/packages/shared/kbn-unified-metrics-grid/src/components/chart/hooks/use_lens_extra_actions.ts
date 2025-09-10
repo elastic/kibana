@@ -16,6 +16,7 @@ interface CopyToDashboardActionConfig {
 
 interface UseLensExtraActions {
   copyToDashboard?: CopyToDashboardActionConfig;
+  viewDetails?: { onClick: () => void };
 }
 export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
   const extraActions = useMemo(() => {
@@ -25,10 +26,36 @@ export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
       actions.push(getCopyToDashboardAction(config.copyToDashboard.onClick));
     }
 
+    if (config.viewDetails) {
+      actions.push(getViewDetailsAction(config.viewDetails.onClick));
+    }
+
     return actions;
-  }, [config.copyToDashboard]);
+  }, [config.copyToDashboard, config.viewDetails]);
 
   return extraActions;
+};
+
+const getViewDetailsAction = (onExecute: () => void): Action => {
+  return {
+    id: 'viewDetails',
+    order: 2,
+    type: 'actionButton',
+    getDisplayName() {
+      return i18n.translate('metricsExperience.lens.actions.viewDetails', {
+        defaultMessage: 'View details',
+      });
+    },
+    getIconType() {
+      return 'eye';
+    },
+    async isCompatible() {
+      return true;
+    },
+    async execute() {
+      onExecute();
+    },
+  };
 };
 
 const getCopyToDashboardAction = (onExecute: () => void): Action => {

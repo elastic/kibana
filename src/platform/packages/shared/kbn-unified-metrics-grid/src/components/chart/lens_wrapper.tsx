@@ -6,15 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useBoolean } from '@kbn/react-hooks';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { MetricInsightsFlyout } from '../flyout/metrics_insights_flyout';
 
 export type LensWrapperProps = {
+  esqlQuery: string;
+  metric: MetricField;
   lensProps: LensProps;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
@@ -27,6 +31,8 @@ const DEFAULT_DISABLED_ACTIONS = [
 
 export function LensWrapper({
   lensProps,
+  esqlQuery,
+  metric,
   services,
   onBrushEnd,
   onFilter,
@@ -34,6 +40,7 @@ export function LensWrapper({
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const { EmbeddableComponent, SaveModalComponent } = services.lens;
 
@@ -67,6 +74,7 @@ export function LensWrapper({
 
   const extraActions = useLensExtraActions({
     copyToDashboard: { onClick: toggleSaveModalVisible },
+    viewDetails: { onClick: () => setIsFlyoutOpen(true) },
   });
 
   return (
@@ -91,6 +99,12 @@ export function LensWrapper({
           isSaveable={false}
         />
       )}
+      <MetricInsightsFlyout
+        metric={metric}
+        esqlQuery={esqlQuery}
+        isOpen={isFlyoutOpen}
+        onClose={() => setIsFlyoutOpen(false)}
+      />
     </>
   );
 }

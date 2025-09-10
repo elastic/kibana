@@ -100,6 +100,8 @@ export const Chart: React.FC<ChartProps> = ({
     >
       {lensProps && (
         <LensWrapperMemo
+          metric={metric}
+          esqlQuery={esqlQuery}
           lensProps={lensProps}
           services={services}
           onBrushEnd={onBrushEnd}

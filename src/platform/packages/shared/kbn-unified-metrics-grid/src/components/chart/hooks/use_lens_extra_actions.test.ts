@@ -49,4 +49,58 @@ describe('useLensExtraActions', () => {
       expect(onClick).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('viewDetails', () => {
+    it('should return viewDetails action when config is provided', () => {
+      const onClick = jest.fn();
+      const { result } = renderHook(() => useLensExtraActions({ viewDetails: { onClick } }));
+
+      expect(result.current).toHaveLength(1);
+      const action = result.current[0];
+
+      expect(action).toEqual(
+        expect.objectContaining({
+          id: 'viewDetails',
+          order: 2,
+          type: 'actionButton',
+        })
+      );
+
+      expect(action.getIconType({} as ActionExecutionContext)).toBe('eye');
+    });
+
+    it('should call onClick when execute is invoked', async () => {
+      const onClick = jest.fn();
+      const { result } = renderHook(() => useLensExtraActions({ viewDetails: { onClick } }));
+
+      const action = result.current[0];
+
+      await act(async () => {
+        await action.execute({} as ActionExecutionContext);
+      });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('multiple actions', () => {
+    it('should return both actions when both configs are provided', () => {
+      const copyOnClick = jest.fn();
+      const viewOnClick = jest.fn();
+      const { result } = renderHook(() =>
+        useLensExtraActions({
+          copyToDashboard: { onClick: copyOnClick },
+          viewDetails: { onClick: viewOnClick },
+        })
+      );
+
+      expect(result.current).toHaveLength(2);
+
+      const copyAction = result.current.find((action) => action.id === 'copyToDashboard');
+      const viewAction = result.current.find((action) => action.id === 'viewDetails');
+
+      expect(copyAction).toBeDefined();
+      expect(viewAction).toBeDefined();
+    });
+  });
 });
