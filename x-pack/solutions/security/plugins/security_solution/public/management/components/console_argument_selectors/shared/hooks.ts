@@ -6,11 +6,22 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import moment from 'moment-timezone';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ArgSelectorState } from '../../console/types';
 import type { BaseSelectorState } from './types';
-import { getGenericErrorMessage } from '../../../common/translations';
+import type { ActionListApiResponse, ActionDetails } from '../../../../../common/endpoint/types';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
+import {
+  getGenericErrorMessage,
+  getPendingActionDescription,
+  UNKNOWN_HOST,
+} from '../../../common/translations';
 
 /**
  * Generic error toast hook that handles both custom scripts and pending actions errors
@@ -119,12 +130,83 @@ export const useRenderDelay = (): boolean => {
  * Hook to handle focus management when popover closes
  */
 export const useFocusManagement = (isPopoverOpen: boolean, requestFocus?: () => void): void => {
+  const getIsMounted = useIsMounted();
+
   useEffect(() => {
     if (!isPopoverOpen && requestFocus) {
       // Use setTimeout to ensure focus happens after the popover closes
       setTimeout(() => {
-        requestFocus();
+        if (getIsMounted() && requestFocus) {
+          requestFocus();
+        }
       }, 0);
     }
-  }, [isPopoverOpen, requestFocus]);
+  }, [isPopoverOpen, requestFocus, getIsMounted]);
+};
+
+/**
+ * Format timestamp using user's preferred date format and timezone settings
+ */
+const formatTimestamp = (timestamp: string, dateFormat: string, timeZone: string): string => {
+  return moment.tz(timestamp, timeZone).format(dateFormat);
+};
+
+/**
+ * Hook to transform pending actions response to selectable options with user's preferred date formatting
+ */
+export const usePendingActionsOptions = ({
+  response,
+  selectedValue,
+  privilegeChecker,
+}: {
+  response: ActionListApiResponse[] | null;
+  selectedValue?: string;
+  privilegeChecker?: (command: string) => { canCancel: boolean; reason?: string };
+}): EuiSelectableOption<Partial<{ description: string }>>[] => {
+  const dateFormat = useDateFormat();
+  const timeZone = useTimeZone();
+
+  return useMemo(() => {
+    const data = response?.[0]?.data;
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map((action: ActionDetails) => {
+      const isChecked = action.id === selectedValue;
+      const hostName = action.agents?.[0]
+        ? action.hosts?.[action.agents[0]]?.name || UNKNOWN_HOST
+        : UNKNOWN_HOST;
+      const timestamp = formatTimestamp(action.startedAt, dateFormat, timeZone);
+      const command = action.command;
+      const createdBy = action.createdBy;
+
+      // Use the console command name for display (e.g., 'release' instead of 'unisolate')
+      const displayCommand =
+        RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
+          command as ResponseActionsApiCommandNames
+        ] || command;
+
+      const description = getPendingActionDescription(
+        displayCommand,
+        hostName,
+        createdBy,
+        timestamp
+      );
+
+      // Check if user has permission to cancel this action
+      const permissionCheck = privilegeChecker ? privilegeChecker(command) : { canCancel: false };
+      const isDisabled = !permissionCheck.canCancel;
+
+      return {
+        label: `${displayCommand} - ${action.id}`,
+        value: action.id,
+        description,
+        data: action,
+        checked: isChecked ? 'on' : undefined,
+        disabled: isDisabled,
+        toolTipContent: isDisabled ? permissionCheck.reason : undefined,
+      };
+    });
+  }, [response, selectedValue, privilegeChecker, dateFormat, timeZone]);
 };

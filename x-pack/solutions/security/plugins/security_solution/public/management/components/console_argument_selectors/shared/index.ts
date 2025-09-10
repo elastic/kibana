@@ -20,7 +20,6 @@ export {
 } from './hooks';
 export {
   transformCustomScriptsToOptions,
-  transformPendingActionsToOptions,
   createSelectionHandler,
   createKeyDownHandler,
   checkActionCancelPermission,

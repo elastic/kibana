@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiPopover,
   EuiFlexGroup,
@@ -21,11 +21,7 @@ import type { ResponseActionAgentType } from '../../../../../common/endpoint/ser
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
 import { PENDING_ACTIONS_CONFIG, SHARED_TRUNCATION_STYLE } from '../shared/constants';
-import {
-  useGenericErrorToast,
-  transformPendingActionsToOptions,
-  checkActionCancelPermission,
-} from '../shared';
+import { useGenericErrorToast, checkActionCancelPermission } from '../shared';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -34,6 +30,7 @@ import {
   useBaseSelectorHandlers,
   useRenderDelay,
   useFocusManagement,
+  usePendingActionsOptions,
 } from '../shared/hooks';
 import { createSelectionHandler, createKeyDownHandler } from '../shared/utils';
 import { ERROR_LOADING_PENDING_ACTIONS } from '../../../common/translations';
@@ -49,9 +46,13 @@ export interface PendingActionsSelectorState {
  * A Console Argument Selector component that enables the user to select from available pending actions
  */
 export const PendingActionsSelector = memo<
-  CommandArgumentValueSelectorProps<string, PendingActionsSelectorState>
+  CommandArgumentValueSelectorProps<
+    string,
+    PendingActionsSelectorState,
+    { agentType?: ResponseActionAgentType; endpointId?: string }
+  >
 >(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
-  const agentType = command.commandDefinition.meta?.agentType as ResponseActionAgentType;
+  const agentType = command.commandDefinition.meta?.agentType;
   const endpointId = command.commandDefinition.meta?.endpointId;
 
   const userPrivileges = useUserPrivileges();
@@ -70,10 +71,11 @@ export const PendingActionsSelector = memo<
     [userPrivileges.endpointPrivileges]
   );
 
-  const options = useMemo(() => {
-    if (!data) return [];
-    return transformPendingActionsToOptions([data], value, privilegeChecker);
-  }, [data, value, privilegeChecker]);
+  const options = usePendingActionsOptions({
+    response: data ? [data] : null,
+    selectedValue: value,
+    privilegeChecker,
+  });
 
   const {
     services: { notifications },

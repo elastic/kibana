@@ -6,11 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type {
-  ActionListApiResponse,
-  ActionDetails,
-  ResponseActionScript,
-} from '../../../../../common/endpoint/types';
+import type { ActionDetails, ResponseActionScript } from '../../../../../common/endpoint/types';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { BaseSelectorState } from './types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -18,9 +14,7 @@ import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../
 import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import {
   getCancelPermissionDeniedMessage,
-  getPendingActionDescription,
   getPermissionVerificationErrorMessage,
-  UNKNOWN_HOST,
 } from '../../../common/translations';
 
 /**
@@ -129,64 +123,4 @@ export const checkActionCancelPermission = (
       reason: getPermissionVerificationErrorMessage(displayCommand),
     };
   }
-};
-
-/**
- * Transform pending actions response (using standard ActionListApiResponse) to selectable options.
- * Labels are formatted as "CommandName - ActionId" for better user context, while values remain as action IDs
- * for compatibility with existing cancel action workflows.
- */
-export const transformPendingActionsToOptions = (
-  response: ActionListApiResponse[],
-  selectedValue?: string,
-  privilegeChecker?: (command: string) => { canCancel: boolean; reason?: string }
-): EuiSelectableOption<Partial<{ description: string }>>[] => {
-  // The hook returns a single response object, but our data parameter is an array
-  // So we need to handle both cases
-  if (!response || response.length === 0) {
-    return [];
-  }
-
-  // Extract the actual response object from the array
-  const actualResponse = response[0];
-
-  if (!actualResponse || !actualResponse.data) {
-    return [];
-  }
-
-  const data = actualResponse.data;
-
-  if (!Array.isArray(data)) {
-    return [];
-  }
-
-  return data.map((action: ActionDetails) => {
-    const isChecked = action.id === selectedValue;
-    const hostName = action.agents?.[0] ? action.hosts?.[action.agents[0]]?.name : UNKNOWN_HOST;
-    const timestamp = action.startedAt;
-    const command = action.command;
-    const createdBy = action.createdBy;
-
-    // Use the console command name for display (e.g., 'release' instead of 'unisolate')
-    const displayCommand =
-      RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
-        command as ResponseActionsApiCommandNames
-      ] || command;
-
-    const description = getPendingActionDescription(displayCommand, hostName, createdBy, timestamp);
-
-    // Check if user has permission to cancel this action
-    const permissionCheck = privilegeChecker ? privilegeChecker(command) : { canCancel: false };
-    const isDisabled = !permissionCheck.canCancel;
-
-    return {
-      label: `${displayCommand} - ${action.id}`,
-      value: action.id,
-      description,
-      data: action,
-      checked: isChecked ? 'on' : undefined,
-      disabled: isDisabled,
-      toolTipContent: isDisabled ? permissionCheck.reason : undefined,
-    };
-  });
 };
