@@ -33,7 +33,7 @@ import type {
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { MlCapabilitiesService } from '@kbn/ml-services/capabilities/check_capabilities';
 import type { MlFieldFormatService } from '@kbn/ml-services/field_format_service';
-import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
 
 import type {
   anomalyChartsEmbeddableOverridableStateSchema,

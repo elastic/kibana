@@ -8,7 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { MlClient } from '@kbn/ml-client';
-import { datafeedsProvider } from '@kbn/ml-services/datafeeds';
+import { datafeedsProvider } from '@kbn/ml-server-services/datafeeds';
 
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
