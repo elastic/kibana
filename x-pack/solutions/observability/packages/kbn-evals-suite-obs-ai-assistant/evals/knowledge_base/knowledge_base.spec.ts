@@ -11,6 +11,12 @@ import { evaluate as base } from '../../src/evaluate';
 import { clearConversations } from '../utils/conversation';
 import { clearKnowledgeBase, testDocs } from '../utils/knowledge_base';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/kb/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 const evaluate = base.extend<{
   evaluateKnowledgeBase: EvaluateKnowledgeBase;
 }>({
@@ -30,7 +36,6 @@ const evaluate = base.extend<{
 });
 
 evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
-  // --- Tests for kb functions ---
   evaluate.describe('kb functions', () => {
     evaluate.afterEach(async ({ esClient }) => {
       await clearKnowledgeBase(esClient);
@@ -94,7 +99,6 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     });
   });
 
-  // --- Tests for kb retrieval ---
   evaluate.describe('kb retrieval', () => {
     evaluate.beforeAll(async ({ knowledgeBaseClient }) => {
       await knowledgeBaseClient.importEntries({ entries: testDocs });
