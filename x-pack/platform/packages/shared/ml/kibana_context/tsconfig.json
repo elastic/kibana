@@ -44,5 +44,7 @@
     "@kbn/licensing-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/ml-services",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/ml-common-types",
   ]
 }
