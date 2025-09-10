@@ -166,7 +166,7 @@ export class OnboardingApp {
 
     for (const selector of possibleSelectors) {
       const description = tile.locator(selector).first();
-      if (await description.count() > 0) {
+      if ((await description.count()) > 0) {
         return await description.textContent();
       }
     }
