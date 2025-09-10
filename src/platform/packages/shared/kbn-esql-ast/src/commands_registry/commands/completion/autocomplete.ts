@@ -8,7 +8,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
@@ -17,12 +16,14 @@ import {
   pipeCompleteItem,
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
+  withCompleteItem,
 } from '../../complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,
   handleFragment,
   columnExists,
+  createInferenceEndpointToCompletionItem,
 } from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
@@ -95,30 +96,11 @@ const defaultPrompt: ISuggestionItem = {
 };
 
 const withCompletionItem: ISuggestionItem = {
+  ...withCompleteItem,
   detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
     defaultMessage: 'Provide additional parameters for the LLM prompt.',
   }),
-  kind: 'Reference',
-  label: 'WITH',
-  sortText: '1',
-  asSnippet: true,
-  text: 'WITH { $0 }',
-  command: TRIGGER_SUGGESTION_COMMAND,
 };
-
-function inferenceEndpointToCompletionItem(
-  inferenceEndpoint: InferenceEndpointAutocompleteItem
-): ISuggestionItem {
-  return {
-    detail: i18n.translate('kbn-esql-ast.esql.definitions.completionInferenceIdDoc', {
-      defaultMessage: 'Inference endpoint used for the completion',
-    }),
-    kind: 'Reference',
-    label: inferenceEndpoint.inference_id,
-    sortText: '1',
-    text: inferenceEndpoint.inference_id,
-  };
-}
 
 export async function autocomplete(
   query: string,
@@ -216,7 +198,7 @@ export async function autocomplete(
 
     case CompletionPosition.WITHIN_MAP_EXPRESSION:
       const availableParameters = {
-        inference_id: endpoints?.map(inferenceEndpointToCompletionItem) || [],
+        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
