@@ -6,13 +6,43 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
+
 import type { getGapFillAutoSchedulerLogsSchema } from '../schemas';
 
 export type GetGapFillAutoSchedulerLogsParams = TypeOf<typeof getGapFillAutoSchedulerLogsSchema>;
 
+export interface GapFillAutoSchedulerLogEntry {
+  timestamp: string;
+  status: 'success' | 'error' | 'warning' | 'unknown';
+  message: string;
+  durationMs: number;
+  summary: {
+    totalRules: number;
+    successfulRules: number;
+    failedRules: number;
+    totalGapsProcessed: number;
+  };
+  config: {
+    name: string;
+    maxAmountOfGapsToProcessPerRun: number;
+    maxAmountOfRulesToProcessPerRun: number;
+    amountOfRetries: number;
+    rulesFilter: string;
+    gapFillRange: string;
+    schedule: {
+      interval: string;
+    };
+  };
+  results?: Array<{
+    ruleId: string;
+    processedGaps: number;
+    status: 'success' | 'error' | 'unknown';
+    error?: string;
+  }>;
+}
+
 export interface GapFillAutoSchedulerLogsResult {
-  data: IValidatedEventInternalDocInfo[];
+  data: GapFillAutoSchedulerLogEntry[];
   total: number;
   page: number;
   perPage: number;

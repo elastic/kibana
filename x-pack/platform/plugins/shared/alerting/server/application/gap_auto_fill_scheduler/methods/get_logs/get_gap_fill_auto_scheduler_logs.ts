@@ -7,7 +7,47 @@
 
 import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type { GetGapFillAutoSchedulerLogsParams, GapFillAutoSchedulerLogsResult } from './types';
+import type {
+  GetGapFillAutoSchedulerLogsParams,
+  GapFillAutoSchedulerLogsResult,
+  GapFillAutoSchedulerLogEntry,
+} from './types';
+
+interface RawEventLogEntry {
+  '@timestamp': string;
+  message?: string;
+  kibana?: {
+    auto_gap_fill?: {
+      execution?: {
+        status?: string;
+        duration_ms?: number;
+        config?: {
+          name?: string;
+          max_amount_of_gaps_to_process_per_run?: number;
+          max_amount_of_rules_to_process_per_run?: number;
+          amount_of_retries?: number;
+          rules_filter?: string;
+          gap_fill_range?: string;
+          schedule?: {
+            interval?: string;
+          };
+        };
+        results?: Array<{
+          rule_id?: string;
+          processed_gaps?: number;
+          status?: string;
+          error?: string;
+        }>;
+        summary?: {
+          total_rules?: number;
+          successful_rules?: number;
+          failed_rules?: number;
+          total_gaps_processed?: number;
+        };
+      };
+    };
+  };
+}
 import { getGapFillAutoSchedulerLogsSchema } from './schemas';
 import type { GapAutoFillSchedulerSavedObjectAttributes } from '../../transforms';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -121,8 +161,48 @@ export async function getGapFillAutoSchedulerLogs(
       })
     );
 
+    // Transform raw event log data into cleaner format
+    const transformedData: GapFillAutoSchedulerLogEntry[] = (result.data as RawEventLogEntry[]).map(
+      (entry: RawEventLogEntry) => {
+        const execution = entry.kibana?.auto_gap_fill?.execution;
+        const config = execution?.config;
+        const summary = execution?.summary;
+        const executionResults = execution?.results;
+
+        return {
+          timestamp: entry['@timestamp'],
+          status: (execution?.status as 'success' | 'error' | 'warning') || 'unknown',
+          message: entry.message || 'Gap fill execution',
+          durationMs: execution?.duration_ms || 0,
+          summary: {
+            totalRules: summary?.total_rules || 0,
+            successfulRules: summary?.successful_rules || 0,
+            failedRules: summary?.failed_rules || 0,
+            totalGapsProcessed: summary?.total_gaps_processed || 0,
+          },
+          config: {
+            name: config?.name || 'Unknown',
+            maxAmountOfGapsToProcessPerRun: config?.max_amount_of_gaps_to_process_per_run || 0,
+            maxAmountOfRulesToProcessPerRun: config?.max_amount_of_rules_to_process_per_run || 0,
+            amountOfRetries: config?.amount_of_retries || 0,
+            rulesFilter: config?.rules_filter || '',
+            gapFillRange: config?.gap_fill_range || '',
+            schedule: {
+              interval: config?.schedule?.interval || '1h',
+            },
+          },
+          results: executionResults?.map((execResult) => ({
+            ruleId: execResult.rule_id || '',
+            processedGaps: execResult.processed_gaps || 0,
+            status: (execResult.status as 'success' | 'error') || 'unknown',
+            error: execResult.error,
+          })),
+        };
+      }
+    );
+
     return {
-      data: result.data,
+      data: transformedData,
       total: result.total,
       page: params.page || 1,
       perPage: params.perPage || 50,

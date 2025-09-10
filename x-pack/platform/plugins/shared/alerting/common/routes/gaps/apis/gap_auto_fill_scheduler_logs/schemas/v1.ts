@@ -22,8 +22,51 @@ export const autoFillSchedulerLogsQuerySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
+export const gapFillSchedulerLogEntrySchema = schema.object({
+  timestamp: schema.string(),
+  status: schema.oneOf([
+    schema.literal('success'),
+    schema.literal('error'),
+    schema.literal('warning'),
+    schema.literal('unknown'),
+  ]),
+  message: schema.string(),
+  duration_ms: schema.number(),
+  summary: schema.object({
+    total_rules: schema.number(),
+    successful_rules: schema.number(),
+    failed_rules: schema.number(),
+    total_gaps_processed: schema.number(),
+  }),
+  config: schema.object({
+    name: schema.string(),
+    max_amount_of_gaps_to_process_per_run: schema.number(),
+    max_amount_of_rules_to_process_per_run: schema.number(),
+    amount_of_retries: schema.number(),
+    rules_filter: schema.string(),
+    gap_fill_range: schema.string(),
+    schedule: schema.object({
+      interval: schema.string(),
+    }),
+  }),
+  results: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        rule_id: schema.string(),
+        processed_gaps: schema.number(),
+        status: schema.oneOf([
+          schema.literal('success'),
+          schema.literal('error'),
+          schema.literal('unknown'),
+        ]),
+        error: schema.maybe(schema.string()),
+      })
+    )
+  ),
+});
+
 export const autoFillSchedulerLogsResponseSchema = schema.object({
-  data: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+  data: schema.arrayOf(gapFillSchedulerLogEntrySchema),
   total: schema.number(),
   page: schema.number(),
   per_page: schema.number(),

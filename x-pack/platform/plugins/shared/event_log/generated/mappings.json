@@ -623,20 +623,20 @@
                                             "type": "keyword",
                                             "ignore_above": 1024
                                         },
-                                        "maxAmountOfGapsToProcessPerRun": {
+                                        "max_amount_of_gaps_to_process_per_run": {
                                             "type": "long"
                                         },
-                                        "maxAmountOfRulesToProcessPerRun": {
+                                        "max_amount_of_rules_to_process_per_run": {
                                             "type": "long"
                                         },
-                                        "amountOfRetries": {
+                                        "amount_of_retries": {
                                             "type": "long"
                                         },
-                                        "rulesFilter": {
+                                        "rules_filter": {
                                             "type": "keyword",
                                             "ignore_above": 1024
                                         },
-                                        "gapFillRange": {
+                                        "gap_fill_range": {
                                             "type": "keyword",
                                             "ignore_above": 1024
                                         },
@@ -652,11 +652,11 @@
                                 },
                                 "results": {
                                     "properties": {
-                                        "ruleId": {
+                                        "rule_id": {
                                             "type": "keyword",
                                             "ignore_above": 1024
                                         },
-                                        "processedGaps": {
+                                        "processed_gaps": {
                                             "type": "long"
                                         },
                                         "status": {
@@ -671,16 +671,16 @@
                                 },
                                 "summary": {
                                     "properties": {
-                                        "totalRules": {
+                                        "total_rules": {
                                             "type": "long"
                                         },
-                                        "successfulRules": {
+                                        "successful_rules": {
                                             "type": "long"
                                         },
-                                        "failedRules": {
+                                        "failed_rules": {
                                             "type": "long"
                                         },
-                                        "totalGapsProcessed": {
+                                        "total_gaps_processed": {
                                             "type": "long"
                                         }
                                     }

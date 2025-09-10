@@ -8,4 +8,5 @@
 export type {
   GetGapFillAutoSchedulerLogsParams,
   GapFillAutoSchedulerLogsResult,
+  GapFillAutoSchedulerLogEntry,
 } from './get_gap_fill_auto_scheduler_logs_types';

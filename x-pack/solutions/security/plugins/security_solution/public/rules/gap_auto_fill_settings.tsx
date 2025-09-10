@@ -93,18 +93,21 @@ interface GapAutoFill {
 }
 
 // Generic event log interface since the API returns Record<string, unknown>
-interface GapFillEventLog extends Record<string, unknown> {
-  _id: string;
-  _index: string;
-  '@timestamp': string;
-  event: {
-    action: string;
-  };
+interface GapFillLogEntry {
+  timestamp: string;
+  status: 'success' | 'error' | 'warning' | 'unknown';
   message: string;
+  duration_ms: number;
+  summary: {
+    total_rules: number;
+    successful_rules: number;
+    failed_rules: number;
+    total_gaps_processed: number;
+  };
 }
 
 interface EventLogResponse {
-  data: GapFillEventLog[];
+  data: GapFillLogEntry[];
   total: number;
   page: number;
   per_page: number;
@@ -112,7 +115,7 @@ interface EventLogResponse {
 
 // Event Logs Component
 const EventLogsComponent: React.FC<{ autoFillId: string }> = ({ autoFillId }) => {
-  const [eventLogs, setEventLogs] = useState<GapFillEventLog[]>([]);
+  const [eventLogs, setEventLogs] = useState<GapFillLogEntry[]>([]);
   const [eventLogsLoading, setEventLogsLoading] = useState(false);
   const [eventLogsError, setEventLogsError] = useState<string | null>(null);
   const [eventLogsPagination, setEventLogsPagination] = useState({
@@ -130,7 +133,11 @@ const EventLogsComponent: React.FC<{ autoFillId: string }> = ({ autoFillId }) =>
         `/internal/alerting/rules/gaps/gap_auto_fill_scheduler/${autoFillId}/logs`
       );
       setEventLogs(response.data);
-      setEventLogsPagination((prev) => ({ ...prev, total: response.total }));
+      setEventLogsPagination((prev) => ({
+        ...prev,
+        total: response.total,
+        perPage: response.per_page,
+      }));
     } catch (err) {
       setEventLogsError('Failed to load event logs');
     } finally {
@@ -165,28 +172,34 @@ const EventLogsComponent: React.FC<{ autoFillId: string }> = ({ autoFillId }) =>
           <EuiTableHeader>
             <EuiTableRow>
               <EuiTableHeaderCell>{'Timestamp'}</EuiTableHeaderCell>
-              <EuiTableHeaderCell>{'Action'}</EuiTableHeaderCell>
               <EuiTableHeaderCell>{'Status'}</EuiTableHeaderCell>
               <EuiTableHeaderCell>{'Message'}</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{'Duration'}</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{'Summary'}</EuiTableHeaderCell>
             </EuiTableRow>
           </EuiTableHeader>
           <EuiTableBody>
-            {eventLogs.map((log) => (
-              <EuiTableRow key={log._id}>
-                <EuiTableRowCell>{new Date(log['@timestamp']).toLocaleString()}</EuiTableRowCell>
-                <EuiTableRowCell>{log.event.action}</EuiTableRowCell>
+            {eventLogs.map((log, idx) => (
+              <EuiTableRow key={`${log.timestamp}-${idx}`}>
+                <EuiTableRowCell>{new Date(log.timestamp).toLocaleString()}</EuiTableRowCell>
                 <EuiTableRowCell>
                   <EuiBadge
                     color={
-                      log.kibana?.auto_gap_fill?.execution?.status === 'success'
+                      log.status === 'success'
                         ? 'success'
-                        : 'danger'
+                        : log.status === 'warning'
+                        ? 'warning'
+                        : log.status === 'error'
+                        ? 'danger'
+                        : 'hollow'
                     }
                   >
-                    {log.kibana?.auto_gap_fill?.execution?.status || 'unknown'}
+                    {log.status}
                   </EuiBadge>
                 </EuiTableRowCell>
                 <EuiTableRowCell>{log.message}</EuiTableRowCell>
+                <EuiTableRowCell>{`${log.duration_ms} ms`}</EuiTableRowCell>
+                <EuiTableRowCell>{`${log.summary.successful_rules}/${log.summary.total_rules} ok, ${log.summary.failed_rules} failed, ${log.summary.total_gaps_processed} gaps`}</EuiTableRowCell>
               </EuiTableRow>
             ))}
           </EuiTableBody>
@@ -390,8 +403,6 @@ export const GapAutoFillSettings: React.FC = () => {
     return <div>{'Loading...'}</div>;
   }
 
-  const lastRun = autoFill?.last_run;
-
   return (
     <EuiPanel>
       <EuiTitle size="m">
@@ -594,20 +605,6 @@ export const GapAutoFillSettings: React.FC = () => {
             <p>
               <strong>{'Last Updated:'}</strong> {new Date(autoFill.updated_at).toLocaleString()}
             </p>
-            {lastRun && (
-              <>
-                <p>
-                  <strong>{'Last Run Status:'}</strong> {lastRun.status}
-                </p>
-                <p>
-                  <strong>{'Last Run Message:'}</strong> {lastRun.message}
-                </p>
-                <p>
-                  <strong>{'Last Run Metrics:'}</strong>{' '}
-                  {lastRun.metrics.totalRules} rules processed, {lastRun.metrics.totalGapsProcessed} gaps filled
-                </p>
-              </>
-            )}
           </EuiText>
 
           <EventLogsComponent autoFillId={AUTO_FILL_ID} />
