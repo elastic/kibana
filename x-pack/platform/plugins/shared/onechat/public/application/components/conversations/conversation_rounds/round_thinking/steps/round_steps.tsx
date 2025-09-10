@@ -5,50 +5,26 @@
  * 2.0.
  */
 
-import { EuiSteps, useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
+import type {
+  ConversationRoundStep,
+  ToolCallProgress,
+  ToolCallStep,
+} from '@kbn/onechat-common/chat/conversation';
 import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { conversationRoundsId } from '../../conversation_rounds.styles';
-import { QueryResultStep } from './query_result_step';
-import { OtherResultStep } from './other_result_step';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useAgentId } from '../../../../../hooks/use_conversation';
+import { useNavigation } from '../../../../../hooks/use_navigation';
+import { appPaths } from '../../../../../utils/app_paths';
 import { TabularDataResultStep } from './tabular_data_result_step';
-
-const resourceResultTitle = i18n.translate(
-  'xpack.onechat.conversation.thinking.resourceResult.title',
-  {
-    defaultMessage: 'Found document(s)',
-  }
-);
-const tabularResultTitle = i18n.translate(
-  'xpack.onechat.conversation.thinking.tabularResult.title',
-  {
-    defaultMessage: 'Table result',
-  }
-);
-const queryResultTitle = i18n.translate('xpack.onechat.conversation.thinking.queryResult.title', {
-  defaultMessage: 'Query result',
-});
-const otherResultTitle = i18n.translate('xpack.onechat.conversation.thinking.otherResult.title', {
-  defaultMessage: 'Other result',
-});
-
-const getToolResultTitle = (toolResult: ToolResult) => {
-  switch (toolResult.type) {
-    case ToolResultType.resource:
-      return resourceResultTitle;
-    case ToolResultType.tabularData:
-      return tabularResultTitle;
-    case ToolResultType.query:
-      return queryResultTitle;
-    default:
-      return otherResultTitle;
-  }
-};
+import { OtherResultStep } from './other_result_step';
+import { QueryResultStep } from './query_result_step';
 
 interface ToolResultDisplayProps {
   toolResult: ToolResult;
@@ -70,61 +46,166 @@ const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => 
   }
 };
 
+const StepLabel: React.FC<{ value?: string; href?: string }> = ({ value, href }) => {
+  if (!value) {
+    return null;
+  }
+  if (href) {
+    return <EuiLink href={href}>{value}</EuiLink>;
+  }
+  return (
+    <EuiText>
+      <p>{value}</p>
+    </EuiText>
+  );
+};
+
+interface ThinkingItemLayoutProps {
+  content: ReactNode;
+  label: { value?: string; href?: string };
+}
+
+const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
+  content,
+  label: { value, href },
+}) => {
+  return (
+    // No gap because we're using the margin on the horizontal divider
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="m">
+          <EuiFlexItem>{content}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StepLabel value={value} href={href} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiHorizontalRule margin="m" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const ToolCallDisplay: React.FC<{
+  step: ToolCallStep;
+  agentId?: string;
+  agentHref?: string;
+  toolHref: string;
+}> = ({ step, agentId, agentHref, toolHref }) => {
+  return (
+    <ThinkingItemLayout
+      content={
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.onechat.thinking.toolCallThinkingItem"
+              defaultMessage="Calling tool "
+            />
+            <code>
+              <EuiLink href={toolHref} target="_blank">
+                {step.tool_id}
+              </EuiLink>
+            </code>
+          </p>
+        </EuiText>
+      }
+      label={{
+        value: agentId,
+        href: agentHref,
+      }}
+    />
+  );
+};
+
+const ToolProgressDisplay: React.FC<{
+  progress: ToolCallProgress;
+  toolId: string;
+  toolHref: string;
+}> = ({ progress, toolId, toolHref }) => {
+  return (
+    <ThinkingItemLayout content={progress.message} label={{ value: toolId, href: toolHref }} />
+  );
+};
+
 interface RoundStepsProps {
   steps: ConversationRoundStep[];
 }
 
-export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
-  const { euiTheme } = useEuiTheme();
-  const stepsStyles = css`
-    .euiTitle {
-      ${useEuiFontSize('s')}
-      font-weight: ${euiTheme.font.weight.regular};
+const labels = {
+  roundThinkingSteps: i18n.translate('xpack.onechat.conversation.thinking.stepsList', {
+    defaultMessage: 'Round thinking steps',
+  }),
+};
 
-      /*
-      Align the title with the step bullet
-      I can't find any other way to do this, vertical-align doesn't work here
-      */
-      position: relative;
-      top: -2px;
-    }
-
-    .euiStepNumber,
-    /* Using id for higher specificity to override the default border color */
-    #${conversationRoundsId} & .euiStep::before {
-      border-color: ${euiTheme.colors.borderBasePlain};
-    }
-  `;
-
+const getProgressionItems = ({ step, toolHref }: { step: ToolCallStep; toolHref: string }) => {
   return (
-    <EuiSteps
-      css={stepsStyles}
-      titleSize="xxs"
-      steps={steps.flatMap((step) => {
+    step.progression?.map((progress, index) => (
+      <ToolProgressDisplay
+        key={`${step.tool_id}-progress-${index}`}
+        progress={progress}
+        toolId={step.tool_id}
+        toolHref={toolHref}
+      />
+    )) ?? []
+  );
+};
+
+const getResultItems = ({ step, toolHref }: { step: ToolCallStep; toolHref: string }) => {
+  return step.results.map((result: ToolResult, index) => (
+    <ThinkingItemLayout
+      key={`${step.tool_id}-result-${index}`}
+      content={<ToolResultDisplay toolResult={result} />}
+      label={{ value: step.tool_id, href: toolHref }}
+    />
+  ));
+};
+
+export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
+  const stepsListStyles = css`
+    list-style: none;
+    padding: none;
+  `;
+  const agentId = useAgentId();
+  const { createOnechatUrl } = useNavigation();
+  const agentHref = agentId && createOnechatUrl(appPaths.agents.edit({ agentId }));
+  const createToolUrl = ({ toolId }: { toolId: string }) =>
+    createOnechatUrl(appPaths.tools.details({ toolId }));
+
+  // Each step will map to multiple thinking items
+  // In the case of tool call steps we'll have
+  // an item for the tool call, items for the progression, and items for the tool call results
+  return (
+    <ol css={stepsListStyles} aria-label={labels.roundThinkingSteps}>
+      {steps.flatMap((step, index): ReactNode => {
         if (isToolCallStep(step)) {
-          return step.results.map((toolResult) => {
-            return {
-              title: getToolResultTitle(toolResult),
-              children: <ToolResultDisplay toolResult={toolResult} />,
-              status: 'incomplete',
-            };
-          });
+          return [
+            <ToolCallDisplay
+              key={`step-tool-call-${index}`}
+              step={step}
+              agentId={agentId}
+              agentHref={agentHref}
+              toolHref={createToolUrl({ toolId: step.tool_id })}
+            />,
+            ...getProgressionItems({ step, toolHref: createToolUrl({ toolId: step.tool_id }) }),
+            ...getResultItems({ step, toolHref: createToolUrl({ toolId: step.tool_id }) }),
+          ];
         }
 
-        // Are reasoning steps produced at all right now?
+        // What is the difference between a reasoning step and a tool call progression message. When does the agent produce one over the other?
+        // Is there any difference for how we should display reasoning and progression?
         if (isReasoningStep(step)) {
           return [
-            {
-              title: step.reasoning,
-              // For reasoning, the title is the content so render nothing
-              children: <></>,
-              status: 'incomplete',
-            },
+            <ThinkingItemLayout
+              key={`step-reasoning-${index}`}
+              content={step.reasoning}
+              label={{ value: agentId, href: agentHref }}
+            />,
           ];
         }
 
         return [];
       })}
-    />
+    </ol>
   );
 };
