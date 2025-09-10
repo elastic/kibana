@@ -193,26 +193,20 @@ export class ScopedDiscoverEBTManager {
     if (!this.reportEvent) {
       return;
     }
-    console.log({ eventName, fieldNames });
-    const isOnlyFreeTextSearch = fieldNames.length === 1 && fieldNames[0] === FREE_TEXT;
-
     const eventData: QueryFieldsUsageEventData = {
       [FIELD_USAGE_EVENT_NAME]: eventName,
     };
 
-    // Handle free text search vs field-specific queries
-    if (isOnlyFreeTextSearch) {
-      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [FREE_TEXT];
-    } else if (fieldsMetadata) {
-      // Process actual field names
+    if (fieldsMetadata) {
       const fields = await this.getFieldsFromMetadata({
         fieldsMetadata,
         fieldNames,
       });
 
-      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
+      // tracks ECS compliant fields with a field name, non-ECS compliant fields with a "<non-ecs>" label
+      // and free text searches with a "__FREE_TEXT__" label
       const categorizedFields = fieldNames.map((fieldName) =>
-        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+        fields[fieldName]?.short || fieldName === FREE_TEXT ? fieldName : NON_ECS_FIELD
       );
 
       eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
@@ -246,7 +240,6 @@ export class ScopedDiscoverEBTManager {
         ? embeddedQueries
             .map((embeddedQuery) => {
               const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
-
               return embeddedKQLFieldNames.length === 0 ? [FREE_TEXT] : embeddedKQLFieldNames;
             })
             .flat()
