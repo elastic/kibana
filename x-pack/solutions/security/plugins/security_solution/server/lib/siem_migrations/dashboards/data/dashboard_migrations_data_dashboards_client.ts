@@ -84,7 +84,6 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
           total: (successAgg as AggregationsFilterAggregate)?.doc_count ?? 0,
           result: this.translationResultAggCount(translationResultsAgg),
           installable: (successAgg.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
-          missing_index: (successAgg.missing_index as AggregationsFilterAggregate)?.doc_count ?? 0,
         },
         failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },

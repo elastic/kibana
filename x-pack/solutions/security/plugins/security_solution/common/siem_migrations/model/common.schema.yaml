@@ -136,7 +136,6 @@ components:
                 - total
                 - result
                 - installable
-                - missing_index
               properties:
                 total:
                   type: integer
@@ -161,9 +160,6 @@ components:
                 installable:
                   type: integer
                   description: The number of items that have been successfully translated and can be installed.
-                missing_index:
-                  type: integer
-                  description: The number of items that have the placeholder for the missing index pattern in the query.
             failed:
               type: integer
               description: The number of items that have failed translation.
