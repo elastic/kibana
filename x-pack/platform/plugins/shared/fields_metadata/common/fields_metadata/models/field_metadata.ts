@@ -34,7 +34,7 @@ export class FieldMetadata {
     const short = fieldMetadata.short ?? fieldMetadata.description;
     const source = fieldMetadata.source ?? 'unknown';
     const type = fieldMetadata.type ?? 'unknown';
-    const otel_equivalent = getOtelFieldName(fieldMetadata);
+    const otel_equivalent = fieldMetadata.otel ? getOtelFieldName(fieldMetadata) : undefined;
 
     const fieldMetadataProps = {
       ...fieldMetadata,
