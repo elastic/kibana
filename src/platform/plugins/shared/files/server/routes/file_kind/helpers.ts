@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import mimeTypes from 'mime-types';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import type { File } from '../../../common';
+import type { File, FileKind } from '../../../common';
 import type { FileServiceStart } from '../../file_service';
 import { errors } from '../../file_service';
 
@@ -39,4 +40,60 @@ export async function getById(
   }
 
   return { result };
+}
+
+/**
+ * Validate file kind restrictions on a provided MIME type
+ * @param mimeType The MIME type to validate
+ * @param fileKind The file kind definition that may contain restrictions
+ * @returns `undefined` if the MIME type is valid or there are no restrictions.
+ */
+export function validateMimeType(
+  mimeType: string | undefined,
+  fileKind: FileKind | undefined
+): undefined | IKibanaResponse {
+  if (!mimeType || !fileKind) {
+    return;
+  }
+
+  const allowedMimeTypes = fileKind.allowedMimeTypes ?? null;
+
+  if (allowedMimeTypes && !allowedMimeTypes.includes(mimeType)) {
+    return kibanaResponseFactory.badRequest({
+      body: {
+        message: `MIME type is not allowed for file kind`,
+      },
+    });
+  }
+}
+
+/**
+ * Validate file name extension matches the file's MIME type
+ * @param fileName The file name to validate
+ * @param file
+ * @returns `undefined` if the extension matches the MIME type or if no MIME type is provided.
+ */
+export function validateFileNameExtension(
+  fileName: string | undefined,
+  file: File | undefined
+): undefined | IKibanaResponse {
+  if (!fileName || !file) {
+    return;
+  }
+
+  if (fileName && file.data.mimeType) {
+    const fileMimeType = file.data.mimeType;
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+
+    if (!fileExtension) {
+      return;
+    }
+
+    const expectedExtensions = mimeTypes.extensions[fileMimeType];
+    if (expectedExtensions && !expectedExtensions.includes(fileExtension)) {
+      return kibanaResponseFactory.badRequest({
+        body: { message: `File extension does not match file MIME type.` },
+      });
+    }
+  }
 }

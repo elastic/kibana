@@ -14,6 +14,7 @@ import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
 import * as commonSchemas from '../common_schemas';
+import { validateMimeType } from './helpers';
 import type { CreateHandler } from './types';
 
 export const method = 'post' as const;
@@ -42,13 +43,9 @@ const createHandler =
     } = req;
     const user = security.authc.getCurrentUser();
 
-    // Validate MIME type if provided and file kind has restrictions
-    if (mimeType && fileKindDefinition.allowedMimeTypes) {
-      if (!fileKindDefinition.allowedMimeTypes.includes(mimeType)) {
-        return res.badRequest({
-          body: { message: `MIME type is not allowed for file kind "${fileKind}"}` },
-        });
-      }
+    const invalidResponse = validateMimeType(mimeType, fileKindDefinition);
+    if (invalidResponse) {
+      return invalidResponse;
     }
 
     const file = await fileService.asCurrentUser().create({
