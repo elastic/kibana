@@ -106,24 +106,6 @@ export const withCompleteItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
-export const andCompleteItem: ISuggestionItem = {
-  label: 'AND',
-  text: ' AND ',
-  kind: 'Keyword',
-  detail: 'And',
-  sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
-
-export const orCompleteItem: ISuggestionItem = {
-  label: 'OR',
-  text: ' OR ',
-  kind: 'Keyword',
-  detail: 'Or',
-  sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
-
 export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionItem => {
   return {
     label,

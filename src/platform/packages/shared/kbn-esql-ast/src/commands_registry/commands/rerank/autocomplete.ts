@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
@@ -18,6 +17,7 @@ import {
   columnExists,
   suggestForExpression,
   withinQuotes,
+  createInferenceEndpointToCompletionItem,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
@@ -26,11 +26,10 @@ import {
   commaCompleteItem,
   withCompleteItem,
   assignCompletionItem,
-  andCompleteItem,
-  orCompleteItem,
 } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
+import { logicalOperators } from '../../../definitions/all_operators';
 
 export async function autocomplete(
   query: string,
@@ -187,7 +186,7 @@ async function getContextualSuggestions({
         innerText,
         getColumnsByType: callbacks.getByType,
         expressionRoot,
-        location: Location.WHERE,
+        location: Location.RERANK,
         preferredExpressionType: 'boolean',
         context,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
@@ -231,20 +230,6 @@ function createBasicConstants(): ISuggestionItem[] {
   ];
 }
 
-function createInferenceEndpointToCompletionItem(
-  inferenceEndpoint: InferenceEndpointAutocompleteItem
-): ISuggestionItem {
-  return {
-    detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
-      defaultMessage: 'Inference endpoint used for the completion',
-    }),
-    kind: 'Reference',
-    label: inferenceEndpoint.inference_id,
-    sortText: '1',
-    text: inferenceEndpoint.inference_id,
-  };
-}
-
 function buildNextActions(options?: {
   includeAssign?: boolean;
   withSpaces?: boolean;
@@ -284,7 +269,28 @@ function buildNextActions(options?: {
 
   // Add AND/OR operators to the next actions, after a boolean expression is completed
   if (includeBinaryOperators) {
-    items.push({ ...andCompleteItem, sortText: '05' }, { ...orCompleteItem, sortText: '06' });
+    const andOperator = logicalOperators.find((op) => op.name === 'and')!;
+    const orOperator = logicalOperators.find((op) => op.name === 'or')!;
+
+    items.push(
+      {
+        // AND operator suggestion
+        label: andOperator.name.toUpperCase(),
+        text: ` ${andOperator.name.toUpperCase()} `,
+        kind: 'Keyword',
+        detail: andOperator.description,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        sortText: '05',
+      },
+      {
+        label: orOperator.name.toUpperCase(),
+        text: ` ${orOperator.name.toUpperCase()} `,
+        kind: 'Keyword',
+        detail: orOperator.description,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        sortText: '06',
+      }
+    );
   }
 
   return items;

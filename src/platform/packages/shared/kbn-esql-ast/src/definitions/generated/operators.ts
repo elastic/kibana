@@ -377,6 +377,7 @@ const addDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -552,6 +553,7 @@ const divDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -1053,6 +1055,7 @@ const equalsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -1434,6 +1437,7 @@ const greaterThanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -1815,6 +1819,7 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -2062,6 +2067,7 @@ const inDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
 };
@@ -2294,6 +2300,7 @@ const isNotNullDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| WHERE is_rehired IS NOT NULL\n| STATS COUNT(emp_no)'],
 };
@@ -2526,6 +2533,7 @@ const isNullDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| WHERE birth_date IS NULL'],
 };
@@ -2907,6 +2915,7 @@ const lessThanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -3288,6 +3297,7 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -3343,6 +3353,7 @@ const likeDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
 };
@@ -4027,6 +4038,7 @@ const modDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -4202,6 +4214,7 @@ const mulDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -4514,6 +4527,7 @@ const notInDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -4569,6 +4583,7 @@ const notLikeDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -4579,7 +4594,7 @@ const notRlikeDefinition: FunctionDefinition = {
   name: 'not rlike',
   description: i18n.translate('kbn-esql-ast.esql.definitions.not_rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
   preview: false,
   alias: undefined,
@@ -4624,6 +4639,7 @@ const notRlikeDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -5125,6 +5141,7 @@ const notEqualsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -5135,7 +5152,7 @@ const rlikeDefinition: FunctionDefinition = {
   name: 'rlike',
   description: i18n.translate('kbn-esql-ast.esql.definitions.rlike', {
     defaultMessage:
-      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+      'Use `RLIKE` to filter data based on string patterns using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
   preview: false,
   alias: undefined,
@@ -5180,6 +5197,7 @@ const rlikeDefinition: FunctionDefinition = {
     Location.ROW,
     Location.STATS_WHERE,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| WHERE first_name RLIKE """.leja.*"""\n| KEEP first_name, last_name',
@@ -5503,6 +5521,7 @@ const subDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_BY,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
