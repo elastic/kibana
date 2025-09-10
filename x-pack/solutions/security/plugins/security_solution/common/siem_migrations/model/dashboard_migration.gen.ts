@@ -131,12 +131,6 @@ export const ElasticDashboard = z.object({
 });
 
 /**
- * The partial version of the migrated elastic dashboard.
- */
-export type ElasticDashboardPartial = z.infer<typeof ElasticDashboardPartial>;
-export const ElasticDashboardPartial = ElasticDashboard.partial();
-
-/**
  * The dashboard migration document object.
  */
 export type DashboardMigrationDashboardData = z.infer<typeof DashboardMigrationDashboardData>;
@@ -195,6 +189,12 @@ export const DashboardMigrationDashboard = z
     id: NonEmptyString,
   })
   .merge(DashboardMigrationDashboardData);
+
+/**
+ * The partial version of the migrated elastic dashboard.
+ */
+export type ElasticDashboardPartial = z.infer<typeof ElasticDashboardPartial>;
+export const ElasticDashboardPartial = ElasticDashboard.partial();
 
 /**
  * The dashboard migration data object for dashboard update operation
