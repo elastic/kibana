@@ -72,7 +72,7 @@ describe('ValueReportExporter', () => {
     render(<ValueReportExporter>{children}</ValueReportExporter>);
 
     expect(exportFunction).toBeDefined();
-    expect(typeof exportFunction).toBe('function');
+    expect(exportFunction).toEqual(expect.any(Function));
   });
 
   it('handles export error gracefully', async () => {

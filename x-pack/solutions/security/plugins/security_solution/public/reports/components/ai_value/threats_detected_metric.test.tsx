@@ -114,7 +114,7 @@ describe('ThreatsDetectedMetric', () => {
 
     const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
     expect(callArgs.getLensAttributes).toBeDefined();
-    expect(typeof callArgs.getLensAttributes).toBe('function');
+    expect(callArgs.getLensAttributes).toEqual(expect.any(Function));
   });
 
   it('getLensAttributes function calls getThreatsDetectedMetricLensAttributes with correct args', () => {
