@@ -430,6 +430,7 @@ export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
 
   policy.inputs.forEach((input) => {
+    input.id = '';
     input.streams = sortBy(input.streams, 'data_stream.dataset');
     input.streams.forEach((stream) => {
       stream.id = '';
