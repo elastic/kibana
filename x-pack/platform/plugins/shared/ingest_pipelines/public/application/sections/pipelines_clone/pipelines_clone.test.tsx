@@ -69,7 +69,19 @@ const createServicesWithLoad = (
   });
 };
 
+const originalLocation = window.location;
+
 const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockServices) => {
+  // window location is being used in normalizePipelineNameFromParams
+  // but it's not set when rendering via MemoryRouter
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: {
+      ...originalLocation,
+      pathname: initialRouteEntry,
+    },
+  });
+
   mockUseKibana.mockReturnValue({ services });
   return render(
     <I18nProvider>
@@ -85,6 +97,13 @@ const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockSer
 describe('PipelinesClone section', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
   });
 
   describe('WHEN mounting the PipelinesClone route', () => {
@@ -176,18 +195,6 @@ describe('PipelinesClone section', () => {
         };
         const services = createServicesWithLoad({ data: pipeline });
 
-        const originalLocation = window.location;
-        // simualting mismatch on global window.location.pathname
-        // on reload or new tab open from copied URL in address bar
-        // See https://github.com/elastic/kibana/issues/234500
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          value: {
-            ...originalLocation,
-            pathname: initialRoute,
-          },
-        });
-
         renderWithRoute(initialRoute, services);
 
         const useLoadPipelineMock = services.api?.useLoadPipeline as jest.Mock;
@@ -196,11 +203,6 @@ describe('PipelinesClone section', () => {
 
         expect(firstCallArg).not.toBe(decodeURI(encodeURIComponent(pipelineName)));
         expect(firstCallArg).toBe(pipelineName);
-
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          value: originalLocation,
-        });
 
         consoleWarn.mockRestore();
       });

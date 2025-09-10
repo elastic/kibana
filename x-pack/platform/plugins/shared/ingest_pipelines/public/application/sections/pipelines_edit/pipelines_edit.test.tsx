@@ -6,13 +6,13 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DeepPartial } from '@kbn/utility-types';
 
 import { PipelinesEdit } from './pipelines_edit';
 import type { useKibana } from '../../../shared_imports';
+import { createMemoryHistory } from 'history';
 
 const mockUseKibana = jest.fn();
 
@@ -61,7 +61,6 @@ jest.mock('../../../shared_imports', () => ({
   ),
 }));
 
-// Mock PipelineForm to assert props from PipelinesEdit
 jest.mock('../../components', () => ({
   PipelineForm: (props: { defaultValue?: { name: string }; isEditing: boolean }) => (
     <div data-test-subj="pipelineForm">
@@ -74,6 +73,16 @@ jest.mock('../../components', () => ({
 }));
 
 const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockServices) => {
+  // window location is being used in normalizePipelineNameFromParams
+  // but it's not set when rendering via MemoryRouter
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: {
+      ...originalLocation,
+      pathname: initialRouteEntry,
+    },
+  });
+
   mockUseKibana.mockReturnValue({ services });
   const history = createMemoryHistory({ initialEntries: [initialRouteEntry] });
   return render(
@@ -87,9 +96,18 @@ const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockSer
   );
 };
 
+const originalLocation = window.location;
+
 describe('PipelinesEdit section', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
   });
 
   describe('WHEN mounting the PipelinesEdit route', () => {
@@ -107,7 +125,7 @@ describe('PipelinesEdit section', () => {
 
     describe('AND the load returns an error', () => {
       it('SHOULD render the error prompt containing decoded pipeline name', () => {
-        const decoded = 'decoded-pipeline';
+        const decoded = 'decoded-pipeline+';
         const services = createServicesWithLoadPipeline({
           error: {
             message: 'not found',
@@ -165,35 +183,15 @@ describe('PipelinesEdit section', () => {
         };
         const services = createServicesWithLoadPipeline({ data: pipeline });
 
-        const originalLocation = window.location;
-        try {
-          // simualting mismatch on global window.location.pathname
-          // on reload or new tab open from copied URL in address bar
-          // See https://github.com/elastic/kibana/issues/234500
-          Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: {
-              ...originalLocation,
-              pathname: initialRoute,
-            },
-          });
+        renderWithRoute(initialRoute, services);
 
-          renderWithRoute(initialRoute, services);
+        const useLoadPipelineMock = services.api?.useLoadPipeline as jest.Mock;
 
-          const useLoadPipelineMock = services.api?.useLoadPipeline as jest.Mock;
+        const firstCallArg = useLoadPipelineMock.mock.calls[0][0];
 
-          const firstCallArg = useLoadPipelineMock.mock.calls[0][0];
-
-          expect(firstCallArg).not.toBe(decodeURI(encodeURIComponent(pipelineName)));
-          expect(firstCallArg).toBe(pipelineName);
-        } finally {
-          Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: originalLocation,
-          });
-
-          consoleWarn.mockRestore();
-        }
+        expect(firstCallArg).not.toBe(decodeURI(encodeURIComponent(pipelineName)));
+        expect(firstCallArg).toBe(pipelineName);
+        consoleWarn.mockRestore();
       });
     });
   });
