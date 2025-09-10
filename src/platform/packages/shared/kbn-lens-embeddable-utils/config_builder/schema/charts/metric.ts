@@ -25,6 +25,7 @@ import {
   uniqueCountMetricOperationSchema,
   sumMetricOperationSchema,
   esqlColumnSchema,
+  genericOperationOptionsSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
@@ -250,12 +251,20 @@ const esqlMetricState = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: schema.allOf([metricStatePrimaryMetricOptionsSchema, esqlColumnSchema]),
+  metric: schema.allOf([
+    schema.object(genericOperationOptionsSchema),
+    metricStatePrimaryMetricOptionsSchema,
+    esqlColumnSchema,
+  ]),
   /**
    * Secondary value configuration, must define operation.
    */
   secondary_metric: schema.maybe(
-    schema.allOf([metricStateSecondaryMetricOptionsSchema, esqlColumnSchema])
+    schema.allOf([
+      schema.object(genericOperationOptionsSchema),
+      metricStateSecondaryMetricOptionsSchema,
+      esqlColumnSchema,
+    ])
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).

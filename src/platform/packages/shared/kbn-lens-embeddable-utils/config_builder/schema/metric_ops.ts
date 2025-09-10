@@ -19,7 +19,7 @@ import {
 } from './constants';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 
-const genericOperationOptionsSchema = {
+export const genericOperationOptionsSchema = {
   ...formatSchema,
   /**
    * Label for the operation

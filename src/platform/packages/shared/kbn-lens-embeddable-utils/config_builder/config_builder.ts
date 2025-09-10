@@ -20,8 +20,8 @@ import {
   buildTable,
   buildXY,
   buildPartitionChart,
-  fromMetricLegacyToAPI,
 } from './charts';
+import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
 import type { LensApiState } from './schema';
 import { isLensLegacyFormat } from './utils';
 
@@ -43,7 +43,7 @@ export class LensConfigBuilder {
   };
 
   private apiConvertersByChart = {
-    metric: fromMetricLegacyToAPI,
+    metric: { fromAPItoLensState, fromLensStateToAPI },
   };
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon;
@@ -92,14 +92,21 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  async toAPIFormat(config: LensAttributes): Promise<LensApiState> {
+  fromAPIFormat(config: LensApiState): LensAttributes {
+    // Currently we only support metric conversion from API to attributes
+    const chartType = config.type;
+    if (chartType === 'metric') {
+      const converter = this.apiConvertersByChart[chartType];
+      return converter.fromAPItoLensState(config);
+    }
+    throw new Error(`No attributes converter found for chart type: ${chartType}`);
+  }
+
+  toAPIFormat(config: LensAttributes): LensApiState {
     const chartType = config.visualizationType;
     if (chartType === 'metric') {
       const converter = this.apiConvertersByChart[chartType];
-      return converter(config, {
-        formulaAPI: this.formulaAPI,
-        dataViewsAPI: this.dataViewsAPI,
-      });
+      return converter.fromLensStateToAPI(config);
     }
     throw new Error(`No API converter found for chart type: ${chartType}`);
   }

@@ -219,7 +219,7 @@ function buildDatasourceStatesLayer(
  * @returns lens datasource states
  *
  */
-export const buildDatasourceStates = async (
+export const buildDatasourceStates = (
   config: LensApiState,
   dataviews: Record<string, { index: string; timeFieldName: string }>,
   buildFormulaLayers: (

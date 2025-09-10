@@ -341,13 +341,13 @@ function getValueColumns(layer: MetricStateESQL) {
   ];
 }
 
-export async function fromAPItoLensState(config: MetricState): Promise<LensAttributes> {
+export function fromAPItoLensState(config: MetricState): LensAttributes {
   const dataviews: Record<string, { index: string; timeFieldName: string }> = {};
 
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
-  const datasourceStates = await buildDatasourceStates(
+  const datasourceStates = buildDatasourceStates(
     config,
     dataviews,
     _buildDataLayer,
