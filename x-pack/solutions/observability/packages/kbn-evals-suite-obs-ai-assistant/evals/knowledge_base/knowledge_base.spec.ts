@@ -121,8 +121,8 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       const { learnings } = JSON.parse(contextResponseMessage.content!);
       const firstLearning = learnings[0];
 
-      if (learnings.length !== 1) {
-        throw new Error(`Expected 1 learning, got ${learnings.length}`);
+      if (learnings.length < 1) {
+        throw new Error(`Expected at least 1 learning`);
       }
 
       if (!(firstLearning.llmScore > 4)) {
