@@ -21,7 +21,7 @@ const createMock = () => {
   return mocked;
 };
 
-const createMockProcessMetricsCollector = () => ({
+const createMockWithRegisterMetrics = () => ({
   ...createMock(),
   registerMetrics: jest.fn().mockResolvedValue({}),
 });
@@ -29,5 +29,5 @@ const createMockProcessMetricsCollector = () => ({
 export const collectorMock = {
   create: createMock,
   createOpsProcessMetrics: createMockOpsProcessMetrics,
-  createProcessMetricsCollector: createMockProcessMetricsCollector,
+  createMockWithRegisterMetrics,
 };
