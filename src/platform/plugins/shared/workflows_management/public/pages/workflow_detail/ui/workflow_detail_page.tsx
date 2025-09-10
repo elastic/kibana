@@ -267,6 +267,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
                   readOnly={activeTab === 'executions'}
+                  activeTab={activeTab}
+                  selectedExecutionId={selectedExecutionId}
                 />
               </React.Suspense>
             </EuiFlexItem>

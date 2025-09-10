@@ -149,7 +149,11 @@ export const WorkflowDetailHeader = ({
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
               <EuiToolTip
                 content={
-                  !isValid
+                  hasUnsavedChanges
+                    ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
+                        defaultMessage: 'Save changes to enable/disable workflow',
+                      })
+                    : !isValid
                     ? i18n.translate('workflows.workflowDetailHeader.invalid', {
                         defaultMessage: 'Fix errors to enable workflow',
                       })
@@ -157,7 +161,7 @@ export const WorkflowDetailHeader = ({
                 }
               >
                 <EuiSwitch
-                  disabled={isLoading || !canSaveWorkflow || !isValid}
+                  disabled={isLoading || !canSaveWorkflow || !isValid || hasUnsavedChanges}
                   checked={isEnabled}
                   onChange={() => handleToggleWorkflow()}
                   label={i18n.translate('workflows.workflowDetailHeader.enabled', {

@@ -18,15 +18,19 @@ const DEFAULT_MESSAGE_TEXT = i18n.translate('workflows.shared.unsavedChangesMess
 interface Props {
   hasUnsavedChanges: boolean;
   messageText?: string;
+  shouldPromptOnNavigation?: boolean;
+  isTabSwitch?: boolean;
 }
 
 export const UnsavedChangesPrompt: React.FC<Props> = ({
   hasUnsavedChanges,
   messageText = DEFAULT_MESSAGE_TEXT,
+  shouldPromptOnNavigation = true,
+  isTabSwitch = false,
 }) => {
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
+      if (hasUnsavedChanges && shouldPromptOnNavigation) {
         // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
         // whether or not a user wants to leave the current site.
         event.preventDefault();
@@ -36,8 +40,14 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
     // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, shouldPromptOnNavigation]);
 
   // Adding this Prompt will prompt users if they are navigating to a new page, within the Kibana SPA
-  return <Prompt when={hasUnsavedChanges} message={messageText} />;
+  // Don't prompt if it's just a tab switch
+  return (
+    <Prompt
+      when={hasUnsavedChanges && shouldPromptOnNavigation && !isTabSwitch}
+      message={messageText}
+    />
+  );
 };

@@ -14,7 +14,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -91,13 +91,15 @@ export interface WorkflowYAMLEditorProps {
   hasChanges?: boolean;
   lastUpdatedAt?: Date;
   highlightStep?: string;
-  stepExecutions?: WorkflowStepExecutionDto[];
+  stepExecutions?: EsWorkflowStepExecution[];
   'data-testid'?: string;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
   onSave?: (value: string) => void;
+  activeTab?: string;
+  selectedExecutionId?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -112,6 +114,8 @@ export const WorkflowYAMLEditor = ({
   onChange,
   onSave,
   onValidationErrors,
+  activeTab,
+  selectedExecutionId,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -497,7 +501,11 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <div css={styles.container}>
-      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={hasChanges}
+        shouldPromptOnNavigation={true}
+        isTabSwitch={activeTab === 'executions' || activeTab === 'workflow'}
+      />
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
