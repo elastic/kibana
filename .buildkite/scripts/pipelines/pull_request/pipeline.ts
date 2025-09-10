@@ -18,6 +18,7 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
+import { checkPromptChanges } from '../../steps/checks/prompt_changes_detector';
 import {
   areChangesSkippable,
   doAllChangesMatch,
@@ -25,7 +26,6 @@ import {
   getAgentImageConfig,
   emitPipeline,
 } from '#pipeline-utils';
-import { checkPromptChanges } from '../../steps/checks/prompt_changes_detector';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
