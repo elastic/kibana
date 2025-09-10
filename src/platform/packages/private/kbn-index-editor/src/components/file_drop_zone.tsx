@@ -234,7 +234,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const successfulPreviews = filesStatus.filter(
     (f) => f.analysisStatus === STATUS.COMPLETED && f.importStatus !== STATUS.COMPLETED
   );
-  const showFilePreview = isSaving || (!isDragActive && successfulPreviews.length > 0);
+  const showFilePreview = !isDragActive && successfulPreviews.length > 0;
 
   let content: React.ReactNode = children;
 
