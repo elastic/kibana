@@ -38,6 +38,7 @@ import type {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
@@ -98,6 +99,11 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     userProfileService: jest.fn() as unknown as UserProfileService,
     getUrlForApp: jest.fn(),
     chrome,
+    settings: {
+      client: {
+        get: jest.fn()
+      }
+    } as unknown as SettingsStart
   };
 
   return (
