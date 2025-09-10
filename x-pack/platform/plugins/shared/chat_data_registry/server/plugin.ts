@@ -14,37 +14,34 @@ import type {
 } from '@kbn/core/server';
 
 import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
-import { DataCatalogService } from './services';
+import { type DataCatalog, createDataCatalog } from './services/data_catalog/data_catalog';
 
 export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
 {
   private readonly logger: Logger;
-  private dataCatalogService: DataCatalogService;
+  private dataCatalog: DataCatalog;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.dataCatalogService = new DataCatalogService();
+    this.dataCatalog = createDataCatalog();
   }
 
   public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
     this.logger.debug('chatDataRegistry: Setup');
 
-    const dataCatalogSetup = this.dataCatalogService.setup({ logger: this.logger });
-
     return {
-      dataCatalog: dataCatalogSetup,
+      register: (dataType) => this.dataCatalog.register(dataType),
     };
   }
 
   public start(core: CoreStart): ChatDataRegistryPluginStart {
     this.logger.debug('chatDataRegistry: Started');
 
-    const dataCatalogStart = this.dataCatalogService.start({});
+    const registeredTypes = this.dataCatalog.list();
+    this.logger.info(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
 
-    return {
-      dataCatalog: dataCatalogStart,
-    };
+    return {};
   }
 
   public stop() {}

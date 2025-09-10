@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { DataCatalogServiceSetup, DataCatalogServiceStart } from './services';
+import type { DataTypeDefinition } from './services';
 
 export interface ChatDataRegistryPluginSetup {
-  dataCatalog: DataCatalogServiceSetup;
+  register: (dataType: DataTypeDefinition) => void;
 }
 
-export interface ChatDataRegistryPluginStart {
-  dataCatalog: DataCatalogServiceStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ChatDataRegistryPluginStart {}
