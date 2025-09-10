@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
@@ -28,11 +28,13 @@ const StatusFilterButtonComponent = <T,>({
 }: StatusFilterButtonProps<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const selectableOptions: EuiSelectableOption[] = statusFilterOptions.map(({ label, data }) => ({
-    label,
-    data,
-    checked: status === data.status ? 'on' : undefined,
-  }));
+  const selectableOptions: EuiSelectableOption[] = useMemo(() => {
+    return statusFilterOptions.map(({ label, data }) => ({
+      label,
+      data,
+      checked: status === data.status ? 'on' : undefined,
+    }));
+  }, [status, statusFilterOptions]);
 
   const handleOptionsChange = useCallback(
     (
