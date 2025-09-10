@@ -8,8 +8,7 @@
 import Papa from 'papaparse';
 import type { SiemMigrationResourceData } from '../../../../../../common/siem_migrations/model/common.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
-import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
-import type { SiemDashboardMigrationsClient } from '../../../dashboards/siem_dashboard_migration_service';
+import type { SiemMigrationsDataLookupsClient } from '../../../common/data/siem_migrations_data_lookups_client';
 
 interface LookupWithData extends SiemMigrationResourceData {
   data: object[] | null;
@@ -17,7 +16,7 @@ interface LookupWithData extends SiemMigrationResourceData {
 
 export const processLookups = async (
   resources: SiemMigrationResourceData[],
-  migrationsClient: SiemRuleMigrationsClient | SiemDashboardMigrationsClient
+  migrationsClient: SiemMigrationsDataLookupsClient
 ): Promise<SiemMigrationResourceData[]> => {
   const lookupsData: Record<string, LookupWithData> = {};
 
@@ -40,7 +39,7 @@ export const processLookups = async (
         lookups.push({ ...resource, content: '' }); // empty content will make lookup be ignored during translation
         return;
       }
-      const indexName = await migrationsClient.data.lookups.create(name, data);
+      const indexName = await migrationsClient.create(name, data);
       lookups.push({ ...resource, content: indexName }); // lookup will be translated using the index name
     },
   });
@@ -54,7 +53,7 @@ export const processLookups = async (
 
 const parseContent = (fileContent: string): object[] | null => {
   const trimmedContent = fileContent.trim();
-  if (fileContent === '') {
+  if (trimmedContent === '') {
     return null;
   }
   let arrayContent: object[];

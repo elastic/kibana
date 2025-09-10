@@ -15,6 +15,8 @@ import { registerSiemDashboardMigrationsStartRoute } from './start';
 import { registerSiemDashboardMigrationsStopRoute } from './stop';
 import { registerSiemDashboardMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemDashboardMigrationsResourceGetMissingRoute } from './resources/missing';
+import { registerSiemDashboardMigrationsResourceGetRoute } from './resources/get';
+import { registerSiemDashboardMigrationsResourceUpsertRoute } from './resources/upsert';
 import { registerSiemDashboardMigrationsGetDashboardsRoute } from './dashboards/get';
 import { registerSiemDashboardMigrationsDeleteRoute } from './delete';
 

@@ -65,7 +65,10 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
               await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
               const [lookups, macros] = partition(resources, { type: 'lookup' });
-              const processedLookups = await processLookups(lookups, dashboardMigrationsClient);
+              const processedLookups = await processLookups(
+                lookups,
+                dashboardMigrationsClient.data.lookups
+              );
               // Add migration_id to all resources
               const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
                 ...resource,
