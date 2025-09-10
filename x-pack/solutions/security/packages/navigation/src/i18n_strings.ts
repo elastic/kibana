@@ -225,4 +225,14 @@ export const i18nStrings = {
       }),
     },
   },
+  launchPad: {
+    title: i18n.translate('securitySolutionPackages.navLinks.launchPad', {
+      defaultMessage: 'Launch Pad',
+    }),
+    migrations: {
+      title: i18n.translate('securitySolutionPackages.navLinks.launchPad.migrations', {
+        defaultMessage: 'Migrations',
+      }),
+    },
+  },
 };

@@ -47,7 +47,6 @@ export const createRulesNavigationTree = (
         {
           id: SecurityPageName.cloudSecurityPostureBenchmarks,
           link: securityLink(SecurityPageName.cloudSecurityPostureBenchmarks),
-          sideNavVersion: 'v1',
         },
         {
           id: SecurityPageName.exceptions,
@@ -56,6 +55,7 @@ export const createRulesNavigationTree = (
         {
           id: SecurityPageName.siemMigrationsRules,
           link: securityLink(SecurityPageName.siemMigrationsRules),
+          sideNavVersion: 'v1',
         },
       ],
     },

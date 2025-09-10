@@ -99,7 +99,47 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           id: SecurityPageName.landing,
           link: securityLink(SecurityPageName.landing),
+          sideNavVersion: 'v1',
           icon: 'launch',
+        },
+        {
+          id: 'launchpad',
+          title: i18nStrings.launchPad.title,
+          renderAs: 'panelOpener',
+          sideNavVersion: 'v2',
+          iconV2: 'launch',
+          children: [
+            {
+              children: [
+                {
+                  link: securityLink(SecurityPageName.landing),
+                  sideNavVersion: 'v2',
+                },
+                {
+                  link: securityLink(SecurityPageName.siemReadiness),
+                  sideNavVersion: 'v2',
+                },
+                {
+                  // value report
+                  link: securityLink(SecurityPageName.aiValue),
+                  sideNavVersion: 'v2',
+                },
+              ],
+            },
+            {
+              title: i18nStrings.launchPad.migrations.title,
+              children: [
+                {
+                  link: securityLink(SecurityPageName.siemMigrationsRules),
+                  sideNavVersion: 'v2',
+                },
+                {
+                  link: securityLink(SecurityPageName.siemMigrationsDashboards),
+                  sideNavVersion: 'v2',
+                },
+              ],
+            },
+          ],
         },
         {
           link: 'dev_tools',
@@ -112,6 +152,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           breadcrumbStatus: 'hidden',
           renderAs: 'accordion',
           spaceBefore: null,
+          sideNavVersion: 'v1',
           children: [
             {
               id: 'stack_management',
