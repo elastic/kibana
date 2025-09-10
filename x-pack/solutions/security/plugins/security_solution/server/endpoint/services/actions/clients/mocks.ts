@@ -372,9 +372,8 @@ const createCancelActionOptionsMock = (
 ): CancelActionRequestBody => {
   const options: CancelActionRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
-    action_id: 'test-action-id-123',
     parameters: {
-      id: 'test-action-id-123',
+      action_id: 'test-action-id-123',
     },
   };
   return merge(options, overrides);

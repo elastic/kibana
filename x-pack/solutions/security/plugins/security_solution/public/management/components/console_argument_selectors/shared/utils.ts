@@ -139,7 +139,7 @@ export const transformPendingActionsToOptions = (
   response: ActionListApiResponse[],
   selectedValue?: string,
   privilegeChecker?: (command: string) => { canCancel: boolean; reason?: string }
-): EuiSelectableOption[] => {
+): EuiSelectableOption<Partial<{ description: string }>>[] => {
   // The hook returns a single response object, but our data parameter is an array
   // So we need to handle both cases
   if (!response || response.length === 0) {
@@ -161,7 +161,7 @@ export const transformPendingActionsToOptions = (
 
   return data.map((action: ActionDetails) => {
     const isChecked = action.id === selectedValue;
-    const hostName = action.agents?.[0] ? action.hosts?.[action.agents[0]]?.name : undefined;
+    const hostName = action.agents?.[0] ? action.hosts?.[action.agents[0]]?.name : UNKNOWN_HOST;
     const timestamp = new Date(action.startedAt).toLocaleString();
     const command = action.command;
     const createdBy = action.createdBy;
