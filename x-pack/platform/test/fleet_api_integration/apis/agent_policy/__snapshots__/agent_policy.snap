@@ -1,5 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Agent policies fleet_agent_policies GET /api/fleet/agent_policies TESTME should get a list of agent policies by kuery 1`] = `
+Object {
+  "agents": 0,
+  "fips_agents": 0,
+  "inactivity_timeout": 1209600,
+  "is_managed": false,
+  "is_protected": false,
+  "name": "TEST",
+  "namespace": "default",
+  "revision": 1,
+  "schema_version": "1.1.1",
+  "space_ids": Array [
+    "default",
+  ],
+  "status": "active",
+  "unprivileged_agents": 0,
+  "updated_by": "elastic",
+}
+`;
+
 exports[`Agent policies fleet_agent_policies GET /api/fleet/agent_policies should get a list of agent policies by kuery 1`] = `
 Object {
   "agents": 0,
