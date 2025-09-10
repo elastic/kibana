@@ -44,7 +44,6 @@ enum FieldUsageEventName {
 
 enum QueryFieldsUsageEventName {
   kqlQuery = 'kqlQuery',
-  luceneQuery = 'luceneQuery',
   esqlQuery = 'esqlQuery',
 }
 interface FieldUsageEventData {
@@ -194,7 +193,7 @@ export class ScopedDiscoverEBTManager {
     if (!this.reportEvent) {
       return;
     }
-
+    console.log({ eventName, fieldNames });
     const isOnlyFreeTextSearch = fieldNames.length === 1 && fieldNames[0] === FREE_TEXT;
 
     const eventData: QueryFieldsUsageEventData = {
@@ -261,9 +260,13 @@ export class ScopedDiscoverEBTManager {
         fieldsMetadata,
       });
     } else {
-      // KQL or Lucene query
+      // KQL query
 
-      if (typeof query.query !== 'string' || query.query.trim() === '') {
+      if (
+        query.language === 'lucene' || // TODO in issue #234590
+        typeof query.query !== 'string' ||
+        query.query.trim() === ''
+      ) {
         return;
       }
 
@@ -273,10 +276,7 @@ export class ScopedDiscoverEBTManager {
       const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
 
       await this.trackQueryFieldsUsageEvent({
-        eventName:
-          query.language === 'lucene'
-            ? QueryFieldsUsageEventName.luceneQuery
-            : QueryFieldsUsageEventName.kqlQuery,
+        eventName: QueryFieldsUsageEventName.kqlQuery,
         fieldNames,
         fieldsMetadata,
       });
