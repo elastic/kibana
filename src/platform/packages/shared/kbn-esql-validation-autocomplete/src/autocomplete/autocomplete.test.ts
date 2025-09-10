@@ -416,6 +416,7 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'col0 = ',
+      'BY ',
       ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
         scalar: true,
         agg: true,
@@ -811,6 +812,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM a | STATS /',
       [
+        'BY ',
         'col0 = ',
         ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
           scalar: true,

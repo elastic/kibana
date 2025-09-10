@@ -73,6 +73,16 @@ export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
 
+export type DeleteDashboardMigrationRequestParams = z.infer<
+  typeof DeleteDashboardMigrationRequestParams
+>;
+export const DeleteDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type DeleteDashboardMigrationRequestParamsInput = z.input<
+  typeof DeleteDashboardMigrationRequestParams
+>;
+
 export type GetAllDashboardMigrationsStatsResponse = z.infer<
   typeof GetAllDashboardMigrationsStatsResponse
 >;

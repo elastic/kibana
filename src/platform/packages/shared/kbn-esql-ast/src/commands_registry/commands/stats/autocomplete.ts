@@ -62,6 +62,8 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+  const isInlineStats = command.name === 'inlinestats';
+
   const columnExists = (name: string) => _columnExists(name, context);
 
   const innerText = query.substring(0, cursorPosition);
@@ -91,7 +93,9 @@ export async function autocomplete(
 
   switch (pos) {
     case 'expression_without_assignment': {
-      const expressionRoot = /,\s*$/.test(innerText)
+      const isNewMultipleExpression = /,\s*$/.test(innerText);
+
+      const expressionRoot = isNewMultipleExpression
         ? undefined // we're in a new expression, but there isn't an AST node for it yet
         : command.args[command.args.length - 1];
 
@@ -106,6 +110,14 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
+          ...(!isNewMultipleExpression && !isInlineStats
+            ? [
+                {
+                  ...byCompleteItem,
+                  sortText: 'D',
+                },
+              ]
+            : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
         ],
         afterCompleteSuggestions: [
