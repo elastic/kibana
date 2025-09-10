@@ -22,11 +22,15 @@ jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   createPermissionFailureMessage: jest.fn(),
 }));
 
-jest.mock('../../../../../contexts/kibana', () => ({
+jest.mock('@kbn/ml-hooks/use_ml_api', () => ({
   useMlApi: jest.fn(),
+}));
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
+}));
+jest.mock('../../../../../contexts/kibana', () => ({
   useNotifications: () => {
     return {
       toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
