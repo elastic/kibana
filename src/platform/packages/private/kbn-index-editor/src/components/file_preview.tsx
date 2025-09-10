@@ -10,6 +10,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiBasicTable,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
@@ -17,9 +18,8 @@ import {
   EuiTabbedContent,
   type EuiTabbedContentTab,
   EuiTitle,
-  EuiBasicTable,
 } from '@elastic/eui';
-import { STATUS, useFileUploadContext } from '@kbn/file-upload';
+import { CLASH_ERROR_TYPE, STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FC } from 'react';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
@@ -30,6 +30,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
+import type { FileClash } from '@kbn/file-upload/file_upload_manager';
+import { FileClashResult } from './file_clashes';
 import type { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
@@ -44,12 +46,13 @@ interface FilePreviewItem {
   dataView: DataView;
   mappings: FindFileStructureResponse['mappings'];
   columnNames: Exclude<FindFileStructureResponse['column_names'], undefined>;
+  fileClash?: FileClash;
 }
 
 const FILE_PREVIEW_ROWS_LIMIT = 10;
 
 export const FilesPreview: FC = () => {
-  const { filesStatus, uploadStatus, fileClashes, deleteFile } = useFileUploadContext();
+  const { filesStatus, uploadStatus, deleteFile } = useFileUploadContext();
 
   const {
     services: { data },
@@ -107,6 +110,11 @@ export const FilesPreview: FC = () => {
             properties: {},
           };
 
+          let fileClash: FileClash | undefined = uploadStatus.fileClashes[index];
+          if (fileClash.clash === CLASH_ERROR_TYPE.NONE) {
+            fileClash = undefined;
+          }
+
           const item: FilePreviewItem = {
             fileName: status.fileName,
             dataView: dV,
@@ -117,6 +125,7 @@ export const FilesPreview: FC = () => {
               .slice(0, FILE_PREVIEW_ROWS_LIMIT)
               .join('\n'),
             filePreview: {},
+            ...(fileClash ? { fileClash } : {}),
           };
 
           if (promisePreviewResult.status === 'fulfilled') {
@@ -154,7 +163,7 @@ export const FilesPreview: FC = () => {
     } catch (error) {
       // Handle error appropriately, e.g., log it or show a notification
     }
-  }, [data.dataViews, filesStatus, isMounted, previewDocs]);
+  }, [data.dataViews, filesStatus, isMounted, previewDocs, uploadStatus.fileClashes]);
 
   useEffect(
     function fetchFilePreviewAfterAnalysis() {
@@ -221,6 +230,24 @@ export const FilesPreview: FC = () => {
           });
         }
 
+        if (filePreviewItem.fileClash) {
+          tabs.push({
+            id: 'fileClash',
+            name: (
+              <FormattedMessage
+                id="indexEditor.fileUploader.fileClashTab"
+                defaultMessage="File issues"
+              />
+            ),
+            content: (
+              <>
+                <EuiSpacer size={'s'} />
+                <FileClashResult fileClash={filePreviewItem.fileClash} />
+              </>
+            ),
+          });
+        }
+
         return (
           <Fragment key={filePreviewItem.fileName}>
             <EuiAccordion
@@ -254,8 +281,6 @@ export const FilesPreview: FC = () => {
           </Fragment>
         );
       })}
-
-      {fileClashes ? <div>clashes</div> : null}
       <EuiSpacer />
     </div>
   ) : null;
