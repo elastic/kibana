@@ -13,7 +13,6 @@ import type {
   WorkChatFrameworkPluginSetup,
   WorkChatFrameworkPluginStart,
 } from '@kbn/workchat-framework-plugin/server';
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
 import type { ChatDataRegistryPluginSetup } from '@kbn/chat-data-registry-plugin/server';
 
 export interface WorkChatAppPluginSetup {
@@ -27,7 +26,6 @@ export interface WorkChatAppPluginStart {}
 export interface WorkChatAppPluginSetupDependencies {
   workchatFramework: WorkChatFrameworkPluginSetup;
   features: FeaturesPluginSetup;
-  onechat: OnechatPluginSetup;
   chatDataRegistry: ChatDataRegistryPluginSetup;
 }
 
@@ -35,5 +33,4 @@ export interface WorkChatAppPluginStartDependencies {
   workchatFramework: WorkChatFrameworkPluginStart;
   inference: InferenceServerStart;
   actions: ActionsPluginStart;
-  onechat: OnechatPluginStart;
 }
