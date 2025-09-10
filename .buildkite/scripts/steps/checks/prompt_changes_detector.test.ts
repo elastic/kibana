@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { doAnyChangesMatch } from '#pipeline-utils';
+import { doAnyChangesMatch, upsertComment } from '#pipeline-utils';
 
 // Mock the pipeline utils for testing
 jest.mock('#pipeline-utils', () => ({
@@ -16,7 +16,7 @@ jest.mock('#pipeline-utils', () => ({
 }));
 
 const mockDoAnyChangesMatch = doAnyChangesMatch as jest.MockedFunction<typeof doAnyChangesMatch>;
-const mockUpsertComment = require('#pipeline-utils').upsertComment as jest.MockedFunction<any>;
+const mockUpsertComment = upsertComment as jest.MockedFunction<typeof upsertComment>;
 
 describe('Prompt Changes Detector', () => {
   beforeEach(() => {
@@ -28,9 +28,9 @@ describe('Prompt Changes Detector', () => {
     mockDoAnyChangesMatch.mockResolvedValue(true);
     mockUpsertComment.mockResolvedValue({});
 
-    // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
-    await main();
+    // Import and run the checkPromptChanges function
+    const { checkPromptChanges } = await import('./prompt_changes_detector');
+    await checkPromptChanges();
 
     expect(mockDoAnyChangesMatch).toHaveBeenCalledWith([
       /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/local_prompt_object\.ts$/,
@@ -50,9 +50,9 @@ describe('Prompt Changes Detector', () => {
     // Mock that no changes are detected
     mockDoAnyChangesMatch.mockResolvedValue(false);
 
-    // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
-    await main();
+    // Import and run the checkPromptChanges function
+    const { checkPromptChanges } = await import('./prompt_changes_detector');
+    await checkPromptChanges();
 
     expect(mockDoAnyChangesMatch).toHaveBeenCalled();
     expect(mockUpsertComment).not.toHaveBeenCalled();
@@ -62,22 +62,19 @@ describe('Prompt Changes Detector', () => {
     // Mock an error
     mockDoAnyChangesMatch.mockRejectedValue(new Error('Test error'));
 
-    // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
+    // Import and run the checkPromptChanges function
+    const { checkPromptChanges } = await import('./prompt_changes_detector');
 
-    // Should not throw, but should exit with code 1
+    // Should not throw, but should log error
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    const processSpy = jest.spyOn(process, 'exit').mockImplementation();
 
-    await main();
+    await checkPromptChanges();
 
     expect(consoleSpy).toHaveBeenCalledWith(
       '❌ Error checking for prompt changes:',
       expect.any(Error)
     );
-    expect(processSpy).toHaveBeenCalledWith(1);
 
     consoleSpy.mockRestore();
-    processSpy.mockRestore();
   });
 });

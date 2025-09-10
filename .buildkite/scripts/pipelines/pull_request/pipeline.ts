@@ -25,6 +25,7 @@ import {
   getAgentImageConfig,
   emitPipeline,
 } from '#pipeline-utils';
+import { checkPromptChanges } from '../../steps/checks/prompt_changes_detector';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
@@ -497,6 +498,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+
+    // Check for prompt file changes and post reminder comment if needed
+    await checkPromptChanges();
 
     emitPipeline(pipeline);
   } catch (ex) {

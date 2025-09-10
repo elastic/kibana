@@ -18,7 +18,7 @@ const PROMPT_FILES = [
 
 const COMMENT_MESSAGE = `## 🤖 Prompt Changes Detected
 
-Changes have been detected to one or more prompt files in the Elastic Assistant plugin. 
+Changes have been detected to one or more prompt files in the Elastic Assistant plugin.
 
 **Please remember to update the integrations repository** with your prompt changes to ensure consistency across all deployments.
 
@@ -30,31 +30,19 @@ Changes have been detected to one or more prompt files in the Elastic Assistant 
 
 This is an automated reminder to help maintain prompt consistency across repositories.`;
 
-export async function main() {
+export async function checkPromptChanges(): Promise<void> {
   try {
-    console.log('Checking for changes to prompt files...');
-
     const hasPromptChanges = await doAnyChangesMatch(PROMPT_FILES);
 
     if (hasPromptChanges) {
-      console.log('Prompt file changes detected. Posting reminder comment...');
-
       await upsertComment({
         commentBody: COMMENT_MESSAGE,
         commentContext: 'prompt-changes-reminder',
         clearPrevious: true,
       });
-
-      console.log('✅ Reminder comment posted successfully');
-    } else {
-      console.log('No prompt file changes detected. Skipping comment.');
     }
   } catch (error) {
-    console.error('❌ Error checking for prompt changes:', error);
-    process.exit(1);
+    console.warn('❌ Error checking for prompt changes:', error);
+    // Don't fail the pipeline generation if comment posting fails
   }
-}
-
-if (require.main === module) {
-  main();
 }
