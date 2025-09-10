@@ -10,11 +10,11 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
 import { getCreateRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { useRuleTemplate } from '../../hooks/use_rule_template';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 
 export const RuleFormRoute = () => {
   const {
