@@ -13,6 +13,8 @@ export type { TSemconvFields, SemconvFieldName } from './types';
 // Export generated data (will be available after build)
 export { semconvFlat } from './generated/resolved-semconv';
 
+export { RESOURCE_FIELDS } from './resource_fields';
+
 // Export processing functionality
 export { processSemconvYaml } from './lib/generate_semconv';
 export { cli } from './cli';

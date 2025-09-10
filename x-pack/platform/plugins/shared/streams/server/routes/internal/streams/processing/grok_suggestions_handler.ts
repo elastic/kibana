@@ -76,18 +76,20 @@ export const handleProcessingGrokSuggestions = async ({
   // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
   const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
 
-  const fieldMetadata = await Promise.all(
-    reviewResult.fields.map(async (field) => fieldsMetadataClient.getByName(field.ecs_field))
-  );
+  const fieldMetadata = await fieldsMetadataClient
+    .find({
+      fieldNames: reviewResult.fields.map((field) => field.ecs_field),
+    })
+    .then((fieldsDictionary) => fieldsDictionary.toPlain());
 
   return {
     log_source: reviewResult.log_source,
-    fields: reviewResult.fields.map((field, index) => {
+    fields: reviewResult.fields.map((field) => {
       const name = field.ecs_field.startsWith('@timestamp')
         ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
         : field.ecs_field;
       return {
-        name: useOtelFieldNames ? getOtelFieldName(name, fieldMetadata[index]) : name,
+        name: useOtelFieldNames ? getOtelFieldName(name, fieldMetadata[field.ecs_field]) : name,
         columns: field.columns,
         grok_components: field.grok_components,
       };

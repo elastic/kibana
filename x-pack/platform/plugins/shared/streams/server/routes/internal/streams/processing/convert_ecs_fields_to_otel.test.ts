@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { getOtelFieldName } from './convert_ecs_fields_to_otel';
 
 describe('getOtelFieldName', () => {
@@ -20,12 +21,13 @@ describe('getOtelFieldName', () => {
     expect(getOtelFieldName('client.address', undefined)).toBe('attributes.client.address');
   });
 
-  it('maps equivalent fields with attributes prefix', () => {
-    expect(getOtelFieldName('error.message', undefined)).toBe('attributes.exception.message');
-  });
-
   it('maps OTLP fields without attributes prefix', () => {
-    expect(getOtelFieldName('span.id', undefined)).toBe('span_id');
+    expect(
+      getOtelFieldName('span.id', {
+        name: 'span.id',
+        otel: [{ relation: 'otlp', otlp_field: 'span_id' }],
+      } as FieldMetadataPlain)
+    ).toBe('span_id');
   });
 
   it('maps unknown fields with attributes prefix', () => {
@@ -41,12 +43,12 @@ describe('getOtelFieldName', () => {
   });
 
   it('maps equivalent resource fields with resource.attributes prefix', () => {
-    expect(getOtelFieldName('cloud.service.name', undefined)).toBe(
-      'resource.attributes.cloud.platform'
-    );
-    expect(getOtelFieldName('container.image.hash.all', undefined)).toBe(
-      'resource.attributes.container.image.repo_digests'
-    );
+    expect(
+      getOtelFieldName('cloud.service.name', {
+        name: 'cloud.service.name',
+        otel: [{ relation: 'equivalent', attribute: 'cloud.platform' }],
+      } as FieldMetadataPlain)
+    ).toBe('resource.attributes.cloud.platform');
   });
 
   it('handles resource fields not in MATCH_FIELDS or EQUIVALENT_FIELDS', () => {
@@ -61,11 +63,8 @@ describe('getOtelFieldName', () => {
         { relation: 'equivalent', attribute: 'otel.equivalent.field' },
         { relation: 'other', attribute: 'should.not.use' },
       ],
-      // minimal stub for FieldMetadata
-      pick: () => undefined,
-      toPlain: () => ({}),
       name: 'some.ecs.field',
-    } as any;
+    } as FieldMetadataPlain;
     expect(getOtelFieldName('some.ecs.field', fakeFieldMetadata)).toBe(
       'attributes.otel.equivalent.field'
     );
