@@ -62,7 +62,7 @@ export type TabsBarProps = Pick<
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
-  onMaxItemsReached: () => void;
+  onEvent: (eventName: string, payload?: any) => void;
 };
 
 export interface TabsBarApi {
@@ -86,7 +86,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onReorder,
       onClose,
       getPreviewData,
-      onMaxItemsReached,
+      onEvent,
     },
     componentRef
   ) => {
@@ -127,11 +127,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     useEffect(() => {
       if (hasReachedMaxItemsCount && !hasSentMaxReachedEventRef.current) {
         hasSentMaxReachedEventRef.current = true;
-        onMaxItemsReached();
+        onEvent('tabsLimitReached');
       } else if (!hasReachedMaxItemsCount) {
         hasSentMaxReachedEventRef.current = false;
       }
-    }, [hasReachedMaxItemsCount, onMaxItemsReached]);
+    }, [hasReachedMaxItemsCount, onEvent]);
 
     useEffect(() => {
       if (selectedItem && tabsContainerRef.current) {
