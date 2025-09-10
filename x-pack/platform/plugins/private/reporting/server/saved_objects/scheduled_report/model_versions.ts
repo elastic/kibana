@@ -23,22 +23,4 @@ export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
       create: rawScheduledReportSchemaV2,
     },
   },
-  '3': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          enabled: { type: 'boolean' },
-          jobType: { type: 'keyword' },
-          notification: {
-            properties: {
-              email: {
-                properties: { to: { type: 'keyword' } },
-              },
-            },
-          },
-        },
-      },
-    ],
-  },
 };

@@ -9,6 +9,7 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
+  MappingRuntimeFieldType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ReportingUsage } from '../types';
@@ -44,6 +45,17 @@ export async function getTotalCountAggregations({
         bool: {
           // Aggregate over all scheduled report saved objects
           filter: [{ term: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE } }],
+        },
+      },
+      runtime_mappings: {
+        'scheduled_report.enabled': {
+          type: 'boolean' as MappingRuntimeFieldType,
+        },
+        'scheduled_report.jobType': {
+          type: 'keyword' as MappingRuntimeFieldType,
+        },
+        'scheduled_report.notification.email.to': {
+          type: 'keyword' as MappingRuntimeFieldType,
         },
       },
       aggs: {

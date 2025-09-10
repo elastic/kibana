@@ -69,6 +69,11 @@ describe('kibana alerting cases index telemetry', () => {
             filter: { exists: { field: 'scheduled_report.notification.email.to' } },
           },
         },
+        runtime_mappings: {
+          'scheduled_report.enabled': { type: 'boolean' },
+          'scheduled_report.jobType': { type: 'keyword' },
+          'scheduled_report.notification.email.to': { type: 'keyword' },
+        },
         index: 'test',
         query: { bool: { filter: [{ term: { type: 'scheduled_report' } }] } },
         size: 0,
@@ -150,7 +155,7 @@ describe('kibana alerting cases index telemetry', () => {
       const loggerCalls = loggingSystemMock.collect(logger);
       expect(loggerCalls.debug).toHaveLength(2);
       expect(loggerCalls.debug[0][0]).toEqual(
-        `query for getTotalCountAggregations - {\"index\":\"test\",\"size\":0,\"track_total_hits\":true,\"query\":{\"bool\":{\"filter\":[{\"term\":{\"type\":\"scheduled_report\"}}]}},\"aggs\":{\"by_job_type\":{\"terms\":{\"field\":\"scheduled_report.jobType\",\"size\":20}},\"enabled\":{\"filter\":{\"term\":{\"scheduled_report.enabled\":true}},\"aggs\":{\"by_job_type\":{\"terms\":{\"field\":\"scheduled_report.jobType\",\"size\":20}}}},\"has_notifications\":{\"filter\":{\"exists\":{\"field\":\"scheduled_report.notification.email.to\"}}}}}`
+        `query for getTotalCountAggregations - {\"index\":\"test\",\"size\":0,\"track_total_hits\":true,\"query\":{\"bool\":{\"filter\":[{\"term\":{\"type\":\"scheduled_report\"}}]}},\"runtime_mappings\":{\"scheduled_report.enabled\":{\"type\":\"boolean\"},\"scheduled_report.jobType\":{\"type\":\"keyword\"},\"scheduled_report.notification.email.to\":{\"type\":\"keyword\"}},\"aggs\":{\"by_job_type\":{\"terms\":{\"field\":\"scheduled_report.jobType\",\"size\":20}},\"enabled\":{\"filter\":{\"term\":{\"scheduled_report.enabled\":true}},\"aggs\":{\"by_job_type\":{\"terms\":{\"field\":\"scheduled_report.jobType\",\"size\":20}}}},\"has_notifications\":{\"filter\":{\"exists\":{\"field\":\"scheduled_report.notification.email.to\"}}}}}`
       );
       expect(loggerCalls.debug[1][0]).toMatchInlineSnapshot(`
         "Error executing reporting telemetry task: getTotalCountAggregations - ResponseError: search_phase_execution_exception
