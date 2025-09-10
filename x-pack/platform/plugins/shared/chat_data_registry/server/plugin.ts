@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
-import { type DataCatalog, createDataCatalog } from './services/data_catalog/data_catalog';
+import { type DataCatalog, createDataCatalog } from './data_catalog';
 
 export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>

@@ -16,4 +16,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
-export type { DataCatalog, DataTypeDefinition } from './services';
+export type { DataCatalog, DataTypeDefinition } from './data_catalog';
