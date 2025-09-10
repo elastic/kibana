@@ -439,9 +439,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -485,9 +484,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -604,9 +602,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields, routing: [] },
             },
           },
@@ -618,9 +615,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields: {}, routing: [] },
             },
           },
@@ -651,9 +647,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: {
-                  steps: [],
-                },
+                processing: { steps: [] },
+                settings: {},
                 wired: { fields: {}, routing: [] },
               },
             },
@@ -669,9 +664,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields: {}, routing: [] },
             },
           },
