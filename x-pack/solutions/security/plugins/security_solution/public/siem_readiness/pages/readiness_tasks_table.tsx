@@ -25,9 +25,9 @@ import { useGetLatestTasks } from '../hooks/use_get_latest_tasks';
 
 const PILLARS = [
   { value: '', inputDisplay: 'All Categories' },
-  { value: 'visibility', inputDisplay: 'Visibility' },
-  { value: 'detection', inputDisplay: 'Detection' },
-  { value: 'response', inputDisplay: 'Response' },
+  { value: 'visibility', inputDisplay: 'Visibility', badgeColor: '#61A2FF' },
+  { value: 'detection', inputDisplay: 'Detection', badgeColor: '#EE72A6' },
+  { value: 'response', inputDisplay: 'Response', badgeColor: '#16C5C0' },
 ];
 
 const PANEL_HEIGHT = 600; // px, adjust as needed
@@ -100,6 +100,7 @@ export const ReadinessTasksTable: React.FC = () => {
           const taskData = getLatestTasks.data?.find(
             (latestTaskData) => latestTaskData.task_id === task.id
           );
+          const pillar = PILLARS.find((p) => p.value === task.pillar);
 
           return (
             <EuiAccordion
@@ -121,7 +122,7 @@ export const ReadinessTasksTable: React.FC = () => {
               }}
               extraAction={
                 <div style={{ paddingRight: euiTheme.size.base }}>
-                  <EuiBadge>{task.pillar}</EuiBadge>
+                  <EuiBadge color={pillar.badgeColor}>{pillar.inputDisplay}</EuiBadge>
                   <EuiBadge color={taskData?.status === 'completed' ? 'success' : 'warning'}>
                     {taskData?.status || 'incomplete'}
                   </EuiBadge>

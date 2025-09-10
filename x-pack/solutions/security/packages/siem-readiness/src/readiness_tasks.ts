@@ -70,7 +70,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 3,
+    order: 6,
   },
   {
     // Completion: Ingested logs from container/k8s integration
@@ -89,7 +89,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 4,
+    order: 10,
   },
   {
     // Completion: Logs + asset data present from AWS, Azure, and GCP (dynamic based on Asset Inventory/Entity store)
@@ -109,7 +109,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'visibility',
-    order: 5,
+    order: 15,
   },
 
   /**
@@ -132,19 +132,35 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 6,
+    order: 3,
   },
   {
-    // Completion: CSPM enabled for AWS, Azure, and GCP, findings/dashboard pages visited (dynamic based on CSP footprint)
-    id: 'enable-cspm-on-all-clouds',
-    title: i18n.translate('xpack.securitySolution.readinessTask.enableCspmOnAllClouds.title', {
-      defaultMessage: 'Enable CSPM on all 3 major cloud providers (AWS, Azure, GCP)',
+    // Completion: Coverage page visited
+    id: 'view-detection-coverage-mitre',
+    title: i18n.translate('xpack.securitySolution.readinessTask.viewDetectionCoverageMitre.title', {
+      defaultMessage: 'View detection coverage across MITRE matrix',
     }),
     description: i18n.translate(
-      'xpack.securitySolution.readinessTask.enableCspmOnAllClouds.description',
+      'xpack.securitySolution.readinessTask.viewDetectionCoverageMitre.description',
       {
         defaultMessage:
-          'Activate cloud security posture monitoring (CSPM) for AWS, Azure, GCP. Review active findings.',
+          'Show tactics and techniques covered by active rules in a heatmap. Track posture',
+      }
+    ),
+    pillar: 'detection',
+    order: 4,
+  },
+  {
+    // Completion: Threat feed events ingested and alerts enriched
+    id: 'add-threat-intel-feeds',
+    title: i18n.translate('xpack.securitySolution.readinessTask.addThreatIntelFeeds.title', {
+      defaultMessage: 'Add threat intelligence feeds',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.readinessTask.addThreatIntelFeeds.description',
+      {
+        defaultMessage:
+          'Integrate threat intel (Abuse.ch, etc.) to enrich alerts and correlate known IOCs.',
       }
     ),
     pillar: 'detection',
@@ -167,22 +183,6 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     order: 8,
   },
   {
-    // Completion: Threat feed events ingested and alerts enriched
-    id: 'add-threat-intel-feeds',
-    title: i18n.translate('xpack.securitySolution.readinessTask.addThreatIntelFeeds.title', {
-      defaultMessage: 'Add threat intelligence feeds',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.readinessTask.addThreatIntelFeeds.description',
-      {
-        defaultMessage:
-          'Integrate threat intel (Abuse.ch, etc.) to enrich alerts and correlate known IOCs.',
-      }
-    ),
-    pillar: 'detection',
-    order: 9,
-  },
-  {
     // Completion: Activity like running Attack Discovery multiple times or scheduling action on the Attack Discovery page
     id: 'use-attack-discovery',
     title: i18n.translate('xpack.securitySolution.readinessTask.useAttackDiscovery.title', {
@@ -193,22 +193,6 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       {
         defaultMessage:
           'Visualize threats in MITRE ATT&CK graph via Attack Discovery. Correlates alerts to kill chain.',
-      }
-    ),
-    pillar: 'detection',
-    order: 10,
-  },
-  {
-    // Completion: Coverage page visited
-    id: 'view-detection-coverage-mitre',
-    title: i18n.translate('xpack.securitySolution.readinessTask.viewDetectionCoverageMitre.title', {
-      defaultMessage: 'View detection coverage across MITRE matrix',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.readinessTask.viewDetectionCoverageMitre.description',
-      {
-        defaultMessage:
-          'Show tactics and techniques covered by active rules in a heatmap. Track posture',
       }
     ),
     pillar: 'detection',
@@ -227,7 +211,23 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'detection',
-    order: 12,
+    order: 13,
+  },
+  {
+    // Completion: CSPM enabled for AWS, Azure, and GCP, findings/dashboard pages visited (dynamic based on CSP footprint)
+    id: 'enable-cspm-on-all-clouds',
+    title: i18n.translate('xpack.securitySolution.readinessTask.enableCspmOnAllClouds.title', {
+      defaultMessage: 'Enable CSPM on all 3 major cloud providers (AWS, Azure, GCP)',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.readinessTask.enableCspmOnAllClouds.description',
+      {
+        defaultMessage:
+          'Activate cloud security posture monitoring (CSPM) for AWS, Azure, GCP. Review active findings.',
+      }
+    ),
+    pillar: 'detection',
+    order: 16,
   },
 
   /**
@@ -249,7 +249,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 13,
+    order: 5,
   },
   {
     // Completion: Summary generated on Alert - AI assistant workflow
@@ -268,23 +268,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 14,
-  },
-  {
-    // Completion: Multiple alerts triaged and closed via case workflow
-    id: 'create-manage-case-workflows',
-    title: i18n.translate('xpack.securitySolution.readinessTask.createManageCaseWorkflows.title', {
-      defaultMessage: 'Create and manage case workflows',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.readinessTask.createManageCaseWorkflows.description',
-      {
-        defaultMessage:
-          'Open a case, assign it, and link alerts to it. Manages SOC workflow maturity.',
-      }
-    ),
-    pillar: 'response',
-    order: 15,
+    order: 9,
   },
   {
     // Completion: Jira/Slack/ServiceNow/SentinelOne/Crowdstrike connector tested and in use
@@ -299,7 +283,7 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       }
     ),
     pillar: 'response',
-    order: 16,
+    order: 12,
   },
   {
     // Completion: At least one rule creates a case or sends notification automatically
@@ -315,6 +299,22 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
       {
         defaultMessage:
           'Use rule actions or case templates to automatically trigger cases or actions',
+      }
+    ),
+    pillar: 'response',
+    order: 14,
+  },
+  {
+    // Completion: Multiple alerts triaged and closed via case workflow
+    id: 'create-manage-case-workflows',
+    title: i18n.translate('xpack.securitySolution.readinessTask.createManageCaseWorkflows.title', {
+      defaultMessage: 'Create and manage case workflows',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.readinessTask.createManageCaseWorkflows.description',
+      {
+        defaultMessage:
+          'Open a case, assign it, and link alerts to it. Manages SOC workflow maturity.',
       }
     ),
     pillar: 'response',
