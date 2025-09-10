@@ -59,12 +59,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Logs\nAll\nRead\nNone',
         'Infrastructure\nAll\nRead\nNone',
         'Applications\nAll\nRead\nNone',
+        'Agent Builder\nAll\nRead\nNone',
         'Synthetics\nAll\nRead\nNone',
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
-        'Agent Builder\nAll\nRead\nNone',
       ]);
     });
 
