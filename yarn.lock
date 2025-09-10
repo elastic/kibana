@@ -7220,6 +7220,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-fixture@link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-mocks-server@link:src/platform/packages/private/kbn-reporting/mocks_server":
   version "0.0.0"
   uid ""
