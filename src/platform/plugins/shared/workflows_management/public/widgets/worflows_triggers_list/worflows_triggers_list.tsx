@@ -10,9 +10,11 @@
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import capitalize from 'lodash/capitalize';
-import React, { useState } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+import * as i18n from '../../../common/translations';
 import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
-
+import { PopoverItems } from './popover_items';
 interface WorkflowsTriggersListProps {
   triggers: WorkflowTrigger[];
 }
@@ -24,8 +26,6 @@ const TRIGGERS_ICONS: Record<string, string> = {
 };
 
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
-  const [showAllTriggers, setShowAllTriggers] = useState<boolean>(false);
-
   const [first, ...rest] = triggers || [];
 
   // Rare edge-case: empty triggers list
@@ -33,39 +33,36 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
 
   return (
     <>
-      <EuiBadge color="hollow" iconType={TRIGGERS_ICONS[first.type]}>
+      <EuiBadge
+        color="hollow"
+        iconType={TRIGGERS_ICONS[first.type]}
+        css={css`
+          margin: 2px 3px 0 0;
+        `}
+      >
         <FormattedMessage
           id={`workflows.workflowList.trigger.${first.type}`}
           defaultMessage={capitalize(first.type)}
         />
       </EuiBadge>
-      {rest.length > 0 ? (
-        showAllTriggers ? (
-          <>
-            {rest.map(({ type }) => (
-              <EuiBadge color="hollow" iconType={TRIGGERS_ICONS[type]}>
-                <FormattedMessage
-                  id={`workflows.workflowList.trigger.${type}`}
-                  defaultMessage={capitalize(type)}
-                />
-              </EuiBadge>
-            ))}
-            <EuiBadge
-              iconType="cross"
-              onClick={() => setShowAllTriggers(false)}
-              onClickAriaLabel="Show less triggers"
-            />
-          </>
-        ) : (
+      <PopoverItems
+        items={triggers}
+        popoverTitle={i18n.TRIGGERS_LIST_TITLE}
+        popoverButtonTitle={`+${rest.length.toString()}`}
+        dataTestPrefix="triggers"
+        renderItem={(trigger, idx) => (
           <EuiBadge
+            key={`${trigger}-${idx}`}
             color="hollow"
-            onClick={() => setShowAllTriggers(true)}
-            onClickAriaLabel="Show more triggers"
+            iconType={TRIGGERS_ICONS[trigger.type]}
           >
-            +{rest.length}
+            <FormattedMessage
+              id={`workflows.workflowList.trigger.${trigger.type}`}
+              defaultMessage={capitalize(trigger.type)}
+            />
           </EuiBadge>
-        )
-      ) : null}
+        )}
+      />
     </>
   );
 };
