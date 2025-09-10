@@ -7,20 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-// Extract the task IDs as a union type
-export type ReadinessTaskId = (typeof READINESS_TASKS)[number]['id'];
-
-export interface ReadinessTaskConfig {
-  id: ReadinessTaskId;
-  title: string;
-  description: string;
-  pillar: 'visibility' | 'detection' | 'response';
-  order: number;
-  meta?: Record<string, 'string' | 'number' | 'boolean' | 'string[]' | 'number[]'>;
-}
-
 // Used to define and validate readiness tasks structure
-export const READINESS_TASKS: ReadinessTaskConfig[] = [
+export const READINESS_TASKS = [
   /**
    *  ### Visibility Pillar Tasks ###
    */
@@ -336,3 +324,6 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     order: 18,
   },
 ] as const;
+
+export type ReadinessTaskId = (typeof READINESS_TASKS)[number]['id'];
+export type ReadinessTaskConfig = (typeof READINESS_TASKS)[number];
