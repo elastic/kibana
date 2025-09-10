@@ -88,8 +88,12 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
     });
 
     it('should disable the privilege monitoring engine', async () => {
-      mockGetEngineDescriptor.mockResolvedValue({
+      // first call is to check the current status, second is after updating to 'disabled'
+      mockGetEngineDescriptor.mockResolvedValueOnce({
         status: 'started',
+      });
+      mockGetEngineDescriptor.mockResolvedValueOnce({
+        status: 'disabled',
       });
 
       const result = await statusService.disable();
