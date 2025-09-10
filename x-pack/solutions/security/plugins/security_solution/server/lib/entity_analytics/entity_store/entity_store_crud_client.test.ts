@@ -41,7 +41,7 @@ describe('EntityStoreCrudClient', () => {
         Promise.resolve({ status: 'not_installed', engines: [] })
       );
 
-      expect(async () =>
+      await expect(async () =>
         client.upsertEntity('host', {
           entity: {
             id: 'host-id',
@@ -63,7 +63,7 @@ describe('EntityStoreCrudClient', () => {
         })
       );
 
-      expect(async () =>
+      await expect(async () =>
         client.upsertEntity('user', {
           entity: {
             id: 'user-id',
@@ -91,7 +91,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
+      await expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
             `updated without forcing it (?force=true): user.name, user.id, entity.type, entity.sub_type`
@@ -116,7 +116,7 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
+      await expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
         new DocumentNotFoundError()
       );
     });
