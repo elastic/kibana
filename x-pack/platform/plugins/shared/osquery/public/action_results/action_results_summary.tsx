@@ -12,7 +12,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
 import { Direction } from '../../common/search_strategy';
-import { useActionResultsPrivileges } from './use_action_privileges';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -42,9 +41,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [expirationDate]
   );
   const [isLive, setIsLive] = useState(true);
-  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
-    // @ts-expect-error update types
     data: { aggregations, edges },
   } = useActionResults({
     actionId,
@@ -55,7 +52,6 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
-    skip: !hasActionResultsPrivileges,
   });
 
   useEffect(() => {
