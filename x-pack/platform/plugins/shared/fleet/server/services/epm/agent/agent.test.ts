@@ -256,7 +256,7 @@ New lines and\\n escaped values.`,
       expect(output).toEqual({
         input: 'log',
         text_var: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
       });
     });
   });
@@ -272,7 +272,7 @@ New lines and \\n escaped values.`,
         multiline_text: {
           type: 'textarea',
           value: `This is a text with
-New lines and \n escaped values.`,
+New lines and\n escaped values.`,
         },
       };
 
