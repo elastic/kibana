@@ -23,21 +23,6 @@ export async function clearKnowledgeBase(esClient: EsClient) {
   );
 }
 
-export async function clearConversations(esClient: EsClient) {
-  const CONV_INDEX = '.kibana-observability-ai-assistant-conversations-*';
-  return pRetry(
-    () => {
-      return esClient.deleteByQuery({
-        index: CONV_INDEX,
-        conflicts: 'proceed',
-        query: { match_all: {} },
-        refresh: true,
-      });
-    },
-    { retries: 5 }
-  );
-}
-
 export const testDocs = [
   {
     id: 'acme_teams',

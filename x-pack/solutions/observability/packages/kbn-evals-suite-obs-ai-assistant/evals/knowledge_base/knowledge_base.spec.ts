@@ -8,7 +8,8 @@
 import type { EvaluateKnowledgeBase } from './evaluate_knowledge_base';
 import { createEvaluateKnowledgeBase } from './evaluate_knowledge_base';
 import { evaluate as base } from '../../src/evaluate';
-import { clearConversations, clearKnowledgeBase, testDocs } from './knowledge_base_helpers';
+import { clearConversations } from '../utils/conversation';
+import { clearKnowledgeBase, testDocs } from '../utils/knowledge_base';
 
 const evaluate = base.extend<{
   evaluateKnowledgeBase: EvaluateKnowledgeBase;
