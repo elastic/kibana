@@ -103,8 +103,6 @@ const getCloudConnectorRemoteRoleTemplate: (
     input?.streams?.[0]?.vars?.[ProviderAccountTypeInputNames[typedProvider]]?.value ??
     defaultAccountType;
 
-  console.log('accountType:', accountType);
-
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
 
   if (!hostProvider || (provider === 'aws' && hostProvider !== provider)) return undefined;
