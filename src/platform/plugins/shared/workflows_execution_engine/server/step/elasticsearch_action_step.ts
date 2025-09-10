@@ -30,11 +30,27 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
     super(step, contextManager, undefined, workflowRuntime);
   }
 
-  public async _run(): Promise<RunStepResult> {
+  public getInput() {
+    // Get current context for templating
+    const context = this.contextManager.getContext();
+    // Render inputs from 'with' - support both direct step.with and step.configuration.with
+    const stepWith = this.step.with || (this.step as any).configuration?.with || {};
+    return Object.entries(stepWith).reduce((acc: Record<string, any>, [key, value]) => {
+      if (typeof value === 'string') {
+        acc[key] = this.templatingEngine.render(value, context);
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+  }
+
+  public async _run(withInputs?: any): Promise<RunStepResult> {
     try {
       // Support both direct step types (elasticsearch.search.query) and atomic+configuration pattern
       const stepType = this.step.type || (this.step as any).configuration?.type;
-      const stepWith = this.step.with || (this.step as any).configuration?.with;
+      // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
+      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
       this.workflowLogger.logInfo(`Executing Elasticsearch action: ${stepType}`, {
         event: { action: 'elasticsearch-action', outcome: 'unknown' },
@@ -65,7 +81,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       return { input: stepWith, output: result, error: undefined };
     } catch (error) {
       const stepType = (this.step as any).configuration?.type || this.step.type;
-      const stepWith = this.step.with || (this.step as any).configuration?.with;
+      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
       this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error as Error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
@@ -129,7 +145,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         const refresh = queryParams?.refresh ?? false;
 
         // Turn each doc into an action+doc pair
-        const body = docs.flatMap((doc, i) => {
+        const body = docs.flatMap((doc: any, i: number) => {
           // If you have ids, use: { index: { _id: doc._id } }
           return [{ index: {} }, doc];
         });
@@ -143,8 +159,8 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         // Helpful: surface per-item errors if any
         if (resp.errors) {
           const itemsWithErrors = resp.items
-            .map((it, idx) => ({ idx, action: Object.keys(it)[0], result: it[Object.keys(it)[0]] }))
-            .filter((x) => x.result.error);
+            .map((it: any, idx: number) => ({ idx, action: Object.keys(it)[0], result: it[Object.keys(it)[0]] }))
+            .filter((x: any) => x.result.error);
           console.error('Bulk had item errors:', itemsWithErrors);
         }
         return resp;

@@ -59,8 +59,9 @@ export class UnifiedActionsProvider {
 
     // Listen for cursor position changes
     this.editor.onDidChangeCursorPosition((e) => {
-      immediateClear(); // Clear immediately
-      debouncedHighlight(); // Then update after debounce
+      // Always update after debounce, but don't clear immediately
+      // The updateHighlightAndActions will determine if we're in a different step
+      debouncedHighlight();
     });
 
     // Note: Removed onDidChangeModelContent listener to prevent highlighting
@@ -110,60 +111,65 @@ export class UnifiedActionsProvider {
         return;
       }
 
-      console.log('UnifiedActionsProvider: Context detected', {
-        connectorType: context.connectorType,
-        yamlPath: context.yamlPath,
-      });
 
-      // Check if connector type changed - clear highlighting if it did
-      if (this.currentConnectorType !== context.connectorType) {
+      // Check if we're in a different step - only clear and re-highlight if step changed
+      const newStepNode = context.stepContext?.stepNode;
+      const stepChanged = this.currentStepNode !== newStepNode;
+      
+      if (stepChanged) {
+        // Only clear when we move to a different step
         this.clearHighlightAndActions();
+        
+        // Update current connector type and step node
+        this.currentConnectorType = context.connectorType;
+        this.currentStepNode = newStepNode;
+        
+        // Update highlighting for the new step
+        this.updateHighlighting(context);
+        
+        // Generate action buttons for the new step
+        const handler = getMonacoConnectorHandler(context.connectorType);
+        if (handler) {
+          /*
+          console.log(
+            'UnifiedActionsProvider: Found Monaco handler for connector type:',
+            context.connectorType
+          );
+          */
+          // Generate and display action buttons
+          /*
+          console.log('🔍 Generating actions for context:', {
+            connectorType: context.connectorType,
+            stepName: context.stepContext?.stepName,
+            isInWithBlock: context.stepContext?.isInWithBlock,
+            yamlPath: context.yamlPath,
+          });
+          */
+          const actions = await handler.generateActions(context);
+
+          /*
+          console.log('🔍 Generated actions:', {
+            actionCount: actions.length,
+            actions: actions.map((a) => ({ id: a.id, label: a.label })),
+          });
+          */
+          this.updateActionButtons(actions, position);
+        } else {
+          /*
+          console.log(
+            'UnifiedActionsProvider: No Monaco handler found for connector type:',
+            context.connectorType,
+            '- showing highlighting only'
+          );
+          */
+          // No action buttons for this step type, but still show highlighting
+          this.updateActionButtons([], position);
+        }
       }
-
-      // Update current connector type and step node
-      this.currentConnectorType = context.connectorType;
-      this.currentStepNode = context.stepContext?.stepNode;
-
-      // Always update highlighting for any step type
-      this.updateHighlighting(context);
-
-      // Find appropriate handler for action buttons
-      const handler = getMonacoConnectorHandler(context.connectorType);
-      if (handler) {
-        /*
-        console.log(
-          'UnifiedActionsProvider: Found Monaco handler for connector type:',
-          context.connectorType
-        );
-        */
-        // Generate and display action buttons
-        /*
-        console.log('🔍 Generating actions for context:', {
-          connectorType: context.connectorType,
-          stepName: context.stepContext?.stepName,
-          isInWithBlock: context.stepContext?.isInWithBlock,
-          yamlPath: context.yamlPath,
-        });
-        */
-        const actions = await handler.generateActions(context);
-
-        /*
-        console.log('🔍 Generated actions:', {
-          actionCount: actions.length,
-          actions: actions.map((a) => ({ id: a.id, label: a.label })),
-        });
-        */
-        this.updateActionButtons(actions, position);
-      } else {
-        /*
-        console.log(
-          'UnifiedActionsProvider: No Monaco handler found for connector type:',
-          context.connectorType,
-          '- showing highlighting only'
-        );
-        */
-        // No action buttons for this step type, but still show highlighting
-        this.updateActionButtons([], position);
+      // If we're in the same step, don't regenerate actions - just update positions if needed
+      else if (this.currentActionButtons.length > 0) {
+        // Update action button positions for the same step (e.g., when scrolling)
+        this.updateActionButtonPositions();
       }
     } catch (error) {
       console.warn('UnifiedActionsProvider: Error updating highlight and actions', error);

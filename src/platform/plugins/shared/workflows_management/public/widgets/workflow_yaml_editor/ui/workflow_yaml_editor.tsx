@@ -308,6 +308,12 @@ export const WorkflowYAMLEditor = ({
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
+  // Add a ref to track if the last change was just typing
+  const lastChangeWasTypingRef = useRef(false);
+  
+  // Track the last value we set internally to distinguish from external changes
+  const lastInternalValueRef = useRef<string | undefined>(props.value);
+
   // Helper function to clear all decorations
   const clearAllDecorations = useCallback(() => {
     if (alertTriggerDecorationCollectionRef.current) {
@@ -330,36 +336,51 @@ export const WorkflowYAMLEditor = ({
     }
   }, []);
 
-  const changeSideEffects = useCallback(() => {
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
-      if (!model) {
-        return;
-      }
-      validateVariables(editorRef.current);
-      try {
-        const value = model.getValue();
-        const parsedDocument = YAML.parseDocument(value ?? '');
+  // ... existing code ...
 
-        clearAllDecorations();
-
-        setYamlDocument(parsedDocument);
-        yamlDocumentRef.current = parsedDocument;
-      } catch (error) {
-        console.error('❌ Error parsing YAML document:', error);
-        clearAllDecorations();
-        setYamlDocument(null);
-        yamlDocumentRef.current = null;
-      }
+const changeSideEffects = useCallback((isTypingChange = false) => {
+  if (editorRef.current) {
+    const model = editorRef.current.getModel();
+    if (!model) {
+      return;
     }
-  }, [validateVariables, clearAllDecorations]);
+    validateVariables(editorRef.current);
+    try {
+      const value = model.getValue();
+      const parsedDocument = YAML.parseDocument(value ?? '');
+
+      if (isTypingChange) {
+        // If it's because of typing - skip clearing decorations entirely
+        // Let the decoration hooks handle updates naturally
+      } else {
+        // If not typing - continue with the original logic (always clear)
+        clearAllDecorations();
+      }
+
+      setYamlDocument(parsedDocument);
+      yamlDocumentRef.current = parsedDocument;
+    } catch (error) {
+      console.error('❌ Error parsing YAML document:', error);
+      clearAllDecorations();
+      setYamlDocument(null);
+      yamlDocumentRef.current = null;
+    }
+  }
+}, [validateVariables, clearAllDecorations]);
 
   const handleChange = useCallback(
     (value: string | undefined) => {
+      // Track this as an internal change BEFORE calling onChange
+      lastInternalValueRef.current = value;
+      
       if (onChange) {
         onChange(value);
       }
-      changeSideEffects();
+      
+      // Pass the typing flag to changeSideEffects
+      changeSideEffects(lastChangeWasTypingRef.current);
+      // Reset the flag
+      lastChangeWasTypingRef.current = false;
     },
     [onChange, changeSideEffects]
   );
@@ -370,6 +391,19 @@ export const WorkflowYAMLEditor = ({
     editor.updateOptions({
       glyphMargin: true,
     });
+
+    // Listen to content changes to detect typing
+    const model = editor.getModel();
+    if (model) {
+      model.onDidChangeContent((e) => {
+        // Check if this was a simple typing change
+        const isSimpleTyping = e.changes.length === 1 && 
+          e.changes[0].text.length <= 1 && // Single character or deletion
+          !e.changes[0].text.includes('\n'); // No line breaks
+        
+        lastChangeWasTypingRef.current = isSimpleTyping;
+      });
+    }
 
     // Setup Elasticsearch step providers if we have the required services
     if (http && notifications) {
@@ -439,7 +473,7 @@ export const WorkflowYAMLEditor = ({
     if (isEditorMounted && editorRef.current) {
       const model = editorRef.current.getModel();
       if (model && model.getValue() !== '') {
-        changeSideEffects();
+        changeSideEffects(false); // Initial validation, not typing
       }
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
@@ -447,24 +481,32 @@ export const WorkflowYAMLEditor = ({
   // Force refresh of decorations when props.value changes externally (e.g., switching executions)
   useEffect(() => {
     if (isEditorMounted && editorRef.current && props.value !== undefined) {
-      // Always clear decorations first when switching executions/revisions
-      clearAllDecorations();
+      // Check if this is an external change (not from our own typing)
+      const isExternalChange = props.value !== lastInternalValueRef.current;
+      
+      if (isExternalChange) {
+        // Always clear decorations first when switching executions/revisions
+        clearAllDecorations();
 
-      // Check if Monaco editor content matches props.value
-      const model = editorRef.current.getModel();
-      if (model) {
-        const currentContent = model.getValue();
-        if (currentContent !== props.value) {
-          // Wait a bit longer for Monaco to update its content, then force re-parse
-          setTimeout(() => {
-            changeSideEffects();
-          }, 50); // Longer delay to ensure Monaco editor content is updated
-        } else {
-          // Content matches, just force re-parse to be safe
-          setTimeout(() => {
-            changeSideEffects();
-          }, 10);
+        // Check if Monaco editor content matches props.value
+        const model = editorRef.current.getModel();
+        if (model) {
+          const currentContent = model.getValue();
+          if (currentContent !== props.value) {
+            // Wait a bit longer for Monaco to update its content, then force re-parse
+            setTimeout(() => {
+              changeSideEffects(false); // External change, not typing
+            }, 50); // Longer delay to ensure Monaco editor content is updated
+          } else {
+            // Content matches, just force re-parse to be safe
+            setTimeout(() => {
+              changeSideEffects(false); // External change, not typing
+            }, 10);
+          }
         }
+        
+        // Update our tracking ref
+        lastInternalValueRef.current = props.value;
       }
     }
   }, [props.value, isEditorMounted, changeSideEffects, clearAllDecorations]);
@@ -474,7 +516,7 @@ export const WorkflowYAMLEditor = ({
     if (isEditorMounted && readOnly) {
       // Small delay to ensure all state is settled
       setTimeout(() => {
-        changeSideEffects();
+        changeSideEffects(false); // Mode change, not typing
       }, 50);
     }
   }, [readOnly, isEditorMounted, changeSideEffects]);

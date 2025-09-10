@@ -23,7 +23,7 @@ export function buildRequestFromConnector(
   const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated_es_connectors');
 
   // Find the connector definition for this step type
-  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c) => c.type === stepType);
+  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c: any) => c.type === stepType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)

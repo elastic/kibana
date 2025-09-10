@@ -542,9 +542,45 @@ function extractFieldsFromSchema(schemaDefinition) {
   const fields = new Map(); // Map<fieldName, zodSchema>
 
   try {
-    // Find the main .object({ ... }) pattern
+    // Handle union schemas first - z.union([...])
+    const unionMatch = schemaDefinition.match(/\.union\(\s*\[\s*([\s\S]*?)\s*\]\s*\)/);
+    if (unionMatch) {
+      // Uncomment for debugging: console.log(`🔄 Processing union schema`);
+      const unionContent = unionMatch[1];
+      
+      // Extract schema references from the union
+      const schemaRefs = unionContent.match(/[A-Za-z_][A-Za-z0-9_]*/g);
+      if (schemaRefs) {
+        // Uncomment for debugging: console.log(`🔍 Found union members:`, schemaRefs);
+        
+        // For union schemas, we'll extract fields from all union members
+        // and create a combined field set with optional fields
+        const allUnionFields = new Map();
+        
+        for (const schemaRef of schemaRefs) {
+          // Skip common Zod method names
+          if (['z', 'union', 'object', 'string', 'number', 'boolean', 'array'].includes(schemaRef)) {
+            continue;
+          }
+          
+          // Try to find and process each union member schema
+          const memberFields = extractFieldsFromUnionMember(schemaRef);
+          for (const [fieldName, fieldDef] of memberFields) {
+            // Mark all union fields as optional since they depend on which union branch is chosen
+            const optionalFieldDef = fieldDef.includes('.optional()') ? fieldDef : `${fieldDef}.optional()`;
+            allUnionFields.set(fieldName, optionalFieldDef);
+          }
+        }
+        
+        // Uncomment for debugging: console.log(`📋 Extracted ${allUnionFields.size} fields from union:`, Array.from(allUnionFields.keys()));
+        return allUnionFields;
+      }
+    }
+
+    // Handle regular object schemas - z.object({ ... })
     const objectMatch = schemaDefinition.match(/\.object\(\s*\{([\s\S]*)\}\s*\)/);
     if (!objectMatch) {
+      // Uncomment for debugging: console.log(`⚠️ Schema is neither union nor object pattern`);
       return fields;
     }
 
@@ -598,6 +634,42 @@ function extractFieldsFromSchema(schemaDefinition) {
 }
 
 /**
+ * Extract fields from a union member schema by looking it up in the schemas file
+ */
+function extractFieldsFromUnionMember(schemaName) {
+  const fields = new Map();
+  
+  try {
+    if (fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
+      const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
+      
+      // Find the union member schema definition
+      const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const schemaRegex = new RegExp(
+        `export const ${escapedSchemaName} = z\\s*([\\s\\S]*?)(?=\\nexport const |\\n$)`,
+        'm'
+      );
+      const match = schemasContent.match(schemaRegex);
+      
+      if (match) {
+        const memberSchemaDefinition = match[1];
+        // Uncomment for debugging: console.log(`🔍 Processing union member ${schemaName}`);
+        
+        // Recursively extract fields from this member (handles nested objects)
+        const memberFields = extractFieldsFromSchema(memberSchemaDefinition);
+        return memberFields;
+      } else {
+        // Uncomment for debugging: console.log(`⚠️ Could not find union member schema: ${schemaName}`);
+      }
+    }
+  } catch (error) {
+    console.warn(`Error extracting fields from union member ${schemaName}:`, error.message);
+  }
+  
+  return fields;
+}
+
+/**
  * Read Kibana API body parameter definitions by extracting from schemas dynamically
  * This "explodes" any body schema to get all its fields (like ES connectors approach)
  */
@@ -609,8 +681,28 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
     if (endpoint.parameters) {
       for (const param of endpoint.parameters) {
         if (param.type === 'Body' && param.schema) {
-          // The schema name is directly in param.schema (like "SearchAlerts_Body")
-          const schemaName = param.schema;
+          // The schema is a reference to the actual schema object, not a string
+          // We need to extract the schema name from the reference
+          let schemaName;
+          
+          // Handle different ways the schema might be represented
+          if (typeof param.schema === 'string') {
+            schemaName = param.schema;
+          } else if (param.schema && typeof param.schema === 'object') {
+            // If it's an object reference, try to extract the name from the raw content
+            // Look for the schema name in the raw endpoint content
+            const rawContent = endpoint.rawContent || '';
+            const schemaMatch = rawContent.match(/schema:\s*([A-Za-z_][A-Za-z0-9_]*)/);
+            if (schemaMatch) {
+              schemaName = schemaMatch[1];
+            }
+          }
+          
+          if (!schemaName) {
+            console.warn(`⚠️ Could not determine schema name for ${operationId} body parameter`);
+            continue;
+          }
+
           // Uncomment for debugging: console.log(`🔍 Processing ${operationId} with body schema ${schemaName}`);
 
           // Read the generated schemas file to get the actual schema definition
@@ -627,6 +719,7 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
 
             if (match) {
               const schemaDefinition = match[1];
+              // Uncomment for debugging: console.log(`📋 Found schema definition for ${schemaName}:`, schemaDefinition.substring(0, 200) + '...');
 
               // Extract all fields from this schema
               const extractedFields = extractFieldsFromSchema(schemaDefinition);
@@ -647,7 +740,7 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
                 result._fieldDefinitions = fieldDefs;
                 return result;
               } else {
-                // Uncomment for debugging: console.log(`⚠️ No fields found in ${schemaName}`);
+                // Uncomment for debugging: console.log(`⚠️ No fields found in ${schemaName} - schema type might not be supported`);
               }
             } else {
               // Uncomment for debugging: console.log(`⚠️ Could not find schema definition for ${schemaName}`);

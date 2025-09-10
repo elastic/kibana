@@ -77,7 +77,7 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
       let result: any;
 
       // Handle different Kibana action types
-      if (stepType.startsWith('kibana.cases')) {
+      if (stepType.startsWith('kibana.cases') || stepType === 'kibana.addCaseCommentDefaultSpace') {
         result = await this.executeCasesAction(stepType, stepWith, fakeRequest);
       } else if (stepType.startsWith('kibana.spaces')) {
         result = await this.executeSpacesAction(stepType, stepWith, fakeRequest);
@@ -171,6 +171,44 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
           },
           fakeRequest
         );
+      } else if (stepType === 'kibana.addCaseCommentDefaultSpace') {
+        const caseId = params.caseId;
+        if (!caseId) throw new Error('Case ID is required for kibana.addCaseCommentDefaultSpace');
+        
+        // Build body only with provided parameters, don't include undefined values
+        const body: any = {};
+        
+        // Determine comment type based on provided parameters
+        if (params.alertId !== undefined || params.index !== undefined || params.rule !== undefined) {
+          // Alert comment - requires alertId, index, owner, rule, type
+          body.type = 'alert';
+          if (params.alertId !== undefined) body.alertId = params.alertId;
+          if (params.index !== undefined) body.index = params.index;
+          if (params.owner !== undefined) body.owner = params.owner;
+          if (params.rule !== undefined) body.rule = params.rule;
+        } else if (params.comment !== undefined) {
+          // User comment - requires comment, owner, type
+          body.type = 'user';
+          body.comment = params.comment;
+          body.owner = params.owner || 'cases'; // Default to 'cases' if not specified
+        } else {
+          // Explicit type provided
+          if (params.type !== undefined) body.type = params.type;
+          if (params.alertId !== undefined) body.alertId = params.alertId;
+          if (params.index !== undefined) body.index = params.index;
+          if (params.owner !== undefined) body.owner = params.owner;
+          if (params.rule !== undefined) body.rule = params.rule;
+          if (params.comment !== undefined) body.comment = params.comment;
+        }
+        
+        return await this.makeHttpRequest(
+          {
+            method: 'POST',
+            path: `/api/cases/${caseId}/comments`,
+            body,
+          },
+          fakeRequest
+        );
       } else {
         throw new Error(`Unsupported cases action: ${stepType}`);
       }
@@ -250,10 +288,9 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
       ...customHeaders,
     };
 
-    // Add authorization header if available
-    if (authHeader) {
-      headers.Authorization = authHeader;
-    }
+    // Add authorization header - use basic auth for demo
+    const basicAuth = Buffer.from('elastic:changeme').toString('base64');
+    headers.Authorization = `Basic ${basicAuth}`;
 
     // Try to get user context from workflow for user attribution
     const context = this.contextManager.getContext();

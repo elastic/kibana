@@ -11,7 +11,6 @@ import * as monaco from 'monaco-editor';
 import type * as YAML from 'yaml';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getStepNode } from '../../../../../common/lib/yaml_utils';
-import { getMonacoRangeFromYamlNode } from '../utils';
 
 export interface StepExecutionProviderOptions {
   editor: monaco.editor.IStandaloneCodeEditor;
@@ -43,6 +42,65 @@ export class StepExecutionProvider {
     this.updateDecorations();
 
     // console.log('🎯 StepExecutionProvider: Created');
+  }
+
+  /**
+   * Get adjusted range for a step node (prevents bleeding into next step)
+   * This uses the same logic as UnifiedActionsProvider to ensure consistency
+   */
+  private getAdjustedStepRange(model: monaco.editor.ITextModel, stepNode: any): monaco.Range | null {
+    try {
+      if (!stepNode.range) {
+        return null;
+      }
+
+      const [startOffset, , endOffset] = stepNode.range;
+      const startPos = model.getPositionAt(startOffset);
+      const endPos = model.getPositionAt(endOffset);
+
+      // Adjust end position to exclude trailing empty lines and prevent bleeding into next step
+      let adjustedEndLine = endPos.lineNumber;
+      let adjustedEndColumn = endPos.column;
+
+      // Walk backwards from endPos to find the last non-empty line
+      while (adjustedEndLine > startPos.lineNumber) {
+        const lineContent = model.getLineContent(adjustedEndLine);
+        const trimmedContent = lineContent.trim();
+
+        // If this line is non-empty and doesn't start with "- " (which would be the next step)
+        if (trimmedContent.length > 0 && !trimmedContent.startsWith('- ')) {
+          // Use the full line length for this non-empty line
+          adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
+          break;
+        }
+
+        // If we found a line that starts with "- ", this is likely the next step
+        if (trimmedContent.startsWith('- ')) {
+          // Go back to the previous line and use its end
+          adjustedEndLine = Math.max(startPos.lineNumber, adjustedEndLine - 1);
+          adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
+          break;
+        }
+
+        adjustedEndLine--;
+      }
+
+      // Safety check: ensure we don't go beyond the start line
+      if (adjustedEndLine < startPos.lineNumber) {
+        adjustedEndLine = startPos.lineNumber;
+        adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
+      }
+
+      return new monaco.Range(
+        startPos.lineNumber,
+        startPos.column,
+        adjustedEndLine,
+        adjustedEndColumn
+      );
+    } catch (error) {
+      // console.warn('StepExecutionProvider: Error getting adjusted step range', error);
+      return null;
+    }
   }
 
   /**
@@ -109,7 +167,7 @@ export class StepExecutionProvider {
               return null;
             }
 
-            const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
+            const stepRange = this.getAdjustedStepRange(model, stepNode);
             if (!stepRange) {
               // console.warn(`❌ No stepRange found for stepNode: ${stepExecution.stepId}`);
               return null;

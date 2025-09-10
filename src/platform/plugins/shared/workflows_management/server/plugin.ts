@@ -118,7 +118,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           description: 'Executes workflows on a scheduled basis',
           timeout: '5m',
           maxAttempts: 3,
-          createTaskRunner: ({ taskInstance }) => {
+          createTaskRunner: ({ taskInstance, fakeRequest }) => {
             // Capture the plugin instance in a closure
             const plugin = this;
             // Use a factory pattern to get dependencies when the task runs
@@ -133,7 +133,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
                   workflowsService: plugin.workflowsService!,
                   workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
                   actionsClient: plugin.unsecureActionsClient!,
-                })({ taskInstance });
+                })({ taskInstance, fakeRequest });
 
                 return taskRunner.run();
               },
