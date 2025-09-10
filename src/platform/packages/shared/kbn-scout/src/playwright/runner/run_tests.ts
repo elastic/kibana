@@ -120,11 +120,17 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   const pwGrepTag = getPlaywrightGrepTag(options.mode);
   const pwConfigPath = options.configPath;
+  const pwTestFiles = options.testFiles || [];
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
+
+  if (pwTestFiles.length > 0) {
+    log.info(`scout: Running Scout tests located in:\n${pwTestFiles.join('\n')}`);
+  }
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
+    ...(pwTestFiles.length ? pwTestFiles : []),
     `--config=${pwConfigPath}`,
     `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
