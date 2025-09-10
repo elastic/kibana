@@ -76,12 +76,14 @@ describe('AlertProcessing', () => {
         escalatedAlerts: defaultValueMetrics.totalAlerts - defaultValueMetrics.filteredAlerts,
         filteredAlertsPerc: '80.00%',
         escalatedAlertsPerc: '20.00%',
+        isLoading: false,
       },
       {}
     );
 
     expect(mockAlertProcessingKeyInsight).toHaveBeenCalledWith(
       {
+        isLoading: false,
         valueMetrics: defaultValueMetrics,
       },
       {}

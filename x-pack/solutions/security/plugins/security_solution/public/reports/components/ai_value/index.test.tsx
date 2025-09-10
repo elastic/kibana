@@ -101,18 +101,6 @@ describe('AIValueMetrics', () => {
     });
   });
 
-  it('shows nothing when loading', () => {
-    mockUseValueMetrics.mockReturnValue({
-      attackAlertIds: [],
-      isLoading: true,
-      valueMetrics: mockValueMetrics,
-      valueMetricsCompare: mockValueMetricsCompare,
-    });
-
-    const { container } = render(<AIValueMetrics {...defaultProps} />);
-    expect(container.firstChild).toBeNull();
-  });
-
   it('renders all components when loaded with attack discoveries', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
