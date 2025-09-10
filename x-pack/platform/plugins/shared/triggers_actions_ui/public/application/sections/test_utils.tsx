@@ -57,13 +57,13 @@ export const createAppMockRenderer = (options?: {
 
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
-      core.rendering.addContext(
-      <KibanaContextProvider services={{ ...services, ...additionalServices }}>
-        <QueryClientProvider client={queryClient} context={queryClientContext}>
-          {children}
-        </QueryClientProvider>
-      </KibanaContextProvider>
-      )
+      {core.rendering.addContext(
+        <KibanaContextProvider services={{ ...services, ...additionalServices }}>
+          <QueryClientProvider client={queryClient} context={queryClientContext}>
+            {children}
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      )}
     </I18nProvider>
   ));
 
