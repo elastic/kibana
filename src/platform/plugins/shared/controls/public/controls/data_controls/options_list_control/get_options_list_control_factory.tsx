@@ -25,6 +25,7 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { OPTIONS_LIST_CONTROL } from '../../../../common';
+import { isOptionsListESQLControlState } from '../../../../common/options_list/types';
 import type {
   OptionsListControlState,
   OptionsListSortingType,
@@ -73,6 +74,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
     },
     CustomOptionsComponent: OptionsListEditorOptions,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+      if (isOptionsListESQLControlState(initialState)) {
+        throw new Error('ES|QL control state handling not yet implemented');
+      }
+
       /** Serializable state - i.e. the state that is saved with the control */
       const editorStateManager = initializeEditorStateManager(initialState);
 
@@ -299,6 +304,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
+          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+            throw new Error('ES|QL control state handling not yet implemented');
+          }
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
