@@ -197,46 +197,38 @@ export default function searchSolutionNavigation({
     });
 
     it('renders only expected items', async () => {
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      await solutionNavigation.sidenav.expectSectionOpen(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
       const isV2 = await solutionNavigation.sidenav.isV2();
 
       if (isV2) {
         // in v2 we don't have "sections" and order is different because items under "more" are in the end
         await solutionNavigation.sidenav.expectOnlyDefinedLinks(
           [
-            // home:
             'searchHomepage',
-
-            // main;
             'discover',
             'dashboards',
             'searchPlayground',
             'searchSynonyms:synonyms',
             'searchQueryRules',
-
-            // more:
             'machine_learning',
-            'maps',
-            'graph',
-            'visualize',
-
-            // footer:
             'dev_tools',
             'ingest_and_data',
             'monitoring',
             'stack_management',
+            // more:
+            'maps',
+            'graph',
+            'visualize',
           ],
-          {
-            // don't check order because of "more" menu
-            checkOrder: false,
-          }
+          { checkOrder: false }
         );
       } else {
+        await solutionNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+        await solutionNavigation.sidenav.expectSectionOpen(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+
         await solutionNavigation.sidenav.expectOnlyDefinedLinks([
           'search_project_nav',
           'searchHomepage',
