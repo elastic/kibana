@@ -19,7 +19,7 @@ describe('INLINESTATS', () => {
       { name: '@timestamp', type: 'date', userDefined: false },
     ];
 
-    const queryString = `FROM a | STATS AVG(field1) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`;
+    const queryString = `FROM a | INLINESTATS AVG(field1) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`;
 
     // Can't use synth because it steps on the location information
     // which is used to determine the name of the new column
