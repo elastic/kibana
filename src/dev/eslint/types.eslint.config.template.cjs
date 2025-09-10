@@ -64,7 +64,10 @@ module.exports = {
       },
     },
     {
-      files: ['*spaces_api_integration/common/services/basic_auth_supertest.ts'],
+      files: [
+        '*spaces_api_integration/common/services/basic_auth_supertest.ts',
+        '*security_solution_api_integration/scripts/mki_api_ftr_execution.ts',
+      ],
       rules: {
         '@typescript-eslint/no-floating-promises': 'off',
       },

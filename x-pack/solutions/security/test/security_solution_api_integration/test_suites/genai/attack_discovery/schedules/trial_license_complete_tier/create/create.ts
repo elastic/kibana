@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
 
-        checkIfScheduleExists({ getService, id: schedule.id });
+        await checkIfScheduleExists({ getService, id: schedule.id });
       });
 
       it('should create a new schedule with `enabled` defaulted to `false`', async () => {
