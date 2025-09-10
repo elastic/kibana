@@ -11,6 +11,12 @@ import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateConnectorDataset } from './evaluate_connector_dataset';
 import { createEvaluateConnectorDataset } from './evaluate_connector_dataset';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/connector/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 const EMAIL_PROMPT =
   'Send an email to user@test.com with the subject "Test Email" and body "This is a test email."';
 
