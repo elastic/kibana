@@ -36,7 +36,7 @@ const mockKibana = {
   },
 };
 
-jest.mock('../kibana', () => ({
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: jest.fn(() => {
     return mockKibana;
   }),
