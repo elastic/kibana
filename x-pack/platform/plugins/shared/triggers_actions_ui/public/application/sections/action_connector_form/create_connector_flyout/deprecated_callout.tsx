@@ -11,10 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   name: string;
-  onClick: () => void;
+  id: string;
+  onClick: (id: string) => void;
 }
 
-const DeprecatedCallOutComponent: React.FC<Props> = ({ name, onClick }) => (
+const DeprecatedCallOutComponent: React.FC<Props> = ({ id, name, onClick }) => (
   <EuiCallOut
     title={
       <FormattedMessage
@@ -34,7 +35,7 @@ const DeprecatedCallOutComponent: React.FC<Props> = ({ name, onClick }) => (
       defaultMessage="To keep up with GenAI innovation and take advantage of our Inference service we will deprecate this connector in a future update. Consider using the {aiConnectorLink} instead."
       values={{
         aiConnectorLink: (
-          <EuiLink onClick={onClick}>
+          <EuiLink onClick={() => onClick(id)}>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.actionConnectorAdd.deprecatedBannerLinkTitle"
               defaultMessage="AI Connector"

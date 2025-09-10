@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     application: { capabilities },
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -217,9 +219,14 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   const banner = useMemo(() => {
-    const openAiConnector = () => {
+    const openAiConnector = (provider: string) => {
       if (allActionTypes) {
         setActionType(allActionTypes['.inference']);
+
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('connectorProvider', provider);
+        // Update the URL without a full page refresh
+        setSearchParams(newSearchParams);
       }
     };
 
@@ -228,10 +235,14 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       banners.push(<UpgradeLicenseCallOut />);
     }
 
-    if (actionTypeModel?.isDeprecated && actionTypeModel?.actionTypeTitle) {
+    if (actionTypeModel?.id && actionTypeModel?.isDeprecated && actionTypeModel?.actionTypeTitle) {
       banners.push(
         banners.length ? <EuiSpacer /> : null,
-        <DeprecatedCallOut name={actionTypeModel?.actionTypeTitle} onClick={openAiConnector} />
+        <DeprecatedCallOut
+          name={actionTypeModel.actionTypeTitle}
+          id={actionTypeModel.id}
+          onClick={openAiConnector}
+        />
       );
     }
 
@@ -239,9 +250,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, [
     allActionTypes,
     actionType,
+    actionTypeModel?.id,
     actionTypeModel?.isDeprecated,
     actionTypeModel?.actionTypeTitle,
     hasActionsUpgradeableByTrial,
+    searchParams,
+    setSearchParams,
   ]);
 
   return (

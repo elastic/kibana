@@ -37,6 +37,7 @@ import {
   type ProviderSolution,
 } from './providers/render_service_provider/service_provider';
 import type { ServiceProviderKeys } from '../constants';
+import { ServiceProviderKeyMap } from '../constants';
 import {
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
@@ -406,8 +407,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         setSolutionFilter(currentSolution);
       }
       setUpdatedProviders(getUpdatedProviders(currentSolution));
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedProvider = urlParams.get('connectorProvider') ?? '';
+      const providerKey = ServiceProviderKeyMap[selectedProvider];
+
+      if (providerKey && !config?.provider) {
+        onProviderChange(providerKey);
+      }
     }
-  }, [providers, currentSolution, getUpdatedProviders]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config?.provider, providers, currentSolution, getUpdatedProviders]);
 
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
