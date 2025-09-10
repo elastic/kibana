@@ -42,7 +42,7 @@ For the Elastic Observability 9.1.4 release information, refer to [Elastic Obser
 ### Fixes [kibana-9.1.4-fixes]
 
 **Dashboards and Visualizations**:
-* Fixes an issue with the Save modal that allowed duplicate saves of dashboards, visualizations, and other objects when clicking the Save button multiple times [#233933]({{kib-pull}}233933).
+* Fixes an issue with the Save modal that allowed duplicate saves of dashboards, visualizations, and other objects when clicking the **Save** button multiple times [#233933]({{kib-pull}}233933).
 
 **Elastic Security solution**:
 For the Elastic Security 9.1.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
