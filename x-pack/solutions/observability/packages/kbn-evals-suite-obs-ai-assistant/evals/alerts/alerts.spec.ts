@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { createEvaluateAlerts, EvaluateAlerts } from './evaluate_alerts';
-import { evaluate as base } from '../../src/evaluate';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { createEvaluateAlerts } from './evaluate_alerts';
+import type { EvaluateAlerts } from './evaluate_alerts';
+import { evaluate as base } from '../../src/evaluate';
 import {
   apmErrorCountAIAssistant,
   apmTransactionRateAIAssistant,
