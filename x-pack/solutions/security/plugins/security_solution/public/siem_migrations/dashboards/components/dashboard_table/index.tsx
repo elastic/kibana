@@ -99,8 +99,8 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
             return '';
           }
           return item.elastic_dashboard?.id
-            ? i18n.ALREADY_TRANSLATED_DASHBOARD_TOOLTIP
-            : i18n.NOT_FULLY_TRANSLATED_DASHBOARD_TOOLTIP;
+            ? i18n.ALREADY_INSTALLED_DASHBOARD_TOOLTIP
+            : i18n.NOT_TRANSLATED_DASHBOARD_TOOLTIP;
         },
         onSelectionChange: setSelectedMigrationDashboards,
         selected: selectedMigrationDashboards,
