@@ -182,6 +182,8 @@ export interface UsageStats {
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
   'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
+  'genAiSettings:defaultAIConnector': string;
+  'genAiSettings:defaultAIConnectorOnly': boolean;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
