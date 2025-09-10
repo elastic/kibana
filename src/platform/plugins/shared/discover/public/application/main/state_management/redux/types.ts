@@ -37,6 +37,7 @@ export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
+    visContext?: UnifiedHistogramVisContext | {};
   };
   initialAppState?: DiscoverAppState;
 

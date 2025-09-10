@@ -54,6 +54,19 @@ describe('updateSavedSearch', () => {
     jest.clearAllMocks();
   });
 
+  it('should set visContect from initialInternalState', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    updateSavedSearch({
+      savedSearch,
+      initialInternalState: { visContext: { foo: 'bar' } },
+      services: discoverServiceMock,
+    });
+    expect(savedSearch.visContext).toEqual({ foo: 'bar' });
+  });
+
   it('should set query and filters from appState and globalState', async () => {
     const savedSearch = {
       ...savedSearchMock,

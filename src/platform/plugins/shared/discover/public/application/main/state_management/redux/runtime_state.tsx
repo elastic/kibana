@@ -121,7 +121,10 @@ export const selectTabRuntimeInternalState = (
     return undefined;
   }
 
-  return { serializedSearchSource: savedSearch.searchSource.getSerializedFields() };
+  return {
+    serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+    visContext: savedSearch.visContext,
+  };
 };
 
 export const selectInitialUnifiedHistogramLayoutPropsMap = (
