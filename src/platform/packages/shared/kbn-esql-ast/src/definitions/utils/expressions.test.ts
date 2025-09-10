@@ -370,6 +370,19 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('returns_any()'))).toBe('unknown');
     });
 
+    it('returns unknown when a function argument is of type unknown', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'takes_keyword',
+          description: 'Test function',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('takes_keyword(unknownField)'))).toBe('unknown');
+    });
+
     it('implicit casting within function parameter', () => {
       setTestFunctions([
         {

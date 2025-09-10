@@ -130,7 +130,8 @@ export function getExpressionType(
     const matchingSignatures = getMatchingSignatures(
       fnDefinition.signatures,
       argTypes,
-      literalMask
+      literalMask,
+      false
     );
 
     if (matchingSignatures.length > 0 && argTypes.includes('null')) {
@@ -183,7 +184,8 @@ export function getMatchingSignatures(
   signatures: Signature[],
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
-  literalMask: boolean[]
+  literalMask: boolean[],
+  acceptUnknown: boolean
 ): Signature[] {
   return signatures.filter((sig) => {
     if (!matchesArity(sig, givenTypes.length)) {
@@ -193,7 +195,7 @@ export function getMatchingSignatures(
     return givenTypes.every((givenType, index) => {
       // safe to assume the param is there, because we checked the length above
       const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
-      return argMatchesParamType(givenType, expectedType, literalMask[index]);
+      return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
     });
   });
 }
@@ -208,7 +210,8 @@ export function getMatchingSignatures(
 function argMatchesParamType(
   givenType: SupportedDataType | 'unknown',
   expectedType: FunctionParameterType,
-  givenIsLiteral: boolean
+  givenIsLiteral: boolean,
+  acceptUnknown: boolean
 ): boolean {
   if (givenType === expectedType) return true;
 
@@ -216,7 +219,7 @@ function argMatchesParamType(
 
   if (givenType === 'param') return true;
 
-  if (givenType === 'unknown') return true;
+  if (givenType === 'unknown') return acceptUnknown;
 
   // all ES|QL functions accept null, but this is not reflected
   // in our function definitions so we let it through here

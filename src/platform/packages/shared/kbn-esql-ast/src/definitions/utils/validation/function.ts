@@ -126,7 +126,8 @@ class FunctionValidator {
     const S = getMatchingSignatures(
       this.definition.signatures,
       this.argTypes,
-      this.argLiteralsMask
+      this.argLiteralsMask,
+      true
     );
 
     if (!S.length) {
