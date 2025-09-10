@@ -47,7 +47,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   const installStackSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
   let codeSnippet: string;
-  
+
   if (!isLogsEssentialsMode) {
     /**
      * Getting the snippets and replacing placeholder
@@ -89,7 +89,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
     );
-    
+
     await otelKubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
 
     const apmServiceInventoryPage = new ApmServiceInventoryPage(
@@ -103,7 +103,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    await page.waitForTimeout(3 * 60000); 
+    await page.waitForTimeout(3 * 60000);
 
     const discoverValidation =
       await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();

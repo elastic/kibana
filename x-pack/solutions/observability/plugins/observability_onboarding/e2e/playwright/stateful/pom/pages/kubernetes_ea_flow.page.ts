@@ -35,7 +35,7 @@ export class KubernetesEAFlowPage {
       .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
       .getByText('We are monitoring your cluster');
 
-      this.exploreLogsButton = this.page.getByText('Explore logs');
+    this.exploreLogsButton = this.page.getByText('Explore logs');
   }
 
   public async assertVisibilityCodeBlock() {

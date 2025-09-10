@@ -53,7 +53,7 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await hostsOverviewPage.assertCpuPercentageNotEmpty();
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
-    
+
     const { DiscoverValidation } = await import('./pom/pages/discover_validation');
     const discoverValidation = new DiscoverValidation(page);
     await discoverValidation.waitForDiscoverToLoad();

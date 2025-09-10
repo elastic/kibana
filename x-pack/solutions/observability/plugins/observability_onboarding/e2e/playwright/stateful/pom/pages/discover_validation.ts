@@ -12,11 +12,11 @@ export class DiscoverValidation {
 
   async waitForDiscoverToLoad() {
     await this.page.waitForLoadState('networkidle');
-    
+
     // Wait for the histogram component to be fully rendered
-    await this.page.waitForSelector('[data-test-subj="unifiedHistogramRendered"]', { 
+    await this.page.waitForSelector('[data-test-subj="unifiedHistogramRendered"]', {
       timeout: 60000,
-      state: 'visible'
+      state: 'visible',
     });
   }
 
@@ -25,12 +25,17 @@ export class DiscoverValidation {
    * Checks for either histogram chart or query hits indicator.
    */
   async assertHasAnyLogData() {
-    const histogramExists = await this.page.locator('[data-test-subj="unifiedHistogramChart"]').isVisible();
-    const queryHitsExists = await this.page.locator('[data-test-subj="discoverQueryHits"]').isVisible();
-    
-    expect(histogramExists || queryHitsExists, 
+    const histogramExists = await this.page
+      .locator('[data-test-subj="unifiedHistogramChart"]')
+      .isVisible();
+    const queryHitsExists = await this.page
+      .locator('[data-test-subj="discoverQueryHits"]')
+      .isVisible();
+
+    expect(
+      histogramExists || queryHitsExists,
       'Expected to find log data in Discover. Neither histogram chart nor query hits indicator was found. ' +
-      'This indicates that no log data was successfully ingested or the Discover app failed to load properly.'
+        'This indicates that no log data was successfully ingested or the Discover app failed to load properly.'
     ).toBe(true);
   }
 }
