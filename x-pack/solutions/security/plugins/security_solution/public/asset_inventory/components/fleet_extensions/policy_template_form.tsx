@@ -36,7 +36,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       defaultSetupTechnology,
     }) => {
       const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '0.18.0';
-      const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '1.1.0-preview';
+      const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '1.1.3';
       const { cloud, uiSettings } = useKibana().services;
       const isValidFormState = !hasErrors(validationResults);
 
