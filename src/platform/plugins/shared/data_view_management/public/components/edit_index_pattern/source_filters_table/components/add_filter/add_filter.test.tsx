@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { AddFilter } from './add_filter';
+
+type RenderAddFilterComponentProps = React.ComponentProps<typeof AddFilter>;
 
 const mockMakeRegExTest = jest.fn(() => true);
 
@@ -29,20 +30,16 @@ jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
 });
 
 const renderAddFilterComponent = (
-  { onAddFilter }: React.ComponentProps<typeof AddFilter> = { onAddFilter: jest.fn() }
+  { onAddFilter }: RenderAddFilterComponentProps = { onAddFilter: jest.fn() }
 ) => {
-  return render(
-    <IntlProvider locale="en">
-      <AddFilter onAddFilter={onAddFilter} />
-    </IntlProvider>
-  );
+  return renderWithI18n(<AddFilter onAddFilter={onAddFilter} />);
 };
 
 describe('AddFilter', () => {
   test('should render normally', async () => {
     renderAddFilterComponent();
 
-    expect(await screen.findByTestId('fieldFilterInput')).toBeInTheDocument();
+    expect(screen.getByTestId('fieldFilterInput')).toBeVisible();
   });
 
   test('should allow adding a filter', async () => {
@@ -53,10 +50,7 @@ describe('AddFilter', () => {
     await user.type(screen.getByTestId('fieldFilterInput'), 'tim*');
 
     await user.click(screen.getByTestId('addFieldFilterButton'));
-
-    await waitFor(() => {
-      expect(onAddFilter).toBeCalledWith('tim*');
-    });
+    expect(onAddFilter).toBeCalledWith('tim*');
   });
 
   test('should ignore strings with just spaces', async () => {
@@ -68,9 +62,7 @@ describe('AddFilter', () => {
     // Set a value in the input field
     await user.type(screen.getByTestId('fieldFilterInput'), ' ');
     await user.click(screen.getByTestId('addFieldFilterButton'));
-    await waitFor(() => {
-      expect(onAddFilter).not.toBeCalled();
-    });
+    expect(onAddFilter).not.toBeCalled();
   });
 
   test('should handle errors with invalid filter patterns', async () => {
@@ -88,18 +80,14 @@ describe('AddFilter', () => {
     // Trigger the blur event to validate the input
     await user.tab();
 
-    await waitFor(async () => {
-      expect(await screen.findByTestId('fieldFilterInput')).toHaveAttribute('aria-invalid', 'true');
-      expect(screen.getByTestId('addFieldFilterButton')).toBeDisabled();
-    });
+    expect(await screen.findByTestId('fieldFilterInput')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByTestId('addFieldFilterButton')).toBeDisabled();
 
     // This would be regarded as a valid regex
     await user.type(screen.getByTestId('fieldFilterInput'), '*//foo');
     await user.tab();
 
-    await waitFor(async () => {
-      expect(await screen.findByTestId('fieldFilterInput')).not.toHaveAttribute('aria-invalid');
-      expect(screen.getByTestId('addFieldFilterButton')).not.toBeDisabled();
-    });
+    expect(await screen.findByTestId('fieldFilterInput')).not.toHaveAttribute('aria-invalid');
+    expect(screen.getByTestId('addFieldFilterButton')).not.toBeDisabled();
   });
 });

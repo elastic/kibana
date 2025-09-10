@@ -45,7 +45,7 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
       // test value is not important, just that the created regex is able to compile
       makeRegEx(value).test('');
       setIsInvalid(false);
-    } catch (e) {
+    } catch (_) {
       setIsInvalid(true);
       return;
     }
