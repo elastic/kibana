@@ -402,6 +402,7 @@ describe('Fleet cloud preconfiguration', () => {
                 "unused_key": "not_used",
               },
               "enabled": true,
+              "id": "fleet-server-fleet_server-elastic-cloud-fleet-server",
               "keep_enabled": true,
               "policy_template": "fleet_server",
               "streams": Array [],
