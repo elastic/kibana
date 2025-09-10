@@ -45,6 +45,7 @@ export const JsonEditor: FC<JobEditorProps> = ({
           },
         ],
       }}
+      isCopyable={true}
       options={{
         tabSize: 2,
         readOnly,
