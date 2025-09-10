@@ -10,7 +10,7 @@
 import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 
 import type { SecondaryMenuItem } from '../../../types';
@@ -41,6 +41,16 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const activeItemRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (isActive && activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [isActive]);
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
@@ -78,7 +88,7 @@ export const SecondaryMenuItemComponent = ({
   );
 
   return (
-    <li>
+    <li ref={activeItemRef}>
       {isActive ? (
         <EuiButton
           css={styles}
