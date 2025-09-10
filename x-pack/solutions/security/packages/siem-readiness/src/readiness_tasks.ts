@@ -326,4 +326,12 @@ export const READINESS_TASKS = [
 ] as const;
 
 export type ReadinessTaskId = (typeof READINESS_TASKS)[number]['id'];
-export type ReadinessTaskConfig = (typeof READINESS_TASKS)[number];
+
+export interface ReadinessTaskConfig {
+  id: ReadinessTaskId;
+  title: string;
+  description: string;
+  pillar: 'visibility' | 'detection' | 'response';
+  order: number;
+  meta?: Record<string, unknown>;
+}
