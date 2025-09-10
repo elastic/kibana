@@ -7,51 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  GraphNode,
-  AtomicGraphNode,
-  AtomicGraphNodeSchema,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
-  WaitGraphNode,
-  WaitGraphNodeSchema,
-} from './nodes/base';
-export type {
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  EnterIfNode,
+import { z } from '@kbn/zod';
+import { AtomicGraphNodeSchema, HttpGraphNodeSchema, WaitGraphNodeSchema } from './base';
+import {
   EnterIfNodeSchema,
-  ExitConditionBranchNode,
+  ExitIfNodeSchema,
+  EnterConditionBranchNodeSchema,
   ExitConditionBranchNodeSchema,
-  ExitIfNode,
-} from './nodes/branching_nodes';
-export type {
-  EnterForeachNode,
-  EnterForeachNodeSchema,
-  ExitForeachNode,
-  ExitForeachNodeSchema,
-} from './nodes/loop_nodes';
-export type {
-  EnterRetryNode,
+} from './branching_nodes';
+import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
+import {
   EnterRetryNodeSchema,
-  ExitRetryNode,
   ExitRetryNodeSchema,
-  EnterContinueNode,
   EnterContinueNodeSchema,
-  ExitContinueNode,
   ExitContinueNodeSchema,
   EnterTryBlockNodeSchema,
-  EnterTryBlockNode,
   ExitTryBlockNodeSchema,
-  ExitTryBlockNode,
   EnterNormalPathNodeSchema,
-  EnterNormalPathNode,
   ExitNormalPathNodeSchema,
-  ExitNormalPathNode,
   EnterFallbackPathNodeSchema,
-  EnterFallbackPathNode,
   ExitFallbackPathNodeSchema,
-  ExitFallbackPathNode,
-} from './nodes/on_failure_nodes';
+} from './on_failure_nodes';
 
-export type { UnionExecutionGraphNode } from './nodes/union';
+const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
+  AtomicGraphNodeSchema,
+  HttpGraphNodeSchema,
+  WaitGraphNodeSchema,
+  EnterIfNodeSchema,
+  ExitIfNodeSchema,
+  EnterConditionBranchNodeSchema,
+  ExitConditionBranchNodeSchema,
+  EnterForeachNodeSchema,
+  ExitForeachNodeSchema,
+  EnterRetryNodeSchema,
+  ExitRetryNodeSchema,
+  EnterContinueNodeSchema,
+  ExitContinueNodeSchema,
+  EnterTryBlockNodeSchema,
+  ExitTryBlockNodeSchema,
+  EnterNormalPathNodeSchema,
+  ExitNormalPathNodeSchema,
+  EnterFallbackPathNodeSchema,
+  ExitFallbackPathNodeSchema,
+]);
+
+export type UnionExecutionGraphNode = z.infer<typeof UnionExecutionGraphNodeSchema>;

@@ -121,7 +121,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'analysis',
         status: ExecutionStatus.COMPLETED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
@@ -133,7 +132,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'debug_ai_response',
         status: ExecutionStatus.FAILED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
@@ -145,7 +143,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'print-enter-dash',
         status: ExecutionStatus.WAITING_FOR_INPUT,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
@@ -157,7 +154,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'foreachstep',
         status: ExecutionStatus.RUNNING,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
@@ -169,7 +165,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'log-name-surname',
         status: ExecutionStatus.COMPLETED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
@@ -181,7 +176,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'slack_it',
         status: ExecutionStatus.COMPLETED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
@@ -193,7 +187,6 @@ export const WithStepExecutions: Story = {
       {
         stepId: 'print-exit-dash',
         status: ExecutionStatus.SKIPPED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
