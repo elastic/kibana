@@ -1,0 +1,92 @@
+{
+  "id": "upgradeAssistant",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "upgradeAssistant",
+        "id": "def-public.generateNewIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "generateNewIndexName",
+        "description": [
+          "\nProvides the index name to re-index into\n\n.foo -> .reindexed-v7-foo\nfoo => reindexed-v7-foo"
+        ],
+        "signature": [
+          "(indexName: string, versionService: ",
+          {
+            "pluginId": "@kbn/upgrade-assistant-pkg-common",
+            "scope": "common",
+            "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+            "section": "def-common.Version",
+            "text": "Version"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/indices/index_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "upgradeAssistant",
+            "id": "def-public.generateNewIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/indices/index_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "upgradeAssistant",
+            "id": "def-public.generateNewIndexName.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "versionService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-common",
+                "scope": "common",
+                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+                "section": "def-common.Version",
+                "text": "Version"
+              }
+            ],
+            "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/indices/index_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
