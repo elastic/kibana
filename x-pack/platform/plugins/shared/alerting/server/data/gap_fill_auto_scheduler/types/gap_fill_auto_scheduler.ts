@@ -19,7 +19,6 @@ export interface GapAutoFillSchedulerSO extends Record<string, unknown> {
   updatedBy?: string;
   createdAt: string;
   updatedAt: string;
-  lastRun?: string | null;
   scheduledTaskId: string;
 }
 
@@ -37,5 +36,4 @@ export interface GapAutoFillScheduler {
   updatedBy?: string;
   createdAt: string;
   updatedAt: string;
-  lastRun?: string | null;
 }

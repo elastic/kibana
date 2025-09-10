@@ -24,13 +24,6 @@ describe('transformResponse v1 - update', () => {
       updatedBy: 'admin-user',
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-02T00:00:00.000Z',
-      lastRun: {
-        timestamp: '2024-01-01T18:00:00.000Z',
-        status: 'success',
-        gapsProcessed: 10,
-        rulesProcessed: 3,
-        duration: 2500,
-      },
       scheduledTaskId: 'updated-task-id',
     };
 
@@ -50,13 +43,6 @@ describe('transformResponse v1 - update', () => {
       updated_by: 'admin-user',
       created_at: '2024-01-01T00:00:00.000Z',
       updated_at: '2024-01-02T00:00:00.000Z',
-      last_run: {
-        timestamp: '2024-01-01T18:00:00.000Z',
-        status: 'success',
-        gapsProcessed: 10,
-        rulesProcessed: 3,
-        duration: 2500,
-      },
       scheduled_task_id: 'updated-task-id',
     });
   });

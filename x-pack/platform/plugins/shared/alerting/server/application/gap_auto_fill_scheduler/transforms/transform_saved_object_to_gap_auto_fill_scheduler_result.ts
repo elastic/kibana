@@ -41,7 +41,6 @@ export const transformSavedObjectToGapAutoFillSchedulerResult = ({
     updatedBy: attributes.updatedBy,
     createdAt: attributes.createdAt,
     updatedAt: attributes.updatedAt,
-    lastRun: attributes.lastRun,
     scheduledTaskId: attributes.scheduledTaskId || '',
   };
 };

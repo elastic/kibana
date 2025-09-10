@@ -43,7 +43,6 @@ export const gapAutoFillSchedulerResponseSchema = schema.object({
   updated_by: schema.maybe(schema.string()),
   created_at: schema.string(),
   updated_at: schema.string(),
-  last_run: schema.maybe(schema.nullable(schema.string())),
   scheduled_task_id: schema.string(),
 });
 

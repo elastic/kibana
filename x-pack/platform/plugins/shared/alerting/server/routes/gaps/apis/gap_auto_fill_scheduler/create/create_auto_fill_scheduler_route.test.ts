@@ -51,7 +51,6 @@ describe('createAutoFillSchedulerRoute', () => {
     updatedBy: 'test-user',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
-    lastRun: null,
     scheduledTaskId: 'task-id',
   };
 
@@ -101,7 +100,6 @@ describe('createAutoFillSchedulerRoute', () => {
         updated_by: 'test-user',
         created_at: '2024-01-01T00:00:00.000Z',
         updated_at: '2024-01-01T00:00:00.000Z',
-        last_run: null,
         scheduled_task_id: 'task-id',
       },
     });

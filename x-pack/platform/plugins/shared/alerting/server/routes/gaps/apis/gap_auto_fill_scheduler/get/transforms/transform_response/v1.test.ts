@@ -24,13 +24,6 @@ describe('transformResponse v1 - get', () => {
       updatedBy: 'test-user',
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
-      lastRun: {
-        timestamp: '2024-01-01T12:00:00.000Z',
-        status: 'success',
-        gapsProcessed: 5,
-        rulesProcessed: 2,
-        duration: 1500,
-      },
       scheduledTaskId: 'task-id-123',
     };
 
@@ -50,13 +43,6 @@ describe('transformResponse v1 - get', () => {
       updated_by: 'test-user',
       created_at: '2024-01-01T00:00:00.000Z',
       updated_at: '2024-01-01T00:00:00.000Z',
-      last_run: {
-        timestamp: '2024-01-01T12:00:00.000Z',
-        status: 'success',
-        gapsProcessed: 5,
-        rulesProcessed: 2,
-        duration: 1500,
-      },
       scheduled_task_id: 'task-id-123',
     });
   });

@@ -27,24 +27,6 @@ export const rawGapFillAutoSchedulerSchemaV1 = schema.object(
     createdAt: schema.string(),
     updatedAt: schema.string(),
 
-    lastRun: schema.maybe(
-      schema.object({
-        status: schema.oneOf([
-          schema.literal('success'),
-          schema.literal('failure'),
-          schema.literal('warning'),
-        ]),
-        message: schema.maybe(schema.string()),
-        metrics: schema.maybe(
-          schema.object({
-            totalRules: schema.maybe(schema.number()),
-            successfulRules: schema.maybe(schema.number()),
-            failedRules: schema.maybe(schema.number()),
-            totalGapsProcessed: schema.maybe(schema.number()),
-          })
-        ),
-      })
-    ),
     nextRun: schema.maybe(schema.string()),
     running: schema.maybe(schema.boolean()),
   },
