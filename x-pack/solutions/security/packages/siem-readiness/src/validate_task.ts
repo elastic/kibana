@@ -6,25 +6,25 @@
  */
 
 import type { SiemReadinessTask } from './types';
+import type { ReadinessTaskConfig } from './readiness_tasks';
 import { READINESS_TASKS } from './readiness_tasks';
 
 const validTaskIds = READINESS_TASKS.map((config) => config.id);
 const validStatuses: SiemReadinessTask['status'][] = ['completed', 'incomplete'];
 
 export const validateTask = (task: SiemReadinessTask): void => {
-  // Find task
-  const taskConfig = READINESS_TASKS.find((config) => config.id === task.task_id);
+  const taskConfig: ReadinessTaskConfig = READINESS_TASKS.find(
+    (config) => config.id === task.task_id
+  );
 
   if (!taskConfig) {
     throw new Error(`Invalid task_id: ${task.task_id}. Must be one of: ${validTaskIds.join(', ')}`);
   }
 
-  // Validate status
   if (!validStatuses.includes(task.status)) {
     throw new Error(`Invalid status: ${task.status}. Must be one of: ${validStatuses.join(', ')}`);
   }
 
-  // Validate meta structure
   const expectedMeta = taskConfig.meta;
 
   if (!expectedMeta && task.meta) {
