@@ -26,7 +26,7 @@
           ") => ",
           "MappingTypeMapping"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/cleanup_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,7 +40,7 @@
             "signature": [
               "MappingTypeMapping"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/cleanup_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,16 +60,10 @@
         ],
         "signature": [
           "(esql: ",
-          {
-            "pluginId": "@kbn/onechat-genai-utils",
-            "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-            "section": "def-server.EsqlResponse",
-            "text": "EsqlResponse"
-          },
+          "EsqlResponse",
           ") => Record<string, any>[]"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/misc.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,15 +75,9 @@
             "label": "esql",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/onechat-genai-utils",
-                "scope": "server",
-                "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-                "section": "def-server.EsqlResponse",
-                "text": "EsqlResponse"
-              }
+              "EsqlResponse"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/misc.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -111,16 +99,10 @@
           "({ query, esClient, }: { query: string; esClient: ",
           "ElasticsearchClient",
           "; }) => Promise<",
-          {
-            "pluginId": "@kbn/onechat-genai-utils",
-            "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-            "section": "def-server.EsqlResponse",
-            "text": "EsqlResponse"
-          },
+          "EsqlResponse",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,7 +113,7 @@
             "tags": [],
             "label": "{\n  query,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,7 +124,7 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1142,7 +1124,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1174,7 +1156,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/flatten_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1188,7 +1170,7 @@
             "signature": [
               "MappingTypeMapping"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/flatten_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3381,16 +3363,10 @@
           "({ indices, cleanup, esClient, }: { indices: string[]; cleanup?: boolean | undefined; esClient: ",
           "ElasticsearchClient",
           "; }) => Promise<",
-          {
-            "pluginId": "@kbn/onechat-genai-utils",
-            "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-            "section": "def-server.GetIndexMappingsResult",
-            "text": "GetIndexMappingsResult"
-          },
+          "GetIndexMappingsResult",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3401,7 +3377,7 @@
             "tags": [],
             "label": "{\n  indices,\n  cleanup = true,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3415,7 +3391,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3429,7 +3405,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4429,7 +4405,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -10217,50 +10193,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-genai-utils",
-        "id": "def-server.EsqlResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "EsqlResponse",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-genai-utils",
-            "id": "def-server.EsqlResponse.columns",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              "EsqlEsqlColumnInfo",
-              "[]"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-genai-utils",
-            "id": "def-server.EsqlResponse.values",
-            "type": "Array",
-            "tags": [],
-            "label": "values",
-            "description": [],
-            "signature": [
-              "FieldValue",
-              "[][]"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/execute_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-genai-utils",
         "id": "def-server.GenerateEsqlResponse",
         "type": "Interface",
         "tags": [],
@@ -10292,34 +10224,6 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-genai-utils",
-        "id": "def-server.GetIndexMappingEntry",
-        "type": "Interface",
-        "tags": [],
-        "label": "GetIndexMappingEntry",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-genai-utils",
-            "id": "def-server.GetIndexMappingEntry.mappings",
-            "type": "Object",
-            "tags": [],
-            "label": "mappings",
-            "description": [],
-            "signature": [
-              "MappingTypeMapping"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10623,7 +10527,7 @@
         "description": [
           "\nRepresents the relevant information of an field"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10636,7 +10540,7 @@
             "description": [
               "the path of the field"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10649,7 +10553,7 @@
             "description": [
               "the type of the field"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10665,7 +10569,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10706,13 +10610,7 @@
               "\nThe ES|QL data which was returned by executing the query."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/onechat-genai-utils",
-                "scope": "server",
-                "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-                "section": "def-server.EsqlResponse",
-                "text": "EsqlResponse"
-              }
+              "EsqlResponse"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
             "deprecated": false,
@@ -10774,29 +10672,6 @@
           "GetDocumentByIdFailure"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-genai-utils",
-        "id": "def-server.GetIndexMappingsResult",
-        "type": "Type",
-        "tags": [],
-        "label": "GetIndexMappingsResult",
-        "description": [],
-        "signature": [
-          "{ [x: string]: ",
-          {
-            "pluginId": "@kbn/onechat-genai-utils",
-            "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-            "section": "def-server.GetIndexMappingEntry",
-            "text": "GetIndexMappingEntry"
-          },
-          "; }"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
