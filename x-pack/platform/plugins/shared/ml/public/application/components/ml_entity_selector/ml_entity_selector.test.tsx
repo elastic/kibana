@@ -7,14 +7,18 @@
 
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { MlEntitySelector } from './ml_entity_selector';
+
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
+import { MlEntitySelector } from './ml_entity_selector';
+
+jest.mock('@kbn/ml-hooks/use_ml_api');
+jest.mock('@kbn/ml-services/capabilities/check_capabilities');
 jest.mock('../../contexts/kibana');
 jest.mock('../../services/toast_notification_service');
-jest.mock('@kbn/ml-services/capabilities/check_capabilities');
 
 describe('MlEntitySelector', () => {
   const getAllJobAndGroupIds = jest.fn(() => {

@@ -6,5 +6,4 @@
  */
 
 export { useTimefilter } from './use_timefilter';
-export { useMlApi } from './use_ml_api_context';
 export { useMlLicenseInfo } from './use_ml_license';
