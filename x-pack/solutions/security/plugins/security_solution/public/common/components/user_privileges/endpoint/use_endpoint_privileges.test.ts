@@ -87,8 +87,6 @@ describe('When using useEndpointPrivileges hook', () => {
 
     expect(result.current).toEqual({
       ...getEndpointPrivilegesInitialStateMock(),
-      // canCancelResponseActions is always false, as it's privileges are being checked dynamically
-      canCancelResponseActions: false,
     });
   });
 

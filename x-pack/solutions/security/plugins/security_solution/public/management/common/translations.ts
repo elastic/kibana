@@ -109,6 +109,16 @@ export const getPendingActionDescription = (
   );
 };
 
+export const getPermissionVerificationErrorMessage = (displayCommand: string) => {
+  return i18n.translate(
+    'xpack.securitySolution.consoleArgumentSelectors.cancel.permissionVerificationError',
+    {
+      defaultMessage: 'Unable to verify permissions for {displayCommand} action cancellation.',
+      values: { displayCommand },
+    }
+  );
+};
+
 export const CONSOLE_COMMANDS = {
   isolate: {
     title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.title', {

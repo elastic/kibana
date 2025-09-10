@@ -19,6 +19,7 @@ import { canUserCancelCommand } from '../../../../../common/endpoint/service/aut
 import {
   getCancelPermissionDeniedMessage,
   getPendingActionDescription,
+  getPermissionVerificationErrorMessage,
   UNKNOWN_HOST,
 } from '../../../common/translations';
 
@@ -125,7 +126,7 @@ export const checkActionCancelPermission = (
   } catch (error) {
     return {
       canCancel: false,
-      reason: `Unable to verify permissions for ${displayCommand} action cancellation.`,
+      reason: getPermissionVerificationErrorMessage(displayCommand),
     };
   }
 };
@@ -162,7 +163,7 @@ export const transformPendingActionsToOptions = (
   return data.map((action: ActionDetails) => {
     const isChecked = action.id === selectedValue;
     const hostName = action.agents?.[0] ? action.hosts?.[action.agents[0]]?.name : UNKNOWN_HOST;
-    const timestamp = new Date(action.startedAt).toLocaleString();
+    const timestamp = action.startedAt;
     const command = action.command;
     const createdBy = action.createdBy;
 
