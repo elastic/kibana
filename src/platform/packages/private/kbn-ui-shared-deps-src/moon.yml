@@ -33,6 +33,9 @@ tasks:
       - build
     deps:
       - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
   watch-webpack:
@@ -45,5 +48,8 @@ tasks:
       - --watch
     deps:
       - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
