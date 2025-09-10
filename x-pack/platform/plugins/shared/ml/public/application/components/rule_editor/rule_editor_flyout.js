@@ -36,7 +36,7 @@ import {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '@kbn/ml-anomaly-utils/detector_rule';
-import { getPartitioningFieldNames } from '@kbn/ml-common-utils/job_utils';
+import { getPartitioningFieldNames } from '@kbn/ml-common-utils/job_utils/get_partitioning_field_names';
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 

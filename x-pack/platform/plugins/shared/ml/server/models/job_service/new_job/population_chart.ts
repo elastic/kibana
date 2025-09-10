@@ -11,7 +11,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { type AggFieldNamePair, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils';
+import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
 

@@ -49,14 +49,12 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import type { Job as MlJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlClient } from '@kbn/ml-client';
 import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
-import {
-  isMappableJob,
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isSourceDataChartableForDetector,
-  ML_MEDIAN_PERCENTS,
-  mlFunctionToESAggregation,
-} from '@kbn/ml-common-utils/job_utils';
+import { isMappableJob } from '@kbn/ml-common-utils/job_utils/is_mappable_job';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
+import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
+import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_function_to_es_aggregation';
 import { findAggField } from '@kbn/ml-common-utils/validation_utils';
 import { getChartType } from '@kbn/ml-common-utils/chart_utils';
 

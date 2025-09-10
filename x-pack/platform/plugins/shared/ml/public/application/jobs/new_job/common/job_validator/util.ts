@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import type { ValidationResults } from '@kbn/ml-common-utils/job_utils';
+import type { ValidationResults } from '@kbn/ml-common-utils/job_utils/validation_results';
 
 import type { BasicValidations } from './job_validator';
 import { getNewJobLimits } from '../../../../services/ml_server_info';

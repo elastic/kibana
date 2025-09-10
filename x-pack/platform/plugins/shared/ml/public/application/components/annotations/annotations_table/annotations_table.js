@@ -32,10 +32,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
-import {
-  getLatestDataOrBucketTimestamp,
-  isTimeSeriesViewJob,
-} from '@kbn/ml-common-utils/job_utils';
+import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   ANNOTATION_EVENT_USER,

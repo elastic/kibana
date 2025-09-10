@@ -13,7 +13,7 @@ import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
-import { ML_DATA_PREVIEW_COUNT } from '@kbn/ml-common-utils/job_utils';
+import { ML_DATA_PREVIEW_COUNT } from '@kbn/ml-common-utils/job_utils/constants';
 import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 
 import { useEnabledFeatures } from '../../../../contexts/ml';

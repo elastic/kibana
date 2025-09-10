@@ -32,7 +32,8 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '@kbn/ml-validators';
-import { isJobIdValid, validateModelMemoryLimitUnits } from '@kbn/ml-common-utils/job_utils';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils/is_job_id_valid';
+import { validateModelMemoryLimitUnits } from '@kbn/ml-common-utils/job_utils/validate_model_memory_limit_units';
 
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
