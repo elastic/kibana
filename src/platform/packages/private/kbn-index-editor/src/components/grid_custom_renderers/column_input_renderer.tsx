@@ -32,7 +32,7 @@ export const getColumnInputRenderer = (
           label: (
             <FormattedMessage
               id="indexEditor.flyout.grid.columnHeader.deleteAction"
-              defaultMessage="Delete field and values"
+              defaultMessage="Delete column and values"
             />
           ),
           size: 'xs',
@@ -80,7 +80,10 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
   );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
-    <FormattedMessage id="indexEditor.flyout.grid.columnHeader.add" defaultMessage="Add a field…" />
+    <FormattedMessage
+      id="indexEditor.flyout.grid.columnHeader.add"
+      defaultMessage="Add a column…"
+    />
   ) : (
     columnName
   );

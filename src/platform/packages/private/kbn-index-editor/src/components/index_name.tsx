@@ -66,7 +66,7 @@ export const IndexName: FC = () => {
     if (INDEX_NAME_INVALID_START_CHARS.some((char) => value.startsWith(char))) {
       setError([
         i18n.translate('indexEditor.indexName.invalidStartCharError', {
-          defaultMessage: 'Index name cannot start with {chars}',
+          defaultMessage: 'The index name must not start with {chars}',
           values: { chars: INDEX_NAME_INVALID_START_CHARS.join(', ') },
         }),
       ]);
@@ -76,8 +76,8 @@ export const IndexName: FC = () => {
     if (INDEX_NAME_INVALID_CHARS.some((char) => value.includes(char))) {
       setError([
         i18n.translate('indexEditor.indexName.invalidCharsError', {
-          defaultMessage: 'Index name cannot contain {chars}',
-          values: { chars: INDEX_NAME_INVALID_CHARS.join(', ') },
+          defaultMessage: 'The index name must not contain spaces or {chars}',
+          values: { chars: INDEX_NAME_INVALID_CHARS.filter((it) => it !== ' ').join(', ') },
         }),
       ]);
       return true;

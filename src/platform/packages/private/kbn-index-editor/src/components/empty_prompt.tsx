@@ -55,7 +55,7 @@ export const EmptyPrompt: FC = () => {
           <EuiText color="subdued" textAlign="center" size="s">
             <FormattedMessage
               id="indexEditor.emptyPrompt.description"
-              defaultMessage="Start creating your lookup index by adding cells to the table, by {uploading} or {dragAndDrop} a file."
+              defaultMessage="Add data to your lookup index by specifying columns and cell values manually, by {uploading}, or by {dragAndDrop} a file."
               values={{ uploading, dragAndDrop }}
             />
           </EuiText>
@@ -63,7 +63,7 @@ export const EmptyPrompt: FC = () => {
           <EuiText color="subdued" textAlign="center" size="xs">
             <FormattedMessage
               id="indexEditor.emptyPrompt.description.supportedFormats"
-              defaultMessage="Supports .csv files up to {maxFileSize}."
+              defaultMessage="Supports CSV files up to {maxFileSize}."
               values={{
                 maxFileSize,
               }}

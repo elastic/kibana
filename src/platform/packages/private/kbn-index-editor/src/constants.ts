@@ -10,5 +10,5 @@
 export const ROW_PLACEHOLDER_PREFIX = 'row-placeholder-';
 export const COLUMN_PLACEHOLDER_PREFIX = 'column-placeholder-';
 
-export const INDEX_NAME_INVALID_CHARS = ['\\', '/', '*', '?', ' ', '<', '>', '|', '#', ':'];
+export const INDEX_NAME_INVALID_CHARS = ['\\', '/', '*', '?', ' ', '<', '>', '|', ':', '#'];
 export const INDEX_NAME_INVALID_START_CHARS = ['-', '_', '+', '.'];

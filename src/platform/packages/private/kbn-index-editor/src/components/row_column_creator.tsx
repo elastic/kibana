@@ -56,7 +56,7 @@ export const RowColumnCreator = ({
           disabled={indexUpdateService.canEditIndex === false}
         >
           <EuiText size="xs">
-            <FormattedMessage defaultMessage="Add document" id="indexEditor.addRow" />
+            <FormattedMessage defaultMessage="Add row" id="indexEditor.addRow" />
           </EuiText>
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -69,7 +69,7 @@ export const RowColumnCreator = ({
           disabled={indexUpdateService.canEditIndex === false}
         >
           <EuiText size="xs">
-            <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
+            <FormattedMessage defaultMessage="Add column" id="indexEditor.addColumn" />
           </EuiText>
         </EuiButtonEmpty>
       </EuiFlexItem>

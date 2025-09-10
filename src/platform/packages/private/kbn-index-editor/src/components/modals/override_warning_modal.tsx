@@ -69,7 +69,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
         <EuiText size="m">
           <FormattedMessage
             id="indexEditor.overrideWarningModal.body"
-            defaultMessage="You have unsaved changes in your table. If you continue, these changes will be lost."
+            defaultMessage="By continuing, you'll lose unsaved changes in your table."
           />
         </EuiText>
         <EuiSpacer size="s" />

@@ -52,22 +52,22 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
       title={
         <FormattedMessage
           id="indexEditor.warningModal.title"
-          defaultMessage="You have unsaved changes"
+          defaultMessage="Leave without saving?"
         />
       }
       onCancel={continueEditing}
       onConfirm={closeWithoutSaving}
       cancelButtonText={
-        <FormattedMessage id="indexEditor.warningModal.cancel" defaultMessage="Cancel" />
+        <FormattedMessage id="indexEditor.warningModal.cancel" defaultMessage="Resume editing" />
       }
       confirmButtonText={
-        <FormattedMessage id="indexEditor.warningModal.confirm" defaultMessage="Yes" />
+        <FormattedMessage id="indexEditor.warningModal.confirm" defaultMessage="Leave" />
       }
       buttonColor="danger"
     >
       <FormattedMessage
         id="indexEditor.warningModal.body_2"
-        defaultMessage="Are you sure you want to leave without saving?"
+        defaultMessage="By leaving, you'll lose all unsaved changes."
       />
     </EuiConfirmModal>
   );

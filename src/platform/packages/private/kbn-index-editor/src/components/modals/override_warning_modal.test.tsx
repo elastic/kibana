@@ -43,9 +43,7 @@ describe('OverrideWarningModal', () => {
 
     expect(screen.getByText('This action will override your data')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'You have unsaved changes in your table. If you continue, these changes will be lost.'
-      )
+      screen.getByText(`By continuing, you'll lose unsaved changes in your table.`)
     ).toBeInTheDocument();
   });
 

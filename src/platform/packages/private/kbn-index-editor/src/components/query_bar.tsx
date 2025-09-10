@@ -91,7 +91,7 @@ export const QueryBar = () => {
           <EuiText size="xs">
             <FormattedMessage
               id="esqlDataGrid.openInDiscoverLabel"
-              defaultMessage="Query this index"
+              defaultMessage="Open in Discover"
             />
           </EuiText>
         </EuiButton>

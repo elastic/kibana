@@ -100,7 +100,7 @@ describe('IndexName', () => {
     fireEvent.click(screen.getByTestId('indexNameSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByText(/Index name cannot start with/)).toBeInTheDocument();
+      expect(screen.getByText(/The index name must not start with/)).toBeInTheDocument();
     });
   });
 
@@ -111,7 +111,7 @@ describe('IndexName', () => {
     fireEvent.click(screen.getByTestId('indexNameSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByText(/Index name cannot contain/)).toBeInTheDocument();
+      expect(screen.getByText(/The index name must not contain spaces or/)).toBeInTheDocument();
     });
   });
 

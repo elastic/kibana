@@ -97,7 +97,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                   <FormattedMessage
                     id="indexEditor.flyout.headerDescription"
                     defaultMessage={
-                      'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
+                      'You can create lookup indices manually, by uploading data from a file, or by using the Elasticsearch API.'
                     }
                   />
                 </EuiText>
@@ -108,7 +108,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                     defaultMessage: 'Technical preview',
                   })}
                   content={i18n.translate('indexEditor.flyout.experimentalLabel.content', {
-                    defaultMessage: 'Lookup index editor is currently on Technical preview.',
+                    defaultMessage: 'The lookup index editor is currently in technical preview.',
                   })}
                 >
                   <EuiBetaBadge
