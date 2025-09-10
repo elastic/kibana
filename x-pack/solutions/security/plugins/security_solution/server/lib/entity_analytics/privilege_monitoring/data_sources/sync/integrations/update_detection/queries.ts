@@ -117,7 +117,6 @@ export const buildBulkBody = async (
       },
       // upsert defines doc shape if it does not exist yet
       upsert: {
-        // update this logic,
         user: { id: u.id, name: u.username },
         roles: u.roles ?? [],
         is_privileged: u.isPrivileged,
@@ -126,7 +125,6 @@ export const buildBulkBody = async (
         },
         last_seen: u.lastSeen,
       },
-      // Optional: doc_as_upsert: true,   // if you prefer partial doc merging
     });
   }
   return body;
