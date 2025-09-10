@@ -172,7 +172,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let searchSessionList = await searchSessionsManagement.getList();
         let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
         expect(searchSessionItem.searchesCount).to.be(1);
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
+        await retry.waitFor('session should be in a completed status', async () => {
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.status === 'complete';
+        });
 
         await searchSessionItem.view();
 
@@ -190,6 +196,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         searchSessionList = await searchSessionsManagement.getList();
         searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
         expect(searchSessionItem.searchesCount).to.be(2);
+
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
+        await retry.waitFor('session should be in a completed status', async () => {
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.status === 'complete';
+        });
 
         await searchSessionItem.view();
         expect(await toasts.getCount()).to.be(0); // there should be no warnings
