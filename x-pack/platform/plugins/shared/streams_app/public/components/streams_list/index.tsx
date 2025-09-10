@@ -300,7 +300,7 @@ function StreamNode({
                 defaultMessage: 'Management',
               })}
               href={router.link('/{key}/management/{tab}', {
-                path: { key: node.name, tab: 'route' },
+                path: { key: node.name, tab: 'partitioning' },
               })}
             />
           </EuiToolTip>
