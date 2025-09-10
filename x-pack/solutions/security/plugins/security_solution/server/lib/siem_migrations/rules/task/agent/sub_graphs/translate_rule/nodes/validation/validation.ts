@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import {
   getValidateEsql,
   type GetValidateEsqlParams,
-} from '../../../../../../../common/task/agent/tools/validate_esql';
-import type { GraphNode } from '../../types';
+} from '../../../../../../../common/task/agent/helpers/validate_esql';
+import type { GraphNode, TranslateRuleState } from '../../types';
 
 /**
  * This node runs all validation steps, and will redirect to the END of the graph if no errors are found.
@@ -17,15 +18,40 @@ import type { GraphNode } from '../../types';
  */
 export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
   const validateEsql = getValidateEsql(params);
-  return async (state) => {
-    const iterations = state.validation_errors.iterations + 1;
+  return async (state): Promise<Partial<TranslateRuleState>> => {
     if (!state.elastic_rule.query) {
       params.logger.warn('Missing query in validation node');
-      return { iterations };
+
+      return {
+        validation_errors: { esql_errors: 'Missing query', retries_left: 0 },
+        comments: [
+          generateAssistantComment(
+            '## ESQL Validation Summary\n\nMissing query from translation response. Skipping self-healing loop'
+          ),
+        ],
+      };
     }
 
     const { error } = await validateEsql({ query: state.elastic_rule.query });
 
-    return { validation_errors: { iterations, esql_errors: error } };
+    if (error && state.elastic_rule.query.match(/\[(macro|lookup):.*?\]/)) {
+      // The fix_query_errors tends to remove all the macro and lookup placeholder from the query to make the query valid,
+      // we need to keep them so we skip validation unless the missing resources are provided
+      return {
+        validation_errors: { esql_errors: error, retries_left: 0 },
+        comments: [
+          generateAssistantComment(
+            '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping self-healing loop'
+          ),
+        ],
+      };
+    }
+
+    return {
+      validation_errors: {
+        esql_errors: error,
+        retries_left: state.validation_errors.retries_left - 1,
+      },
+    };
   };
 };
