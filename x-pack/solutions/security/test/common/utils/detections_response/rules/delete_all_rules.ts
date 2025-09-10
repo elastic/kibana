@@ -12,7 +12,6 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { withSpaceUrl } from '../../spaces';
 import { countDownTest } from '../count_down_test';
 
 /**
@@ -27,7 +26,7 @@ export const deleteAllRules = async (
   await countDownTest(
     async () => {
       await supertest
-        .post(withSpaceUrl(DETECTION_ENGINE_RULES_BULK_ACTION, spaceId))
+        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
         .send({ action: 'delete', query: '' })
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31');
