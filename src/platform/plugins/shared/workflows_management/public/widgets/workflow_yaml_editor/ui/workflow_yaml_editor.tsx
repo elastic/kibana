@@ -14,7 +14,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -91,7 +91,7 @@ export interface WorkflowYAMLEditorProps {
   hasChanges?: boolean;
   lastUpdatedAt?: Date;
   highlightStep?: string;
-  stepExecutions?: EsWorkflowStepExecution[];
+  stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
@@ -671,6 +671,28 @@ const componentStyles = {
       },
       '.alert-trigger-highlight': {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
+      },
+      '.duplicate-step-name-error': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.duplicate-step-name-error-margin': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+        // Use a solid background to completely cover the line numbers
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: euiTheme.colors.backgroundLightDanger,
+          zIndex: 1000,
+        },
+        // Make the text invisible as backup
+        color: 'transparent',
+        textShadow: 'none',
+        fontSize: 0,
       },
     }),
   editorContainer: css({
