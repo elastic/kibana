@@ -72,7 +72,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     setIntegrationToEnable,
   }) => {
     const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '2.0.0-preview01';
-    const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '3.0.1-preview01';
+    const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '3.1.0-preview02';
     const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
     const GCP_MINIMUM_ORGANIZATION_VERSION = '1.6.0';
     const GCP_MINIMUM_PACKAGE_VERSION = '1.5.2';
