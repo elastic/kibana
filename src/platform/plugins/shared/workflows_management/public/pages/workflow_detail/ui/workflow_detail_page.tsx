@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StepContext } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
@@ -29,6 +30,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
+import { buildStepContextMockForStep } from './build_step_context_mock_for_step';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -124,7 +126,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
+
   const [testStepId, setTestStepId] = useState<string | null>(null);
+  const [stepContextMock, setStepContextMock] = useState<Partial<StepContext> | null>(null);
 
   const handleRunClick = () => {
     let needInput: boolean | undefined = false;
@@ -224,18 +228,27 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
     if (params.actionType === 'run') {
+      const builtStepContextMock = buildStepContextMockForStep(workflowYaml, params.stepId);
+
+      if (!Object.keys(builtStepContextMock).length) {
+        submitStepRun(params.stepId, {});
+        return;
+      }
+
+      setStepContextMock(builtStepContextMock);
       setTestStepId(params.stepId);
     }
   };
 
-  const submitStepRun = async (stepContextMock: Record<string, any>) => {
+  const submitStepRun = async (stepId: string, mock: Partial<StepContext>) => {
     const response = await runIndividualStep.mutateAsync({
-      stepId: testStepId!,
+      stepId,
       workflowYaml,
-      stepContextMock,
+      stepContextMock: mock,
     });
     setSelectedExecution(response.workflowExecutionId);
     setTestStepId(null);
+    setStepContextMock(null);
   };
 
   if (workflowError) {
@@ -334,12 +347,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           onClose={() => setTestWorkflowModalOpen(false)}
         />
       )}
-      {testStepId && (
+      {testStepId && stepContextMock && (
         <TestStepModal
-          stepId={testStepId}
-          workflowYaml={workflowYaml}
-          onSubmit={({ stepInputs }) => submitStepRun(stepInputs)}
-          onClose={() => setTestStepId(null)}
+          initialStepContextMock={stepContextMock}
+          onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
+          onClose={() => {
+            setTestStepId(null);
+            setStepContextMock(null);
+          }}
         />
       )}
     </div>

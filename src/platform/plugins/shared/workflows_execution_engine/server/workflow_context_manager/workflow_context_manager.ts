@@ -128,7 +128,7 @@ export class WorkflowContextManager {
         stepContextMock.foreach = stepContextMock.foreach;
       }
 
-      Object.entries(stepContextMock.steps).forEach(([stepId, stepData]) => {
+      Object.entries(stepContextMock.steps || {}).forEach(([stepId, stepData]) => {
         if (!stepContext.steps[stepId]) {
           stepContext.steps[stepId] = stepData;
         }

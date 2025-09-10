@@ -18,45 +18,24 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
-import { WorkflowGraph } from '@kbn/workflows/graph';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { buildStepContextMock } from './find_inputs_in_graph/find_inputs_in_graph';
+import type { StepContext } from '@kbn/workflows';
 
 export function TestStepModal({
-  stepId,
-  workflowYaml,
+  initialStepContextMock,
   onClose,
   onSubmit,
 }: {
-  stepId: string;
-  workflowYaml: string;
+  initialStepContextMock: Partial<StepContext>;
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {
-  const [inputsJson, setInputsJson] = React.useState<string>('');
+  const [inputsJson, setInputsJson] = React.useState<string>(
+    JSON.stringify(initialStepContextMock, null, 2)
+  );
   const [isJsonValid, setIsJsonValid] = React.useState<boolean>(true);
   const modalTitleId = useGeneratedHtmlId();
-
-  const stepExecutionGraph: WorkflowGraph | null = useMemo(() => {
-    if (!workflowYaml) {
-      return null;
-    }
-
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-    return WorkflowGraph.fromWorkflowDefinition((parsingResult as any).data).getStepGraph(stepId);
-  }, [stepId, workflowYaml]);
-
-  useEffect(() => {
-    if (!stepExecutionGraph) {
-      return;
-    }
-    const stepContextMock = buildStepContextMock(stepExecutionGraph);
-
-    setInputsJson(JSON.stringify(stepContextMock, null, 2));
-  }, [stepExecutionGraph]);
 
   useEffect(() => {
     try {
