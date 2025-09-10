@@ -30,11 +30,10 @@ export const withExistingMigration = <
     const { migration_id: migrationId } = req.params;
     const pathParts = req.route.path.split('/');
     const ctx = await context.resolve(['securitySolution']);
-    let migrationsClient: SiemRuleMigrationsClient | SiemDashboardMigrationsClient =
-      ctx.securitySolution.siemMigrations.getRulesClient();
-    if (pathParts.includes('dashboards')) {
-      migrationsClient = ctx.securitySolution.siemMigrations.getDashboardsClient();
-    }
+    const migrationsClient: SiemRuleMigrationsClient | SiemDashboardMigrationsClient =
+      pathParts.includes('rules')
+        ? ctx.securitySolution.siemMigrations.getRulesClient()
+        : ctx.securitySolution.siemMigrations.getDashboardsClient();
     const storedMigration = await migrationsClient.data.migrations.get(migrationId);
 
     if (!storedMigration) {
