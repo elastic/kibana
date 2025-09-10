@@ -24,13 +24,13 @@ export function NamePopoverContent({
 }: NamePopoverContentProps) {
   return (
     <>
-      <EuiText size="s" className="eui-textTruncate">
+      <EuiText size="s" className="eui-textBreakWord">
         {fieldName}
       </EuiText>
       {fieldConfig?.description && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="xs" className="eui-textTruncate">
+          <EuiText size="xs" className="eui-textBreakWord">
             {fieldConfig.description}
           </EuiText>
         </>
