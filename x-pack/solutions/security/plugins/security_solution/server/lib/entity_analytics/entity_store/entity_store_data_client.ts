@@ -118,7 +118,7 @@ import { entityEngineDescriptorTypeName } from './saved_object';
 import {
   createEntityUpdatesIndex,
   deleteEntityUpdatesIndex,
-  getEntityUpdatesIndexName,
+  getEntityUpdatesIndexStatus,
 } from './elasticsearch_assets/updates_entity_index';
 import {
   createEntityUpdatesIndexComponentTemplate,
@@ -248,12 +248,7 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
-          getEntityIndexStatus({
-            entityType: type,
-            esClient: this.esClient,
-            namespace,
-            indexName: getEntityUpdatesIndexName(type, namespace),
-          }),
+          getEntityUpdatesIndexStatus(type, this.esClient, namespace),
           getEntityIndexComponentTemplateStatus({
             definitionId: definition.id,
             esClient: this.esClient,
@@ -749,7 +744,7 @@ export class EntityStoreDataClient {
       this.log('debug', entityType, `Deleted field retention enrich policy`);
 
       // CRUD Assets
-      await deleteEntityUpdatesIndex(entityType, this.esClient, namespace, logger);
+      await deleteEntityUpdatesIndex(entityType, this.esClient, namespace);
       this.log('debug', entityType, `Delete entity updates index`);
       await deleteEntityUpdatesIndexComponentTemplate(description, this.esClient);
       this.log('debug', entityType, `Delete entity updates index`);

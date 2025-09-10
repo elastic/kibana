@@ -11,8 +11,12 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema/src/schema/v1/patterns';
-import { type EntityType } from '../../../../../common/api/entity_analytics/entity_store';
-import { createEntityIndex, deleteEntityIndex } from './entity_index';
+import type {
+  EntityType,
+  EngineComponentStatus,
+} from '../../../../../common/api/entity_analytics/entity_store';
+import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/entity_store';
+import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
 export const createEntityUpdatesIndex = async (
   entityType: EntityType,
@@ -20,28 +24,45 @@ export const createEntityUpdatesIndex = async (
   namespace: string,
   logger: Logger
 ) => {
-  await createEntityIndex({
-    entityType,
+  await createOrUpdateIndex({
     esClient,
-    namespace,
     logger,
-    indexName: getEntityUpdatesIndexName(entityType, namespace),
+    options: {
+      index: getEntityUpdatesIndexName(entityType, namespace),
+    },
   });
 };
 
 export const deleteEntityUpdatesIndex = async (
   entityType: EntityType,
   esClient: ElasticsearchClient,
-  namespace: string,
-  logger: Logger
+  namespace: string
 ) => {
-  return deleteEntityIndex({
-    entityType,
-    esClient,
-    namespace,
-    logger,
-    indexName: getEntityUpdatesIndexName(entityType, namespace),
-  });
+  esClient.indices.delete(
+    {
+      index: getEntityUpdatesIndexName(entityType, namespace),
+    },
+    {
+      ignore: [404],
+    }
+  );
+};
+
+export const getEntityUpdatesIndexStatus = async (
+  entityType: EntityType,
+  esClient: ElasticsearchClient,
+  namespace: string
+): Promise<EngineComponentStatus> => {
+  const index = getEntityUpdatesIndexName(entityType, namespace);
+  const exists = await esClient.indices.exists(
+    {
+      index,
+    },
+    {
+      ignore: [404],
+    }
+  );
+  return { id: index, installed: exists, resource: EngineComponentResourceEnum.index };
 };
 
 export const getEntityUpdatesIndexName = (type: EntityType, namespace: string): string => {
