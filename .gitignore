@@ -184,3 +184,22 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 # Ruler manually managed
 .ruler/instructions/local
 
+
+# START Ruler Generated Files
+/.cursor/mcp.json
+/.cursor/mcp.json.bak
+/.cursor/rules/ruler_cursor_instructions.mdc
+/.cursor/rules/ruler_cursor_instructions.mdc.bak
+/.gemini/settings.json
+/.gemini/settings.json.bak
+/.github/copilot-instructions.md
+/.github/copilot-instructions.md.bak
+/.mcp.json
+/.mcp.json.bak
+/.vscode/mcp.json
+/.vscode/mcp.json.bak
+/AGENTS.md
+/AGENTS.md.bak
+/CLAUDE.md
+/CLAUDE.md.bak
+# END Ruler Generated Files
