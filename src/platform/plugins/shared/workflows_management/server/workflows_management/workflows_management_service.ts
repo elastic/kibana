@@ -28,6 +28,9 @@ import type {
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import { WorkflowValidationError } from '../../common/lib/errors';
+
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -162,6 +165,17 @@ export class WorkflowsService {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
 
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
+    }
+
+    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -245,11 +259,25 @@ export class WorkflowsService {
       if (workflow.yaml) {
         const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
         if (!parsedYaml.success) {
-          throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
+          workflow.definition = undefined;
+          workflow.enabled = false;
+          workflow.valid = false;
+        } else {
+          // Validate step name uniqueness
+          const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+          if (!stepValidation.isValid) {
+            const errorMessages = stepValidation.errors.map((error) => error.message);
+            throw new WorkflowValidationError(
+              'Workflow validation failed: Step names must be unique throughout the workflow.',
+              errorMessages
+            );
+          }
+          const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
+            parsedYaml.data as WorkflowYaml
+          );
+          updatedData.definition = workflowDef.definition;
+          updatedData.valid = true;
         }
-        const workflowDef = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-        updatedData.definition = workflowDef.definition;
-        updatedData.valid = true;
       }
 
       const finalData = { ...existingDocument._source, ...updatedData };
