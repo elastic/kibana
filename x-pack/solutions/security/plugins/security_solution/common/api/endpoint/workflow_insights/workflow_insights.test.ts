@@ -37,6 +37,38 @@ describe('Workflow Insights', () => {
       expect(() => validateQuery(validQuery)).not.toThrow();
     });
 
+    describe('policy_response_failure type validation', () => {
+      it('should validate successfully with policy_response_failure type', () => {
+        const validQuery = {
+          query: {
+            types: ['policy_response_failure'],
+          },
+        };
+
+        expect(() => validateQuery(validQuery)).not.toThrow();
+      });
+
+      it('should validate successfully with mixed types including policy_response_failure', () => {
+        const validQuery = {
+          query: {
+            types: ['incompatible_antivirus', 'policy_response_failure'],
+          },
+        };
+
+        expect(() => validateQuery(validQuery)).not.toThrow();
+      });
+
+      it('should validate successfully with noisy_process_tree and policy_response_failure', () => {
+        const validQuery = {
+          query: {
+            types: ['noisy_process_tree', 'policy_response_failure'],
+          },
+        };
+
+        expect(() => validateQuery(validQuery)).not.toThrow();
+      });
+    });
+
     it('should throw an error for invalid types', () => {
       const invalidQuery = {
         query: {
@@ -206,8 +238,106 @@ describe('Workflow Insights', () => {
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(`
     "[body.type]: types that failed validation:
     - [body.type.0]: expected value to equal [incompatible_antivirus]
-    - [body.type.1]: expected value to equal [noisy_process_tree]"
+    - [body.type.1]: expected value to equal [policy_response_failure]
+    - [body.type.2]: expected value to equal [noisy_process_tree]"
     `);
+    });
+
+    describe('policy_response_failure type validation in PUT requests', () => {
+      it('should validate successfully with policy_response_failure type', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'policy_response_failure',
+            action: { type: 'refreshed' },
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+
+      it('should validate successfully with policy_response_failure in body fields', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            '@timestamp': '2024-11-29T00:00:00Z',
+            message: 'Policy response failure detected',
+            category: 'endpoint',
+            type: 'policy_response_failure',
+            source: {
+              type: 'llm-connector',
+              id: 'source-id',
+              data_range_start: '2024-11-01T00:00:00Z',
+              data_range_end: '2024-11-30T00:00:00Z',
+            },
+            target: {
+              type: 'endpoint',
+              ids: ['agent-1', 'agent-2'],
+            },
+            action: {
+              type: 'remediated',
+              timestamp: '2024-11-29T00:00:00Z',
+            },
+            value: 'Policy configuration issue',
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+
+      it('should validate successfully with policy_response_failure remediation data', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'policy_response_failure',
+            action: {
+              type: 'remediated',
+              timestamp: '2024-11-29T00:00:00Z',
+            },
+            remediation: {
+              exception_list_items: [
+                {
+                  list_id: 'policy-exceptions',
+                  name: 'Policy Response Exception',
+                  description: 'Exception for policy response failures',
+                  entries: [{ field: 'policy.response', value: 'failed' }],
+                  tags: ['policy', 'response', 'failure'],
+                  os_types: ['windows', 'linux'],
+                },
+              ],
+            },
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+
+      it('should validate successfully with policy_response_failure metadata', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'policy_response_failure',
+            action: { type: 'refreshed' },
+            metadata: {
+              notes: {
+                policy_id: 'policy-123',
+                failure_reason: 'Configuration timeout',
+              },
+              message_variables: ['policy_id', 'failure_reason', 'agent_version'],
+            },
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
     });
 
     it('should throw an error if target ids contain empty strings', () => {
