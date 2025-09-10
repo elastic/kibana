@@ -566,59 +566,61 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         postBulkUninstallPackagesHandler
       );
 
-    router.versioned
-      .post({
-        path: EPM_API_ROUTES.BULK_ROLLBACK_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Bulk rollback packages`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: BulkRollbackPackagesRequestSchema,
-            response: {
-              200: {
-                body: () => BulkRollbackPackagesResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
+    if (experimentalFeatures.enablePackageRollback) {
+      router.versioned
+        .post({
+          path: EPM_API_ROUTES.BULK_ROLLBACK_PATTERN,
+          security: INSTALL_PACKAGES_SECURITY,
+          summary: `Bulk rollback packages`,
+          options: {
+            tags: ['oas-tag:Elastic Package Manager (EPM)'],
+          },
+        })
+        .addVersion(
+          {
+            version: API_VERSIONS.public.v1,
+            validate: {
+              request: BulkRollbackPackagesRequestSchema,
+              response: {
+                200: {
+                  body: () => BulkRollbackPackagesResponseSchema,
+                },
+                400: {
+                  body: genericErrorResponse,
+                },
               },
             },
           },
-        },
-        postBulkRollbackPackagesHandler
-      );
+          postBulkRollbackPackagesHandler
+        );
 
-    router.versioned
-      .get({
-        path: EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Get Bulk rollback packages details`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: GetOneBulkOperationPackagesRequestSchema,
-            response: {
-              200: {
-                body: () => GetOneBulkOperationPackagesResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
+      router.versioned
+        .get({
+          path: EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN,
+          security: INSTALL_PACKAGES_SECURITY,
+          summary: `Get Bulk rollback packages details`,
+          options: {
+            tags: ['oas-tag:Elastic Package Manager (EPM)'],
+          },
+        })
+        .addVersion(
+          {
+            version: API_VERSIONS.public.v1,
+            validate: {
+              request: GetOneBulkOperationPackagesRequestSchema,
+              response: {
+                200: {
+                  body: () => GetOneBulkOperationPackagesResponseSchema,
+                },
+                400: {
+                  body: genericErrorResponse,
+                },
               },
             },
           },
-        },
-        getOneBulkOperationPackagesHandler
-      );
+          getOneBulkOperationPackagesHandler
+        );
+    }
 
     router.versioned
       .get({
