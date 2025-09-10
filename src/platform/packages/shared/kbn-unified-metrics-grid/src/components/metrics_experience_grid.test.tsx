@@ -71,6 +71,11 @@ describe('MetricsExperienceGrid', () => {
       onValuesChange: jest.fn(),
       onClearValues: jest.fn(),
       onClearAllDimensions: jest.fn(),
+      isFullscreen: false,
+      searchTerm: '',
+      onClearSearchTerm: () => {},
+      onSearchTermChange: () => {},
+      onToggleFullscreen: () => {},
     });
 
     usePaginatedFieldsMock.mockReturnValue({
@@ -175,6 +180,11 @@ describe('MetricsExperienceGrid', () => {
       onValuesChange: jest.fn(),
       onClearValues: jest.fn(),
       onClearAllDimensions: jest.fn(),
+      isFullscreen: false,
+      searchTerm: '',
+      onClearSearchTerm: () => {},
+      onSearchTermChange: () => {},
+      onToggleFullscreen: () => {},
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

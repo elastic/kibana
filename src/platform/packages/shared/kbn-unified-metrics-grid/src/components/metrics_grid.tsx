@@ -80,6 +80,7 @@ export const MetricsGrid = ({
             filters={filters}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            metricName={metric.name}
           />
         </EuiFlexItem>
       ))}
