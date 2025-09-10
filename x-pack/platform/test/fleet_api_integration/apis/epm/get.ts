@@ -377,6 +377,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('validates knowledge base content structure', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        //  Since KB indexing is async, wait a bit to make sure it's done before trying to fetch
+        // This is due to the ML model needing to get deployed first which can take a bit
+        await new Promise((resolve) => setTimeout(resolve, 60000));
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
           .set('kbn-xsrf', 'xxxx')
@@ -404,6 +407,9 @@ export default function (providerContext: FtrProviderContext) {
 
       it('includes knowledge base information in package info assets when fetching from the info endpoint', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        //  Since KB indexing is async, wait a bit to make sure it's done before trying to fetch
+        // This is due to the ML model needing to get deployed first which can take a bit
+        await new Promise((resolve) => setTimeout(resolve, 60000));
         const res = await supertest
           .get(`/api/fleet/epm/packages/${knowledgeBasePkgName}/${knowledgeBasePkgVersion}`)
           .expect(200);
