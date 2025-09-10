@@ -156,12 +156,6 @@ export async function runJest(configName = 'jest.config.js') {
       process.argv.push(relative(wd, cwd));
     }
   }
-
-  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
-    // Expose Jest config file path via environment variables
-    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
-  }
-
   let initialOptions: Config.InitialOptions | undefined;
 
   // If a config path was provided via argv, use that; otherwise we already set resolvedConfigPath above
@@ -177,6 +171,11 @@ export async function runJest(configName = 'jest.config.js') {
     throw new Error(
       `--config is not set or invalid, and no config path was found for any listed files`
     );
+  }
+
+  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
+    // Expose Jest config file path via environment variables
+    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
   }
 
   if (!initialOptions) {
