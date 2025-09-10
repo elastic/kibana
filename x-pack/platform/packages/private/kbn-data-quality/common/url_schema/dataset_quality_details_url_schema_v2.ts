@@ -8,7 +8,30 @@
 import * as rt from 'io-ts';
 import { dataStreamRT, degradedFieldRT, qualityIssuesRT, timeRangeRT } from './common';
 
-export const urlSchemaRT = rt.exact(
+export const isStream = (value: unknown): value is { dataStream: string; view: 'streams' } =>
+  rt.type({ dataStream: rt.string, view: rt.literal('streams') }).is(value);
+
+export const urlSchemaRT = rt.union([
+  // Case 1: view === 'streams', dataStream is string
+  rt.intersection([
+    rt.type({
+      dataStream: rt.string,
+      view: rt.literal('streams'),
+    }),
+    rt.partial({
+      v: rt.literal(2),
+      timeRange: timeRangeRT,
+      qualityIssuesChart: qualityIssuesRT,
+      breakdownField: rt.string,
+      qualityIssues: degradedFieldRT,
+      expandedQualityIssue: rt.type({
+        name: rt.string,
+        type: qualityIssuesRT,
+      }),
+      showCurrentQualityIssues: rt.boolean,
+    }),
+  ]),
+  // Case 2: dataStream is dataStreamRT
   rt.intersection([
     rt.type({
       dataStream: dataStreamRT,
@@ -25,7 +48,7 @@ export const urlSchemaRT = rt.exact(
       }),
       showCurrentQualityIssues: rt.boolean,
     }),
-  ])
-);
+  ]),
+]);
 
 export type UrlSchema = rt.TypeOf<typeof urlSchemaRT>;

@@ -25,9 +25,9 @@ import { EsqlToolFieldType } from '@kbn/onechat-common';
 import React, { useCallback, useMemo } from 'react';
 import type { FieldArrayWithId, FieldError } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
-import { i18nMessages } from '../i18n';
-import { EsqlParamSource, type EsqlToolFormData } from '../types/tool_form_types';
+import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
+import { i18nMessages } from '../../i18n';
+import { EsqlParamSource, type EsqlToolFormData } from '../../types/tool_form_types';
 
 const FIELD_TYPE_TOKEN_MAP: Record<EsqlToolFieldType, string> = {
   [EsqlToolFieldType.TEXT]: 'tokenString',
