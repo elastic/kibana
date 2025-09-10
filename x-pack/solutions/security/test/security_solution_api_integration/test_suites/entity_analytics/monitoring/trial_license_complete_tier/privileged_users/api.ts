@@ -368,10 +368,6 @@ export default ({ getService }: FtrProviderContext) => {
           query: { kql: `user.name: csv_user_1` },
         });
         log.info(`User before second upload: ${JSON.stringify(userBefore)}`);
-
-        // wait for 1 second to ensure that if the document is updated, the timestamp would be different
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
         log.info(`Uploading the same user via CSV again`);
         const res2 = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res2.status !== 200) {
