@@ -6,4 +6,7 @@
  */
 
 export * from './constants';
+
+export * from './name';
 export * from './status';
+export * from './updated';
