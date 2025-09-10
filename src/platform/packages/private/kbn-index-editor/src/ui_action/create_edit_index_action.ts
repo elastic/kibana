@@ -41,6 +41,20 @@ export function createEditLookupIndexContentAction(
 
       const { indexName, doesIndexExist } = context;
 
+      // It can happen that the caller has outdated information about the index existence
+      if (doesIndexExist && indexName) {
+        const indexExists = await indexUpdateService.doesIndexExist(indexName);
+        if (!indexExists) {
+          coreStart.notifications.toasts.addError(new Error('Index does not exist'), {
+            title: i18n.translate('indexEditor.actions.indexDoesNotExistErrorMessage', {
+              defaultMessage: 'Index "{indexName}" does not exist anymore.',
+              values: { indexName },
+            }),
+          });
+          return;
+        }
+      }
+
       const existingIndexName = doesIndexExist ? indexName : null;
 
       const fileManager = new FileUploadManager(

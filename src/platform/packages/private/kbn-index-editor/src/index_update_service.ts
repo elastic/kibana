@@ -44,6 +44,7 @@ import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
@@ -977,6 +978,14 @@ export class IndexUpdateService {
       this.setIndexCreated(true);
       this._isSaving$.next(false);
     }
+  }
+
+  public async doesIndexExist(indexName: string): Promise<boolean> {
+    const lookupIndexesResult = await this.http.get<IndicesAutocompleteResult>(
+      '/internal/esql/autocomplete/join/indices'
+    );
+
+    return lookupIndexesResult.indices.some((index) => index.name === indexName);
   }
 
   public exit() {
