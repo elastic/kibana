@@ -277,16 +277,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
       });
 
+      const accessLogDoc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: JSON.stringify({
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          message: 'test',
+        }),
+      };
+
       it('Index an Nginx access log message, should goto logs.nginx.access', async () => {
-        const doc = {
-          '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: JSON.stringify({
-            'log.level': 'info',
-            'log.logger': 'nginx',
-            message: 'test',
-          }),
-        };
-        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
+        const result = await indexAndAssertTargetStream(
+          esClient,
+          'logs.nginx.access',
+          accessLogDoc
+        );
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           body: { text: 'test' },
@@ -322,15 +327,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const doc = {
-          '@timestamp': '2024-01-01T00:00:30.000Z',
-          message: JSON.stringify({
-            'log.level': 'error',
-            'log.logger': 'nginx',
-            message: 'test',
-          }),
-        };
-        await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
+        await indexAndAssertTargetStream(esClient, 'logs.nginx', accessLogDoc);
       });
 
       it('Fork logs to logs.nginx.error with invalid condition', async () => {
