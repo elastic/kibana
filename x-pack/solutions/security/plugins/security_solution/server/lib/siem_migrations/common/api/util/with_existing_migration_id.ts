@@ -8,6 +8,8 @@
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { MIGRATION_ID_NOT_FOUND } from '../../translations';
+import type { SiemRuleMigrationsClient } from '../../../rules/siem_rule_migrations_service';
+import type { SiemDashboardMigrationsClient } from '../../../dashboards/siem_dashboard_migration_service';
 
 /**
  * Checks the existence of a valid migration before proceeding with the request.
@@ -26,9 +28,14 @@ export const withExistingMigration = <
 ): RequestHandler<P, Q, B, SecuritySolutionRequestHandlerContext, Method> => {
   return async (context, req, res) => {
     const { migration_id: migrationId } = req.params;
+    const pathParts = req.route.path.split('/');
     const ctx = await context.resolve(['securitySolution']);
-    const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
-    const storedMigration = await ruleMigrationsClient.data.migrations.get(migrationId);
+    let migrationsClient: SiemRuleMigrationsClient | SiemDashboardMigrationsClient =
+      ctx.securitySolution.siemMigrations.getRulesClient();
+    if (pathParts.includes('dashboards')) {
+      migrationsClient = ctx.securitySolution.siemMigrations.getDashboardsClient();
+    }
+    const storedMigration = await migrationsClient.data.migrations.get(migrationId);
 
     if (!storedMigration) {
       return res.notFound({
