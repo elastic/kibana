@@ -12,7 +12,7 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { NotificationsList } from './notifications_list';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 
-jest.mock('../../contexts/kibana');
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 jest.mock('../../services/toast_notification_service');
 jest.mock('../../contexts/ml/ml_notifications_context');
 jest.mock('../../contexts/kibana/use_field_formatter');
