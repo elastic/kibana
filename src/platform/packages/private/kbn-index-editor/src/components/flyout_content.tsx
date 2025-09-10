@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiBetaBadge,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
@@ -133,23 +134,27 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             `}
           >
             <FileDropzone noResults={noResults}>
-              <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
-                <EuiFlexItem grow={false}>
-                  <QueryBar />
-                </EuiFlexItem>
+              {dataView ? (
+                <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
+                  <EuiFlexItem grow={false}>
+                    <QueryBar />
+                  </EuiFlexItem>
 
-                <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
-                  {dataView && dataViewColumns ? (
-                    <DataGridLazy
-                      {...props}
-                      dataView={dataView}
-                      columns={dataViewColumns}
-                      rows={rows}
-                      totalHits={totalHits}
-                    />
-                  ) : null}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
+                    {dataViewColumns ? (
+                      <DataGridLazy
+                        {...props}
+                        dataView={dataView}
+                        columns={dataViewColumns}
+                        rows={rows}
+                        totalHits={totalHits}
+                      />
+                    ) : null}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiSkeletonText />
+              )}
             </FileDropzone>
           </EuiFlyoutBody>
 
