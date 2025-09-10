@@ -76,112 +76,6 @@ export const initializeCspIndices = async (
   }
 };
 
-const waitForIndexTemplate = async (
-  esClient: ElasticsearchClient,
-  templateName: string,
-  logger: Logger,
-  maxRetries: number = 10,
-  retryDelayMs: number = 1000
-): Promise<boolean> => {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      await esClient.indices.getIndexTemplate({ name: templateName });
-      logger.info(`Index template ${templateName} is available`);
-      return true;
-    } catch (error) {
-      if (i === maxRetries - 1) {
-        logger.error(`Index template ${templateName} not available after ${maxRetries} retries`);
-        return false;
-      }
-      logger.debug(`Waiting for index template ${templateName} (attempt ${i + 1}/${maxRetries})`);
-      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
-    }
-  }
-  return false;
-};
-
-const validateIndexMapping = async (
-  esClient: ElasticsearchClient,
-  indexName: string,
-  expectedMapping: MappingTypeMapping,
-  logger: Logger
-): Promise<boolean> => {
-  try {
-    const indexMappingResponse = await esClient.indices.getMapping({ index: indexName });
-    const indexMapping = indexMappingResponse[indexName]?.mappings?.properties;
-    const expectedProperties = expectedMapping.properties;
-
-    if (!expectedProperties) {
-      return true; // No expected properties to validate
-    }
-
-    // Check if index has all expected fields with correct types
-    for (const [fieldName, expectedField] of Object.entries(expectedProperties)) {
-      const indexField = indexMapping?.[fieldName];
-
-      if (!indexField) {
-        logger.warn(`Field ${fieldName} missing in index ${indexName}`);
-        return false;
-      }
-
-      if (indexField.type !== expectedField.type) {
-        logger.warn(
-          `Field ${fieldName} type mismatch in index ${indexName}: expected ${expectedField.type}, got ${indexField.type}`
-        );
-        return false;
-      }
-    }
-
-    return true;
-  } catch (error) {
-    logger.error(`Failed to validate index mapping for ${indexName}:`, error);
-    return false;
-  }
-};
-
-const recreateIndexWithCorrectMapping = async (
-  esClient: ElasticsearchClient,
-  indexName: string,
-  logger: Logger
-): Promise<void> => {
-  try {
-    // Create backup index name
-    const backupIndexName = `${indexName}-backup-${Date.now()}`;
-
-    logger.info(`Backing up data from ${indexName} to ${backupIndexName}`);
-
-    // Reindex to backup
-    await esClient.reindex({
-      source: { index: indexName },
-      dest: { index: backupIndexName },
-    });
-
-    // Delete the original index
-    await esClient.indices.delete({ index: indexName });
-
-    logger.info(`Deleted index ${indexName}`);
-
-    // Recreate index (will use the updated template)
-    await esClient.indices.create({ index: indexName });
-
-    logger.info(`Recreated index ${indexName} with updated template`);
-
-    // Reindex data back from backup
-    await esClient.reindex({
-      source: { index: backupIndexName },
-      dest: { index: indexName },
-    });
-
-    // Delete backup index
-    await esClient.indices.delete({ index: backupIndexName });
-
-    logger.info(`Successfully recreated index ${indexName} with correct mapping`);
-  } catch (error) {
-    logger.error(`Failed to recreate index ${indexName}:`, error);
-    throw error;
-  }
-};
-
 export const createBenchmarkScoreIndex = async (
   esClient: ElasticsearchClient,
   cloudSecurityPostureConfig: CloudSecurityPostureConfig,
@@ -218,44 +112,15 @@ export const createBenchmarkScoreIndex = async (
       priority: 500,
     });
 
-    // Wait for index template to be available to prevent race condition during upgrades
-    const templateAvailable = await waitForIndexTemplate(
-      esClient,
-      BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
-      logger
-    );
-
-    if (!templateAvailable) {
-      throw new Error(
-        `Index template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} is not available after waiting`
-      );
-    }
-
     const result = await createIndexSafe(esClient, logger, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
 
     if (result === 'already-exists') {
-      // Check if the existing index mapping is compatible with benchmarkScoreMapping
-      const indexMappingCompatible = await validateIndexMapping(
+      await updateIndexSafe(
         esClient,
+        logger,
         BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-        benchmarkScoreMapping,
-        logger
+        benchmarkScoreMapping
       );
-
-      if (!indexMappingCompatible) {
-        logger.warn(
-          `Existing index ${BENCHMARK_SCORE_INDEX_DEFAULT_NS} has incompatible mapping. Recreating index.`
-        );
-        await recreateIndexWithCorrectMapping(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger);
-      } else {
-        // Only update mapping if compatible (can add fields, but not remove)
-        await updateIndexSafe(
-          esClient,
-          logger,
-          BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-          benchmarkScoreMapping
-        );
-      }
     }
   } catch (e) {
     logger.error(e);

@@ -77,28 +77,25 @@ const validateBenchmarkScoreTemplate = async (
     }
 
     let hasFieldMismatch = false;
-    const fieldMismatches: string[] = [];
 
     // Check all expected fields against template fields
     for (const [fieldName, expectedField] of Object.entries(expectedProperties)) {
       const templateField = templateProperties[fieldName];
       
       if (!templateField) {
-        logger.warn(`Field '${fieldName}' missing in template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}`);
-        fieldMismatches.push(`${fieldName} (missing)`);
+        logger.warn(`${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} field missing '${fieldName}'`);
         hasFieldMismatch = true;
-      } else if (templateField.type !== (expectedField as any)?.type) {
+      } else if (templateField.type !== expectedField?.type) {
         logger.warn(
-          `Field '${fieldName}' type mismatch in template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}: expected ${(expectedField as any)?.type}, got ${templateField.type}`
+          `Field '${fieldName}' type mismatch in template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}: expected ${expectedField?.type}, got ${templateField.type}`
         );
-        fieldMismatches.push(`${fieldName} (${templateField.type} → ${(expectedField as any)?.type})`);
         hasFieldMismatch = true;
       }
     }
 
     if (hasFieldMismatch) {
       logger.warn(
-        `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has field mapping issues: ${fieldMismatches.join(', ')}. Will trigger fixing.`
+        `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has field mapping issues. Will trigger fixing.`
       );
       await triggerTemplateFix(esClient, logger);
       return;
