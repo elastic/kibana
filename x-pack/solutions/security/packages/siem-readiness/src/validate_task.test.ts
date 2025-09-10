@@ -6,7 +6,7 @@
  */
 
 import { validateTask } from './validate_task';
-import type { SiemReadinessTask } from '..';
+import type { SiemReadinessTask } from './types';
 
 // Mock the readiness tasks to avoid dependency on the actual file
 jest.mock('./readiness_tasks', () => ({
