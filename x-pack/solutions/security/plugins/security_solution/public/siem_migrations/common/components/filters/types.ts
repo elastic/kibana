@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './status';
+export interface StatusFilterOptions<T> {
+  label: string;
+  data: { status: T };
+}

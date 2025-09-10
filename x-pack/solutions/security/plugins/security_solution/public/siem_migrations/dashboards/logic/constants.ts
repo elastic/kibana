@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './status';
+const ONE_MINUTE = 60000;
+
+export const DEFAULT_QUERY_OPTIONS = {
+  refetchIntervalInBackground: false,
+  staleTime: ONE_MINUTE * 5,
+};
