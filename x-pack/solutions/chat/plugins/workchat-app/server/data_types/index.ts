@@ -23,7 +23,11 @@ export const workChatDataTypes: DataTypeDefinition[] = [
   },
 ];
 
-export const registerWorkChatDataTypes = ({ chatDataRegistry }: { chatDataRegistry: ChatDataRegistryPluginSetup }) => {
+export const registerWorkChatDataTypes = ({
+  chatDataRegistry,
+}: {
+  chatDataRegistry: ChatDataRegistryPluginSetup;
+}) => {
   workChatDataTypes.forEach((dataType) => {
     chatDataRegistry.dataCatalog.register(dataType);
   });
