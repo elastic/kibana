@@ -68,11 +68,5 @@ export const validate = (
     messages.push(errors.tooManyForks(forks[1]));
   }
 
-  context?.columns.set('_fork', {
-    name: '_fork',
-    type: 'keyword',
-    userDefined: false,
-  });
-
   return messages;
 };
