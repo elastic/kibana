@@ -17,7 +17,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
       name: 'My connector',
       config: {},
       secrets: {
-        secretHeaders: [{ key: 'token', value: 'supersecret', type: 'secret' }],
+        secretHeaders: [{ key: 'secretKey', value: 'supersecret', type: 'secret' }],
       },
     }),
   };
@@ -33,7 +33,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
           getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
             attributes: {
               secrets: {
-                secretHeaders: [{ key: 'secretKey', value: 'supersecret', type: 'secret' }],
+                secretHeaders: { secretKey: 'supersecret' },
               },
             },
           }),
@@ -54,7 +54,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     await routeHandler({}, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
-      body: { secretHeaders: [{ key: 'secretKey' }] },
+      body: ['secretKey'],
     });
   });
 
