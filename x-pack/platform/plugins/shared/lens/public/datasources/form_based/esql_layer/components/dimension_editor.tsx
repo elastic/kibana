@@ -79,6 +79,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           const { columns } = transformEsqlMultiTermBreakdown({
             columns: initialColumns,
             rows: [],
+            query: query.esql,
           });
 
           setAllColumns(columns);

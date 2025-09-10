@@ -102,6 +102,7 @@ function getExpressionForLayer(
       arguments: {
         idMap: [JSON.stringify(idMapper)],
         isTextBased: [true],
+        query: [JSON.stringify(layer.query)],
       },
     });
     textBasedQueryToAst.chain.push(...formatterOverrides);
@@ -123,6 +124,7 @@ function getExpressionForLayer(
           arguments: {
             idMap: [JSON.stringify(idMapper)],
             isTextBased: [true],
+            query: [JSON.stringify(layer.query)],
           },
         },
         ...formatterOverrides,

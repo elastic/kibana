@@ -8,10 +8,12 @@
  */
 
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { Parser, Walker } from '@kbn/esql-ast';
 
 interface EsqlMultiTermTransformInput {
   columns: DatatableColumn[];
   rows: DatatableRow[];
+  query?: string;
 }
 
 interface EsqlMultiTermTransformOutput {
@@ -33,9 +35,36 @@ interface EsqlMultiTermTransformOutput {
 export function transformEsqlMultiTermBreakdown({
   columns,
   rows,
+  query,
 }: EsqlMultiTermTransformInput): EsqlMultiTermTransformOutput {
+  const noTransform = {
+    columns,
+    rows,
+    transformed: false,
+    newColumnName: null,
+    originalStringColumns: [],
+  };
+
+  // No query, don't transform
+  if (!query) {
+    return noTransform;
+  }
+
+  // If the query is a string BUT it does not have a STATS command, don't transform
+  if (typeof query === 'string') {
+    const { root } = Parser.parse(query);
+    const statsCommand = Walker.find(
+      root,
+      (node) => node.type === 'command' && node.name === 'stats'
+    );
+    if (!statsCommand) {
+      return noTransform;
+    }
+  }
+
+  // If the columns are less than 2, dont transform
   if (columns.length <= 2) {
-    return { columns, rows, transformed: false, newColumnName: null, originalStringColumns: [] };
+    return noTransform;
   }
 
   // Categorize columns by their data type.
@@ -46,14 +75,14 @@ export function transformEsqlMultiTermBreakdown({
   // Check if the datatable matches the specific shape for transformation.
   if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
     // Create the new combined column name (e.g., "host.name > region").
-    const newColumnName = stringColumns.map((c) => c.name).join(' > ');
+    const newColumnName = stringColumns.map((c) => c.name).join(', ');
     const stringColumnIds = stringColumns.map((c) => c.id);
 
     // Transform each row to have the new combined column.
     const newRows = rows.map((row) => {
       const newRow = { ...row };
       // Concatenate the values of the original string columns.
-      newRow[newColumnName] = stringColumnIds.map((id) => row[id] ?? '(empty)').join(' > ');
+      newRow[newColumnName] = stringColumnIds.map((id) => row[id] ?? '(empty)').join(', ');
       // Remove the original string columns from the row.
       stringColumnIds.forEach((id) => {
         delete newRow[id];
@@ -81,5 +110,5 @@ export function transformEsqlMultiTermBreakdown({
     };
   }
 
-  return { columns, rows, transformed: false, newColumnName: null, originalStringColumns: [] };
+  return noTransform;
 }

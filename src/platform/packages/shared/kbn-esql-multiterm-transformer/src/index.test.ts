@@ -11,6 +11,8 @@ import { transformEsqlMultiTermBreakdown } from '.';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('transformEsqlMultiTermBreakdown', () => {
+  const statsQuery = 'FROM my_index | STATS a BY b, c, d';
+
   it('should not transform the datatable if it has less than 3 columns', () => {
     const datatable: Datatable = {
       type: 'datatable',
@@ -20,7 +22,7 @@ describe('transformEsqlMultiTermBreakdown', () => {
       ],
       rows: [{ date: 1, metric: 100 }],
     };
-    const result = transformEsqlMultiTermBreakdown(datatable);
+    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: statsQuery });
     expect(result.transformed).toBe(false);
     expect(result.columns).toEqual(datatable.columns);
     expect(result.rows).toEqual(datatable.rows);
@@ -36,10 +38,25 @@ describe('transformEsqlMultiTermBreakdown', () => {
       ],
       rows: [{ date: 1, metric1: 100, metric2: 200 }],
     };
-    const result = transformEsqlMultiTermBreakdown(datatable);
+    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: statsQuery });
     expect(result.transformed).toBe(false);
     expect(result.columns).toEqual(datatable.columns);
     expect(result.rows).toEqual(datatable.rows);
+  });
+
+  it('should not transform the datatable if the query does not have a STATS command', () => {
+    const datatable: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'date', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'metric', name: 'AVG(bytes)', meta: { type: 'number' } },
+        { id: 'host', name: 'host.name', meta: { type: 'string' } },
+        { id: 'region', name: 'region', meta: { type: 'string' } },
+      ],
+      rows: [{ date: 1, metric: 100, host: 'host-a', region: 'us-east-1' }],
+    };
+    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: 'FROM my_index' });
+    expect(result.transformed).toBe(false);
   });
 
   it('should transform the datatable if it matches the shape', () => {
@@ -57,7 +74,7 @@ describe('transformEsqlMultiTermBreakdown', () => {
         { date: 3, metric: 300, host: 'host-c', region: null },
       ],
     };
-    const result = transformEsqlMultiTermBreakdown(datatable);
+    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: statsQuery });
     expect(result.transformed).toBe(true);
     expect(result.newColumnName).toBe('host.name > region');
     expect(result.originalStringColumns).toEqual([
@@ -85,7 +102,7 @@ describe('transformEsqlMultiTermBreakdown', () => {
       ],
       rows: [{ date: 1, metric: 100, host: 'host-a', region: 'us-east-1', cloud: 'aws' }],
     };
-    const result = transformEsqlMultiTermBreakdown(datatable);
+    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: statsQuery });
     expect(result.transformed).toBe(true);
     expect(result.newColumnName).toBe('host.name > region > cloud.provider');
     expect(result.columns).toHaveLength(3);

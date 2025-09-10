@@ -229,6 +229,7 @@ export function getTextBasedDatasource({
       const { columns: textBasedQueryColumns } = transformEsqlMultiTermBreakdown({
         columns: context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
         rows: [],
+        query: context.query.esql,
       });
 
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query

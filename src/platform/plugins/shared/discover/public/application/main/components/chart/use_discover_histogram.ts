@@ -526,6 +526,7 @@ function getUnifiedHistogramPropsForEsql({
   const { columns, rows } = transformEsqlMultiTermBreakdown({
     columns: initialColumns,
     rows: initialRows,
+    query: isEsqlMode && typeof query.esql === 'string' ? query.esql : undefined,
   });
 
   const table: Datatable | undefined =

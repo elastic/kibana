@@ -6,18 +6,20 @@
  */
 
 import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type {
   OriginalColumn,
   MapToColumnsExpressionFunction,
+  MapToColumnsExpressionFunctionArgs,
 } from '../../defs/map_to_columns/types';
 
 export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn'] = (
-  data,
-  { idMap: encodedIdMap }
+  data: Datatable,
+  { idMap: encodedIdMap, query: queryStr }: MapToColumnsExpressionFunctionArgs
 ) => {
+  const query = queryStr ? (JSON.parse(queryStr) as { esql: string }) : undefined;
   const { columns, rows, transformed, newColumnName, originalStringColumns } =
-    transformEsqlMultiTermBreakdown(data);
+    transformEsqlMultiTermBreakdown({ ...data, query: query?.esql });
   const table = { ...data, columns, rows };
 
   const isOriginalColumn = (item: OriginalColumn | undefined): item is OriginalColumn => {

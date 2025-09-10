@@ -28,6 +28,12 @@ export const mapToColumns: MapToColumnsExpressionFunction = {
         defaultMessage: 'An optional flag to indicate if this is about the text based datasource.',
       }),
     },
+    query: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.functions.mapToColumns.query.help', {
+        defaultMessage: 'The query that generated the datatable.',
+      }),
+    },
   },
   inputTypes: ['datatable'],
   async fn(...args) {
