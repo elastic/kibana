@@ -22,5 +22,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/scout-oblt",
+    "@kbn/alerting-plugin",
+    "@kbn/alerting-comparators",
   ]
 }
