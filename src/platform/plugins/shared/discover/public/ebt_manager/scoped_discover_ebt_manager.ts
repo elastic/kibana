@@ -195,14 +195,14 @@ export class ScopedDiscoverEBTManager {
       return;
     }
 
-    const isOnlyFullTextSearch = fieldNames.length === 1 && fieldNames[0] === FREE_TEXT;
+    const isOnlyFreeTextSearch = fieldNames.length === 1 && fieldNames[0] === FREE_TEXT;
 
     const eventData: QueryFieldsUsageEventData = {
       [FIELD_USAGE_EVENT_NAME]: eventName,
     };
 
-    // Handle full text search vs field-specific queries
-    if (isOnlyFullTextSearch) {
+    // Handle free text search vs field-specific queries
+    if (isOnlyFreeTextSearch) {
       eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [FREE_TEXT];
     } else if (fieldsMetadata) {
       // Process actual field names
@@ -269,7 +269,7 @@ export class ScopedDiscoverEBTManager {
 
       const extractedFieldNames = getKqlFieldNamesFromExpression(query.query);
 
-      // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
+      // we discarded an empty query earlier, so if we're getting an empty array here it's a free text search
       const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
 
       await this.trackQueryFieldsUsageEvent({
