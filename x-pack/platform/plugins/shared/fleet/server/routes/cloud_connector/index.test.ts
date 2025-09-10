@@ -8,7 +8,10 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../../types';
-import type { CloudProvider, CloudConnectorSO } from '../../../common/types/models/cloud_connector';
+import type {
+  CloudProvider,
+  CloudConnectorResponse,
+} from '../../../common/types/models/cloud_connector';
 
 import { cloudConnectorService } from '../../services';
 
@@ -91,7 +94,7 @@ describe('Cloud Connector API', () => {
       });
 
       it('should accept valid AWS cloud provider', async () => {
-        const mockCloudConnector: CloudConnectorSO = {
+        const mockCloudConnector: CloudConnectorResponse = {
           id: 'test-id',
           name: 'test-connector',
           cloudProvider: 'aws' as CloudProvider,
@@ -138,7 +141,7 @@ describe('Cloud Connector API', () => {
       });
 
       it('should handle valid query parameters', async () => {
-        const mockCloudConnectors: CloudConnectorSO[] = [
+        const mockCloudConnectors: CloudConnectorResponse[] = [
           {
             id: 'test-id',
             name: 'test-connector',
@@ -170,7 +173,7 @@ describe('Cloud Connector API', () => {
 
   describe('CREATE Cloud Connector', () => {
     it('should create cloud connector successfully', async () => {
-      const mockCloudConnector: CloudConnectorSO = {
+      const mockCloudConnector: CloudConnectorResponse = {
         id: 'test-id',
         name: 'test-connector',
         cloudProvider: 'aws' as CloudProvider,
@@ -246,7 +249,7 @@ describe('Cloud Connector API', () => {
 
   describe('GET Cloud Connectors', () => {
     it('should get cloud connectors list successfully', async () => {
-      const mockCloudConnectors: CloudConnectorSO[] = [
+      const mockCloudConnectors: CloudConnectorResponse[] = [
         {
           id: 'connector-1',
           name: 'aws-connector',
@@ -286,7 +289,7 @@ describe('Cloud Connector API', () => {
     });
 
     it('should return empty list when no connectors exist', async () => {
-      const mockCloudConnectors: CloudConnectorSO[] = [];
+      const mockCloudConnectors: CloudConnectorResponse[] = [];
 
       mockCloudConnectorService.getList.mockResolvedValue(mockCloudConnectors);
 

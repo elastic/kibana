@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type {
-  CloudConnectorSO,
+  CloudConnectorResponse,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
@@ -29,11 +29,11 @@ export interface CloudConnectorServiceInterface {
   create(
     soClient: SavedObjectsClientContract,
     cloudConnector: CreateCloudConnectorRequest
-  ): Promise<CloudConnectorSO>;
+  ): Promise<CloudConnectorResponse>;
   getList(
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
-  ): Promise<CloudConnectorSO[]>;
+  ): Promise<CloudConnectorResponse[]>;
 }
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
@@ -46,7 +46,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   async create(
     soClient: SavedObjectsClientContract,
     cloudConnector: CreateCloudConnectorRequest
-  ): Promise<CloudConnectorSO> {
+  ): Promise<CloudConnectorResponse> {
     const logger = this.getLogger('create');
 
     try {
@@ -106,7 +106,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   async getList(
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
-  ): Promise<CloudConnectorSO[]> {
+  ): Promise<CloudConnectorResponse[]> {
     const logger = this.getLogger('getList');
     logger.debug('Getting cloud connectors list');
 

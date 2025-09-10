@@ -150,6 +150,14 @@ export type {
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
   GetListAgentPolicyOutputsResponse,
+  CloudConnectorResponse,
+  CloudConnectorListOptions,
+  CreateCloudConnectorRequest,
+  CloudConnectorVars,
+  CloudProvider,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
+  CloudConnectorSecretReference,
 } from '../../common/types';
 export {
   entries,

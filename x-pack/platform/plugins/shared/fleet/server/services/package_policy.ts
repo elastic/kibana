@@ -77,7 +77,7 @@ import type {
   AgentPolicy,
   PackagePolicyAssetsMap,
   CloudProvider,
-  CloudConnectorSO,
+  CloudConnectorResponse,
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
@@ -2883,7 +2883,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
     agentPolicy: AgentPolicy
-  ): Promise<CloudConnectorSO | undefined> {
+  ): Promise<CloudConnectorResponse | undefined> {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
     // Check if cloud connector setup supported and not already created

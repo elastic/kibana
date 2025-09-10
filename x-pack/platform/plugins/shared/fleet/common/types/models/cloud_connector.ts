@@ -35,7 +35,7 @@ export interface CloudConnectorVars {
   // TODO: Add other cloud providers vars
 }
 
-export interface CloudConnectorSO {
+export interface CloudConnectorResponse {
   id: string;
   name: string;
   cloudProvider: CloudProvider;
