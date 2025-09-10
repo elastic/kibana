@@ -24,6 +24,11 @@ export interface PerformInstallResponse {
   failureReason?: string;
 }
 
+export interface PerformUpdateResponse {
+  installed: boolean;
+  failureReason?: string;
+}
+
 export interface UninstallResponse {
   success: boolean;
 }

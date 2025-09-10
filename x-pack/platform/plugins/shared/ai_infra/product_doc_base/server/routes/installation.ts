@@ -12,6 +12,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type {
   InstallationStatusResponse,
   PerformInstallResponse,
+  PerformUpdateResponse,
   UninstallResponse,
 } from '../../common/http_api/installation';
 import {
@@ -121,7 +122,12 @@ export const registerInstallationRoutes = ({
   router.post(
     {
       path: UPDATE_ALL_API_PATH,
-      validate: {},
+      validate: {
+        body: schema.object({
+          forceUpdate: schema.boolean({ defaultValue: false }),
+          inferenceIds: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
       options: {
         access: 'internal',
         timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
@@ -133,10 +139,13 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
+      const { forceUpdate, inferenceIds: requestedInferenceIdsToUpdate } = req.body ?? {};
       const { documentationManager } = getServices();
 
       const resp = await documentationManager.updateAll({
         request: req,
+        forceUpdate,
+        inferenceIds: requestedInferenceIdsToUpdate,
       });
       const inferenceIds = resp.inferenceIds ?? [];
 
@@ -148,13 +157,12 @@ export const registerInstallationRoutes = ({
           })
         )
       );
-      const body = statuses.reduce<Record<string, PerformInstallResponse>>(
+      const body = statuses.reduce<Record<string, PerformUpdateResponse>>(
         (acc, installationStatus, index) => {
           const inferenceId = inferenceIds[index];
           // Handle internal server error
           if (installationStatus.status === 'rejected') {
             const failureReason = installationStatus.reason;
-            // @TODO: remove
             return {
               ...acc,
               [inferenceId]: {
@@ -182,14 +190,14 @@ export const registerInstallationRoutes = ({
               [inferenceId]: {
                 installed: status === 'installed',
                 ...(failureReason ? { failureReason } : {}),
-              } as PerformInstallResponse,
+              } as PerformUpdateResponse,
             };
           }
           return acc;
         },
         {}
       );
-      return res.ok<Record<string, PerformInstallResponse>>({
+      return res.ok<Record<string, PerformUpdateResponse>>({
         body,
       });
     }

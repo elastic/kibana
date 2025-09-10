@@ -10,6 +10,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type {
   InstallationStatusResponse,
   PerformInstallResponse,
+  PerformUpdateResponse,
   UninstallResponse,
 } from '../../../common/http_api/installation';
 import {
@@ -65,8 +66,22 @@ export class InstallationService {
     return response;
   }
 
-  async updateAll(): Promise<PerformInstallResponse> {
-    const response = await this.http.post<PerformInstallResponse>(UPDATE_ALL_API_PATH);
+  /**
+   * Update all product documentation to the latest version.
+   *
+   * @param forceUpdate - If true, the docs with the same version majorMinor version will be forced to updated regardless
+   * @param inferenceIds - If provided, only the product docs for the given inference IDs will be updated. If not, all previously installed inference IDs will be updated.
+   * @returns
+   */
+  async updateAll(params?: {
+    forceUpdate?: boolean;
+    inferenceIds?: string[];
+  }): Promise<PerformUpdateResponse> {
+    const forceUpdate = params?.forceUpdate ?? false;
+    const inferenceIds = params?.inferenceIds ?? [];
+    const response = await this.http.post<PerformUpdateResponse>(UPDATE_ALL_API_PATH, {
+      body: JSON.stringify({ forceUpdate, inferenceIds }),
+    });
 
     return response;
   }

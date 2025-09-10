@@ -114,6 +114,10 @@ export interface DocUpdateOptions {
    * If provided, the docs will be updated with the model indicated by Inference ID
    */
   inferenceId: string;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
 }
 
 /**
@@ -126,4 +130,12 @@ export interface DocUpdateAllOptions {
    * If not provided, the call will be considered as being done on behalf of system.
    */
   request?: KibanaRequest;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+  /**
+   * inferenceIds to update
+   */
+  inferenceIds?: string[];
 }

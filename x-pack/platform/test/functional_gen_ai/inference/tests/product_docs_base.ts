@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -57,10 +56,7 @@ const getIndexName = (productName: string, optionalInferenceId?: string) => {
   return indexName;
 };
 
-export const productDocsBaseInstallationSuite = (
-  { id: connectorId, actionTypeId: connectorType }: AvailableConnectorWithId,
-  { getService }: FtrProviderContext
-) => {
+export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const retry = getService('retry');
@@ -95,7 +91,7 @@ export const productDocsBaseInstallationSuite = (
     const indexName = getIndexName(productName, optionalInferenceId);
     await retry.waitForWithTimeout(
       `Elasticsearch index [${indexName}] should ${shouldExist ? 'exist' : 'not exist'}`,
-      180 * 1000,
+      240 * 1000,
       async () => {
         if ((await es.indices.exists({ index: indexName })) === shouldExist) {
           return true;
@@ -110,8 +106,8 @@ export const productDocsBaseInstallationSuite = (
     );
   };
 
-  describe('product docs base installation', () => {
-    before(async () => {
+  describe('product docs base', () => {
+    const cleanUp = async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await Promise.all(products.map((product) => deleteProductDocIndex({ productName: product })));
       await Promise.all(
@@ -122,7 +118,14 @@ export const productDocsBaseInstallationSuite = (
           })
         )
       );
+    };
+    before(async () => {
+      await cleanUp();
     });
+    after(async () => {
+      await cleanUp();
+    });
+
     it('installs the ELSER product docs', async () => {
       const elserProductDocs = await installProductDoc(supertest, defaultInferenceEndpoints.ELSER);
       expect(elserProductDocs.status).to.be(200);
@@ -180,17 +183,35 @@ export const productDocsBaseInstallationSuite = (
         });
       }
     });
-
-    it('updates the product docs for all previously installed Inference IDs', async () => {
+    it('updates the product docs for all previously installed Inference IDs if inferenceIds is ommited', async () => {
       const updatedResponse = await supertest
         .post('/internal/product_doc_base/update_all')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          forceUpdate: false,
+        })
         .set('kbn-xsrf', 'foo')
         .expect(200);
       const updatedBody = updatedResponse.body;
       expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
       expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL].installed).to.be(true);
+    });
+
+    it('updates the product docs the specific inferenceId', async () => {
+      const updatedResponse = await supertest
+        .post('/internal/product_doc_base/update_all')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          forceUpdate: true,
+          inferenceIds: [defaultInferenceEndpoints.ELSER],
+        })
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+      const updatedBody = updatedResponse.body;
+      expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+      expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL]).to.be(undefined);
     });
 
     it('uninstalls the E5 product docs', async () => {
