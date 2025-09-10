@@ -201,7 +201,7 @@ describe('getFileHandler', () => {
       body: 'not found',
       headers: new Headers({
         raw: '',
-        'content-type': 'text',
+        'content-type': 'text/plain',
       }),
     });
 
@@ -212,7 +212,7 @@ describe('getFileHandler', () => {
         statusCode: 404,
         body: 'not found',
         headers: expect.objectContaining({
-          'content-type': 'text',
+          'content-type': 'text/plain',
         }),
       })
     );
