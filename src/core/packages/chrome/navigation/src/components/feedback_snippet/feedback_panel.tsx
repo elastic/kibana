@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeedbackView } from '.';
-import { Confetti } from './confetti';
 
 interface FeedbackPanelProps {
   feedbackView: FeedbackView;
@@ -33,6 +32,8 @@ interface FeedbackPanelProps {
   handleNegativeFeedback: () => void;
   handlePositiveFeedback: () => void;
 }
+
+const ConfettiComponentLazy = React.lazy(() => import('./confetti'));
 
 const thumbUpIconLabel = i18n.translate(
   'core.ui.chrome.sideNavigation.sideNavigation.feedbackPanel.thumbUpIconLabel',
@@ -193,7 +194,7 @@ export const FeedbackPanel = ({
       <EuiFlexGroup gutterSize="s" justifyContent="center">
         {panelFooter[feedbackView]}
       </EuiFlexGroup>
-      {feedbackView === 'positive' && <Confetti />}
+      {feedbackView === 'positive' && <ConfettiComponentLazy />}
     </EuiPanel>
   );
 };

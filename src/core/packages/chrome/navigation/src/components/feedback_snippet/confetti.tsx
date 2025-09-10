@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import confetti from 'canvas-confetti';
 import React, { useEffect, useRef } from 'react';
 
-export const Confetti = () => {
+const Confetti = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -60,3 +60,7 @@ export const Confetti = () => {
     />
   );
 };
+
+// We need to use the default export here because of the way React.lazy works
+// eslint-disable-next-line import/no-default-export
+export default Confetti;
