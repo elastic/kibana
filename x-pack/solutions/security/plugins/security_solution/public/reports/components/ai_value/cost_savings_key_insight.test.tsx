@@ -202,7 +202,7 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('shows loading state when lensResponse is null', () => {
-    render(<CostSavingsKeyInsight lensResponse={null} />);
+    render(<CostSavingsKeyInsight isLoading={false} lensResponse={null} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -241,7 +241,7 @@ describe('CostSavingsKeyInsight', () => {
       },
     };
 
-    rerender(<CostSavingsKeyInsight lensResponse={newLensResponse} />);
+    rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={newLensResponse} />);
 
     await waitFor(() => {
       expect(mockChatComplete).toHaveBeenCalledTimes(2);
