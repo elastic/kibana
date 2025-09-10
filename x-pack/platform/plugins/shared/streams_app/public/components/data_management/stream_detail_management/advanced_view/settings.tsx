@@ -113,7 +113,7 @@ export function Settings({
         setSettings((prev) => ({ ...prev, [name]: original }));
       }
     },
-    [originalSettings, isClassicStream]
+    [originalSettings, isClassicStream, definition.stream.name]
   );
 
   const updateSettings = useCallback(async () => {
@@ -149,7 +149,14 @@ export function Settings({
     } finally {
       setIsUpdating(false);
     }
-  }, [definition, settings]);
+  }, [
+    definition,
+    settings,
+    abortController.signal,
+    streamsRepositoryClient,
+    notifications.toasts,
+    refreshDefinition,
+  ]);
 
   useEffect(() => {
     if (!definition) return;
