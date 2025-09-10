@@ -15,7 +15,7 @@ import {
   apmErrorCountAIAssistant,
   apmTransactionRateAIAssistant,
   customThresholdAIAssistantLogCount,
-} from './templates';
+} from '../utils/alerts';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
