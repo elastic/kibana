@@ -190,7 +190,7 @@ export interface PackagePolicyClient {
       skipUnassignFromAgentPolicies?: boolean;
       force?: boolean;
       asyncDeploy?: boolean;
-    },
+    } & WithSpaceIdOption,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;
@@ -313,6 +313,16 @@ interface WithSpaceIdsOption {
    * all space, use a value of `*` (ex. `spaceIds: ['*']`)
    */
   spaceIds?: string[];
+}
+
+interface WithSpaceIdOption {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to those spaces.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceId: '*'`)
+   * */
+  spaceId?: string;
 }
 
 export interface RollbackResult {

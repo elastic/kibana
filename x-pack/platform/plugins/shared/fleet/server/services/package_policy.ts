@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
 import semverGt from 'semver/functions/gt';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pMap from 'p-map';
 
@@ -659,7 +659,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
-    const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds]);
+    const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds], {
+      spaceId: ALL_SPACES_ID,
+    });
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
     for (const agentPolicy of agentPolicies) {
       validateIsNotHostedPolicy(agentPolicy, options?.force);
@@ -1954,6 +1956,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       skipUnassignFromAgentPolicies?: boolean;
       force?: boolean;
+      spaceId?: string;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -1971,7 +1974,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = this.getLogger('delete');
     logger.debug(`Deleting package policies ${ids}`);
 
-    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
+    const packagePolicies = await this.getByIDs(soClient, ids, {
+      ignoreMissing: true,
+      spaceIds: options?.spaceId ? [options?.spaceId] : undefined,
+    });
     if (!packagePolicies) {
       return [];
     }
@@ -1998,7 +2004,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+        const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, false, {
+          spaceId: options?.spaceId,
+        });
         if (!agentPolicy) {
           throw new AgentPolicyNotFoundError('Agent policy not found');
         }
