@@ -76,21 +76,21 @@ export const buildPrivilegedSearchBody = (
 // Note: this script does not update last_seen or roles, those should be handled separately if needed: will need to update
 export const UPDATE_SCRIPT_SOURCE = `
 if (params.new_privileged_status == false) {
-  if (ctx._source.is_privileged == true) {
-    if (ctx._source.sources == null) { ctx._source.sources = []; }
-    ctx._source.sources.removeIf(s -> s == params.sourceLabel);
-    if (ctx._source.sources.size() == 0) { ctx._source.is_privileged = false; }
+  if (ctx._source.user.is_privileged == true) {
+    if (ctx._source.labels.sources == null) { ctx._source.labels.sources = []; }
+    ctx._source.labels.sources.removeIf(s -> s == params.sourceLabel);
+    if (ctx._source.labels.sources.size() == 0) { ctx._source.user.is_privileged = false; }
   }
 } else {
-  if (ctx._source.sources == null) { ctx._source.sources = []; }
-  if (ctx._source.is_privileged == true) {
-    if (!ctx._source.sources.contains(params.sourceLabel)) {
-      ctx._source.sources.add(params.sourceLabel);
+  if (ctx._source.labels.sources == null) { ctx._source.labels.sources = []; }
+  if (ctx._source.user.is_privileged == true) {
+    if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
+      ctx._source.labels.sources.add(params.sourceLabel);
     }
   } else {
-    ctx._source.is_privileged = true;
-    if (!ctx._source.sources.contains(params.sourceLabel)) {
-      ctx._source.sources.add(params.sourceLabel);
+    ctx._source.user.is_privileged = true;
+    if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
+      ctx._source.labels.sources.add(params.sourceLabel);
     }
   }
 }
@@ -121,7 +121,9 @@ export const buildBulkBody = async (
         user: { id: u.id, name: u.username },
         roles: u.roles ?? [],
         is_privileged: u.isPrivileged,
-        sources: u.isPrivileged ? [sourceLabel] : [],
+        labels: {
+          sources: u.isPrivileged ? [sourceLabel] : [],
+        },
         last_seen: u.lastSeen,
       },
       // Optional: doc_as_upsert: true,   // if you prefer partial doc merging
