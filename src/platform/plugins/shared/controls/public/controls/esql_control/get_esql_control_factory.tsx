@@ -15,9 +15,10 @@ import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { omit } from 'lodash';
 import type { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
-import type { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
   defaultControlComparators,
@@ -32,28 +33,22 @@ const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
 });
 
-export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLControlApi> => {
+export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
   return {
     type: ESQL_CONTROL,
-    order: 3,
-    getIconType: () => 'editorChecklist',
-    getDisplayName: () => displayName,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
-      const defaultControlManager = initializeDefaultControlManager(initialState);
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState.rawState;
+      const defaultControlManager = await initializeDefaultControlManager({
+        grow: state.grow,
+        width: state.width,
+      });
+
+      // TODO Rename this; this is actually the state manager for all non-default control state params, "selections" is a confusing name
       const selections = initializeESQLControlSelections(
-        initialState,
-        controlGroupApi.controlFetch$(uuid),
+        { uuid, parentApi },
+        state,
         defaultControlManager.api.setDataLoading
       );
-
-      const onSaveControl = (updatedState: ESQLControlState) => {
-        controlGroupApi?.replacePanel(uuid, {
-          panelType: 'esqlControl',
-          serializedState: {
-            rawState: updatedState,
-          },
-        });
-      };
 
       function serializeState() {
         return {
@@ -67,7 +62,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
 
       const unsavedChangesApi = initializeUnsavedChanges<ESQLControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
         anyStateChange$: merge(defaultControlManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
@@ -86,25 +81,29 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         ...unsavedChangesApi,
         ...defaultControlManager.api,
         ...selections.api,
-        defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
+        defaultTitle$: new BehaviorSubject<string | undefined>(state.title),
         isEditingEnabled: () => true,
         getTypeDisplayName: () => displayName,
         onEdit: async () => {
-          const state = {
-            ...initialState,
+          const nextState = {
             ...defaultControlManager.getLatestState(),
+            ...selections.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
+          const onSaveControl = async (updatedState: ESQLControlState) => {
+            defaultControlManager.reinitializeState(updatedState);
+            selections.reinitializeState(updatedState);
+          };
           try {
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-              queryString: initialState.esqlQuery,
-              variableType: initialState.variableType,
-              controlType: initialState.controlType,
+              queryString: nextState.esqlQuery,
+              variableType: nextState.variableType,
+              controlType: nextState.controlType,
               esqlVariables: variablesInParent,
               onSaveControl,
-              initialState: state,
+              initialState: nextState,
             });
           } catch (e) {
             // eslint-disable-next-line no-console
@@ -123,7 +122,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         sort: undefined,
         runPastTimeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
-        fieldName: initialState.variableName,
+        fieldName: state.variableName,
       };
       // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
       const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
@@ -145,11 +144,22 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         deselectAll: () => {},
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
+        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
       };
 
       return {
-        api,
-        Component: ({ className: controlPanelClassName }) => (
+        api: {
+          ...api,
+          /**
+           * TODO: Remove this once duplicating ES|QL controls has been implemented
+           * ES|QL controls can only output unique variable names, so in order to duplicate the control,
+           * we would need to add a number or other uniquifying character to the end of the variable name.
+           * The problem with this is that the user cannot edit variable names after the control is created.
+           * Once we come up with a good UX solution to this, we can return duplicatePanel to the parentApi
+           */
+          parentApi: omit(api.parentApi, 'duplicatePanel'),
+        },
+        Component: () => (
           <OptionsListControlContext.Provider
             value={{
               componentApi,
@@ -161,7 +171,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               },
             }}
           >
-            <OptionsListControl controlPanelClassName={controlPanelClassName} />
+            <OptionsListControl />
           </OptionsListControlContext.Provider>
         ),
       };

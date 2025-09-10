@@ -25,11 +25,6 @@ export const useESQLVariables = ({
   const dashboardPanels = useStateFromPublishingSubject(
     isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
   );
-  const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
-      ? parentApi?.controlGroupApi$
-      : new BehaviorSubject(undefined)
-  );
 
   const panel = useMemo(() => {
     if (!panelId) {
@@ -43,12 +38,12 @@ export const useESQLVariables = ({
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
-      if (!panelId) {
+      if (!panelId || !isApiESQLVariablesCompatible(parentApi)) {
         return;
       }
 
       // add a new control
-      controlGroupApi?.addNewPanel?.({
+      parentApi.addNewPanel({
         panelType: 'esqlControl',
         serializedState: {
           rawState: {
@@ -69,7 +64,7 @@ export const useESQLVariables = ({
         await panel.onEdit();
       }
     },
-    [attributes, controlGroupApi, panel, panelId]
+    [attributes, parentApi, panel, panelId]
   );
 
   const onCancelControl = useCallback(() => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { ESQL_CONTROL, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 
@@ -19,6 +19,11 @@ import { registerESQLControl } from './controls/esql_control/register_esql_contr
 import { registerTimeSliderControl } from './controls/timeslider_control/register_timeslider_control';
 import { setKibanaServices } from './services/kibana_services';
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
+
+const CONTROL_PANEL_PLACEMENT = {
+  placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
+  resizeSettings: { maxHeight: 2, minHeight: 2 },
+};
 
 export class ControlsPlugin
   implements Plugin<void, void, ControlsPluginSetupDeps, ControlsPluginStartDeps>
@@ -34,7 +39,7 @@ export class ControlsPlugin
     registerOptionsListControl(embeddable);
     registerRangeSliderControl();
     registerTimeSliderControl();
-    registerESQLControl();
+    registerESQLControl(embeddable);
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {
@@ -43,10 +48,11 @@ export class ControlsPlugin
     registerActions(startPlugins.uiActions);
 
     startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
-      return {
-        placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
-        resizeSettings: { maxHeight: 2, minHeight: 2 },
-      };
+      return CONTROL_PANEL_PLACEMENT;
+    });
+
+    startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
+      return CONTROL_PANEL_PLACEMENT;
     });
   }
 

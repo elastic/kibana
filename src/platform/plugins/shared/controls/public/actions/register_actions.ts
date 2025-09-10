@@ -12,6 +12,7 @@ import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/p
 import {
   ACTION_CLEAR_CONTROL,
   ACTION_CREATE_CONTROL,
+  ACTION_CREATE_ESQL_CONTROL,
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
   OPTIONS_LIST_ACTION,
@@ -43,6 +44,11 @@ export function registerActions(uiActions: UiActionsStart) {
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_CONTROL, async () => {
     const { createControlAction } = await import('../controls_module');
     return createControlAction();
+  });
+
+  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
+    const { createESQLControlAction } = await import('../controls_module');
+    return createESQLControlAction();
   });
 
   uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, OPTIONS_LIST_ACTION, async () => {

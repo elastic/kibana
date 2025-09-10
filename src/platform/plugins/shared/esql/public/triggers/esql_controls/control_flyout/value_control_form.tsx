@@ -12,24 +12,15 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiCallOut, type EuiSwitchEvent, EuiPanel } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiCallOut, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  EsqlControlType,
-  type ESQLControlState,
-  type ControlWidthOptions,
-} from '@kbn/esql-types';
-import {
-  getIndexPatternFromESQLQuery,
-  getESQLResults,
-  appendStatsByToQuery,
-} from '@kbn/esql-utils';
+import { ESQLVariableType, EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
+import { getESQLResults, appendStatsByToQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import { ControlWidth, ControlLabel } from './shared_form_components';
+import { ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
@@ -99,8 +90,9 @@ export function ValueControlForm({
     valuesRetrieval ? [valuesRetrieval] : []
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
-  const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
-  const [grow, setGrow] = useState(initialState?.grow ?? false);
+  // TODO Remove these from control state
+  const [minimumWidth] = useState(initialState?.width ?? 'medium');
+  const [grow] = useState(initialState?.grow ?? false);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedValues(selectedOptions);
@@ -135,16 +127,6 @@ export function ValueControlForm({
 
   const onLabelChange = useCallback((e: { target: { value: React.SetStateAction<string> } }) => {
     setLabel(e.target.value);
-  }, []);
-
-  const onMinimumSizeChange = useCallback((optionId: string) => {
-    if (optionId) {
-      setMinimumWidth(optionId as ControlWidthOptions);
-    }
-  }, []);
-
-  const onGrowChange = useCallback((e: EuiSwitchEvent) => {
-    setGrow(e.target.checked);
   }, []);
 
   const onValuesQuerySubmit = useCallback(
@@ -194,11 +176,7 @@ export function ValueControlForm({
       controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
       valuesRetrieval
     ) {
-      const queryForValues =
-        variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
-          : '';
-      onValuesQuerySubmit(queryForValues);
+      onValuesQuerySubmit(queryString);
     }
   }, [
     controlFlyoutType,
@@ -358,13 +336,6 @@ export function ValueControlForm({
         </EuiFormRow>
       )}
       <ControlLabel label={label} onLabelChange={onLabelChange} />
-
-      <ControlWidth
-        minimumWidth={minimumWidth}
-        grow={grow}
-        onMinimumSizeChange={onMinimumSizeChange}
-        onGrowChange={onGrowChange}
-      />
     </>
   );
 }
