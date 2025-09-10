@@ -24,7 +24,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
-import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -136,9 +136,11 @@ const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
 const useWorkflowJsonSchema = () => {
   // Generate JSON schema dynamically to include all current connectors
+  // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
-      const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
+      const zodSchema = getWorkflowZodSchema();
+      const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
       // Post-process to improve validation messages and reduce duplicate suggestions
       const processedSchema = improveTypeFieldDescriptions(jsonSchema);
@@ -150,6 +152,7 @@ const useWorkflowJsonSchema = () => {
     }
   }, []);
 };
+
 
 /**
  * Since we implemented custom error formatting at the validation level,
@@ -241,13 +244,18 @@ export const WorkflowYAMLEditor = ({
     display: 'none',
   });
 
+  // Memoize the schema to avoid re-generating it on every render
+  const workflowYamlSchemaLoose = useMemo(() => {
+    return getWorkflowZodSchemaLoose(); // Now uses lazy loading
+  }, []);
+
   const {
     error: errorValidating,
     validationErrors,
     validateVariables,
     handleMarkersChanged,
   } = useYamlValidation({
-    workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
+    workflowYamlSchema: workflowYamlSchemaLoose,
     onValidationErrors,
   });
 
@@ -717,8 +725,8 @@ export const WorkflowYAMLEditor = ({
   };
 
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
-  }, []);
+    return getCompletionItemProvider(workflowYamlSchemaLoose); // Use memoized schema
+  }, [workflowYamlSchemaLoose]);
 
   useEffect(() => {
     monaco.editor.defineTheme('workflows-subdued', {

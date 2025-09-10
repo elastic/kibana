@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GENERATED_ELASTICSEARCH_CONNECTORS } from './generated_es_connectors';
+// Lazy import to avoid bundling large generated file in main plugin bundle
 
 /**
  * Builds an Elasticsearch request from connector definitions
@@ -18,6 +18,9 @@ export function buildRequestFromConnector(
   params: any
 ): { method: string; path: string; body?: any; params?: any } {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
+
+  // Lazy load the generated connectors to avoid main bundle bloat
+  const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated_es_connectors');
 
   // Find the connector definition for this step type
   const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c) => c.type === stepType);

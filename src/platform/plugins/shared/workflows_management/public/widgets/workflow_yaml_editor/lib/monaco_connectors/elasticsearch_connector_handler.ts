@@ -24,7 +24,7 @@ let allConnectorsCache: any[] | null = null;
 
 function getCachedAllConnectors(): any[] {
   if (allConnectorsCache === null) {
-    allConnectorsCache = getAllConnectors();
+    allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
   }
   return allConnectorsCache;
 }
