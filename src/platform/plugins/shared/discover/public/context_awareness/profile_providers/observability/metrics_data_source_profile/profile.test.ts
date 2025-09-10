@@ -62,7 +62,7 @@ describe('metricsDataSourceProfileProvider', () => {
     });
 
     it.each([
-      'TS metrics-*',
+      'TS metrics-*,',
       'FROM metrics-* | LIMIT 10',
       'FROM metrics-* | SORT @timestamp DESC',
       'FROM metrics-* | WHERE host.name="foo"',
@@ -103,8 +103,15 @@ describe('metricsDataSourceProfileProvider', () => {
       provider = createProvider();
     });
 
-    it('when query references non-metrics indices', async () => {
+    it('when query references a non-metrics index', async () => {
       const result = await provider.resolve(createParams({ query: { esql: 'FROM traces-*' } }));
+      expect(result).toEqual({ isMatch: false });
+    });
+
+    it('when query references a metrics index and a non-metrics index', async () => {
+      const result = await provider.resolve(
+        createParams({ query: { esql: 'FROM logs-*,metrics-*' } })
+      );
       expect(result).toEqual({ isMatch: false });
     });
 

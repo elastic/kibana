@@ -40,7 +40,7 @@ export const createMetricsDataSourceProfileProvider = (
     }
 
     const indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    if (!services.metricsContextService.containsMetricsIndexPattern(indexPattern)) {
+    if (!services.metricsContextService.isMetricsIndexPattern(indexPattern)) {
       return { isMatch: false };
     }
 
