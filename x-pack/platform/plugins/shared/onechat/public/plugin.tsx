@@ -23,6 +23,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 
 export class OnechatPlugin
   implements
@@ -62,7 +63,16 @@ export class OnechatPlugin
       registerAnalytics({ analytics: core.analytics });
     }
 
-    registerManagementSection({ core, management: deps.management });
+    try {
+      core.getStartServices().then(([coreStart]) => {
+        const { capabilities } = coreStart.application;
+        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
+          registerManagementSection({ core, management: deps.management });
+        }
+      });
+    } catch (error) {
+      this.logger.error('Error registering Agent Builder management section', error);
+    }
 
     return {};
   }
