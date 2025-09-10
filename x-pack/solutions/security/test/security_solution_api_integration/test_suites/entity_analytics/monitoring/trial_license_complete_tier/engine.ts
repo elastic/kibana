@@ -21,7 +21,6 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const privmonUtils = PrivMonUtils(getService);
   const log = getService('log');
-  const es = getService('es');
   const spaces = getService('spaces');
   const customSpace = 'privmontestspace';
   const supertest = getService('supertest');
@@ -359,11 +358,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        try {
-          await es.indices.delete({ index: indexName }, { ignore: [404] });
-        } catch (err) {
-          log.warning(`Failed to clean up in afterEach: ${err.message}`);
-        }
+        await indexSyncUtils.deleteIndex();
         await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
       });

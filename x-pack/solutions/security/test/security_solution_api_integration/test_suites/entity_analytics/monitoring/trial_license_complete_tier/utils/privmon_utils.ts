@@ -166,22 +166,6 @@ export const PrivMonUtils = (
   const findUser = (users: ListPrivMonUsersResponse, username: string) =>
     users.find((user) => user.user?.name === username);
 
-  const createSourceIndex = async (indexName: string) =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    });
-
   const _waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
     let lastSeenLength = -1;
 
@@ -211,7 +195,6 @@ export const PrivMonUtils = (
   return {
     assertIsPrivileged,
     bulkUploadUsersCsv,
-    createSourceIndex,
     expectTimestampsHaveBeenUpdated,
     findUser,
     initPrivMonEngine,

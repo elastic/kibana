@@ -81,10 +81,19 @@ export const PlainIndexSyncUtils = (
     return response;
   };
 
+  const deleteIndex = async () => {
+    try {
+      await es.indices.delete({ index: indexName }, { ignore: [404] });
+    } catch (err) {
+      log.error(`Error deleting index ${indexName}: ${err}`);
+    }
+  };
+
   return {
     createIndex,
     addUsersToIndex,
     deleteUserFromIndex,
     createEntitySourceForIndex,
+    deleteIndex,
   };
 };
