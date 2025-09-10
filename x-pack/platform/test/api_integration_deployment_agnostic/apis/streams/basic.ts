@@ -298,6 +298,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('Does not index to logs.nginx.access if routing is disabled', async () => {
+        await putStream(apiClient, 'logs.nginx', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [],
+              },
+              wired: {
+                fields: {},
+                routing: [
+                  {
+                    destination: 'logs.nginx.access',
+                    where: { field: 'severity_text', eq: 'info' },
+                    status: 'disabled',
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:30.000Z',
+          message: JSON.stringify({
+            'log.level': 'error',
+            'log.logger': 'nginx',
+            message: 'test',
+          }),
+        };
+        await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
+      });
+
       it('Fork logs to logs.nginx.error with invalid condition', async () => {
         const body = {
           stream: {
