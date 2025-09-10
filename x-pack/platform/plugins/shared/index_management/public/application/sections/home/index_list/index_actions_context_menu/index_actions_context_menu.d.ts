@@ -35,7 +35,6 @@ export interface IndexActionsContextMenuProps {
   clearCacheIndices: () => Promise<void>;
   forcemergeIndices: (maxNumSegments: string) => Promise<void>;
   deleteIndices: () => Promise<void>;
-  convertToLookupIndex: (lookupIndexName: string) => Promise<void>;
 
   // used to determine if all indices are open
   indexStatusByName: {

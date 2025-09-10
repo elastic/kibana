@@ -489,12 +489,20 @@ export function useLoadInferenceEndpoints() {
   });
 }
 
-export const convertToLookupIndex = async (sourceIndexName: string, lookupIndexName: string) => {
-  await reindexService.startReindex({
+export const startReindex = (sourceIndexName: string, lookupIndexName: string) => {
+  return reindexService.startReindex({
     indexName: sourceIndexName,
     newIndexName: lookupIndexName,
     settings: {
       mode: 'lookup',
     },
   });
+};
+
+export const cancelReindex = (sourceIndexName: string) => {
+  return reindexService.cancelReindex(sourceIndexName);
+};
+
+export const getReindexStatus = (sourceIndexName: string) => {
+  return reindexService.getReindexStatus(sourceIndexName);
 };

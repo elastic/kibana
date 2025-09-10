@@ -23,6 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ConvertToLookupIndexModalContainer } from '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import {
   INDEX_OPEN,
@@ -31,8 +32,8 @@ import {
   MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
 } from '../../../../../../common/constants';
 import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
+import { notificationService } from '../../../../services/notification';
 import { AppContext } from '../../../../app_context';
-import { ConvertToLookupIndexModal } from '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;
@@ -302,12 +303,12 @@ export class IndexActionsContextMenu extends Component {
     }));
   };
 
-  closePopoverAndExecute = (func, param) => {
+  closePopoverAndExecute = (func) => {
     this.setState({
       isPopoverOpen: false,
       renderConfirmModal: false,
     });
-    func(param);
+    func();
     this.props.resetSelection && this.props.resetSelection();
   };
 
@@ -505,15 +506,38 @@ export class IndexActionsContextMenu extends Component {
   };
 
   renderConvertToLookupIndexModal = () => {
-    const { convertToLookupIndex, indexNames } = this.props;
+    const {
+      services: { extensionsService },
+      core: { application, http },
+    } = this.context;
+
+    const { indexNames, indicesListURLParams } = this.props;
+    const sourceIndexName = indexNames[0];
 
     return (
-      <ConvertToLookupIndexModal
+      <ConvertToLookupIndexModalContainer
         onCloseModal={() => this.closeConfirmModal()}
-        onConvert={(lookupIndexName) =>
-          this.closePopoverAndExecute(convertToLookupIndex, lookupIndexName)
-        }
-        sourceIndexName={indexNames[0]}
+        onSuccess={(lookupIndexName) => {
+          navigateToIndexDetailsPage(
+            lookupIndexName,
+            indicesListURLParams,
+            extensionsService,
+            application,
+            http,
+            IndexDetailsSection.Overview
+          );
+
+          notificationService.showSuccessToast(
+            i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastTitle', {
+              defaultMessage: 'Lookup index created',
+            }),
+            i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastMessage', {
+              defaultMessage: 'The {lookupIndexName} has been created.',
+              values: { lookupIndexName },
+            })
+          );
+        }}
+        sourceIndexName={sourceIndexName}
       />
     );
   };

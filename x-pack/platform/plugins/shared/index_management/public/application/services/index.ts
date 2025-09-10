@@ -28,7 +28,9 @@ export {
   useLoadIndexSettings,
   createIndex,
   useLoadInferenceEndpoints,
-  convertToLookupIndex,
+  startReindex,
+  cancelReindex,
+  getReindexStatus,
 } from './api';
 
 export { sortTable } from './sort_table';
