@@ -79,6 +79,9 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/utility-types",
     "@kbn/apm-synthtrace-client",
-    "@kbn/streamlang"
+    "@kbn/streamlang",
+    "@kbn/data-quality",
+    "@kbn/core-notifications-browser",
+    "@kbn/io-ts-utils",
   ]
 }

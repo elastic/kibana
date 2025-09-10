@@ -11,15 +11,38 @@ import type { ParseOptions } from '../parser';
 import { Parser } from '../parser';
 import { createTag } from './tag';
 import { SynthNode } from './synth_node';
+import { SOURCE_COMMANDS } from '../parser/constants';
 import type { SynthGenerator } from './types';
 import type { ESQLAstQueryExpression } from '../types';
+
+const doesStartWithSourceCommand = (src: string): boolean => {
+  const tokens = Parser.tokens(src, 1);
+
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  return SOURCE_COMMANDS.has(tokens[0].text.toUpperCase());
+};
 
 const generator: SynthGenerator<ESQLAstQueryExpression> = (
   src: string,
   { withFormatting = true, ...rest }: ParseOptions = {}
 ): ESQLAstQueryExpression => {
   src = src.trimStart();
-  const { root } = Parser.parseQuery(src, { withFormatting, ...rest });
+  const options = { withFormatting, ...rest };
+  const isSourceQuery = doesStartWithSourceCommand(src);
+
+  if (!isSourceQuery) {
+    src = `FROM a | ${src}`;
+  }
+
+  const { root } = Parser.parseQuery(src, options);
+
+  if (!isSourceQuery) {
+    root.commands.shift();
+  }
+
   const node = SynthNode.from(root);
 
   return node;

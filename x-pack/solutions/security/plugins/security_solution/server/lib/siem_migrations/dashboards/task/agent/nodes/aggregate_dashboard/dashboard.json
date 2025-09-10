@@ -1,0 +1,23 @@
+{
+    "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+        "panelsJSON": "",
+        "timeRestore": false,
+        "title": "",
+        "version": 2
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2024-11-22T22:38:58.430Z",
+    "created_by": "u_3965676980_cloud",
+    "id": "cb50f38e-2cdd-42cf-bd51-16063303dda1",
+    "managed": false,
+    "type": "dashboard",
+    "typeMigrationVersion": "10.2.0",
+    "updated_at": "2024-11-23T00:49:12.254Z",
+    "updated_by": "u_3965676980_cloud",
+    "version": "WzEzODMsNF0="
+}
