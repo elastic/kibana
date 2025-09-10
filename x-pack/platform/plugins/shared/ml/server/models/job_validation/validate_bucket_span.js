@@ -6,7 +6,8 @@
  */
 
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '@kbn/ml-validators';
-import { mlFunctionToESAggregation, parseTimeIntervalForJob } from '@kbn/ml-common-utils/job_utils';
+import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_function_to_es_aggregation';
+import { parseTimeIntervalForJob } from '@kbn/ml-common-utils/job_utils/parse_time_interval_for_job';
 
 import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 

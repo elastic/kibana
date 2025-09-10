@@ -48,11 +48,9 @@ import type { JobExistResult, JobStat } from '@kbn/ml-common-types/data_recogniz
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { MlClient } from '@kbn/ml-client';
 import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
-import {
-  getLatestDataOrBucketTimestamp,
-  prefixDatafeedId,
-  splitIndexPatternNames,
-} from '@kbn/ml-common-utils/job_utils';
+import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
+import { prefixDatafeedId } from '@kbn/ml-common-utils/job_utils/prefix_datafeed_id';
+import { splitIndexPatternNames } from '@kbn/ml-common-utils/job_utils/split_index_pattern_names';
 import { resultsServiceProvider } from '@kbn/ml-services/results_service';
 
 import { getAuthorizationHeader } from '../../lib/request_authorization';

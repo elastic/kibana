@@ -36,7 +36,7 @@ import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '@kbn/ml-common-constants/new_job';
 import type { MlCalendar } from '@kbn/ml-common-types/calendars';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { createDatafeedId } from '@kbn/ml-common-utils/job_utils';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
 import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
 import { getFirstKeyInObject } from '@kbn/ml-common-utils/object_utils';
 

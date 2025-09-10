@@ -14,10 +14,8 @@ import type { MlEntityField, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import {
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-} from '@kbn/ml-common-utils/job_utils';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
 
 import type { ModelPlotOutput } from '@kbn/ml-services/results_service_2/result_service_rx';
 import {

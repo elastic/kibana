@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList, EuiFormRow } from '@elas
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_QUERY_DELAY } from '@kbn/ml-common-constants/new_job';
-import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils';
+import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils/calculate_datafeed_frequency_default_seconds';
 
 import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
