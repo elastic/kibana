@@ -15,6 +15,8 @@ import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_pr
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { SiemMigrationsDataLookupsClient } from '../../common/data/siem_migrations_data_lookups_client';
 import type { RuleMigrationIndexNameProviders, RuleMigrationsClientDependencies } from '../types';
+import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
@@ -36,7 +38,7 @@ export class RuleMigrationsDataClient extends SiemMigrationsDataClient<
     esScopedClient: IScopedClusterClient,
     logger: Logger,
     spaceId: string,
-    dependencies: RuleMigrationsClientDependencies
+    dependencies: SiemMigrationsClientDependencies
   ) {
     super(esScopedClient, logger);
 
