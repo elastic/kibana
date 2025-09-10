@@ -138,11 +138,19 @@ const labels = {
   }),
 };
 
-const getProgressionItems = ({ step, toolHref }: { step: ToolCallStep; toolHref: string }) => {
+const getProgressionItems = ({
+  step,
+  stepIndex,
+  toolHref,
+}: {
+  step: ToolCallStep;
+  stepIndex: number;
+  toolHref: string;
+}) => {
   return (
     step.progression?.map((progress, index) => (
       <ToolProgressDisplay
-        key={`${step.tool_id}-progress-${index}`}
+        key={`step-${stepIndex}-${step.tool_id}-progress-${index}`}
         progress={progress}
         toolId={step.tool_id}
         toolHref={toolHref}
@@ -151,21 +159,30 @@ const getProgressionItems = ({ step, toolHref }: { step: ToolCallStep; toolHref:
   );
 };
 
-const getResultItems = ({ step, toolHref }: { step: ToolCallStep; toolHref: string }) => {
+const getResultItems = ({
+  step,
+  stepIndex,
+  toolHref,
+}: {
+  step: ToolCallStep;
+  stepIndex: number;
+  toolHref: string;
+}) => {
   return step.results.map((result: ToolResult, index) => (
     <ThinkingItemLayout
-      key={`${step.tool_id}-result-${index}`}
+      key={`step-${stepIndex}-${step.tool_id}-result-${index}`}
       content={<ToolResultDisplay toolResult={result} />}
       label={{ value: step.tool_id, href: toolHref }}
     />
   ));
 };
 
+const stepsListStyles = css`
+  list-style: none;
+  padding: none;
+`;
+
 export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
-  const stepsListStyles = css`
-    list-style: none;
-    padding: none;
-  `;
   const agentId = useAgentId();
   const { createOnechatUrl } = useNavigation();
   const agentHref = agentId && createOnechatUrl(appPaths.agents.edit({ agentId }));
@@ -181,14 +198,22 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
         if (isToolCallStep(step)) {
           return [
             <ToolCallDisplay
-              key={`step-tool-call-${index}`}
+              key={`step-${index}-tool-call`}
               step={step}
               agentId={agentId}
               agentHref={agentHref}
               toolHref={createToolUrl({ toolId: step.tool_id })}
             />,
-            ...getProgressionItems({ step, toolHref: createToolUrl({ toolId: step.tool_id }) }),
-            ...getResultItems({ step, toolHref: createToolUrl({ toolId: step.tool_id }) }),
+            ...getProgressionItems({
+              step,
+              stepIndex: index,
+              toolHref: createToolUrl({ toolId: step.tool_id }),
+            }),
+            ...getResultItems({
+              step,
+              stepIndex: index,
+              toolHref: createToolUrl({ toolId: step.tool_id }),
+            }),
           ];
         }
 
