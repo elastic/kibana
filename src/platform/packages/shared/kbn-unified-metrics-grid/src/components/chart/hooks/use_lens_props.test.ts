@@ -88,23 +88,30 @@ describe('useLensProps', () => {
     );
 
     await waitFor(() => {
-      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith({
-        chartType: 'xy',
-        title: 'Test Chart',
-        layers: mockChartLayers,
-        axisTitleVisibility: {
-          showYRightAxisTitle: false,
-          showXAxisTitle: false,
-          showYAxisTitle: false,
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        {
+          chartType: 'xy',
+          title: 'Test Chart',
+          layers: mockChartLayers,
+          axisTitleVisibility: {
+            showYRightAxisTitle: false,
+            showXAxisTitle: false,
+            showYAxisTitle: false,
+          },
+          dataset: {
+            esql: 'FROM metrics-*',
+          },
+          fittingFunction: 'Linear',
+          legend: {
+            show: false,
+          },
         },
-        dataset: {
-          esql: 'FROM metrics-*',
-        },
-        fittingFunction: 'Linear',
-        legend: {
-          show: false,
-        },
-      });
+        {
+          query: {
+            esql: 'FROM metrics-*',
+          },
+        }
+      );
     });
   });
 

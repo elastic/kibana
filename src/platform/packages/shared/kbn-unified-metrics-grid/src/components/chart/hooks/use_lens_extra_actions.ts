@@ -21,12 +21,12 @@ export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
   const extraActions = useMemo(() => {
     const actions: Action[] = [];
 
-    if (config.copyToDashboard) {
+    if (config.copyToDashboard?.onClick) {
       actions.push(getCopyToDashboardAction(config.copyToDashboard.onClick));
     }
 
     return actions;
-  }, [config.copyToDashboard]);
+  }, [config.copyToDashboard?.onClick]);
 
   return extraActions;
 };
