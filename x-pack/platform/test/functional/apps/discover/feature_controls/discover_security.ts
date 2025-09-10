@@ -53,7 +53,7 @@ export default function (ctx: FtrProviderContext) {
     await timePicker.setDefaultAbsoluteRange();
   }
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
     before(async () => {
