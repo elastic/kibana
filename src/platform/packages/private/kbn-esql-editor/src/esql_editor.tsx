@@ -695,8 +695,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
+      // forces refresh
+      if (dataSourcesCache.clear) {
+        dataSourcesCache.clear();
+      }
       if (getJoinIndices) {
-        // forces refresh
         await getJoinIndices({ forceRefresh: true });
       }
       onQueryUpdate(resultQuery);
@@ -704,7 +707,7 @@ const ESQLEditorInternal = function ESQLEditor({
       // but the lookup index was created
       await queryValidation({ active: true });
     },
-    [getJoinIndices, onQueryUpdate, queryValidation]
+    [dataSourcesCache, getJoinIndices, onQueryUpdate, queryValidation]
   );
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
