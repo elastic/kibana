@@ -21622,7 +21622,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -22188,7 +22189,8 @@
                                         "ilm_policy",
                                         "data_stream_ilm_policy",
                                         "transform",
-                                        "ml_model"
+                                        "ml_model",
+                                        "knowledge_base"
                                       ],
                                       "type": "string"
                                     },
@@ -22312,6 +22314,10 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "previous_version": {
+                                "nullable": true,
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string"
@@ -22636,7 +22642,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -22854,7 +22861,8 @@
                                                 "ilm_policy",
                                                 "data_stream_ilm_policy",
                                                 "transform",
-                                                "ml_model"
+                                                "ml_model",
+                                                "knowledge_base"
                                               ],
                                               "type": "string"
                                             },
@@ -23922,7 +23930,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -24341,7 +24350,8 @@
                                       "ilm_policy",
                                       "data_stream_ilm_policy",
                                       "transform",
-                                      "ml_model"
+                                      "ml_model",
+                                      "knowledge_base"
                                     ],
                                     "type": "string"
                                   },
@@ -24465,6 +24475,10 @@
                                 "type": "string"
                               },
                               "type": "array"
+                            },
+                            "previous_version": {
+                              "nullable": true,
+                              "type": "string"
                             },
                             "type": {
                               "type": "string"
@@ -24873,7 +24887,8 @@
                                   "ilm_policy",
                                   "data_stream_ilm_policy",
                                   "transform",
-                                  "ml_model"
+                                  "ml_model",
+                                  "knowledge_base"
                                 ],
                                 "type": "string"
                               },
@@ -25289,7 +25304,8 @@
                                       "ilm_policy",
                                       "data_stream_ilm_policy",
                                       "transform",
-                                      "ml_model"
+                                      "ml_model",
+                                      "knowledge_base"
                                     ],
                                     "type": "string"
                                   },
@@ -25413,6 +25429,10 @@
                                 "type": "string"
                               },
                               "type": "array"
+                            },
+                            "previous_version": {
+                              "nullable": true,
+                              "type": "string"
                             },
                             "type": {
                               "type": "string"
@@ -59260,6 +59280,12 @@
                                         },
                                         "type": "array"
                                       },
+                                      "metadata": {
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
                                       "tags": {
                                         "items": {
                                           "type": "string"
@@ -59268,6 +59294,7 @@
                                       }
                                     },
                                     "required": [
+                                      "metadata",
                                       "tags",
                                       "members"
                                     ],
@@ -59732,6 +59759,12 @@
                         },
                         "type": "array"
                       },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
                       "tags": {
                         "items": {
                           "type": "string"
@@ -59740,6 +59773,7 @@
                       }
                     },
                     "required": [
+                      "metadata",
                       "tags",
                       "members"
                     ],

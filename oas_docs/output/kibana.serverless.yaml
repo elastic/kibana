@@ -24736,6 +24736,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -25128,6 +25129,7 @@ paths:
                                       - data_stream_ilm_policy
                                       - transform
                                       - ml_model
+                                      - knowledge_base
                                     type: string
                                   version:
                                     type: string
@@ -25210,6 +25212,9 @@ paths:
                               items:
                                 type: string
                               type: array
+                            previous_version:
+                              nullable: true
+                              type: string
                             type:
                               type: string
                             updated_at:
@@ -25431,6 +25436,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -25581,6 +25587,7 @@ paths:
                                               - data_stream_ilm_policy
                                               - transform
                                               - ml_model
+                                              - knowledge_base
                                             type: string
                                           version:
                                             type: string
@@ -26043,6 +26050,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -26332,6 +26340,7 @@ paths:
                                     - data_stream_ilm_policy
                                     - transform
                                     - ml_model
+                                    - knowledge_base
                                   type: string
                                 version:
                                   type: string
@@ -26414,6 +26423,9 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            nullable: true
+                            type: string
                           type:
                             type: string
                           updated_at:
@@ -26691,6 +26703,7 @@ paths:
                                 - data_stream_ilm_policy
                                 - transform
                                 - ml_model
+                                - knowledge_base
                               type: string
                             version:
                               type: string
@@ -26979,6 +26992,7 @@ paths:
                                     - data_stream_ilm_policy
                                     - transform
                                     - ml_model
+                                    - knowledge_base
                                   type: string
                                 version:
                                   type: string
@@ -27061,6 +27075,9 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            nullable: true
+                            type: string
                           type:
                             type: string
                           updated_at:
@@ -52299,11 +52316,16 @@ paths:
                                       items:
                                         type: string
                                       type: array
+                                    metadata:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
                                     tags:
                                       items:
                                         type: string
                                       type: array
                                   required:
+                                    - metadata
                                     - tags
                                     - members
                               required:
@@ -52559,11 +52581,16 @@ paths:
                       items:
                         type: string
                       type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
                     tags:
                       items:
                         type: string
                       type: array
                   required:
+                    - metadata
                     - tags
                     - members
               required:

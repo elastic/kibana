@@ -22,7 +22,7 @@ export interface DeleteToolResponse {
   success: boolean;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags'> &
+export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
 export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
@@ -54,4 +54,18 @@ export interface BulkDeleteToolResponse {
 
 export interface ExecuteToolResponse {
   result: ToolResult[];
+}
+
+export interface ResolveSearchSourcesRequest {
+  pattern: string;
+}
+
+export interface ResolveSearchSourceItem {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
+}
+
+export interface ResolveSearchSourcesResponse {
+  results: ResolveSearchSourceItem[];
+  total: number;
 }
