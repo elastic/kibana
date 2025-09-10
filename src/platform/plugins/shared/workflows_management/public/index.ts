@@ -22,7 +22,7 @@ export type { WorkflowExecutionProps } from './features/workflow_execution_detai
 
 // Lazy export to avoid bundling the component in the main plugin bundle
 // This creates a dynamic import that will be code-split
-export const WorkflowExecution = React.lazy(() => 
+export const WorkflowExecution = React.lazy(() =>
   import('./features/workflow_execution_detail/ui/workflow_execution.lazy').then((module) => ({
     default: module.WorkflowExecutionLazy,
   }))

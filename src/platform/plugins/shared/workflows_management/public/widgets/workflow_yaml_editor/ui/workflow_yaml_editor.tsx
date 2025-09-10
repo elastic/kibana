@@ -24,7 +24,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
-import { getWorkflowZodSchema, getWorkflowZodSchemaLoose, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -152,7 +152,6 @@ const useWorkflowJsonSchema = () => {
     }
   }, []);
 };
-
 
 /**
  * Since we implemented custom error formatting at the validation level,

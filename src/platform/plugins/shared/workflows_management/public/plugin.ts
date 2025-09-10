@@ -36,7 +36,7 @@ export class WorkflowsPlugin
       const { getWorkflowsConnectorType } = await import('./connectors/workflows');
       plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
     };
-    
+
     // Register the connector type immediately but load it lazily
     registerConnectorType();
 

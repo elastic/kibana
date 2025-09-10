@@ -123,8 +123,11 @@ const staticConnectors: ConnectorContract[] = [
 function generateElasticsearchConnectors(): ConnectorContract[] {
   // Lazy load the large generated files to keep them out of the main bundle
   const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated_es_connectors');
-  const { ENHANCED_ELASTICSEARCH_CONNECTORS, mergeEnhancedConnectors } = require('./enhanced_es_connectors');
-  
+  const {
+    ENHANCED_ELASTICSEARCH_CONNECTORS,
+    mergeEnhancedConnectors,
+  } = require('./enhanced_es_connectors');
+
   // Return enhanced connectors (merge generated with enhanced definitions)
   return mergeEnhancedConnectors(
     GENERATED_ELASTICSEARCH_CONNECTORS,
@@ -135,7 +138,7 @@ function generateElasticsearchConnectors(): ConnectorContract[] {
 function generateKibanaConnectors(): ConnectorContract[] {
   // Lazy load the generated Kibana connectors
   const { GENERATED_KIBANA_CONNECTORS } = require('./generated_kibana_connectors');
-  
+
   // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
   return GENERATED_KIBANA_CONNECTORS;
 }
