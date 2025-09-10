@@ -8,143 +8,81 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiFlexGridProps, IconType } from '@elastic/eui';
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiFlexGroup,
-  useEuiTheme,
-  euiScrollBarStyles,
-  EuiText,
-  EuiIcon,
-} from '@elastic/eui';
+import type { EuiFlexGridProps } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { css } from '@emotion/react';
-import { IconChartBarStacked } from '@kbn/chart-icons';
-import { i18n } from '@kbn/i18n';
-import { MetricChart } from './metric_chart';
+import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { Observable } from 'rxjs';
+import { Chart } from './chart';
 
-export type MetricsGridProps = {
-  timeRange: { from?: string; to?: string };
-  loading: boolean;
+export type MetricsGridProps = Pick<
+  ChartSectionProps,
+  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+> & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
   columns: EuiFlexGridProps['columns'];
+  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
 } & (
-  | {
-      pivotOn: 'metric';
-      fields: MetricField[];
-    }
-  | {
-      pivotOn: 'dimension';
-      fields: MetricField;
-    }
-);
+    | {
+        pivotOn: 'metric';
+        fields: MetricField[];
+      }
+    | {
+        pivotOn: 'dimension';
+        fields: MetricField;
+      }
+  );
 
 export const MetricsGrid = ({
   fields,
-  timeRange,
-  loading,
+  searchSessionId,
+  onBrushEnd,
+  onFilter,
   dimensions,
   pivotOn,
-  filters = [],
+  services,
   columns,
+  abortController,
+  requestParams,
+  discoverFetch$,
+  filters = [],
 }: MetricsGridProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        css={css`
-          min-height: 400px;
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingChart size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const colorPalette = useMemo(
+    () => Object.values(euiTheme.colors.vis).slice(0, 10),
+    [euiTheme.colors.vis]
+  );
 
-  if (pivotOn === 'metric' && fields.length === 0) {
-    return (
-      <div
-        css={css`
-          width: 100%;
-          height: 100%;
-        `}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="spaceAround"
-          css={css`
-            height: 100%;
-          `}
-          gutterSize="s"
-        >
-          <EuiFlexItem
-            css={css`
-              justify-content: end;
-            `}
-          >
-            <EuiIcon type={IconChartBarStacked as IconType} size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs">
-              {i18n.translate('metricsExperience.grid.noData', {
-                defaultMessage: 'No results found',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
-  }
+  const rows = useMemo(() => {
+    return pivotOn === 'metric'
+      ? fields.map((field, i) => ({ key: `${field.name}-${i}`, metric: field }))
+      : dimensions.map((dim, i) => ({ key: `${dim}-${i}`, metric: fields }));
+  }, [pivotOn, fields, dimensions]);
 
   return (
-    <EuiFlexGrid
-      columns={columns}
-      gutterSize="s"
-      css={css`
-        overflow: auto;
-        padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-        ${euiScrollBarStyles(euiThemeContext)}
-      `}
-      data-test-subj="unifiedMetricsExperienceGrid"
-    >
-      {pivotOn === 'metric'
-        ? fields.map((field, index) => (
-            <EuiFlexItem key={field.name}>
-              <MetricChart
-                metric={field}
-                timeRange={timeRange}
-                dimensions={dimensions}
-                filters={filters}
-                colorIndex={index}
-                size={chartSize}
-              />
-            </EuiFlexItem>
-          ))
-        : dimensions.map((dimension, index) => (
-            <EuiFlexItem key={dimension}>
-              <MetricChart
-                metric={fields}
-                timeRange={timeRange}
-                byDimension={dimension}
-                dimensions={[dimension]}
-                filters={filters}
-                colorIndex={index}
-                size={chartSize}
-              />
-            </EuiFlexItem>
-          ))}
+    <EuiFlexGrid columns={columns} gutterSize="s" data-test-subj="unifiedMetricsExperienceGrid">
+      {rows.map(({ key, metric }, index) => (
+        <EuiFlexItem key={key}>
+          <Chart
+            metric={metric}
+            size={chartSize}
+            color={colorPalette[index % colorPalette.length]}
+            dimensions={dimensions}
+            discoverFetch$={discoverFetch$}
+            requestParams={requestParams}
+            services={services}
+            abortController={abortController}
+            searchSessionId={searchSessionId}
+            filters={filters}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+          />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGrid>
   );
 };

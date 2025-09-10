@@ -19,7 +19,7 @@ import {
 } from './constants';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 
-const genericOperationOptionsSchema = {
+export const genericOperationOptionsSchema = {
   ...formatSchema,
   /**
    * Label for the operation
@@ -56,6 +56,18 @@ export const formulaOperationDefinitionSchema = schema.object({
   formula: schema.string({
     meta: {
       description: 'Formula',
+    },
+  }),
+});
+
+export const esqlColumnSchema = schema.object({
+  /**
+   * Value
+   */
+  operation: schema.literal('value'),
+  column: schema.string({
+    meta: {
+      description: 'Column to use',
     },
   }),
 });

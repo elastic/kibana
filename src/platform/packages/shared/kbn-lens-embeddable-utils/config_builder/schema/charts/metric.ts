@@ -24,9 +24,11 @@ import {
   staticOperationDefinitionSchema,
   uniqueCountMetricOperationSchema,
   sumMetricOperationSchema,
+  esqlColumnSchema,
+  genericOperationOptionsSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
-import { datasetSchema } from '../dataset';
+import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
@@ -135,7 +137,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Prefix
    */
-  prefix: schema.string({ meta: { description: 'Prefix' }, defaultValue: '' }),
+  prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
   /**
    * Compare to
    */
@@ -168,7 +170,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const metricStateSchema = schema.object({
+export const metricStateSchemaNoESQL = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -241,4 +243,37 @@ export const metricStateSchema = schema.object({
   ),
 });
 
+const esqlMetricState = schema.object({
+  type: schema.literal('metric'),
+  ...sharedPanelInfoSchema,
+  ...layerSettingsSchema,
+  ...datasetEsqlTableSchema,
+  /**
+   * Primary value configuration, must define operation.
+   */
+  metric: schema.allOf([
+    schema.object(genericOperationOptionsSchema),
+    metricStatePrimaryMetricOptionsSchema,
+    esqlColumnSchema,
+  ]),
+  /**
+   * Secondary value configuration, must define operation.
+   */
+  secondary_metric: schema.maybe(
+    schema.allOf([
+      schema.object(genericOperationOptionsSchema),
+      metricStateSecondaryMetricOptionsSchema,
+      esqlColumnSchema,
+    ])
+  ),
+  /**
+   * Configure how to break down the metric (e.g. show one metric per term).
+   */
+  breakdown_by: schema.maybe(schema.allOf([metricStateBreakdownByOptionsSchema, esqlColumnSchema])),
+});
+
+export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState]);
+
 export type MetricState = TypeOf<typeof metricStateSchema>;
+export type MetricStateNoESQL = TypeOf<typeof metricStateSchemaNoESQL>;
+export type MetricStateESQL = TypeOf<typeof esqlMetricState>;
