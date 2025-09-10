@@ -17,6 +17,11 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { schema } from '@kbn/config-schema';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -25,6 +30,7 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { NO_DEFAULT_CONNECTOR } from '../common/constants';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
@@ -49,18 +55,6 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.capabilities.registerProvider(() => {
-      return {
-        management: {
-          kibana: {
-            aiAssistantManagementSelection: true,
-            observabilityAiAssistantManagement: true,
-            securityAiAssistantManagement: true,
-          },
-        },
-      };
-    });
-
     plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
@@ -119,6 +113,36 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.string(),
+        value: NO_DEFAULT_CONNECTOR,
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
+    core.capabilities.registerProvider(() => {
+      return {
+        management: {
+          kibana: {
+            aiAssistantManagementSelection: true,
+            observabilityAiAssistantManagement: true,
+            securityAiAssistantManagement: true,
+          },
+        },
+      };
+    });
+
     const { cloud } = plugins;
     const serverlessProjectType = cloud?.serverless.projectType;
 
