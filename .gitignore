@@ -181,6 +181,7 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 
 .moon/cache
 
+# Ruler automatically managed
 # START Ruler Generated Files
 /.cursor/mcp.json
 /.cursor/mcp.json.bak
