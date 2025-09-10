@@ -50,23 +50,22 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
     const nextPath: string | undefined = nextLocation?.pathname;
     const currentPath = currentPathRef.current;
 
-    // Normalize paths by removing /app/workflows prefix for comparison
-    const normalizePath = (path: string) => {
-      return path.replace(/^\/app\/workflows/, '');
+    // Helper to determine if navigation is within the same workflow
+    const isSameWorkflowNavigation = (currentPath: string, nextPath: string): boolean => {
+      const normalizePath = (path: string) => path.replace(/^\/app\/workflows/, '');
+      const normalizedCurrent = normalizePath(currentPath);
+      const normalizedNext = nextPath ? normalizePath(nextPath) : '';
+      return (
+        !!nextPath &&
+        (
+          normalizedNext === normalizedCurrent ||
+          (normalizedCurrent.startsWith('/workflow-') && normalizedNext.startsWith(normalizedCurrent)) ||
+          (normalizedNext.startsWith('/workflow-') && normalizedCurrent.startsWith(normalizedNext))
+        )
+      );
     };
 
-    const normalizedCurrent = normalizePath(currentPath);
-    const normalizedNext = nextPath ? normalizePath(nextPath) : '';
-
-    // Consider navigation within the same workflow page as in-page
-    // Only if both paths contain the same workflow ID
-    const isSameWorkflow =
-      !!nextPath &&
-      (normalizedNext === normalizedCurrent ||
-        (normalizedCurrent.startsWith('/workflow-') &&
-          normalizedNext.startsWith(normalizedCurrent)) ||
-        (normalizedNext.startsWith('/workflow-') && normalizedCurrent.startsWith(normalizedNext)));
-
+    const isSameWorkflow = isSameWorkflowNavigation(currentPath, nextPath);
     const isLeavingPage = !!nextPath && !isSameWorkflow;
     const shouldShow = !!(hasUnsavedChanges && shouldPromptOnNavigation && isLeavingPage);
 
