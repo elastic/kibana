@@ -92,8 +92,7 @@ export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
-      index: layer.index,
-      query: layer.query,
+      query: layer.query?.esql ?? '',
     };
   }
   return {

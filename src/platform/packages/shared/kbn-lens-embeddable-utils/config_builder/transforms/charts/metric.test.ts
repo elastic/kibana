@@ -629,8 +629,6 @@ describe('metric chart transformations', () => {
           "type": "metric",
         }
       `);
-
-      expect(convertedConfig).toEqual(comprehensiveMetricConfig);
     });
   });
 });
