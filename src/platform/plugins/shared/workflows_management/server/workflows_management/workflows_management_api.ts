@@ -224,7 +224,7 @@ export class WorkflowsManagementApi {
   public async testStep(
     workflowYaml: string,
     stepId: string,
-    stepInputs: Record<string, any>,
+    stepContextMock: Record<string, any>,
     spaceId: string
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -248,7 +248,7 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
-      stepInputs
+      stepContextMock
     );
     return executeResponse.workflowExecutionId;
   }

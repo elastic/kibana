@@ -56,7 +56,9 @@ export class WorkflowContextManager {
       }
     });
 
-    return this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
+    return stepContext;
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
@@ -95,7 +97,7 @@ export class WorkflowContextManager {
     };
   }
 
-  private enrichStepContextAccordingToStepScope(stepContext: StepContext): StepContext {
+  private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
     for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
       const node = this.workflowExecutionGraph.getNode(nodeId);
       const nodeType = node?.type;
@@ -105,7 +107,32 @@ export class WorkflowContextManager {
           break;
       }
     }
+  }
 
-    return stepContext;
+  private enrichStepContextWithMockedData(stepContext: StepContext): void {
+    const stepContextMock: StepContext | undefined =
+      this.workflowExecutionRuntime.getWorkflowExecution().context?.stepContextMock;
+
+    if (stepContextMock) {
+      stepContextMock.execution = {
+        ...(stepContextMock.execution || {}),
+        ...stepContextMock.execution,
+      };
+
+      stepContextMock.workflow = {
+        ...(stepContextMock.workflow || {}),
+        ...stepContextMock.workflow,
+      };
+
+      if (!stepContextMock.foreach) {
+        stepContextMock.foreach = stepContextMock.foreach;
+      }
+
+      Object.entries(stepContextMock.steps).forEach(([stepId, stepData]) => {
+        if (!stepContext.steps[stepId]) {
+          stepContext.steps[stepId] = stepData;
+        }
+      });
+    }
   }
 }

@@ -51,14 +51,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     error: workflowError,
   } = useWorkflowDetail(id);
 
-  useEffect(() => {
-    console.log(workflow);
-  }, [workflow]);
-
-  useEffect(() => {
-    console.log(workflow);
-  }, [workflow]);
-
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
 
@@ -236,11 +228,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     }
   };
 
-  const submitStepRun = async () => {
+  const submitStepRun = async (stepContextMock: Record<string, any>) => {
     const response = await runIndividualStep.mutateAsync({
       stepId: testStepId!,
       workflowYaml,
-      stepInputs: {},
+      stepContextMock,
     });
     setSelectedExecution(response.workflowExecutionId);
     setTestStepId(null);
@@ -346,7 +338,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         <TestStepModal
           stepId={testStepId}
           workflowYaml={workflowYaml}
-          onSubmit={() => submitStepRun()}
+          onSubmit={({ stepInputs }) => submitStepRun(stepInputs)}
           onClose={() => setTestStepId(null)}
         />
       )}

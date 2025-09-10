@@ -10,7 +10,12 @@
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { extractNunjucksVariables } from '@kbn/workflows/common/utils';
 
-import type { AtomicGraphNode, EnterForeachNode, ExitForeachNode } from '@kbn/workflows';
+import type {
+  AtomicGraphNode,
+  EnterForeachNode,
+  ExitForeachNode,
+  StepContext,
+} from '@kbn/workflows';
 
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};
@@ -121,4 +126,72 @@ export function __findInputsInGraph(workflowGraph: WorkflowGraph): string[] {
   });
 
   return Array.from(resultSet);
+}
+
+export function buildStepContextMock(workflowGraph: WorkflowGraph): Partial<StepContext> {
+  const stepContextMock = {} as Partial<StepContext>;
+  const inputsInGraph = findInputsInGraph(workflowGraph);
+  const allInputsParsed = Object.values(inputsInGraph)
+    .flat()
+    .map((input) => parseJsPropertyAccess(input));
+  const stepVariables = allInputsParsed.filter((input) => input[0] === 'steps');
+
+  stepVariables.forEach((parsed) => {
+    const stepName = parsed.slice(1, 2).join();
+    const stepStateKey = parsed.slice(2, 3).join();
+
+    if (!['output', 'error'].includes(stepStateKey)) {
+      return;
+    }
+
+    if (!stepContextMock.steps) {
+      stepContextMock.steps = {};
+    }
+
+    if (!stepContextMock.steps[stepName]) {
+      stepContextMock.steps[stepName] = {} as Partial<StepContext['steps']>;
+    }
+
+    switch (stepStateKey) {
+      case 'output': {
+        stepContextMock.steps[stepName][stepStateKey] = {};
+        break;
+      }
+      case 'error': {
+        stepContextMock.steps[stepName][stepStateKey] = null;
+        break;
+      }
+    }
+  });
+
+  if (allInputsParsed.some((input) => input[0] === 'event')) {
+    stepContextMock.event = {};
+  }
+
+  const foreachInputs = allInputsParsed.filter((input) => input[0] === 'foreach');
+
+  if (foreachInputs.length) {
+    if (foreachInputs.some((x) => x.length === 1 && x[0] === 'foreach')) {
+      stepContextMock.foreach = {
+        item: {},
+        items: [],
+        index: 0,
+        total: 0,
+      };
+    } else {
+      if (!stepContextMock.foreach) {
+        stepContextMock.foreach = {} as StepContext['foreach'];
+      }
+
+      const itemReference = foreachInputs.find(
+        (input) => input[0] === 'foreach' && input[1] === 'item'
+      );
+
+      if (itemReference) {
+        stepContextMock.foreach!.item = {};
+      }
+    }
+  }
+
+  return stepContextMock;
 }

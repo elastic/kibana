@@ -80,9 +80,9 @@ export function useWorkflowActions() {
 
   const runIndividualStep = useMutation<RunWorkflowResponseDto, Error, RunStepCommand>({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: ({ stepId, stepInputs, workflowYaml }) => {
+    mutationFn: ({ stepId, stepContextMock, workflowYaml }) => {
       return http!.post(`/api/workflows/testStep`, {
-        body: JSON.stringify({ stepId, stepInputs, workflowYaml }),
+        body: JSON.stringify({ stepId, stepContextMock, workflowYaml }),
       });
     },
     onSuccess: ({ workflowExecutionId }, {}) => {
