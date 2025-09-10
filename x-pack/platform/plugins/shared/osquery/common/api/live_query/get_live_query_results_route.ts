@@ -15,6 +15,7 @@ export const getLiveQueryResultsRequestQuerySchema = t.type({
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.literal(Direction.asc), t.literal(Direction.desc), t.undefined]),
+  startDate: t.union([t.string, t.undefined]),
 });
 
 export type GetLiveQueryResultsRequestQuerySchema = t.OutputOf<
