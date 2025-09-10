@@ -26,7 +26,7 @@ import {
   createTabRuntimeState,
   selectTabRuntimeState,
   selectTabRuntimeAppState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
 } from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -60,11 +60,8 @@ export const setTabs: InternalStateThunkActionCreator<
         profilesManager,
         ebtManager,
         initialValues: {
-          unifiedHistogramLayoutProps: tab.duplicatedFromId
-            ? selectRestorableTabRuntimeHistogramLayoutProps(
-                runtimeStateManager,
-                tab.duplicatedFromId
-              )
+          unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
+            ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
             : undefined,
         },
       });
