@@ -244,7 +244,11 @@ export class ScopedDiscoverEBTManager {
 
       const embeddedQueryColumns = embeddedQueries
         ? embeddedQueries
-            .map((embeddedQuery) => getKqlFieldNamesFromExpression(embeddedQuery))
+            .map((embeddedQuery) => {
+              const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
+
+              return embeddedKQLFieldNames.length === 0 ? [FREE_TEXT] : embeddedKQLFieldNames;
+            })
             .flat()
         : [];
 
