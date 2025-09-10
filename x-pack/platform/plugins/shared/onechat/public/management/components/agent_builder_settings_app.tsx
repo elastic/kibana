@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { FieldRow, FieldRowKibanaProvider } from '@kbn/management-settings-components-field-row';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { BottomBarActions } from './bottom_bar_actions';
 import { useEditableSettings } from '../hooks/use_editable_settings';
 import { labels } from '../../application/utils/i18n';
+import { useKibana } from '../../application/hooks/use_kibana';
 
-export const AgentBuilderSettingsApp: React.FC<{}> = () => {
+export const AgentBuilderSettingsApp: React.FC = () => {
   const { services } = useKibana();
   const settingsKeys = [AGENT_BUILDER_ENABLED_SETTING_ID];
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
@@ -26,12 +26,11 @@ export const AgentBuilderSettingsApp: React.FC<{}> = () => {
       await saveAll();
       window.location.reload();
     } catch (e) {
-      const error = e as Error;
       services.notifications?.toasts.addDanger({
         title: i18n.translate('xpack.onechat.management.agentBuilder.save.error', {
           defaultMessage: 'An error occurred while saving the settings',
         }),
-        text: error.message,
+        text: e instanceof Error ? e.message : String(e),
       });
     }
   }
@@ -48,9 +47,9 @@ export const AgentBuilderSettingsApp: React.FC<{}> = () => {
         <EuiSpacer size="l" />
         <EuiPanel hasBorder grow={false}>
           <FieldRowKibanaProvider
-            docLinks={{ links: { management: services.docLinks!.links.management } }}
-            notifications={{ toasts: services.notifications!.toasts }}
-            settings={{ client: services.settings!.client }}
+            docLinks={{ links: { management: services.docLinks.links.management } }}
+            notifications={{ toasts: services.notifications.toasts }}
+            settings={{ client: services.settings.client }}
           >
             {settingsKeys.map((settingKey) => {
               const field = fields[settingKey];

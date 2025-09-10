@@ -71,7 +71,7 @@ export const registerManagementSection = ({
   management.sections.section.ai.registerApp({
     id: 'agentBuilder',
     title: ONECHAT_TITLE,
-    order: 1,
+    order: 3,
     mount: async (mountParams) => {
       const { mountManagementSection } = await import('./management/mount_management_section');
       return mountManagementSection({ core, mountParams });
