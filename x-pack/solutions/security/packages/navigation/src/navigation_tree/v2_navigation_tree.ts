@@ -38,6 +38,7 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   },
   {
     id: SecurityPageName.assetInventory,
+    iconV2: 'editorChecklist',
     link: securityLink(SecurityPageName.assetInventory),
     sideNavVersion: 'v2',
   },

@@ -14,6 +14,7 @@ export const createDashboardsNavigationTree = (
   { sideNavVersion }: { sideNavVersion?: SideNavVersion } = { sideNavVersion: 'v1' }
 ): NodeDefinition => ({
   id: SecurityPageName.dashboards,
+  iconV2: 'dashboardApp',
   link: securityLink(SecurityPageName.dashboards),
   renderAs: 'item',
   sideNavVersion,
