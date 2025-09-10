@@ -545,7 +545,6 @@ describe('metric chart transformations', () => {
               "maxCols": 5,
               "metricAccessor": "metric_formula_accessor",
               "secondaryAlign": "right",
-              "secondaryLabelPosition": "center",
               "secondaryMetricAccessor": "metric_formula_accessor_secondary",
               "secondaryPrefix": "Requests: ",
               "showBar": false,
