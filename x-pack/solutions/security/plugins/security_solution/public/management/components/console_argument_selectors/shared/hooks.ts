@@ -17,11 +17,7 @@ import type { ActionListApiResponse, ActionDetails } from '../../../../../common
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
-import {
-  getGenericErrorMessage,
-  getPendingActionDescription,
-  UNKNOWN_HOST,
-} from '../../../common/translations';
+import { getGenericErrorMessage, getPendingActionDescription } from '../../../common/translations';
 
 /**
  * Generic error toast hook that handles both custom scripts and pending actions errors
@@ -174,9 +170,6 @@ export const usePendingActionsOptions = ({
 
     return data.map((action: ActionDetails) => {
       const isChecked = action.id === selectedValue;
-      const hostName = action.agents?.[0]
-        ? action.hosts?.[action.agents[0]]?.name || UNKNOWN_HOST
-        : UNKNOWN_HOST;
       const timestamp = formatTimestamp(action.startedAt, dateFormat, timeZone);
       const command = action.command;
       const createdBy = action.createdBy;
@@ -187,19 +180,14 @@ export const usePendingActionsOptions = ({
           command as ResponseActionsApiCommandNames
         ] || command;
 
-      const description = getPendingActionDescription(
-        displayCommand,
-        hostName,
-        createdBy,
-        timestamp
-      );
+      const description = getPendingActionDescription(action.id, createdBy, timestamp);
 
       // Check if user has permission to cancel this action
       const permissionCheck = privilegeChecker ? privilegeChecker(command) : { canCancel: false };
       const isDisabled = !permissionCheck.canCancel;
 
       return {
-        label: `${displayCommand} - ${action.id}`,
+        label: displayCommand,
         value: action.id,
         description,
         data: action,

@@ -87,24 +87,16 @@ export const getCancelPermissionDeniedMessage = (displayCommand: string) => {
   });
 };
 
-export const UNKNOWN_HOST = i18n.translate(
-  'xpack.securitySolution.consoleArgumentSelectors.unknownHost',
-  {
-    defaultMessage: 'Unknown host',
-  }
-);
-
 export const getPendingActionDescription = (
-  displayCommand: string,
-  hostName: string,
+  action: string,
   createdBy: string,
-  timestamp: string
+  timeStamp: string
 ) => {
   return i18n.translate(
     'xpack.securitySolution.consoleArgumentSelectors.pendingAction.description',
     {
-      defaultMessage: '{displayCommand} on {hostName} by {createdBy} at {timestamp}',
-      values: { displayCommand, hostName, createdBy, timestamp },
+      defaultMessage: 'Action id {action} submitted by {createdBy} on {timeStamp}',
+      values: { action, createdBy, timeStamp },
     }
   );
 };

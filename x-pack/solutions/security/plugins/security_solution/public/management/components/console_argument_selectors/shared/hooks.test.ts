@@ -139,7 +139,7 @@ describe('usePendingActionsOptions hook', () => {
       expect(result.current).toHaveLength(1);
       const option = result.current[0];
       expect(option).toMatchObject({
-        label: 'isolate - action-123-abc',
+        label: 'isolate',
         data: mockAction,
         checked: undefined,
         disabled: true, // Default when no privilege checker
@@ -161,13 +161,16 @@ describe('usePendingActionsOptions hook', () => {
         })
       );
 
-      expect(result.current[0].description).toContain('isolate on test-host by test-user at');
+      expect(result.current[0].description).toContain(
+        'Action id action-123-abc submitted by test-user on'
+      );
       // Should include the formatted timestamp
       expect(result.current[0].description).toMatch(/Nov 1, 2023 @ 10:00:00\.000/);
     });
 
-    it('should handle unknown host name', () => {
+    it('should include action ID in description', () => {
       const mockAction = createMockActionDetails({
+        id: 'custom-action-id-456',
         agents: ['unknown-agent'],
         hosts: {},
       });
@@ -179,7 +182,9 @@ describe('usePendingActionsOptions hook', () => {
         })
       );
 
-      expect(result.current[0].description).toContain('Unknown host');
+      expect(result.current[0].description).toContain(
+        'Action id custom-action-id-456 submitted by test-user'
+      );
     });
 
     it('should map unisolate command to release display name', () => {
@@ -196,9 +201,11 @@ describe('usePendingActionsOptions hook', () => {
       );
 
       const option = result.current[0];
-      expect(option.label).toBe('release - action-unisolate-123');
+      expect(option.label).toBe('release');
       expect(getOptionValue(option)).toBe('action-unisolate-123');
-      expect(result.current[0].description).toContain('release on');
+      expect(result.current[0].description).toContain(
+        'Action id action-unisolate-123 submitted by test-user'
+      );
     });
 
     it('should handle various command types correctly', () => {
@@ -218,11 +225,11 @@ describe('usePendingActionsOptions hook', () => {
       );
 
       expect(result.current).toHaveLength(5);
-      expect(result.current[0].label).toBe('isolate - action-1');
-      expect(result.current[1].label).toBe('release - action-2'); // unisolate -> release
-      expect(result.current[2].label).toBe('get-file - action-3');
-      expect(result.current[3].label).toBe('execute - action-4');
-      expect(result.current[4].label).toBe('kill-process - action-5');
+      expect(result.current[0].label).toBe('isolate');
+      expect(result.current[1].label).toBe('release'); // unisolate -> release
+      expect(result.current[2].label).toBe('get-file');
+      expect(result.current[3].label).toBe('execute');
+      expect(result.current[4].label).toBe('kill-process');
     });
 
     it('should handle edge cases with very long action IDs', () => {
@@ -241,7 +248,7 @@ describe('usePendingActionsOptions hook', () => {
       );
 
       const option = result.current[0];
-      expect(option.label).toBe(`execute - ${longId}`);
+      expect(option.label).toBe('execute');
       expect(getOptionValue(option)).toBe(longId);
     });
   });
@@ -568,7 +575,9 @@ describe('usePendingActionsOptions hook', () => {
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].description).toContain('Unknown host');
+      expect(result.current[0].description).toContain(
+        'Action id action-123-abc submitted by test-user'
+      );
     });
 
     it('should handle missing timestamp gracefully', () => {
