@@ -15,6 +15,6 @@
     "configPath": ["xpack", "chatDataRegistry"],
     "requiredPlugins": [],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": []
   }
 }

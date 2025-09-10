@@ -6,10 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type {
-  ChatDataRegistryPluginSetup,
-  ChatDataRegistryPluginStart,
-} from './types';
+import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
 import { DataTypeRegistry } from './services';
 
 export class ChatDataRegistryPlugin
