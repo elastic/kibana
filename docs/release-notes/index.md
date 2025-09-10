@@ -383,7 +383,7 @@ For the Elastic Security 9.0.7 release information, refer to [Elastic Security S
 **Kibana security**:
 * Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names [#234083]({{kib-pull}}234083).
 
-**Search**:
+**Search solution**:
 * Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML [#234079]({{kib-pull}}234079).
 
 ## 9.0.6 [kibana-9.0.6-release-notes]
