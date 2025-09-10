@@ -21,7 +21,10 @@ import type { SiemMigrationFilters } from '../../../../../common/siem_migrations
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useMigrationDashboardsTableColumns } from '../../hooks/use_migration_dashboards_table_columns';
 import { useGetMigrationDashboards } from '../../logic/use_get_migration_dashboards';
-import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  MigrationTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import type { DashboardMigrationStats } from '../../types';
 import { MigrationDashboardsFilter } from './filters';
@@ -87,7 +90,8 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
         selectable: (item: DashboardMigrationDashboard) => {
           return (
             !item.elastic_dashboard?.id &&
-            item.translation_result !== MigrationTranslationResult.FAILED
+            item.status !== SiemMigrationStatus.FAILED &&
+            item.translation_result !== MigrationTranslationResult.UNTRANSLATABLE
           );
         },
         selectableMessage: (selectable: boolean, item: DashboardMigrationDashboard) => {
