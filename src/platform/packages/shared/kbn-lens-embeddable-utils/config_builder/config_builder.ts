@@ -49,7 +49,7 @@ export class LensConfigBuilder {
   private dataViewsAPI: DataViewsCommon;
 
   // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
-  constructor(dataViewsAPI: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
+  constructor(dataViewsAPI?: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
   }
@@ -64,6 +64,10 @@ export class LensConfigBuilder {
     config: LensConfig | LensApiState,
     options: LensConfigOptions = {}
   ): Promise<LensAttributes | LensEmbeddableInput> {
+    if (!this.dataViewsAPI) {
+      throw new Error('DataViews API is required to build Lens configurations');
+    }
+
     const chartType = isLensLegacyFormat(config) ? config.chartType : config.type;
     const chartBuilderFn = this.charts[chartType];
     const chartConfig = await chartBuilderFn(config as any, {
