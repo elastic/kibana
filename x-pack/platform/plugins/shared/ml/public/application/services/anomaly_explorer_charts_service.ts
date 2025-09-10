@@ -23,7 +23,7 @@ import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';

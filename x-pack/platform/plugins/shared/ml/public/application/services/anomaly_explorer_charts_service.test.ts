@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import moment from 'moment';
 
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
 
 import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';

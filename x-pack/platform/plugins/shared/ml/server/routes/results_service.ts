@@ -7,12 +7,12 @@
 
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { MlClient } from '@kbn/ml-client';
-import { resultsServiceProvider } from '@kbn/ml-services/results_service';
-import { getTopInfluencers } from '@kbn/ml-services/results_service/top_influencers';
+import { resultsServiceProvider } from '@kbn/ml-server-services/results_service';
+import { getTopInfluencers } from '@kbn/ml-server-services/results_service/top_influencers';
 import {
   getScoresByBucket,
   getInfluencerValueMaxScoreByTime,
-} from '@kbn/ml-services/results_service/view_by';
+} from '@kbn/ml-server-services/results_service/view_by';
 import {
   getTopInfluencersSchema,
   getScoresByBucketSchema,

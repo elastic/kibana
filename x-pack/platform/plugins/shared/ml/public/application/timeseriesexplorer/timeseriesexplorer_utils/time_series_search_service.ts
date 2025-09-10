@@ -17,11 +17,8 @@ import { useMlKibana } from '@kbn/ml-kibana-context';
 import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
 import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
 
-import type { ModelPlotOutput } from '@kbn/ml-services/results_service_2/result_service_rx';
-import {
-  type MlResultsService,
-  mlResultsServiceProvider,
-} from '@kbn/ml-services/results_service_2';
+import type { ModelPlotOutput } from '@kbn/ml-services/results_service/result_service_rx';
+import { type MlResultsService, mlResultsServiceProvider } from '@kbn/ml-services/results_service';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 
 interface TimeSeriesExplorerChartDetails {

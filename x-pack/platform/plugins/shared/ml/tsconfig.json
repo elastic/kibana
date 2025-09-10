@@ -158,5 +158,6 @@
     "@kbn/ml-locator",
     "@kbn/ml-plugin-contracts",
     "@kbn/ml-node-checks",
+    "@kbn/ml-server-services",
   ]
 }

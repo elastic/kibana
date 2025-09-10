@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
-import { datafeedsProvider } from '@kbn/ml-services/datafeeds';
+import { datafeedsProvider } from '@kbn/ml-server-services/datafeeds';
 import type { MlClient } from '@kbn/ml-client';
 
 import type { FormCalendar } from '../calendar';

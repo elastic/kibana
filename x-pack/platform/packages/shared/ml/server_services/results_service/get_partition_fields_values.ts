@@ -13,8 +13,7 @@ import type { MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils/constants';
 import type { MlClient } from '@kbn/ml-client';
 import type { FieldConfig, FieldsConfig } from '@kbn/ml-server-api-schemas/results_service_schema';
-
-import type { CriteriaField } from './results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 type SearchTerm =
   | {

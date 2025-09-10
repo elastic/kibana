@@ -55,8 +55,7 @@ import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
 import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_function_to_es_aggregation';
 import { findAggField } from '@kbn/ml-common-utils/validation_utils';
 import { getChartType } from '@kbn/ml-common-utils/chart_utils';
-
-import type { CriteriaField } from './results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {

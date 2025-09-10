@@ -28,8 +28,8 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_function_to_es_aggregation';
-import type { CriteriaField } from '@kbn/ml-services/results_service';
-import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
 import { useMlResultsService } from '@kbn/ml-hooks/results/use_ml_results_service';
 
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';

@@ -16,8 +16,8 @@ import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
-import type { MlResultsService } from '@kbn/ml-services/results_service_2';
-import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service';
 
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 
