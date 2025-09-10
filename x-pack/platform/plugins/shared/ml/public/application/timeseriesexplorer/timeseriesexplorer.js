@@ -43,13 +43,11 @@ import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
-import {
-  isModelPlotEnabled,
-  isModelPlotChartableForDetector,
-  isSourceDataChartableForDetector,
-  isTimeSeriesViewJob,
-  mlFunctionToESAggregation,
-} from '@kbn/ml-common-utils/job_utils';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
+import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_function_to_es_aggregation';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '@kbn/ml-common-constants/settings';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { indexServiceFactory } from '@kbn/ml-services/index_service';

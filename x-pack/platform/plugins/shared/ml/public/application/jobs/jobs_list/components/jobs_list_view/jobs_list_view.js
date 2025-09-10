@@ -17,7 +17,7 @@ import {
   BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
 } from '@kbn/ml-common-constants/jobs_list';
 
-import { removeNodeInfo } from '@kbn/ml-common-utils/job_utils';
+import { removeNodeInfo } from '@kbn/ml-common-utils/job_utils/remove_node_info';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 
 import { jobCloningService } from '../../../../services/job_cloning_service';
