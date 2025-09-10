@@ -295,7 +295,10 @@ export default ({ getService }: FtrProviderContext) => {
         expectStatusCode: 404,
       });
 
-      expect(response.body).toHaveProperty('message', 'Migration not found');
+      expect(response.body).toHaveProperty(
+        'message',
+        `No Migration found with id: ${nonExistentMigrationId}`
+      );
     });
 
     it('should handle large number of resources efficiently', async () => {
@@ -312,9 +315,10 @@ export default ({ getService }: FtrProviderContext) => {
         body: largeResourceSet,
       });
 
-      // Get all resources
+      // Get all resources (specify a large size to get all 50)
       const response = await dashboardMigrationRoutes.resources.get({
         migrationId,
+        queryParams: { size: 100 },
       });
 
       expect(response.body).toHaveLength(50);
