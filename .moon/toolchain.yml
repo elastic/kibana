@@ -15,3 +15,5 @@ node:
   syncVersionManagerConfig: nvm
   dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
   syncProjectWorkspaceDependencies: false
+
+typescript: {}

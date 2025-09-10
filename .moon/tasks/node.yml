@@ -1,4 +1,4 @@
-$schema: https://moonrepo.dev/schemas/tasks.json
+$schema: https://moonrepo.dev/schemas/project.json
 
 fileGroups:
   sharedGlobals: [ ]
@@ -8,3 +8,45 @@ fileGroups:
   src:
     - 'src/**/*'
 
+tasks:
+  eslint:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '$projectSource'
+      - '--no-error-on-unmatched-pattern'
+    options:
+      runFromWorkspaceRoot: true
+      cache: true
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+
+  eslint-fix:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '$projectSource'
+      - '--no-error-on-unmatched-pattern'
+      - '--fix'
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'

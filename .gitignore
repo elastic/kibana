@@ -180,3 +180,5 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 .dependency-graph-log.json
 
 .moon/cache
+tsconfig.moon.json
+tsconfig.base.moon.json
