@@ -47,7 +47,9 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
         console.log('Creating AI-assisted rule');
         const { user_query: userQuery } = request.body;
 
-        return response.ok({ body: { rule: getRulesSchemaMock() } });
+        return response.ok({
+          body: { rule: { ...getRulesSchemaMock(), index: ['ai_index'], references: [] } },
+        });
         // const siemResponse = buildSiemResponse(response);
         // const [_, { security }] = await getStartServices();
         // const securitySolution = await context.securitySolution;
