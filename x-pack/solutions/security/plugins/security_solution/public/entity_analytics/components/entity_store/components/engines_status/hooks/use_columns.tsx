@@ -43,6 +43,7 @@ const RESOURCE_TO_TEXT: Record<EngineComponentResource, string> = {
   entity_definition: 'Entity Definition',
   entity_engine: 'Engine',
   index_template: 'Index Template',
+  ilm_policy: 'ILM Policy',
 };
 
 export const useColumns = (
