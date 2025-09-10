@@ -6,10 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type {
-  GapAutoFillSchedulerResponseBodyV1,
-  GapAutoFillSchedulerResponseV1,
-} from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
+import type { UpdateGapAutoFillSchedulerResponseV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import { updateGapAutoFillSchema } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
@@ -36,41 +33,20 @@ export const updateAutoFillSchedulerRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const { id } = req.params as { id: string };
-        const {
-          schedule,
-          name,
-          maxAmountOfGapsToProcessPerRun,
-          maxAmountOfRulesToProcessPerRun,
-          amountOfRetries,
-          rulesFilter,
-          gapFillRange,
-          enabled,
-        } = req.body as any;
-
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
 
         try {
-          const updatedSo = await rulesClient.updateGapFillAutoScheduler(
-            transformRequestV1(id, {
-              schedule,
-              name,
-              maxAmountOfGapsToProcessPerRun,
-              maxAmountOfRulesToProcessPerRun,
-              amountOfRetries,
-              rulesFilter,
-              gapFillRange,
-              enabled,
-            })
-          );
-          const response: GapAutoFillSchedulerResponseV1 = {
+          const updatedSo = await rulesClient.updateGapFillAutoScheduler(transformRequestV1(req));
+          const response: UpdateGapAutoFillSchedulerResponseV1 = {
             body: transformResponseV1(updatedSo),
           };
           return res.ok(response);
         } catch (error) {
           if (error?.output?.statusCode === 404) {
-            return res.notFound({ body: { message: `Scheduler with id ${id} not found` } });
+            return res.notFound({
+              body: { message: `Scheduler with id ${req.params.id} not found` },
+            });
           }
           return res.customError({
             statusCode: 500,

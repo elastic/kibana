@@ -99,9 +99,11 @@ import type {
 import { createGapFillAutoScheduler } from '../application/gap_auto_fill_scheduler/methods/create';
 import { getGapFillAutoScheduler } from '../application/gap_auto_fill_scheduler/methods/get';
 import { updateGapFillAutoScheduler } from '../application/gap_auto_fill_scheduler/methods/update';
+import { getGapFillAutoSchedulerLogs } from '../application/gap_auto_fill_scheduler/methods/get_logs';
 import type { CreateGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
 import type { GetGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/get/types';
 import type { UpdateGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/update/types';
+import type { GetGapFillAutoSchedulerLogsParams } from '../application/gap_auto_fill_scheduler/methods/get_logs/types';
 
 interface UpdateGapFillAutoSchedulerMethodParams {
   id: string;
@@ -269,6 +271,9 @@ export class RulesClient {
 
   public updateGapFillAutoScheduler = (params: UpdateGapFillAutoSchedulerMethodParams) =>
     updateGapFillAutoScheduler(this.context, params);
+
+  public getGapFillAutoSchedulerLogs = (params: GetGapFillAutoSchedulerLogsParams) =>
+    getGapFillAutoSchedulerLogs(this.context, params);
 
   public getTaskManager = () => this.context.taskManager;
   public getEventLogClient = () => this.context.getEventLogClient();

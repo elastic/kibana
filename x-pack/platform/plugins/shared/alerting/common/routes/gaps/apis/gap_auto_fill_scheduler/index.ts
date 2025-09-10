@@ -14,6 +14,8 @@ export type {
   GapAutoFillSchedulerRequestBody,
   GapAutoFillSchedulerResponseBody,
   GapAutoFillSchedulerResponse,
+  UpdateGapAutoFillSchedulerRequestBody,
+  UpdateGapAutoFillSchedulerResponse,
 } from './types/latest';
 
 export {
@@ -25,4 +27,6 @@ export type {
   GapAutoFillSchedulerRequestBody as GapAutoFillSchedulerRequestBodyV1,
   GapAutoFillSchedulerResponseBody as GapAutoFillSchedulerResponseBodyV1,
   GapAutoFillSchedulerResponse as GapAutoFillSchedulerResponseV1,
+  UpdateGapAutoFillSchedulerRequestBody as UpdateGapAutoFillSchedulerRequestBodyV1,
+  UpdateGapAutoFillSchedulerResponse as UpdateGapAutoFillSchedulerResponseV1,
 } from './types/v1';

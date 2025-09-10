@@ -44,6 +44,11 @@ interface GapAutoFillConfig {
   schedule: {
     interval: string;
   };
+  scope?: string[];
+  rule_types?: Array<{
+    type: string;
+    consumer: string;
+  }>;
 }
 
 interface GapAutoFillLastRun {
@@ -70,6 +75,21 @@ interface GapAutoFill {
   max_amount_of_gaps_to_process_per_run: number;
   max_amount_of_rules_to_process_per_run: number;
   amount_of_retries: number;
+  created_by?: string;
+  updated_by?: string;
+  created_at: string;
+  updated_at: string;
+  last_run?: {
+    status: 'success' | 'error';
+    message: string;
+    metrics: {
+      totalRules: number;
+      successfulRules: number;
+      failedRules: number;
+      totalGapsProcessed: number;
+    };
+  } | null;
+  scheduled_task_id: string;
 }
 
 // Generic event log interface since the API returns Record<string, unknown>
@@ -264,31 +284,41 @@ export const GapAutoFillSettings: React.FC = () => {
     try {
       if (!autoFill) {
         // Auto fill doesn't exist - create it with new API structure
-        await KibanaServices.get().http.post('/internal/alerting/rules/gaps/gap_auto_fill_scheduler', {
-          body: JSON.stringify({
-            name: 'Gap Auto-Fill',
-            max_amount_of_gaps_to_process_per_run: 100,
-            max_amount_of_rules_to_process_per_run: 50,
-            amount_of_retries: 3,
-            rules_filter: '',
-            gap_fill_range: 'now-7d',
-            schedule: {
-              interval: '1m',
-            },
-            scope: ['securitySolution'],
-            id: 'default',
-          }),
-        });
+        await KibanaServices.get().http.post(
+          '/internal/alerting/rules/gaps/gap_auto_fill_scheduler',
+          {
+            body: JSON.stringify({
+              name: 'Gap Auto-Fill',
+              max_amount_of_gaps_to_process_per_run: 100,
+              max_amount_of_rules_to_process_per_run: 50,
+              amount_of_retries: 3,
+              rules_filter: '',
+              gap_fill_range: 'now-7d',
+              schedule: {
+                interval: '1m',
+              },
+              scope: ['securitySolution'],
+              rule_types: [
+                {
+                  type: '.siem-signal',
+                  consumer: 'siem',
+                },
+              ],
+              id: 'default',
+            }),
+          }
+        );
         // Fetch the newly created auto fill
         await fetchAutoFill();
       } else {
         // Auto fill exists - toggle enable/disable
-        await KibanaServices.get().http.put(
+        const data = await KibanaServices.get().http.put<GapAutoFill>(
           `/internal/alerting/rules/gaps/gap_auto_fill_scheduler/${AUTO_FILL_ID}`,
           {
             body: JSON.stringify({ enabled: !enabled }),
           }
         );
+        setAutoFill(data);
         setEnabled(!enabled);
       }
     } catch (err) {
@@ -331,7 +361,7 @@ export const GapAutoFillSettings: React.FC = () => {
     setSaving(true);
     setError(null);
     try {
-      await KibanaServices.get().http.put(
+      const data = await KibanaServices.get().http.put<GapAutoFill>(
         `/internal/alerting/rules/gaps/gap_auto_fill_scheduler/${AUTO_FILL_ID}`,
         {
           body: JSON.stringify({
@@ -347,6 +377,7 @@ export const GapAutoFillSettings: React.FC = () => {
           }),
         }
       );
+      setAutoFill(data);
       setIsEditing(false);
     } catch (err) {
       setError('Failed to update auto fill configuration');
@@ -420,6 +451,29 @@ export const GapAutoFillSettings: React.FC = () => {
 
                 <EuiDescriptionListTitle>{'Schedule'}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>{schedule}</EuiDescriptionListDescription>
+
+                <EuiDescriptionListTitle>{'Scheduled Task ID'}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {autoFill.scheduled_task_id}
+                </EuiDescriptionListDescription>
+
+                {autoFill.created_by && (
+                  <>
+                    <EuiDescriptionListTitle>{'Created By'}</EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      {autoFill.created_by}
+                    </EuiDescriptionListDescription>
+                  </>
+                )}
+
+                {autoFill.updated_by && (
+                  <>
+                    <EuiDescriptionListTitle>{'Updated By'}</EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      {autoFill.updated_by}
+                    </EuiDescriptionListDescription>
+                  </>
+                )}
               </EuiDescriptionList>
 
               <EuiSpacer size="m" />
@@ -449,7 +503,7 @@ export const GapAutoFillSettings: React.FC = () => {
                   }
                   disabled={saving}
                   min={1}
-                  max={1000}
+                  max={10000}
                 />
               </EuiFormRow>
 
@@ -463,7 +517,7 @@ export const GapAutoFillSettings: React.FC = () => {
                   }
                   disabled={saving}
                   min={1}
-                  max={1000}
+                  max={10000}
                 />
               </EuiFormRow>
 
@@ -476,7 +530,7 @@ export const GapAutoFillSettings: React.FC = () => {
                     setAmountOfRetries(Number(e.target.value))
                   }
                   disabled={saving}
-                  min={0}
+                  min={1}
                   max={10}
                 />
               </EuiFormRow>
@@ -541,9 +595,18 @@ export const GapAutoFillSettings: React.FC = () => {
               <strong>{'Last Updated:'}</strong> {new Date(autoFill.updated_at).toLocaleString()}
             </p>
             {lastRun && (
-              <p>
-                <strong>{'Last Run:'}</strong> {new Date(lastRun).toLocaleString()}
-              </p>
+              <>
+                <p>
+                  <strong>{'Last Run Status:'}</strong> {lastRun.status}
+                </p>
+                <p>
+                  <strong>{'Last Run Message:'}</strong> {lastRun.message}
+                </p>
+                <p>
+                  <strong>{'Last Run Metrics:'}</strong>{' '}
+                  {lastRun.metrics.totalRules} rules processed, {lastRun.metrics.totalGapsProcessed} gaps filled
+                </p>
+              </>
             )}
           </EuiText>
 
@@ -553,5 +616,3 @@ export const GapAutoFillSettings: React.FC = () => {
     </EuiPanel>
   );
 };
-
-

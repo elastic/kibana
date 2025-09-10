@@ -4,20 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import type { GapAutoFillSchedulerLogsQueryV1 } from '../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import type { GapAutoFillSchedulerLogsQueryV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import type { GetGapFillAutoSchedulerLogsParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/get_logs/types';
 
-export interface LogsRequestParams {
-  start?: string;
-  end?: string;
-  page: number;
-  perPage: number;
-  sort?: Array<{ field: string; direction: 'asc' | 'desc' }>;
-  filter?: string;
-}
-
-export const transformRequest = (query: GapAutoFillSchedulerLogsQueryV1): LogsRequestParams => ({
+export const transformRequest = (
+  query: GapAutoFillSchedulerLogsQueryV1
+): Omit<GetGapFillAutoSchedulerLogsParams, 'id'> => ({
   start: query.start,
   end: query.end,
   page: query.page || 1,

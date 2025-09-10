@@ -14,7 +14,6 @@ import type { AlertingRequestHandlerContext } from '../../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
-import { GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
 
 export const getGapFillAutoSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -40,48 +39,31 @@ export const getGapFillAutoSchedulerLogsRoute = (
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
 
-          // Access the unsecuredSavedObjectsClient through the rulesClient context
-          const soClient = (rulesClient as any).context.unsecuredSavedObjectsClient;
-
-          // Resolve the scheduled task id from the scheduler SO
-          const so = await soClient.get(GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE, id);
-          const taskId = (so.attributes as { scheduledTaskId?: string }).scheduledTaskId || id;
-
           const { start, end, page, perPage, sort, filter } = transformRequestV1(query);
 
-          // Build sort
-          const sortOptions = sort || [{ field: '@timestamp', direction: 'desc' }];
-          const formattedSort = sortOptions.map((s) => ({
-            sort_field: s.field,
-            sort_order: s.direction,
-          }));
-
-          const eventLogClient = await rulesClient.getEventLogClient();
-
-          const result = await eventLogClient.findEventsBySavedObjectIds('task', [taskId], {
-            page,
-            per_page: perPage,
+          const result = await rulesClient.getGapFillAutoSchedulerLogs({
+            id,
             start,
             end,
-            sort: formattedSort,
-            filter: filter
-              ? `(${filter}) AND event.action:gap-fill-auto-schedule`
-              : 'event.action:gap-fill-auto-schedule',
+            page,
+            perPage,
+            sort,
+            filter,
           });
 
           const response: GapAutoFillSchedulerLogsResponseV1 = {
-            body: transformResponseV1({
-              data: result.data,
-              total: result.total,
-              page,
-              perPage,
-            }),
+            body: transformResponseV1(result),
           };
 
           return res.ok(response);
         } catch (error) {
+          if (error?.output?.statusCode === 404) {
+            return res.notFound({
+              body: { message: `Gap fill auto scheduler with id ${req.params.id} not found` },
+            });
+          }
           return res.customError({
-            statusCode: 500,
+            statusCode: error?.output?.statusCode || 500,
             body: { message: error.message || 'Error fetching gap fill event logs' },
           });
         }

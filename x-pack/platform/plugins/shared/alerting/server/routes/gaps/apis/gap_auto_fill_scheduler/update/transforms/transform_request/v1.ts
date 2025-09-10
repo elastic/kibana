@@ -4,20 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import type { UpdateGapFillAutoSchedulerParams } from '../../../../../../application/rule/methods/update_gap_fill_auto_scheduler/types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { UpdateGapFillAutoSchedulerParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/update/types';
+import type { UpdateGapAutoFillSchedulerRequestBodyV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 
-export const transformRequest = (id: string, updates: any): { id: string; updates: UpdateGapFillAutoSchedulerParams } => ({
-  id,
-  updates: {
-    schedule: updates.schedule,
-    name: updates.name,
-    maxAmountOfGapsToProcessPerRun: updates.max_amount_of_gaps_to_process_per_run,
-    maxAmountOfRulesToProcessPerRun: updates.max_amount_of_rules_to_process_per_run,
-    amountOfRetries: updates.amount_of_retries,
-    rulesFilter: updates.rules_filter,
-    gapFillRange: updates.gap_fill_range,
-    enabled: updates.enabled,
-  },
-});
+export const transformRequest = (
+  request: KibanaRequest<{ id: string }, unknown, unknown, 'put'>
+): { id: string; updates: UpdateGapFillAutoSchedulerParams } => {
+  const { id } = request.params;
+  const body = request.body as UpdateGapAutoFillSchedulerRequestBodyV1;
+
+  return {
+    id,
+    updates: {
+      schedule: body.schedule,
+      name: body.name,
+      maxAmountOfGapsToProcessPerRun: body.max_amount_of_gaps_to_process_per_run,
+      maxAmountOfRulesToProcessPerRun: body.max_amount_of_rules_to_process_per_run,
+      amountOfRetries: body.amount_of_retries,
+      rulesFilter: body.rules_filter,
+      gapFillRange: body.gap_fill_range,
+      enabled: body.enabled,
+    },
+  };
+};

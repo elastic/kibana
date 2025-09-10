@@ -6,16 +6,10 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import type { GapFillAutoSchedulerLogsResult } from '../../../../../../../application/gap_auto_fill_scheduler/methods/get_logs/types';
 
-export interface LogsResponseData {
-  data: Array<Record<string, any>>;
-  total: number;
-  page: number;
-  perPage: number;
-}
-
-export const transformResponse = (result: LogsResponseData): GapAutoFillSchedulerLogsResponseBodyV1 => ({
+export const transformResponse = (result: GapFillAutoSchedulerLogsResult): GapAutoFillSchedulerLogsResponseBodyV1 => ({
   data: result.data,
   total: result.total,
   page: result.page,

@@ -6,11 +6,20 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { gapAutoFillSchedulerBodySchemaV1, gapAutoFillSchedulerResponseSchemaV1 } from '..';
+import type {
+  gapAutoFillSchedulerBodySchemaV1,
+  gapAutoFillSchedulerResponseSchemaV1,
+  updateGapAutoFillSchemaV1,
+} from '..';
 
 export type GapAutoFillSchedulerRequestBody = TypeOf<typeof gapAutoFillSchedulerBodySchemaV1>;
 export type GapAutoFillSchedulerResponseBody = TypeOf<typeof gapAutoFillSchedulerResponseSchemaV1>;
+export type UpdateGapAutoFillSchedulerRequestBody = TypeOf<typeof updateGapAutoFillSchemaV1>;
 
 export interface GapAutoFillSchedulerResponse {
+  body: GapAutoFillSchedulerResponseBody;
+}
+
+export interface UpdateGapAutoFillSchedulerResponse {
   body: GapAutoFillSchedulerResponseBody;
 }
