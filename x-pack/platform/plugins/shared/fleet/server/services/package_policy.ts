@@ -2279,9 +2279,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 }
 
                 if (externalCallbackType === 'packagePolicyCreate') {
-                  updatedNewData = NewPackagePolicySchema.validate(
-                    omit(thisCallbackResponse, 'spaceIds')
-                  );
+                  try {
+                    updatedNewData = NewPackagePolicySchema.validate(
+                      omit(thisCallbackResponse, 'spaceIds')
+                    );
+                  } catch (validationError: any) {
+                    throw new PackagePolicyValidationError(validationError.message);
+                  }
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
