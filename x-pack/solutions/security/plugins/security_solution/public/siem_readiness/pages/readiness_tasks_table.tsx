@@ -12,14 +12,13 @@ import {
   EuiAccordion,
   EuiText,
   EuiButton,
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
   EuiSplitPanel,
   EuiLoadingElastic,
 } from '@elastic/eui';
-import type { SiemReadinessTask, ReadinessTaskConfig } from '@kbn/siem-readiness';
+import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
 import { useLogReadinessTask, READINESS_TASKS } from '@kbn/siem-readiness';
 import { useGetLatestTasks } from '../hooks/use_get_latest_tasks';
 
@@ -33,7 +32,6 @@ const PILLARS = [
 const PANEL_HEIGHT = 600; // px, adjust as needed
 
 export const ReadinessTasksPanel: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { getLatestTasks } = useGetLatestTasks();
   const [selectedPillar, setSelectedPillar] = useState<string>('');
   const { logReadinessTask } = useLogReadinessTask();
@@ -50,9 +48,10 @@ export const ReadinessTasksPanel: React.FC = () => {
     (task: ReadinessTaskConfig) => !selectedPillar || task.pillar === selectedPillar
   ).sort((a: ReadinessTaskConfig, b: ReadinessTaskConfig) => a.order - b.order);
 
-  console.log(getLatestTasks.data);
-
-  const readinessTasksContentMap = {
+  const readinessTasksContentMap: Record<
+    ReadinessTaskId,
+    { action?: () => void; buttonLabel?: string }
+  > = {
     'enable-endpoint-visibility': {
       action: () => handleLogTask({ task_id: 'enable-endpoint-visibility', status: 'completed' }),
       buttonLabel: 'Complete Demo Task',

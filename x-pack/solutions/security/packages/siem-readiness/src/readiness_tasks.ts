@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+// Extract the task IDs as a union type
+export type ReadinessTaskId = (typeof READINESS_TASKS)[number]['id'];
+
 export interface ReadinessTaskConfig {
-  id: string;
+  id: ReadinessTaskId;
   pillar: 'visibility' | 'detection' | 'response';
   order: number;
   meta?: Record<string, 'string' | 'number' | 'boolean' | 'string[]' | 'number[]'>;

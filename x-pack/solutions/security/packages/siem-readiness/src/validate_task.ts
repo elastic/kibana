@@ -25,14 +25,18 @@ export const validateTask = (task: SiemReadinessTask): void => {
   }
 
   // Validate meta structure
-  const expectedMetaFields = taskConfig.meta;
+  const expectedMeta = taskConfig.meta;
 
-  if (expectedMetaFields) {
+  if (!expectedMeta && task.meta) {
+    throw new Error(`Task ${task.task_id} should not have a meta field`);
+  }
+
+  if (expectedMeta) {
     if (!('meta' in task)) {
       throw new Error(`Task ${task.task_id} should have a meta field`);
     }
 
-    const expectedFields = Object.keys(expectedMetaFields);
+    const expectedFields = Object.keys(expectedMeta);
 
     if (!task.meta || typeof task.meta !== 'object') {
       throw new Error(
