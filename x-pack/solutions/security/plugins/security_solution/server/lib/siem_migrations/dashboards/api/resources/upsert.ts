@@ -64,15 +64,6 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
 
               await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
-              // Check if the migration exists
-              const { data } = await dashboardMigrationsClient.data.items.get(migrationId, {
-                size: 1,
-              });
-              const [dashboard] = data;
-              if (!dashboard) {
-                return res.notFound({ body: { message: 'Migration not found' } });
-              }
-
               const [lookups, macros] = partition(resources, { type: 'lookup' });
               const processedLookups = await processLookups(lookups, dashboardMigrationsClient);
               // Add migration_id to all resources

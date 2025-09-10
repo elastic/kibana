@@ -192,7 +192,10 @@ export default ({ getService }: FtrProviderContext) => {
         expectedStatusCode: 404,
       });
 
-      expect(response.body).toHaveProperty('message', 'Migration not found');
+      expect(response.body).toHaveProperty(
+        'message',
+        `No Migration found with id: ${nonExistentMigrationId}`
+      );
     });
 
     it('should handle empty resources array', async () => {
