@@ -3,6 +3,9 @@ name: "CodeQL"
 on:
   schedule:
     - cron: '27 21 * * *' # At 21:27 every day
+  push:
+    branches:
+      - 'codeql-packs'
 
 jobs:
   analyze:
@@ -18,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        branch: [ 'main', '8.19' ]
+        branch: [ 'main', '8.19', 'codeql-packs' ]
 
     steps:
     - name: Checkout repository
@@ -32,6 +35,10 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
         debug: true
+        packs: |
+          githubsecuritylab/codeql-${{ matrix.language }}-queries
+          github/codeql:${{ matrix.language }}-queries
+
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -66,7 +73,7 @@ jobs:
     name: Alert
     runs-on: ubuntu-latest
     needs: analyze
-    if: ${{ github.repository == 'elastic/kibana' && success() }} # Hack: Do not run on forks
+    if: ${{ github.repository == 'elastic/kibana' && success() && github.ref_name != 'codeql-packs' }} # Hack: Do not run on forks
     steps:
     - name: Checkout kibana-operations
       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
