@@ -16,10 +16,10 @@ import { StepExecutionTimeline } from './step_execution_timeline';
 
 export const StepExecutionTimelineStateful = ({
   executionId,
-  stepId,
+  stepExecutionId,
 }: {
   executionId: string;
-  stepId: string;
+  stepExecutionId: string;
 }) => {
   const {
     data: logsData,
@@ -27,7 +27,7 @@ export const StepExecutionTimelineStateful = ({
     error,
   } = useWorkflowExecutionLogs({
     executionId,
-    stepId,
+    stepExecutionId,
     limit: 100, // Get more logs without pagination
     offset: 0,
     enabled: true,

@@ -204,3 +204,13 @@ export const getDashboardMigrationAllStats = async ({
     { version: VERSION, signal }
   );
 };
+
+export const deleteDashboardMigration = async ({
+  migrationId,
+  signal,
+}: WithSignal<GetDashboardMigrationParams>) => {
+  return KibanaServices.get().http.delete<void>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, { migration_id: migrationId }),
+    { version: VERSION, signal }
+  );
+};

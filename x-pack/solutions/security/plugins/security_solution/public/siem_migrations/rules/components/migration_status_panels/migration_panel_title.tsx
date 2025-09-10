@@ -25,7 +25,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import { useUpdateMigration } from '../../logic/use_update_migration';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
-import { useDeleteMigration } from '../../logic/use_delete_migration';
+import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
 
 interface MigrationPanelTitleProps {
   migrationStats: RuleMigrationStats;
@@ -52,7 +52,8 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
   }, [migrationStats.name]);
 
   const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
-    migrationStats.id
+    migrationStats.id,
+    'rule'
   );
   const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateMigration(
     migrationStats.id,

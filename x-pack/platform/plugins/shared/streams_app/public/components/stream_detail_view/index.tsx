@@ -70,7 +70,7 @@ export function StreamDetailView() {
   const { features } = useStreamsPrivileges();
 
   if (tab === 'management') {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />;
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />;
   }
 
   if (!isValidStreamDetailTab(tab)) {
@@ -109,7 +109,7 @@ export function StreamDetailView() {
           <EuiButton
             iconType="gear"
             href={router.link('/{key}/management/{tab}', {
-              path: { key, tab: 'route' },
+              path: { key, tab: 'partitioning' },
             })}
           >
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamLabel', {

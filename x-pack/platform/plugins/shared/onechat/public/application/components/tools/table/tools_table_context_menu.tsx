@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_table_provider';
@@ -61,10 +60,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const testMenuItem = (
     <EuiContextMenuItem
-      icon="eye"
+      icon="play"
       key="test"
       size="s"
-      disabled // Not implemented
       onClick={() => {
         testTool(tool.id);
         setIsOpen(false);
@@ -102,9 +100,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     </EuiContextMenuItem>
   );
 
-  const menuItems = isEsqlTool(tool)
+  const menuItems = !tool.readonly
     ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
-    : [viewMenuItem];
+    : [testMenuItem, viewMenuItem];
 
   return (
     <EuiPopover

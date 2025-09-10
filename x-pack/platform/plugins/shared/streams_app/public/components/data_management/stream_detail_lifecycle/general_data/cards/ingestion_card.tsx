@@ -62,5 +62,5 @@ export const IngestionCard = ({
     },
   ];
 
-  return <BaseMetricCard title={title} metrics={metrics} />;
+  return <BaseMetricCard title={title} metrics={metrics} grow />;
 };

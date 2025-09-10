@@ -23,8 +23,8 @@ import { SEARCH_BAR_TEST_ID } from './search_bar/search_bar_section';
 import { KPIS_SECTION } from './kpis/kpis_section';
 import { GROUPED_TABLE_TEST_ID } from './table/table_section';
 import { useNavigateToIntegrationsPage } from '../../hooks/alert_summary/use_navigate_to_integrations_page';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useKibana } from '../../../common/lib/kibana';
+import { useCreateEaseAlertsDataView } from '../../hooks/alert_summary/use_create_data_view';
 
 jest.mock('../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
@@ -36,7 +36,7 @@ jest.mock('../alerts_table/alerts_grouping', () => ({
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../hooks/alert_summary/use_navigate_to_integrations_page');
 jest.mock('../../hooks/alert_summary/use_integration_last_alert_ingested');
-jest.mock('../../../common/hooks/use_create_data_view');
+jest.mock('../../hooks/alert_summary/use_create_data_view');
 
 const packages: PackageListItem[] = [
   {
@@ -50,7 +50,7 @@ const packages: PackageListItem[] = [
 
 describe('<Wrapper />', () => {
   it('should render a loading skeleton while creating the dataView', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,
       loading: true,
     });
@@ -64,7 +64,7 @@ describe('<Wrapper />', () => {
   });
 
   it('should render an error if the dataView fail to be created correctly', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
@@ -93,7 +93,7 @@ describe('<Wrapper />', () => {
       isLoading: true,
       lastAlertIngested: {},
     });
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
       loading: false,
     });

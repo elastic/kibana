@@ -181,5 +181,5 @@ export const RetentionCard = ({
 
   const metrics = isIlmLifecycle(lifecycle) ? getIlmMetrics() : getDslMetrics();
 
-  return <BaseMetricCard title={title} actions={contextualMenu} metrics={metrics} />;
+  return <BaseMetricCard grow title={title} actions={contextualMenu} metrics={metrics} />;
 };

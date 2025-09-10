@@ -8,7 +8,7 @@ This directory contains the server-side components and API routes for the ES|QL 
 
 The ES|QL server exposes the following internal API routes:
 
-* **`/internal/esql/autocomplete/join/indices`**: Used by the ES|QL editor to retrieve a list of indices suitable for **`JOIN`** autocompletion.
+* **`/internal/esql/autocomplete/join/indices`**: Used by the ES|QL editor to retrieve a list of indices suitable for **`JOIN`** autocompletion. If the remoteClusters array is passed it will also retrieve the list of remote indices.
 * **`/internal/esql/autocomplete/timeseries/indices`**: Provides index suggestions specifically for **time-series analysis** contexts within the ES|QL editor.
 * **`/internal/esql/autocomplete/inference_endpoints/{taskType}`**: This endpoint is used to fetch LLM inference endpoints by task type.
 * **`/internal/esql_registry/extensions/{query}`**: This is the primary endpoint for fetching **registered ES|QL extensions**, which enhance the editor's capabilities by providing contextual suggestions.

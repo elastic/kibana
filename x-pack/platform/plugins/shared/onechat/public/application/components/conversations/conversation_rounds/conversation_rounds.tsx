@@ -17,7 +17,13 @@ import { RoundLayout } from './round_layout';
 import { RoundResponse } from './round_response';
 import { conversationRoundsId } from './conversation_rounds.styles';
 
-export const ConversationRounds: React.FC<{}> = () => {
+interface ConversationRoundsProps {
+  scrollContainerHeight: number;
+}
+
+export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
+  scrollContainerHeight,
+}) => {
   const { isResponseLoading, retry, error } = useSendMessage();
 
   const conversationRounds = useConversationRounds();
@@ -40,8 +46,11 @@ export const ConversationRounds: React.FC<{}> = () => {
           return (
             <RoundLayout
               key={index}
+              scrollContainerHeight={scrollContainerHeight}
               // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
               input={<EuiText size="s">{input.message}</EuiText>}
+              isResponseLoading={isResponseLoading}
+              isCurrentRound={isCurrentRound}
               outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (

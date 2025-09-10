@@ -16,6 +16,7 @@ import type {
   FullAgentPolicyInputStream,
   PackageInfo,
   PackagePolicyInput,
+  NewPackagePolicyInput,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
@@ -24,6 +25,22 @@ import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
 };
+
+export function getInputId(
+  input: NewPackagePolicyInput,
+  packagePolicyId?: string,
+  packageInfo?: PackageInfo
+): string {
+  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
+  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
+  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
+
+  return appendInputId
+    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+        packagePolicyId ? `-${packagePolicyId}` : ''
+      }`
+    : packagePolicyId || 'default';
+}
 
 export const storedPackagePolicyToAgentInputs = (
   packagePolicy: PackagePolicy,
@@ -38,24 +55,14 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
-
   packagePolicy.inputs.forEach((input) => {
     if (!input.enabled) {
       return;
     }
 
-    const inputId = appendInputId
-      ? `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
-          packagePolicy.id
-        }`
-      : packagePolicy.id;
-
     const fullInput: FullAgentPolicyInput = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
-      id: inputId,
+      id: input.id ?? getInputId(input, packagePolicy.id, packageInfo), // Generate input id if not already set
       revision: packagePolicy.revision,
       name: packagePolicy.name,
       type: input.type,

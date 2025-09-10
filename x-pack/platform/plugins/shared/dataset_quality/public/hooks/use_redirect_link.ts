@@ -163,14 +163,15 @@ const getDataView = <T extends BasicDataStream | string>({
   dataStreamStat: T;
   selector?: DataStreamSelector;
 }): { dataViewId: string; dataViewTitle: string } => {
+  const dataViewSelector = selector ? `${selector}` : '';
   if (dataStreamStat && typeof dataStreamStat === 'string') {
-    return { dataViewId: dataStreamStat, dataViewTitle: dataStreamStat };
+    const dataViewId = `${dataStreamStat}${dataViewSelector}`;
+    return { dataViewId, dataViewTitle: dataViewId };
   }
 
   const { name, namespace, type, integration } = dataStreamStat as BasicDataStream;
 
   const dataViewNamespace = `${namespace || '*'}`;
-  const dataViewSelector = selector ? `${selector}` : '';
   const dataViewId = `${type}-${name}-${dataViewNamespace}${dataViewSelector}`;
   const dataViewTitle = integration
     ? `[${integration.title}] ${name}-${dataViewNamespace}${dataViewSelector}`

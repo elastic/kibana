@@ -33,6 +33,7 @@
     "@kbn/visualization-utils",
     "@kbn/visualizations-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/data-views-plugin"
   ]
 }

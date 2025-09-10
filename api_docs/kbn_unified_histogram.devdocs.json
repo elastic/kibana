@@ -658,6 +658,111 @@
       },
       {
         "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.useFetch",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetch",
+        "description": [],
+        "signature": [
+          "({ input$, beforeFetch, }: { input$: ",
+          "UnifiedHistogramInput",
+          "$; beforeFetch: () => void; }) => ",
+          "Observable",
+          "<",
+          "UnifiedHistogramFetchMessage",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/hooks/use_fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.useFetch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  input$,\n  beforeFetch,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/hooks/use_fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.useFetch.$1.input$",
+                "type": "Object",
+                "tags": [],
+                "label": "input$",
+                "description": [],
+                "signature": [
+                  "Subject",
+                  "<",
+                  "UnifiedHistogramFetchMessage",
+                  ">"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/hooks/use_fetch.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-histogram",
+                "id": "def-public.useFetch.$1.beforeFetch",
+                "type": "Function",
+                "tags": [],
+                "label": "beforeFetch",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/hooks/use_fetch.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
+        "id": "def-public.useStableCallback",
+        "type": "Function",
+        "tags": [],
+        "label": "useStableCallback",
+        "description": [
+          "\nAccepts a callback and returns a function with a stable identity\nthat will always call the latest version of the callback when invoked"
+        ],
+        "signature": [
+          "<T extends (...args: any[]) => any>(fn: T | undefined) => (...args: Parameters<T>) => any"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_stable_callback.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.useStableCallback.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_stable_callback.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.useUnifiedHistogram",
         "type": "Function",
         "tags": [],
@@ -1866,6 +1971,26 @@
             "description": [],
             "signature": [
               "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
             "deprecated": false,

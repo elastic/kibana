@@ -59,7 +59,7 @@ describe('tracesDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildTraceMockRecord('index', {
+          record: buildTraceMockRecord('traces-index', {
             'trace.id': ['c0ffee'],
           }),
         })
@@ -71,7 +71,7 @@ describe('tracesDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildTraceMockRecord('another-index'),
+          record: buildTraceMockRecord('traces-index'),
         })
       ).toEqual(RESOLUTION_MISMATCH);
     });
@@ -81,7 +81,7 @@ describe('tracesDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildTraceMockRecord('index', {
+          record: buildTraceMockRecord('traces-index', {
             'trace.id': ['c0ffee'],
             kind: 'Internal',
           }),
@@ -101,7 +101,7 @@ describe('tracesDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId, solutionType }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildTraceMockRecord('index', {
+          record: buildTraceMockRecord('traces-index', {
             'trace.id': ['c0ffee'],
           }),
         })

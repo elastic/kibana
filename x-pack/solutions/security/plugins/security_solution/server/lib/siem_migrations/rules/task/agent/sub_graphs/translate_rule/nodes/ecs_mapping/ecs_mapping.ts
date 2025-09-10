@@ -8,7 +8,7 @@
 import {
   getConvertEsqlSchemaCisToEcs,
   type GetConvertEsqlSchemaCisToEcsParams,
-} from '../../../../../../../common/task/agent/tools/convert_esql_schema_cim_to_ecs';
+} from '../../../../../../../common/task/agent/helpers/convert_esql_schema_cim_to_ecs';
 import type { GraphNode } from '../../types';
 
 export const getEcsMappingNode = (params: GetConvertEsqlSchemaCisToEcsParams): GraphNode => {

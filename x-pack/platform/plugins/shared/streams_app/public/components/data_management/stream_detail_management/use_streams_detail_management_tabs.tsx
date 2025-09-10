@@ -26,7 +26,7 @@ export function useStreamsDetailManagementTabs({
   const isSignificantEventsEnabled = !!significantEvents?.available;
 
   return {
-    enrich: {
+    processing: {
       content: (
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),

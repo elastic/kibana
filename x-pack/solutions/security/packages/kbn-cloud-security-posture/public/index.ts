@@ -32,3 +32,12 @@ export {
 } from './src/utils/vulnerability_reference';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
 export { getGroupPanelTitle } from './src/utils/get_group_panel_title';
+export {
+  GroupWrapper,
+  GroupWrapperLoading,
+  GenericGroupRenderer,
+  LoadingGroup,
+  NullGroup,
+  firstNonNullValue,
+  type GroupRenderRegistry,
+} from './src/components/grouping';

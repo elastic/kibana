@@ -22,6 +22,7 @@ import type {
 } from '../../console/types';
 import type { ParsedCommandInterface } from '../../console/service/types';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../hooks/custom_scripts/use_get_custom_scripts');
 jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
@@ -60,6 +61,13 @@ describe('CustomScriptSelector', () => {
         capabilities: [],
         privileges: {},
         platform: 'linux',
+      },
+      args: {
+        ScriptName: {
+          required: true,
+          allowMultiples: false,
+          about: 'an argument',
+        },
       },
     },
   };
@@ -252,7 +260,7 @@ describe('CustomScriptSelector', () => {
       <CustomScriptSelector {...defaultProps} command={crowdstrikeCommand} />
     );
 
-    expect(mockUseGetCustomScripts).toHaveBeenCalledWith('crowdstrike', {});
+    expect(mockUseGetCustomScripts).toHaveBeenCalledWith('crowdstrike', {}, { enabled: true });
   });
 
   test('displays script description in dropdown', async () => {
@@ -325,5 +333,18 @@ describe('CustomScriptSelector', () => {
     });
 
     expect(mockRequestFocus).toHaveBeenCalled();
+  });
+
+  test('does not render full component if command does not allow multiples', async () => {
+    const { getByTestId } = await renderAndWaitForComponent(
+      <IntlProvider locale="en">
+        <CustomScriptSelector {...defaultProps} argIndex={1} />
+      </IntlProvider>
+    );
+
+    expect(
+      getByTestId(`scriptSelector-${defaultProps.command.commandDefinition.name}-noMultipleArgs`)
+        .textContent
+    ).toEqual(' Argument is only supported once per command');
   });
 });

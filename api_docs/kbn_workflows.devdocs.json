@@ -2851,6 +2851,21 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"workflows:ui:executionGraph:enabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.WORKFLOWS_UI_SETTING_ID",
         "type": "string",
         "tags": [],

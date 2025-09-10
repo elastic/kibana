@@ -233,7 +233,7 @@
         "label": "WORKFLOWS_EXECUTION_LOGS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-execution-logs\""
+          "\".workflows-execution-logs\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,
@@ -248,7 +248,7 @@
         "label": "WORKFLOWS_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-executions\""
+          "\".workflows-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,
@@ -263,7 +263,7 @@
         "label": "WORKFLOWS_STEP_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-step-executions\""
+          "\".workflows-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,

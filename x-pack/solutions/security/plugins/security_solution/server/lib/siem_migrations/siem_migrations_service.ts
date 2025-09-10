@@ -18,8 +18,7 @@ import {
   type SiemDashboardMigrationsClient,
   SiemDashboardMigrationsService,
 } from './dashboards/siem_dashboard_migration_service';
-import type { DashboardMigrationsCreateClientParams } from './dashboards/types';
-import type { RuleMigrationsCreateClientParams } from './rules/types';
+import type { SiemMigrationsCreateClientParams } from './common/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -50,13 +49,11 @@ export class SiemMigrationsService {
     }
   }
 
-  createRulesClient(params: RuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
+  createRulesClient(params: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
     return this.rulesService.createClient(params);
   }
 
-  createDashboardsClient(
-    params: DashboardMigrationsCreateClientParams
-  ): SiemDashboardMigrationsClient {
+  createDashboardsClient(params: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
     return this.dashboardsService.createClient(params);
   }
 

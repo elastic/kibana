@@ -23,10 +23,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useState } from 'react';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
-import { useWorkflows } from '../../entities/workflows/model/use_workflows';
-import { WorkflowList } from '../../features/workflow_list';
-import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
+import { useWorkflows } from '../../entities/workflows/model/use_workflows';
+import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
+import { WorkflowList } from '../../features/workflow_list';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../types';
@@ -84,6 +84,19 @@ export function WorkflowsPage() {
           refetch();
         },
         onError: (error) => {
+          // Extract message from HTTP error body and update the error message
+          if (
+            error &&
+            typeof error === 'object' &&
+            'body' in error &&
+            error.body &&
+            typeof error.body === 'object' &&
+            'message' in error.body &&
+            typeof error.body.message === 'string'
+          ) {
+            (error as any).message = error.body.message;
+          }
+
           notifications!.toasts.addError(error, {
             title: i18n.translate('workflows.createWorkflowError', {
               defaultMessage: 'Error creating workflow',

@@ -79,6 +79,18 @@ export const par = (name: string): ESQLParamLiteral => {
 };
 
 /**
+ * Creates an ES|QL named double parameter node.
+ *
+ * @param name The name of the parameter.
+ * @returns ES|QL named parameter node.
+ */
+export const dpar = (name: string): ESQLParamLiteral => {
+  const node = Builder.param.named({ value: name, paramKind: '??' });
+
+  return SynthNode.from(node);
+};
+
+/**
  * Creates an ES|QL column node.
  *
  * @param name The name of the column.

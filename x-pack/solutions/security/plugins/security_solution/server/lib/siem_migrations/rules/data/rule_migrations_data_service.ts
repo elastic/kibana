@@ -17,8 +17,8 @@ import type {
   RuleMigrationAdapterId,
   RuleMigrationAdapters,
   RuleMigrationIndexNameProviders,
-  RuleMigrationsClientDependencies,
 } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import {
   getIntegrationsFieldMap,
   getPrebuiltRulesFieldMap,
@@ -33,7 +33,7 @@ interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
-  dependencies: RuleMigrationsClientDependencies;
+  dependencies: SiemMigrationsClientDependencies;
 }
 interface CreateRuleAdapterParams {
   adapterId: RuleMigrationAdapterId;

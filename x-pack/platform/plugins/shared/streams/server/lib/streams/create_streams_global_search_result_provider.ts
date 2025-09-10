@@ -82,6 +82,7 @@ async function findStreams({
             wildcard: {
               name: {
                 value: `*${term}*`,
+                case_insensitive: true,
               },
             },
           },

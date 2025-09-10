@@ -13,19 +13,28 @@ import type { QueryPipeline } from '../types';
 
 /**
  * The entry point for the ESQL composer pipeline. Creates a new query
- * starting with a `FROM` clause.
+ * starting with a `FROM` or `TS` clause.
  *
  * @param patterns The index patterns to query.
  * @returns A `QueryPipeline` instance to which other composer commands can be chained.
  */
-export function from(...patterns: Array<string | string[]>): QueryPipeline {
-  const allPatterns = patterns.flatMap((pattern) => pattern);
 
-  const { root } = parse(`FROM ${allPatterns.join(', ')}`);
+function buildPipeline(
+  command: 'TS' | 'FROM',
+  ...patterns: Array<string | string[]>
+): QueryPipeline {
+  const allPatterns = patterns.flat();
+  const { root } = parse(`${command} ${allPatterns.join(', ')}`);
 
   return createPipeline({
     root,
     commands: [],
     params: [],
   });
+}
+export function timeseries(...patterns: Array<string | string[]>): QueryPipeline {
+  return buildPipeline('TS', ...patterns);
+}
+export function from(...patterns: Array<string | string[]>): QueryPipeline {
+  return buildPipeline('FROM', ...patterns);
 }

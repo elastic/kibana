@@ -105,7 +105,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                     href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: field.parent,
-                        tab: 'schemaEditor',
+                        tab: 'schema',
                       },
                     })}
                     target="_blank"

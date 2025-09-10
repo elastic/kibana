@@ -23,6 +23,14 @@ const getDefaultValues = (toolType: ToolType): ToolFormData => {
         params: [],
         type: ToolType.esql,
       };
+    case ToolType.index_search:
+      return {
+        toolId: '',
+        description: '',
+        labels: [],
+        type: ToolType.index_search,
+        pattern: '',
+      };
     default:
       return {
         toolId: '',
@@ -33,10 +41,10 @@ const getDefaultValues = (toolType: ToolType): ToolFormData => {
   }
 };
 
-export const useToolForm = (tool?: ToolDefinitionWithSchema) => {
+export const useToolForm = (tool?: ToolDefinitionWithSchema, initialToolType?: ToolType) => {
   const esqlResolver = useEsqlToolFormValidationResolver();
 
-  const toolType = tool?.type ?? ToolType.esql;
+  const toolType = tool?.type ?? initialToolType ?? ToolType.esql;
 
   const form = useForm<ToolFormData>({
     defaultValues: getDefaultValues(toolType),

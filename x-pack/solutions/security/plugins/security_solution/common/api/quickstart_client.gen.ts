@@ -397,6 +397,7 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
+  DeleteDashboardMigrationRequestParamsInput,
   GetAllDashboardMigrationsStatsResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
@@ -910,6 +911,21 @@ For detailed information on Kibana actions and alerting, and additional API call
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Deletes a SIEM dashboards migration using the migration id provided
+   */
+  async deleteDashboardMigration(props: DeleteDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3057,6 +3073,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteDashboardMigrationProps {
+  params: DeleteDashboardMigrationRequestParamsInput;
 }
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
