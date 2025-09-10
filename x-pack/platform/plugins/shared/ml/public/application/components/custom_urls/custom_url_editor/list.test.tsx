@@ -27,13 +27,16 @@ const mockDataViews = {
   get: jest.fn(),
 };
 
-jest.mock('../../../contexts/kibana', () => ({
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: {
       http: { basePath: { get: () => '' } },
       data: { dataViews: mockDataViews },
     },
   }),
+}));
+
+jest.mock('@kbn/ml-hooks/use_ml_api', () => ({
   useMlApi: () => ({}),
 }));
 
