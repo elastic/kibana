@@ -263,7 +263,7 @@ export class ScopedDiscoverEBTManager {
       // KQL query
 
       if (
-        query.language === 'lucene' || // TODO in issue #234590
+        query.language !== 'kuery' || // TODO in issue #234590
         typeof query.query !== 'string' ||
         query.query.trim() === ''
       ) {
