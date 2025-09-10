@@ -10,6 +10,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ArgSelectorState } from '../../console/types';
 import type { BaseSelectorState } from './types';
+import { getGenericErrorMessage } from '../../../common/translations';
 
 /**
  * Generic error toast hook that handles both custom scripts and pending actions errors
@@ -18,7 +19,7 @@ export const useGenericErrorToast = (
   error: IHttpFetchError<unknown> | null,
   notifications: NotificationsStart,
   errorTitlePrefix?: string
-) => {
+): void => {
   useEffect(() => {
     if (error) {
       let code = 'Error';
@@ -34,9 +35,8 @@ export const useGenericErrorToast = (
       }
 
       if (message) {
-        const titlePrefix = errorTitlePrefix ? `${errorTitlePrefix}: ` : '';
         notifications.toasts.addDanger({
-          title: `${titlePrefix}Error ${code}`,
+          title: getGenericErrorMessage(errorTitlePrefix || '', code),
           text: message,
         });
       }
@@ -50,7 +50,7 @@ export const useGenericErrorToast = (
 export const useBaseSelectorState = <T extends BaseSelectorState>(
   store: T | undefined,
   value: string | undefined
-) => {
+): T => {
   return useMemo<T>(() => {
     return (store ?? { isPopoverOpen: !value }) as T;
   }, [store, value]);
@@ -64,7 +64,11 @@ export const useBaseSelectorHandlers = <T extends BaseSelectorState>(
   onChange: (newData: ArgSelectorState<T>) => void,
   value: string,
   valueText: string
-) => {
+): {
+  setIsPopoverOpen: (newValue: boolean) => void;
+  handleOpenPopover: () => void;
+  handleClosePopover: () => void;
+} => {
   const setIsPopoverOpen = useCallback(
     (newValue: boolean) => {
       onChange({
@@ -97,7 +101,7 @@ export const useBaseSelectorHandlers = <T extends BaseSelectorState>(
 /**
  * Hook to manage render delay state (handles race condition with parent input)
  */
-export const useRenderDelay = () => {
+export const useRenderDelay = (): boolean => {
   const [isAwaitingRenderDelay, setIsAwaitingRenderDelay] = useState(true);
 
   useEffect(() => {
@@ -114,7 +118,7 @@ export const useRenderDelay = () => {
 /**
  * Hook to handle focus management when popover closes
  */
-export const useFocusManagement = (isPopoverOpen: boolean, requestFocus?: () => void) => {
+export const useFocusManagement = (isPopoverOpen: boolean, requestFocus?: () => void): void => {
   useEffect(() => {
     if (!isPopoverOpen && requestFocus) {
       // Use setTimeout to ensure focus happens after the popover closes

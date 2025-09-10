@@ -5,24 +5,38 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { IHttpFetchError } from '@kbn/core/public';
+import React, { memo, useCallback, useMemo } from 'react';
+import {
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelectable,
+  EuiToolTip,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
-import { BaseArgumentSelector } from '../shared/base_argument_selector';
-import { PENDING_ACTIONS_CONFIG } from '../shared/constants';
+import { PENDING_ACTIONS_CONFIG, SHARED_TRUNCATION_STYLE } from '../shared/constants';
 import {
   useGenericErrorToast,
   transformPendingActionsToOptions,
   checkActionCancelPermission,
 } from '../shared';
-import { canCancelResponseAction } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
-import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { useKibana } from '../../../../common/lib/kibana';
+import {
+  useBaseSelectorState,
+  useBaseSelectorHandlers,
+  useRenderDelay,
+  useFocusManagement,
+} from '../shared/hooks';
+import { createSelectionHandler, createKeyDownHandler } from '../shared/utils';
+import { ERROR_LOADING_PENDING_ACTIONS } from '../../../common/translations';
 
 /**
  * State for the pending actions selector component
@@ -32,97 +46,164 @@ export interface PendingActionsSelectorState {
 }
 
 /**
- * Hook wrapper that properly handles the data transformation for BaseArgumentSelector
+ * A Console Argument Selector component that enables the user to select from available pending actions
  */
-const usePendingActionsDataHook = (params: unknown) => {
-  const hookParams = params as {
-    agentType: ResponseActionAgentType;
-    endpointId?: string;
-    page: number;
-    pageSize: number;
-  };
-
-  const result = useGetPendingActions(hookParams);
-
-  // Transform the single response object into array format expected by BaseArgumentSelector
-  return {
-    data: result.data ? [result.data] : [],
-    isLoading: result.isLoading,
-    error: result.error,
-  };
-};
-
-/**
- * Custom error toast hook for pending actions
- */
-const usePendingActionsErrorToast = (
-  error: IHttpFetchError<unknown> | null,
-  notifications: NotificationsStart
-) => {
-  useGenericErrorToast(error, notifications, 'Error loading pending actions');
-};
-
 export const PendingActionsSelector = memo<
   CommandArgumentValueSelectorProps<string, PendingActionsSelectorState>
 >(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
-  // Extract agentType from command.meta instead of direct parameter
   const agentType = command.commandDefinition.meta?.agentType as ResponseActionAgentType;
   const endpointId = command.commandDefinition.meta?.endpointId;
 
   const userPrivileges = useUserPrivileges();
-  const featureFlags = ExperimentalFeaturesService.get();
-  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg`);
 
-  const privilegeChecker = useMemo(
-    () => (actionCommand: string) => {
-      // First check if the overall cancel feature is available
-      const canCancelGeneral = canCancelResponseAction(
-        userPrivileges.endpointPrivileges,
-        featureFlags,
-        agentType
-      );
+  const { data, isLoading, error } = useGetPendingActions({
+    agentType,
+    endpointId,
+    page: 1,
+    pageSize: 200,
+  });
 
-      if (!canCancelGeneral) {
-        return {
-          canCancel: false,
-          reason: 'Cancel action is not available for this agent type or user.',
-        };
-      }
-
-      // Then check specific command permission
+  const privilegeChecker = useCallback(
+    (actionCommand: string) => {
       return checkActionCancelPermission(actionCommand, userPrivileges.endpointPrivileges);
     },
-    [userPrivileges.endpointPrivileges, featureFlags, agentType]
+    [userPrivileges.endpointPrivileges]
   );
 
-  const transformToOptionsWithPrivileges = useMemo(
-    () => (response: ActionListApiResponse[], selectedValue?: string) =>
-      transformPendingActionsToOptions(response, selectedValue, privilegeChecker),
-    [privilegeChecker]
+  const options = useMemo(() => {
+    if (!data) return [];
+    return transformPendingActionsToOptions([data], value, privilegeChecker);
+  }, [data, value, privilegeChecker]);
+
+  const {
+    services: { notifications },
+  } = useKibana();
+
+  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg-${argIndex}`);
+
+  const state = useBaseSelectorState(store, value);
+  const { handleOpenPopover, handleClosePopover } = useBaseSelectorHandlers(
+    state,
+    onChange,
+    value || '',
+    valueText || ''
   );
+
+  const isAwaitingRenderDelay = useRenderDelay();
+
+  useFocusManagement(state.isPopoverOpen, requestFocus);
+
+  useGenericErrorToast(error, notifications, ERROR_LOADING_PENDING_ACTIONS);
+
+  const handleSelection = useCallback(
+    (newOptions: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
+      const handler = createSelectionHandler(onChange, state);
+      handler(newOptions, _event, changedOption);
+    },
+    [onChange, state]
+  );
+
+  const renderOption = useCallback(
+    (option: EuiSelectableOption) => {
+      const hasDescription = 'description' in option && option.description;
+      const hasToolTipContent = 'toolTipContent' in option && option.toolTipContent;
+      const testIdPrefix = testId();
+      const descriptionText = hasDescription ? String(option.description) : '';
+      const toolTipText = hasToolTipContent ? String(option.toolTipContent) : '';
+
+      const content = (
+        <div data-test-subj={`${testIdPrefix}-script`}>
+          <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
+            <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
+          </EuiText>
+          {hasDescription ? (
+            <EuiToolTip position="right" content={descriptionText}>
+              <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
+                <small css={SHARED_TRUNCATION_STYLE}>{descriptionText}</small>
+              </EuiText>
+            </EuiToolTip>
+          ) : null}
+        </div>
+      );
+
+      // If the option has toolTipContent (typically for disabled options), wrap in tooltip
+      if (hasToolTipContent) {
+        return (
+          <EuiToolTip position="right" content={toolTipText}>
+            {content}
+          </EuiToolTip>
+        );
+      }
+
+      return content;
+    },
+    [testId]
+  );
+
+  if (isAwaitingRenderDelay || (isLoading && !error)) {
+    const testIdPrefix = testId();
+    return <EuiLoadingSpinner data-test-subj={`${testIdPrefix}-loading`} size="m" />;
+  }
+
+  const testIdPrefix = testId();
 
   return (
-    <BaseArgumentSelector
-      value={value}
-      valueText={valueText}
-      onChange={onChange}
-      store={store}
-      command={command}
-      requestFocus={requestFocus}
-      argName={argName}
-      argIndex={argIndex}
-      useDataHook={usePendingActionsDataHook}
-      hookParams={{
-        agentType,
-        endpointId,
-        page: 1,
-        pageSize: 200,
+    <EuiPopover
+      isOpen={state.isPopoverOpen}
+      offset={10}
+      panelStyle={{
+        padding: 0,
+        minWidth: PENDING_ACTIONS_CONFIG.minWidth,
       }}
-      transformToOptions={transformToOptionsWithPrivileges}
-      config={PENDING_ACTIONS_CONFIG}
-      useErrorToast={usePendingActionsErrorToast}
-      testIdPrefix={testId()}
-    />
+      data-test-subj={testIdPrefix}
+      closePopover={handleClosePopover}
+      panelProps={{ 'data-test-subj': `${testIdPrefix}-popoverPanel` }}
+      button={
+        <EuiToolTip content={PENDING_ACTIONS_CONFIG.tooltipText} position="top" display="block">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false} onClick={handleOpenPopover}>
+              <div title={valueText}>{valueText || PENDING_ACTIONS_CONFIG.initialLabel}</div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      }
+    >
+      {state.isPopoverOpen && (
+        <EuiSelectable
+          id={PENDING_ACTIONS_CONFIG.selectableId}
+          searchable={true}
+          options={options}
+          onChange={handleSelection}
+          renderOption={renderOption}
+          singleSelection
+          searchProps={{
+            placeholder: valueText || PENDING_ACTIONS_CONFIG.initialLabel,
+            autoFocus: true,
+            onKeyDown: createKeyDownHandler,
+          }}
+          listProps={{
+            rowHeight: PENDING_ACTIONS_CONFIG.rowHeight,
+            showIcons: true,
+            textWrap: 'truncate',
+          }}
+          errorMessage={
+            error ? (
+              <FormattedMessage
+                id="xpack.securitySolution.baseArgumentSelector.errorLoading"
+                defaultMessage="Error loading data"
+              />
+            ) : undefined
+          }
+        >
+          {(list, search) => (
+            <>
+              <div css={{ margin: 5 }}>{search}</div>
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      )}
+    </EuiPopover>
   );
 });
 

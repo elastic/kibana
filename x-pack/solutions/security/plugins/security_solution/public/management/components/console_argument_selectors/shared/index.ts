@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { BaseArgumentSelector } from './base_argument_selector';
-export type { BaseArgumentSelectorProps, BaseSelectorState, BaseSelectorConfig } from './types';
+export type { BaseSelectorState, BaseSelectorConfig } from './types';
 export {
   SHARED_TRUNCATION_STYLE,
   CUSTOM_SCRIPTS_CONFIG,
