@@ -5496,6 +5496,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-quality@link:x-pack/platform/packages/private/kbn-data-quality":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-search-plugin@link:src/platform/test/plugin_functional/plugins/data_search":
   version "0.0.0"
   uid ""
