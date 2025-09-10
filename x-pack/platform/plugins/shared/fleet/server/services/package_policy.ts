@@ -2279,13 +2279,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 }
 
                 if (externalCallbackType === 'packagePolicyCreate') {
-                  try {
-                    updatedNewData = NewPackagePolicySchema.validate(
-                      omit(thisCallbackResponse, 'spaceIds')
-                    );
-                  } catch (validationError: any) {
-                    throw new PackagePolicyValidationError(validationError.message);
-                  }
+                  updatedNewData = NewPackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
@@ -2313,6 +2309,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       .toString()
                       .substring(0, 1000)}`
                 );
+
+                // Convert schema validation errors to Fleet errors
+                if (
+                  callbackError.constructor.name === 'ValidationError' ||
+                  callbackError.name === 'ValidationError'
+                ) {
+                  throw new PackagePolicyValidationError(callbackError.message);
+                }
+
                 throw callbackError;
               }
             }
