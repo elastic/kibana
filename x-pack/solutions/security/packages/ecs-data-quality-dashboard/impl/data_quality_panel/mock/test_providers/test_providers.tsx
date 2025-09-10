@@ -23,6 +23,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import type { AssistantProviderProps } from '@kbn/elastic-assistant/impl/assistant_context';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataQualityProviderProps } from '../../data_quality_context';
 import { DataQualityProvider } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
@@ -38,7 +39,6 @@ import type {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
@@ -101,9 +101,9 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     chrome,
     settings: {
       client: {
-        get: jest.fn()
-      }
-    } as unknown as SettingsStart
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart,
   };
 
   return (
