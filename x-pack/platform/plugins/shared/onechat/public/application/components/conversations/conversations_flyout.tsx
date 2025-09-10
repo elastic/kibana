@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +29,7 @@ import { ConversationHeader } from './conversation_header';
 import { Conversation } from './conversation';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
+export const CONVERSATION_MAIN_PANEL_MIN_WIDTH = 800;
 
 const ConversationsContainer = styled('span')`
   display: flex;
@@ -49,6 +50,7 @@ export const ConversationsFlyout: React.FC<ConversationsFlyoutProps> = ({
   handleShortcutPress,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userResizeOffset, setUserResizeOffset] = useState<number>(0);
   const spaceId = useSpaceId();
   const { euiTheme } = useEuiTheme();
   const flyoutRef = useRef<HTMLDivElement>();
@@ -65,11 +67,42 @@ export const ConversationsFlyout: React.FC<ConversationsFlyoutProps> = ({
   useEvent('keydown', onKeyDown);
   const { conversations = [], isLoading } = useConversationList();
 
-  if (!isVisible || !OnechatConversationsView) return null;
+  // Reset user resize offset when flyout is closed
+  useEffect(() => {
+    if (!isVisible) {
+      setUserResizeOffset(0);
+    }
+  }, [isVisible]);
+
+  // Calculate the base size based on sidebar state
+  const getBaseSize = () => {
+    return isSidebarOpen
+      ? CONVERSATION_MAIN_PANEL_MIN_WIDTH + CONVERSATION_SIDE_PANEL_WIDTH
+      : CONVERSATION_MAIN_PANEL_MIN_WIDTH;
+  };
+
+  // Calculate the final flyout size (base size + user's resize offset)
+  const getFlyoutSize = () => {
+    return getBaseSize() + userResizeOffset;
+  };
+
+  // Handle flyout resize - calculate the offset from the current base size
+  const handleFlyoutResize = useCallback(
+    (newSize: number) => {
+      const baseSize = isSidebarOpen
+        ? CONVERSATION_MAIN_PANEL_MIN_WIDTH + CONVERSATION_SIDE_PANEL_WIDTH
+        : CONVERSATION_MAIN_PANEL_MIN_WIDTH;
+      setUserResizeOffset(newSize - baseSize);
+    },
+    [isSidebarOpen]
+  );
+
+  if (!isVisible || !OnechatConversationsView || !spaceId) return null;
 
   return (
     <EuiFlyoutResizable
       ref={flyoutRef}
+      size={getFlyoutSize()}
       css={css`
         max-inline-size: calc(100% - 20px);
         min-inline-size: 400px;
@@ -78,6 +111,7 @@ export const ConversationsFlyout: React.FC<ConversationsFlyoutProps> = ({
         }
       `}
       onClose={onClose}
+      onResize={handleFlyoutResize}
       data-test-subj="onechat-flyout"
       paddingSize="none"
       hideCloseButton
