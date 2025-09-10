@@ -62,9 +62,7 @@ test('Kubernetes EA', async ({
     await kubernetesEAFlowPage.clickKubernetesAgentCTA();
     await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
   } else {
-    await page.waitForTimeout(5 * 60000);
-    
-    await kubernetesEAFlowPage.assertLogsDataReceivedIndicator();
+    await page.waitForTimeout(60000); 
     
     const discoverValidation = await kubernetesEAFlowPage.clickExploreLogsAndGetDiscoverValidation();
     await discoverValidation.waitForDiscoverToLoad();

@@ -7,7 +7,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
@@ -100,9 +99,6 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    await page.waitForTimeout(5 * 60000);
-    
-    // Navigate to Discover and validate actual data exists  
     const discoverValidation = await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
