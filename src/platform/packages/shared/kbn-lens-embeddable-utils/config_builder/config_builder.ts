@@ -46,7 +46,7 @@ export class LensConfigBuilder {
     metric: { fromAPItoLensState, fromLensStateToAPI },
   };
   private formulaAPI: FormulaPublicApi | undefined;
-  private dataViewsAPI: DataViewsCommon;
+  private dataViewsAPI: DataViewsCommon | undefined;
 
   // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
   constructor(dataViewsAPI?: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
