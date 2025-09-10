@@ -10,7 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { isPair, isScalar, visit, isMap } from 'yaml';
 import type YAML from 'yaml';
-import { buildRequestFromConnector } from '../../../../common/elasticsearch_request_builder';
+import { buildRequestFromConnector } from '@kbn/workflows';
 
 export interface ElasticsearchStepData {
   type: string;

@@ -12,6 +12,8 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
   BaseStepSchema,
+  ElasticsearchStepSchema,
+  KibanaStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -71,14 +73,18 @@ function createRecursiveStepSchema(
       })
     );
 
-    // Return discriminated union with all step types
-    return z.discriminatedUnion('type', [
+    // Return union with all step types
+    // Note: We can't use discriminatedUnion because ElasticsearchStepSchema and KibanaStepSchema
+    // use .refine() validation which doesn't work with discriminated unions
+    return z.union([
       forEachSchema,
       ifSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
       httpSchema,
+      ElasticsearchStepSchema,
+      KibanaStepSchema,
       ...connectorSchemas,
     ]);
   });

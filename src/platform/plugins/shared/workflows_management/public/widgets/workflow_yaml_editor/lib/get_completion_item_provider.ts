@@ -185,7 +185,7 @@ function generateTriggerSnippet(triggerType: string, shouldBeQuoted: boolean): s
   // Generate appropriate snippets based on trigger type
   switch (triggerType) {
     case 'alert':
-      return `${quotedType}\n  with:\n    rule_id: "\${1:rule-id-here}"`;
+      return `${quotedType}`;
 
     case 'scheduled':
       return `${quotedType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildRequestFromConnector } from '@kbn/workflows-management-plugin/common';
+import { buildRequestFromConnector } from '@kbn/workflows';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
@@ -126,7 +126,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
 
         // Optional: forward query flags like refresh if you have them
-        const refresh = requestOptions.query?.refresh ?? false;
+        const refresh = queryParams?.refresh ?? false;
 
         // Turn each doc into an action+doc pair
         const body = docs.flatMap((doc, i) => {

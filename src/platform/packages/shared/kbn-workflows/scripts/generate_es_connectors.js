@@ -20,7 +20,7 @@ const path = require('path');
 // Path to Console definitions
 const CONSOLE_DEFINITIONS_PATH = path.resolve(
   __dirname,
-  '../../console/server/lib/spec_definitions/json/generated'
+  '../../../../plugins/shared/console/server/lib/spec_definitions/json/generated'
 );
 const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_es_connectors.ts');
 
@@ -153,6 +153,23 @@ function readConsoleBodyDefinitions(endpointName) {
     reindex: ['source', 'dest', 'script', 'conflicts'],
     update_by_query: ['query', 'script', 'conflicts'],
     delete_by_query: ['query', 'conflicts'],
+    // Index management APIs
+    'indices.create': ['mappings', 'settings', 'aliases'],
+    'indices.put_mapping': ['properties', 'dynamic', 'meta'],
+    'indices.put_settings': ['settings'],
+    'indices.put_template': ['template', 'mappings', 'settings', 'aliases'],
+    'indices.put_index_template': ['template', 'composed_of', 'priority', 'version'],
+    // Document APIs
+    'create': ['document'],
+    'delete': [],
+    'get': [],
+    'exists': [],
+    // Cluster APIs  
+    'cluster.put_settings': ['persistent', 'transient'],
+    'cluster.health': [],
+    // Node APIs
+    'nodes.info': [],
+    'nodes.stats': [],
   };
 
   // Check hardcoded definitions first
@@ -165,7 +182,7 @@ function readConsoleBodyDefinitions(endpointName) {
   // Look for override files (they have data_autocomplete_rules)
   const overridePath = path.resolve(
     __dirname,
-    '../../console/server/lib/spec_definitions/json/overrides',
+    '../../../plugins/shared/console/server/lib/spec_definitions/json/overrides',
     `${endpointName}.json`
   );
 
@@ -184,7 +201,140 @@ function readConsoleBodyDefinitions(endpointName) {
     }
   }
 
+  // If no body params found yet, try to infer from API name and patterns
+  if (bodyParams.size === 0) {
+    const inferredParams = inferBodyParamsFromApiName(endpointName);
+    for (const param of inferredParams) {
+      bodyParams.add(param);
+    }
+  }
+
   return Array.from(bodyParams);
+}
+
+/**
+ * Intelligently infer body parameters from API endpoint name and common patterns
+ */
+function inferBodyParamsFromApiName(endpointName) {
+  const bodyParams = [];
+
+  // Index management APIs
+  if (endpointName.includes('indices.create') && !endpointName.includes('data_stream')) {
+    return ['mappings', 'settings', 'aliases'];
+  }
+  if (endpointName.includes('indices.put_mapping')) {
+    return ['properties', 'dynamic', 'meta'];
+  }
+  if (endpointName.includes('indices.put_settings')) {
+    return ['settings'];
+  }
+  if (endpointName.includes('indices.put_template')) {
+    return ['template', 'mappings', 'settings', 'aliases'];
+  }
+  if (endpointName.includes('indices.put_index_template')) {
+    return ['template', 'composed_of', 'priority', 'version'];
+  }
+  if (endpointName.includes('indices.put_component_template')) {
+    return ['template', 'version', 'meta'];
+  }
+
+  // Search APIs
+  if (endpointName === 'search' || endpointName.includes('.search')) {
+    return ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'fields', 'track_total_hits'];
+  }
+  if (endpointName.includes('msearch')) {
+    return ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'index'];
+  }
+  if (endpointName.includes('search_template')) {
+    return ['template', 'params', 'explain', 'profile'];
+  }
+
+  // Document APIs
+  if (endpointName === 'index' || endpointName.includes('.index')) {
+    return ['document'];
+  }
+  if (endpointName === 'create' || endpointName.includes('.create') && !endpointName.includes('indices')) {
+    return ['document'];
+  }
+  if (endpointName === 'update' || endpointName.includes('.update')) {
+    return ['doc', 'script', 'upsert', 'doc_as_upsert'];
+  }
+  if (endpointName.includes('update_by_query')) {
+    return ['query', 'script', 'conflicts'];
+  }
+  if (endpointName.includes('delete_by_query')) {
+    return ['query', 'conflicts'];
+  }
+  if (endpointName.includes('reindex')) {
+    return ['source', 'dest', 'script', 'conflicts'];
+  }
+  if (endpointName.includes('bulk')) {
+    return ['operations'];
+  }
+
+  // Cluster APIs
+  if (endpointName.includes('cluster.put_settings')) {
+    return ['persistent', 'transient'];
+  }
+  if (endpointName.includes('cluster.put_component_template')) {
+    return ['template', 'version', 'meta'];
+  }
+
+  // Security APIs
+  if (endpointName.includes('security.put_user')) {
+    return ['password', 'roles', 'full_name', 'email', 'metadata'];
+  }
+  if (endpointName.includes('security.put_role')) {
+    return ['cluster', 'indices', 'applications', 'run_as', 'metadata'];
+  }
+  if (endpointName.includes('security.put_role_mapping')) {
+    return ['roles', 'enabled', 'rules', 'metadata'];
+  }
+
+  // ML APIs
+  if (endpointName.includes('ml.put_job')) {
+    return ['job_id', 'description', 'analysis_config', 'data_description'];
+  }
+  if (endpointName.includes('ml.put_datafeed')) {
+    return ['job_id', 'indices', 'query', 'frequency', 'scroll_size'];
+  }
+
+  // Watcher APIs
+  if (endpointName.includes('watcher.put_watch')) {
+    return ['trigger', 'input', 'condition', 'actions', 'metadata'];
+  }
+
+  // Transform APIs
+  if (endpointName.includes('transform.put_transform')) {
+    return ['source', 'dest', 'pivot', 'description', 'frequency'];
+  }
+
+  // Snapshot APIs
+  if (endpointName.includes('snapshot.create')) {
+    return ['indices', 'ignore_unavailable', 'include_global_state', 'metadata'];
+  }
+  if (endpointName.includes('snapshot.create_repository')) {
+    return ['type', 'settings'];
+  }
+
+  // Ingest APIs
+  if (endpointName.includes('ingest.put_pipeline')) {
+    return ['description', 'processors', 'on_failure', 'version'];
+  }
+
+  // ESQL APIs
+  if (endpointName.includes('esql.query')) {
+    return ['query', 'columnar', 'locale', 'params', 'profile', 'filter'];
+  }
+
+  // If no specific pattern matches, check for common patterns in the name
+  if (endpointName.includes('put_') || endpointName.includes('post_') || endpointName.includes('create')) {
+    // For PUT/POST/CREATE operations, there's usually a body
+    return []; // Will fall back to generic body
+  }
+
+  // GET/DELETE operations typically don't have body parameters
+  return [];
 }
 
 /**
@@ -255,6 +405,108 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.object({}).passthrough()${optionalSuffix}.describe('Destination configuration${requiredMarker}')`;
     case 'conflicts':
       return `z.enum(['abort', 'proceed'])${optionalSuffix}.describe('Conflict resolution${requiredMarker}')`;
+
+    // Index management parameters
+    case 'mappings':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Index mappings${requiredMarker}')`;
+    case 'settings':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Index settings${requiredMarker}')`;
+    case 'aliases':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Index aliases${requiredMarker}')`;
+    case 'properties':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Mapping properties${requiredMarker}')`;
+    case 'dynamic':
+      return `z.union([z.boolean(), z.enum(['strict'])])${optionalSuffix}.describe('Dynamic mapping${requiredMarker}')`;
+    case 'meta':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Mapping metadata${requiredMarker}')`;
+    case 'template':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Template configuration${requiredMarker}')`;
+    case 'composed_of':
+      return `z.array(z.string())${optionalSuffix}.describe('Component templates${requiredMarker}')`;
+    case 'priority':
+      return `z.number()${optionalSuffix}.describe('Template priority${requiredMarker}')`;
+    case 'version':
+      return `z.number()${optionalSuffix}.describe('Template version${requiredMarker}')`;
+    
+    // Cluster settings
+    case 'persistent':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Persistent cluster settings${requiredMarker}')`;
+    case 'transient':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Transient cluster settings${requiredMarker}')`;
+
+    // Security parameters
+    case 'password':
+      return `z.string()${optionalSuffix}.describe('User password${requiredMarker}')`;
+    case 'roles':
+      return `z.array(z.string())${optionalSuffix}.describe('User roles${requiredMarker}')`;
+    case 'full_name':
+      return `z.string()${optionalSuffix}.describe('Full name${requiredMarker}')`;
+    case 'email':
+      return `z.string()${optionalSuffix}.describe('Email address${requiredMarker}')`;
+    case 'metadata':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Metadata${requiredMarker}')`;
+    case 'cluster':
+      return `z.array(z.string())${optionalSuffix}.describe('Cluster privileges${requiredMarker}')`;
+    case 'indices':
+      return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Index privileges${requiredMarker}')`;
+    case 'applications':
+      return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Application privileges${requiredMarker}')`;
+    case 'run_as':
+      return `z.array(z.string())${optionalSuffix}.describe('Run as users${requiredMarker}')`;
+    case 'enabled':
+      return `z.boolean()${optionalSuffix}.describe('Enabled flag${requiredMarker}')`;
+    case 'rules':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Mapping rules${requiredMarker}')`;
+
+    // ML parameters
+    case 'job_id':
+      return `z.string()${optionalSuffix}.describe('Job ID${requiredMarker}')`;
+    case 'description':
+      return `z.string()${optionalSuffix}.describe('Description${requiredMarker}')`;
+    case 'analysis_config':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Analysis configuration${requiredMarker}')`;
+    case 'data_description':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Data description${requiredMarker}')`;
+    case 'frequency':
+      return `z.string()${optionalSuffix}.describe('Frequency${requiredMarker}')`;
+    case 'scroll_size':
+      return `z.number()${optionalSuffix}.describe('Scroll size${requiredMarker}')`;
+
+    // Watcher parameters
+    case 'trigger':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Watch trigger${requiredMarker}')`;
+    case 'input':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Watch input${requiredMarker}')`;
+    case 'condition':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Watch condition${requiredMarker}')`;
+    case 'actions':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Watch actions${requiredMarker}')`;
+
+    // Transform parameters
+    case 'pivot':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Pivot configuration${requiredMarker}')`;
+
+    // Snapshot parameters
+    case 'ignore_unavailable':
+      return `z.boolean()${optionalSuffix}.describe('Ignore unavailable indices${requiredMarker}')`;
+    case 'include_global_state':
+      return `z.boolean()${optionalSuffix}.describe('Include global state${requiredMarker}')`;
+    case 'type':
+      return `z.string()${optionalSuffix}.describe('Repository type${requiredMarker}')`;
+
+    // Ingest parameters
+    case 'processors':
+      return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Pipeline processors${requiredMarker}')`;
+    case 'on_failure':
+      return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Failure processors${requiredMarker}')`;
+
+    // Search template parameters
+    case 'template':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Template configuration${requiredMarker}')`;
+    case 'params':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Template parameters${requiredMarker}')`;
+    case 'explain':
+      return `z.boolean()${optionalSuffix}.describe('Explain query${requiredMarker}')`;
 
     default:
       return `z.any()${optionalSuffix}.describe('${paramName}${requiredMarker}')`;
