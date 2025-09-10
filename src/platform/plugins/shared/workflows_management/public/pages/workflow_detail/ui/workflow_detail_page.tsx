@@ -269,6 +269,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   readOnly={activeTab === 'executions'}
                   activeTab={activeTab}
                   selectedExecutionId={selectedExecutionId}
+                  originalValue={workflow?.yaml ?? ''}
                 />
               </React.Suspense>
             </EuiFlexItem>

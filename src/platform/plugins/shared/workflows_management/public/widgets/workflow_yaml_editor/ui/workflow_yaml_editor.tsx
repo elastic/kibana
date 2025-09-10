@@ -100,6 +100,7 @@ export interface WorkflowYAMLEditorProps {
   onSave?: (value: string) => void;
   activeTab?: string;
   selectedExecutionId?: string;
+  originalValue?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -116,6 +117,7 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   activeTab,
   selectedExecutionId,
+  originalValue,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -141,6 +143,8 @@ export const WorkflowYAMLEditor = ({
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const changesHighlightDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const {
     error: errorValidating,
@@ -153,6 +157,49 @@ export const WorkflowYAMLEditor = ({
   });
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  const [showDiffHighlight, setShowDiffHighlight] = useState(false);
+
+  // Helper to compute diff lines
+  const calculateLineDifferences = useCallback((original: string, current: string) => {
+    const originalLines = (original ?? '').split('\n');
+    const currentLines = (current ?? '').split('\n');
+    const changed: number[] = [];
+    const max = Math.max(originalLines.length, currentLines.length);
+    for (let i = 0; i < max; i++) {
+      if ((originalLines[i] ?? '') !== (currentLines[i] ?? '')) changed.push(i + 1);
+    }
+    return changed;
+  }, []);
+
+  // Apply diff highlight when toggled
+  useEffect(() => {
+    if (!showDiffHighlight || !originalValue || !editorRef.current || !isEditorMounted) {
+      if (changesHighlightDecorationCollectionRef.current) {
+        changesHighlightDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const model = editorRef.current.getModel();
+    if (!model) return;
+    if (changesHighlightDecorationCollectionRef.current) {
+      changesHighlightDecorationCollectionRef.current.clear();
+    }
+    const changedLines = calculateLineDifferences(originalValue, props.value ?? '');
+    if (changedLines.length === 0) return;
+    const decorations = changedLines.map((lineNumber) => ({
+      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
+      options: {
+        className: 'changed-line-highlight',
+        isWholeLine: true,
+        marginClassName: 'changed-line-margin',
+      },
+    }));
+    changesHighlightDecorationCollectionRef.current =
+      editorRef.current.createDecorationsCollection(decorations);
+    return () => {
+      changesHighlightDecorationCollectionRef.current?.clear();
+    };
+  }, [showDiffHighlight, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
 
   const changeSideEffects = useCallback(() => {
     if (editorRef.current) {
@@ -518,7 +565,29 @@ export const WorkflowYAMLEditor = ({
               gap: '4px',
               padding: '4px 6px',
               color: euiTheme.colors.accent,
+              cursor: 'pointer',
+              borderRadius: euiTheme.border.radius.small,
+              '&:hover': {
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              },
             }}
+            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={showDiffHighlight}
+            aria-label={
+              showDiffHighlight
+                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
+                    defaultMessage: 'Hide diff highlighting',
+                  })
+                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
+                    defaultMessage: 'Show diff highlighting',
+                  })
+            }
+            onKeyDown={() => {}}
+            title={
+              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
+            }
           >
             <EuiIcon type="dot" />
             <span>
@@ -701,6 +770,16 @@ const componentStyles = {
         color: 'transparent',
         textShadow: 'none',
         fontSize: 0,
+      },
+      '.changed-line-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        borderLeft: `2px solid ${euiTheme.colors.warning}`,
+        opacity: 0.7,
+      },
+      '.changed-line-margin': {
+        backgroundColor: euiTheme.colors.warning,
+        width: '2px',
+        opacity: 0.7,
       },
     }),
   editorContainer: css({
