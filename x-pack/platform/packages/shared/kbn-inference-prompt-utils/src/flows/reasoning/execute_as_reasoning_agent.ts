@@ -6,25 +6,26 @@
  */
 import type {
   AssistantMessage,
-  ToolMessage,
-  ToolCall,
-  Message,
   BoundInferenceClient,
+  Message,
   PromptOptions,
-  ToolCallbacksOf,
-  ToolOptionsOfPrompt,
-  ToolCallback,
   PromptResponse,
+  ToolCall,
+  ToolCallOfToolDefinitions,
+  ToolCallback,
+  ToolCallbacksOfToolOptions,
+  ToolMessage,
+  ToolOptionsOfPrompt,
   UnboundPromptOptions,
 } from '@kbn/inference-common';
-import { MessageRole, type Prompt, type ToolCallsOf } from '@kbn/inference-common';
+import { MessageRole, type Prompt } from '@kbn/inference-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { partition, last, takeRightWhile } from 'lodash';
-import { createReasonToolCall } from './create_reason_tool_call';
+import { last, partition, takeRightWhile } from 'lodash';
 import {
   createCompleteToolCall,
   createCompleteToolCallResponse,
 } from './create_complete_tool_call';
+import { createReasonToolCall } from './create_reason_tool_call';
 
 const planningTools = {
   reason: {
@@ -47,7 +48,7 @@ type PlanningTools = typeof planningTools;
 
 type PlanningToolCallName = keyof PlanningTools;
 
-type PlanningToolCall = ToolCallsOf<{ tools: PlanningTools }>['toolCalls'][number];
+type PlanningToolCall = ToolCallOfToolDefinitions<PlanningTools>;
 
 function isPlanningToolName(name: string) {
   return Object.keys(planningTools).includes(name);
@@ -112,7 +113,7 @@ export function executeAsReasoningAgent<
 >(
   options: UnboundPromptOptions &
     PromptReasoningAgentOptions & { prompt: TPrompt } & {
-      toolCallbacks: ToolCallbacksOf<ToolOptionsOfPrompt<TPrompt>>;
+      toolCallbacks: ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>;
     }
 ): Promise<PromptResponse<TPromptOptions>>;
 
@@ -122,7 +123,7 @@ export function executeAsReasoningAgent(
       toolCallbacks: Record<string, ToolCallback>;
     }
 ): Promise<PromptResponse> {
-  const { inferenceClient, maxSteps = 10, toolCallbacks, tools, toolChoice } = options;
+  const { inferenceClient, maxSteps = 10, toolCallbacks, toolChoice } = options;
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
@@ -143,8 +144,10 @@ export function executeAsReasoningAgent(
           },
           () => callback(toolCall)
         );
+
         return {
-          response,
+          response: response.response,
+          data: response.data,
           name: toolCall.function.name,
           toolCallId: toolCall.toolCallId,
           role: MessageRole.Tool,
@@ -172,7 +175,7 @@ export function executeAsReasoningAgent(
     }).length;
 
     const lastSystemToolCall = prevMessages.findLast(
-      (msg): msg is ToolMessage<PlanningToolCallName, PlanningToolCall> =>
+      (msg): msg is ToolMessage<PlanningToolCallName> =>
         msg.role === MessageRole.Tool && isPlanningToolName(msg.name)
     );
 
@@ -190,14 +193,11 @@ export function executeAsReasoningAgent(
     const nextPrompt = {
       ...options.prompt,
       versions: options.prompt.versions.map((version) => {
-        const { tools: promptTools, toolChoice: promptToolChoice, ...rest } = version;
+        const { tools: promptTools, ...rest } = version;
 
         const mergedToolOptions = {
-          tools: {
-            ...promptTools,
-            ...tools,
-          },
-          toolChoice: toolChoice || promptToolChoice,
+          tools: promptTools,
+          toolChoice,
         };
 
         const nextTools = isCompleting
