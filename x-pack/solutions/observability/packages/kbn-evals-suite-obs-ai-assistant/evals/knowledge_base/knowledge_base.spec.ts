@@ -105,6 +105,31 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       await clearConversations(esClient);
     });
 
+    evaluate('retrieves one entry from the KB without LLM', async ({ chatClient }) => {
+      const conversation = await chatClient.complete({
+        messages: 'What DevOps teams do we have and how is the on-call rotation managed?',
+      });
+      const contextResponseMessage = conversation.messages.find((msg) => msg.name === 'context');
+      if (!contextResponseMessage) {
+        throw new Error('No context function message returned');
+      }
+
+      const { learnings } = JSON.parse(contextResponseMessage.content!);
+      const firstLearning = learnings[0];
+
+      if (learnings.length !== 1) {
+        throw new Error(`Expected 1 learning, got ${learnings.length}`);
+      }
+
+      if (!(firstLearning.llmScore > 4)) {
+        throw new Error(`Expected LLM score > 4, got ${firstLearning.llmScore}`);
+      }
+
+      if (firstLearning.id !== 'acme_teams') {
+        throw new Error(`Expected first learning id "acme_teams", got "${firstLearning.id}"`);
+      }
+    });
+
     evaluate(
       'retrieves and describes DevOps teams and on-call info',
       async ({ evaluateKnowledgeBase }) => {
