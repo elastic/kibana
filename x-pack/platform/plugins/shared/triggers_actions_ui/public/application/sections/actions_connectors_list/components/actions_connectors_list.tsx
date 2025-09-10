@@ -278,6 +278,28 @@ const ActionsConnectorsList = ({
           defaultMessage: 'Type',
         }
       ),
+      render: (value: string, item: ActionConnectorTableItem) => {
+        return (
+          <EuiFlexGroup>
+            <EuiFlexItem>{value}</EuiFlexItem>
+            {item.isDeprecated ? (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  data-test-subj="deprecatedLabelMessage"
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.deprecatedLabelMessage',
+                    {
+                      defaultMessage: 'Deprecated',
+                    }
+                  )}
+                  color="warning"
+                  tooltipContent="This connector type will be removed in a future update."
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        );
+      },
       sortable: false,
       truncateText: true,
     },

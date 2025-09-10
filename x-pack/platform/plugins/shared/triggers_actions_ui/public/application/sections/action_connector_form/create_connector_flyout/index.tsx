@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,7 @@ import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
+import { DeprecatedCallOut } from './deprecated_callout';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -60,6 +62,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     application: { capabilities },
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -215,6 +218,46 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     };
   }, []);
 
+  const banner = useMemo(() => {
+    const openAiConnector = (provider: string) => {
+      if (allActionTypes) {
+        setActionType(allActionTypes['.inference']);
+
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('connectorProvider', provider);
+        // Update the URL without a full page refresh
+        setSearchParams(newSearchParams);
+      }
+    };
+
+    const banners = [];
+    if (!actionType && hasActionsUpgradeableByTrial) {
+      banners.push(<UpgradeLicenseCallOut />);
+    }
+
+    if (actionTypeModel?.id && actionTypeModel?.isDeprecated && actionTypeModel?.actionTypeTitle) {
+      banners.push(
+        banners.length ? <EuiSpacer /> : null,
+        <DeprecatedCallOut
+          name={actionTypeModel.actionTypeTitle}
+          id={actionTypeModel.id}
+          onClick={openAiConnector}
+        />
+      );
+    }
+
+    return banners;
+  }, [
+    allActionTypes,
+    actionType,
+    actionTypeModel?.id,
+    actionTypeModel?.isDeprecated,
+    actionTypeModel?.actionTypeTitle,
+    hasActionsUpgradeableByTrial,
+    searchParams,
+    setSearchParams,
+  ]);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -230,9 +273,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
       />
-      <EuiFlyoutBody
-        banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
-      >
+      <EuiFlyoutBody banner={banner}>
         {!hasConnectorTypeSelected && (
           <>
             <CreateConnectorFilter
