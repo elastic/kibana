@@ -65,7 +65,7 @@ describe('ES Client - custom user-agent', () => {
       agentFactoryProvider,
     });
 
-    let userAgentHeader: string | undefined;
+    let userAgentHeader: string | string[] | undefined;
     esServer = createFakeElasticsearchServer((res) => {
       userAgentHeader = res.headers[USER_AGENT_HEADER];
     });
