@@ -106,17 +106,17 @@ for (let i = 0; i < concurrency; i++) {
               timeWindowSize: 5,
               timeWindowUnit: 'm',
 
-            //   index: ['.kibana-event-log*'],
-            //   timeField: '@timestamp',
+              //   index: ['.kibana-event-log*'],
+              //   timeField: '@timestamp',
 
-                // index: ["kibana_sample_data_flights"],
-                // timeField: "timestamp",
+              // index: ["kibana_sample_data_flights"],
+              // timeField: "timestamp",
 
               //   index: ["kibana_sample_data_logs"],
               //   timeField: "timestamp",
 
-                index: ["kibana_sample_data_ecommerce"],
-                timeField: "order_date",
+              index: ['kibana_sample_data_ecommerce'],
+              timeField: 'order_date',
             },
           })
         );
