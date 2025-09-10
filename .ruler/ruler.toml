@@ -21,7 +21,7 @@ args = ["-lc", "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use 
 # --- Global .gitignore Configuration ---
 [gitignore]
 # Enable/disable automatic .gitignore updates (default: true)
-enabled = true
+enabled = false
 
 # --- Agent Specific Configurations ---
 # You can enable/disable agents and override their default output paths here.
