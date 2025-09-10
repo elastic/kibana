@@ -104,6 +104,7 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
   // add settings
   if (isObject(migratedDefinition.ingest) && !('settings' in migratedDefinition.ingest)) {
     set(migratedDefinition, 'ingest.settings', {});
+    hasBeenMigrated = true;
   }
 
   // Add metadata to Group stream if missing
