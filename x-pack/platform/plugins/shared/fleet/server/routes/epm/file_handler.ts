@@ -29,6 +29,7 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'image/gif',
   'application/json',
+  'application/yaml',
   'text/plain',
   'text/markdown',
   'text/yaml',
@@ -141,6 +142,11 @@ export const getFileHandler: FleetRequestHandler<
       }
       return headers;
     }, {} as ResponseHeaders);
+
+    if (!proxiedHeaders['content-type'] || typeof proxiedHeaders['content-type'] !== 'string') {
+      throw new FleetError(`unknown content type for file: ${filePath}`);
+    }
+    validateContentTypeIsAllowed(proxiedHeaders['content-type']);
 
     return response.custom({
       body: registryResponse.body,

@@ -634,6 +634,7 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+    return response.ok({ body });
   } else if (format === 'yml' || format === 'yaml') {
     body = await getTemplateInputs(
       soClient,
@@ -644,8 +645,10 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+
+    return response.ok({ body, headers: { 'content-type': 'application/yaml' } });
   }
-  return response.ok({ body });
+  throw new FleetError(`Fleet error template format not supported ${format}`);
 };
 
 export const getKnowledgeBaseHandler: FleetRequestHandler<
