@@ -8,19 +8,12 @@
  */
 
 import { mapValues } from 'lodash';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
-} from '@kbn/kibana-utils-plugin/common';
-import { DataViewPersistableStateService, DataViewsContract } from '@kbn/data-views-plugin/common';
-import {
-  createSearchSource,
-  extractReferences,
-  injectReferences,
-  SearchSource,
-  SearchSourceDependencies,
-  SerializedSearchSourceFields,
-} from '.';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { SearchSourceDependencies, SerializedSearchSourceFields } from '.';
+import { createSearchSource, extractReferences, injectReferences, SearchSource } from '.';
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/filters/persistable_state';
 
 const getAllMigrations = (): MigrateFunctionsObject => {

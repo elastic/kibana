@@ -8,7 +8,7 @@
  */
 
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
 describe('transformDashboardIn', () => {

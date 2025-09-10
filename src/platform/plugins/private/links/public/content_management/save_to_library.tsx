@@ -9,11 +9,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
   showSaveModal,
-  OnSaveProps,
-  SavedObjectSaveModal,
-  SaveResult,
+  SavedObjectSaveModalWithSaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { LINKS_EMBEDDABLE_TYPE, CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
@@ -75,7 +74,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
     };
 
     const saveModal = (
-      <SavedObjectSaveModal
+      <SavedObjectSaveModalWithSaveResult
         onSave={onSave}
         onClose={() => resolve(undefined)}
         title={newState.title ?? ''}

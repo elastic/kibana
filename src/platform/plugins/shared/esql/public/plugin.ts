@@ -10,7 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -19,8 +19,8 @@ import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -49,7 +49,7 @@ interface EsqlPluginStartDependencies {
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getInferenceEndpointsAutocomplete?: (
     taskType: InferenceTaskType
@@ -106,14 +106,18 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const variablesService = new EsqlVariablesService();
 
-    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
-      async () => {
+    const getJoinIndicesAutocomplete = cacheParametrizedAsyncFunction(
+      async (remoteClusters?: string) => {
+        const query = remoteClusters ? { remoteClusters } : {};
+
         const result = await core.http.get<IndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/join/indices'
+          '/internal/esql/autocomplete/join/indices',
+          { query }
         );
 
         return result;
       },
+      (remoteClusters?: string) => remoteClusters || '',
       1000 * 60 * 5, // Keep the value in cache for 5 minutes
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );

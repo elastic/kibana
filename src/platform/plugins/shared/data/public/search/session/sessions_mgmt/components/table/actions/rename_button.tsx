@@ -23,23 +23,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { IClickActionDescriptor } from './types';
-import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { IClickActionDescriptor } from './types';
+import type { OnActionDismiss } from './types';
+import type { UISession } from '../../../types';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 
 interface RenameButtonProps {
   searchSession: UISession;
   api: SearchSessionsMgmtAPI;
+  hasBackgroundSearchEnabled: boolean;
 }
 
 const RenameDialog = ({
   onActionDismiss,
   ...props
 }: RenameButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { api, searchSession } = props;
+  const { api, searchSession, hasBackgroundSearchEnabled } = props;
   const { id, name: originalName } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
@@ -49,6 +51,10 @@ const RenameDialog = ({
   const title = i18n.translate('data.mgmt.searchSessions.renameModal.title', {
     defaultMessage: 'Edit search session name',
   });
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.renameModal.backgroundSearchTitle', {
+    defaultMessage: 'Edit background search name',
+  });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.renameModal.renameButton', {
     defaultMessage: 'Save',
   });
@@ -59,6 +65,12 @@ const RenameDialog = ({
   const label = i18n.translate('data.mgmt.searchSessions.renameModal.searchSessionNameInputLabel', {
     defaultMessage: 'Search session name',
   });
+  const bgsLabel = i18n.translate(
+    'data.mgmt.searchSessions.renameModal.backgroundSearchNameInputLabel',
+    {
+      defaultMessage: 'Background search name',
+    }
+  );
 
   const isNewNameValid = newName && originalName !== newName;
 
@@ -69,12 +81,14 @@ const RenameDialog = ({
       initialFocus="[name=newName]"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {hasBackgroundSearchEnabled ? bgsTitle : title}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
-          <EuiFormRow label={label}>
+          <EuiFormRow label={hasBackgroundSearchEnabled ? bgsLabel : label}>
             <EuiFieldText
               name="newName"
               placeholder={originalName}
@@ -119,7 +133,15 @@ export const createRenameActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />,
+        <RenameDialog
+          hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
+            BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+            false
+          )}
+          onActionDismiss={() => ref?.close()}
+          api={api}
+          searchSession={uiSession}
+        />,
         core
       )
     );

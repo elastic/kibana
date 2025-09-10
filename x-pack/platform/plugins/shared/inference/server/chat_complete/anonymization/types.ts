@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { Anonymization } from '@kbn/inference-common';
+import type { Anonymization, RegexAnonymizationRule } from '@kbn/inference-common';
 
 /**
- * AnonymizationRecord are named strings that will be anonymized
- * per key-value pair. This allows us to pass in plain text strings
- * like `content` as a single document, instead of JSON.stringifying
- * the entire message.
+ * AnonymizationRecord maps JSON Pointer paths to string values that need anonymization.
+ * Keys are RFC-6901 JSON Pointer paths (e.g. "/content", "/toolCalls/0/function/arguments").
+ *
+ * Note: JSON Pointer paths should always contain string values.
+ * The undefined is for system messages which may be optional.
  */
 export interface AnonymizationRecord {
-  // make sure it matches Record<string, string | undefined>
-  [x: string]: string | undefined;
-  data?: string;
-  contentParts?: string;
-  content?: string;
-  system?: string;
+  [jsonPointerPath: string]: string | undefined;
 }
 
 /**
@@ -29,4 +25,19 @@ export interface AnonymizationRecord {
 export interface AnonymizationState {
   records: Array<Record<string, string>>;
   anonymizations: Anonymization[];
+}
+
+export interface DetectedMatch {
+  recordIndex: number;
+  recordKey: string;
+  start: number;
+  end: number;
+  matchValue: string;
+  class_name: string;
+  ruleIndex: number;
+}
+
+export interface AnonymizationRegexWorkerTaskPayload {
+  rules: RegexAnonymizationRule[];
+  records: Array<Record<string, string>>;
 }

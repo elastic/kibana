@@ -9,13 +9,11 @@ import type { ScopedRunnerRunAgentParams } from '@kbn/onechat-server';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';
+import type { CreateScopedRunnerDepsMock, MockedAgent, AgentClientMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedAgent,
   createMockedAgentClient,
-  CreateScopedRunnerDepsMock,
-  MockedAgent,
-  AgentClientMock,
 } from '../../test_utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 

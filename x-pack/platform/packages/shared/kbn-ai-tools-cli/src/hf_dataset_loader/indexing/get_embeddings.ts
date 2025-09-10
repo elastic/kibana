@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { indexDocuments } from './index_documents';
-import { HuggingFaceDatasetSpec } from '../types';
+import type { HuggingFaceDatasetSpec } from '../types';
 
 export async function getEmbeddings({
   esClient,

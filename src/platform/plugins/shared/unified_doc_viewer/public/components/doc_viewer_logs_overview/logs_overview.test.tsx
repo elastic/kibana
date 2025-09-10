@@ -11,13 +11,15 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LogsOverview, LogsOverviewApi, LogsOverviewProps } from './logs_overview';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { LogsOverviewApi, LogsOverviewProps } from './logs_overview';
+import { LogsOverview } from './logs_overview';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -141,20 +143,35 @@ setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
 );
 
+const indexes: TraceIndexes = {
+  apm: {
+    errors: 'apm-error-index',
+    traces: 'apm-trace-index',
+  },
+  logs: 'logs-index',
+};
+
 const renderLogsOverview = (
   props: Partial<LogsOverviewProps> = {},
   ref?: (api: LogsOverviewApi) => void
 ) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider highContrastMode={false}>
-      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} />
+      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} indexes={indexes} {...props} />
     </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<LogsOverviewProps>) =>
     baseRerender(
       <EuiProvider highContrastMode={false}>
-        <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+        <LogsOverview
+          ref={ref}
+          dataView={dataView}
+          hit={fullHit}
+          indexes={indexes}
+          {...props}
+          {...rerenderProps}
+        />
       </EuiProvider>
     );
 

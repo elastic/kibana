@@ -10,6 +10,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
+  getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
@@ -26,8 +27,9 @@ import {
   getCategorizeField,
   findClosestColumn,
 } from './query_parsing_helpers';
-import { monaco } from '@kbn/monaco';
-import { ESQLColumn, parse, walk } from '@kbn/esql-ast';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLColumn } from '@kbn/esql-ast';
+import { parse, walk } from '@kbn/esql-ast';
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
     it('should return the index pattern string from esql queries', () => {
@@ -960,6 +962,62 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getRemoteClustersFromESQLQuery', () => {
+    it('should return undefined for queries without remote clusters', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM foo')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery('FROM foo-1,foo-2')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery('FROM foo | STATS COUNT(*)')).toBeUndefined();
+    });
+
+    it('should return undefined for empty or undefined queries', () => {
+      expect(getRemoteClustersFromESQLQuery('')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery()).toBeUndefined();
+    });
+
+    it('should extract remote clusters from FROM command', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM cluster1:index1')).toEqual(['cluster1']);
+      expect(getRemoteClustersFromESQLQuery('FROM remote_cluster:foo-2')).toEqual([
+        'remote_cluster',
+      ]);
+    });
+
+    it('should extract multiple remote clusters from mixed indices', () => {
+      expect(
+        getRemoteClustersFromESQLQuery(
+          'FROM local-index, cluster1:remote-index1, cluster2:remote-index2'
+        )
+      ).toEqual(['cluster1', 'cluster2']);
+      expect(
+        getRemoteClustersFromESQLQuery('FROM cluster1:index1, local-index, cluster2:index2')
+      ).toEqual(['cluster1', 'cluster2']);
+    });
+
+    it('should extract remote clusters from TS command', () => {
+      expect(getRemoteClustersFromESQLQuery('TS cluster1:tsdb')).toEqual(['cluster1']);
+      expect(
+        getRemoteClustersFromESQLQuery('TS remote_cluster:timeseries | STATS max(cpu) BY host')
+      ).toEqual(['remote_cluster']);
+    });
+
+    it('should handle duplicate remote clusters', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM cluster1:index1, cluster1:index2')).toEqual([
+        'cluster1',
+      ]);
+    });
+
+    it('should handle wrapped in quotes', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM "cluster1:index1,cluster1:index2"')).toEqual([
+        'cluster1',
+      ]);
+
+      expect(
+        getRemoteClustersFromESQLQuery(
+          'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
+        )
+      ).toEqual(['cluster3', 'cluster1', 'cluster2']);
     });
   });
 });

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
 
 describe('ExitConditionBranchNodeImpl', () => {
@@ -23,12 +23,13 @@ describe('ExitConditionBranchNodeImpl', () => {
     getNodeSuccessors = jest.fn();
     step = {
       id: 'testStep',
-      type: 'exit-condition-branch',
+      type: 'exit-then-branch',
       startNodeId: 'startBranchNode',
     };
     wfExecutionRuntimeManagerMock = {
       goToStep,
       getNodeSuccessors,
+      exitScope: jest.fn(),
     } as any;
     impl = new ExitConditionBranchNodeImpl(step, wfExecutionRuntimeManagerMock);
 
@@ -69,5 +70,11 @@ describe('ExitConditionBranchNodeImpl', () => {
   it('should go to the exitIfNode after running', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
+  });
+
+  it('should exit scope after running', async () => {
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.exitScope).toHaveBeenCalled();
+    expect(wfExecutionRuntimeManagerMock.exitScope).toHaveBeenCalledTimes(1);
   });
 });

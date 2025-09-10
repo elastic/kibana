@@ -9,7 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { MaintenanceWindowStatus, KibanaServices } from './types';
+import type { KibanaServices } from './types';
+import { MaintenanceWindowStatus } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import {

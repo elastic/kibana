@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/ftr_provider_context';
+import { emptyAssets, type Streams } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryCustomRoleClient,
 } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
@@ -21,13 +21,13 @@ import {
 
 const STREAM_NAME = 'logs.crud';
 const request: Streams.WiredStream.UpsertRequest = {
-  dashboards: [],
-  queries: [],
   stream: {
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: [],
+      processing: {
+        steps: [],
+      },
       wired: {
         routing: [],
         fields: {
@@ -38,6 +38,7 @@ const request: Streams.WiredStream.UpsertRequest = {
       },
     },
   },
+  ...emptyAssets,
 };
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

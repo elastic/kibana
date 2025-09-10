@@ -16,7 +16,8 @@ import type { McpClientProvider } from '@kbn/wci-server';
 import type { Integration } from '../../../common/integrations';
 import { integrationTypeName } from '../../saved_objects/integrations';
 import type { IntegrationRegistry } from './integration_registry';
-import { IntegrationClientImpl, IntegrationClient } from './integration_client';
+import type { IntegrationClient } from './integration_client';
+import { IntegrationClientImpl } from './integration_client';
 
 interface IntegrationsServiceOptions {
   logger: Logger;

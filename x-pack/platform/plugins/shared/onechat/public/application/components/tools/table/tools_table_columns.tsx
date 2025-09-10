@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiFlexGroup, EuiText } from '@elastic/eui';
-import { ToolDefinitionWithSchema, ToolType, isEsqlTool } from '@kbn/onechat-common/tools';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';
@@ -16,23 +17,18 @@ import { ToolQuickActions } from './tools_table_quick_actions';
 
 export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
   return [
+    // Readonly indicator
+    {
+      width: '30px',
+      render: (tool: ToolDefinitionWithSchema) =>
+        tool.readonly ? <EuiIconTip type="lock" content={labels.tools.readOnly} /> : null,
+    },
     {
       field: 'id',
       name: labels.tools.toolIdLabel,
       sortable: true,
       width: '60%',
       render: (_, tool: ToolDefinitionWithSchema) => <ToolIdWithDescription tool={tool} />,
-    },
-    {
-      field: 'type',
-      name: labels.tools.typeLabel,
-      width: '80px',
-      render: (type: string) =>
-        type === ToolType.esql ? (
-          <EuiText size="s">{labels.tools.esqlLabel}</EuiText>
-        ) : type === ToolType.builtin ? (
-          <EuiText size="s">{labels.tools.builtinLabel}</EuiText>
-        ) : null,
     },
     {
       field: 'tags',
@@ -44,7 +40,7 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       align: 'right',
       render: (tool: ToolDefinitionWithSchema) => (
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-          {isEsqlTool(tool) && <ToolQuickActions tool={tool} />}
+          {!tool.readonly && <ToolQuickActions tool={tool} />}
           <ToolContextMenu tool={tool} />
         </EuiFlexGroup>
       ),

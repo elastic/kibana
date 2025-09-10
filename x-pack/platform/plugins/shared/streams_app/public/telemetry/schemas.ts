@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RootSchema, SchemaArray } from '@elastic/ebt';
-import {
+import type { RootSchema, SchemaArray } from '@elastic/ebt';
+import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
   StreamsAssetClickEventProps,

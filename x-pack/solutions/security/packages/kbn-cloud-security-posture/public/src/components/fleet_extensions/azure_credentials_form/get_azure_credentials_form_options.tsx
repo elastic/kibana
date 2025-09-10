@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
+import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
-import { AzureCredentialsType } from '../types';
-import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from './azure_test_subjects';
+import type { AzureCredentialsType } from '../types';
 
 export type AzureCredentialsFields = Record<
   string,
@@ -59,18 +59,24 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
       } as const;
     });
 
-const I18N_TENANT_ID = i18n.translate('securitySolutionPackages.azureIntegration.tenantIdLabel', {
-  defaultMessage: 'Tenant ID',
-});
+const I18N_TENANT_ID = i18n.translate(
+  'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.tenantIdLabel',
+  {
+    defaultMessage: 'Tenant ID',
+  }
+);
 
-const I18N_CLIENT_ID = i18n.translate('securitySolutionPackages.azureIntegration.clientIdLabel', {
-  defaultMessage: 'Client ID',
-});
+const I18N_CLIENT_ID = i18n.translate(
+  'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientIdLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
 
 export const getAzureCredentialsFormOptions = (): AzureOptions => ({
   [AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY]: {
     label: i18n.translate(
-      'securitySolutionPackages.azureIntegration.credentialType.managedIdentityLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.credentialType.managedIdentityLabel',
       {
         defaultMessage: 'Managed Identity',
       }
@@ -78,7 +84,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     info: (
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.azureIntegration.credentialType.managedIdentityInfo"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.credentialType.managedIdentityInfo"
           defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication."
         />
       </EuiText>
@@ -98,7 +104,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
   },
   [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET]: {
     label: i18n.translate(
-      'securitySolutionPackages.azureIntegration.servicePrincipalWithClientSecretLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.servicePrincipalWithClientSecretLabel',
       {
         defaultMessage: 'Service principal with Client Secret',
       }
@@ -106,25 +112,28 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_secret': {
         type: 'password',
         isSecret: true,
-        label: i18n.translate('securitySolutionPackages.azureIntegration.clientSecretLabel', {
-          defaultMessage: 'Client Secret',
-        }),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+        label: i18n.translate(
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
+          {
+            defaultMessage: 'Client Secret',
+          }
+        ),
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
       },
     },
   },
   [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE]: {
     label: i18n.translate(
-      'securitySolutionPackages.azureIntegration.servicePrincipalWithClientCertificateLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.servicePrincipalWithClientCertificateLabel',
       {
         defaultMessage: 'Service principal with Client Certificate',
       }
@@ -132,61 +141,67 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_certificate_path': {
         label: i18n.translate(
-          'securitySolutionPackages.azureIntegration.clientCertificatePathLabel',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientCertificatePathLabel',
           {
             defaultMessage: 'Client Certificate Path',
           }
         ),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
         isSecret: true,
         label: i18n.translate(
-          'securitySolutionPackages.azureIntegration.clientCertificatePasswordLabel',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientCertificatePasswordLabel',
           {
             defaultMessage: 'Client Certificate Password',
           }
         ),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
       },
     },
   },
   [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD]: {
     label: i18n.translate(
-      'securitySolutionPackages.azureIntegration.servicePrincipalWithClientUsernameAndPasswordLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.servicePrincipalWithClientUsernameAndPasswordLabel',
       { defaultMessage: 'Service principal with Client Username and Password' }
     ),
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_username': {
-        label: i18n.translate('securitySolutionPackages.azureIntegration.clientUsernameLabel', {
-          defaultMessage: 'Client Username',
-        }),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
+        label: i18n.translate(
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientUsernameLabel',
+          {
+            defaultMessage: 'Client Username',
+          }
+        ),
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
       },
       'azure.credentials.client_password': {
         type: 'password',
         isSecret: true,
-        label: i18n.translate('securitySolutionPackages.azureIntegration.clientPasswordLabel', {
-          defaultMessage: 'Client Password',
-        }),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
+        label: i18n.translate(
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientPasswordLabel',
+          {
+            defaultMessage: 'Client Password',
+          }
+        ),
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
       },
     },
   },

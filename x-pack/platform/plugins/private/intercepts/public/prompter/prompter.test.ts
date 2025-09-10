@@ -11,7 +11,8 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { InterceptDialogService } from './service';
-import { InterceptPrompter, Intercept } from './prompter';
+import type { Intercept } from './prompter';
+import { InterceptPrompter } from './prompter';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
 import type { TriggerInfo } from '../../common/types';
 

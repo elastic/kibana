@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ToolType } from './definition';
+import type { ToolType } from './definition';
+import type { ByIdsToolSelection, ToolSelectionRelevantFields } from './tool_selection';
 import {
   allToolsSelectionWildcard,
-  ByIdsToolSelection,
-  ToolSelectionRelevantFields,
   filterToolsBySelection,
   toolMatchSelection,
 } from './tool_selection';

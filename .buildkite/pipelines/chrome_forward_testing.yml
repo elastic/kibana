@@ -3,7 +3,7 @@ env:
   # This is what will switch the FTRs/cypress pipeline to use Chrome Beta
   USE_CHROME_BETA: 'true'
 agents:
-  image: family/kibana-ubuntu-2004
+  image: family/kibana-ubuntu-2404
   imageProject: elastic-images-prod
   provider: gcp
 
@@ -56,6 +56,18 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
+    env:
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
       automatic:
         - exit_status: '*'

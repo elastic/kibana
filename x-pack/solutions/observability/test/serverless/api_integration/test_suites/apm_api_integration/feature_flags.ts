@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import type { InternalRequestHeader, RoleCredentials } from '../../services';
-import { APMFtrContextProvider } from './common/services';
-import { ApmApiClient } from './common/apm_api_supertest';
+import type { APMFtrContextProvider } from './common/services';
+import type { ApmApiClient } from './common/apm_api_supertest';
 
 const fleetMigrationResponse = {
   statusCode: 404,

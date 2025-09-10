@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
 export const AssistantStateAnnotation = Annotation.Root({

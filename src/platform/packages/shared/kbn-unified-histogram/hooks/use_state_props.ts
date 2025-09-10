@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { useCallback, useEffect, useMemo } from 'react';
-import {
+import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  UnifiedHistogramTopPanelHeightContext,
   UnifiedHistogramVisContext,
 } from '../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
@@ -35,7 +38,7 @@ import {
 import { useStateSelector } from './use_state_selector';
 import { setBreakdownField } from '../utils/local_storage_utils';
 import { exportVisContext } from '../utils/external_vis_context';
-import { UseUnifiedHistogramProps } from './use_unified_histogram';
+import type { UseUnifiedHistogramProps } from './use_unified_histogram';
 
 export const useStateProps = ({
   services,
@@ -146,7 +149,7 @@ export const useStateProps = ({
    */
 
   const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number | undefined) => {
+    (newTopPanelHeight: UnifiedHistogramTopPanelHeightContext) => {
       stateService?.setTopPanelHeight(newTopPanelHeight);
     },
     [stateService]

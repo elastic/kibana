@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AIMessage, BaseMessage } from '@langchain/core/messages';
+import type { AIMessage, BaseMessage } from '@langchain/core/messages';
 
 export const containsToolCalls = (
   message: BaseMessage

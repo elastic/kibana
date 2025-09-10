@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { Operation } from '../../types';
-import { Operations } from '../../constants';
+import type { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { Operation } from '../../types';
+import type { Operations } from '../../constants';
 
 interface Agg {
   isFormula?: false;

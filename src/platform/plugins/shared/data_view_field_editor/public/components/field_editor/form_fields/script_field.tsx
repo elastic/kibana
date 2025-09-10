@@ -13,13 +13,14 @@ import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
-import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
+import type { PainlessContext } from '@kbn/monaco';
+import { PainlessLang, monaco } from '@kbn/monaco';
 
+import type { RuntimeType } from '../../../shared_imports';
 import {
   UseField,
   useFormData,
   useBehaviorSubject,
-  RuntimeType,
   CodeEditor,
   useFormContext,
 } from '../../../shared_imports';
@@ -29,7 +30,7 @@ import { useFieldPreviewContext } from '../../preview';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
 import { useStateSelector } from '../../../state_utils';
-import { PreviewState } from '../../preview/types';
+import type { PreviewState } from '../../preview/types';
 
 interface Props {
   links: { runtimePainless: string };

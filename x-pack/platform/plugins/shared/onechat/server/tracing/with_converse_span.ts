@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { Span } from '@opentelemetry/api';
-import { Observable, tap } from 'rxjs';
+import type { Span } from '@opentelemetry/api';
+import type { Observable } from 'rxjs';
+import { tap } from 'rxjs';
 import { safeJsonStringify } from '@kbn/std';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import { AgentMode, ChatEvent, isRoundCompleteEvent } from '@kbn/onechat-common';
+import type { ChatEvent } from '@kbn/onechat-common';
+import { isRoundCompleteEvent } from '@kbn/onechat-common';
 
 interface WithConverseSpanOptions {
   agentId: string;
-  mode: AgentMode;
   conversationId: string | undefined;
 }
 
 export function withConverseSpan(
-  { agentId, conversationId, mode }: WithConverseSpanOptions,
+  { agentId, conversationId }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
   return withActiveInferenceSpan(
@@ -28,7 +29,6 @@ export function withConverseSpan(
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
         [ElasticGenAIAttributes.AgentId]: agentId,
         [ElasticGenAIAttributes.AgentConversationId]: conversationId,
-        [ElasticGenAIAttributes.AgentMode]: mode,
       },
     },
     (span) => {

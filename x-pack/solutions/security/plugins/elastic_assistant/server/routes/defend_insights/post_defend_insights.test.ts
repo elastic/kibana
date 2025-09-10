@@ -17,14 +17,16 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import { serverMock } from '../../__mocks__/server';
-import {
-  ElasticAssistantRequestHandlerContextMock,
-  requestContextMock,
-} from '../../__mocks__/request_context';
+import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__/request_context';
 import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { postDefendInsightsRequest } from '../../__mocks__/request';
-import { createDefendInsight, isDefendInsightsEnabled, invokeDefendInsightsGraph } from './helpers';
+import {
+  createDefendInsight,
+  invokeDefendInsightsGraph,
+  isDefendInsightsPolicyResponseFailureEnabled,
+} from './helpers';
 import { postDefendInsightsRoute } from './post_defend_insights';
 
 jest.mock('@kbn/security-ai-prompts');
@@ -66,7 +68,9 @@ describe('postDefendInsightsRoute', () => {
     };
   }
 
-  function getDefaultRequestBody(): DefendInsightsPostRequestBody {
+  function getDefaultRequestBody(
+    overrides: Partial<DefendInsightsPostRequestBody> = {}
+  ): DefendInsightsPostRequestBody {
     return {
       endpointIds: [],
       insightType: DefendInsightType.Enum.incompatible_antivirus,
@@ -77,6 +81,7 @@ describe('postDefendInsightsRoute', () => {
       model: 'gpt-4',
       langSmithProject: 'langSmithProject',
       langSmithApiKey: 'langSmithApiKey',
+      ...overrides,
     };
   }
 
@@ -97,7 +102,6 @@ describe('postDefendInsightsRoute', () => {
       currentInsight: mockCurrentInsight,
       defendInsightId: mockCurrentInsight.id,
     });
-    (isDefendInsightsEnabled as jest.Mock).mockResolvedValue(true);
     (invokeDefendInsightsGraph as jest.Mock).mockResolvedValue({
       anonymizedEvents: [],
       insights: [mockCurrentInsight],
@@ -126,7 +130,8 @@ describe('postDefendInsightsRoute', () => {
     );
     expect(response.status).toEqual(403);
     expect(response.body).toEqual({
-      message: 'Your license does not support Defend Workflows. Please upgrade your license.',
+      message:
+        'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
     });
   });
 
@@ -167,15 +172,6 @@ describe('postDefendInsightsRoute', () => {
     });
   });
 
-  it('should 404 if feature flag disabled', async () => {
-    (isDefendInsightsEnabled as jest.Mock).mockReturnValueOnce(false);
-    const response = await server.inject(
-      postDefendInsightsRequest(mockRequestBody),
-      requestContextMock.convertContext(context)
-    );
-    expect(response.status).toEqual(404);
-  });
-
   it('should handle createDefendInsight error', async () => {
     (createDefendInsight as jest.Mock).mockRejectedValueOnce(new Error('Oh no!'));
     const response = await server.inject(
@@ -212,6 +208,37 @@ describe('postDefendInsightsRoute', () => {
       });
 
       expect(createDefendInsight).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('policy_response_failure feature flags', () => {
+    it('should 500 if feature flag is disabled', async () => {
+      (isDefendInsightsPolicyResponseFailureEnabled as jest.Mock).mockReturnValueOnce(false);
+      const response = await server.inject(
+        postDefendInsightsRequest(
+          getDefaultRequestBody({ insightType: DefendInsightType.Enum.policy_response_failure })
+        ),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: {
+          error: 'invalid defend insight type',
+          success: false,
+        },
+        status_code: 500,
+      });
+    });
+
+    it('should 200 if feature flag is enabled', async () => {
+      (isDefendInsightsPolicyResponseFailureEnabled as jest.Mock).mockReturnValueOnce(true);
+      const response = await server.inject(
+        postDefendInsightsRequest(
+          getDefaultRequestBody({ insightType: DefendInsightType.Enum.policy_response_failure })
+        ),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(200);
     });
   });
 });

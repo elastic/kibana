@@ -8,13 +8,13 @@ import expect from '@kbn/expect';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
+import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type StorageDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/storage_details'>;
 

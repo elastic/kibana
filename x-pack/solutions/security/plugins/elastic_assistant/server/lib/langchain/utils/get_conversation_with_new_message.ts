@@ -6,12 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  Replacements,
-  replaceAnonymizedValuesWithOriginalValues,
-} from '@kbn/elastic-assistant-common';
-import { BaseMessage, _isMessageFieldWithRole } from '@langchain/core/messages';
-import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { BaseMessage } from '@langchain/core/messages';
+import { _isMessageFieldWithRole } from '@langchain/core/messages';
+import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../helpers';
 
 interface Params {
@@ -56,6 +55,12 @@ export const getConversationWithNewMessage = async (params: Params) => {
           replacements: params.replacements,
         }),
         role,
+        user:
+          existingConversation.createdBy ??
+          (existingConversation.users?.length === 1
+            ? // no createdBy indicates legacy conversation, assign the sole user in the user list
+              existingConversation.users?.[0]
+            : undefined),
         timestamp: new Date().toISOString(),
       };
     }),

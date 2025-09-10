@@ -8,13 +8,8 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiDataGridControlColumn,
-  EuiIconTip,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconTip, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { FieldRow } from './field_row';

@@ -8,17 +8,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
-import { CoreSetup } from '@kbn/core/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type {
+  CoreStart,
+  HttpStart,
+  I18nStart,
+  IUiSettingsClient,
+  StartServicesAccessor,
+} from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
-import { SEARCH_SESSIONS_MANAGEMENT_ID, BACKGROUND_SEARCH_ENABLED } from '../constants';
+import { SEARCH_SESSIONS_MANAGEMENT_ID, BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
 
 export { openSearchSessionsFlyout } from './flyout/get_flyout';
+export type { BackgroundSearchOpenedHandler } from './types';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
@@ -45,8 +52,8 @@ export interface AppDependencies {
 
 export const APP = {
   id: SEARCH_SESSIONS_MANAGEMENT_ID,
-  getI18nName: (): string =>
-    BACKGROUND_SEARCH_ENABLED
+  getI18nName: (hasBackgroundSearchEnabled: boolean): string =>
+    hasBackgroundSearchEnabled
       ? i18n.translate('data.mgmt.backgroundSearch.appTitle', {
           defaultMessage: 'Background Search',
         })
@@ -61,9 +68,9 @@ export function registerSearchSessionsMgmt(
   config: SearchSessionsConfigSchema,
   kibanaVersion: string
 ) {
-  deps.management.sections.section.kibana.registerApp({
+  return deps.management.sections.section.kibana.registerApp({
     id: APP.id,
-    title: APP.getI18nName(),
+    title: APP.getI18nName(false),
     order: 1.75,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
@@ -71,4 +78,25 @@ export function registerSearchSessionsMgmt(
       return mgmtApp.mountManagementSection();
     },
   });
+}
+
+export async function updateSearchSessionMgmtSectionTitle(
+  getStartServices: StartServicesAccessor,
+  app: ManagementApp | undefined
+) {
+  if (!app) return;
+
+  const [coreStart] = await getStartServices();
+  const hasBackgroundSearchEnabled = coreStart.featureFlags.getBooleanValue(
+    BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+    false
+  );
+
+  if (hasBackgroundSearchEnabled) {
+    // @ts-expect-error
+    // This apps are supposed to be readonly but I can't find a different workaround to make it work.
+    // If I go in manually everything works correctly but if I await the start services before registering the app the
+    // functional tests can't find it. This is temporary until we remove the feature flag.
+    app.title = APP.getI18nName(true);
+  }
 }

@@ -16,11 +16,12 @@ import type {
   MappingProperty,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { last, mapValues, padStart } from 'lodash';
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -38,7 +39,7 @@ import {
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
-import { StorageMappingProperty } from '../../types';
+import type { StorageMappingProperty } from '../../types';
 
 function getAliasName(name: string) {
   return name;
@@ -243,13 +244,6 @@ export class StorageIndexAdapter<
     const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
       name: getBackingIndexName(this.storage.name, 999999),
     });
-
-    if (simulateIndexTemplateResponse.template.settings) {
-      await this.esClient.indices.putSettings({
-        index: name,
-        settings: simulateIndexTemplateResponse.template.settings,
-      });
-    }
 
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({

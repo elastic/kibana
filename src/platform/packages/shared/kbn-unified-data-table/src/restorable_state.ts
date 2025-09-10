@@ -10,7 +10,7 @@
 import type { InTableSearchRestorableState } from '@kbn/data-grid-in-table-search/src/types';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import type { DocumentDiffMode } from './components/compare_documents/types';
-import { DataGridDensity } from './constants';
+import type { DataGridDensity } from './constants';
 
 type SelectedDocId = string;
 

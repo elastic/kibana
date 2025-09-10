@@ -8,16 +8,16 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
   EuiPopoverTitle,
   EuiToolTip,
-  PopoverAnchorPosition,
   type EuiPopoverProps,
 } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useUIFieldActions } from '../../../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {

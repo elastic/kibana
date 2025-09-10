@@ -8,14 +8,10 @@
  */
 import React, { Fragment } from 'react';
 import { snakeCase } from 'lodash';
-import {
-  AnnotationDomainType,
-  CustomAnnotationTooltip,
-  LineAnnotation,
-  Position,
-  RectAnnotation,
-} from '@elastic/charts';
+import type { CustomAnnotationTooltip } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import moment from 'moment';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +20,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  UseEuiTheme,
 } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
@@ -33,8 +28,8 @@ import type {
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { MergedAnnotation } from '../../common';

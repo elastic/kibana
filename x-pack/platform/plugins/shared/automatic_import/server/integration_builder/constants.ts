@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InputType } from '../../common';
+import type { InputType } from '../../common';
 
 export const CEL_EXISTING_AUTH_CONFIG_FIELDS = [
   'oauth_id',

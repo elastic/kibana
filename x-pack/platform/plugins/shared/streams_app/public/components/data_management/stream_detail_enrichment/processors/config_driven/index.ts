@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { kvProcessorConfig } from './configs/kv';
-import { geoIpProcessorConfig } from './configs/geoip';
+import { appendProcessorConfig } from './configs/append';
 import { renameProcessorConfig } from './configs/rename';
-import { urlDecodeProcessorConfig } from './configs/url_decode';
-import { userAgentProcessorConfig } from './configs/user_agent';
 
 export const configDrivenProcessors = {
-  kv: kvProcessorConfig,
-  geoip: geoIpProcessorConfig,
   rename: renameProcessorConfig,
-  urldecode: urlDecodeProcessorConfig,
-  user_agent: userAgentProcessorConfig,
+  append: appendProcessorConfig,
 };

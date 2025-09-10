@@ -6,9 +6,11 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
-import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
+import type { FieldFormatter } from '@kbn/maps-plugin/common';
+import { MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   Attribution,
   DataRequestMeta,
@@ -22,8 +24,8 @@ import type {
   IRasterSource,
   SourceEditorArgs,
 } from '@kbn/maps-plugin/public';
-import { RasterTileSourceData } from '@kbn/maps-plugin/public/classes/sources/raster_source';
-import { RasterTileSource } from 'maplibre-gl';
+import type { RasterTileSourceData } from '@kbn/maps-plugin/public/classes/sources/raster_source';
+import type { RasterTileSource } from 'maplibre-gl';
 
 interface CustomRasterSourceDescriptor {
   type: 'CUSTOM_RASTER';

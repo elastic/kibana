@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 export function navigateToSettingsManagementApp(application: ApplicationStart) {
   application.navigateToApp('management', {

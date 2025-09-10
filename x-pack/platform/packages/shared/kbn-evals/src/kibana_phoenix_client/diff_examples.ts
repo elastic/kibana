@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import objectHash from 'object-hash';
-import { ExampleWithId } from '../types';
+import type { ExampleWithId } from '../types';
 
 function normaliseExample(example: Example | ExampleWithId) {
   return {

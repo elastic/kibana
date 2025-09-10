@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -19,14 +20,13 @@ import {
   EuiInputPopover,
   EuiToken,
   EuiToolTip,
-  UseEuiTheme,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopover } from './options_list_popover';

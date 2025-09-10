@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
   dataTestSubj?: string;

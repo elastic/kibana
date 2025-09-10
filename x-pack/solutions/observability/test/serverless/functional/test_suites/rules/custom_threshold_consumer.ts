@@ -6,8 +6,8 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../services';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');

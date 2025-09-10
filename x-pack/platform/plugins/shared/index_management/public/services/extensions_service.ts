@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   IndexBadge,
   IndexToggle,
   IndicesListColumn,
@@ -15,7 +15,7 @@ import {
   ExtensionsSetup,
   IndexDetailsPageRoute,
 } from '@kbn/index-management-shared-types';
-import { IndexDetailsTab } from '../../common/constants';
+import type { IndexDetailsTab } from '../../common/constants';
 
 export class ExtensionsService {
   private _actions: any[] = [];

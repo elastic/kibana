@@ -14,13 +14,8 @@ import {
 } from '../../complete_items';
 import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ESQLPolicy,
-  ICommandCallbacks,
-} from '../../types';
+import type { ESQLPolicy, ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import {
   Position,
   buildMatchingFieldsDefinition,

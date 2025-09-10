@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-  MouseEvent,
-  MutableRefObject,
-} from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,7 +24,7 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { TableListViewProps } from '@kbn/content-management-table-list-view';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
@@ -134,6 +128,7 @@ const useTableListViewProps = (
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -212,12 +207,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(

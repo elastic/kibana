@@ -6,15 +6,18 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { RoutingDefinition } from '@kbn/streams-schema';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { RoutingDefinitionWithUIAttributes } from './types';
+import { isAlwaysCondition, type Condition } from '@kbn/streamlang';
+import type { RoutingDefinitionWithUIAttributes } from './types';
+import { emptyEqualsToAlways } from '../../../util/condition';
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TRoutingDefinition extends RoutingDefinition>(
   routingDefinition: TRoutingDefinition
 ): RoutingDefinitionWithUIAttributes => ({
   id: createId(),
+  status: routingDefinition.status ?? 'enabled',
   ...routingDefinition,
 });
 
@@ -27,4 +30,12 @@ const toAPIDefinition = (
 export const routingConverter = {
   toAPIDefinition,
   toUIDefinition,
+};
+
+export const processCondition = (condition?: Condition): Condition | undefined => {
+  if (!condition) return undefined;
+  const convertedCondition = emptyEqualsToAlways(condition);
+  return convertedCondition && isAlwaysCondition(convertedCondition)
+    ? undefined
+    : convertedCondition;
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PublicLicense } from '@kbn/licensing-types';
+import type { PublicLicense } from '@kbn/licensing-types';
 
 import { License } from './license';
 import { hasLicenseInfoChanged } from './has_license_info_changed';

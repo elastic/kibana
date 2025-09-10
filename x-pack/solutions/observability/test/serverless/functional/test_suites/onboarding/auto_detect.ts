@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { generateLongId, log, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'svlCommonPage']);
@@ -18,8 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225147
-  describe.skip('Onboarding Auto-Detect', () => {
+  describe('Onboarding Auto-Detect', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin(); // Onboarding requires admin role
       await PageObjects.common.navigateToUrlWithBrowserHistory(

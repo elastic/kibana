@@ -8,7 +8,8 @@
  */
 
 import { SearchSessionStatus } from '../../../../../../../common';
-import { ACTION, UISearchSessionState } from '../../../types';
+import type { UISearchSessionState } from '../../../types';
+import { ACTION } from '../../../types';
 
 export function getActions(status: UISearchSessionState) {
   const actions: ACTION[] = [];

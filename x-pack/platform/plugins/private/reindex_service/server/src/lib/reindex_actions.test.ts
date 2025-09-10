@@ -10,21 +10,18 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
-import { ReindexSavedObject, ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import { REINDEX_OP_TYPE, type Version } from '@kbn/upgrade-assistant-pkg-server';
-import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
-import { getMockVersionInfo } from '../__fixtures__/version';
+import type { ReindexSavedObject } from './types';
+import { ReindexStatus, ReindexStep } from '../../../common';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
+import type { ReindexActions } from './reindex_actions';
+import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
+import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixtures__/version';
 
-const { currentMajor, prevMajor } = getMockVersionInfo();
+const { currentMajor } = getMockVersionInfo();
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   getRollupJobByIndexName: jest.fn(),
 }));
-
-const versionMock = {
-  getMajorVersion: jest.fn().mockReturnValue(8),
-  getPrevMajorVersion: jest.fn().mockReturnValue(7),
-} as unknown as Version;
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -50,7 +47,7 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log, versionMock);
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
   });
 
   describe('createReindexOp', () => {
@@ -58,42 +55,13 @@ describe('ReindexActions', () => {
       client.create.mockResolvedValue();
     });
 
-    it(`prepends reindexed-v${currentMajor} to new name`, async () => {
-      await actions.createReindexOp('myIndex');
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
+    it(`creates new reindex op with correct arguments`, async () => {
+      await actions.createReindexOp({
         indexName: 'myIndex',
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
       });
-    });
-
-    it(`prepends reindexed-v${currentMajor} to new name, preserving leading period`, async () => {
-      await actions.createReindexOp('.internalIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
-
-    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
-      await actions.createReindexOp(`reindexed-v${prevMajor}-myIndex`);
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `reindexed-v${prevMajor}-myIndex`,
+        indexName: 'myIndex',
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,

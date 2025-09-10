@@ -36,3 +36,7 @@ export {
 } from './interfaces/presentation_container';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/can_focus_panel';
+export {
+  apiSupportsPassThroughContext,
+  type PassThroughContext,
+} from './interfaces/pass_through_context';

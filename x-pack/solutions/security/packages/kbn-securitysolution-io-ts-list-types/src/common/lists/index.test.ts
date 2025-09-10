@@ -8,7 +8,8 @@
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
 import { getEndpointListMock, getListArrayMock, getListMock } from './index.mock';
-import { List, list, ListArray, listArray, ListArrayOrUndefined, listArrayOrUndefined } from '.';
+import type { List, ListArray, ListArrayOrUndefined } from '.';
+import { list, listArray, listArrayOrUndefined } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('Lists', () => {

@@ -8,12 +8,14 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
 
-import { VisLegend, VisLegendProps } from './legend';
+import type { VisLegendProps } from './legend';
+import { VisLegend } from './legend';
 import { legendColors } from './models';
 import { act } from '@testing-library/react';
 

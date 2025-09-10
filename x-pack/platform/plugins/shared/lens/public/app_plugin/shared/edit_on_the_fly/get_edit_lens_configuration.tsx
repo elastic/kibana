@@ -16,11 +16,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import type { LensRootStore } from '../../../state_management';
 import {
   makeConfigureStore,
-  LensRootStore,
   loadInitial,
   initExisting,
   initEmpty,
@@ -134,7 +134,7 @@ export async function getEditLensConfiguration(
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,
-    getLensAttributeService(startDependencies)
+    getLensAttributeService(coreStart.http)
   );
 
   return ({
@@ -172,7 +172,7 @@ export async function getEditLensConfiguration(
      */
     const saveByRef = useCallback(
       async (attrs: LensDocument) => {
-        const lensDocumentService = new LensDocumentService(lensServices.contentManagement);
+        const lensDocumentService = new LensDocumentService(lensServices.http);
         await lensDocumentService.save({
           ...attrs,
           savedObjectId,

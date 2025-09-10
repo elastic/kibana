@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import {
-  TRIGGER_SUGGESTION_COMMAND,
-  fieldTypes,
-  FieldType,
-  FunctionParameterType,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '@kbn/esql-ast';
+import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
+import { TRIGGER_SUGGESTION_COMMAND, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import {
+import type {
   Location,
   ESQLFieldWithMetadata,
   ISuggestionItem,
@@ -26,8 +20,8 @@ import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { LicenseType } from '@kbn/licensing-types';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';

@@ -6,23 +6,23 @@
  */
 
 import React from 'react';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
-import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
+import type { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { SetupRegistries } from './plugin_api';
+import type { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';

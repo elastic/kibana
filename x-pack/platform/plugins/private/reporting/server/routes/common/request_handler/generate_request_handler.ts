@@ -9,9 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getCounters } from '..';
-import { Report, SavedReport } from '../../../lib/store';
+import type { SavedReport } from '../../../lib/store';
+import { Report } from '../../../lib/store';
 import type { ReportingJobResponse } from '../../../types';
-import { RequestHandler, RequestParams } from './request_handler';
+import type { RequestParams } from './request_handler';
+import { RequestHandler } from './request_handler';
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),

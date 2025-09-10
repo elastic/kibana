@@ -7,14 +7,8 @@
 
 import * as Gemini from '@google/generative-ai';
 import { defer, map } from 'rxjs';
-import {
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolOptions,
-  ToolSchema,
-  ToolSchemaType,
-} from '@kbn/inference-common';
+import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
@@ -234,9 +228,10 @@ function messageToGeminiMapper() {
               functionResponse: {
                 name: message.toolCallId,
                 // gemini expects a structured response shape, making sure we're not sending a string
-                response: (typeof message.response === 'string'
-                  ? { response: message.response }
-                  : (message.response as string)) as object,
+                response:
+                  typeof message.response === 'string'
+                    ? { response: message.response }
+                    : message.response,
               },
             },
           ],

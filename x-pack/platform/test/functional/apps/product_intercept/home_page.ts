@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { TRIGGER_DEF_ID } from '@kbn/product-intercept-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common']);

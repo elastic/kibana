@@ -9,7 +9,7 @@
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import type { ICommandContext } from '../../types';
 
 function unquoteTemplate(inputString: string): string {
   if (inputString.startsWith('"') && inputString.endsWith('"') && inputString.length >= 2) {

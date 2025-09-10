@@ -9,12 +9,19 @@ import type {
   CreateMonitoringEntitySource,
   ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
-} from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+} from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
+}
+
+type UpsertWithId = CreateMonitoringEntitySource & { id: string };
+type UpsertInput = CreateMonitoringEntitySource | UpsertWithId;
+interface UpsertResult {
+  action: 'created' | 'updated';
+  source: MonitoringEntitySource;
 }
 
 export class MonitoringEntitySourceDescriptorClient {
@@ -32,7 +39,58 @@ export class MonitoringEntitySourceDescriptorClient {
     return { ...created, id };
   }
 
-  async update(monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }) {
+  async bulkCreate(sources: CreateMonitoringEntitySource[]) {
+    const createdSources = await this.dependencies.soClient.bulkCreate(
+      sources.map((source) => ({
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...source },
+      }))
+    );
+    return createdSources;
+  }
+
+  async upsert(source: UpsertInput): Promise<UpsertResult> {
+    const foundResult = await this.find({ name: source.name });
+    const found = foundResult.saved_objects[0];
+    if (found) {
+      await this.update({ ...source, id: found.id });
+      return { action: 'updated', source: { ...source, id: found.id } as MonitoringEntitySource };
+    } else {
+      const createdSource = await this.create(source as CreateMonitoringEntitySource);
+      return { action: 'created', source: createdSource };
+    }
+  }
+
+  async bulkUpsert(sources: UpsertInput[]) {
+    if (!sources.length) return { created: 0, updated: 0, results: [] };
+
+    const existing = await this.findAll({});
+    const byName = new Map(existing.map((s) => [s.name, s]));
+
+    let created = 0;
+    let updated = 0;
+    const results: UpsertResult[] = [];
+
+    for (const attrs of sources) {
+      const found = byName.get(attrs.name);
+      if (!found) {
+        const createdSo = await this.create(attrs);
+        created++;
+        byName.set(createdSo.name, createdSo);
+        results.push({ action: 'created', source: createdSo });
+      } else {
+        const updatedSo = await this.update({ id: found.id, ...attrs });
+        updated++;
+        byName.set(updatedSo.name, updatedSo);
+        results.push({ action: 'updated', source: updatedSo });
+      }
+    }
+    return { created, updated, results };
+  }
+
+  async update(
+    monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }
+  ): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(monitoringEntitySource);
 
     const { attributes } = await this.dependencies.soClient.update<MonitoringEntitySource>(
@@ -42,13 +100,11 @@ export class MonitoringEntitySourceDescriptorClient {
       { refresh: 'wait_for' }
     );
 
-    return attributes;
+    return { ...attributes, id: monitoringEntitySource.id };
   }
 
   async find(query?: ListEntitySourcesRequestQuery) {
-    const scopedSoClient = this.dependencies.soClient.asScopedToNamespace(
-      this.dependencies.namespace
-    );
+    const scopedSoClient = this.dependencies.soClient;
     return scopedSoClient.find<MonitoringEntitySource>({
       type: monitoringEntitySourceTypeName,
       filter: this.getQueryFilters(query),

@@ -11,7 +11,7 @@ import _ from 'lodash';
 
 import { validateField } from '../../common/fields_utils';
 import { TimeFieldNotSpecifiedError } from '../../common/errors';
-import { Framework } from '../plugin';
+import type { Framework } from '../plugin';
 import type { TimeseriesVisData, FetchedIndexPattern, Series } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import type {

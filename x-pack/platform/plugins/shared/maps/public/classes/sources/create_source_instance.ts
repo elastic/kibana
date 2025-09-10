@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SourceDescriptor } from '../../../common/descriptor_types';
-import { ISource } from './source';
+import type { SourceDescriptor } from '../../../common/descriptor_types';
+import type { ISource } from './source';
 import { getSourceByType } from './source_registry';
 import { setupSources } from './setup_sources';
 

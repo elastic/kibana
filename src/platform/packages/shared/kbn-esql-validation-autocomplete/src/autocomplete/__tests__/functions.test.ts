@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
-import { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 
 describe('functions arg suggestions', () => {
   afterEach(() => {
@@ -119,7 +120,7 @@ describe('functions arg suggestions', () => {
     setTestFunctions([
       {
         type: FunctionDefinitionTypes.SCALAR,
-        name: 'func_with_accepted_values',
+        name: 'func_with_suggested_values',
         description: '',
         signatures: [
           {
@@ -127,26 +128,7 @@ describe('functions arg suggestions', () => {
               {
                 name: 'arg',
                 type: 'keyword',
-                acceptedValues: ['value1', 'value2', 'value3'],
-              },
-            ],
-            returnType: 'double',
-          },
-        ],
-        locationsAvailable: [Location.EVAL],
-      },
-      {
-        type: FunctionDefinitionTypes.SCALAR,
-        name: 'func_with_suggested_literals',
-        description: '',
-        signatures: [
-          {
-            params: [
-              {
-                name: 'arg',
-                type: 'keyword',
-                acceptedValues: ['value1', 'value2', 'value3'],
-                literalSuggestions: ['value1'],
+                suggestedValues: ['value1', 'value2', 'value3'],
               },
             ],
             returnType: 'double',
@@ -158,12 +140,11 @@ describe('functions arg suggestions', () => {
 
     const { assertSuggestions } = await setup();
 
-    await assertSuggestions('FROM index | EVAL FUNC_WITH_ACCEPTED_VALUES(/)', [
+    await assertSuggestions('FROM index | EVAL FUNC_WITH_SUGGESTED_VALUES(/)', [
       '"value1"',
       '"value2"',
       '"value3"',
     ]);
-    await assertSuggestions('FROM index | EVAL FUNC_WITH_SUGGESTED_LITERALS(/)', ['"value1"']);
   });
 
   it('respects constant-only', async () => {

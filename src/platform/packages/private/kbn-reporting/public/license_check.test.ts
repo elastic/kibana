@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LicenseCheck } from '@kbn/licensing-types';
+import type { LicenseCheck } from '@kbn/licensing-types';
 import { checkLicense } from './license_check';
 
 describe('License check', () => {

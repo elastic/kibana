@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { CurrentRouteContextProvider } from './use_current_route';
-import { RouteMatch } from './types';
+import type { RouteMatch } from './types';
 import { useMatchRoutes } from './use_match_routes';
 
 export function RouteRenderer() {

@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const OPEN_IN_DISCOVER_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
 

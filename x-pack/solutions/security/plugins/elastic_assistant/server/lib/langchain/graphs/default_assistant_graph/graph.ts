@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import type { BaseCheckpointSaver } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import { AgentState, NodeParamsBase } from './types';
+import type { AgentState, NodeParamsBase } from './types';
 
 import { stepRouter } from './nodes/step_router';
 import { runAgent } from './nodes/run_agent';
@@ -32,12 +33,14 @@ export interface GetDefaultAssistantGraphParams {
   signal?: AbortSignal;
   tools: StructuredTool[];
   contentReferencesStore: ContentReferencesStore;
+  checkpointSaver: BaseCheckpointSaver | null;
 }
 
 export type DefaultAssistantGraph = Awaited<ReturnType<typeof getDefaultAssistantGraph>>;
 
 export const getDefaultAssistantGraph = async ({
   actionsClient,
+  checkpointSaver,
   contentReferencesStore,
   createLlmInstance,
   logger,
@@ -80,7 +83,9 @@ export const getDefaultAssistantGraph = async ({
         [NodeType.TOOLS]: NodeType.TOOLS,
         [NodeType.END]: END,
       });
-    return graph.compile();
+    return graph.compile({
+      ...(checkpointSaver !== null ? { checkpointer: checkpointSaver } : {}),
+    });
   } catch (e) {
     throw new Error(`Unable to compile DefaultAssistantGraph\n${e}`);
   }

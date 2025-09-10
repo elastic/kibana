@@ -6,29 +6,22 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Direction, Criteria, EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiIcon,
   EuiInMemoryTable,
-  Direction,
-  Criteria,
   useEuiTheme,
-  EuiSearchBarProps,
   EuiHighlight,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isEmpty } from 'lodash';
-import {
-  buildStreamRows,
-  TableRow,
-  SortableField,
-  asTrees,
-  enrichStream,
-  shouldComposeTree,
-} from './utils';
+import { Streams } from '@kbn/streams-schema';
+import type { TableRow, SortableField } from './utils';
+import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -58,7 +51,12 @@ export function StreamsTreeTable({
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const enrichedStreams = React.useMemo(() => {
-    const streamList = shouldComposeTree(sortField, searchQuery) ? asTrees(streams) : streams;
+    const ingestStreams = streams.filter((stream) =>
+      Streams.ingest.all.Definition.is(stream.stream)
+    );
+    const streamList = shouldComposeTree(sortField, searchQuery)
+      ? asTrees(ingestStreams)
+      : ingestStreams;
     return streamList.map(enrichStream);
   }, [sortField, searchQuery, streams]);
 
@@ -156,7 +154,7 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
-              lifecycle={item.effective_lifecycle}
+              lifecycle={item.effective_lifecycle!}
               aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },

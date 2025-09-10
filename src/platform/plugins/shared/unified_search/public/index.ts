@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import { UnifiedSearchPublicPlugin } from './plugin';
 

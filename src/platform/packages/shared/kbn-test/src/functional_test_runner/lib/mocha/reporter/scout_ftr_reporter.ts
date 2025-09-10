@@ -11,6 +11,7 @@ import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import {
   datasources,
   ScoutEventsReport,
@@ -18,7 +19,6 @@ import {
   type ScoutTestRunInfo,
   generateTestRunId,
   getTestIDForTitle,
-  ScoutFileInfo,
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
@@ -27,8 +27,8 @@ import {
   getCodeOwnersEntries,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import { Runner, Test } from '../../../fake_mocha_types';
-import { Config as FTRConfig } from '../../config';
+import type { Runner, Test } from '../../../fake_mocha_types';
+import type { Config as FTRConfig } from '../../config';
 
 /**
  * Configuration options for the Scout Mocha reporter

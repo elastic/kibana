@@ -13,28 +13,28 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
-import { LicenseType } from '@kbn/licensing-types';
-import {
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   ICommandCallbacks,
   ISuggestionItem,
-  getLocationFromCommandOrOptionName,
   Location,
 } from '../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLCommand } from '../types';
-import {
+import type {
   FieldType,
-  FunctionDefinitionTypes,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
@@ -91,6 +91,11 @@ export const expectSuggestions = async (
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
+    if (containsSnippet(suggestion.text) && !suggestion.asSnippet) {
+      throw new Error(
+        `Suggestion with snippet placeholder must be marked as a snippet. -> ${suggestion.text}`
+      );
+    }
     suggestions.push(suggestion.text);
   });
   expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
@@ -269,3 +274,10 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   }
   return [];
 }
+
+export const containsSnippet = (text: string): boolean => {
+  // Matches most common monaco snippets
+  // $0, $1, etc. and ${1:placeholder}, ${2:another}
+  const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
+  return snippetRegex.test(text);
+};

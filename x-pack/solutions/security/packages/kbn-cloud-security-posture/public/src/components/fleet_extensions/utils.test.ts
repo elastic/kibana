@@ -8,30 +8,29 @@ import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 import {
-  getMaxPackageName,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
-  getCspmCloudShellDefaultValue,
-  isBelowMinVersion,
+  getInputHiddenVars,
+  updatePolicyWithInputs,
+  getCloudShellDefaultValue,
   findVariableDef,
+  getDefaultAwsCredentialsType,
+  getDefaultAzureCredentialsType,
+  getDefaultGcpHiddenVars,
 } from './utils';
-import { getMockPolicyAWS, getPackageInfoMock } from './mocks';
-import { getDefaultAwsCredentialsType } from './aws_credentials_form/aws_utils';
-import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
-import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
+import { getMockPolicyAWS, getPackageInfoMock, TEMPLATE_NAME } from './test/mock';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
     ['cloudbeat/cis_aws', getMockPolicyAWS, { 'aws.credentials.type': { value: 'assume_role' } }],
   ] as const) {
     it(`updates package policy with hidden vars for ${name}`, () => {
-      const inputVars = getPostureInputHiddenVars(
-        name,
+      const inputVars = getInputHiddenVars(
+        'aws',
         {} as PackageInfo,
+        TEMPLATE_NAME,
         SetupTechnology.AGENT_BASED,
         false
       );
-      const policy = getPosturePolicy(getPolicy(), name, inputVars);
+      const policy = updatePolicyWithInputs(getPolicy(), name, inputVars);
 
       const enabledInputs = policy.inputs.filter(
         (i) => i.type === name && i.enabled && i.streams.some((s) => s.enabled)
@@ -44,87 +43,22 @@ describe('getPosturePolicy', () => {
   }
 });
 
-describe('getMaxPackageName', () => {
-  it('should correctly increment cspm package name', () => {
-    const packageName = 'cspm';
-    const packagePolicies = [
-      { name: 'kspm-1' },
-      { name: 'kspm-2' },
-      { name: 'cspm-3' },
-      { name: 'vuln_mgmt-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('cspm-4');
-  });
-
-  it('should return correctly increment vuln_mgmt package name', () => {
-    const packageName = 'vuln_mgmt';
-    const packagePolicies = [
-      { name: 'vuln_mgmt-1' },
-      { name: 'vuln_mgmt-2' },
-      { name: 'vuln_mgmt-3' },
-      { name: 'cspm-1' },
-      { name: 'kspm-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('vuln_mgmt-4');
-  });
-
-  it('should return correctly increment kspm package name', () => {
-    const packageName = 'kspm';
-    const packagePolicies = [
-      { name: 'vuln_mgmt-1' },
-      { name: 'vuln_mgmt-2' },
-      { name: 'vuln_mgmt-3' },
-      { name: 'cspm-1' },
-      { name: 'kspm-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('kspm-2');
-  });
-
-  it('should return package name with -1 when no matching package policies are found', () => {
-    const packageName = 'kspm';
-    const packagePolicies = [
-      { name: 'vuln_mgmt-1' },
-      { name: 'vuln_mgmt-2' },
-      { name: 'vuln_mgmt-3' },
-      { name: 'cspm-1' },
-    ];
-
-    const result = getMaxPackageName(packageName, packagePolicies);
-
-    expect(result).toBe('kspm-1');
-  });
-});
-
-describe('getCspmCloudShellDefaultValue', () => {
+describe('getCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates is missing', () => {
     const packagePolicy = { name: 'test' } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
-
-    expect(result).toBe('');
-  });
-
-  it('should return empty string when policy_templates.name is not cspm', () => {
-    const packagePolicy = { name: 'test', policy_templates: [{ name: 'kspm' }] } as PackageInfo;
-
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
 
   it('should return empty string when policy_templates.inputs is missing', () => {
-    const packagePolicy = { name: 'test', policy_templates: [{ name: 'cspm' }] } as PackageInfo;
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [{ name: TEMPLATE_NAME }],
+    } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -136,13 +70,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [{}],
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -154,13 +88,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: undefined,
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -172,13 +106,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [{ vars: [{ name: 'cloud_shell_url_FAKE' }] }],
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -190,13 +124,13 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [{ vars: [{ name: 'cloud_shell_url' }] }],
         },
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('');
   });
@@ -208,7 +142,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -221,36 +155,9 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
     expect(result).toBe('URL');
-  });
-});
-
-describe('isBelowMinVersion', () => {
-  test.each([
-    ['1.2.3', '2.0.0', true], // Version '1.2.3' is below '2.0.0', expect true
-    ['1.2.3-preview20', '2.0.0', true], // Version '1.2.3-preview20' is below '2.0.0', expect true
-    ['2.0.0', '1.2.3', false], // Version '2.0.0' is not below '1.2.3', expect false
-    ['1.2.3', '1.2.3', false], // Version '1.2.3' is not below itself, expect false
-  ])('returns expected boolean for version and minVersion', (version, minVersion, expected) => {
-    const result = isBelowMinVersion(version, minVersion);
-
-    expect(result).toBe(expected);
-  });
-
-  test.each([
-    ['invalid', '1.0.0'], // Invalid version, expect error
-    ['1.2', '1.0.0'], // Invalid version, expect error
-    ['', '1.0.0'], // Empty version, expect error
-    ['1.0.0', ''], // Empty minVersion, expect error
-    ['', ''], // Empty version and minVersion, expect error
-  ])('semver return errors when invalid versions are used', (version, minVersion) => {
-    try {
-      isBelowMinVersion(version, minVersion);
-    } catch (error) {
-      expect(error).toBeDefined();
-    }
   });
 });
 
@@ -261,7 +168,7 @@ describe('getDefaultAwsCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -279,7 +186,7 @@ describe('getDefaultAwsCredentialsType', () => {
 
   it('should return "direct_access_key" for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAwsCredentialsType(packageInfo, false, setupTechnology);
+    const result = getDefaultAwsCredentialsType(packageInfo, false, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toBe('direct_access_keys');
   });
@@ -289,7 +196,7 @@ describe('getDefaultAwsCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -312,7 +219,7 @@ describe('getDefaultAwsCredentialsType', () => {
   it('should return "cloud_formation" for agent-based, when cloudformation is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
 
-    const result = getDefaultAwsCredentialsType(packageInfo, false, setupTechnology);
+    const result = getDefaultAwsCredentialsType(packageInfo, false, TEMPLATE_NAME, setupTechnology);
     expect(result).toBe('cloud_formation');
   });
 });
@@ -324,7 +231,7 @@ describe('getDefaultAzureCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -342,14 +249,14 @@ describe('getDefaultAzureCredentialsType', () => {
 
   it('should return "service_principal_with_client_secret" for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toBe('service_principal_with_client_secret');
   });
 
   it('shold return "arm_template" for agent-based, when arm_template is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toBe('arm_template');
   });
@@ -359,7 +266,7 @@ describe('getDefaultAzureCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -374,7 +281,7 @@ describe('getDefaultAzureCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAzureCredentialsType(packageInfo, setupTechnology);
+    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toBe('managed_identity');
   });
@@ -387,7 +294,7 @@ describe('getDefaultGcpHiddenVars', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [
@@ -405,7 +312,7 @@ describe('getDefaultGcpHiddenVars', () => {
 
   it('should return manual credentials-json credentials type for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+    const result = getDefaultGcpHiddenVars(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-json', type: 'text' },
@@ -414,7 +321,7 @@ describe('getDefaultGcpHiddenVars', () => {
 
   it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+    const result = getDefaultGcpHiddenVars(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-none', type: 'text' },
@@ -426,7 +333,7 @@ describe('getDefaultGcpHiddenVars', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'cspm',
+          name: TEMPLATE_NAME,
           inputs: [
             {
               vars: [

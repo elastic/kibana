@@ -14,10 +14,12 @@ import type {
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RRule } from '@kbn/rrule';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
+import { isOk } from '@kbn/task-manager-plugin/server/lib/result_type';
 import type { ReportingCore } from '../../..';
 import type {
   ListScheduledReportApiJSON,
@@ -65,33 +67,44 @@ export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 export function transformSingleResponse(
   logger: Logger,
   so: SavedObjectsFindResult<ScheduledReportType>,
-  lastResponse?: CreatedAtSearchResponse
+  lastResponse?: CreatedAtSearchResponse,
+  nextRunResponse?: BulkGetResult
 ) {
   const id = so.id;
   const lastRunForId = (lastResponse?.hits.hits ?? []).find(
     (hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id
   );
+  const nextRunForId = (nextRunResponse ?? []).find(
+    (taskOrError) => isOk(taskOrError) && taskOrError.value.id === id
+  );
 
-  const schedule = so.attributes.schedule;
+  let nextRun: string | undefined;
+  if (!nextRunForId) {
+    // try to calculate dynamically if we were not able to get from the task
+    const schedule = so.attributes.schedule;
 
-  // get start date
-  let dtstart = new Date();
-  const rruleStart = schedule.rrule.dtstart;
-  if (rruleStart) {
-    try {
-      // if start date is provided and in the future, use it, otherwise use current time
-      const startDateValue = new Date(rruleStart).valueOf();
-      const now = Date.now();
-      if (startDateValue > now) {
-        dtstart = new Date(startDateValue + 60000); // add 1 minute to ensure it's in the future
+    // get start date
+    let dtstart = new Date();
+    const rruleStart = schedule.rrule.dtstart;
+    if (rruleStart) {
+      try {
+        // if start date is provided and in the future, use it, otherwise use current time
+        const startDateValue = new Date(rruleStart).valueOf();
+        const now = Date.now();
+        if (startDateValue > now) {
+          dtstart = new Date(startDateValue + 60000); // add 1 minute to ensure it's in the future
+        }
+      } catch (e) {
+        logger.debug(
+          `Failed to parse rrule.dtstart for scheduled report next run calculation - default to now ${id}: ${e.message}`
+        );
       }
-    } catch (e) {
-      logger.debug(
-        `Failed to parse rrule.dtstart for scheduled report next run calculation - default to now ${id}: ${e.message}`
-      );
     }
+    const _rrule = new RRule({ ...schedule.rrule, dtstart });
+    nextRun = _rrule.after(new Date())?.toISOString();
+  } else {
+    nextRun = isOk(nextRunForId) ? nextRunForId.value.runAt.toISOString() : undefined;
   }
-  const _rrule = new RRule({ ...schedule.rrule, dtstart });
 
   let payload: ReportApiJSON['payload'] | undefined;
   try {
@@ -107,7 +120,7 @@ export function transformSingleResponse(
     enabled: so.attributes.enabled,
     jobtype: so.attributes.jobType,
     last_run: lastRunForId?._source?.[CREATED_AT_FIELD],
-    next_run: _rrule.after(new Date())?.toISOString(),
+    next_run: nextRun,
     notification: so.attributes.notification,
     payload,
     schedule: so.attributes.schedule,
@@ -119,13 +132,16 @@ export function transformSingleResponse(
 export function transformResponse(
   logger: Logger,
   result: SavedObjectsFindResponse<ScheduledReportType>,
-  lastResponse?: CreatedAtSearchResponse
+  lastResponse?: CreatedAtSearchResponse,
+  nextRunResponse?: BulkGetResult
 ): ApiResponse {
   return {
     page: result.page,
     per_page: result.per_page,
     total: result.total,
-    data: result.saved_objects.map((so) => transformSingleResponse(logger, so, lastResponse)),
+    data: result.saved_objects.map((so) =>
+      transformSingleResponse(logger, so, lastResponse, nextRunResponse)
+    ),
   };
 }
 
@@ -154,6 +170,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
         const esClient = await reportingCore.getEsClient();
         const auditLogger = await reportingCore.getAuditLogger(req);
         const savedObjectsClient = await reportingCore.getScopedSoClient(req);
+        const taskManager = await reportingCore.getTaskManager();
         const username = getUsername(user);
 
         // if user has Manage Reporting privileges, we can list
@@ -196,6 +213,8 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           )
         );
 
+        const scheduledReportIds = scheduledReportIdsAndName.map(({ id }) => id);
+
         let lastRunResponse;
         try {
           lastRunResponse = (await esClient.asInternalUser.search({
@@ -208,7 +227,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
                 filter: [
                   {
                     terms: {
-                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportIdsAndName.map(({ id }) => id),
+                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportIds,
                     },
                   },
                 ],
@@ -222,7 +241,15 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           logger.warn(`Error getting last run for scheduled reports: ${error.message}`);
         }
 
-        return transformResponse(logger, response, lastRunResponse);
+        let nextRunResponse;
+        try {
+          nextRunResponse = await taskManager.bulkGet(scheduledReportIds);
+        } catch (error) {
+          // swallow this error
+          logger.warn(`Error getting next run for scheduled reports: ${error.message}`);
+        }
+
+        return transformResponse(logger, response, lastRunResponse, nextRunResponse);
       } catch (error) {
         throw res.customError({
           statusCode: 500,

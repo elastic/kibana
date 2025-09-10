@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -116,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
@@ -127,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });

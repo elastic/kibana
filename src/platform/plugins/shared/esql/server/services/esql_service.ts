@@ -8,9 +8,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type {
+  IndicesAutocompleteResult,
+  IndexAutocompleteItem,
+  ResolveIndexResponse,
+} from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import { getListOfCCSIndices } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -19,70 +24,42 @@ export interface EsqlServiceOptions {
 export class EsqlService {
   constructor(public readonly options: EsqlServiceOptions) {}
 
-  protected async getIndexAliases(indices: string[]): Promise<Record<string, string[]>> {
-    const result: Record<string, string[]> = {};
-    const { client } = this.options;
-
-    // Execute: GET /<index1,index2,...>/_alias
-    interface AliasesResponse {
-      [indexName: string]: {
-        aliases: {
-          [aliasName: string]: {};
-        };
-      };
-    }
-    const response = (await client.indices.getAlias({
-      index: indices,
-    })) as AliasesResponse;
-
-    for (const [indexName, { aliases }] of Object.entries(response)) {
-      const aliasNames = Object.keys(aliases ?? {});
-
-      if (aliasNames.length > 0) {
-        result[indexName] = aliasNames;
-      }
-    }
-
-    return result;
-  }
-
   public async getIndicesByIndexMode(
-    mode: 'lookup' | 'time_series'
+    mode: 'lookup' | 'time_series',
+    remoteClusters?: string
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
-    // Execute: GET /_all/_settings/index.mode,index.hidden,aliases?flat_settings=true
-    interface IndexModeResponse {
-      [indexName: string]: {
-        settings: {
-          'index.mode': string;
-          'index.hidden': boolean;
-        };
-      };
-    }
-    const queryByIndexModeResponse = (await client.indices.getSettings({
-      name: ['index.hidden', 'index.mode'],
-      flat_settings: true,
-    })) as IndexModeResponse;
-
     const indices: IndexAutocompleteItem[] = [];
-    const indexNames: string[] = [];
 
-    for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
-      if (settings['index.mode'] === mode && !settings['index.hidden']) {
-        indexNames.push(name);
-        indices.push({ name, mode, aliases: [] });
-      }
+    const sourcesToQuery = ['*'];
+    const remoteClustersArray: string[] = [];
+    if (remoteClusters) {
+      remoteClustersArray.push(...remoteClusters.split(','));
+      // attach a wildcard * for each remoteCluster
+      const clustersArray = remoteClustersArray.map((cluster) => `${cluster.trim()}:*`);
+      sourcesToQuery.push(...clustersArray);
     }
 
-    const aliases = await this.getIndexAliases(indexNames);
+    // It doesn't return hidden indices
+    const sources = (await client.indices.resolveIndex({
+      name: sourcesToQuery,
+      expand_wildcards: 'open',
+      querystring: {
+        mode,
+      },
+    })) as ResolveIndexResponse;
 
-    for (const index of indices) {
-      index.aliases = aliases[index.name] ?? [];
-    }
+    sources.indices?.forEach((index) => {
+      indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
+    });
+
+    const crossClusterCommonIndices = remoteClusters
+      ? getListOfCCSIndices(remoteClustersArray, indices)
+      : indices;
 
     const result: IndicesAutocompleteResult = {
-      indices,
+      indices: crossClusterCommonIndices,
     };
 
     return result;

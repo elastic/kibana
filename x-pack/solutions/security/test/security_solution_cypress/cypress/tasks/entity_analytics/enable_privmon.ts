@@ -8,7 +8,7 @@
 import { visit } from '../navigation';
 import { ADVANCED_SETTINGS_URL } from '../../urls/navigation';
 
-export const enablePrivilegedUserMonitoring = () => {
+export const togglePrivilegedUserMonitoring = () => {
   visit(`${ADVANCED_SETTINGS_URL}?query=privilege+user`);
   cy.get(
     '[data-test-subj="management-settings-editField-securitySolution:enablePrivilegedUserMonitoring"]'

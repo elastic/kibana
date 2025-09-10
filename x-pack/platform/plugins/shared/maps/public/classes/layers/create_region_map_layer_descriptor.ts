@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Writable } from '@kbn/utility-types';
-import {
+import type { Writable } from '@kbn/utility-types';
+import type {
   AggDescriptor,
   ColorDynamicOptions,
   ESTermSourceDescriptor,

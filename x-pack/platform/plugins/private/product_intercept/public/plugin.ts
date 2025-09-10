@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import capitalize from 'lodash/capitalize';
-import { type CoreSetup, type CoreStart, Plugin } from '@kbn/core/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { InterceptsStart } from '@kbn/intercepts-plugin/public';
+import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import type { PluginInitializerContext, Plugin } from '@kbn/core/public';
+import type { InterceptsStart } from '@kbn/intercepts-plugin/public';
 import { type CloudStart } from '@kbn/cloud-plugin/public';
 
 import { PromptTelemetry } from './telemetry';

@@ -8,13 +8,13 @@
 import Url from 'url';
 
 import { createEsClientForFtrConfig } from '@kbn/test';
-import { TransportResult } from '@elastic/elasticsearch';
-import { FtrProviderContext } from '@kbn/test-suites-xpack/common/ftr_provider_context';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { FtrProviderContext } from '../api_integration/ftr_provider_context';
 import { tiAbusechMalware } from './pipelines/ti_abusech_malware';
 import { tiAbusechMalwareBazaar } from './pipelines/ti_abusech_malware_bazaar';
 import { tiAbusechUrl } from './pipelines/ti_abusech_url';
 
-export type { FtrProviderContext } from '@kbn/test-suites-xpack/common/ftr_provider_context';
+export type { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export async function SecuritySolutionConfigurableCypressTestRunner({
   getService,

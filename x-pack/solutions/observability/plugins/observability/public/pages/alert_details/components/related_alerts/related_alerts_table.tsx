@@ -10,16 +10,13 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRelatedColumns } from './get_related_columns';
 import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
-import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
-import {
-  GetObservabilityAlertsTableProp,
-  ObservabilityAlertsTableContext,
-  observabilityFeatureId,
-} from '../../../..';
+import type { AlertData } from '../../../../hooks/use_fetch_alert_detail';
+import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../../../..';
+import { observabilityFeatureId } from '../../../..';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useKibana } from '../../../../utils/kibana_react';
 import { AlertsFlyoutBody } from '../../../../components/alerts_flyout/alerts_flyout_body';

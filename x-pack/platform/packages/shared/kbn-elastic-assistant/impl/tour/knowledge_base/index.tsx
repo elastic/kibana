@@ -11,7 +11,8 @@
  * */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';

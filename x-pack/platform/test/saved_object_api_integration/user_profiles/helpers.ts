@@ -6,7 +6,7 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export interface LoginAsInteractiveUserResponse {
   headers: {

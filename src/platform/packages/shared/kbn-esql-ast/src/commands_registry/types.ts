@@ -13,7 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
 } from '@kbn/esql-types';
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
@@ -188,7 +188,7 @@ export enum Location {
   STATS_WHERE = 'stats_where',
 
   /**
-   * WHEN TS is used as a source command, inner STATS functions
+   * WHEN TS is used as a source command, and we are within an aggregation function
    */
   STATS_TIMESERIES = 'stats_timeseries',
 
@@ -214,6 +214,11 @@ export enum Location {
   RENAME = 'rename',
 
   /**
+   * In the RERANK command
+   */
+  RERANK = 'rerank',
+
+  /**
    * In the JOIN command (used only for AS)
    */
   JOIN = 'join',
@@ -235,6 +240,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
+  inlinestats: Location.STATS,
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
@@ -243,6 +249,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  rerank: Location.RERANK,
 };
 
 /**

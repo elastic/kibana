@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  calculateHistogramInterval,
-  CalculateHistogramIntervalParams,
-} from './histogram_calculate_interval';
+import type { CalculateHistogramIntervalParams } from './histogram_calculate_interval';
+import { calculateHistogramInterval } from './histogram_calculate_interval';
 import { ES_FIELD_TYPES } from '../../../../types';
 
 describe('calculateHistogramInterval', () => {

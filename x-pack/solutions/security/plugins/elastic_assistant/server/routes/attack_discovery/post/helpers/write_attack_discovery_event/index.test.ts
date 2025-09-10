@@ -23,7 +23,6 @@ describe('writeAttackDiscoveryEvent', () => {
   const defaultProps: Parameters<typeof writeAttackDiscoveryEvent>[0] = {
     action: 'generation-started',
     alertsContextCount: 2,
-    attackDiscoveryAlertsEnabled: true,
     authenticatedUser: mockAuthenticatedUser,
     connectorId: 'test-connector',
     dataClient: mockDataClient,

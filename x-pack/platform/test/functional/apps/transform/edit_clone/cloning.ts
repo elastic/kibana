@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  isLatestTransform,
-  isPivotTransform,
-  TransformPivotConfig,
-} from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
+import { isLatestTransform, isPivotTransform } from '@kbn/transform-plugin/common/types/transform';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig } from '../helpers';
 
 interface TestData {

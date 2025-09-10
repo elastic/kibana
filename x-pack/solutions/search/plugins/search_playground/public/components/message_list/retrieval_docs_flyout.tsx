@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { Doc } from '../../types';
+import type { Doc } from '../../types';
 
 interface RetrievalDocsFlyoutProps {
   onClose: () => void;

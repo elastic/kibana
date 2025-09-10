@@ -6,7 +6,8 @@
  */
 
 import { evaluate as base } from '../../src/evaluate';
-import { EvaluateEsqlDataset, createEvaluateEsqlDataset } from './evaluate_esql_dataset';
+import type { EvaluateEsqlDataset } from './evaluate_esql_dataset';
+import { createEvaluateEsqlDataset } from './evaluate_esql_dataset';
 import {
   generateApacheErrorSpikeLogs,
   generateCorrelationIdLog,

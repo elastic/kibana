@@ -30,17 +30,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
   getDescription,
   getTitle,
-  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 import { FiltersDetails } from './filters_details';
 
 interface TimePickerQuickRange {

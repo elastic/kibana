@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'home', 'svlCommonPage']);

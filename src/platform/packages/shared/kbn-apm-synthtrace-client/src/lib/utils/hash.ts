@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Fields } from '../entity';
+import type { Fields } from '../entity';
 
 export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
   let hashed: string = '';

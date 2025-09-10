@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,10 +24,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   useForm,
   FIELD_TYPES,
-  FormSchema,
   Form,
   useFormIsModified,
   UseField,
@@ -270,7 +271,10 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onCloseModal()}>
+        <EuiButtonEmpty
+          data-test-subj="failureStoreModalCancelButton"
+          onClick={() => onCloseModal()}
+        >
           <FormattedMessage
             id="xpack.failureStoreModal.cancelButtonLabel"
             defaultMessage="Cancel"
@@ -281,7 +285,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
           fill
           type="submit"
           isLoading={false}
-          data-test-subj="saveButton"
+          data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}
         >

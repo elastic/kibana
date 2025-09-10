@@ -19,7 +19,6 @@ export const useManagedDataViews = (): DataView[] => {
   const {
     dataViews: dataViewSpecs,
     adhocDataViews,
-    defaultDataViewId,
     alertDataViewId,
   } = useSelector(sharedStateSelector);
   const {
@@ -29,13 +28,8 @@ export const useManagedDataViews = (): DataView[] => {
   return useMemo(
     () =>
       [...dataViewSpecs, ...adhocDataViews]
-        .filter(
-          (dv) =>
-            dv.id === defaultDataViewId ||
-            dv.id === alertDataViewId ||
-            dv.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX)
-        )
+        .filter((dv) => dv.id === alertDataViewId || dv.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX))
         .map((spec) => new DataView({ spec, fieldFormats })),
-    [dataViewSpecs, adhocDataViews, defaultDataViewId, alertDataViewId, fieldFormats]
+    [dataViewSpecs, adhocDataViews, alertDataViewId, fieldFormats]
   );
 };

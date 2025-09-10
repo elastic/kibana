@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MlApi } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
-import { MlJob } from './ml_job_configs';
+import type { MlApi } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
+import type { MlJob } from './ml_job_configs';
 
 export function createMlJobHelper(ml: MlApi) {
   async function createMlJobs(jobs: MlJob[]) {

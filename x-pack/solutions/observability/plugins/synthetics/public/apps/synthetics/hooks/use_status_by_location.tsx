@@ -13,7 +13,7 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
 import { useLocations } from './use_locations';
 

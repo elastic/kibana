@@ -9,10 +9,7 @@
     "id": "logsShared",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "logs_shared"
-    ],
+    "configPath": ["xpack", "logs_shared"],
     "requiredPlugins": [
       "charts",
       "data",
@@ -25,17 +22,10 @@
       "uiActions",
       "usageCollection",
       "embeddable",
+      "savedSearch"
     ],
-    "optionalPlugins": [
-      "observabilityAIAssistant",
-      "ml",
-    ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "optionalPlugins": ["observabilityAIAssistant", "ml"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact"],
+    "extraPublicDirs": ["common"]
   }
 }

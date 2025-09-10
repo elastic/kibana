@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -17,33 +17,9 @@ import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
-
-export enum LoadingStatus {
-  Uninitialized = 'uninitialized',
-  Loading = 'loading',
-  LoadingMore = 'loading_more',
-  Complete = 'complete',
-  Error = 'error',
-}
-
-type RequestState<
-  TResult extends {},
-  TLoadingStatus extends LoadingStatus = Exclude<LoadingStatus, LoadingStatus.LoadingMore>
-> =
-  | {
-      loadingStatus: Exclude<TLoadingStatus, LoadingStatus.Error>;
-      result: TResult;
-    }
-  | {
-      loadingStatus: LoadingStatus.Error;
-      error: Error;
-    };
-
-export type DocumentsRequest = RequestState<DataTableRecord[], LoadingStatus>;
-export type TotalHitsRequest = RequestState<number>;
-export type ChartRequest = RequestState<{}>;
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -58,13 +34,14 @@ export interface TabStateGlobalState {
 }
 
 export interface TabState extends TabItem {
-  // Initial app and global state for the tab (provided before the tab is initialized).
+  // Initial state for the tab (provided before the tab is initialized).
+  initialInternalState?: {
+    serializedSearchSource?: SerializedSearchSourceFields;
+  };
   initialAppState?: DiscoverAppState;
-  initialGlobalState?: TabStateGlobalState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
-  lastPersistedGlobalState: TabStateGlobalState;
-  dataViewId: string | undefined;
+  globalState: TabStateGlobalState;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -75,9 +52,6 @@ export interface TabState extends TabItem {
     breakdownField: boolean;
     hideChart: boolean;
   };
-  documentsRequest: DocumentsRequest;
-  totalHitsRequest: TotalHitsRequest;
-  chartRequest: ChartRequest;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
@@ -98,6 +72,9 @@ export enum TabsBarVisibility {
 
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  userId: string | undefined;
+  spaceId: string | undefined;
+  persistedDiscoverSession: DiscoverSession | undefined;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
@@ -105,6 +82,7 @@ export interface DiscoverInternalState {
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
+    areInitializing: boolean;
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
     recentlyClosedTabIds: string[];

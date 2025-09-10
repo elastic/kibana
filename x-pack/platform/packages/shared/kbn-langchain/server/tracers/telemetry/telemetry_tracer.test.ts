@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import { TelemetryTracer, TelemetryParams } from './telemetry_tracer';
-import { Run } from 'langsmith/schemas';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { TelemetryParams } from './telemetry_tracer';
+import { TelemetryTracer } from './telemetry_tracer';
+import type { Run } from 'langsmith/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AIMessageChunk, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages';
 

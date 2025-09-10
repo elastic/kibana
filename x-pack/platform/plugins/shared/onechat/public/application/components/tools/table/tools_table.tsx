@@ -4,19 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  CriteriaWithPagination,
-  EuiInMemoryTable,
-  EuiSkeletonText,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
-import { useOnechatTools } from '../../../hooks/tools/use_tools';
+import { useToolsService } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
 import { getToolsTableColumns } from './tools_table_columns';
 import { ToolsTableHeader } from './tools_table_header';
@@ -25,14 +18,7 @@ import { useToolsTableSearch } from './tools_table_search';
 
 export const OnechatToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
-  const { includeSystemTools } = useToolsPreferences();
-  const {
-    tools,
-    isLoading: isLoadingTools,
-    error: toolsError,
-  } = useOnechatTools({
-    includeSystemTools,
-  });
+  const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
   const { searchConfig, results: tableTools } = useToolsTableSearch();
@@ -77,7 +63,7 @@ export const OnechatToolsTable = memo(() => {
         showPerPageOptions: false,
       }}
       selection={{
-        selectable: isEsqlTool,
+        selectable: (tool) => !tool.readonly,
         onSelectionChange: (selectedItems: ToolDefinitionWithSchema[]) => {
           setSelectedTools(selectedItems);
         },

@@ -1,9 +1,3 @@
-You are a helpful assistant for generating and executing ES|QL queries.
-Your goal is to help the user construct an ES|QL query for their data.
-
-VERY IMPORTANT: When writing ES|QL queries, make sure to ONLY use commands, functions
-and operators listed in the current documentation.
-
 # Limitations
 
 - ES|QL currently does not support pagination.
@@ -35,26 +29,30 @@ changing rows and columns.
 
 The following processing commands are available:
 
+[preview] CHANGE_POINT
+- [preview] COMPLETION: send prompts and context to an LLM
 - DISSECT: extracts structured data out of a string, using a dissect pattern
 - DROP: drops one or more columns
 - ENRICH: adds data from existing indices as new columns
 - EVAL: adds a new column with calculated values, using various type of functions
+- [preview] FORK: executes multiple branches of a query and combines them into a single output table
 - GROK: extracts structured data out of a string, using a grok pattern
 - KEEP: keeps one or more columns, drop the ones that are not kept
 - LIMIT: returns the first n number of rows. The maximum value for this is 10000
-- MV_EXPAND: expands multi-value columns into a single row per value
+- LOOKUP JOIN: Joins data from a query results table with matching records from a specified lookup index
+- [preview] MV_EXPAND: expands multi-value columns into a single row per value
 - RENAME: renames a column
+- [preview] RERANK: uses an inference model to compute a new relevance score for an initial set of documents
+- [preview] SAMPLE: samples a fraction of the table rows
 - STATS ... BY: groups rows according to a common value and calculates
   one or more aggregated values over the grouped rows. STATS supports aggregation
   function and can group using grouping functions.
 - SORT: sorts the row in a table by a column. Expressions are not supported.
 - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
-- LOOKUP JOIN: Joins data from a query results table with matching records from a specified lookup index.
 
 ## Functions and operators
 
 ### Join functions
-
 
 ### Grouping functions
 
@@ -74,7 +72,7 @@ PERCENTILE: calculates a specified percentile of a numeric field
 STD_DEV: calculates the standard deviation of a numeric field
 SUM: calculates the total sum of a numeric expression
 TOP: collects the top values for a specified field
-VALUES: returns all values in a group as a multivalued field
+[preview] VALUES: returns all values in a group as a multivalued field
 WEIGHTED_AVG: calculates the weighted average of a numeric expression
 
 ### Conditional functions and expressions
@@ -181,6 +179,12 @@ TO_TIMEDURATION
 TO_UNSIGNED_LONG
 TO_VERSION
 
+### Search functions
+KQL
+MATCH
+MATCH_PHRASE
+QSTR
+
 ### Multivalue functions
 
 Multivalue function are used to manipulate and transform multi-value fields.
@@ -197,7 +201,7 @@ MV_MEDIAN: returns the median value of a multivalued field
 MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
 MV_MIN: returns the min value of a multivalued field
 MV_PERCENTILE: returns the specified percentile of a multivalued field
-MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+MV_SLICE: extract a subset of a multivalued field using specified start and end index values
 MV_SORT: sorts a multivalued field in lexicographical order.
 MV_SUM: returns the sum of all values of a multivalued field
 MV_ZIP: combines the values from two multivalued fields with a specified delimiter

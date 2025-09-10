@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RootSchema, EventTypeOpts } from '@kbn/core/server';
+import type { RootSchema, EventTypeOpts } from '@kbn/core/server';
 
 interface ScoredDocument {
   esScore: number;

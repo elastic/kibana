@@ -6,10 +6,10 @@
  */
 
 import datemath from '@elastic/datemath';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -21,7 +21,7 @@ import {
   GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
   ALERTS_FUNCTION_NAME,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import { FunctionRegistrationParameters } from '.';
+import type { FunctionRegistrationParameters } from '.';
 
 const defaultFields = [
   '@timestamp',
@@ -123,6 +123,7 @@ export function registerAlertsFunction({
               stream: true,
             });
           },
+          logger: resources.logger,
         });
 
         return {

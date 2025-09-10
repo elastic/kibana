@@ -8,11 +8,12 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import React, { ComponentProps, useMemo } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useMemo } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { useKibana } from '../../utils/kibana_react';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 
 export type AlertsFlyoutFooterProps = Pick<
   ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutFooter'>>,

@@ -13,7 +13,7 @@ import {
   getRangeFilter,
 } from '../constants/client_defaults';
 import type { CertificatesResults } from '../../server/queries/get_certs';
-import { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import { asMutableArray } from '../utils/as_mutable_array';

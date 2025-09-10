@@ -25,10 +25,8 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import {
-  DataSourceActorRef,
-  useDataSourceSelector,
-} from './state_management/data_source_state_machine';
+import type { DataSourceActorRef } from './state_management/data_source_state_machine';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
 const DataSourcesFlyout = dynamic(() =>
   import('./data_sources_flyout').then((mod) => ({ default: mod.DataSourcesFlyout }))
