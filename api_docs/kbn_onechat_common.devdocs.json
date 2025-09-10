@@ -4005,6 +4005,30 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.IndexSearchToolDefinitionWithSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexSearchToolDefinitionWithSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinitionWithSchema",
+            "text": "ToolDefinitionWithSchema"
+          },
+          "<",
+          "IndexSearchToolConfig",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/index_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.MessageChunkEvent",
         "type": "Type",
         "tags": [],
