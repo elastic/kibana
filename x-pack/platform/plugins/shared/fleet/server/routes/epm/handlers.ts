@@ -646,7 +646,7 @@ export const getInputsHandler: FleetRequestHandler<
       ignoreUnverified
     );
 
-    return response.ok({ body, headers: { 'content-type': 'application/yaml' } });
+    return response.ok({ body, headers: { 'content-type': 'text/yaml;charset=utf-8' } });
   }
   throw new FleetError(`Fleet error template format not supported ${format}`);
 };
