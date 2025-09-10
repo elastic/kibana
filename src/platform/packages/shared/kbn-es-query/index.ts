@@ -129,6 +129,8 @@ export {
   escapeQuotes,
   getKqlFieldNames,
   getKqlFieldNamesFromExpression,
+  isKqlFreeText,
+  isKqlFreeTextExpression,
 } from './src/kuery';
 
 export {

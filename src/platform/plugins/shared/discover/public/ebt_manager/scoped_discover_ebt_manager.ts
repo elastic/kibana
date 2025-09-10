@@ -10,7 +10,11 @@
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { getKqlFieldNamesFromExpression, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  getKqlFieldNamesFromExpression,
+  isKqlFreeTextExpression,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getSearchQueries } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
@@ -240,6 +244,7 @@ export class ScopedDiscoverEBTManager {
         ? embeddedQueries
             .map((embeddedQuery) => {
               const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
+              // TODO refactor for isKqlFreeTextExpression when import fixed
               return embeddedKQLFieldNames.length === 0 ? [FREE_TEXT] : embeddedKQLFieldNames;
             })
             .flat()
@@ -267,10 +272,10 @@ export class ScopedDiscoverEBTManager {
         return;
       }
 
-      const extractedFieldNames = getKqlFieldNamesFromExpression(query.query);
-
-      // we discarded an empty query earlier, so if we're getting an empty array here it's a free text search
-      const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
+      const fieldNames = getKqlFieldNamesFromExpression(query.query);
+      if (isKqlFreeTextExpression(query.query)) {
+        fieldNames.push(FREE_TEXT);
+      }
 
       await this.trackQueryFieldsUsageEvent({
         eventName: QueryFieldsUsageEventName.kqlQuery,

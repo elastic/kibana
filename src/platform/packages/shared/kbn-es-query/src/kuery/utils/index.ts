@@ -8,4 +8,9 @@
  */
 
 export { escapeKuery, escapeQuotes } from './escape_kuery';
-export { getKqlFieldNames, getKqlFieldNamesFromExpression } from './get_kql_fields';
+export {
+  getKqlFieldNames,
+  getKqlFieldNamesFromExpression,
+  isKqlFreeText,
+  isKqlFreeTextExpression,
+} from './get_kql_fields';

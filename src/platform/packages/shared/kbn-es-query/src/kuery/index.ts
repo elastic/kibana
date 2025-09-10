@@ -29,5 +29,7 @@ export {
   escapeQuotes,
   getKqlFieldNames,
   getKqlFieldNamesFromExpression,
+  isKqlFreeText,
+  isKqlFreeTextExpression,
 } from './utils';
 export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';
