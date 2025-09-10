@@ -12,6 +12,11 @@ import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
 import { ApmServiceInventoryPage } from './pom/pages/apm_service_inventory.page';
 
+/**
+ * In case you need to run this test locally, you can use https://github.com/elastic/oblt-reference-stack
+ * to spin up a local k8s cluster with the required resources.
+ */
+
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
 });
