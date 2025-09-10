@@ -312,6 +312,7 @@ export const getNavigationTreeDefinition = ({
                         {
                           children: [
                             { link: 'management:genAiSettings' },
+                            { link: 'management:agentBuilder' },
                             { link: 'management:aiAssistantManagementSelection' },
                           ],
                           title: 'AI',
