@@ -6,13 +6,15 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type {
+  DashboardMigrationDashboard,
+  UpdateMigrationDashboard,
+} from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { getVendorTag } from '../../../common/api/util/tags';
-import { findTagsByName } from '../../../../tags/saved_objects/find_tags_by_name';
-import { createTag } from '../../../../tags/saved_objects/create_tag';
+import { findOrCreateTagReferences } from './tag_utils';
 
 const MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL = 10;
 
@@ -87,11 +89,11 @@ const installDashboards = async (
   savedObjectsClient: SavedObjectsClientContract,
   spaceId: string
 ): Promise<{
-  dashboardsToUpdate: Array<DashboardMigrationDashboard>;
+  dashboardsToUpdate: Array<UpdateMigrationDashboard>;
   errors: Error[];
 }> => {
   const errors: Error[] = [];
-  const dashboardsToUpdate: Array<DashboardMigrationDashboard> = [];
+  const dashboardsToUpdate: Array<UpdateMigrationDashboard> = [];
 
   const createDashboardsOutcome = await initPromisePool({
     concurrency: MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL,
@@ -107,42 +109,8 @@ const installDashboards = async (
         const dashboardData = JSON.parse(dashboard.elastic_dashboard.data);
         const tagNames = [getVendorTag(dashboard.original_dashboard.vendor)];
 
-        // Find or create tag IDs by name
-        const tagReferences = [];
-        for (const tagName of tagNames) {
-          let tagResults = await findTagsByName({
-            savedObjectsClient,
-            tagName,
-          });
-
-          // If tag doesn't exist, create it
-          if (tagResults.length === 0) {
-            try {
-              const createdTag = await createTag({
-                savedObjectsClient,
-                tagName,
-                description: `Auto-created tag for ${tagName}`,
-              });
-              // Convert SavedObject to SavedObjectsFindResult format
-              tagResults = [
-                {
-                  ...createdTag,
-                  score: 0,
-                },
-              ];
-            } catch (createError) {
-              // For now, we'll skip the tag silently
-            }
-          }
-
-          if (tagResults.length > 0) {
-            tagReferences.push({
-              id: tagResults[0].id,
-              name: `tag-ref-${tagName}`,
-              type: 'tag',
-            });
-          }
-        }
+        // Find or create tag references
+        const tagReferences = await findOrCreateTagReferences(savedObjectsClient, tagNames);
 
         const result = await savedObjectsClient.create(
           'dashboard',
@@ -162,10 +130,7 @@ const installDashboards = async (
         dashboardsToUpdate.push({
           id: dashboard.id,
           elastic_dashboard: {
-            id: dashboard.id,
-            title: dashboard.original_dashboard.title,
-            description: dashboard.original_dashboard.description,
-            data: JSON.stringify(result),
+            id: result.id,
           },
         });
       } catch (error) {
