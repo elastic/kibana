@@ -176,6 +176,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
+  const fields = getGenericEntity.data.fields;
 
   return (
     <>
@@ -194,7 +195,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
       {assetInventoryEnabled && (
-        <GenericEntityFlyoutFooter entityId={entity.id} entitySource={source} />
+        <GenericEntityFlyoutFooter entityId={entity.id} entityFields={fields} />
       )}
     </>
   );

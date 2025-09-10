@@ -9,23 +9,22 @@ import React from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
-import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { TakeAction } from '../shared/components/take_action';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
 
 interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
-  entitySource: GenericEntityRecord;
+  entityFields: Record<string, string[]>;
 }
 
 export const GenericEntityFlyoutFooter = ({
   entityId,
-  entitySource,
+  entityFields,
 }: GenericEntityFlyoutFooterProps) => {
   const { showAssistant, showAssistantOverlay } = useAssetInventoryAssistant({
-    entityData: entitySource,
     entityId,
+    entityFields,
   });
 
   return (
