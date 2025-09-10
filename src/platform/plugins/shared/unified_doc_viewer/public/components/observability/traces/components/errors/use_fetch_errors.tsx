@@ -50,7 +50,6 @@ export function useFetchErrors({
       return fetchErrors.fetchErrors(
         {
           traceId,
-          transactionId,
           serviceName,
           start: timeFilter.from,
           end: timeFilter.to,

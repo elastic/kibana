@@ -52,8 +52,8 @@ export function Errors({ transactionId, traceId, serviceName, spanId }: Props) {
 
   const columns = useMemo(() => getColumns(generateDiscoverLink), [generateDiscoverLink]);
   const openInDiscoverLink = useMemo(() => {
-    return generateDiscoverLink(createTraceContextWhereClause({ traceId, spanId, transactionId }));
-  }, [generateDiscoverLink, traceId, spanId, transactionId]);
+    return generateDiscoverLink(createTraceContextWhereClause({ traceId }));
+  }, [generateDiscoverLink, traceId]);
 
   if (loading || (!error && response.errorGroups.length === 0)) {
     return null;
