@@ -66,7 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
   }
 
-  describe.only('Settings', () => {
+  describe('Settings', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
