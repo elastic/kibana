@@ -1712,7 +1712,7 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
-      
+
       // scheduled
       '.codicon-symbol-operator:before': {
         content: '" "',
@@ -1725,7 +1725,7 @@ const componentStyles = {
         display: 'block',
       },
 
-      //manual
+      // manual
       '.codicon-symbol-type-parameter:before': {
         content: '" "',
         width: '16px',
@@ -1736,9 +1736,6 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
-
-
-
     }),
   editorContainer: css({
     flex: '1 1 0',

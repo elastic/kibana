@@ -1096,7 +1096,7 @@ function getTriggerTypeSuggestions(
 
   matchingTriggerTypes.forEach((triggerType) => {
     const snippetText = generateTriggerSnippet(triggerType.type, shouldBeQuoted);
-    
+
     // Extended range for multi-line insertion
     const extendedRange = {
       startLineNumber: range.startLineNumber,
