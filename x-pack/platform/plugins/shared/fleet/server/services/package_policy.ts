@@ -92,7 +92,6 @@ import {
   FleetNotFoundError,
   PackagePolicyRequestError,
   PackageRollbackError,
-
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
