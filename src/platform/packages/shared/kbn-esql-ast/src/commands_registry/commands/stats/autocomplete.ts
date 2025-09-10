@@ -62,6 +62,8 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+  const isInlineStats = command.name === 'inlinestats';
+
   const columnExists = (name: string) => _columnExists(name, context);
 
   const innerText = query.substring(0, cursorPosition);
@@ -108,7 +110,7 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
-          ...(!isNewMultipleExpression
+          ...(!isNewMultipleExpression && !isInlineStats
             ? [
                 {
                   ...byCompleteItem,

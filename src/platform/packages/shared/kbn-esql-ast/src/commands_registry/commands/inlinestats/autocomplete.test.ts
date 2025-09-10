@@ -67,15 +67,6 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
-
-export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
-  'BY ',
-  ' = ',
-  ...allAggFunctions,
-  ...allGroupingFunctions,
-  ...allEvalFunctionsForStats,
-];
-
 export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ' = ',
   ...allAggFunctions,
@@ -125,21 +116,14 @@ describe('INLINESTATS Autocomplete', () => {
 
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
-        await inlineStatsExpectSuggestions(
-          'from a | inlinestats ',
-          EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
-        );
-        await inlineStatsExpectSuggestions(
-          'FROM a | INLINESTATS ',
-          EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
-        );
-        await inlineStatsExpectSuggestions(
-          'from a | inlinestats a=max(b), ',
-          EXPECTED_FOR_EMPTY_EXPRESSION
-        );
+        const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
+
+        await inlineStatsExpectSuggestions('from a | inlinestats ', expected);
+        await inlineStatsExpectSuggestions('FROM a | INLINESTATS ', expected);
+        await inlineStatsExpectSuggestions('from a | inlinestats a=max(b), ', expected);
         await inlineStatsExpectSuggestions(
           'from a | inlinestats a=max(b) WHERE doubleField > longField, ',
-          EXPECTED_FOR_EMPTY_EXPRESSION
+          expected
         );
       });
 
@@ -446,12 +430,20 @@ describe('INLINESTATS Autocomplete', () => {
       test('increments suggested variable name counter', async () => {
         await inlineStatsExpectSuggestions(
           'from a | eval col0=round(b), col1=round(c) | inlinestats ',
-          EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
+          [
+            ' = ',
+            // TODO verify that this change is ok
+            ...allAggFunctions,
+            ...allEvalFunctionsForStats,
+            ...allGroupingFunctions,
+          ]
         );
-        await inlineStatsExpectSuggestions(
-          'from a | inlinestats col0=min(b),col1=c,',
-          EXPECTED_FOR_EMPTY_EXPRESSION
-        );
+        await inlineStatsExpectSuggestions('from a | inlinestats col0=min(b),col1=c,', [
+          ' = ',
+          ...allAggFunctions,
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+        ]);
       });
 
       test('expressions with aggregates', async () => {
