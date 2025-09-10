@@ -12,11 +12,23 @@ import type { UseEuiTheme } from '@elastic/eui';
 import type { CascadeSizing } from '../../types';
 
 export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) => ({
-  rowHeaderSlotWrapper: css({
+  rowHeaderTitleWrapper: css({
+    minWidth: 0,
+    overflow: 'hidden',
+    justifyContent: 'center',
+  }),
+  rowHeaderSlotWrapper: css({ overflow: 'scroll', flexGrow: 0 }),
+  rowHeaderSlotInner: css({
     justifyContent: 'center',
     alignItems: 'center',
     borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     paddingLeft: euiTheme.size.s,
-    flexGrow: 0,
+    // flexGrow: 0, // FIXME: align with Ryan about the consequences of having this here
+
+    '& > *': {
+      // Ensure that all direct children of the slot wrapper
+      // that render numbers have the same font size and weight for consistency
+      fontVariantNumeric: 'tabular-nums',
+    },
   }),
 });
