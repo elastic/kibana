@@ -1,4 +1,4 @@
-import { EsClient } from '@kbn/scout';
+import { EsClient } from '@kbn/scout-oblt';
 import pRetry from 'p-retry';
 
 export async function clearKnowledgeBase(esClient: EsClient) {
