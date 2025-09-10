@@ -13,7 +13,7 @@ POST kbn://internal/product_doc_base/install
 ```
 ### To update
 
- Passing `forceUpdate: true` will uninstall and install the product docs to the latest compatatible version, even if docs for the same Kibana version are already installed. This is helpful if we need to repair installation or simply upgrade/update docs to the newest possible version even for the same Kibana major-minor version.
+ Passing `forceUpdate: true` will uninstall and install the product docs to the latest compatible version, even if docs for the same Kibana version are already installed. This is helpful if we need to repair installation or simply upgrade/update docs to the newest possible version even for the same Kibana major-minor version.
 
 Because the operation is expensive, by default, `forceUpdate` is set to false unless user explicitly wants to do that with the API.
 
@@ -24,8 +24,8 @@ POST kbn://internal/product_doc_base/update_all
   # Will force update to latest compatible, even for same Kibana version
   "forceUpdate": true
 }
-
 ```
+
 Optionally, you can specify specific Inference IDs to update:
 ```
 POST kbn://internal/product_doc_base/update_all
@@ -36,12 +36,11 @@ POST kbn://internal/product_doc_base/update_all
     ".multilingual-e5-small-elasticsearch",
   ]
 }
-
+```
 Omit `inferenceIds` if you want to update all previously installed docs, regardless of which Inference ID.
-- If ELSER was installed, but not e5 -> Update ELSER docs
-- If ELSER was installed, E5 was installed -> Update ELSER & E5 docs
-
-
+- If ELSER was installed, but not E5 → ELSER docs will be updated
+- If E5 was installed, but not ELSER → E5 docs will be updated
+- If ELSER was installed, E5 was installed → ELSER & E5 docs will be updated
 
 ### To uninstall
 ```
