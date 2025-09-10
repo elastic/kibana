@@ -189,7 +189,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
     );
 
-    const defaultLlm = settings.client.get<string | undefined>(
+    const defaultAIConnectorId = settings.client.get<string | undefined>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
       undefined
     );
@@ -223,7 +223,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             isOpen={modalForceOpen}
             onChange={onChange}
             options={allConnectorOptions}
-            valueOfSelected={selectedConnectorId ?? defaultLlm}
+            valueOfSelected={selectedConnectorId ?? defaultAIConnectorId}
             placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
             popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
