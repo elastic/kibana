@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import type { NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,7 +16,7 @@ import {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
-import { updatePolicyWithInputs } from '../utils';
+import { getAzureCredentialsType, updatePolicyWithInputs } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { AzureAccountType, UpdatePolicy } from '../types';
@@ -64,26 +64,30 @@ interface AzureAccountTypeSelectProps {
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   disabled: boolean;
-  packageInfo: PackageInfo;
-  setupTechnology: SetupTechnology;
 }
 export const AzureAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
   disabled,
-  packageInfo,
-  setupTechnology,
 }: AzureAccountTypeSelectProps) => {
-  const { azurePolicyType, azureOrganizationEnabled, shortName } = useCloudSetup();
-  const azureAccountTypeOptions = getAzureAccountTypeOptions(!azureOrganizationEnabled);
-  // const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
+  const { azurePolicyType, azureOrganizationEnabled, shortName, azureCloudConnectors } =
+    useCloudSetup();
 
-  if (!getAzureAccountType(input)) {
+  // this should be removed when we enable Azure organization support for cloud connectors
+  const cloudConnectorDisablesOrganization =
+    !!azureCloudConnectors && getAzureCredentialsType(input) === 'cloud_connectors';
+
+  const organizationDisabled = !azureOrganizationEnabled || !!cloudConnectorDisablesOrganization;
+  const azureAccountTypeOptions = getAzureAccountTypeOptions(organizationDisabled);
+
+  const accountType = getAzureAccountType(input);
+
+  if (!accountType || (accountType === AZURE_ORGANIZATION_ACCOUNT && organizationDisabled)) {
     updatePolicy({
       updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
         'azure.account_type': {
-          value: azureOrganizationEnabled ? AZURE_ORGANIZATION_ACCOUNT : AZURE_SINGLE_ACCOUNT,
+          value: organizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
           type: 'text',
         },
       }),
