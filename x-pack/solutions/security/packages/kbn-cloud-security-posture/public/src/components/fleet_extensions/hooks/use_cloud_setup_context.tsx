@@ -305,8 +305,11 @@ const buildCloudSetupState = ({
     awsCloudConnectorRemoteRoleTemplate,
     awsCloudConnectors,
     azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
-    azureCloudConnectorRemoteRoleTemplate,
-    azureCloudConnectors,
+    // this Serverless check should be removed when we enable Azure cloud connectors for ESS
+    azureCloudConnectorRemoteRoleTemplate: cloud.isServerlessEnabled
+      ? azureCloudConnectorRemoteRoleTemplate
+      : undefined,
+    azureCloudConnectors: cloud.isServerlessEnabled ? azureCloudConnectors : false,
     azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
     azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
     azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
