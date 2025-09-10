@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
-import globby from 'globby';
-import { Logger } from '@kbn/core/server';
-=======
 import { glob } from 'fs/promises';
 import type { Logger } from '@kbn/core/server';
->>>>>>> 5573d9356bd (Replaced globby with native glob (#233481))
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { resolve } from 'path';
 import { Document } from 'langchain/document';
