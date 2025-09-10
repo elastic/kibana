@@ -23,13 +23,13 @@ import { useLayoutState } from './layout_state_context';
  *   --kbn-layout--header-[top|left|right|height|width]
  *
  * Footer:
- *   --kbn-layout--footer-[height|top|bottom|left|width]
+ *   --kbn-layout--footer-[height|top|bottom|left|right|width]
  *
  * Navigation:
- *   --kbn-layout--navigation-[top|bottom|height|width]
+ *   --kbn-layout--navigation-[top|bottom|left|right|height|width]
  *
  * Sidebar:
- *   --kbn-layout--sidebar-[top|bottom|height|width]
+ *   --kbn-layout--sidebar-[top|bottom|left|right|height|width]
  *
  * Application:
  *   --kbn-layout--application-[top|bottom|left|right|height|width]
@@ -82,6 +82,7 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--footer-top: calc(100vh - var(--kbn-layout--footer-height));
     --kbn-layout--footer-bottom: 0;
     --kbn-layout--footer-left: 0;
+    --kbn-layout--footer-right: 0;
     --kbn-layout--footer-width: 100vw;
   `;
 
@@ -89,6 +90,7 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--navigation-top: var(--kbn-layout--banner-height);
     --kbn-layout--navigation-bottom: var(--kbn-layout--footer-height);
     --kbn-layout--navigation-left: 0;
+    --kbn-layout--navigation-right: calc(100vw - ${navigationWidth}px);
     --kbn-layout--navigation-height: calc(
       100vh - var(--kbn-layout--navigation-top) - var(--kbn-layout--navigation-bottom)
     );
@@ -111,8 +113,8 @@ export const LayoutGlobalCSS = () => {
       var(--kbn-layout--banner-height) + var(--kbn-layout--header-height)
     );
     --kbn-layout--application-bottom: var(--kbn-layout--footer-height);
-    --kbn-layout--application-left: var(--kbn-layout--navigation-width);
-    --kbn-layout--application-right: var(--kbn-layout--sidebar-width);
+    --kbn-layout--application-left: ${navigationWidth}px;
+    --kbn-layout--application-right: ${sidebarWidth}px;
     --kbn-layout--application-height: calc(
       100vh - var(--kbn-layout--application-top) - var(--kbn-layout--application-bottom)
     );
@@ -135,23 +137,23 @@ export const LayoutGlobalCSS = () => {
   const applicationBottomBar = css`
     --kbn-application--bottom-bar-height: ${applicationBottomBarHeight}px;
     --kbn-application--bottom-bar-top: calc(
-      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
+      100vh - var(--kbn-layout--footer-height) - var(--kbn-application--bottom-bar-height)
     );
     --kbn-application--bottom-bar-left: var(--kbn-layout--application-left);
     --kbn-application--bottom-bar-width: var(--kbn-layout--application-width);
     --kbn-application--bottom-bar-right: var(--kbn-layout--application-right);
-    --kbn-application--bottom-bar-bottom: var(--kbn-layout--application-bottom);
+    --kbn-application--bottom-bar-bottom: var(--kbn-layout--footer-height);
   `;
 
   // The application content is the main area where the application renders its content.
   // It is not a slot, but it is styled to ensure it fits within the layout.
-  // It is positioned inside application area and takes the full heigh available minus that application top and bottom bars.
+  // It is positioned inside application area and takes the full height available minus that application top and bottom bars.
   const applicationContent = css`
     --kbn-application--content-top: calc(
       var(--kbn-layout--application-top) + var(--kbn-application--top-bar-height)
     );
     --kbn-application--content-bottom: calc(
-      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
+      var(--kbn-layout--footer-height) + var(--kbn-application--bottom-bar-height)
     );
     --kbn-application--content-left: var(--kbn-layout--application-left);
     --kbn-application--content-right: var(--kbn-layout--application-right);
