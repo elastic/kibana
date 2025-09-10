@@ -65,11 +65,18 @@ import { fromDifferencesAPItoLensState, fromDifferencesLensStateToAPI } from './
 import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from './cumulative_sum';
 import { fromCounterRateAPItoLensState, fromCounterRateLensStateToAPI } from './counter_rate';
 import { fromMovingAverageAPItoLensState, fromMovingAverageLensStateToAPI } from './moving_average';
-import type { AnyMetricLensStateColumn, ReferableMetricLensStateColumn } from './types';
+import type {
+  AnyLensStateColumn,
+  AnyMetricLensStateColumn,
+  ReferableMetricLensStateColumn,
+  ReferenceMetricLensStateColumn,
+} from './types';
 import {
   LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
   isAPIColumnOfType,
   isApiColumnOfReferableType,
+  isColumnOfReferableType,
+  isLensStateBucketColumnType,
   isLensStateColumnOfType,
 } from './utils';
 
@@ -209,58 +216,33 @@ export function fromMetricAPItoLensState(
   throw new Error(`Unsupported metric operation: ${options.operation}`);
 }
 
-export function getMetricApiColumnFromLensState(
-  column: CountIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiCountMetricOperation;
-export function getMetricApiColumnFromLensState(
-  column: CardinalityIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiUniqueCountMetricOperation;
-export function getMetricApiColumnFromLensState(
-  column:
-    | StandardDeviationIndexPatternColumn
-    | MinIndexPatternColumn
-    | MaxIndexPatternColumn
-    | AvgIndexPatternColumn
-    | MedianIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiMetricOperation;
-export function getMetricApiColumnFromLensState(
-  column: SumIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiSumMetricOperation;
-export function getMetricApiColumnFromLensState(
-  column: StaticValueIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiStaticValueOperation;
-export function getMetricApiColumnFromLensState(
-  column: FormulaIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiFormulaOperation;
-export function getMetricApiColumnFromLensState(
-  column: LastValueIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiLastValueOperation;
-export function getMetricApiColumnFromLensState(
-  column: MovingAverageIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiMovingAverageOperation;
-export function getMetricApiColumnFromLensState(
-  column: CounterRateIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiCounterRateOperation;
-export function getMetricApiColumnFromLensState(
-  column: CumulativeSumIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiCumulativeSumOperation;
-export function getMetricApiColumnFromLensState(
-  column: DerivativeIndexPatternColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
-): LensApiDifferencesOperation;
+export function getMetricReferableApiColumnFromLensState(
+  parentColumn: ReferenceMetricLensStateColumn,
+  columns: Record<string, AnyLensStateColumn>
+): LensApiReferableMetricOperations {
+  const refId = parentColumn.references[0];
+  if (refId == null || columns[refId] == null) {
+    throw new Error(`Missing referenced metric operation for ${parentColumn.operationType}`);
+  }
+  const refColumn = columns[refId];
+  if (isLensStateBucketColumnType(refColumn)) {
+    throw new Error(`Unsupported referenced metric operation: ${refColumn.operationType}`);
+  }
+  if (!isColumnOfReferableType(refColumn)) {
+    throw Error(`Unsupported referable metric operation: ${refColumn.operationType}`);
+  }
+  const retColumn = getMetricApiColumnFromLensState(refColumn, columns) as
+    | LensApiReferableMetricOperations
+    | undefined;
+  if (!retColumn) {
+    throw new Error(`Unsupported referenced metric operation: ${refColumn.operationType}`);
+  }
+  return retColumn;
+}
+
 export function getMetricApiColumnFromLensState(
   options: AnyMetricLensStateColumn,
-  columns: Record<string, AnyMetricLensStateColumn>
+  columns: Record<string, AnyLensStateColumn>
 ): LensApiAllMetricOperations {
   if (isLensStateColumnOfType<CountIndexPatternColumn>('count', options)) {
     return fromCountLensStateToAPI(options);
@@ -296,63 +278,25 @@ export function getMetricApiColumnFromLensState(
     return fromPercentileRankLensStateToAPI(options);
   }
   if (isLensStateColumnOfType<MovingAverageIndexPatternColumn>('moving_average', options)) {
-    if (!options.references || columns[options.references[0]] == null) {
-      throw new Error(`Missing referenced metric operation for ${options.operationType}`);
-    }
-    const refLensStateColumn = columns[options.references[0]];
-    const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
-      refLensStateColumn,
-      columns
-    ) as LensApiReferableMetricOperations;
-    if (!refColumn || !('field' in refColumn)) {
-      throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
-    }
+    const refColumn = getMetricReferableApiColumnFromLensState(options, columns);
     return fromMovingAverageLensStateToAPI(options, refColumn);
   }
   if (isLensStateColumnOfType<CounterRateIndexPatternColumn>('counter_rate', options)) {
-    if (!options.references || columns[options.references[0]] == null) {
-      throw new Error(`Missing referenced metric operation for ${options.operationType}`);
-    }
-    const refLensStateColumn = columns[options.references[0]];
-    const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
-      refLensStateColumn,
-      columns
-    ) as LensApiReferableMetricOperations;
-    if (!refColumn || !('sourceField' in refLensStateColumn)) {
+    const refColumn = getMetricReferableApiColumnFromLensState(options, columns);
+    if (!isAPIColumnOfType<LensApiMetricOperation>('max', refColumn)) {
       throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
     }
-    return fromCounterRateLensStateToAPI(options, refLensStateColumn);
+    return fromCounterRateLensStateToAPI(options, refColumn);
   }
   if (isLensStateColumnOfType<CumulativeSumIndexPatternColumn>('cumulative_sum', options)) {
-    if (!options.references || columns[options.references[0]] == null) {
-      throw new Error(`Missing referenced metric operation for ${options.operationType}`);
-    }
-    const refLensStateColumn = columns[options.references[0]];
-    const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
-      refLensStateColumn,
-      columns
-    ) as LensApiReferableMetricOperations;
-    if (!refColumn || !('sourceField' in refLensStateColumn)) {
+    const refColumn = getMetricReferableApiColumnFromLensState(options, columns);
+    if (!isAPIColumnOfType<LensApiSumMetricOperation>('sum', refColumn)) {
       throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
     }
-    return fromCumulativeSumLensStateToAPI(options, refLensStateColumn);
+    return fromCumulativeSumLensStateToAPI(options, refColumn);
   }
   if (isLensStateColumnOfType<DerivativeIndexPatternColumn>('differences', options)) {
-    if (!options.references || columns[options.references[0]] == null) {
-      throw new Error(`Missing referenced metric operation for ${options.operationType}`);
-    }
-    const refLensStateColumn = columns[options.references[0]];
-    const refColumn = getMetricApiColumnFromLensState(
-      // @ts-expect-error
-      refLensStateColumn,
-      columns
-    ) as LensApiReferableMetricOperations;
-    if (!refColumn || !('sourceField' in refLensStateColumn)) {
-      throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
-    }
+    const refColumn = getMetricReferableApiColumnFromLensState(options, columns);
     return fromDifferencesLensStateToAPI(options, refColumn);
   }
   throw new Error(`Unsupported metric operation`);
