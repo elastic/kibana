@@ -845,9 +845,12 @@ export class IndexUpdateService {
         return acc;
       }, {}) || {};
 
-    const newDocOperations = Object.entries(newDocs).map(([id, doc]) => {
-      return [{ index: {} }, doc];
-    });
+    // Filter out new docs that have no fields defined
+    const newDocOperations = Object.entries(newDocs)
+      .filter(([, doc]) => Object.keys(doc).length > 0)
+      .map(([id, doc]) => {
+        return [{ index: {} }, doc];
+      });
 
     const operations: BulkRequest['operations'] = [
       ...updateOperations,
