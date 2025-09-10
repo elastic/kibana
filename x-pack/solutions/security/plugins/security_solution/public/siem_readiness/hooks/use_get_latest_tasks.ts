@@ -8,14 +8,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { TaskSource } from '../../../server/lib/siem_readiness/routes/get_latest_readiness_tasks';
 import { GET_LATEST_SIEM_READINESS_TASKS_API_PATH } from '../../../common/api/siem_readiness/constants';
-
-interface TaskSource {
-  task_id: string;
-  status: 'completed' | 'incomplete';
-  '@timestamp': string;
-  meta?: Record<string, unknown>;
-}
 
 const GET_LATEST_TASKS_QUERY_KEY = ['latest-readiness-tasks'];
 

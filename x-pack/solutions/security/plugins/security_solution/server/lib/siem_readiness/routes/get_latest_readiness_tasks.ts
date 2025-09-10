@@ -13,6 +13,44 @@ import type { SiemReadinessRoutesDeps } from '../types';
 
 const SIEM_READINESS_INDEX = 'security_solution-siem_readiness';
 
+export interface TaskSource {
+  task_id: string;
+  status: 'completed' | 'incomplete';
+  '@timestamp': string;
+  meta?: Record<string, unknown>;
+}
+
+interface EsHit<T = unknown> {
+  _index: string;
+  _id: string;
+  _score: number;
+  _source: T;
+}
+
+interface TopHitsAggregation<T = unknown> {
+  hits: {
+    total: { value: number; relation: string };
+    max_score: number;
+    hits: EsHit<T>[];
+  };
+}
+
+interface TermsBucket<T = unknown> {
+  key: string;
+  doc_count: number;
+  latest_doc: TopHitsAggregation<T>;
+}
+
+interface TermsAggregation<T = unknown> {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: TermsBucket<T>[];
+}
+
+interface AggregationResponse<T = unknown> {
+  latest_tasks: TermsAggregation<T>;
+}
+
 export const getLatestReadinessTaskRoute = (
   router: SiemReadinessRoutesDeps['router'],
   logger: SiemReadinessRoutesDeps['logger']
@@ -40,7 +78,7 @@ export const getLatestReadinessTaskRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const searchResult = await esClient.search({
+          const searchResult = await esClient.search<TaskSource, AggregationResponse<TaskSource>>({
             index: SIEM_READINESS_INDEX,
             body: {
               size: 0,
@@ -70,9 +108,9 @@ export const getLatestReadinessTaskRoute = (
           });
 
           // Extract the latest document for each task_id from aggregation results
-          const latestTasks =
+          const latestTasks: TaskSource[] =
             searchResult.aggregations?.latest_tasks?.buckets?.map(
-              (bucket: any) => bucket.latest_doc.hits.hits[0]._source
+              (bucket: TermsBucket<TaskSource>) => bucket.latest_doc.hits.hits[0]._source
             ) || [];
 
           logger.info(

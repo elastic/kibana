@@ -32,7 +32,7 @@ const PILLARS = [
 
 const PANEL_HEIGHT = 600; // px, adjust as needed
 
-export const ReadinessTasksPanel: React.FC = () => {
+export const ReadinessTasksTable: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<string>('');
 
   const { euiTheme } = useEuiTheme();
