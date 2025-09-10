@@ -8,3 +8,4 @@
  */
 
 export { extractNunjucksVariables } from './extract_nunjucks_variables/extract_nunjucks_variables';
+export { findInputsInGraph } from './find_inputs_in_graph/find_inputs_in_graph';

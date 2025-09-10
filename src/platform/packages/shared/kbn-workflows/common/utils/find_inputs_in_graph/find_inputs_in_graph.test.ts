@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowGraph } from '../../../graph';
 
-import type { EnterForeachNode, ForEachStep, ConnectorStep, WorkflowYaml } from '@kbn/workflows';
+import type { ForEachStep, ConnectorStep, WorkflowYaml } from '../../../spec/schema';
+import type { EnterForeachNode } from '../../../types/execution';
+
 import { findInputsInGraph } from './find_inputs_in_graph';
 
 describe('findInputsInGraph', () => {
