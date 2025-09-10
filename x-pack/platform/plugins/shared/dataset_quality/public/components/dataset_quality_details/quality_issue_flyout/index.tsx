@@ -72,7 +72,7 @@ export default function QualityIssueFlyout() {
   });
 
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: datasetDetails.rawName,
     timeRangeConfig: timeRange,
     query: {
       language: 'kuery',
