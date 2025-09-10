@@ -28,6 +28,7 @@ const mockConnectors: UseGenAIConnectorsResult = {
   selectedConnector: 'test-connector',
   selectConnector: jest.fn(),
   reloadConnectors: jest.fn(),
+  getConnector: jest.fn(),
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({

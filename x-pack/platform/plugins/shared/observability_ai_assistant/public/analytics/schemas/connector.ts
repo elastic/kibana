@@ -9,14 +9,16 @@ import type { RootSchema } from '@kbn/core/public';
 import type { InferenceConnectorType, ModelFamily, ModelProvider } from '@kbn/inference-common';
 
 export interface Connector {
-  connector: {
-    connectorId: string;
-    name: string;
-    type: InferenceConnectorType;
-    family: ModelFamily;
-    provider: ModelProvider;
-    modelId: string | undefined;
-  };
+  connector:
+    | {
+        connectorId: string;
+        name: string;
+        type: InferenceConnectorType;
+        family: ModelFamily;
+        provider: ModelProvider;
+        modelId: string | undefined;
+      }
+    | undefined;
 }
 
 export const connectorSchema: RootSchema<Connector['connector']> = {

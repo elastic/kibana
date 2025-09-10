@@ -30,14 +30,16 @@ export interface UseGenAIConnectorsResult {
   error?: Error;
   selectConnector: (id: string) => void;
   reloadConnectors: () => void;
-  getConnector: (id: string) => {
-    connectorId: string;
-    name: string;
-    type: InferenceConnectorType;
-    family: ModelFamily;
-    provider: ModelProvider;
-    modelId: string | undefined;
-  };
+  getConnector: (id: string) =>
+    | {
+        connectorId: string;
+        name: string;
+        type: InferenceConnectorType;
+        family: ModelFamily;
+        provider: ModelProvider;
+        modelId: string | undefined;
+      }
+    | undefined;
 }
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
@@ -118,11 +120,14 @@ export function useGenAIConnectorsWithoutContext(
 
   const getConnector = (id: string) => {
     const connector = connectors?.find((_connector) => _connector.id === id);
+    if (!connector) {
+      return;
+    }
 
     const inferenceConnector: InferenceConnector = {
-      connectorId: connector?.id || '',
-      type: (connector?.actionTypeId || '') as InferenceConnector['type'],
-      name: connector?.name || '',
+      connectorId: connector.id,
+      type: connector.actionTypeId as InferenceConnector['type'],
+      name: connector.name,
       config: connector?.config || {},
       capabilities: {},
     };
