@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RULES_UI_READ_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import {
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import {
   COVERAGE_OVERVIEW_PATH,
   EXCEPTIONS_PATH,
@@ -39,7 +42,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: RULES_UI_READ_PRIVILEGE,
+  capabilities: [RULES_UI_READ_PRIVILEGE, SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.rules,
@@ -55,7 +58,7 @@ export const links: LinkItem = {
         }),
       ],
       // TODO Remove `${SECURITY_FEATURE_ID}.detections` ? Check if AI4SOC needs it
-      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`],
+      capabilities: [[RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -82,7 +85,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [RULES_UI_READ_PRIVILEGE],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [

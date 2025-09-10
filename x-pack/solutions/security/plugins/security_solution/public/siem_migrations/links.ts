@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SECURITY_UI_SHOW_PRIVILEGE,
+  RULES_UI_READ_PRIVILEGE,
   SIEM_MIGRATIONS_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 import { SecurityPageName, SIEM_MIGRATIONS_RULES_PATH } from '../../common/constants';
@@ -25,7 +25,7 @@ export const siemMigrationsLinks: LinkItem = {
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
-  capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+  capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
   skipUrlState: true,
   hideTimeline: true,
   hideWhenExperimentalKey: 'siemMigrationsDisabled',
