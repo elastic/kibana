@@ -14,6 +14,7 @@ export interface PrivMonBulkUser {
 }
 
 export interface PrivMonOktaIntegrationsUser {
+  id: string;
   username: string;
   email: string | undefined;
   roles: string[];

@@ -6,10 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Matcher } from '../../../constants';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { AfterKey } from './privileged_status_match';
+import type { PrivMonOktaIntegrationsUser } from '../../../../types';
 
 // First step -- see which are privileged via matchers
 export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
@@ -96,21 +96,16 @@ if (params.new_privileged_status == false) {
 }
 `;
 
-// WIP below should be moved to correct place, this is here for future me to move
-interface PrivUser {
-  // TODO: probably not this type - this is POC quick results atm
-  userKey: string;
-  id?: string;
-  name?: string;
-  roles?: string[];
-  isPrivileged: boolean;
-  lastSeen?: string;
-}
+// WIP below should be moved to correct place
 
-export const buildBulkBody = async (users: PrivUser[], index: string, sourceLabel: string) => {
+export const buildBulkBody = async (
+  users: PrivMonOktaIntegrationsUser[],
+  index: string,
+  sourceLabel: string
+) => {
   const body = [];
   for (const u of users) {
-    body.push({ update: { _index: index, _id: u.userKey } });
+    body.push({ update: { _index: index, _id: u.username } });
     body.push({
       script: {
         lang: 'painless',
@@ -122,7 +117,8 @@ export const buildBulkBody = async (users: PrivUser[], index: string, sourceLabe
       },
       // upsert defines doc shape if it does not exist yet
       upsert: {
-        user: { id: u.id, name: u.name },
+        // update this logic,
+        user: { id: u.id, name: u.username },
         roles: u.roles ?? [],
         is_privileged: u.isPrivileged,
         sources: u.isPrivileged ? [sourceLabel] : [],
@@ -134,26 +130,32 @@ export const buildBulkBody = async (users: PrivUser[], index: string, sourceLabe
   return body;
 };
 
-export const applyPrivilegedUpdates = async (
-  dataClient: PrivilegeMonitoringDataClient,
-  esClient: ElasticsearchClient,
-  users: PrivUser[]
-) => {
+export const applyPrivilegedUpdates = async ({
+  dataClient,
+  users,
+}: {
+  dataClient: PrivilegeMonitoringDataClient;
+  users: PrivMonOktaIntegrationsUser[];
+}) => {
   if (users.length === 0) return;
-  // chunk if large; 500–1k updates per bulk is a good rule
+
   const chunkSize = 500;
-  for (let i = 0; i < users.length; i += chunkSize) {
-    const chunk = users.slice(i, i + chunkSize);
-    const res = await esClient.bulk({
-      refresh: 'wait_for',
-      body: buildBulkBody(chunk, 'indexPattern', 'sourceLabel'),
-    });
-    if (res.errors) {
-      const fails = res.items.filter((item) => item.update?.error);
-      dataClient.log(
-        'warn',
-        `Bulk had ${fails.length} failures; first=${JSON.stringify(fails[0])}`
+  const esClient = dataClient.deps.clusterClient.asCurrentUser;
+
+  try {
+    for (let i = 0; i < users.length; i += chunkSize) {
+      const chunk = users.slice(i, i + chunkSize);
+      const operations = await buildBulkBody(
+        chunk,
+        dataClient.index,
+        'entity_analytics_integration'
       );
+      await esClient.bulk({
+        refresh: 'wait_for',
+        body: operations,
+      });
     }
+  } catch (error) {
+    dataClient.log('error', `Error applying privileged updates: ${error.message}`);
   }
 };

@@ -7,11 +7,12 @@
 
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { PrivMonOktaIntegrationsUser } from '../../../../types';
+import { applyPrivilegedUpdates } from './queries';
 
 export const createPrivilegeStatusUpdateService = (dataClient: PrivilegeMonitoringDataClient) => {
   const updatePrivilegedStatus = async (users: PrivMonOktaIntegrationsUser[]) => {
-    // TODO: implement the logic to update the privileged internal index for users
     dataClient.log('info', `Updating internal index for users: ${JSON.stringify(users, null, 2)}`);
+    applyPrivilegedUpdates({ users, dataClient });
   };
 
   return {

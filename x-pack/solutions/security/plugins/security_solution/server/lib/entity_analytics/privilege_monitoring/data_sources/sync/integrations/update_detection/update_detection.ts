@@ -10,7 +10,6 @@ import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_clie
 import type { PrivMonOktaIntegrationsUser } from '../../../../types';
 import { createPatternMatcherService } from './privileged_status_match';
 import { createPrivilegeStatusUpdateService } from './privileged_status_update';
-// TODO: fill in
 export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringDataClient) => {
   const statusUpdateService = createPrivilegeStatusUpdateService(dataClient);
   const patternMatcherService = createPatternMatcherService(dataClient);
@@ -18,8 +17,11 @@ export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringData
   const updateDetection = async (source: MonitoringEntitySource) => {
     const users: PrivMonOktaIntegrationsUser[] =
       await patternMatcherService.findPrivilegedUsersFromMatchers(source);
-    // logic to compare users for updating internal index
     await statusUpdateService.updatePrivilegedStatus(users);
+    dataClient.log(
+      'info',
+      `Completed update detection for source ${source.id}. Processed ${users.length} users.`
+    );
   };
   return {
     updateDetection,

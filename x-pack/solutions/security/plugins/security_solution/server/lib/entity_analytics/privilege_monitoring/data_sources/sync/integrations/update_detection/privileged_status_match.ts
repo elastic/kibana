@@ -52,41 +52,49 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonOktaIntegrationsUser[]> => {
-    // pagination variables
-    let afterKey: AfterKey | undefined;
-    const pageSize = 1; // adjust as needed
-    let fetchMore = true;
-    const matcherConfig = source.matchers?.[0];
+    // quick exits / setup
+    if (!source.matchers?.length) {
+      dataClient.log('info', `No matchers for source id=${source.id ?? '(unknown)'}`);
+      return [];
+    }
+
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
-    const script = buildMatcherScript(matcherConfig);
+    const script = buildMatcherScript(source.matchers[0]);
+
+    let afterKey: AfterKey | undefined;
+    let fetchMore = true;
+    const pageSize = 2; // TODO: make bigger, smaller for testing atm.
     const users: PrivMonOktaIntegrationsUser[] = [];
+
     try {
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
-          ...buildPrivilegedSearchBody(script, 'now-10y', afterKey, pageSize), // adjust time range as needed
+          ...buildPrivilegedSearchBody(script, 'now-10y', afterKey, pageSize), // TODO: change time range: testing atm.
         });
+
         const aggregations = response.aggregations;
-        // move to next page
-        afterKey = aggregations?.privileged_user_status_since_last_run?.after_key;
-        if (aggregations) {
+        const privUserAgg = response.aggregations?.privileged_user_status_since_last_run;
+        const buckets = privUserAgg?.buckets ?? [];
+
+        // process current page
+        if (buckets.length && aggregations) {
           users.push(processAggregations(aggregations));
         }
-        if (!afterKey) {
-          // no more pages
-          fetchMore = false;
-        }
+
+        // update cursor & loop condition
+        afterKey = privUserAgg?.after_key;
+        fetchMore = Boolean(afterKey);
       }
-      dataClient.log(
-        'info',
-        `Found ${JSON.stringify(users, null, 2)} privileged users from matchers.`
-      );
+
+      dataClient.log('info', `Found ${users.length} privileged users from matchers.`);
       return users;
     } catch (error) {
       dataClient.log('error', `Error finding privileged users from matchers: ${error.message}`);
       return [];
     }
   };
+
   const processAggregations = (
     aggregation: PrivMatchersAggregation
   ): PrivMonOktaIntegrationsUser => {
@@ -98,6 +106,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     const topHit: PrivTopHit = buckets.latest_doc_for_user.hits.hits[0];
     return {
       //  username: topHit._source?.user?.name || 'unknown',
+      id: topHit._source?.user?.id || 'unknown',
       username: buckets.key.username,
       email: topHit._source?.user?.email,
       roles: topHit._source?.user?.roles || [],
