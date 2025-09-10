@@ -81,7 +81,7 @@ ${formatResourceWithSampledValues({ resource: resolvedResource, indentLevel: 0 }
     * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the \`LIMIT\`.
     * **Default:** If no number is given, default to \`LIMIT 100\` for both raw events and \`GROUP BY\` results. Notify the user when you apply this default (e.g., "I've added a \`LIMIT 100\` for safety.").
 
-3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety \`LIMIT 1000\` and state that this limit was added to protect the system.
+3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety \`LIMIT 250\` and state that this limit was added to protect the system.
 </directives>
 
 Based on all the information above, generate the ES|QL query.
