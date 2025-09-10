@@ -196,12 +196,7 @@ describe('cancel authorization utilities', () => {
       const command = 'isolate';
 
       // Check overall permission
-      const result = checkCancelPermission(
-        mockAuthz,
-        mockExperimentalFeatures,
-        agentType,
-        command
-      );
+      const result = checkCancelPermission(mockAuthz, mockExperimentalFeatures, agentType, command);
       const canCancel = result;
 
       // Verify individual checks

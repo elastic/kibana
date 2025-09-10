@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ResponseActionScript,
-} from '../../../../../common/endpoint/types';
-import {
-  transformCustomScriptsToOptions,
-  checkActionCancelPermission,
-} from './utils';
+import type { ResponseActionScript } from '../../../../../common/endpoint/types';
+import { transformCustomScriptsToOptions, checkActionCancelPermission } from './utils';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 describe('utils', () => {
-
   describe('transformCustomScriptsToOptions', () => {
     const mockScript: ResponseActionScript = {
       id: 'script-1',
