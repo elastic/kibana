@@ -14,7 +14,8 @@
       "esUiShared",
       "kibanaReact",
       "triggersActionsUi",
-      "encryptedSavedObjects"
+      "encryptedSavedObjects",
+      "spaces"
     ],
     "extraPublicDirs": ["public/common"]
   }
