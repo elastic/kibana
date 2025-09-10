@@ -10,7 +10,6 @@ import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { PROMPT_CONTEXT_ASSET_CATEGORY } from '../../../../assistant/content/prompt_contexts';
-import type { GenericEntityRecord } from '../../../../asset_inventory/types/generic_entity_record';
 import {
   ENTITY_SUMMARY_CONVERSATION_ID,
   ENTITY_SUMMARY_CONTEXT_DESCRIPTION,
@@ -25,14 +24,8 @@ const useAssistantNoop = () => ({
 });
 
 export interface UseAssetInventoryAssistantParams {
-  /**
-   * Entity data
-   */
-  entityData: GenericEntityRecord;
-  /**
-   * Entity ID
-   */
   entityId: EntityEcs['id'];
+  entityFields: Record<string, string[]>;
 }
 
 export interface UseAssetInventoryAssistantResult {
@@ -54,8 +47,8 @@ export interface UseAssetInventoryAssistantResult {
  * Hook to return the assistant button visibility and prompt context id for Asset Inventory entities
  */
 export const useAssetInventoryAssistant = ({
-  entityData,
   entityId,
+  entityFields,
 }: UseAssetInventoryAssistantParams): UseAssetInventoryAssistantResult => {
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
@@ -68,40 +61,12 @@ export const useAssetInventoryAssistant = ({
   );
   const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
 
-  // TODO: does it make sense to convert like this? Asset Inventory also has field data, should we use it somehow?
-  // Create prompt context directly from entity data
-  const getPromptContext = useCallback(async () => {
-    if (!entityData) return {};
-
-    // Helper function to flatten the document and preserve field paths
-    const flattenDocument = (obj: Record<string, unknown>, path = ''): Record<string, string[]> => {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        const currentPath = path ? `${path}.${key}` : key;
-
-        // Skip null or undefined values
-        if (value === null || value === undefined) {
-          return acc;
-          // Handle nested objects (but not arrays)
-        } else if (typeof value === 'object' && !Array.isArray(value)) {
-          return { ...acc, ...flattenDocument(value as Record<string, unknown>, currentPath) };
-          // Handle arrays and primitive values
-        } else {
-          const stringValues = Array.isArray(value)
-            ? value.map((item) => String(item))
-            : [String(value)];
-          return { ...acc, [currentPath]: stringValues };
-        }
-      }, {});
-    };
-
-    // Directly convert entity data to the format expected by the AI Assistant
-    return flattenDocument(entityData as Record<string, unknown>);
-  }, [entityData]);
+  const getPromptContext = useCallback(async () => entityFields || {}, [entityFields]);
 
   const uniqueName = useMemo(() => {
-    const entityName = entityData?.name || entityId || ENTITY_SUMMARY_CONVERSATION_ID;
+    const entityName = entityId || ENTITY_SUMMARY_CONVERSATION_ID;
     return `${entityName}`;
-  }, [entityData, entityId]);
+  }, [entityId]);
 
   const { promptContextId, showAssistantOverlay } = useAssistantHook(
     'entity',

@@ -20,7 +20,6 @@ import {
 import { GenericEntityPanelKey } from '../shared/constants';
 import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
 
@@ -28,21 +27,21 @@ interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
   isPreviewMode: boolean;
   scopeId: string;
-  entitySource: GenericEntityRecord;
+  entityFields: Record<string, string[]>;
 }
 
 export const GenericEntityFlyoutFooter = ({
   entityId,
   isPreviewMode,
   scopeId,
-  entitySource,
+  entityFields,
 }: GenericEntityFlyoutFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
   const { showAssistant, showAssistantOverlay } = useAssetInventoryAssistant({
-    entityData: entitySource,
     entityId,
+    entityFields,
   });
 
   const openDocumentFlyout = useCallback(() => {
