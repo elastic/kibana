@@ -21,7 +21,6 @@ export interface ChartSectionTemplateProps {
     rightSide?: IconButtonGroupProps['buttons'];
     additionalControls?: {
       prependRight?: React.ReactNode;
-      appendRight?: React.ReactNode;
     };
   };
   children: React.ReactNode;
@@ -80,9 +79,6 @@ export const ChartSectionTemplate = ({
                     buttons={rightSide}
                   />
                 </EuiFlexItem>
-                {toolbar?.additionalControls?.appendRight ? (
-                  <EuiFlexItem grow={false}>{toolbar.additionalControls.appendRight}</EuiFlexItem>
-                ) : null}
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
