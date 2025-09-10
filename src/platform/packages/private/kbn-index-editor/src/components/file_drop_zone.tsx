@@ -119,6 +119,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         .map((errorItem) => `- ${errorItem.title}: \n ${errorItem?.error?.error?.reason}`)
         .join('\n');
       indexUpdateService.setError(IndexEditorErrors.FILE_UPLOAD_ERROR, errorDetail);
+      indexUpdateService.setIsSaving(false);
     }
   }, [indexUpdateService, uploadStatus.errors]);
 
