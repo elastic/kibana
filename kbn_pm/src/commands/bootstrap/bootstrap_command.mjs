@@ -51,6 +51,7 @@ export const command = {
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
+    --no-ruler           Disable generating instructions for AI tooling
   `,
   reportTimings: {
     group: 'scripts/kbn bootstrap',
@@ -66,6 +67,7 @@ export const command = {
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
+    const runRuler = args.getBooleanValue('ruler') ?? true;
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
@@ -137,6 +139,12 @@ export const command = {
             // Update vscode settings
             await run('node', ['scripts/update_vscode_config']);
             log.success('vscode config updated');
+          })
+        : undefined,
+      runRuler
+        ? time('generate AI instructions', async () => {
+            await run('yarn', ['ruler', 'apply', '--nested']);
+            log.success('AI instructions generated');
           })
         : undefined,
     ]);

@@ -139,6 +139,26 @@
       "enabled": true
     },
     {
+      "groupName": "ruler",
+      "matchDepNames": [
+        "@intellectronica/ruler"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^9.[1-9].*/",
+        "8.19"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "operations actions",
       "matchManagers": [
         "github-actions"

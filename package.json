@@ -1459,6 +1459,7 @@
     "@fast-check/jest": "^2.1.1",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
     "@huggingface/hub": "^2.2.0",
+    "@intellectronica/ruler": "^0.3.8",
     "@jest/console": "^29.7.0",
     "@jest/reporters": "^29.7.0",
     "@jest/transform": "^29.6.1",

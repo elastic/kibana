@@ -1,0 +1,16 @@
+---
+id: kibDevTutorialRuler
+slug: /kibana-dev-docs/tutorials/ruler
+title: Ruler
+description: AI Agent Instructions and MCP server management
+date: 2023-11-08
+tags: ['kibana', 'onboarding', 'dev', 'ai', 'agent', 'mcp', 'instructions']
+---
+
+## Ruler
+
+### For full documentation on Ruler, visit it's [docs](https://github.com/intellectronica/ruler). 
+Ruler centralizes our AI agent instructions and MCP configuration within `.ruler`. Then when running `ruler apply` it will generate the respective files (`CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/mcp.json`, etc) for each tool using the centralized rules.
+
+### Local Overrides
+If you want to have your own local instructions which are not committed, add a `local` directory to `instructions`, and within `local` create a new `.md` file with any name. So the path is `.ruler/instructions/local/my_instructions.md`. Add any instructions you require and they will be appended when using `ruler apply`.

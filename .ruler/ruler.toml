@@ -1,0 +1,40 @@
+# Ruler Configuration File
+# See https://ai.intellectronica.net/ruler for documentation.
+
+# To specify which agents are active by default when --agents is not used,
+# uncomment and populate the following line. If omitted, all agents are active.
+# THIS RULE SHOULD ALWAYS BE FIRST
+default_agents = ["copilot", "claude", "cursor", "gemini-cli"]
+
+# --- Global MCP Server Configuration ---
+[mcp]
+# Enable/disable MCP propagation globally (default: true)
+enabled = true
+# Global merge strategy: 'merge' or 'overwrite' (default: 'merge')
+merge_strategy = "merge"
+
+# --- MCP Server Definitions ---
+[mcp_servers.kibana]
+command = "bash"
+args = ["-lc", "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && node --no-experimental-require-module ./scripts/mcp_dev.js"]
+
+# --- Global .gitignore Configuration ---
+[gitignore]
+# Enable/disable automatic .gitignore updates (default: true)
+enabled = false
+
+# --- Agent Specific Configurations ---
+# You can enable/disable agents and override their default output paths here.
+# Use lowercase agent identifiers: amp, copilot, claude, codex, cursor, windsurf, cline, aider, kilocode
+
+[agents.copilot]
+enabled = true
+
+[agents.claude]
+enabled = true
+
+[agents.cursor]
+enabled = true
+
+[agents.gemini-cli]
+enabled = true
