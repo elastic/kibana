@@ -35,6 +35,7 @@ export interface TableFieldConfiguration {
   name: string;
   value: unknown;
   description?: string;
+  type?: string;
   valueCellContent?: React.ReactNode;
 }
 
@@ -72,7 +73,7 @@ export function ContentFrameworkTable({
     fieldFormats,
   } = getUnifiedDocViewerServices();
   const { fieldsMetadata = {} } = useFieldsMetadata({
-    attributes: ['short', 'flat_name', 'name'],
+    attributes: ['short', 'type'],
     fieldNames,
   });
 
@@ -106,6 +107,7 @@ export function ContentFrameworkTable({
             name: fieldConfiguration?.title || fieldName,
             value,
             description: fieldDescription,
+            type: fieldsMetadata[fieldName]?.type,
             valueCellContent: fieldConfiguration?.formatter ? (
               <>{fieldConfiguration.formatter(value, formattedValue)}</>
             ) : (

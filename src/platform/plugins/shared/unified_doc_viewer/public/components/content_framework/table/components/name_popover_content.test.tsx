@@ -11,6 +11,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { NamePopoverContent } from './name_popover_content';
 
+jest.mock('@kbn/field-utils/src/components/field_icon', () => ({
+  FieldIcon: ({}: { type: string; size: string }) => <span data-test-subj="fieldIcon" />,
+}));
+
 describe('NamePopoverContent', () => {
   it('renders the field name', () => {
     render(
@@ -54,5 +58,28 @@ describe('NamePopoverContent', () => {
       />
     );
     expect(screen.getByText('ActionBtn')).toBeInTheDocument();
+  });
+
+  it('renders FieldIcon when fieldConfig.type is provided', () => {
+    render(
+      <NamePopoverContent
+        fieldName="myField"
+        fieldConfig={{ name: 'name', value: 'value', type: 'keyword', description: 'desc' }}
+        cellActions={null}
+      />
+    );
+    const icon = screen.getByTestId('fieldIcon');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('does not render FieldIcon when fieldConfig.type is not provided', () => {
+    render(
+      <NamePopoverContent
+        fieldName="myField"
+        fieldConfig={{ name: 'name', value: 'value', description: 'desc' }}
+        cellActions={null}
+      />
+    );
+    expect(screen.queryByTestId('fieldIcon')).toBeNull();
   });
 });
