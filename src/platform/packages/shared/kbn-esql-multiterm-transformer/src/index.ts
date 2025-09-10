@@ -38,23 +38,30 @@ export function transformEsqlMultiTermBreakdown({
     return { columns, rows, transformed: false, newColumnName: null, originalStringColumns: [] };
   }
 
+  // Categorize columns by their data type.
   const dateColumns = columns.filter((c) => c.meta.type === 'date');
   const numberColumns = columns.filter((c) => c.meta.type === 'number');
   const stringColumns = columns.filter((c) => c.meta.type === 'string');
 
+  // Check if the datatable matches the specific shape for transformation.
   if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
+    // Create the new combined column name (e.g., "host.name > region").
     const newColumnName = stringColumns.map((c) => c.name).join(' > ');
     const stringColumnIds = stringColumns.map((c) => c.id);
 
+    // Transform each row to have the new combined column.
     const newRows = rows.map((row) => {
       const newRow = { ...row };
+      // Concatenate the values of the original string columns.
       newRow[newColumnName] = stringColumnIds.map((id) => row[id] ?? '(empty)').join(' > ');
+      // Remove the original string columns from the row.
       stringColumnIds.forEach((id) => {
         delete newRow[id];
       });
       return newRow;
     });
 
+    // Create the new set of columns for the transformed table.
     const newColumns = [
       ...dateColumns,
       ...numberColumns,

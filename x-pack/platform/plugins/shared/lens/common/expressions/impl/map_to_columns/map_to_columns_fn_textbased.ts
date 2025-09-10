@@ -25,6 +25,12 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
   };
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn[]>;
 
+  // Backwards compatibility for saved objects:
+  // If a transformation occurred, the column IDs in the datatable have changed.
+  // We need to check if the saved configuration (`idMap`) was using one of the
+  // original, now-removed columns. If it was, we remap that configuration
+  // on-the-fly to point to the new, combined column. This ensures that visualizations
+  // saved before this change will still load correctly.
   if (transformed && newColumnName) {
     for (const originalCol of originalStringColumns) {
       if (idMap[originalCol.id]) {
