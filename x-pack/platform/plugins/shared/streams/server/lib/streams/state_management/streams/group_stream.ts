@@ -77,6 +77,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         definition: {
           name: member,
           description: '',
+          systems: [],
           ingest: {
             classic: {},
             lifecycle: {

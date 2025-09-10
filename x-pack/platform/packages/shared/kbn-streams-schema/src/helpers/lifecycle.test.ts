@@ -23,6 +23,7 @@ function createMockWiredStream(
         steps: [],
       },
     },
+    systems: [],
   };
 }
 

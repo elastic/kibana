@@ -24,6 +24,7 @@ export const streamsStorageSettings = {
       description: types.text(),
       ingest: types.object({ enabled: false }),
       group: types.object({ enabled: false }),
+      systems: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;

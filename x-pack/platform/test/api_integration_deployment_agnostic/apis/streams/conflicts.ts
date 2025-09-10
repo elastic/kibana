@@ -89,6 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             stream: {
               description: '',
+              systems: [],
               ingest: {
                 lifecycle: {
                   dsl: {},
@@ -132,6 +133,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.child',
           {
             stream: {
+              systems: [],
               description: '',
               ingest: {
                 lifecycle: {

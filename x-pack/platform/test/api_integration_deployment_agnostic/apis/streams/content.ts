@@ -37,6 +37,7 @@ const upsertRequest = ({
   ...emptyAssets,
   queries,
   stream: {
+    systems: [],
     description: 'Test stream',
     ingest: {
       processing: {
@@ -289,6 +290,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: 'ok',
+                  systems: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -306,6 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: 'a'.repeat(twoMB),
+                  systems: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -464,6 +467,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 request: {
                   stream: {
                     description: '',
+                    systems: [],
                     ingest: {
                       processing: {
                         steps: [],
@@ -556,6 +560,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ROOT_STREAM_ID,
               request: {
                 stream: {
+                  systems: [],
                   description: '',
                   ingest: {
                     processing: {
@@ -583,6 +588,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: '',
+                  systems: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -627,6 +633,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: '',
+                  systems: [],
                   ingest: {
                     processing: {
                       steps: [],

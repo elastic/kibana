@@ -23,6 +23,7 @@ describe('ClassicStream', () => {
           },
           classic: {},
         },
+        systems: [],
       },
       {
         name: 'classic-stream-with-fields',
@@ -42,6 +43,7 @@ describe('ClassicStream', () => {
             },
           },
         },
+        systems: [],
       },
     ])('is valid', (val) => {
       expect(ClassicStream.Definition.asserts(val)).toBe(true);
@@ -101,6 +103,7 @@ describe('ClassicStream', () => {
             processing: { steps: [] },
             classic: {},
           },
+          systems: [],
         },
         effective_lifecycle: {
           dsl: {},
@@ -167,6 +170,7 @@ describe('ClassicStream', () => {
             },
             classic: {},
           },
+          systems: [],
         },
         ...emptyAssets,
       },

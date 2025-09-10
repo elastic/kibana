@@ -11,12 +11,14 @@ import type { StreamQuery } from '../queries';
 import { streamQuerySchema } from '../queries';
 import type { ModelValidation } from './validation/model_validation';
 import { modelValidation } from './validation/model_validation';
+import { systemSchema, type System } from './system';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
   export interface Definition {
     name: string;
     description: string;
+    systems: System[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -47,6 +49,7 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
   Definition: z.object({
     name: z.string(),
     description: z.string(),
+    systems: z.array(systemSchema).default([]) as z.Schema<System[]>,
   }),
   Source: z.object({}),
   GetResponse: z.object({

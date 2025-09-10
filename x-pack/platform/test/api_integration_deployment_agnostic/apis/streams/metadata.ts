@@ -32,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...emptyAssets,
         stream: {
           description: 'This is a test stream',
+          systems: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
@@ -55,6 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...emptyAssets,
         stream: {
           description: 'Updated test stream description',
+          systems: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
