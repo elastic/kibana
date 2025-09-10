@@ -31,7 +31,7 @@ export const getAnomalyChartsServiceDependencies = async (
     await import('@kbn/ml-services/index_service'),
     await import('@kbn/ml-services/ml_api_service'),
     await import('@kbn/ml-services/job_service'),
-    await import('@kbn/ml-services/results_service_2'),
+    await import('@kbn/ml-services/results_service'),
     await import('@kbn/ml-services/capabilities/check_capabilities'),
   ]);
   const httpService = new HttpService(coreStart.http);

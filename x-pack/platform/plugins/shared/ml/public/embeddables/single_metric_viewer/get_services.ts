@@ -40,7 +40,7 @@ export const getMlServices = async (
     await import('@kbn/ml-services/index_service'),
     await import('../../application/util/time_series_explorer_service'),
     await import('@kbn/ml-services/ml_api_service'),
-    await import('@kbn/ml-services/results_service_2'),
+    await import('@kbn/ml-services/results_service'),
     await import('@kbn/ml-services/capabilities/check_capabilities'),
     await import(
       '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'

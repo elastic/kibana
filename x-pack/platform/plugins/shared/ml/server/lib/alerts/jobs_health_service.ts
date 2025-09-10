@@ -26,7 +26,7 @@ import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { MlClient } from '@kbn/ml-client';
 import type { JobSelection } from '@kbn/ml-server-api-schemas/alerting_schema';
-import { datafeedsProvider, type DatafeedsService } from '@kbn/ml-services/datafeeds';
+import { datafeedsProvider, type DatafeedsService } from '@kbn/ml-server-services/datafeeds';
 import { annotationServiceProvider } from '@kbn/ml-common-utils/annotation_service';
 import type { AnnotationService } from '@kbn/ml-common-utils/annotation_service/annotation';
 

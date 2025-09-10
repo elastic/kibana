@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { resultsServiceProvider } from '@kbn/ml-services/results_service';
+import { resultsServiceProvider } from '@kbn/ml-server-services/results_service';
 
 import type { GetGuards } from '../shared_services';
 

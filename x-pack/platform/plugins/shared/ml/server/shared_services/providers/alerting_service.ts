@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { datafeedsProvider } from '@kbn/ml-services/datafeeds';
+import { datafeedsProvider } from '@kbn/ml-server-services/datafeeds';
 
 import type { GetGuards } from '../shared_services';
 import type { MlAlertingService } from '../../lib/alerts/alerting_service';

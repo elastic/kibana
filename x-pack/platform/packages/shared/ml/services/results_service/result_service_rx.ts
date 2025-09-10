@@ -28,10 +28,9 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
 import { findAggField } from '@kbn/ml-common-utils/validation_utils';
 import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 import type { MlApi } from '../ml_api_service';
-
-import type { CriteriaField } from '../results_service';
 
 export interface ResultResponse {
   success: boolean;

@@ -765,6 +765,7 @@
     "@kbn/ml-runtime-field-utils": "link:x-pack/platform/packages/shared/ml/runtime_field_utils",
     "@kbn/ml-saved-objects": "link:x-pack/platform/packages/shared/ml/saved_objects",
     "@kbn/ml-server-api-schemas": "link:x-pack/platform/packages/shared/ml/server_api_schemas",
+    "@kbn/ml-server-services": "link:x-pack/platform/packages/shared/ml/server_services",
     "@kbn/ml-services": "link:x-pack/platform/packages/shared/ml/services",
     "@kbn/ml-string-hash": "link:x-pack/platform/packages/private/ml/string_hash",
     "@kbn/ml-time-buckets": "link:x-pack/platform/packages/private/ml/time_buckets",

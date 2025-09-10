@@ -28,7 +28,7 @@ import {
 } from '@kbn/ml-common-types/storage';
 import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import type { FieldDefinition } from '@kbn/ml-services/results_service_2/result_service_rx';
+import type { FieldDefinition } from '@kbn/ml-services/results_service/result_service_rx';
 
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
 import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';

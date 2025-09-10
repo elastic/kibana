@@ -180,6 +180,6 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-chrome-browser",
     "@kbn/ml-server-api-schemas",
-    "@kbn/ml-services"
+    "@kbn/ml-server-services"
   ]
 }

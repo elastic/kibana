@@ -7,7 +7,7 @@
 
 import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 
-import type { DatafeedsService } from '@kbn/ml-services/datafeeds';
+import type { DatafeedsService } from '@kbn/ml-server-services/datafeeds';
 import type { Logger } from '@kbn/core/server';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { MlClient } from '@kbn/ml-client';

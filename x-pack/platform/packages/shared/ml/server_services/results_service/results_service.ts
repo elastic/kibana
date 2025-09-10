@@ -31,6 +31,7 @@ import { defaultSearchQuery } from '@kbn/ml-common-types/results';
 import type { MlClient } from '@kbn/ml-client';
 import { getIndicesOptions } from '@kbn/ml-common-utils/datafeed_utils';
 import { annotationServiceProvider } from '@kbn/ml-common-utils/annotation_service';
+import type { CriteriaField, Influencer } from '@kbn/ml-common-types/results';
 
 import { datafeedsProvider } from '../datafeeds';
 

@@ -44,8 +44,8 @@ import type {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,
 } from '@kbn/ml-server-api-schemas/alerting_schema';
-import type { DatafeedsService } from '@kbn/ml-services/datafeeds';
-import { getTypicalAndActualValues } from '@kbn/ml-services/results_service/results_service';
+import type { DatafeedsService } from '@kbn/ml-server-services/datafeeds';
+import { getTypicalAndActualValues } from '@kbn/ml-server-services/results_service/results_service';
 
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';

@@ -7455,6 +7455,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-server-services@link:x-pack/platform/packages/shared/ml/server_services":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-services@link:x-pack/platform/packages/shared/ml/services":
   version "0.0.0"
   uid ""

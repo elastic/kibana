@@ -15,9 +15,9 @@ import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets'
 import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
-import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service';
 
 import type {
   ExplorerJob,

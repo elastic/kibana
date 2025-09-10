@@ -162,3 +162,14 @@ export interface ViewByResponse {
   results: Record<string, Record<number, number>>;
   cardinality: number;
 }
+
+export interface CriteriaField {
+  fieldType?: string;
+  fieldName: string;
+  fieldValue: any;
+}
+
+export interface Influencer {
+  fieldName: string;
+  fieldValue: any;
+}

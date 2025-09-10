@@ -45,8 +45,8 @@ import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed
 import type { MlClient } from '@kbn/ml-client';
 import { getEarliestDatafeedStartTime } from '@kbn/ml-common-utils/job_utils/get_earliest_datafeed_start_time';
 import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
-import { datafeedsProvider } from '@kbn/ml-services/datafeeds';
-import { resultsServiceProvider } from '@kbn/ml-services/results_service';
+import { datafeedsProvider } from '@kbn/ml-server-services/datafeeds';
+import { resultsServiceProvider } from '@kbn/ml-server-services/results_service';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-server-api-schemas/alerting_schema';
 
 import type { AuthorizationHeader } from '../../lib/request_authorization';
