@@ -11,7 +11,7 @@ paths:
       operationId: GetAllTranslationStatsDashboardMigration
       x-codegen-enabled: true
       x-internal: true
-      description: Retrieves the dashboard migrations translation stats for all migrations stored in the system
+      description: Retrieves the stats of a SIEM dashboards migration using the migration id provided
       tags:
         - SIEM Dashboard Migrations
       parameters:
