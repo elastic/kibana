@@ -181,10 +181,6 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 
 .moon/cache
 
-# Ruler manually managed
-.ruler/instructions/local
-
-
 # START Ruler Generated Files
 /.cursor/mcp.json
 /.cursor/mcp.json.bak
@@ -203,3 +199,8 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 /CLAUDE.md
 /CLAUDE.md.bak
 # END Ruler Generated Files
+
+# Ruler manually managed
+.ruler/instructions/local
+# Copilot instructions should persist in the repo so they are usable on the GH website
+!/.github/copilot-instructions.md
