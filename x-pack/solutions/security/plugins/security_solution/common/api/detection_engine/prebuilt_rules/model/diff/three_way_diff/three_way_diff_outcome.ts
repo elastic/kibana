@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  areArrayFieldsEqual,
-  areFieldsEqual,
-} from '../../../../../../detection_engine/prebuilt_rules/comparators';
+import { isEqual } from 'lodash';
 import { MissingVersion } from './three_way_diff';
 import type { RuleDataSource } from '../diffable_rule/diffable_field_types';
 import { DataSourceType } from '../diffable_rule/diffable_field_types';
@@ -45,9 +42,9 @@ export const determineDiffOutcome = <TValue>(
   currentVersion: TValue,
   targetVersion: TValue
 ): ThreeWayDiffOutcome => {
-  const baseEqualsCurrent = areFieldsEqual(baseVersion, currentVersion);
-  const baseEqualsTarget = areFieldsEqual(baseVersion, targetVersion);
-  const currentEqualsTarget = areFieldsEqual(currentVersion, targetVersion);
+  const baseEqualsCurrent = isEqual(baseVersion, currentVersion);
+  const baseEqualsTarget = isEqual(baseVersion, targetVersion);
+  const currentEqualsTarget = isEqual(currentVersion, targetVersion);
 
   return getThreeWayDiffOutcome({
     baseEqualsCurrent,
@@ -65,15 +62,12 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   currentVersion: TValue[],
   targetVersion: TValue[]
 ): ThreeWayDiffOutcome => {
-  const isBaseVersionMissing = baseVersion === MissingVersion;
-  const baseEqualsCurrent = isBaseVersionMissing
-    ? false
-    : areArrayFieldsEqual(baseVersion, currentVersion);
-  const baseEqualsTarget = isBaseVersionMissing
-    ? false
-    : areArrayFieldsEqual(baseVersion, targetVersion);
-  const currentEqualsTarget = areArrayFieldsEqual(currentVersion, targetVersion);
-
+  const baseSet = baseVersion === MissingVersion ? MissingVersion : new Set<TValue>(baseVersion);
+  const currentSet = new Set<TValue>(currentVersion);
+  const targetSet = new Set<TValue>(targetVersion);
+  const baseEqualsCurrent = isEqual(baseSet, currentSet);
+  const baseEqualsTarget = isEqual(baseSet, targetSet);
+  const currentEqualsTarget = isEqual(currentSet, targetSet);
   return getThreeWayDiffOutcome({
     baseEqualsCurrent,
     baseEqualsTarget,

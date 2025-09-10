@@ -7,6 +7,10 @@
 
 import { isEqual } from 'lodash';
 
-export const areFieldsEqual = (a: unknown, b: unknown): boolean => {
-  return isEqual(a, b);
+export const orderAgnosticArrayDiffAlgorithm = <TValue>(
+  a: TValue[] | undefined,
+  b: TValue[] | undefined
+): boolean => {
+  // Converts to Sets to compare agnostic of order
+  return isEqual(new Set(a), new Set(b));
 };

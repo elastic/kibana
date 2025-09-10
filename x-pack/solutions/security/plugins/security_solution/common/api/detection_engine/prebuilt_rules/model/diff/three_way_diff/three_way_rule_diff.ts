@@ -18,18 +18,18 @@ import type {
   DiffableThresholdFields,
 } from '../diffable_rule/diffable_rule';
 
-import type { FieldsDiff } from './fields_diff';
+import type { ThreeWayFieldsDiff } from './three_way_fields_diff';
 
-export type AllThreeWayFieldsDiff = FieldsDiff<DiffableAllFields>;
-export type CommonThreeWayFieldsDiff = FieldsDiff<DiffableCommonFields>;
-export type CustomQueryThreeWayFieldsDiff = FieldsDiff<DiffableCustomQueryFields>;
-export type SavedQueryThreeWayFieldsDiff = FieldsDiff<DiffableSavedQueryFields>;
-export type EqlThreeWayFieldsDiff = FieldsDiff<DiffableEqlFields>;
-export type EsqlThreeWayFieldsDiff = FieldsDiff<DiffableEsqlFields>;
-export type ThreatMatchThreeWayFieldsDiff = FieldsDiff<DiffableThreatMatchFields>;
-export type ThresholdThreeWayFieldsDiff = FieldsDiff<DiffableThresholdFields>;
-export type MachineLearningThreeWayFieldsDiff = FieldsDiff<DiffableMachineLearningFields>;
-export type NewTermsThreeWayFieldsDiff = FieldsDiff<DiffableNewTermsFields>;
+export type AllThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableAllFields>;
+export type CommonThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableCommonFields>;
+export type CustomQueryThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableCustomQueryFields>;
+export type SavedQueryThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableSavedQueryFields>;
+export type EqlThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableEqlFields>;
+export type EsqlThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableEsqlFields>;
+export type ThreatMatchThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableThreatMatchFields>;
+export type ThresholdThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableThresholdFields>;
+export type MachineLearningThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableMachineLearningFields>;
+export type NewTermsThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableNewTermsFields>;
 
 /**
  * It's an object which keys are the same as keys of DiffableRule, but values are

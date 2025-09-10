@@ -20,7 +20,7 @@ import {
   MissingVersion,
   SeverityEnum,
 } from '../../../../../../../common/api/detection_engine';
-import type { TwoWayDiffRule } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+import type { TwoWayDiffRule } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/two_way_diff/two_way_rule_diff';
 
 const CUSTOM_QUERY_PREBUILT_RULE_ASSET = getPrebuiltRuleMockOfType('query');
 const CUSTOM_QUERY_PREBUILT_RULE_RESPONSE = convertPrebuiltRuleAssetToRuleResponse(
@@ -114,8 +114,8 @@ describe('synchronizing 2-way and 3-way rule diff calculations', () => {
       target_version: convertRuleToDiffable(CUSTOM_QUERY_PREBUILT_RULE_RESPONSE),
     });
 
-    expect(Object.values(threeWayDiff).every((diff) => diff.has_update === false)).toEqual(true);
     expect(Object.values(twoWayDiff).every((field) => field.is_equal === true)).toEqual(true);
+    expect(Object.values(threeWayDiff).every((diff) => diff.has_update === false)).toEqual(true);
   });
 
   describe('common fields', () => {

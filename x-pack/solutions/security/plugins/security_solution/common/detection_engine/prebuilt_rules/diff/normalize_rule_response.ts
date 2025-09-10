@@ -12,6 +12,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { assertUnreachable } from '../../../utility_types';
 import type {
   RuleResponse,
+  SharedResponseProps,
   TypeSpecificResponse,
 } from '../../../api/detection_engine/model/rule_schema';
 import { addEcsToRequiredFields } from '../../rule_management/utils';
@@ -26,17 +27,27 @@ export const normalizeRuleResponse = (rule: RuleResponse): RuleResponse => {
   const typeSpecificFields = normalizeTypeSpecificFields(rule);
   const commonFields = normalizeCommonResponseFields(rule);
 
+  // Needed to correctly narrow typescript types, we add in the correctly typed alert suppression field in the type-specific normalization
+  const { alert_suppression: unUsedField, ...existingRule } = rule;
+
   return {
-    ...rule,
+    ...existingRule,
     ...commonFields,
     ...typeSpecificFields,
   };
 };
 
-// Only contains fields that need to be normalized, we spread the original rule object already
-const normalizeCommonResponseFields = (rule: RuleResponse) => {
+const normalizeCommonResponseFields = (rule: RuleResponse): SharedResponseProps => {
   return {
     name: rule.name?.trim(),
+    description: rule.description,
+    risk_score: rule.risk_score,
+    severity: rule.severity,
+    version: rule.version,
+    enabled: rule.enabled,
+    exceptions_list: rule.exceptions_list,
+    actions: rule.actions,
+    author: rule.author,
     tags: rule.tags ?? [],
     severity_mapping: rule.severity_mapping ?? [],
     risk_score_mapping: rule.risk_score_mapping?.map((mapping) => requiredOptional(mapping)) ?? [],
@@ -52,10 +63,19 @@ const normalizeCommonResponseFields = (rule: RuleResponse) => {
     to: normalizeDateMath(rule.to ?? 'now'),
     max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
     timestamp_override_fallback_disabled: rule.timestamp_override_fallback_disabled ?? false,
+    id: rule.id,
+    rule_id: rule.rule_id,
+    rule_source: rule.rule_source,
+    immutable: rule.immutable,
+    created_at: rule.created_at,
+    created_by: rule.created_by,
+    updated_at: rule.updated_at,
+    updated_by: rule.updated_by,
+    revision: rule.revision,
   };
 };
 
-const normalizeTypeSpecificFields = (rule: TypeSpecificResponse) => {
+const normalizeTypeSpecificFields = (rule: RuleResponse): TypeSpecificResponse => {
   switch (rule.type) {
     case 'query': {
       return {

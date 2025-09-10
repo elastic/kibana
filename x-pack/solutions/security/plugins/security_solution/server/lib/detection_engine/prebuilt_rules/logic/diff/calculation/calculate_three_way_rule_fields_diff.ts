@@ -33,7 +33,7 @@ import type {
   ThresholdThreeWayFieldsDiff,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
-import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/fields_diff';
+import type { ThreeWayFieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_fields_diff';
 import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
@@ -210,7 +210,7 @@ const calculateCommonFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, commonFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> = {
+const commonFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableCommonFields> = {
   rule_id: simpleDiffAlgorithm,
   /**
    * `version` shouldn't have a conflict. It always get target value automatically.
@@ -251,12 +251,13 @@ const calculateCustomQueryFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, customQueryFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQueryFields> = {
-  type: ruleTypeDiffAlgorithm,
-  kql_query: kqlQueryDiffAlgorithm,
-  data_source: dataSourceDiffAlgorithm,
-  alert_suppression: simpleDiffAlgorithm,
-};
+const customQueryFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableCustomQueryFields> =
+  {
+    type: ruleTypeDiffAlgorithm,
+    kql_query: kqlQueryDiffAlgorithm,
+    data_source: dataSourceDiffAlgorithm,
+    alert_suppression: simpleDiffAlgorithm,
+  };
 
 const calculateSavedQueryFieldsDiff = (
   ruleVersions: ThreeVersionsOf<DiffableSavedQueryFields>,
@@ -265,7 +266,7 @@ const calculateSavedQueryFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, savedQueryFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
+const savedQueryFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
   type: ruleTypeDiffAlgorithm,
   kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
@@ -279,7 +280,7 @@ const calculateEqlFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, eqlFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
+const eqlFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: ruleTypeDiffAlgorithm,
   eql_query: eqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
@@ -293,7 +294,7 @@ const calculateEsqlFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, esqlFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
+const esqlFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
   type: ruleTypeDiffAlgorithm,
   esql_query: esqlQueryDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
@@ -306,18 +307,19 @@ const calculateThreatMatchFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, threatMatchFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMatchFields> = {
-  type: ruleTypeDiffAlgorithm,
-  kql_query: kqlQueryDiffAlgorithm,
-  data_source: dataSourceDiffAlgorithm,
-  threat_query: kqlQueryDiffAlgorithm,
-  threat_index: createScalarArrayDiffAlgorithm({
-    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
-  }),
-  threat_mapping: simpleDiffAlgorithm,
-  threat_indicator_path: singleLineStringDiffAlgorithm,
-  alert_suppression: simpleDiffAlgorithm,
-};
+const threatMatchFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableThreatMatchFields> =
+  {
+    type: ruleTypeDiffAlgorithm,
+    kql_query: kqlQueryDiffAlgorithm,
+    data_source: dataSourceDiffAlgorithm,
+    threat_query: kqlQueryDiffAlgorithm,
+    threat_index: createScalarArrayDiffAlgorithm({
+      missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
+    }),
+    threat_mapping: simpleDiffAlgorithm,
+    threat_indicator_path: singleLineStringDiffAlgorithm,
+    alert_suppression: simpleDiffAlgorithm,
+  };
 
 const calculateThresholdFieldsDiff = (
   ruleVersions: ThreeVersionsOf<DiffableThresholdFields>,
@@ -326,7 +328,7 @@ const calculateThresholdFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, thresholdFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
+const thresholdFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
   type: ruleTypeDiffAlgorithm,
   kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
@@ -345,7 +347,7 @@ const calculateMachineLearningFieldsDiff = (
   );
 };
 
-const machineLearningFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableMachineLearningFields> =
+const machineLearningFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableMachineLearningFields> =
   {
     type: ruleTypeDiffAlgorithm,
     machine_learning_job_id: simpleDiffAlgorithm,
@@ -360,7 +362,7 @@ const calculateNewTermsFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, newTermsFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
+const newTermsFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
   type: ruleTypeDiffAlgorithm,
   kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
@@ -378,7 +380,7 @@ const calculateAllFieldsDiff = (
   return calculateFieldsDiffFor(ruleVersions, allFieldsDiffAlgorithms, isRuleCustomized);
 };
 
-const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
+const allFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableAllFields> = {
   ...commonFieldsDiffAlgorithms,
   ...customQueryFieldsDiffAlgorithms,
   ...savedQueryFieldsDiffAlgorithms,
