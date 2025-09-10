@@ -105,7 +105,7 @@ export class LensConfigBuilder {
   toAPIFormat(config: LensAttributes): LensApiState {
     const chartType = config.visualizationType;
     if (chartType === 'lnsMetric') {
-      const converter = this.apiConvertersByChart['metric'];
+      const converter = this.apiConvertersByChart.metric;
       return converter.fromLensStateToAPI(config);
     }
     throw new Error(`No API converter found for chart type: ${chartType}`);
