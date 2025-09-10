@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
-import { Prompt, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Prompt, useHistory, useLocation } from 'react-router-dom';
 
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const DEFAULT_MESSAGE_TEXT = i18n.translate('workflows.shared.unsavedChangesMessage', {
-  defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
-});
 interface Props {
   hasUnsavedChanges: boolean;
   messageText?: string;
   shouldPromptOnNavigation?: boolean;
-  isTabSwitch?: boolean;
 }
 
 export const UnsavedChangesPrompt: React.FC<Props> = ({
   hasUnsavedChanges,
-  messageText = DEFAULT_MESSAGE_TEXT,
+  messageText,
   shouldPromptOnNavigation = true,
 }) => {
   const location = useLocation();
+  const history = useHistory();
   const currentPathRef = useRef(location.pathname);
+  const [showModal, setShowModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
@@ -51,17 +52,15 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
     const currentPath = currentPathRef.current;
 
     // Helper to determine if navigation is within the same workflow
-    const isSameWorkflowNavigation = (currentPath: string, nextPath: string): boolean => {
+    const isSameWorkflowNavigation = (current: string, next: string | undefined): boolean => {
       const normalizePath = (path: string) => path.replace(/^\/app\/workflows/, '');
-      const normalizedCurrent = normalizePath(currentPath);
-      const normalizedNext = nextPath ? normalizePath(nextPath) : '';
+      const normalizedCurrent = normalizePath(current);
+      const normalizedNext = normalizePath(next || '');
       return (
-        !!nextPath &&
-        (
-          normalizedNext === normalizedCurrent ||
-          (normalizedCurrent.startsWith('/workflow-') && normalizedNext.startsWith(normalizedCurrent)) ||
-          (normalizedNext.startsWith('/workflow-') && normalizedCurrent.startsWith(normalizedNext))
-        )
+        normalizedNext === normalizedCurrent ||
+        (normalizedCurrent.startsWith('/workflow-') &&
+          normalizedNext.startsWith(normalizedCurrent)) ||
+        (normalizedNext.startsWith('/workflow-') && normalizedCurrent.startsWith(normalizedNext))
       );
     };
 
@@ -69,9 +68,56 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
     const isLeavingPage = !!nextPath && !isSameWorkflow;
     const shouldShow = !!(hasUnsavedChanges && shouldPromptOnNavigation && isLeavingPage);
 
-    return shouldShow ? messageText : true;
+    if (shouldShow) {
+      setPendingNavigation(nextPath);
+      setShowModal(true);
+    }
+
+    return shouldShow ? false : true; // false blocks navigation, true allows it
   };
 
-  // Use `when` to enable blocking only if there are unsaved changes
-  return <Prompt when={hasUnsavedChanges && shouldPromptOnNavigation} message={message} />;
+  const handleConfirm = () => {
+    setShowModal(false);
+    if (pendingNavigation) {
+      history.push(pendingNavigation);
+    }
+    setPendingNavigation(null);
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setPendingNavigation(null);
+  };
+
+  return (
+    <>
+      <Prompt when={hasUnsavedChanges && shouldPromptOnNavigation} message={message} />
+      {showModal && (
+        <EuiConfirmModal
+          title={i18n.translate('workflows.shared.unsavedChangesTitle', {
+            defaultMessage: 'Leave Without Saving?',
+          })}
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
+          onCancel={handleCancel}
+          onConfirm={handleConfirm}
+          cancelButtonText={i18n.translate('workflows.shared.unsavedChangesCancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.shared.unsavedChangesDiscard', {
+            defaultMessage: 'Discard Changes',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+        >
+          <p>
+            {messageText ||
+              i18n.translate('workflows.shared.unsavedChangesMessage', {
+                defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+              })}
+          </p>
+        </EuiConfirmModal>
+      )}
+    </>
+  );
 };

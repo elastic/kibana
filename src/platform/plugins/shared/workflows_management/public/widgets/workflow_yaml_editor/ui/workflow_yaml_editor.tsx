@@ -14,12 +14,12 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import YAML, { isPair, isScalar, visit } from 'yaml';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
@@ -91,7 +91,7 @@ export interface WorkflowYAMLEditorProps {
   hasChanges?: boolean;
   lastUpdatedAt?: Date;
   highlightStep?: string;
-  stepExecutions?: EsWorkflowStepExecution[];
+  stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
@@ -548,11 +548,7 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <div css={styles.container}>
-      <UnsavedChangesPrompt
-        hasUnsavedChanges={hasChanges}
-        shouldPromptOnNavigation={true}
-        isTabSwitch={activeTab === 'executions' || activeTab === 'workflow'}
-      />
+      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
