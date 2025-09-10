@@ -19,6 +19,7 @@ export class DocCountService {
   private indexName: string | null = null;
   private indexSearchableSubscription: Subscription | null = null;
   private allDocsSearchableSubscription: Subscription | null = null;
+  private initialDocCount: number = 0;
 
   constructor(
     private fileUpload: FileUploadStartApi,
@@ -48,10 +49,11 @@ export class DocCountService {
   }
 
   public startAllDocsSearchableCheck(indexName: string, totalDocCount: number): void {
+    const expectedDocCount = totalDocCount + this.initialDocCount;
     this.indexName = indexName;
     this.allDocsSearchableSubscription = timer(0, POLL_INTERVAL * 1000)
       .pipe(
-        exhaustMap(() => this.isSearchable$(totalDocCount)),
+        exhaustMap(() => this.isSearchable$(expectedDocCount)),
         takeWhile((isSearchable) => !isSearchable, true) // takeUntil we get `true`, including the final one
       )
       .pipe(finalize(() => this.onAllDocsSearchable(indexName)))
@@ -68,6 +70,15 @@ export class DocCountService {
       map((response) => response.isSearchable),
       catchError((err) => throwError(() => err))
     );
+  }
+
+  public async loadInitialIndexCount(indexName: string) {
+    const { count } = await this.fileUpload.isIndexSearchable(indexName, 0);
+    this.initialDocCount = count;
+  }
+
+  public resetInitialDocCount() {
+    this.initialDocCount = 0;
   }
 }
 
