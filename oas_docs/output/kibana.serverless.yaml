@@ -10997,6 +10997,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              MicrosoftDefenderEndpoint:
+                summary: Cancel a response action on a Microsoft Defender for Endpoint host
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    action_id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_CancelRouteRequestBody'
         required: true
@@ -69395,48 +69405,53 @@ components:
       example: endpoint
       type: string
     Security_Endpoint_Management_API_CancelRouteRequestBody:
-      type: object
-      properties:
-        action_id:
-          description: ID of the response action to cancel
-          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-          minLength: 1
-          type: string
-        agent_type:
-          default: endpoint
-          description: The agent type to target for the action
-          enum:
-            - endpoint
-            - sentinel_one
-            - crowdstrike
-            - microsoft_defender_endpoint
-          type: string
-        alert_ids:
-          description: If defined, any case associated with the given IDs will be updated
-          items:
-            minLength: 1
-            type: string
-          minItems: 1
-          type: array
-        case_ids:
-          description: Case IDs to be updated
-          items:
-            minLength: 1
-            type: string
-          minItems: 1
-          type: array
-        comment:
-          description: Optional comment explaining the reason for canceling the action
-          type: string
-        endpoint_ids:
-          description: A list of endpoint IDs whose hosts will be isolated
-          items:
-            minLength: 1
-            type: string
-          minItems: 1
-          type: array
-      required:
-        - action_id
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+            alert_ids:
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                action_id:
+                  description: ID of the response action to cancel
+                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+                  minLength: 1
+                  type: string
+              required:
+                - action_id
+          required:
+            - parameters
     Security_Endpoint_Management_API_CloudFileScriptParameters:
       type: object
       properties:

@@ -565,6 +565,12 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     actionRequest: CancelActionRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
+    const actionId = actionRequest.parameters?.action_id;
+
+    if (!actionId) {
+      throw new ResponseActionsClientError('action_id is required in parameters', 400);
+    }
+
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionCancelParameters,
       {},
@@ -574,7 +580,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       ...this.getMethodOptions(options),
       command: 'cancel',
       parameters: {
-        id: actionRequest.action_id,
+        id: actionId,
       },
     };
 
@@ -584,19 +590,17 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       if (!error) {
         try {
           // Check for existing cancel action
-          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(
-            actionRequest.action_id
-          );
+          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(actionId);
 
           if (actionAlreadyCanceled) {
             throw new ResponseActionsClientError(
-              `Unable to cancel action [${actionRequest.action_id}]. Action has already been cancelled.`,
+              `Unable to cancel action [${actionId}]. Action has already been cancelled.`,
               409
             );
           }
 
           // Resolve the external action ID from the internal response action ID
-          const externalActionId = await this.resolveExternalActionId(actionRequest.action_id);
+          const externalActionId = await this.resolveExternalActionId(actionId);
 
           const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,

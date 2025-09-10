@@ -372,7 +372,12 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
     response: KibanaResponseFactory
   ) => {
     const logger = endpointContext.logFactory.get('cancelAction');
-    const { action_id: actionId } = request.body;
+    const { parameters } = request.body;
+    const actionId = parameters?.action_id;
+
+    if (!actionId) {
+      return errorHandler(logger, response, new Error('action_id is required in parameters'));
+    }
 
     try {
       // Get space ID from context

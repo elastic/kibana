@@ -16,43 +16,22 @@
 
 import { z } from '@kbn/zod';
 
-import { ResponseActionCreateSuccessResponse } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type CancelRouteRequestBody = z.infer<typeof CancelRouteRequestBody>;
-export const CancelRouteRequestBody = z
-  .object({
-    /**
-     * A list of endpoint IDs whose hosts will be isolated
-     */
-    endpoint_ids: z.array(z.string().min(1)).min(1).optional(),
-    /**
-     * If defined, any case associated with the given IDs will be updated
-     */
-    alert_ids: z.array(z.string().min(1)).min(1).optional(),
-    /**
-     * Case IDs to be updated
-     */
-    case_ids: z.array(z.string().min(1)).min(1).optional(),
-    /**
-     * Optional comment explaining the reason for canceling the action
-     */
-    comment: z.string().optional(),
-    /**
-     * The agent type to target for the action
-     */
-    agent_type: z
-      .enum(['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])
-      .optional()
-      .default('endpoint'),
-  })
-  .merge(
-    z.object({
+export const CancelRouteRequestBody = BaseActionSchema.merge(
+  z.object({
+    parameters: z.object({
       /**
        * ID of the response action to cancel
        */
       action_id: z.string().min(1),
-    })
-  );
+    }),
+  })
+);
 
 export type CancelActionRequestBody = z.infer<typeof CancelActionRequestBody>;
 export const CancelActionRequestBody = CancelRouteRequestBody;

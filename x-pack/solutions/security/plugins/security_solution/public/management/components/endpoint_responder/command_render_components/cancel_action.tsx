@@ -29,7 +29,9 @@ export const CancelActionResult = memo<
           agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: comment?.[0],
-          action_id: action[0],
+          parameters: {
+            action_id: action[0],
+          },
         }
       : undefined;
   }, [

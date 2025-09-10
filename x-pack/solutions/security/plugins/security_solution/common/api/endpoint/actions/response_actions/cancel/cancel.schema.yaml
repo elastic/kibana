@@ -10,13 +10,23 @@ paths:
       operationId: CancelAction
       description: Cancel a running or pending response action (Applies only to some agent types).
       x-codegen-enabled: true
-      x-labels: [ ess, serverless ]
+      x-labels: [ess, serverless]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CancelRouteRequestBody'
+            examples:
+              MicrosoftDefenderEndpoint:
+                summary: Cancel a response action on a Microsoft Defender for Endpoint host
+                value:
+                  endpoint_ids:
+                    - 'ed518850-681a-4d60-bb98-e22640cae2a8'
+                  agent_type: 'microsoft_defender_endpoint'
+                  parameters:
+                    action_id: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
+                  comment: 'Cancelling action due to change in requirements'
       responses:
         '200':
           description: Successfully cancelled the response action
@@ -28,52 +38,18 @@ components:
   schemas:
     CancelRouteRequestBody:
       allOf:
-        - type: object
-          properties:
-            # Base action request properties would be referenced here if base schema existed
-            endpoint_ids:
-              type: array
-              items:
-                type: string
-                minLength: 1
-              minItems: 1
-              description: A list of endpoint IDs whose hosts will be isolated
-            alert_ids:
-              type: array
-              items:
-                type: string
-                minLength: 1
-              minItems: 1
-              description: If defined, any case associated with the given IDs will be updated
-            case_ids:
-              type: array
-              items:
-                type: string
-                minLength: 1
-              minItems: 1
-              description: Case IDs to be updated
-            comment:
-              type: string
-              description: Optional comment explaining the reason for canceling the action
-            agent_type:
-              type: string
-              enum: [ endpoint, sentinel_one, crowdstrike, microsoft_defender_endpoint ]
-              default: endpoint
-              description: The agent type to target for the action
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
           required:
-            - action_id
+            - parameters
           properties:
-            action_id:
-              type: string
-              minLength: 1
-              description: ID of the response action to cancel
-              example: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
-
-  examples:
-    CancelActionRequestExample:
-      summary: Cancel a response action
-      value:
-        action_id: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
-        endpoint_ids: [ '2f8e9c3a-5d4e-4f5a-9b1c-3e4f5a6b7c8d' ]
-        comment: 'Cancelling action due to change in requirements'
+            parameters:
+              required:
+                - action_id
+              type: object
+              properties:
+                action_id:
+                  type: string
+                  minLength: 1
+                  description: ID of the response action to cancel
+                  example: '7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d'
