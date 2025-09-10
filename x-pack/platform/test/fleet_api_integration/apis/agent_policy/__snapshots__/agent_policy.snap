@@ -16,6 +16,7 @@ Object {
   "status": "active",
   "unprivileged_agents": 0,
   "updated_by": "elastic",
+  "fips_agents": 0,
 }
 `;
 
