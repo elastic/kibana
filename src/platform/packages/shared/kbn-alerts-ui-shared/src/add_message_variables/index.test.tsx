@@ -131,7 +131,7 @@ describe('AddMessageVariables', () => {
     expect(screen.queryByTestId('deprecatedVar-selectableOption')).toBeInTheDocument();
   });
 
-  test(`it does't render when no variables exist`, async () => {
+  test(`it renders a disabled button when no variables exist`, async () => {
     render(
       <AddMessageVariables
         messageVariables={[]}
@@ -140,7 +140,7 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    expect(screen.queryByTestId('fooAddVariableButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fooAddVariableButton')).toBeDisabled();
   });
 
   test('it renders button title when passed', async () => {
