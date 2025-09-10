@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import type { Interpolation } from '@emotion/react';
 import { useMemo } from 'react';
-import type { CSSInterpolation } from '@emotion/css';
-import type { UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 
-export type EmotionStyles = Record<
-  string,
-  CSSInterpolation | ((theme: UseEuiTheme) => CSSInterpolation)
->;
+export type EmotionStyles = Record<string, Interpolation | ((theme: UseEuiTheme) => Interpolation)>;
 
 /**
  * Custom hook to reduce boilerplate when working with Emotion styles that may depend on
@@ -38,16 +34,16 @@ export type EmotionStyles = Record<
  */
 export const useMemoCss = <T extends EmotionStyles>(
   styleMap: T
-): { [K in keyof T]: CSSInterpolation } => {
+): { [K in keyof T]: Interpolation } => {
   const euiThemeContext = useEuiTheme();
 
   const outputStyles = useMemo(() => {
-    return Object.entries(styleMap).reduce<{ [K in keyof T]: CSSInterpolation }>(
+    return Object.entries(styleMap).reduce<{ [K in keyof T]: Interpolation }>(
       (acc, [key, value]) => {
         acc[key as keyof T] = typeof value === 'function' ? value(euiThemeContext) : value;
         return acc;
       },
-      {} as { [K in keyof T]: CSSInterpolation }
+      {} as { [K in keyof T]: Interpolation }
     );
   }, [euiThemeContext, styleMap]);
 
