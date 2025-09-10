@@ -19,7 +19,10 @@ export interface ChartSectionTemplateProps {
   toolbar?: {
     leftSide?: React.ReactNode;
     rightSide?: IconButtonGroupProps['buttons'];
-    rightSideAppend?: React.ReactNode;
+    additionalControls?: {
+      prependRight?: React.ReactNode;
+      appendRight?: React.ReactNode;
+    };
   };
   children: React.ReactNode;
 }
@@ -60,8 +63,13 @@ export const ChartSectionTemplate = ({
           </EuiFlexItem>
           {rightSide.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="row" gutterSize="none" responsive={false} alignItems="center">
-                <EuiFlexItem grow={false}>{toolbar?.rightSideAppend}</EuiFlexItem>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                responsive={false}
+                alignItems="center"
+              >
+                <EuiFlexItem grow={false}>{toolbar?.additionalControls?.prependRight}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <IconButtonGroup
                     legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
@@ -71,6 +79,7 @@ export const ChartSectionTemplate = ({
                     buttons={rightSide}
                   />
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>{toolbar?.additionalControls?.appendRight}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           )}

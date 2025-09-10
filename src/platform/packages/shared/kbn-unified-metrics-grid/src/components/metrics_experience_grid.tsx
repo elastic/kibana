@@ -28,13 +28,13 @@ import {
 } from '@elastic/eui';
 import { IconChartBarStacked } from '@kbn/chart-icons';
 import { Subject } from 'rxjs';
+import useDebounce from 'react-use/lib/useDebounce';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { DimensionsSelector } from './toolbar/dimensions_selector';
 import { ValuesSelector } from './toolbar/values_selector';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
-import useDebounce from 'react-use/lib/useDebounce';
 import { FullScreenWrapper } from './fullscreen_wrapper/fullscreen_wrapper';
 import { MetricsGridSearchControl } from './search_control/search_control';
 
@@ -66,7 +66,7 @@ export const MetricsExperienceGrid = ({
     isFullscreen,
     onToggleFullscreen,
     searchTerm,
-    onSearchTermChange
+    onSearchTermChange,
   } = useMetricsGridState();
 
   const [showSearchInput, setShowSearchInput] = useState(false);
@@ -88,9 +88,8 @@ export const MetricsExperienceGrid = ({
     setShowSearchInput(false);
     onClearSearchTerm();
     setDebouncedSearchTerm('');
-  }, []);
+  }, [onClearSearchTerm]);
 
-  
   const { getTimeRange, updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -114,7 +113,13 @@ export const MetricsExperienceGrid = ({
     currentPageFields = [],
     totalPages = 0,
     dimensions: appliedDimensions = [],
-  } = usePaginatedFields({ fields, dimensions, pageSize: 20, currentPage, searchTerm: debouncedSearchTerm }) ?? {};
+  } = usePaginatedFields({
+    fields,
+    dimensions,
+    pageSize: 20,
+    currentPage,
+    searchTerm: debouncedSearchTerm,
+  }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
     () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
@@ -161,7 +166,7 @@ export const MetricsExperienceGrid = ({
           }),
       onClick: onToggleFullscreen,
       'data-test-subj': 'metricsExperienceToolbarFullScreen',
-      className: showSearchInput ? "nextToSearchInput" : undefined,
+      className: showSearchInput ? 'nextToSearchInput' : undefined,
     },
   ];
 
@@ -208,20 +213,23 @@ export const MetricsExperienceGrid = ({
         toolbar={{
           leftSide: rightSideComponents,
           rightSide: actions,
-          rightSideAppend: showSearchInput ? (
-            <MetricsGridSearchControl
-              searchTerm={searchTerm}
-              onSearchTermChange={onSearchTermChange}
-              onClear={onClearSearch}
-              data-test-subj="metricsExperienceToolbarSearchInput"
-            />
-          ) : undefined,
-        }}>
-      <div
-        css={css`
-          height: 100%;
-        `}
+          additionalControls: {
+            prependRight: showSearchInput ? (
+              <MetricsGridSearchControl
+                searchTerm={searchTerm}
+                onSearchTermChange={onSearchTermChange}
+                onClear={onClearSearch}
+                data-test-subj="metricsExperienceToolbarSearchInput"
+              />
+            ) : undefined,
+          },
+        }}
       >
+        <div
+          css={css`
+            height: 100%;
+          `}
+        >
           <EuiFlexGroup
             direction="column"
             alignItems="center"
@@ -256,7 +264,7 @@ export const MetricsExperienceGrid = ({
               </>
             )}
           </EuiFlexGroup>
-      </div>
+        </div>
       </ChartSectionTemplate>
     );
   }
@@ -269,67 +277,70 @@ export const MetricsExperienceGrid = ({
         toolbar={{
           leftSide: rightSideComponents,
           rightSide: actions,
-          rightSideAppend: showSearchInput ? (
-            <MetricsGridSearchControl
-              searchTerm={searchTerm}
-              onSearchTermChange={onSearchTermChange}
-              onClear={onClearSearch}
-              data-test-subj="metricsExperienceToolbarSearchInput"
-            />
-          ) : undefined,
-        }}>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        tabIndex={-1}
-        data-test-subj="unifiedMetricsExperienceRendered"
-        css={css`
-          ${histogramCss || ''}
-          height: 100%;
-          overflow: auto;
-          padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-          margin-block: ${euiTheme.size.xs};
-          ${euiScrollBarStyles(euiThemeContext)}
-        `}
+          additionalControls: {
+            prependRight: showSearchInput ? (
+              <MetricsGridSearchControl
+                searchTerm={searchTerm}
+                onSearchTermChange={onSearchTermChange}
+                onClear={onClearSearch}
+                data-test-subj="metricsExperienceToolbarSearchInput"
+              />
+            ) : undefined,
+          },
+        }}
       >
-        <EuiFlexItem grow={false}>
-          {isLoading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                  defaultMessage: '{count} metrics',
-                  values: { count: allFields.length },
-                })}
-              </strong>
-            </EuiText>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <MetricsGrid
-            pivotOn="metric"
-            columns={columns}
-            dimensions={appliedDimensions}
-            filters={filters}
-            services={services}
-            fields={currentPageFields}
-            searchSessionId={searchSessionId}
-            onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
-            discoverFetch$={discoverFetch$}
-            requestParams={requestParams}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={onPageChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ChartSectionTemplate>
-  </FullScreenWrapper>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          tabIndex={-1}
+          data-test-subj="unifiedMetricsExperienceRendered"
+          css={css`
+            ${histogramCss || ''}
+            height: 100%;
+            overflow: auto;
+            padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+            margin-block: ${euiTheme.size.xs};
+            ${euiScrollBarStyles(euiThemeContext)}
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            {isLoading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                    defaultMessage: '{count} metrics',
+                    values: { count: allFields.length },
+                  })}
+                </strong>
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <MetricsGrid
+              pivotOn="metric"
+              columns={columns}
+              dimensions={appliedDimensions}
+              filters={filters}
+              services={services}
+              fields={currentPageFields}
+              searchSessionId={searchSessionId}
+              onBrushEnd={onBrushEnd}
+              onFilter={onFilter}
+              discoverFetch$={discoverFetch$}
+              requestParams={requestParams}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={onPageChange}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ChartSectionTemplate>
+    </FullScreenWrapper>
   );
 };
