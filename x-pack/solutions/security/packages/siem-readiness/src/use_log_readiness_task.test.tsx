@@ -41,7 +41,7 @@ describe('useLogReadinessTask', () => {
 
     const task: SiemReadinessTask = {
       task_id: 'test-task-1',
-      status: 'complete',
+      status: 'completed',
       meta: { description: 'Test task', duration: 1000 },
     };
 
@@ -84,7 +84,7 @@ describe('useLogReadinessTask', () => {
 
     const task: SiemReadinessTask = {
       task_id: 'test-task-3',
-      status: 'complete',
+      status: 'completed',
       meta: {},
     };
 

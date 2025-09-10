@@ -335,4 +335,4 @@ export const READINESS_TASKS: ReadinessTaskConfig[] = [
     pillar: 'response',
     order: 18,
   },
-];
+] as const;

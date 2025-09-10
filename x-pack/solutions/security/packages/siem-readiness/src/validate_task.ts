@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SiemReadinessTask } from '..';
+import type { SiemReadinessTask } from './types';
 import { READINESS_TASKS } from './readiness_tasks';
 
 const validTaskIds = READINESS_TASKS.map((config) => config.id);
@@ -32,13 +32,13 @@ export const validateTask = (task: SiemReadinessTask): void => {
   }
 
   if (expectedMeta) {
-    if (!('meta' in task)) {
+    if (!('meta' in task) || !task.meta) {
       throw new Error(`Task ${task.task_id} should have a meta field`);
     }
 
     const expectedFields = Object.keys(expectedMeta);
 
-    if (!task.meta || typeof task.meta !== 'object') {
+    if (typeof task.meta !== 'object') {
       throw new Error(
         `Meta must be an object for task ${
           task.task_id
@@ -46,17 +46,18 @@ export const validateTask = (task: SiemReadinessTask): void => {
       );
     }
 
-    const incomingTaskMetaFields = Object.keys(task.meta);
+    const taskMeta = task.meta; // Store reference for type safety
+    const incomingTaskMetaFields = Object.keys(taskMeta);
 
     // Check for missing required fields
     expectedFields.forEach((field) => {
-      if (!(field in task.meta)) {
+      if (!(field in taskMeta)) {
         throw new Error(`Missing required meta field: ${field} for task ${task.task_id}`);
       }
 
       // Check for correct type
-      const expectedType = typeof expectedMetaFields[field];
-      const taskMetaFieldType = typeof task.meta[field];
+      const expectedType = typeof expectedMeta[field];
+      const taskMetaFieldType = typeof taskMeta[field];
 
       if (expectedType !== taskMetaFieldType) {
         throw new Error(
@@ -69,14 +70,11 @@ export const validateTask = (task: SiemReadinessTask): void => {
     const unexpectedExtraFields = incomingTaskMetaFields.filter(
       (field) => !expectedFields.includes(field)
     );
+
     if (unexpectedExtraFields.length > 0) {
       throw new Error(
-        `Extra meta fields not allowed: ${unexpectedExtraFields.join(', ')} for task ${
-          task.task_id
-        }`
+        `Unexpected meta fields for task ${task.task_id}: ${unexpectedExtraFields.join(', ')}`
       );
     }
   }
-
-  // If no errors were thrown, the task is valid
 };

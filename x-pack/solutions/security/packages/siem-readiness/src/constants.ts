@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const SIEM_READINESS_PACKAGE_NAME = '@kbn/siem-readiness';
-export const POST_SIEM_READINESS_TASK_API_PATH = '/api/siem_readiness/post_task';
-export const SIEM_READINESS_INDEX = 'security_solution-siem_readiness';
+export const POST_SIEM_READINESS_TASK_API_PATH = '/internal/siem/readiness/task';

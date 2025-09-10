@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { POST_SIEM_READINESS_TASK_API_PATH } from './constants';
 import type { SiemReadinessTask } from './types';
 import { validateTask } from './validate_task';
+
 /**
  * Hook for logging SIEM readiness tasks via API endpoint
  * @param options - TanStack mutation options
@@ -22,10 +23,10 @@ export const useLogReadinessTask = (
   const { http } = useKibana<CoreStart>().services;
 
   const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>(
-    (task: SiemReadinessTask) => {
+    async (task: SiemReadinessTask) => {
       validateTask(task);
 
-      http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
+      await http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
         body: JSON.stringify(task),
       });
     },
