@@ -106,6 +106,7 @@ export const EngineComponentResource = z.enum([
   'enrich_policy',
   'task',
   'transform',
+  'ilm_policy',
 ]);
 export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
 export const EngineComponentResourceEnum = EngineComponentResource.enum;
