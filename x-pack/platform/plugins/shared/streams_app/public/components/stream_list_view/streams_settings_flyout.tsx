@@ -183,7 +183,12 @@ output {
 
   return (
     <>
-      <EuiFlyout onClose={onClose} size="m" aria-labelledby="streamsSettingsFlyoutTitle">
+      <EuiFlyout
+        onClose={onClose}
+        size="m"
+        maxWidth={700}
+        aria-labelledby="streamsSettingsFlyoutTitle"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="streamsSettingsFlyoutTitle">
@@ -195,6 +200,7 @@ output {
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiDescribedFormGroup
+            fullWidth
             descriptionFlexItemProps={{ grow: 2 }}
             title={
               <h3>
