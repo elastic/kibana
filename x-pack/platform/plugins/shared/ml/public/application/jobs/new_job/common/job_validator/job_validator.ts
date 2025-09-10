@@ -11,11 +11,9 @@ import { combineLatest, ReplaySubject, Subject } from 'rxjs';
 import { map, startWith, tap } from 'rxjs';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
-import {
-  basicJobValidation,
-  basicDatafeedValidation,
-  basicJobAndDatafeedValidation,
-} from '@kbn/ml-common-utils/job_utils';
+import { basicJobValidation } from '@kbn/ml-common-utils/job_utils/basic_job_validation';
+import { basicDatafeedValidation } from '@kbn/ml-common-utils/job_utils/basic_datafeed_validation';
+import { basicJobAndDatafeedValidation } from '@kbn/ml-common-utils/job_utils/basic_job_and_datafeed_validation';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import type { JobCreator, JobCreatorType } from '../job_creator';
 import { isCategorizationJobCreator } from '../job_creator';

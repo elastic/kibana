@@ -10,7 +10,7 @@ import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Filter } from '@kbn/ml-common-types/filters';
-import { createDatafeedId } from '@kbn/ml-common-utils/job_utils';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
 
 export interface ImportedAdJob {
   job: Job;

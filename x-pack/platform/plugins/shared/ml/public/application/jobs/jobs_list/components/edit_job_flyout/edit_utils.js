@@ -7,7 +7,7 @@
 
 import { difference } from 'lodash';
 
-import { processCreatedBy } from '@kbn/ml-common-utils/job_utils';
+import { processCreatedBy } from '@kbn/ml-common-utils/job_utils/process_created_by';
 
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 

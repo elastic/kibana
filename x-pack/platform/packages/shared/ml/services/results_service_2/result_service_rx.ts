@@ -25,7 +25,7 @@ import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { Dictionary } from '@kbn/ml-common-types/common';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils';
+import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
 import { findAggField } from '@kbn/ml-common-utils/validation_utils';
 import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
 

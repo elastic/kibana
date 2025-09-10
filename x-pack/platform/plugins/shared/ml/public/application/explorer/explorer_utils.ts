@@ -40,12 +40,10 @@ import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MlJobService } from '@kbn/ml-services/job_service';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { MlIndexUtils } from '@kbn/ml-services/index_service';
-import {
-  isSourceDataChartableForDetector,
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isTimeSeriesViewJob,
-} from '@kbn/ml-common-utils/job_utils';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import {
   MAX_CATEGORY_EXAMPLES,

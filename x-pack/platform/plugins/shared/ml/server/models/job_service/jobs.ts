@@ -38,17 +38,13 @@ import type {
 import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
 import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
 import { fillResultsWithTimeouts, isRequestTimeout } from '@kbn/ml-error-utils';
-import {
-  getSingleMetricViewerJobErrorMessage,
-  parseTimeIntervalForJob,
-  isJobWithGeoData,
-  createDatafeedId,
-} from '@kbn/ml-common-utils/job_utils';
+import { getSingleMetricViewerJobErrorMessage } from '@kbn/ml-common-utils/job_utils/get_single_metric_viewer_job_error_message';
+import { parseTimeIntervalForJob } from '@kbn/ml-common-utils/job_utils/parse_time_interval_for_job';
+import { isJobWithGeoData } from '@kbn/ml-common-utils/job_utils/is_job_with_geo_data';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
 import type { MlClient } from '@kbn/ml-client';
-import {
-  getEarliestDatafeedStartTime,
-  getLatestDataOrBucketTimestamp,
-} from '@kbn/ml-common-utils/job_utils';
+import { getEarliestDatafeedStartTime } from '@kbn/ml-common-utils/job_utils/get_earliest_datafeed_start_time';
+import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
 import { datafeedsProvider } from '@kbn/ml-services/datafeeds';
 import { resultsServiceProvider } from '@kbn/ml-services/results_service';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-server-api-schemas/alerting_schema';

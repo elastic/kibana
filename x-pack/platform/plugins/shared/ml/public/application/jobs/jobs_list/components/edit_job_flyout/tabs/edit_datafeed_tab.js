@@ -19,7 +19,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils';
+import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils/calculate_datafeed_frequency_default_seconds';
 
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../ml_job_editor';

@@ -35,7 +35,7 @@ import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '@kbn/ml-common-constants/new_job';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { basicJobValidation } from '@kbn/ml-common-utils/job_utils';
+import { basicJobValidation } from '@kbn/ml-common-utils/job_utils/basic_job_validation';
 
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';

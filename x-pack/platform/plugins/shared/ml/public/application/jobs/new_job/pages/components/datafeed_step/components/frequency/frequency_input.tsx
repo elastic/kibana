@@ -10,7 +10,7 @@ import React, { useState, useContext, useEffect } from 'react';
 
 import { EuiFieldText, useGeneratedHtmlId } from '@elastic/eui';
 
-import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils';
+import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils/calculate_datafeed_frequency_default_seconds';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';

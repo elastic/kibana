@@ -9,7 +9,7 @@ import { each, get } from 'lodash';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
-import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils';
+import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
 import { escapeForElasticsearchQuery } from '@kbn/ml-common-utils/string_utils/escape_for_elasticsearch_query';
 
 /**

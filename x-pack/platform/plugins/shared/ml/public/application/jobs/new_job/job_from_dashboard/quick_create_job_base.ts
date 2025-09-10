@@ -26,7 +26,8 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
-import { createDatafeedId, getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
+import { getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils/get_filters_for_dsl_query';
 
 import { createQueries } from '../utils/new_job_utils';
 

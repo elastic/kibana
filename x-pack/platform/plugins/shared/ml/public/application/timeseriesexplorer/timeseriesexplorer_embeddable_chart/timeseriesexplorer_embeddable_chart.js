@@ -32,12 +32,10 @@ import { context } from '@kbn/kibana-react-plugin/public';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
-import {
-  isModelPlotEnabled,
-  isModelPlotChartableForDetector,
-  isSourceDataChartableForDetector,
-  mlFunctionToESAggregation,
-} from '@kbn/ml-common-utils/job_utils';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
+import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_function_to_es_aggregation';
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
