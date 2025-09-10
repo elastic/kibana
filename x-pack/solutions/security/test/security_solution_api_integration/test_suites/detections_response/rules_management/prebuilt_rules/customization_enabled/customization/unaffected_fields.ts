@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('"actions" field', async () => {
           // create connector/action
           const { body: hookAction } = await supertest
-            .post('/api/actions/connector')
+            .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
             .send(getWebHookAction())
             .expect(200);
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 group: 'default',
                 id: hookAction.id,
-                action_type_id: hookAction.connector_type_id,
+                action_type_id: hookAction.actionTypeId,
                 params: {},
               },
             ],
