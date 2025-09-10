@@ -97,6 +97,7 @@ export const FeedbackPanel = ({
   const closePanelIcon = (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
+        data-test-subj="sideNavFeedbackPanelDismiss"
         iconType="cross"
         color="text"
         onClick={handleDismissPanel}
@@ -172,6 +173,7 @@ export const FeedbackPanel = ({
 
   return (
     <EuiPanel
+      data-test-subj="sideNavFeedbackPanel"
       grow={false}
       hasShadow
       css={css`
