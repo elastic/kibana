@@ -6,10 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';
 
@@ -18,6 +18,7 @@ interface Props {
   setPipeline?: (pipeline: string) => void;
   readonly?: boolean;
   showTitle?: boolean;
+  showBorder?: boolean;
 }
 
 export const IngestPipeline: FC<Props> = ({
@@ -25,7 +26,9 @@ export const IngestPipeline: FC<Props> = ({
   setPipeline,
   showTitle = true,
   readonly = false,
+  showBorder = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [localPipeline, setLocalPipeline] = useState(JSON.stringify(pipeline, null, 2));
 
   useEffect(() => {
@@ -46,15 +49,29 @@ export const IngestPipeline: FC<Props> = ({
     [localPipeline]
   );
 
+  const css = useMemo(
+    () => (readonly ? {} : { backgroundColor: euiTheme.colors.backgroundBaseSubdued }),
+    [euiTheme, readonly]
+  );
+
   const editor = (
-    <JsonEditor
-      mode={EDITOR_MODE.JSON}
-      readOnly={readonly}
-      value={localPipeline}
-      onChange={(value) => {
-        setLocalPipeline(value);
-      }}
-    />
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={showBorder}
+      paddingSize="none"
+      data-test-subj="dvMappingsEditor"
+      css={css}
+    >
+      <JsonEditor
+        mode={EDITOR_MODE.JSON}
+        readOnly={readonly}
+        value={localPipeline}
+        onChange={(value) => {
+          setLocalPipeline(value);
+        }}
+        transparentBackground={readonly === false}
+      />
+    </EuiPanel>
   );
 
   return showTitle ? (

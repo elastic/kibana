@@ -6,10 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiSwitch, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiSwitch, EuiSpacer, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';
 
@@ -20,6 +20,7 @@ interface Props {
 }
 
 export const Settings: FC<Props> = ({ settings, setSettings, readonly = false }) => {
+  const { euiTheme } = useEuiTheme();
   const [localSettings, setLocalSettings] = useState(JSON.stringify(settings, null, 2));
   const [showSettings, setShowSettings] = useState<boolean>(false);
 
@@ -35,6 +36,11 @@ export const Settings: FC<Props> = ({ settings, setSettings, readonly = false })
     },
     100,
     [localSettings]
+  );
+
+  const css = useMemo(
+    () => (readonly ? {} : { backgroundColor: euiTheme.colors.backgroundBaseSubdued }),
+    [euiTheme, readonly]
   );
 
   return (
@@ -59,6 +65,7 @@ export const Settings: FC<Props> = ({ settings, setSettings, readonly = false })
           hasBorder={true}
           paddingSize="none"
           data-test-subj="dvSettingsEditor"
+          css={css}
         >
           <JsonEditor
             mode={EDITOR_MODE.JSON}
@@ -67,6 +74,7 @@ export const Settings: FC<Props> = ({ settings, setSettings, readonly = false })
             onChange={(value) => {
               setLocalSettings(value);
             }}
+            transparentBackground={readonly === false}
           />
         </EuiPanel>
       ) : null}

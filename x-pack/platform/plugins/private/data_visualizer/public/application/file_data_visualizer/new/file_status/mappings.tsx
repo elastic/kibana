@@ -6,10 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiCallOut, EuiFormRow, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';
@@ -31,6 +31,7 @@ export const Mappings: FC<Props> = ({
   readonly = false,
   fileCount = 1,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [localMappings, setLocalMappings] = useState(JSON.stringify(mappings, null, 2));
 
   useEffect(() => {
@@ -51,12 +52,18 @@ export const Mappings: FC<Props> = ({
     [localMappings]
   );
 
+  const css = useMemo(
+    () => (readonly ? {} : { backgroundColor: euiTheme.colors.backgroundBaseSubdued }),
+    [euiTheme, readonly]
+  );
+
   const editor = (
     <EuiPanel
       hasShadow={false}
       hasBorder={showBorder}
       paddingSize="none"
       data-test-subj="dvMappingsEditor"
+      css={css}
     >
       <JsonEditor
         mode={EDITOR_MODE.JSON}
@@ -65,6 +72,7 @@ export const Mappings: FC<Props> = ({
         onChange={(value) => {
           setLocalMappings(value);
         }}
+        transparentBackground={readonly === false}
       />
     </EuiPanel>
   );

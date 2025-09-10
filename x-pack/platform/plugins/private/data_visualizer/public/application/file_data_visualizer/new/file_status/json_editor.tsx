@@ -19,6 +19,7 @@ interface JobEditorProps {
   mode?: (typeof EDITOR_MODE)[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
   onChange?: CodeEditorProps['onChange'];
+  transparentBackground?: boolean;
 }
 export const JsonEditor: FC<JobEditorProps> = ({
   value,
@@ -28,6 +29,7 @@ export const JsonEditor: FC<JobEditorProps> = ({
   mode = EDITOR_MODE.JSON,
   readOnly = false,
   onChange = () => {},
+  transparentBackground = false,
 }) => {
   return (
     <CodeEditor
@@ -56,6 +58,7 @@ export const JsonEditor: FC<JobEditorProps> = ({
         quickSuggestions: true,
       }}
       onChange={onChange}
+      transparentBackground={transparentBackground}
     />
   );
 };
