@@ -72,7 +72,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
 
 const mockNavigateToPath = jest.fn();
 const mockLocatorNavigate = jest.fn();
-jest.mock('../../../../../contexts/kibana', () => ({
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: {
       uiSettings: {},
@@ -83,6 +83,8 @@ jest.mock('../../../../../contexts/kibana', () => ({
       contentManagement: {},
     },
   }),
+}));
+jest.mock('../../../../../contexts/kibana', () => ({
   useNavigateToPath: () => mockNavigateToPath,
   useNotifications: () => {
     return {
