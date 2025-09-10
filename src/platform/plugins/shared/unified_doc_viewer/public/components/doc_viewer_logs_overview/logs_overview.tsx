@@ -113,12 +113,14 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             }
           >
             <EuiSpacer size="m" />
-
             <LogsOverviewHighlights
               formattedDoc={parsedDoc}
               doc={hit}
               renderFlyoutStreamField={renderFlyoutStreamField}
               dataView={dataView}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
             <LogsOverviewHeader
               formattedDoc={parsedDoc}
