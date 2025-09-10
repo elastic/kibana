@@ -132,6 +132,52 @@ const getStepNodesWithType = (yamlDocument: YAML.Document): any[] => {
   return stepNodes;
 };
 
+const getTriggerNodesWithType = (yamlDocument: YAML.Document): any[] => {
+  const triggerNodes: any[] = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        // Find the trigger node (parent containing the type)
+        for (let i = path.length - 1; i >= 0; i--) {
+          const ancestor = path[i];
+          if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
+            // Check if this map contains a type field
+            const hasType = ancestor.items.some(
+              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+            );
+            if (hasType) {
+              triggerNodes.push(ancestor);
+              break;
+            }
+          }
+        }
+      }
+    },
+  });
+
+  return triggerNodes;
+};
+
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
 const useWorkflowJsonSchema = () => {
@@ -229,6 +275,8 @@ export const WorkflowYAMLEditor = ({
   // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const triggerTypeDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const connectorTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const unifiedProvidersRef = useRef<{
@@ -264,6 +312,9 @@ export const WorkflowYAMLEditor = ({
   const clearAllDecorations = useCallback(() => {
     if (alertTriggerDecorationCollectionRef.current) {
       alertTriggerDecorationCollectionRef.current.clear();
+    }
+    if (triggerTypeDecorationCollectionRef.current) {
+      triggerTypeDecorationCollectionRef.current.clear();
     }
     if (connectorTypeDecorationCollectionRef.current) {
       connectorTypeDecorationCollectionRef.current.clear();
@@ -710,6 +761,118 @@ export const WorkflowYAMLEditor = ({
     return () => clearTimeout(timeoutId);
   }, [isEditorMounted, yamlDocument]);
 
+  // Trigger type decorations effect
+  useEffect(() => {
+    if (!isEditorMounted || !editorRef.current || !yamlDocument) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const editor = editorRef.current!;
+      const model = editor.getModel();
+      if (!model) return;
+
+      // Clear existing trigger decorations
+      if (triggerTypeDecorationCollectionRef.current) {
+        triggerTypeDecorationCollectionRef.current.clear();
+        triggerTypeDecorationCollectionRef.current = null;
+      }
+
+      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+      // Find all triggers with type
+      const triggerNodes = getTriggerNodesWithType(yamlDocument);
+
+      for (const triggerNode of triggerNodes) {
+        const typePair = triggerNode.items.find((item: any) => item.key?.value === 'type');
+        if (!typePair?.value?.value) continue;
+
+        const triggerType = typePair.value.value;
+
+        // Skip decoration for very short trigger types to avoid false matches
+        if (triggerType.length < 3) {
+          continue; // Skip this iteration
+        }
+
+        const typeRange = typePair.value.range;
+
+        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
+
+        // Get icon and class based on trigger type
+        const { className } = getTriggerIcon(triggerType);
+
+        if (className) {
+          // typeRange format: [startOffset, valueStartOffset, endOffset]
+          const valueStartOffset = typeRange[1]; // Start of the value (after quotes if present)
+          const valueEndOffset = typeRange[2]; // End of the value
+
+          // Convert character offsets to Monaco positions
+          const startPosition = model.getPositionAt(valueStartOffset);
+          const endPosition = model.getPositionAt(valueEndOffset);
+
+          // Get the line content to check if "type:" is at the beginning
+          const currentLineContent = model.getLineContent(startPosition.lineNumber);
+          const trimmedLine = currentLineContent.trimStart();
+
+          // Check if this line contains "type:" (after whitespace and optional dash for array items)
+          if (!trimmedLine.startsWith('type:') && !trimmedLine.startsWith('- type:')) {
+            continue; // Skip this decoration
+          }
+
+          // Try to find the trigger type in the start position line first
+          let targetLineNumber = startPosition.lineNumber;
+          let lineContent = model.getLineContent(targetLineNumber);
+          let typeIndex = lineContent.indexOf(triggerType);
+
+          // If not found on start line, check end line
+          if (typeIndex === -1 && endPosition.lineNumber !== startPosition.lineNumber) {
+            targetLineNumber = endPosition.lineNumber;
+            lineContent = model.getLineContent(targetLineNumber);
+            typeIndex = lineContent.indexOf(triggerType);
+          }
+
+          let actualStartColumn;
+          let actualEndColumn;
+          if (typeIndex !== -1) {
+            // Found the trigger type in the line
+            actualStartColumn = typeIndex + 1; // +1 for 1-based indexing
+            actualEndColumn = typeIndex + triggerType.length + 1; // +1 for 1-based indexing
+          } else {
+            // Fallback to calculated position
+            targetLineNumber = startPosition.lineNumber;
+            actualStartColumn = startPosition.column;
+            actualEndColumn = endPosition.column;
+          }
+
+          // Background highlighting for trigger types
+          const decorations_to_add = [
+            // Background highlighting on the trigger type text
+            {
+              range: {
+                startLineNumber: targetLineNumber,
+                startColumn: actualStartColumn,
+                endLineNumber: targetLineNumber,
+                endColumn: actualEndColumn,
+              },
+              options: {
+                inlineClassName: `trigger-inline-highlight trigger-${className}`,
+              },
+            },
+          ];
+
+          decorations.push(...decorations_to_add);
+        }
+      }
+
+      if (decorations.length > 0) {
+        triggerTypeDecorationCollectionRef.current =
+          editor.createDecorationsCollection(decorations);
+      }
+    }, 100); // Small delay to avoid multiple rapid executions
+
+    return () => clearTimeout(timeoutId);
+  }, [isEditorMounted, yamlDocument]);
+
   // Helper function to get connector icon and class
   const getConnectorIcon = (connectorType: string): { className: string } => {
     if (connectorType.startsWith('elasticsearch.')) {
@@ -720,6 +883,20 @@ export const WorkflowYAMLEditor = ({
       return { className: 'inference' };
     } else {
       return { className: connectorType };
+    }
+  };
+
+  // Helper function to get trigger icon and class
+  const getTriggerIcon = (triggerType: string): { className: string } => {
+    switch (triggerType) {
+      case 'alert':
+        return { className: 'alert' };
+      case 'scheduled':
+        return { className: 'scheduled' };
+      case 'manual':
+        return { className: 'manual' };
+      default:
+        return { className: triggerType };
     }
   };
 
@@ -875,6 +1052,58 @@ export const WorkflowYAMLEditor = ({
 
         .connector-inline-highlight.connector-wait::after {
           background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOC41IDcuNVY0aC0xdjQuNUgxMnYtMUg4LjVaIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTUgOEE3IDcgMCAxIDEgMSA4YTcgNyAwIDAgMSAxNCAwWm0tMSAwQTYgNiAwIDEgMSAyIDhhNiA2IDAgMCAxIDEyIDBaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        /* Trigger type decorations */
+        .trigger-inline-highlight {
+          background-color: rgba(0, 191, 179, 0.12) !important;
+          border-radius: 3px !important;
+          padding: 1px 3px !important;
+          box-shadow: 0 1px 2px rgba(0, 191, 179, 0.15) !important;
+        }
+        
+        .trigger-inline-highlight::after {
+          content: '';
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          margin-left: 4px;
+          vertical-align: middle;
+          position: relative;
+          top: -1px;
+        }
+
+        .trigger-inline-highlight.trigger-alert {
+          background-color: rgba(240, 78, 152, 0.12) !important;
+          box-shadow: 0 1px 2px rgba(240, 78, 152, 0.2) !important;
+        }
+
+        .trigger-inline-highlight.trigger-scheduled {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          box-shadow: 0 1px 2px rgba(255, 193, 7, 0.2) !important;
+        }
+
+        .trigger-inline-highlight.trigger-manual {
+          background-color: rgba(108, 117, 125, 0.12) !important;
+          box-shadow: 0 1px 2px rgba(108, 117, 125, 0.2) !important;
+        }
+
+        .trigger-inline-highlight.trigger-alert::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04LjIyIDEuNzU0YS4yNS4yNSAwIDAgMC0uNDQgMEwxLjY5OCAxMy4xMzJhLjI1LjI1IDAgMCAwIC4yMi4zNjhoMTIuMTY0YS4yNS4yNSAwIDAgMCAuMjItLjM2OEw4LjIyIDEuNzU0Wk03LjI1IDVhLjc1Ljc1IDAgMCAxIDEuNSAwdjIuNWEuNzUuNzUgMCAwIDEtMS41IDBWNTJNOCA5LjVhMSAxIDAgMSAwIDAgMiAxIDEgMCAwIDAgMC0yWiIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjRjA0RTk4Ii8+Cjwvc3ZnPgo=");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .trigger-inline-highlight.trigger-scheduled::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOC41IDcuNVY0aC0xdjQuNUgxMnYtMUg4LjVaIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTUgOEE3IDcgMCAxIDEgMSA4YTcgNyAwIDAgMSAxNCAwWm0tMSAwQTYgNiAwIDEgMSAyIDhhNiA2IDAgMCAxIDEyIDBaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==");
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        .trigger-inline-highlight.trigger-manual::after {
+          background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zLjI5MyA5LjI5MyA0IDEwbC0xIDRoMTBsLTEtNCAuNzA3LS43MDdhMSAxIDAgMCAxIC4yNjMuNDY0bDEgNEExIDEgMCAwIDEgMTMgMTVIM2ExIDEgMCAwIDEtLjk3LTEuMjQybDEtNGExIDEgMCAwIDEgLjI2My0uNDY1Wk04IDljMyAwIDQgMSA0IDEgLjcwNy0uNzA3LjcwNi0uNzA4LjcwNi0uNzA4bC0uMDAxLS4wMDEtLjAwMi0uMDAyLS4wMDUtLjAwNS0uMDEtLjAxYTEuNzk4IDEuNzk4IDAgMCAwLS4xMDEtLjA4OSAyLjkwNyAyLjkwNyAwIDAgMC0uMjM1LS4xNzMgNC42NiA0LjY2IDAgMCAwLS44NTYtLjQ0IDcuMTEgNy4xMSAwIDAgMC0xLjEzNi0uMzQyIDQgNCAwIDEgMC00LjcyIDAgNy4xMSA3LjExIDAgMCAwLTEuMTM2LjM0MiA0LjY2IDQuNjYgMCAwIDAtLjg1Ni40NCAyLjkwOSAyLjkwOSAwIDAgMC0uMzM1LjI2MmwtLjAxMS4wMS0uMDA1LjAwNS0uMDAyLjAwMmgtLjAwMVMzLjI5MyA5LjI5NCA0IDEwYzAgMCAxLTEgNC0xWm0wLTFhMyAzIDAgMSAwIDAtNiAzIDMgMCAwIDAgMCA2WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPgo=");
           background-size: contain;
           background-repeat: no-repeat;
         }
@@ -1471,6 +1700,45 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
+
+      // alert
+      '.codicon-symbol-customcolor:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOSAxMmExIDEgMCAxIDEtMiAwIDEgMSAwIDAgMSAyIDBaIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNNy41IDEwVjVoMXY1aC0xWiIgY2xpcC1ydWxlPSJldmVub2RkIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNOCAxYTEgMSAwIDAgMSAuODY0LjQ5Nmw3IDEyQTEgMSAwIDAgMSAxNSAxNUgxYTEgMSAwIDAgMS0uODY0LTEuNTA0bDctMTJBMSAxIDAgMCAxIDggMVpNMSAxNGgxNEw4IDIgMSAxNFoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPgo8L3N2Zz4K")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+      
+      // scheduled
+      '.codicon-symbol-operator:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOC41IDcuNVY0aC0xdjQuNUgxMnYtMUg4LjVaIi8+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTUgOEE3IDcgMCAxIDEgMSA4YTcgNyAwIDAgMSAxNCAwWm0tMSAwQTYgNiAwIDEgMSAyIDhhNiA2IDAgMCAxIDEyIDBaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+      //manual
+      '.codicon-symbol-type-parameter:before': {
+        content: '" "',
+        width: '16px',
+        height: '16px',
+        backgroundImage:
+          'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zLjI5MyA5LjI5MyA0IDEwbC0xIDRoMTBsLTEtNCAuNzA3LS43MDdhMSAxIDAgMCAxIC4yNjMuNDY0bDEgNEExIDEgMCAwIDEgMTMgMTVIM2ExIDEgMCAwIDEtLjk3LTEuMjQybDEtNGExIDEgMCAwIDEgLjI2My0uNDY1Wk04IDljMyAwIDQgMSA0IDEgLjcwNy0uNzA3LjcwNi0uNzA4LjcwNi0uNzA4bC0uMDAxLS4wMDEtLjAwMi0uMDAyLS4wMDUtLjAwNS0uMDEtLjAxYTEuNzk4IDEuNzk4IDAgMCAwLS4xMDEtLjA4OSAyLjkwNyAyLjkwNyAwIDAgMC0uMjM1LS4xNzMgNC42NiA0LjY2IDAgMCAwLS44NTYtLjQ0IDcuMTEgNy4xMSAwIDAgMC0xLjEzNi0uMzQyIDQgNCAwIDEgMC00LjcyIDAgNy4xMSA3LjExIDAgMCAwLTEuMTM2LjM0MiA0LjY2IDQuNjYgMCAwIDAtLjg1Ni40NCAyLjkwOSAyLjkwOSAwIDAgMC0uMzM1LjI2MmwtLjAxMS4wMS0uMDA1LjAwNS0uMDAyLjAwMmgtLjAwMVMzLjI5MyA5LjI5NCA0IDEwYzAgMCAxLTEgNC0xWm0wLTFhMyAzIDAgMSAwIDAtNiAzIDMgMCAwIDAgMCA2WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPgo=")',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        display: 'block',
+      },
+
+
+
     }),
   editorContainer: css({
     flex: '1 1 0',

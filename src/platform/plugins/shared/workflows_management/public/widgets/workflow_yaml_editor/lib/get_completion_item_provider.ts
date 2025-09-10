@@ -18,6 +18,9 @@ import {
   MergeStepSchema,
   HttpStepSchema,
   WaitStepSchema,
+  AlertRuleTriggerSchema,
+  ScheduledTriggerSchema,
+  ManualTriggerSchema,
 } from '@kbn/workflows';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
@@ -108,6 +111,91 @@ function getBuiltInStepTypesFromSchema(): Array<{
 
   builtInStepTypesCache = stepTypes;
   return stepTypes;
+}
+
+// Cache for built-in trigger types extracted from schema
+let builtInTriggerTypesCache: Array<{
+  type: string;
+  description: string;
+  icon: monaco.languages.CompletionItemKind;
+}> | null = null;
+
+/**
+ * Extract built-in trigger types from the workflow schema (single source of truth)
+ */
+function getBuiltInTriggerTypesFromSchema(): Array<{
+  type: string;
+  description: string;
+  icon: monaco.languages.CompletionItemKind;
+}> {
+  if (builtInTriggerTypesCache !== null) {
+    return builtInTriggerTypesCache;
+  }
+
+  // Extract trigger types from the actual schema definitions
+  const triggerSchemas = [
+    {
+      schema: AlertRuleTriggerSchema,
+      description: 'Trigger workflow when an alert rule fires',
+      icon: monaco.languages.CompletionItemKind.Customcolor, // Alert/event icon
+    },
+    {
+      schema: ScheduledTriggerSchema,
+      description: 'Trigger workflow on a schedule (cron or interval)',
+      icon: monaco.languages.CompletionItemKind.Operator, // Schedule/operator icon
+    },
+    {
+      schema: ManualTriggerSchema,
+      description: 'Trigger workflow manually',
+      icon: monaco.languages.CompletionItemKind.TypeParameter, // Manual/keyword icon
+    },
+  ];
+
+  const triggerTypes = triggerSchemas.map(({ schema, description, icon }) => {
+    // Extract the literal type value from the Zod schema
+    const typeField = schema.shape.type;
+    const triggerType = typeField._def.value; // Get the literal value from z.literal()
+
+    return {
+      type: triggerType,
+      description,
+      icon,
+    };
+  });
+
+  builtInTriggerTypesCache = triggerTypes;
+  return triggerTypes;
+}
+
+/**
+ * Detect if the current cursor position is inside a triggers block
+ */
+function isInTriggersContext(path: any[]): boolean {
+  // Check if the path includes 'triggers' at any level
+  // Examples: ['triggers'], ['triggers', 0], ['triggers', 0, 'with'], etc.
+  return path.length > 0 && path[0] === 'triggers';
+}
+
+/**
+ * Generate a snippet template for trigger types with appropriate parameters
+ */
+function generateTriggerSnippet(triggerType: string, shouldBeQuoted: boolean): string {
+  const quotedType = shouldBeQuoted ? `"${triggerType}"` : triggerType;
+
+  // Generate appropriate snippets based on trigger type
+  switch (triggerType) {
+    case 'alert':
+      return `${quotedType}\n  with:\n    rule_id: "\${1:rule-id-here}"`;
+
+    case 'scheduled':
+      return `${quotedType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;
+
+    case 'manual':
+      return `${quotedType}`;
+
+    default:
+      return `${quotedType}`;
+  }
 }
 
 export interface LineParseResult {
@@ -986,6 +1074,54 @@ function getConnectorTypeSuggestions(
   return suggestions;
 }
 
+/**
+ * Get trigger type suggestions with snippets
+ */
+function getTriggerTypeSuggestions(
+  typePrefix: string,
+  range: monaco.IRange,
+  context: monaco.languages.CompletionContext,
+  scalarType: Scalar.Type | null,
+  shouldBeQuoted: boolean
+): monaco.languages.CompletionItem[] {
+  const suggestions: monaco.languages.CompletionItem[] = [];
+
+  // Get built-in trigger types from the schema (single source of truth)
+  const builtInTriggerTypes = getBuiltInTriggerTypesFromSchema();
+
+  // Filter trigger types that match the prefix
+  const matchingTriggerTypes = builtInTriggerTypes.filter((triggerType) =>
+    triggerType.type.toLowerCase().includes(typePrefix.toLowerCase())
+  );
+
+  matchingTriggerTypes.forEach((triggerType) => {
+    const snippetText = generateTriggerSnippet(triggerType.type, shouldBeQuoted);
+    
+    // Extended range for multi-line insertion
+    const extendedRange = {
+      startLineNumber: range.startLineNumber,
+      endLineNumber: range.endLineNumber,
+      startColumn: range.startColumn,
+      endColumn: Math.max(range.endColumn, 1000),
+    };
+
+    suggestions.push({
+      label: triggerType.type,
+      kind: triggerType.icon,
+      insertText: snippetText,
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      range: extendedRange,
+      documentation: triggerType.description,
+      filterText: triggerType.type,
+      sortText: `!${triggerType.type}`, // Priority prefix to sort before other suggestions
+      detail: 'Workflow trigger',
+      preselect: false,
+    });
+  });
+
+  return suggestions;
+}
+
 export function getSuggestion(
   key: string,
   context: monaco.languages.CompletionContext,
@@ -1125,14 +1261,11 @@ export function getCompletionItemProvider(
           }
         }
 
-        // SPECIAL CASE: Direct type completion in steps
-        // Check if we're trying to complete a type field in a step, regardless of schema validation
+        // SPECIAL CASE: Direct type completion - context-aware
+        // Check if we're trying to complete a type field, regardless of schema validation
         const typeCompletionMatch = lineUpToCursor.match(
           /^\s*-?\s*(?:name:\s*\w+\s*)?type:\s*(.*)$/i
         );
-
-        // console.log('Debug autocomplete: lineUpToCursor =', JSON.stringify(lineUpToCursor));
-        // console.log('Debug autocomplete: typeCompletionMatch =', typeCompletionMatch);
 
         if (typeCompletionMatch) {
           const typePrefix = typeCompletionMatch[1].replace(/['"]/g, '').trim();
@@ -1146,13 +1279,30 @@ export function getCompletionItemProvider(
             endColumn: line.length + 1, // Go to end of line to allow multi-line insertion
           };
 
-          const typeSuggestions = getConnectorTypeSuggestions(
-            typePrefix,
-            adjustedRange,
-            completionContext,
-            scalarType,
-            shouldBeQuoted
-          );
+          // Detect context: are we in triggers or steps?
+          const inTriggersContext = isInTriggersContext(path);
+
+          let typeSuggestions: monaco.languages.CompletionItem[];
+
+          if (inTriggersContext) {
+            // We're in triggers context - suggest trigger types
+            typeSuggestions = getTriggerTypeSuggestions(
+              typePrefix,
+              adjustedRange,
+              completionContext,
+              scalarType,
+              shouldBeQuoted
+            );
+          } else {
+            // We're in steps context - suggest connector/step types
+            typeSuggestions = getConnectorTypeSuggestions(
+              typePrefix,
+              adjustedRange,
+              completionContext,
+              scalarType,
+              shouldBeQuoted
+            );
+          }
 
           return {
             suggestions: typeSuggestions,
@@ -1396,8 +1546,8 @@ export function getCompletionItemProvider(
             continue;
           }
 
-          // Special handling for the 'type' field to provide better suggestions
-          if (key === 'type' && path.length > 0 && path[path.length - 1] === 'steps') {
+          // Special handling for the 'type' field to provide context-aware suggestions
+          if (key === 'type') {
             // Check if we're completing the value after "type: "
             const typeValueMatch = lineUpToCursor.match(/type:\s*(.*)$/i);
 
@@ -1412,13 +1562,30 @@ export function getCompletionItemProvider(
                 endColumn: line.length + 1, // Extended to allow multi-line
               };
 
-              const typeSuggestions = getConnectorTypeSuggestions(
-                typePrefix,
-                adjustedRange,
-                completionContext,
-                scalarType,
-                shouldBeQuoted
-              );
+              // Detect context: are we in triggers or steps?
+              const inTriggersContext = isInTriggersContext(path);
+
+              let typeSuggestions: monaco.languages.CompletionItem[];
+
+              if (inTriggersContext) {
+                // We're in triggers context - suggest trigger types
+                typeSuggestions = getTriggerTypeSuggestions(
+                  typePrefix,
+                  adjustedRange,
+                  completionContext,
+                  scalarType,
+                  shouldBeQuoted
+                );
+              } else {
+                // We're in steps context - suggest connector/step types
+                typeSuggestions = getConnectorTypeSuggestions(
+                  typePrefix,
+                  adjustedRange,
+                  completionContext,
+                  scalarType,
+                  shouldBeQuoted
+                );
+              }
 
               // Return immediately to prevent schema-based literal completions
               return {
