@@ -60,7 +60,11 @@ export function runEslintWithTypes() {
       }
 
       const concurrency = Math.max(1, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
-      log.info(`Linting ${projects.length} projects, ${concurrency} at a time`);
+      if (projects.length !== 1) {
+        log.info(`Linting ${projects.length} projects, ${concurrency} at a time`);
+      } else {
+        log.info(`Linting ${projects[0].name}`);
+      }
 
       const failures = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
