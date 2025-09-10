@@ -15451,7 +15451,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Given an entity type, an entity id and the contents of an entity,  update (or create) the contents of an entity. By default only a specific  set of fields are allowed to be modified, being that `entity.attributes.*,  entity.lifecyle.* and entity.behavior.*`. If you wish to update any  other field you must use the query parameter `force=true`. Be aware  that some fields always fetch the first seen value, thus your changes won't be seen. And also, due to technical limitations, there is no  guarantee that collected values will end up in the final list of  seen values.
+        Given an entity type and the contents of an entity, update (or create) the contents of an entity. By default only a specific set of fields are allowed to be modified, being that `entity.attributes.*`, `entity.lifecyle.*` and `entity.behavior.*`. If you wish to update any other field you must use  the query parameter `force=true`. Be aware that some fields always fetch the first seen value, thus new values won't end up in the final index. Also, due to technical limitations, there is no guarantee that collected values will end up in the final list of seen values.
       operationId: UpsertEntity
       parameters:
         - in: path
