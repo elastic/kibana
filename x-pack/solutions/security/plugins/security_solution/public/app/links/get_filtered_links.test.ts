@@ -31,7 +31,7 @@ const mockGetManagementFilteredLinks = getManagementFilteredLinks as jest.Mocked
 
 // Helper function to create mock link items
 const createMockLinkItem = (overrides: Partial<LinkItem> = {}): LinkItem => ({
-  id: SecurityPageName.management,
+  id: SecurityPageName.administration,
   title: 'Test Link',
   path: '/test',
   ...overrides,
@@ -41,7 +41,7 @@ describe('getFilteredLinks', () => {
   const mockCore = {} as CoreStart;
   const mockPlugins = {} as StartPlugins;
   const mockManagementLinks = createMockLinkItem({
-    id: SecurityPageName.management,
+    id: SecurityPageName.administration,
     title: 'Management',
     path: '/management',
   });
