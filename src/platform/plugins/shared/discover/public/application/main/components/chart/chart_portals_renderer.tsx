@@ -142,6 +142,20 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     [getChartConfigAccessor]
   );
 
+  useEffect(() => {
+    const histogramConfig$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramConfig$;
+
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      localStorageKeyPrefix: chartSectionConfig.replaceDefaultChart
+        ? chartSectionConfig.localStorageKeyPrefix
+        : undefined,
+    });
+  }, [chartSectionConfig, stateContainer]);
+
   return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
       stateContainer={stateContainer}
@@ -191,14 +205,18 @@ const CustomChartSectionWrapper = ({
 }: UnifiedHistogramChartProps & {
   chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
 }) => {
-  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
+    stateContainer,
+    chartSectionConfig.localStorageKeyPrefix
+  );
+  const localStorageKeyPrefix =
+    chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
-  const { api, stateProps, requestParams } = useServicesBootstrap({
+  const { api, stateProps, requestParams, input$ } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
-    localStorageKeyPrefix:
-      chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix,
+    localStorageKeyPrefix,
   });
 
   useEffect(() => {
@@ -213,8 +231,14 @@ const CustomChartSectionWrapper = ({
       isChartAvailable: true,
       chart: stateProps.chart,
       topPanelHeight: stateProps.topPanelHeight,
+      defaultTopPanelHeight: chartSectionConfig.defaultTopPanelHeight,
     }),
-    [stateProps.onTopPanelHeightChange, stateProps.chart, stateProps.topPanelHeight]
+    [
+      chartSectionConfig.defaultTopPanelHeight,
+      stateProps.chart,
+      stateProps.onTopPanelHeightChange,
+      stateProps.topPanelHeight,
+    ]
   );
 
   const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
@@ -222,6 +246,7 @@ const CustomChartSectionWrapper = ({
     layoutProps,
     stateContainer,
     panelsToggle,
+    localStorageKeyPrefix,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(
@@ -241,8 +266,9 @@ const CustomChartSectionWrapper = ({
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
+      input$={input$}
+      requestParams={requestParams}
       {...unifiedHistogramProps}
-      {...requestParams}
     />
   );
 };
