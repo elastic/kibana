@@ -34,7 +34,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.1.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-* Added IPv6 support to address fields in Remote Clusters UI [#233415]({{kib-pull}}233415).
 
 **Stack management**
 * Adds IPv6 support to address fields in Remote Clusters UI [#233415]({{kib-pull}}233415).
