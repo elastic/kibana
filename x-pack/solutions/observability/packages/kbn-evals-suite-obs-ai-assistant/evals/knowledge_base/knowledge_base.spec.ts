@@ -8,6 +8,7 @@
 import type { EvaluateKnowledgeBase } from './evaluate_knowledge_base';
 import { createEvaluateKnowledgeBase } from './evaluate_knowledge_base';
 import { evaluate as base } from '../../src/evaluate';
+import { clearConversations, clearKnowledgeBase } from './knowledge_base_helpers';
 
 const evaluate = base.extend<{
   evaluateKnowledgeBase: EvaluateKnowledgeBase;
@@ -31,18 +32,10 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
   // --- Tests for kb functions ---
   evaluate.describe('kb functions', () => {
     evaluate.afterEach(async ({ esClient }) => {
-      await esClient.deleteByQuery({
-        index: '.kibana-observability-ai-assistant-kb-*',
-        ignore_unavailable: true,
-        query: {
-          match: {
-            text: {
-              query: '*Observability AI Evaluation Framework*',
-            },
-          },
-        },
-      });
+      await clearKnowledgeBase(esClient);
+      await clearConversations(esClient);
     });
+
     evaluate('summarizes information', async ({ evaluateKnowledgeBase }) => {
       await evaluateKnowledgeBase({
         dataset: {
@@ -125,16 +118,8 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     });
 
     evaluate.afterAll(async ({ esClient }) => {
-      await esClient.deleteByQuery({
-        index: '.kibana-observability-ai-assistant-kb-*',
-        ignore_unavailable: true,
-        query: {
-          match: {
-            text: 'ACME',
-          },
-        },
-        refresh: true,
-      });
+      await clearKnowledgeBase(esClient);
+      await clearConversations(esClient);
     });
 
     evaluate(
