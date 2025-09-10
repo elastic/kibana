@@ -67,7 +67,7 @@ export async function mountManagementSection({
   const sectionsRegex = sections.join('|');
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...coreStart}>
+    coreStart.rendering.addContext(
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
           <PolicyStatusContextProvider config={config}>
@@ -91,7 +91,7 @@ export async function mountManagementSection({
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 
