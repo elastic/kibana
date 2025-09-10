@@ -72,6 +72,7 @@ async function runStep(
     await step.run();
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
+    await workflowRuntime.failStep(currentNode.id, error);
   } finally {
     await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
     await workflowRuntime.saveState(); // Ensure state is updated after each step
