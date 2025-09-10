@@ -12,6 +12,12 @@ import { createEvaluateApmDataset } from './evaluate_apm_dataset';
 import { generateAIAssistantApmScenario } from '../../src/data_generators/apm';
 import { apmErrorCountAIAssistant } from '../../src/alert_templates/apm';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/apm/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 const evaluate = base.extend<{
   evaluateApmDataset: EvaluateApmDataset;
 }>({
