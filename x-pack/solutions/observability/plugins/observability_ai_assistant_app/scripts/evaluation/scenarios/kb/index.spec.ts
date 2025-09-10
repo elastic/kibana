@@ -17,7 +17,6 @@ describe('Knowledge base', () => {
   describe('kb functions', () => {
     // This scenario has been migrated to x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/knowledge_base/knowledge_base.spec.ts.
     // Any new improvements should be made in both frameworks.
-    // This scenario will be deleted when all legacy scenarios have been migrated.
     it('summarizes and recalls information', async () => {
       let conversation = await chatClient.complete({
         messages:
@@ -107,7 +106,6 @@ describe('Knowledge base', () => {
       });
       // This scenario has been migrated to x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/knowledge_base/knowledge_base.spec.ts.
       // Any new improvements should be made in both frameworks.
-      // This scenario will be deleted when all legacy scenarios have been migrated.
       it('retrieves one entry from the KB', async () => {
         const contextResponseMessage = conversation.messages.find(
           (msg) => msg.name === CONTEXT_FUNCTION_NAME
@@ -121,7 +119,6 @@ describe('Knowledge base', () => {
       });
       // This scenario has been migrated to x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/knowledge_base/knowledge_base.spec.ts.
       // Any new improvements should be made in both frameworks.
-      // This scenario will be deleted when all legacy scenarios have been migrated.
       it('retrieves DevOps team structure and on-call information', async () => {
         const result = await chatClient.evaluate(conversation, [
           'Uses context function response to find information about ACME DevOps team structure',
@@ -135,7 +132,6 @@ describe('Knowledge base', () => {
     });
     // This scenario has been migrated to x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/knowledge_base/knowledge_base.spec.ts.
     // Any new improvements should be made in both frameworks.
-    // This scenario will be deleted when all legacy scenarios have been migrated.
     it('retrieves monitoring thresholds and database infrastructure details', async () => {
       const prompt =
         'What are our standard alert thresholds for services and what database technologies do we use?';
