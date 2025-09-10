@@ -73,7 +73,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
 
             <EuiHorizontalRule />
 
-            <AnalysisSummary results={results} showTitle={false} />
+            <AnalysisSummary results={results} />
 
             <EuiText size={'s'}>
               <EuiSpacer size="l" />
