@@ -18,10 +18,8 @@ import type { StreamsSupertestRepositoryClient } from './helpers/repository_clie
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const config = getService('config');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
-  const isServerless = !!config.get('serverless');
   let apiClient: StreamsSupertestRepositoryClient;
 
   async function expectSettings(
