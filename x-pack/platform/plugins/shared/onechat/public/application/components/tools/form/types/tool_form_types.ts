@@ -40,6 +40,7 @@ export interface BuiltinToolFormData extends BaseToolFormData {
 
 export interface IndexSearchToolFormData extends BaseToolFormData {
   type: ToolType.index_search;
+  pattern: string;
 }
 
 export type ToolFormData = EsqlToolFormData | BuiltinToolFormData | IndexSearchToolFormData;
