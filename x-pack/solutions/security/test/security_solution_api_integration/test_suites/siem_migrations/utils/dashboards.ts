@@ -160,5 +160,22 @@ export const dashboardMigrationRouteFactory = (supertest: SuperTest.Agent) => {
         return response;
       },
     },
+
+    delete: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: undefined }> => {
+      const url = replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .delete(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
   };
 };
