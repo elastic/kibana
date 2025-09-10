@@ -59,8 +59,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
         body: customThresholdAIAssistantLogCount.dataViewParams,
       });
     } catch (error: any) {
-      if (error?.status === 409) {
-      } else {
+      if (error?.status !== 409) {
         throw error;
       }
     }
