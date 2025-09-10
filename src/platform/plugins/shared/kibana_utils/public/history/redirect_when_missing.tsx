@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { History } from 'history';
-import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { History } from 'history';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
-import type { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
-import type { ThemeServiceStart } from '@kbn/core/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { ApplicationStart, HttpStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import type { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
@@ -28,9 +27,16 @@ const MarkdownRenderer = React.lazy(async () => {
   const { default: ReactMarkdown } = await import('react-markdown');
   const WrappedRenderer = ({ basePath, children }: MarkdownRendererProps) => (
     <ReactMarkdown
-      transformLinkUri={(href) => ReactMarkdown.uriTransformer(basePath.prepend(href))}
-      children={children}
-    />
+      components={{
+        a: ({ href, children: linkChildren, ...props }) => (
+          <a href={basePath.prepend(href || '')} {...props}>
+            {linkChildren}
+          </a>
+        ),
+      }}
+    >
+      {children}
+    </ReactMarkdown>
   );
 
   return { default: WrappedRenderer };
