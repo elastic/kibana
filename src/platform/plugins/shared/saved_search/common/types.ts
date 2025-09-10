@@ -46,14 +46,14 @@ export type VisContextUnmapped =
 /** @internal **/
 export interface SavedSearchAttributes {
   title: string;
-  sort: SortOrder[];
-  columns: string[];
+  sort?: SortOrder[];
+  columns?: string[];
   description: string;
-  grid: DiscoverGridSettings;
-  hideChart: boolean;
-  isTextBasedQuery: boolean;
+  grid?: DiscoverGridSettings;
+  hideChart?: boolean;
+  isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
-  kibanaSavedObjectMeta: {
+  kibanaSavedObjectMeta?: {
     searchSourceJSON: string;
   };
   viewMode?: VIEW_MODE;
