@@ -79,6 +79,7 @@ export function LogsOverviewHighlights({
                 serviceName={value as string}
                 agentName={flattenedHit['agent.name'] ?? ''}
                 formattedServiceName={content}
+                data-test-subj="unifiedDocViewLogsOverviewServiceNameHighlightLink"
               />
             )}
           </HighlightField>
@@ -140,7 +141,7 @@ export function LogsOverviewHighlights({
           dataView={dataView}
         />
 
-        {renderFlyoutStreamField && renderFlyoutStreamField({ doc })}
+        {/* {renderFlyoutStreamField && renderFlyoutStreamField({ doc })} */}
       </EuiPanel>
       <EuiSpacer size="m" />
     </>

@@ -72,6 +72,7 @@ export const getCommonFieldConfiguration = ({
               serviceName={value as string}
               agentName={flattenedDoc[AGENT_NAME_FIELD]}
               formattedServiceName={content}
+              data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
             />
           )}
         </HighlightField>
