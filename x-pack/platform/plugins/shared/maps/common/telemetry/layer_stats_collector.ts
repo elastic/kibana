@@ -118,7 +118,7 @@ export class LayerStatsCollector {
 }
 
 function getEmsFileId(layerDescriptor: LayerDescriptor): string | null {
-  return layerDescriptor.sourceDescriptor !== null &&
+  return layerDescriptor.sourceDescriptor &&
     layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
     'id' in layerDescriptor.sourceDescriptor
     ? (layerDescriptor.sourceDescriptor as EMSFileSourceDescriptor).id

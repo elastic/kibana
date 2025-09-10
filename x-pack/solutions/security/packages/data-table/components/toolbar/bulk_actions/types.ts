@@ -18,10 +18,6 @@ export interface CustomBulkAction {
   ['data-test-subj']?: string;
 }
 
-export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
-  onClick: (eventIds: string[]) => void;
-};
-
 export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
   onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;

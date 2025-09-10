@@ -12,8 +12,10 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
 import { extractEsqlQueries } from './utils/esql';
-import { formatFieldAsXml } from './utils/formatting';
-import { resolveResource } from './steps/resolve_resource';
+import {
+  resolveResourceWithSamplingStats,
+  formatResourceWithSampledValues,
+} from './utils/resources';
 
 export interface GenerateEsqlResponse {
   answer: string;
@@ -47,8 +49,9 @@ export const generateEsql = async ({
     selectedTarget = selectedResource.name;
   }
 
-  const { fields, type: targetType } = await resolveResource({
+  const resolvedResource = await resolveResourceWithSamplingStats({
     resourceName: selectedTarget,
+    samplingSize: 100,
     esClient,
   });
 
@@ -57,8 +60,7 @@ export const generateEsql = async ({
     connectorId: undefined,
     client: model.inferenceClient,
     logger: { debug: () => undefined },
-    input: ` You are an expert ES|QL generator.
-Your task is to write a single, valid ES|QL query based on the provided information.
+    input: `Your task is to write a single, valid ES|QL query based on the provided information.
 
 <user_query>
 ${nlQuery}
@@ -68,11 +70,7 @@ ${nlQuery}
 ${context ?? 'No additional context provided.'}
 </context>
 
-<target_resource name="${selectedTarget}" type="${targetType}" >
-  <fields>
-${fields.map((field) => `    ${formatFieldAsXml(field)}`).join('\n')}
-  </fields>
-</target_resource>
+${formatResourceWithSampledValues({ resource: resolvedResource, indentLevel: 0 })}
 
 Based on all the information above, generate the ES|QL query.
 `,

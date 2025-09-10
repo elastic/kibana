@@ -279,6 +279,18 @@ describe('WorkflowExecutionRuntimeManager', () => {
         workflow: { step_id: 'node3' },
       });
     });
+
+    it('should save step path from the workflow execution stack', async () => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        stack: ['scope1', 'scope2', 'node3'],
+      });
+      await underTest.startStep('node3');
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: ['scope1', 'scope2', 'node3'],
+        })
+      );
+    });
   });
 
   describe('finishStep', () => {
@@ -516,6 +528,54 @@ describe('WorkflowExecutionRuntimeManager', () => {
         },
         tags: ['workflow', 'execution', 'complete'],
       });
+    });
+  });
+
+  describe('enterScope', () => {
+    beforeEach(() => {
+      underTest.goToStep('node1');
+    });
+
+    it('should enter a new scope when no name is provided', () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['some-scope'],
+      } as Partial<EsWorkflowExecution>);
+      underTest.enterScope();
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stack: ['some-scope', 'node1'],
+        })
+      );
+    });
+
+    it('should enter a new scope with the provided name', () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['some-scope'],
+      } as Partial<EsWorkflowExecution>);
+      underTest.enterScope('my-scope');
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stack: ['some-scope', 'my-scope'],
+        })
+      );
+    });
+  });
+
+  describe('exitScope', () => {
+    beforeEach(() => {
+      underTest.goToStep('node1');
+    });
+
+    it('should pop the last element', () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['scope1', 'scope2'],
+      } as Partial<EsWorkflowExecution>);
+      underTest.exitScope();
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stack: ['scope1'],
+        })
+      );
     });
   });
 });

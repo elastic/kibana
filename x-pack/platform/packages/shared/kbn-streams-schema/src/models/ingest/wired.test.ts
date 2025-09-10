@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emptyAssets } from '../../helpers/empty_assets';
 import { WiredStream } from './wired';
 
 describe('WiredStream', () => {
@@ -105,8 +106,7 @@ describe('WiredStream', () => {
           from: 'logs',
         },
         inherited_fields: {},
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);
@@ -151,8 +151,6 @@ describe('WiredStream', () => {
   describe('UpsertRequest', () => {
     it.each([
       {
-        dashboards: [],
-        queries: [],
         stream: {
           description: '',
           ingest: {
@@ -166,6 +164,7 @@ describe('WiredStream', () => {
             },
           },
         },
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(WiredStream.UpsertRequest.is(val)).toBe(true);

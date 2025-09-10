@@ -13,6 +13,7 @@ import type {
   LensPublicSetup,
   LensPublicStart,
 } from '@kbn/lens-plugin/public';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import image from './image.png';
@@ -55,6 +56,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
   };
 
   return {
+    version: LENS_ITEM_LATEST_VERSION,
     visualizationType: 'lnsDatatable',
     title: 'Prefilled from example app',
     references: [

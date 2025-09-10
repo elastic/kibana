@@ -17,7 +17,7 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="securitySolutionPackages.gcpIntegration.setupInfoContentTitle"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.setupInfoContentTitle"
             defaultMessage="Setup Access"
           />
         </h2>
@@ -26,14 +26,14 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
       <EuiText color={'subdued'} size="s">
         {isAgentless ? (
           <FormattedMessage
-            id="securitySolutionPackages.gcpIntegration.agentlessSetupInfoContent"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.agentlessSetupInfoContent"
             defaultMessage="The integration will need elevated access to run some CIS benchmark rules.You can follow these
     step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
                 <EuiLink href={gcpOverviewPath} target="_blank">
                   <FormattedMessage
-                    id="securitySolutionPackages.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.gettingStarted.agentlessSetupInfoContentLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>
@@ -42,7 +42,7 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
           />
         ) : (
           <FormattedMessage
-            id="securitySolutionPackages.gcpIntegration.setupInfoContent"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.setupInfoContent"
             defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
 method of providing the GCP credentials this integration will use. You can follow these
 step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
@@ -50,7 +50,7 @@ step-by-step instructions to generate the necessary credentials. Refer to our {g
               gettingStartedLink: (
                 <EuiLink href={gcpOverviewPath} target="_blank">
                   <FormattedMessage
-                    id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContentLink"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>

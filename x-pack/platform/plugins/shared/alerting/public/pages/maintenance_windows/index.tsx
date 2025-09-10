@@ -23,7 +23,6 @@ import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
-import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
 import type { MaintenanceWindowStatus } from '../../../common';
@@ -126,9 +125,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
               <EuiTitle size="l">
                 <h1>{i18n.MAINTENANCE_WINDOWS}</h1>
               </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

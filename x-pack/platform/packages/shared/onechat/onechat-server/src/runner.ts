@@ -21,10 +21,6 @@ export interface RunToolReturn {
    * The result value as returned by the tool.
    */
   results: ToolResult[];
-  /**
-   * ID of this run
-   */
-  runId: string;
 }
 
 /**

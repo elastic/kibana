@@ -559,7 +559,9 @@
             "section": "def-common.AvailableConnectorWithId",
             "text": "AvailableConnectorWithId"
           },
-          "; repetitions: number; }>"
+          "; repetitions: number; evaluationAnalysisService: ",
+          "EvaluationAnalysisService",
+          "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluate.ts",
         "deprecated": false,

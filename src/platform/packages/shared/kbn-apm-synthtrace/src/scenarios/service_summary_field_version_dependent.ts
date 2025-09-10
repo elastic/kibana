@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates APM data that is dependent on the Elasticsearch version for service summary fields.
+ */
+
 import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';

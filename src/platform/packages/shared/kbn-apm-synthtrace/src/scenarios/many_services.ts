@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates APM data for a very high number of services (2000).
+ */
+
 import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';
 import { flatten, random, times } from 'lodash';

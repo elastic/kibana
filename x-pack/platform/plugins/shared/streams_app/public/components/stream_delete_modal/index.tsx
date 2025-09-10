@@ -101,7 +101,7 @@ export function StreamDeleteModal({
                     href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: stream,
-                        tab: 'route',
+                        tab: 'partitioning',
                       },
                     })}
                     label={stream}

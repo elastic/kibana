@@ -14,7 +14,10 @@ import type {
 } from '@kbn/core/server';
 
 import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+  ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG,
+} from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject, exhaustMap, takeWhile, takeUntil } from 'rxjs';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
@@ -138,7 +141,16 @@ export class ElasticAssistantPlugin
     // to wait for the start services to be available to read the feature flags.
     // This can take a while, but the plugin setup phase cannot run for a long time.
     // As a workaround, this promise does not block the setup phase.
-    const featureFlagDefinitions: FeatureFlagDefinition[] = [];
+    const featureFlagDefinitions: FeatureFlagDefinition[] = [
+      {
+        featureFlagName: ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG,
+        fallbackValue: false,
+        fn: (checkpointSaverEnabled) => {
+          this.assistantService?.setIsCheckpointSaverEnabled(checkpointSaverEnabled);
+          return !checkpointSaverEnabled; // keep subscription active while the feature flag is disabled.
+        },
+      },
+    ];
 
     core
       .getStartServices()

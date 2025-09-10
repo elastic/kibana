@@ -58,6 +58,7 @@ import {
   RULE_DETAILS_MANUAL_RULE_RUN_BTN,
   MANUAL_RULE_RUN_ACTION_BTN,
   RULE_DETAILS_REVERT_RULE_BTN,
+  TOASTER_BODY,
 } from '../screens/alerts_detection_rules';
 import type {
   RULES_MONITORING_TABLE,
@@ -584,6 +585,10 @@ export const cancelConfirmationModal = () => {
 
 export const clickErrorToastBtn = () => {
   cy.get(TOASTER_ERROR_BTN).click();
+};
+
+export const clickErrorToastBtnByContent = (content: string) => {
+  cy.contains(TOASTER_BODY, content).find(TOASTER_ERROR_BTN).click();
 };
 
 export const closeErrorToast = () => {

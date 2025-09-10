@@ -20,7 +20,7 @@ import {
   waitForAlerts,
   waitForPageFilters,
 } from '../../../../tasks/alerts';
-import { EMPTY_ALERT_TABLE } from '../../../../screens/alerts';
+import { ALERTS_PAGE_KQL_BAR, EMPTY_ALERT_TABLE } from '../../../../screens/alerts';
 import { kqlSearch, refreshPage } from '../../../../tasks/security_header';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../../tasks/date_picker';
@@ -37,7 +37,7 @@ describe(`Alerts page filters - kqlbar`, { tags: ['@ess', '@serverless'] }, () =
 
   it('should recover from invalid kql query result', () => {
     // do an invalid search
-    kqlSearch('\\');
+    kqlSearch('\\', ALERTS_PAGE_KQL_BAR);
     refreshPage();
     waitForPageFilters();
     cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
@@ -48,7 +48,7 @@ describe(`Alerts page filters - kqlbar`, { tags: ['@ess', '@serverless'] }, () =
   });
 
   it('should take kqlQuery into account', () => {
-    kqlSearch('kibana.alert.workflow_status: "nothing"');
+    kqlSearch('kibana.alert.workflow_status: "nothing"', ALERTS_PAGE_KQL_BAR);
     refreshPage();
     waitForPageFilters();
     togglePageFilterPopover(0);

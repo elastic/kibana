@@ -11,7 +11,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TelemetryEventsSender } from '../sender';
-import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
+import type { ITelemetryReceiver } from '../receiver';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import type { ITaskMetricsService } from '../task_metrics.types';
@@ -113,6 +113,7 @@ export const createMockTelemetryReceiver = (
 
   return {
     start: jest.fn(),
+    paginate: jest.fn(),
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
     getClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
     fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
@@ -137,11 +138,13 @@ export const createMockTelemetryReceiver = (
       .fn()
       .mockReturnValue({ body: { aggregations: { actionTypes: {} } } }),
     fetchEndpointMetadata: jest.fn().mockReturnValue(Promise.resolve(new Map())),
-    fetchTimelineAlerts: jest.fn().mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
+    fetchTimelineAlerts: jest.fn().mockImplementation(async function* () {
+      yield stubEndpointAlertResponse();
+    }),
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
     fetchValueListMetaData: jest.fn(),
-  } as unknown as jest.Mocked<TelemetryReceiver>;
+  } as unknown as jest.Mocked<ITelemetryReceiver>;
 };
 
 export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {

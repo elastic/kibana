@@ -30,6 +30,7 @@ import type {
   BuildDependencies,
   LensAnnotationLayer,
   LensAttributes,
+  LensBreakdownConfig,
   LensReferenceLineLayer,
   LensSeriesLayer,
   LensXYConfig,
@@ -42,7 +43,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,
       yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
-      yRight: true,
+      yRight: config.axisTitleVisibility?.showYRightAxisTitle ?? true,
     },
     legend: {
       isVisible: config.legend?.show ?? true,
@@ -131,11 +132,15 @@ function buildVisualizationState(config: LensXYConfig): XYState {
             xAccessor: `x_${ACCESSOR}${i}`,
             ...(layer.breakdown
               ? {
-                  splitAccessor: `y_${ACCESSOR}${i}`,
+                  splitAccessor: `${ACCESSOR}${i}_breakdown`,
                 }
               : {}),
             accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
             seriesType: layer.seriesType || 'line',
+            yConfig: layer.yAxis.map((yAxis, index) => ({
+              forAccessor: `${ACCESSOR}${i}_${index}`,
+              color: yAxis.seriesColor,
+            })),
           } as XYDataLayerConfig;
       }
     }),
@@ -144,20 +149,35 @@ function buildVisualizationState(config: LensXYConfig): XYState {
 
 function getValueColumns(layer: LensSeriesLayer, i: number) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
-    throw new Error('breakdown must be a field name when not using index source');
-  }
-  if (typeof layer.xAxis !== 'string') {
-    throw new Error('xAxis must be a field name when not using index source');
+    throw new Error('`breakdown` must be a field name when not using index source');
   }
   return [
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
-    getValueColumn(`x_${ACCESSOR}${i}`, layer.xAxis as string),
-    ...layer.yAxis.map((yAxis, index) => ({
-      ...getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number'),
-    })),
+    getXValueColumn(layer.xAxis, i),
+    ...layer.yAxis.map((yAxis, index) =>
+      getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number')
+    ),
   ];
+}
+
+function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
+  const accessor = `x_${ACCESSOR}${index}`;
+  if (typeof xConfig === 'string') {
+    return getValueColumn(accessor, xConfig);
+  }
+
+  switch (xConfig.type) {
+    case 'dateHistogram':
+      return getValueColumn(accessor, xConfig.field, 'date');
+    case 'intervals':
+      return getValueColumn(accessor, xConfig.field, 'number');
+    case 'topValues':
+      return getValueColumn(accessor, xConfig.field);
+    case 'filters':
+      throw new Error('Not implemented yet');
+  }
 }
 
 function buildAllFormulasInLayer(
@@ -197,7 +217,7 @@ function buildFormulaLayer(
     }
 
     if (layer.breakdown) {
-      const columnName = `y_${ACCESSOR}${i}`;
+      const columnName = `${ACCESSOR}${i}_breakdown`;
       const breakdownColumn = getBreakdownColumn({
         options: layer.breakdown,
         dataView,

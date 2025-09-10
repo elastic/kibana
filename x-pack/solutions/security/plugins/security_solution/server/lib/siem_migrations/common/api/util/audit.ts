@@ -15,7 +15,7 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
   SIEM_MIGRATION_DELETED = 'siem_migration_deleted',
   SIEM_MIGRATION_ADDED_RULES = 'siem_migration_added_rules',
-  SIEM_MIGRATION_RETRIEVED_RULES = 'siem_migration_retrieved_rules',
+  SIEM_MIGRATION_RETRIEVED_ITEMS = 'siem_migration_retrieved_items',
   SIEM_MIGRATION_UPLOADED_RESOURCES = 'siem_migration_uploaded_resources',
   SIEM_MIGRATION_RETRIEVED_RESOURCES = 'siem_migration_retrieved_resources',
   SIEM_MIGRATION_STARTED = 'siem_migration_started',
@@ -62,7 +62,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES]: AUDIT_TYPE.CREATION,
-  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_ITEMS]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS]: AUDIT_TYPE.CREATION,
@@ -161,11 +161,11 @@ export class SiemMigrationAuditLogger {
     });
   }
 
-  public async logGetMigrationRules(params: { migrationId: string; error?: Error }): Promise<void> {
+  public async logGetMigrationItems(params: { migrationId: string; error?: Error }): Promise<void> {
     const { migrationId, error } = params;
-    const message = `User retrieved rules for SIEM migration with [id=${migrationId}]`;
+    const message = `User retrieved items for SIEM migration with [id=${migrationId}]`;
     return this.log({
-      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES,
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_ITEMS,
       message,
       error,
     });

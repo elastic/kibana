@@ -27,7 +27,9 @@ jest.mock('../containers');
 
 const mockGetSourcererDataView = jest.fn(() => mockSourcererScope);
 
-describe('useGetScopedSourcererDataView', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('useGetScopedSourcererDataView', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockImplementation(mockGetSourcererDataView);
   });

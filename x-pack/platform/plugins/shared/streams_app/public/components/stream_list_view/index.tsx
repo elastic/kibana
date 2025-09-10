@@ -16,12 +16,12 @@ import {
   EuiFlexItem,
   EuiEmptyPrompt,
   EuiLoadingLogo,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import type { OverlayRef } from '@kbn/core/public';
-import type { Streams } from '@kbn/streams-schema';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
@@ -33,9 +33,11 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
 import { GroupStreamsCards } from './group_streams_cards';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { StreamsAppContextProvider } from '../streams_app_context_provider';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
+  const context = useKibana();
   const {
     dependencies: {
       start: {
@@ -44,7 +46,7 @@ export function StreamListView() {
       },
     },
     core,
-  } = useKibana();
+  } = context;
   const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
@@ -75,20 +77,21 @@ export function StreamListView() {
 
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
-  function openGroupStreamModificationFlyout(existingStream?: Streams.GroupStream.Definition) {
+  function openGroupStreamModificationFlyout() {
     overlayRef.current?.close();
     overlayRef.current = core.overlays.openFlyout(
       toMountPoint(
-        <GroupStreamModificationFlyout
-          client={streamsRepositoryClient}
-          streamsList={streamsListFetch.value}
-          refresh={() => {
-            streamsListFetch.refresh();
-            overlayRef.current?.close();
-          }}
-          notifications={core.notifications}
-          existingStream={existingStream}
-        />,
+        <StreamsAppContextProvider context={context}>
+          <GroupStreamModificationFlyout
+            client={streamsRepositoryClient}
+            streamsList={streamsListFetch.value}
+            refresh={() => {
+              streamsListFetch.refresh();
+              overlayRef.current?.close();
+            }}
+            notifications={core.notifications}
+          />
+        </StreamsAppContextProvider>,
         core
       ),
       { size: 's' }
@@ -167,7 +170,12 @@ export function StreamListView() {
         ) : (
           <>
             <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
-            {groupStreams?.enabled && <GroupStreamsCards streams={streamsListFetch.value} />}
+            {groupStreams?.enabled && (
+              <>
+                <EuiSpacer size="l" />
+                <GroupStreamsCards streams={streamsListFetch.value} />
+              </>
+            )}
           </>
         )}
       </StreamsAppPageTemplate.Body>

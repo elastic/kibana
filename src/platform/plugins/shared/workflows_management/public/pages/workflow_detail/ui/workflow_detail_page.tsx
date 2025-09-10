@@ -13,17 +13,21 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+} from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -95,6 +99,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       },
       {
         onError: (err: unknown) => {
+          // Extract message from HTTP error body and update the error message
+          if (
+            err &&
+            typeof err === 'object' &&
+            'body' in err &&
+            err.body &&
+            typeof err.body === 'object' &&
+            'message' in err.body &&
+            typeof err.body.message === 'string'
+          ) {
+            (err as any).message = err.body.message;
+          }
           notifications?.toasts.addError(err as Error, {
             toastLifeTimeMs: 3000,
             title: 'Failed to save workflow',
@@ -188,6 +204,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
   );
+  const isExecutionGraphEnabled = uiSettings?.get<boolean>(
+    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+    false
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -215,6 +235,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
+        yaml={yamlValue}
         isLoading={isLoadingWorkflow}
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
@@ -260,6 +281,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                     workflowYaml={yamlValue}
                     workflowExecutionId={selectedExecutionId}
                   />
+                </React.Suspense>
+              </EuiFlexItem>
+            )}
+            {isExecutionGraphEnabled && workflow && (
+              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+                <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <ExecutionGraph workflowYaml={yamlValue} />
                 </React.Suspense>
               </EuiFlexItem>
             )}

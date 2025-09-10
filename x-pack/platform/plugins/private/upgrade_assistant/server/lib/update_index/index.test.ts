@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndex } from '.';
 import type { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
-import { type Version } from '@kbn/upgrade-assistant-pkg-server';
+import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server/src/index_settings';
 
 const versionService = { getMajorVersion: () => 8 } as unknown as Version;

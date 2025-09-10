@@ -3239,7 +3239,7 @@ const knnDefinition: FunctionDefinition = {
   name: 'knn',
   description: i18n.translate('kbn-esql-ast.esql.definitions.knn', {
     defaultMessage:
-      'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors.',
+      'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors or semantic_text fields.',
   }),
   ignoreAsSuggestion: true,
   preview: true,
@@ -3257,7 +3257,7 @@ const knnDefinition: FunctionDefinition = {
     Location.COMPLETION,
   ],
   examples: [
-    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0], 10)\n| sort _score desc, color asc',
+    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0])\n| sort _score desc, color asc',
   ],
 };
 
@@ -11062,6 +11062,51 @@ const stDisjointDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
           type: 'geo_shape',
           optional: false,
         },
@@ -11083,6 +11128,51 @@ const stDisjointDefinition: FunctionDefinition = {
         {
           name: 'geomB',
           type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
           optional: false,
         },
       ],
@@ -11530,6 +11620,51 @@ const stIntersectsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
           type: 'geo_shape',
           optional: false,
         },
@@ -11551,6 +11686,51 @@ const stIntersectsDefinition: FunctionDefinition = {
         {
           name: 'geomB',
           type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
           optional: false,
         },
       ],
@@ -14580,6 +14760,54 @@ const trimDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const urlDecodeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'url_decode',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.url_decode', {
+    defaultMessage: 'URL decodes the input.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'string',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'string',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+  ],
+  examples: [
+    'ROW u = "https%3A%2F%2Fwww.example.com%2Fpapers%3Fq%3Dinformation%2Bretrieval%26year%3D2024%26citations%3Dhigh" | EVAL u = URL_DECODE(u)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const urlEncodeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'url_encode',
@@ -14962,6 +15190,7 @@ export const scalarFunctionDefinitions = [
   toUpperDefinition,
   toVersionDefinition,
   trimDefinition,
+  urlDecodeDefinition,
   urlEncodeDefinition,
   vCosineDefinition,
   vDotProductDefinition,
