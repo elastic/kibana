@@ -271,9 +271,7 @@ export class AlertsClient<
     }
   }
 
-  public async search<Aggregation = unknown>(
-    queryBody: SearchRequest
-  ): Promise<SearchResult<AlertData, Aggregation>> {
+  public async search(queryBody: SearchRequest): Promise<SearchResult<AlertData>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
       ? this.indexTemplateAndPattern.alias
@@ -281,7 +279,7 @@ export class AlertsClient<
     const {
       hits: { hits, total },
       aggregations,
-    } = await esClient.search<Alert & AlertData, Aggregation>({
+    } = await esClient.search<Alert & AlertData>({
       index,
       ...queryBody,
       ignore_unavailable: true,
@@ -911,6 +909,7 @@ export class AlertsClient<
           hit: this.trackedAlerts.get(alert.getUuid()),
         }));
       },
+      search: (queryBody: SearchRequest) => this.search(queryBody),
     };
   }
 

@@ -9,6 +9,7 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { makeFloatString } from '../utils/utils';
 import type {
   DetectionAlertLatest,
@@ -17,9 +18,11 @@ import type {
 import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
+import { alertWithPersistence } from './alert_with_persistence';
 
 export interface BulkCreateParams<T extends DetectionAlertLatest> {
   wrappedAlerts: Array<WrappedAlert<T>>;
+  rule: SanitizedRuleConfig;
   services: SecurityRuleServices;
   sharedParams: SecuritySharedParams;
   maxAlerts?: number;
@@ -38,12 +41,17 @@ export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
 
 export const bulkCreate = async <T extends DetectionAlertLatest>({
   wrappedAlerts,
+  rule,
   services,
   sharedParams,
   maxAlerts,
 }: BulkCreateParams<T>): Promise<GenericBulkCreateResponse<T>> => {
-  const { ruleExecutionLogger, refreshOnIndexingAlerts: refreshForBulkCreate } = sharedParams;
-  const { alertWithPersistence } = services;
+  const {
+    ruleExecutionLogger,
+    refreshOnIndexingAlerts: refreshForBulkCreate,
+    spaceId,
+  } = sharedParams;
+  const { alertsClient } = services;
   if (wrappedAlerts.length === 0) {
     return {
       errors: [],
@@ -78,16 +86,21 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
     }
   };
 
-  const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence(
-    wrappedAlerts.map((doc) => ({
+  const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence({
+    alertsClient,
+    alerts: wrappedAlerts.map((doc) => ({
       _id: doc._id,
       // `fields` should have already been merged into `doc._source`
       _source: doc._source,
     })),
-    refreshForBulkCreate,
+    refresh: refreshForBulkCreate,
+    logger: sharedParams.ruleExecutionLogger,
     maxAlerts,
-    enrichAlertsWrapper
-  );
+    rule,
+    ruleParams: sharedParams.completeRule.ruleParams,
+    spaceId,
+    enrichAlerts: enrichAlertsWrapper,
+  });
 
   const end = performance.now();
 

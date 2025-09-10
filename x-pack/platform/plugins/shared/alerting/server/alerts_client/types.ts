@@ -7,7 +7,7 @@
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -160,6 +160,7 @@ export interface PublicAlertsClient<
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
   getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
+  search: (queryBody: SearchRequest) => Promise<SearchResult<AlertData>>;
 }
 
 export interface ReportedAlert<
