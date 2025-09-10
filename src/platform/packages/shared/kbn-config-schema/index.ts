@@ -72,6 +72,11 @@ import {
 } from './src/types';
 import type { DurationValueType } from './src/types/duration_type';
 import type { ByteSizeValueType } from './src/types/byte_size_type';
+import type {
+  UnionBaseType,
+  UnionResolvedDefault,
+  UnionTypeDefaultValue,
+} from './src/types/union_type';
 
 export type {
   AnyType,
@@ -179,7 +184,10 @@ function object<P extends ObjectProps<Props>, D extends ObjectDefaultValue<P> = 
   return new ObjectType(props, options);
 }
 
-function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
+function arrayOf<T, D extends DefaultValue<T> = never>(
+  itemType: Type<T, D>,
+  options?: ArrayOptions<T, D>
+): Type<T[], D> {
   return new ArrayType(itemType, options);
 }
 
