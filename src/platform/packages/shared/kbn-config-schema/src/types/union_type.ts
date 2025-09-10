@@ -12,15 +12,73 @@ import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import type { DefaultValue, ExtendsDeepOptions } from './type';
 import { Type, type TypeOptions, type TypeMeta } from './type';
+import type {
+  ObjectProps,
+  Props,
+  ObjectDefaultValue,
+  ObjectType,
+  ObjectResultTypeInput,
+} from './object_type';
 
-export type UnionTypeOptions<T, D extends DefaultValue<T>> = TypeOptions<T, D> & {
+// complex types here mostly due to mixing `Type` and `ObjectType`
+
+export type UnionTypeOptions<T, D extends DefaultValue<any>> = Omit<
+  TypeOptions<UnionResolvedValue<T>, D>,
+  'meta'
+> & {
   meta?: Omit<TypeMeta, 'id'>;
 };
 
-export class UnionType<RTS extends Array<Type<any>>, T, D extends DefaultValue<T>> extends Type<
-  T,
-  D
-> {
+export type UnionTypeDefaultValue<T extends any | ObjectProps<Props>> = T extends ObjectProps<Props>
+  ? ObjectDefaultValue<T>
+  : DefaultValue<T>;
+
+/**
+ * Resolves the correct default value from `V`.
+ *
+ * For simple `Type` `T` is the raw value. For `ObjectType` `T` is the schema stucture which needs to be converted.
+ */
+export type UnionResolvedValue<T extends any | ObjectProps<Props>> = T extends ObjectProps<Props>
+  ? ObjectResultTypeInput<T>
+  : T;
+
+/**
+ * Resolves the correct default value from `D`.
+ *
+ * If `never` we need to return the default based on the original `T` for each type in the `oneOf` array.
+ *
+ * Otherwise, return `D` as is.
+ */
+export type UnionResolvedDefault<
+  T extends any | ObjectProps<Props>,
+  D extends UnionTypeDefaultValue<T>
+> = [D] extends [never] ? UnionResolvedValue<T> : D;
+
+/**
+ * Resolves base type between `Type` and `ObjectType`
+ *
+ * @note Must preserve union by disabling distributive conditional
+ */
+export type UnionBaseType<
+  T extends any | ObjectProps<Props>,
+  D extends UnionTypeDefaultValue<T>
+> = [T] extends [ObjectProps<Props>]
+  ? [D] extends [never]
+    ? ObjectType<T, ObjectDefaultValue<T>>
+    : [D] extends [ObjectDefaultValue<T>]
+    ? ObjectType<T, D | ObjectDefaultValue<T>>
+    : never
+  : [D] extends [never]
+  ? Type<T, DefaultValue<T>>
+  : [D] extends [DefaultValue<T>]
+  ? Type<T, D | DefaultValue<T>>
+  : never;
+
+export class UnionType<
+  RTS extends Array<Type<any>>,
+  T extends any | ObjectProps<Props>,
+  D extends UnionTypeDefaultValue<T>
+> extends Type<T, D> {
   private readonly unionTypes: RTS;
   private readonly typeOptions?: UnionTypeOptions<T, D>;
 
