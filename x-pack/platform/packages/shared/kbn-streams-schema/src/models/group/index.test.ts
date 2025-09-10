@@ -6,6 +6,7 @@
  */
 
 import { GroupStream } from '.';
+import { emptyAssets } from '../../helpers/empty_assets';
 
 describe('GroupStream', () => {
   describe('Definition', () => {
@@ -14,6 +15,7 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
+          metadata: {},
           tags: [],
           members: [],
         },
@@ -55,12 +57,12 @@ describe('GroupStream', () => {
           name: 'group-stream',
           description: '',
           group: {
+            metadata: {},
             tags: [],
             members: [],
           },
         },
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(GroupStream.GetResponse.is(val)).toBe(true);
@@ -104,15 +106,15 @@ describe('GroupStream', () => {
   describe('UpsertRequest', () => {
     it.each([
       {
-        dashboards: [],
-        queries: [],
         stream: {
           description: '',
           group: {
+            metadata: {},
             tags: [],
             members: [],
           },
         },
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(GroupStream.UpsertRequest.is(val)).toBe(true);

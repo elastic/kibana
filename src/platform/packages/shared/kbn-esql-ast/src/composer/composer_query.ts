@@ -10,7 +10,7 @@
 import { printTree } from 'tree-dump';
 import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
-import { processTemplateHoles, validateParamName } from './util';
+import { composerQuerySymbol, processTemplateHoles, validateParamName } from './util';
 import { Builder } from '../builder';
 import type {
   ESQLAstExpression,
@@ -31,6 +31,8 @@ import type {
 import { Walker } from '../walker';
 
 export class ComposerQuery {
+  public readonly [composerQuerySymbol] = true;
+
   constructor(
     public readonly ast: ESQLAstQueryExpression,
     protected readonly params: Map<string, unknown> = new Map()

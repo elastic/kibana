@@ -34,5 +34,6 @@ export default function alertingApiIntegrationTests({
     loadTestFile(require.resolve('./retain_api_key'));
     loadTestFile(require.resolve('./bulk_untrack'));
     loadTestFile(require.resolve('./bulk_untrack_by_query'));
+    loadTestFile(require.resolve('./bulk_edit_params'));
   });
 }
