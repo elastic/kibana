@@ -3078,7 +3078,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'GET',
+        method: 'PUT',
         body: props.body,
         query: props.query,
       })

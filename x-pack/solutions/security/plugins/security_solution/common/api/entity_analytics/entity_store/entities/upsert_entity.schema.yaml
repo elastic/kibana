@@ -4,7 +4,7 @@ info:
   title: Entity Store - Upsert Entity
 paths:
   /api/entity_store/entities/{entityType}:
-    get:
+    put:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: UpsertEntity
