@@ -18,7 +18,6 @@ import { EuiBadge, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldConfiguration } from '../content_framework';
 import { ContentFrameworkTable } from '../content_framework';
-import { ServiceNameLink } from '../observability/traces/components/service_name_link';
 import { HighlightField } from '../observability/traces/components/highlight_field';
 import { TraceIdLink } from '../observability/traces/components/trace_id_link';
 
@@ -71,20 +70,6 @@ export function LogsOverviewHighlights({
     // Service & Infrastructure
     [fieldConstants.SERVICE_NAME_FIELD]: {
       title: serviceLabel,
-      formatter: (value: unknown, formattedValue: string) => (
-        <>
-          <HighlightField value={value as string} formattedValue={formattedValue}>
-            {({ content }) => (
-              <ServiceNameLink
-                serviceName={value as string}
-                agentName={flattenedHit['agent.name'] ?? ''}
-                formattedServiceName={content}
-                data-test-subj="unifiedDocViewLogsOverviewServiceNameHighlightLink"
-              />
-            )}
-          </HighlightField>
-        </>
-      ),
     },
     [fieldConstants.HOST_NAME_FIELD]: { title: hostNameLabel },
     [fieldConstants.TRACE_ID_FIELD]: {
