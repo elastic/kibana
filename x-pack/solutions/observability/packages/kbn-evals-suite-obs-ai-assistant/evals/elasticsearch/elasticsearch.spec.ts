@@ -9,6 +9,12 @@ import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateElasticsearchDataset } from './evaluate_elasticsearch_dataset';
 import { createEvaluateElasticsearchDataset } from './evaluate_elasticsearch_dataset';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/elasticsearch/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 const evaluate = base.extend<{
   evaluateElasticsearchDataset: EvaluateElasticsearchDataset;
 }>({
