@@ -116,7 +116,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             <LogsOverviewHighlights
               formattedDoc={parsedDoc}
               doc={hit}
-              renderFlyoutStreamField={renderFlyoutStreamField}
               dataView={dataView}
               filter={filter}
               onAddColumn={onAddColumn}

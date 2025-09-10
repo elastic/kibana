@@ -10,12 +10,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
-import { fieldConstants, getLogDocumentOverview } from '@kbn/discover-utils';
-import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import { fieldConstants } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiBadge, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldConfiguration } from '../content_framework';
 import { ContentFrameworkTable } from '../content_framework';
 import { HighlightField } from '../observability/traces/components/highlight_field';
@@ -26,7 +24,6 @@ interface LogsOverviewHighlightsProps
   formattedDoc: LogDocumentOverview;
   doc: DataTableRecord;
   dataView: DataView;
-  renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
 }
 
 export function LogsOverviewHighlights({
@@ -36,15 +33,11 @@ export function LogsOverviewHighlights({
   filter,
   onAddColumn,
   onRemoveColumn,
-  renderFlyoutStreamField,
 }: LogsOverviewHighlightsProps) {
   const flattenedDoc = doc.flattened;
   const shouldRenderSection = (fields: Array<keyof LogDocumentOverview>) => {
     return fields.some((field) => Boolean(formattedDoc[field] && flattenedDoc[field]));
   };
-
-  const { fieldFormats } = getUnifiedDocViewerServices();
-  const flattenedHit = getLogDocumentOverview(doc, { dataView, fieldFormats });
 
   const fieldNames: Array<keyof LogDocumentOverview> = [
     // Service & Infrastructure
