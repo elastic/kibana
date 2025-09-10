@@ -248,7 +248,7 @@ text_var: {{escape_string text_var}}
         text_var: {
           type: 'text',
           value: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
         },
       };
 
