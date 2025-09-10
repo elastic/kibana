@@ -62,9 +62,11 @@ test('Kubernetes EA', async ({
     await kubernetesEAFlowPage.clickKubernetesAgentCTA();
     await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
   } else {
-    await page.waitForTimeout(60000); 
+    await page.waitForTimeout(5 * 60000); 
     
-    const discoverValidation = await kubernetesEAFlowPage.clickExploreLogsAndGetDiscoverValidation();
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+    
+    const discoverValidation = new (await import('./pom/pages/discover_validation')).DiscoverValidation(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
   } 

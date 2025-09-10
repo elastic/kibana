@@ -11,7 +11,7 @@ export class DiscoverValidation {
   constructor(private page: Page) {}
 
   async waitForDiscoverToLoad() {
-    await this.page.waitForURL('**/app/discover**');
+    await this.page.waitForURL('**/app/discover*');
     
     await this.page.waitForLoadState('networkidle');
     
