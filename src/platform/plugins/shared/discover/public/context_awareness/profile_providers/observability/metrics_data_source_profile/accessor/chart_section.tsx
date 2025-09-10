@@ -20,7 +20,7 @@ export const createChartSection = (
 ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   // prevents unmounting the component when the query changes but the index pattern is still valid
   once((prev: () => ChartSectionConfiguration) =>
-    once(() => {
+    once((): ChartSectionConfiguration => {
       return {
         ...(prev ? prev() : {}),
         Component: (props: ChartSectionProps) => (
@@ -28,6 +28,7 @@ export const createChartSection = (
         ),
         replaceDefaultChart: !!metricsExperienceClient,
         localStorageKeyPrefix: 'discover:metricsExperience',
+        defaultTopPanelHeight: 'max-content',
       };
     })
   );

@@ -14,7 +14,6 @@ import {
   isLiteral,
   isParamLiteral,
 } from '../../ast/is';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../commands_registry/types';
 import type { ESQLAstItem } from '../../types';
 import { lastItem } from '../../visitor/utils';
 import type {
@@ -24,8 +23,9 @@ import type {
   SupportedDataType,
 } from '../types';
 import { getFunctionDefinition } from './functions';
-import { getColumnForASTNode } from './shared';
 import { isArrayType } from './operators';
+import { getColumnForASTNode } from './shared';
+import type { ESQLColumnData } from '../../commands_registry/types';
 
 // #region type detection
 
@@ -34,8 +34,7 @@ import { isArrayType } from './operators';
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
+  columns?: Map<string, ESQLColumnData>
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -45,7 +44,7 @@ export function getExpressionType(
     if (root.length === 0) {
       return 'unknown';
     }
-    return getExpressionType(root[0], fields, userDefinedColumns);
+    return getExpressionType(root[0], columns);
   }
 
   if (isLiteral(root)) {
@@ -70,8 +69,8 @@ export function getExpressionType(
     }
   }
 
-  if (isColumn(root) && fields && userDefinedColumns) {
-    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+  if (isColumn(root) && columns) {
+    const column = getColumnForASTNode(root, { columns });
     const lastArg = lastItem(root.args);
     // If the last argument is a param, we return its type (param literal type)
     // This is useful for cases like `where ??field`
@@ -88,7 +87,7 @@ export function getExpressionType(
   }
 
   if (root.type === 'list') {
-    return getExpressionType(root.values[0], fields, userDefinedColumns);
+    return getExpressionType(root.values[0], columns);
   }
 
   if (isFunctionExpression(root)) {
@@ -122,10 +121,10 @@ export function getExpressionType(
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
-      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
+      return getExpressionType(root.args[root.args.length - 1], columns);
     }
 
-    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
+    const argTypes = root.args.map((arg) => getExpressionType(arg, columns));
     const literalMask = root.args.map((arg) => isLiteral(arg));
     const matchingSignatures = getMatchingSignatures(
       fnDefinition.signatures,

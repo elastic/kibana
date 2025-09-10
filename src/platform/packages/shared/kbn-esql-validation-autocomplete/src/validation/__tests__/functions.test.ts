@@ -391,6 +391,24 @@ describe('function validation', () => {
             ]);
           });
         });
+
+        it('skips column validation for left assignment arg', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL lolz = 2', []);
+          await expectErrors('FROM a_index | EVAL lolz = nonexistent', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
+
+        it('skips column validation for right arg to AS', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | RENAME keywordField AS lolz', []);
+          await expectErrors('FROM a_index | RENAME nonexistent AS lolz', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
       });
     });
 
