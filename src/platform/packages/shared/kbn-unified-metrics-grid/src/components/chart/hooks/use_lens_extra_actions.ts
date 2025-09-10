@@ -25,16 +25,16 @@ export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
   const extraActions = useMemo(() => {
     const actions: Action[] = [];
 
-    if (config.copyToDashboard) {
+    if (config.copyToDashboard?.onClick) {
       actions.push(getCopyToDashboardAction(config.copyToDashboard.onClick));
     }
 
-    if (config.viewDetails) {
+    if (config.viewDetails?.onClick) {
       actions.push(getViewDetailsAction(config.viewDetails.onClick));
     }
 
     return actions;
-  }, [config.copyToDashboard, config.viewDetails]);
+  }, [config.copyToDashboard?.onClick, config.viewDetails?.onClick]);
 
   return extraActions;
 };
