@@ -13,10 +13,13 @@ import { useMemo } from 'react';
 interface CopyToDashboardActionConfig {
   onClick: () => void;
 }
+interface ViewDetailsActionConfig {
+  onClick: () => void;
+}
 
 interface UseLensExtraActions {
   copyToDashboard?: CopyToDashboardActionConfig;
-  viewDetails?: { onClick: () => void };
+  viewDetails?: ViewDetailsActionConfig;
 }
 export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
   const extraActions = useMemo(() => {
