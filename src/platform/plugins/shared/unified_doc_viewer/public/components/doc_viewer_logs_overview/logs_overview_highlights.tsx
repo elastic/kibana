@@ -125,8 +125,6 @@ export function LogsOverviewHighlights({
           hit={doc}
           dataView={dataView}
         />
-
-        {/* {renderFlyoutStreamField && renderFlyoutStreamField({ doc })} */}
       </EuiPanel>
       <EuiSpacer size="m" />
     </>
