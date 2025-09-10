@@ -23,6 +23,8 @@ import {
 import { isFlyoutLink } from '../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../shared/components/preview_link';
 
+const EMPTY_ARRAY: string[] = [];
+
 export interface HighlightedFieldsCellProps {
   /**
    * Highlighted field's name used to know what component to display
@@ -109,7 +111,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
       return values?.slice(displayValuesLimit);
     }
 
-    return [];
+    return EMPTY_ARRAY;
   }, [values, displayValuesLimit]);
 
   const isContentTooLarge = useMemo(
