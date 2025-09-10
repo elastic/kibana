@@ -17,6 +17,12 @@ import {
   customThresholdAIAssistantLogCount,
 } from './templates';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/alerts/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 const evaluate = base.extend<{
   evaluateAlerts: EvaluateAlerts;
 }>({
