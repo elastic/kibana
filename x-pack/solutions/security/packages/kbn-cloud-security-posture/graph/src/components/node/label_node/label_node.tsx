@@ -8,10 +8,18 @@
 import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiTextTruncate,
+  EuiToolTip,
+  transparentize,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
+  LabelShapeDoubleStroke,
   HandleStyleOverride,
   LabelShapeOnHover,
   NodeButton,
@@ -26,8 +34,10 @@ import { analyzeDocuments } from './analyze_documents';
 import { LabelNodeBadges, LIMIT as BADGES_LIMIT } from './label_node_badges';
 import { LabelNodeTooltipContent } from './label_node_tooltip';
 import { LabelNodeDetails } from './label_node_details';
+import { showStackedShape } from '../../utils';
 
 export const TEST_SUBJ_SHAPE = 'label-node-shape';
+export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
 export const TEST_SUBJ_TOOLTIP = 'label-node-tooltip';
 export const TEST_SUBJ_HANDLE = 'label-node-handle';
 export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
@@ -110,6 +120,12 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               <LabelNodeBadges analysis={analysis} />
             </div>
           </LabelShape>
+          {showStackedShape(numEvents + numAlerts) && (
+            <LabelShapeDoubleStroke
+              data-test-subj={TEST_SUBJ_STACKED_SHAPE}
+              borderColor={transparentize(borderColor, 0.5)}
+            />
+          )}
           {interactive && (
             <>
               <NodeButton
