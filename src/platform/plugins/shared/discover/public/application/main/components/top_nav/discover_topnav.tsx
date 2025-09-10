@@ -14,6 +14,8 @@ import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-searc
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -266,7 +268,17 @@ export const DiscoverTopNav = ({
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
-    <>
+    <span
+      css={css({
+        '.controlFrameFloatingActions': {
+          top: '100%',
+          transform: 'translate(calc(100% - 8px), -20%)',
+        },
+        '.controlsWrapper li:last-child .controlFrameFloatingActions': {
+          transform: 'translate(-8px, -20%)',
+        },
+      })}
+    >
       <SearchBar
         {...topNavProps}
         appName="discover"
@@ -332,6 +344,6 @@ export const DiscoverTopNav = ({
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
       )}
-    </>
+    </span>
   );
 };
