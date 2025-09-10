@@ -224,6 +224,12 @@ export function setupSavedObjects(
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
         return `${ruleTemplateSavedObject.attributes.name}`;
       },
+      getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
+        return {
+          path: `/app/management/insightsAndAlerting/triggersActions/rules/create?fromTemplate=${savedObject.id}`,
+          uiCapabilitiesPath: '',
+        };
+      },
     },
     mappings: ruleTemplateMappings,
     modelVersions: ruleTemplateModelVersions,
