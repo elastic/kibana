@@ -29,7 +29,9 @@ export type ObjectProps<P extends Props> = {
   [K in keyof P]: P[K] extends Type<infer V, infer D> ? D : never;
 };
 
-export type TypeOrLazyType<T = any, D extends DefaultValue<T>> = Type<T, D> | (() => Type<T, D>);
+export type TypeOrLazyType<T = any, D extends DefaultValue<T> = never> =
+  | Type<T, D>
+  | (() => Type<T, D>);
 
 export type ObjectTypeOrLazyType<
   P extends ObjectProps<Props> = any,

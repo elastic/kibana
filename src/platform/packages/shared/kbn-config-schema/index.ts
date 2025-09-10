@@ -13,11 +13,11 @@ import type { Stream } from 'stream';
 import {
   META_FIELD_X_OAS_DISCONTINUED,
   META_FIELD_X_OAS_ANY,
-  META_FIELD_X_OAS_OPTIONAL,
-  META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_OPTIONAL,
+  META_FIELD_X_OAS_DEPRECATED,
 } from './src/oas_meta_fields';
 import type { DefaultValue } from './src/types/type';
 import type { ObjectProps, ObjectDefaultValue } from './src/types/object_type';
