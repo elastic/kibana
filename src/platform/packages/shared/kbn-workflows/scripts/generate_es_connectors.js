@@ -160,11 +160,11 @@ function readConsoleBodyDefinitions(endpointName) {
     'indices.put_template': ['template', 'mappings', 'settings', 'aliases'],
     'indices.put_index_template': ['template', 'composed_of', 'priority', 'version'],
     // Document APIs
-    'create': ['document'],
-    'delete': [],
-    'get': [],
-    'exists': [],
-    // Cluster APIs  
+    create: ['document'],
+    delete: [],
+    get: [],
+    exists: [],
+    // Cluster APIs
     'cluster.put_settings': ['persistent', 'transient'],
     'cluster.health': [],
     // Node APIs
@@ -240,10 +240,33 @@ function inferBodyParamsFromApiName(endpointName) {
 
   // Search APIs
   if (endpointName === 'search' || endpointName.includes('.search')) {
-    return ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'fields', 'track_total_hits'];
+    return [
+      'query',
+      'size',
+      'from',
+      'sort',
+      'aggs',
+      'aggregations',
+      'post_filter',
+      'highlight',
+      '_source',
+      'fields',
+      'track_total_hits',
+    ];
   }
   if (endpointName.includes('msearch')) {
-    return ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'index'];
+    return [
+      'query',
+      'size',
+      'from',
+      'sort',
+      'aggs',
+      'aggregations',
+      'post_filter',
+      'highlight',
+      '_source',
+      'index',
+    ];
   }
   if (endpointName.includes('search_template')) {
     return ['template', 'params', 'explain', 'profile'];
@@ -253,7 +276,10 @@ function inferBodyParamsFromApiName(endpointName) {
   if (endpointName === 'index' || endpointName.includes('.index')) {
     return ['document'];
   }
-  if (endpointName === 'create' || endpointName.includes('.create') && !endpointName.includes('indices')) {
+  if (
+    endpointName === 'create' ||
+    (endpointName.includes('.create') && !endpointName.includes('indices'))
+  ) {
     return ['document'];
   }
   if (endpointName === 'update' || endpointName.includes('.update')) {
@@ -328,7 +354,11 @@ function inferBodyParamsFromApiName(endpointName) {
   }
 
   // If no specific pattern matches, check for common patterns in the name
-  if (endpointName.includes('put_') || endpointName.includes('post_') || endpointName.includes('create')) {
+  if (
+    endpointName.includes('put_') ||
+    endpointName.includes('post_') ||
+    endpointName.includes('create')
+  ) {
     // For PUT/POST/CREATE operations, there's usually a body
     return []; // Will fall back to generic body
   }
@@ -427,7 +457,7 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.number()${optionalSuffix}.describe('Template priority${requiredMarker}')`;
     case 'version':
       return `z.number()${optionalSuffix}.describe('Template version${requiredMarker}')`;
-    
+
     // Cluster settings
     case 'persistent':
       return `z.object({}).passthrough()${optionalSuffix}.describe('Persistent cluster settings${requiredMarker}')`;
