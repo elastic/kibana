@@ -31,7 +31,6 @@ export class KubernetesEAFlowPage {
     this.copyToClipboardButton = this.page.getByTestId(
       'observabilityOnboardingCopyToClipboardButton'
     );
-    // logs essentials mode
     this.logsDataReceivedIndicator = this.page
       .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
       .getByText('We are monitoring your cluster');

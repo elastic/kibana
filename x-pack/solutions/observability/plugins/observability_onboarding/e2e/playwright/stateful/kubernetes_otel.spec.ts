@@ -98,7 +98,6 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    // logs essentials mode
     await page.waitForTimeout(3 * 60000); 
 
     const discoverValidation =

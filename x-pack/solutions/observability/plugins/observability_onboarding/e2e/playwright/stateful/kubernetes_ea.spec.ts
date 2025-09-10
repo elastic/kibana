@@ -62,7 +62,6 @@ test('Kubernetes EA', async ({
     await kubernetesEAFlowPage.clickKubernetesAgentCTA();
     await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
   } else {
-    // logs essentials mode
     await page.waitForTimeout(5 * 60000); 
      
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);

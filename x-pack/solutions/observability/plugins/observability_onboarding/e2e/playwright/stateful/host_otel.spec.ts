@@ -52,7 +52,6 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await otelHostFlowPage.clickHostsOverviewCTA();
     await hostsOverviewPage.assertCpuPercentageNotEmpty();
   } else {
-    // logs essentials mode
     await otelHostFlowPage.clickLogsExplorationCTA();
     
     const { DiscoverValidation } = await import('./pom/pages/discover_validation');

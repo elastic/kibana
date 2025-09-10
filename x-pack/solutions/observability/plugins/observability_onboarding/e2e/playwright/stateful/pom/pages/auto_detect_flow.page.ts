@@ -28,7 +28,6 @@ export class AutoDetectFlowPage {
       'observabilityOnboardingDataIngestStatusActionLink-inventory-host-details'
     );
     this.codeBlock = this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
-    // logs essentials mode
     this.logsDataReceivedIndicator = this.page
       .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
       .getByText(/logs.*ready|data.*ready|ready.*explore/i);
