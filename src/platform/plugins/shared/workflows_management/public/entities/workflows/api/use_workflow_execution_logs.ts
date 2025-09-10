@@ -31,7 +31,7 @@ interface WorkflowExecutionLogsResponse {
 
 interface UseWorkflowExecutionLogsParams {
   executionId: string;
-  stepId?: string;
+  stepExecutionId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -41,7 +41,7 @@ interface UseWorkflowExecutionLogsParams {
 
 export function useWorkflowExecutionLogs({
   executionId,
-  stepId,
+  stepExecutionId,
   limit = 100,
   offset = 0,
   sortField = 'timestamp',
@@ -51,13 +51,21 @@ export function useWorkflowExecutionLogs({
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionLogsResponse>({
-    queryKey: ['workflowExecutionLogs', executionId, stepId, limit, offset, sortField, sortOrder],
+    queryKey: [
+      'workflowExecutionLogs',
+      executionId,
+      stepExecutionId,
+      limit,
+      offset,
+      sortField,
+      sortOrder,
+    ],
     queryFn: async () => {
       const response = await http!.get<WorkflowExecutionLogsResponse>(
         `/api/workflowExecutions/${executionId}/logs`,
         {
           query: {
-            stepId,
+            stepExecutionId,
             limit,
             offset,
             sortField,
