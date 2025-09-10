@@ -51,7 +51,7 @@ import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
 import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
 import { prefixDatafeedId } from '@kbn/ml-common-utils/job_utils/prefix_datafeed_id';
 import { splitIndexPatternNames } from '@kbn/ml-common-utils/job_utils/split_index_pattern_names';
-import { resultsServiceProvider } from '@kbn/ml-services/results_service';
+import { resultsServiceProvider } from '@kbn/ml-server-services/results_service';
 
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 

@@ -51,7 +51,7 @@ import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils/ml_fun
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '@kbn/ml-common-constants/settings';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { indexServiceFactory } from '@kbn/ml-services/index_service';
-import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
