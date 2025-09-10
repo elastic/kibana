@@ -8,7 +8,8 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import { NUMERIC_TYPES } from '../../../common/fields/constants';
 
 // copied from @kbn/discover-utils to avoid cyclic dependency
 const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
@@ -27,19 +28,6 @@ const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
 export function extractMetricFields(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>
 ) {
-  const numericTypes = [
-    ES_FIELD_TYPES.LONG,
-    ES_FIELD_TYPES.INTEGER,
-    ES_FIELD_TYPES.SHORT,
-    ES_FIELD_TYPES.BYTE,
-    ES_FIELD_TYPES.DOUBLE,
-    ES_FIELD_TYPES.FLOAT,
-    ES_FIELD_TYPES.HALF_FLOAT,
-    ES_FIELD_TYPES.SCALED_FLOAT,
-    ES_FIELD_TYPES.UNSIGNED_LONG,
-    ES_FIELD_TYPES.HISTOGRAM,
-  ];
-
   const timeSeriesFields: Array<{
     fieldName: string;
     type: string;
@@ -53,7 +41,7 @@ export function extractMetricFields(
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
       // Check for time series metrics (numeric fields with time_series_metric)
-      if (numericTypes.includes(type as ES_FIELD_TYPES) && typeInfo.time_series_metric) {
+      if (NUMERIC_TYPES.includes(type as ES_FIELD_TYPES) && typeInfo.time_series_metric) {
         timeSeriesFields.push({ fieldName, type, typeInfo, fieldType: 'metric' });
       }
     }

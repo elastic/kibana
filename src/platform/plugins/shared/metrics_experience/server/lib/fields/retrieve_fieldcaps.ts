@@ -16,6 +16,7 @@ import { type ElasticsearchClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { parse } from '@kbn/datemath';
 import { dateRangeQuery } from '@kbn/es-query';
+import { NUMERIC_TYPES } from '../../../common/fields/constants';
 
 export async function retrieveFieldCaps({
   esClient,
@@ -64,21 +65,7 @@ export async function retrieveFieldCaps({
       fields,
       include_unmapped: false,
       index_filter: indexFilter,
-      types: [
-        // Numeric types for metrics
-        ES_FIELD_TYPES.LONG,
-        ES_FIELD_TYPES.INTEGER,
-        ES_FIELD_TYPES.SHORT,
-        ES_FIELD_TYPES.BYTE,
-        ES_FIELD_TYPES.DOUBLE,
-        ES_FIELD_TYPES.FLOAT,
-        ES_FIELD_TYPES.HALF_FLOAT,
-        ES_FIELD_TYPES.SCALED_FLOAT,
-        ES_FIELD_TYPES.UNSIGNED_LONG,
-        ES_FIELD_TYPES.HISTOGRAM,
-        // String types for dimensions
-        ES_FIELD_TYPES.KEYWORD,
-      ],
+      types: [...NUMERIC_TYPES, ES_FIELD_TYPES.KEYWORD],
     });
 
     dataStreamFieldCapsMap.set(dataStream.name, fieldCaps.fields);

@@ -37,13 +37,13 @@ describe('MetricsGrid', () => {
       name: 'system.cpu.utilization',
       dimensions: [{ name: 'host.name', type: 'keyword' }],
       index: 'metrics-*',
-      type: 'number',
+      type: 'long',
     },
     {
       name: 'system.memory.utilization',
       dimensions: [{ name: 'host.name', type: 'keyword' }],
       index: 'metrics-*',
-      type: 'number',
+      type: 'long',
     },
   ];
 
