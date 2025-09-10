@@ -128,7 +128,7 @@ export const LabelShape = styled(EuiText, {
 `;
 
 export const LabelShapeDoubleStroke = styled.div<{ borderColor: string }>`
-  position: relative;
+  position: absolute;
   width: 100%;
   height: 100%;
   transform: scale(0.9) translateY(calc(-100% + 3px));
