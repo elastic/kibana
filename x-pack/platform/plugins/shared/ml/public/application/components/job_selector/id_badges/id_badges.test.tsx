@@ -14,7 +14,7 @@ import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/s
 import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
 
-jest.mock('../../../contexts/kibana', () => ({
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: {
       share: { url: { locators: jest.fn() } },
