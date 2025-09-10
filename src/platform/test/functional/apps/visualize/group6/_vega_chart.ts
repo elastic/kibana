@@ -57,8 +57,8 @@ const getLinkTestSpec = (url: string, usermeta?: string) => `
   mark: bar
   encoding: {
     x: {
-      field: key 
-      type: nominal 
+      field: key
+      type: nominal
       axis: {labelAngle: 0}
     }
     y: {
@@ -84,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('vega chart in visualize app', () => {
     before(async () => {
@@ -313,6 +314,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
+        // Wait for tooltip to disappear to avoid flakiness
+        await retry.waitFor('tooltip to disappear', async () => {
+          return !(await testSubjects.exists('euiToolTip'));
+        });
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
 
         expect(await filterBar.getFilterCount()).to.be(1);
