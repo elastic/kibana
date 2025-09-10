@@ -36,10 +36,14 @@ import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css, Global } from '@emotion/react';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  type ESQLControlVariable,
+  type IndicesAutocompleteResult,
+} from '@kbn/esql-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { FieldType } from '@kbn/esql-ast';
 import { EditorFooter } from './editor_footer';
@@ -464,6 +468,21 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const canCreateLookupIndex = useCanCreateLookupIndex();
 
+  const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
+    async (cacheOptions) => {
+      const remoteClusters = getRemoteClustersFromESQLQuery(code);
+      let result: IndicesAutocompleteResult = { indices: [] };
+      if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
+        result = await kibana.services.esql.getJoinIndicesAutocomplete.call(
+          { forceRefresh: cacheOptions?.forceRefresh },
+          remoteClusters?.join(',')
+        );
+      }
+      return result;
+    },
+    [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
+  );
+
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
@@ -530,7 +549,7 @@ const ESQLEditorInternal = function ESQLEditor({
       canSuggestVariables: () => {
         return variablesService?.areSuggestionsEnabled ?? false;
       },
-      getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
         if (activeSolutionId) {
@@ -581,6 +600,7 @@ const ESQLEditorInternal = function ESQLEditor({
     histogramBarTarget,
     activeSolutionId,
     canCreateLookupIndex,
+    getJoinIndices,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -675,22 +695,22 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
-      if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
+      if (getJoinIndices) {
         // forces refresh
-        await kibana.services?.esql?.getJoinIndicesAutocomplete({ forceRefresh: true });
+        await getJoinIndices({ forceRefresh: true });
       }
       onQueryUpdate(resultQuery);
       // Need to force validation, as the query might be unchanged,
       // but the lookup index was created
       await queryValidation({ active: true });
     },
-    [kibana.services?.esql, onQueryUpdate, queryValidation]
+    [getJoinIndices, onQueryUpdate, queryValidation]
   );
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
     editorModel,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    getJoinIndices,
     query,
     onLookupIndexCreate
   );

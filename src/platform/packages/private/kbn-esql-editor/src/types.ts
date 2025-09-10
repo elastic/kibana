@@ -112,9 +112,7 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: (cacheOptions?: {
-    forceRefresh?: boolean;
-  }) => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getEditorExtensionsAutocomplete: (
     queryString: string,
