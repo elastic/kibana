@@ -59,7 +59,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             },
             wired: {
               fields: {
-                'attributes.user.id': { type: 'keyword' },
                 'attributes.process.name': { type: 'keyword', ignore_above: 18 },
               },
               routing: [],
