@@ -12,6 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
 import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
@@ -213,7 +214,7 @@ export async function runTask({
     });
 
     logger.info(msg(`reindexing entities to ${snapshotIndex}`));
-    await esClient.reindex({
+    const snapshotReindexResponse = await esClient.reindex({
       source: {
         index: [getEntitiesIndexName(entityType, namespace)],
       },
@@ -222,10 +223,13 @@ export async function runTask({
       },
       conflicts: 'proceed',
     });
+    logger.info(
+      msg(`reindexed to ${snapshotIndex}: ${prettyReindexResponse(snapshotReindexResponse)}`)
+    );
 
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
     logger.info(msg(`reindexing entities to ${resetIndex}`));
-    await esClient.reindex({
+    const resetReindexResponse = await esClient.reindex({
       source: {
         index: [getEntitiesIndexName(entityType, namespace)],
       },
@@ -238,6 +242,7 @@ export async function runTask({
         lang: 'painless',
       },
     });
+    logger.info(msg(`reindexed to ${resetIndex}: ${prettyReindexResponse(resetReindexResponse)}`));
 
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
@@ -298,4 +303,9 @@ export async function getEntityStoreSnapshotTaskState({
  */
 export function rewindToYesterday(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - 1));
+}
+
+function prettyReindexResponse(resp: ReindexResponse): string {
+  const { created, deleted, noops, failures, version_conflicts: versionConflicts, retries } = resp;
+  return JSON.stringify({ created, deleted, noops, failures, versionConflicts, retries });
 }
