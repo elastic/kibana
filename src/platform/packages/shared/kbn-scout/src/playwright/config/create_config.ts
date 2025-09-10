@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PlaywrightTestConfig } from '@playwright/test';
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type PlaywrightTestConfig } from '@playwright/test';
 import {
-  scoutFailedTestsReporter,
+  SCOUT_SERVERS_ROOT,
+  SCOUT_VISUAL_REGRESSION_ENABLED,
+  SCOUT_VISUAL_REGRESSION_PLUGIN_NAME,
+} from '@kbn/scout-info';
+import {
   scoutPlaywrightReporter,
+  scoutFailedTestsReporter,
+  scoutVisualRegressionReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
-import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
 
@@ -63,6 +67,19 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
         ])
       : scoutDefaultProjects;
 
+  // Build reporter configuration
+  const reporters: PlaywrightTestConfig['reporter'] = [
+    ['html', { outputFolder: './.scout/reports', open: 'never' }], // HTML report configuration
+    ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
+    scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
+    scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+    scoutVisualRegressionReporter({
+      outputDir: './.scout',
+      pluginName: SCOUT_VISUAL_REGRESSION_PLUGIN_NAME,
+      captureMode: 'all',
+    }),
+  ];
+
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
     /* Run tests in files in parallel */
@@ -74,12 +91,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: [
-      ['html', { outputFolder: './.scout/reports', open: 'never' }], // HTML report configuration
-      ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
-      scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
-      scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
-    ],
+    reporter: reporters,
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
       actionTimeout: 10000, // Shorten timeout for actions like `click()`
@@ -93,7 +105,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
 
       /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
       trace: 'on-first-retry',
-      screenshot: 'only-on-failure',
+      screenshot: SCOUT_VISUAL_REGRESSION_ENABLED ? 'on' : 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
     },

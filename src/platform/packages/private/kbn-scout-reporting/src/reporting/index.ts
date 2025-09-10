@@ -8,8 +8,9 @@
  */
 
 import type { ReporterDescription } from 'playwright/test';
-import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
+import { SCOUT_REPORTER_ENABLED, SCOUT_VISUAL_REGRESSION_ENABLED } from '@kbn/scout-info';
 import type { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
+import type { VisualRegressionReporterOptions } from './playwright/visual_regression';
 
 export * from './report';
 export * from './stats';
@@ -29,5 +30,14 @@ export const scoutFailedTestsReporter = (
 ): ReporterDescription => {
   return SCOUT_REPORTER_ENABLED
     ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
+    : ['null'];
+};
+
+// Playwright visual regression reporting
+export const scoutVisualRegressionReporter = (
+  options: VisualRegressionReporterOptions
+): ReporterDescription => {
+  return SCOUT_VISUAL_REGRESSION_ENABLED
+    ? ['@kbn/scout-reporting/src/reporting/playwright/visual_regression', options]
     : ['null'];
 };

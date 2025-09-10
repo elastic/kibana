@@ -28,3 +28,8 @@ export const SCOUT_PLAYWRIGHT_CONFIGS_PATH = path.resolve(
   'test_configs',
   'scout_playwright_configs.json'
 );
+
+export const SCOUT_VISUAL_REGRESSION_OUTPUT_ROOT = path.resolve(
+  SCOUT_OUTPUT_ROOT,
+  'visual-regression'
+);
