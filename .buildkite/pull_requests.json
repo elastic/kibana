@@ -43,7 +43,6 @@
         "^test/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
-        "^x-pack/test/",
         "/__snapshots__/",
         "\\.test\\.(ts|tsx|js|jsx)"
       ]
@@ -68,7 +67,6 @@
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project-from-pr"],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
@@ -95,7 +93,6 @@
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr"],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
