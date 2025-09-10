@@ -111,7 +111,7 @@ export const getActPrompt = ({
           - If you are providing a final answer directly to the user without calling a tool, your response should be plain text.
         2. Tool Use Format (Tool calling):
           - When calling a tool, you should generally include a brief reasoning message to keep the user informed.
-          - This message MUST start with the ${toolReasoningOpeningTag} tag.
+          - This message MUST start with the "${toolReasoningOpeningTag}" and end with "${toolReasoningClosingTag}".
           - You may omit the reasoning message only when the user's request is very direct, simple, and transactional.
 
         PRE-RESPONSE COMPLIANCE CHECK
