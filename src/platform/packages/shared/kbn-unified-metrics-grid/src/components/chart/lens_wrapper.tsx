@@ -61,6 +61,9 @@ export function LensWrapper({
       width: 100%;
       z-index: 9000;
       padding: ${euiTheme.size.s};
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     & .lnsExpressionRenderer {

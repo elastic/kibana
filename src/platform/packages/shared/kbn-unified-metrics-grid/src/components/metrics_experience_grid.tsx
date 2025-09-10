@@ -310,7 +310,7 @@ export const MetricsExperienceGrid = ({
               <EuiText size="s">
                 <strong>
                   {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                    defaultMessage: '{count} metrics',
+                    defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
                     values: { count: allFields.length },
                   })}
                 </strong>

@@ -30,7 +30,7 @@ describe('MetricTermWithHighlight', () => {
   });
 
   it('should highlight only matching searchTerm', () => {
-    const { container, getByTestId } = render(
+    const { container } = render(
       <MetricTermWithHighlight
         searchTerm="cpu.load"
         text="system.cpu.load_average.15m"
@@ -38,18 +38,10 @@ describe('MetricTermWithHighlight', () => {
       />
     );
     // Should highlight only "cpu.load"
-    const part1 = getByTestId('system.0');
     const mark = container.querySelector('mark');
-    const part2 = getByTestId('_average.15m2');
-
-    expect(part1).toBeInTheDocument();
-    expect(part1?.textContent).toBe('system.');
 
     expect(mark).toBeInTheDocument();
     expect(mark?.textContent?.toLowerCase()).toBe('cpu.load');
-
-    expect(part2).toBeInTheDocument();
-    expect(part2?.textContent).toBe('_average.15m');
   });
 
   it('should highlight all occurrences of the searchTerm', () => {

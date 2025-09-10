@@ -48,7 +48,6 @@ export const ChartSectionTemplate = ({
         <EuiFlexGroup
           direction="row"
           gutterSize="s"
-          responsive={false}
           alignItems="center"
           justifyContent="spaceBetween"
         >
@@ -62,14 +61,16 @@ export const ChartSectionTemplate = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           {rightSide.length > 0 && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem wrap grow={false}>
               <EuiFlexGroup
                 direction="row"
-                gutterSize="none"
                 responsive={false}
+                gutterSize="none"
                 alignItems="center"
               >
-                <EuiFlexItem grow={false}>{toolbar?.additionalControls?.prependRight}</EuiFlexItem>
+                {toolbar?.additionalControls?.prependRight ? (
+                  <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <IconButtonGroup
                     legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
@@ -79,7 +80,9 @@ export const ChartSectionTemplate = ({
                     buttons={rightSide}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>{toolbar?.additionalControls?.appendRight}</EuiFlexItem>
+                {toolbar?.additionalControls?.appendRight ? (
+                  <EuiFlexItem grow={false}>{toolbar.additionalControls.appendRight}</EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
