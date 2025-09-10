@@ -7,4 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-yarn moon run --affected :typecheck
+yarn moon ci :typecheck -c 3
