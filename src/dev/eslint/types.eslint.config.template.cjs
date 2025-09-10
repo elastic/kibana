@@ -27,18 +27,41 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['server/**/*', '*functional*/**/*', '*api_integration*/**/*'],
+      files: [
+        'server/**/*',
+        'accessibility/apps/**/*',
+        '*functional*/**/*',
+        '*api_integration*/**/*',
+        'cloud_integration/tests/**/*',
+        'custom_branding/tests/**/*',
+        'disable_ems/tests/**/*',
+        'examples/**/*',
+        'fleet_multi_cluster/apps/**/*',
+        'ftr_apis/**/*',
+        'localization/tests/**/*',
+        'plugin_api_perf/test_suites/**/*',
+        'rule_registry/**/*',
+        'search_sessions_integration/tests/**/*',
+        'screenshot_creation/apps/**/*',
+        'serverless/api_integration/**/*',
+        'serverless/functional/**/*',
+        'upgrade/apps/**/*',
+        'usage_collection/test_suites/**/*',
+      ],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.
         // We'll tackle /public eventually.
-        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/no-floating-promises': [
+          'error',
+          {
+            ignoreIIFE: false,
+            checkThenables: true, // check for thenable objects (not just native Promises)
+          },
+        ],
       },
     },
     {
-      files: [
-        '*spaces_api_integration/common/services/basic_auth_supertest.ts',
-        // TODO: high chances missing awaits cause test flakiness, 37 errors spotted
-        'x-pack/solutions/security/test/security_solution_api_integration/**/*'],
+      files: ['*spaces_api_integration/common/services/basic_auth_supertest.ts'],
       rules: {
         '@typescript-eslint/no-floating-promises': 'off',
       },
