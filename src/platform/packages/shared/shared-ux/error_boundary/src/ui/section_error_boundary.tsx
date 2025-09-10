@@ -13,10 +13,10 @@ import { apm } from '@elastic/apm-rum';
 import { getErrorBoundaryLabels } from '../../lib';
 import { useErrorBoundary } from '../services';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
-import type {
+import {
   BaseErrorBoundary,
-  BaseErrorBoundaryState,
-  BaseErrorBoundaryProps,
+  type BaseErrorBoundaryState,
+  type BaseErrorBoundaryProps,
 } from './base_error_boundary';
 
 interface SectionErrorBoundaryProps {
