@@ -87,7 +87,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
         selectable: (item: DashboardMigrationDashboard) => {
           return (
             !item.elastic_dashboard?.id &&
-            item.translation_result === MigrationTranslationResult.FULL
+            item.translation_result !== MigrationTranslationResult.FAILED
           );
         },
         selectableMessage: (selectable: boolean, item: DashboardMigrationDashboard) => {
