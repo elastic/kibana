@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -59,7 +60,7 @@ import { CustomHttpRequestError } from '../../../utils/custom_http_request_error
 import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import { executeResponseAction, buildResponseActionResult } from './utils';
-import { canCancelResponseAction } from '../../../../common/endpoint/service/authz/cancel_authz_utils';
+import { checkCancelPermission } from '../../../../common/endpoint/service/authz/cancel_authz_utils';
 import { EndpointAuthorizationError } from '../../errors';
 import { fetchActionRequestById } from '../../services/actions/utils/fetch_action_request_by_id';
 
@@ -426,7 +427,7 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
 
       // Use utility to check if cancellation is allowed
       const endpointAuthz = await (await context.securitySolution).getEndpointAuthz();
-      const canCancel = canCancelResponseAction(
+      const canCancel = checkCancelPermission(
         endpointAuthz,
         endpointContext.experimentalFeatures,
         agentType,
@@ -437,7 +438,14 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
         return errorHandler(
           logger,
           response,
-          new EndpointAuthorizationError('Insufficient privileges to cancel this action')
+          new EndpointAuthorizationError(
+            i18n.translate(
+              'xpack.securitySolution.endpoint.actions.cancel.insufficientPrivileges',
+              {
+                defaultMessage: 'Insufficient privileges to cancel this action',
+              }
+            )
+          )
         );
       }
 

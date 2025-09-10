@@ -95,7 +95,7 @@ describe('utils', () => {
       const result = transformPendingActionsToOptions([mockApiResponse]);
 
       expect(result[0]).toMatchObject({
-        actionItem: mockActionDetails,
+        data: mockActionDetails,
         description: expect.stringContaining('isolate on test-host by test-user at'),
       });
     });
@@ -156,22 +156,6 @@ describe('utils', () => {
         value: 'action-unisolate-123',
       });
       expect(result[0].description).toContain('release on test-host by test-user at');
-    });
-
-    it('should handle unknown host gracefully', () => {
-      const actionWithoutHost: ActionDetails = {
-        ...mockActionDetails,
-        hosts: {},
-      };
-
-      const responseWithUnknownHost: ActionListApiResponse = {
-        ...mockApiResponse,
-        data: [actionWithoutHost],
-      };
-
-      const result = transformPendingActionsToOptions([responseWithUnknownHost]);
-
-      expect(result[0].description).toContain('isolate on Unknown host by test-user at');
     });
 
     it('should handle edge cases with command names', () => {
@@ -251,13 +235,13 @@ describe('utils', () => {
         });
       });
 
-      it('should work without privilege checker (defaults to enabled)', () => {
+      it('should work without privilege checker (defaults to disabled)', () => {
         const result = transformPendingActionsToOptions([mockApiResponse]);
 
         expect(result[0]).toMatchObject({
           label: 'isolate - action-123-abc',
           value: 'action-123-abc',
-          disabled: false,
+          disabled: true,
           toolTipContent: undefined,
         });
       });

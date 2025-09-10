@@ -59,6 +59,49 @@ export const getLoadPoliciesError = (error: Error) => {
   });
 };
 
+export const ERROR_LOADING_CUSTOM_SCRIPTS = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.customScripts.errorLoading',
+  {
+    defaultMessage: 'Error loading custom scripts',
+  }
+);
+
+export const ERROR_LOADING_PENDING_ACTIONS = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.pendingActions.errorLoading',
+  {
+    defaultMessage: 'Error loading pending actions',
+  }
+);
+
+export const getGenericErrorMessage = (errorTitlePrefix: string, code: string) => {
+  return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.genericError', {
+    defaultMessage: '{prefix}Error {code}',
+    values: { prefix: errorTitlePrefix ? `${errorTitlePrefix}: ` : '', code },
+  });
+};
+
+export const getCancelPermissionDeniedMessage = (displayCommand: string) => {
+  return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.cancel.permissionDenied', {
+    defaultMessage: "You don't have permission to run {displayCommand} action.",
+    values: { displayCommand },
+  });
+};
+
+export const getPendingActionDescription = (
+  displayCommand: string,
+  hostName: string,
+  createdBy: string,
+  timestamp: string
+) => {
+  return i18n.translate(
+    'xpack.securitySolution.consoleArgumentSelectors.pendingAction.description',
+    {
+      defaultMessage: '{displayCommand} on {hostName} by {createdBy} at {timestamp}',
+      values: { displayCommand, hostName, createdBy, timestamp },
+    }
+  );
+};
+
 export const CONSOLE_COMMANDS = {
   isolate: {
     title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.title', {
@@ -235,7 +278,7 @@ export const CONSOLE_COMMANDS = {
   },
   cancel: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {
-      defaultMessage: 'Cancel an ongoing action on the host',
+      defaultMessage: 'Cancel a pending action on the host',
     }),
   },
 };

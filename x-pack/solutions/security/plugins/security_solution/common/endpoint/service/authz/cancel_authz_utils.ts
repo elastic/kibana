@@ -11,69 +11,43 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+} from '../response_actions/constants';
 import { isActionSupportedByAgentType } from '../response_actions/is_response_action_supported';
 
 /**
- * Determines if a user can cancel a response action based on authorization, agent type,
- * and optionally specific command permissions.
- *
- * This function follows the established Kibana Security Solution pattern of using utility
- * functions for dynamic permission evaluation rather than custom authorization middleware.
+ * Checks if cancel operations are available for the given agent type and environment.
+ * This is a general capability check, not command-specific.
  *
  * @param authz - The user's endpoint authorization permissions
  * @param featureFlags - Experimental features configuration
  * @param agentType - The agent type (endpoint, sentinel_one, crowdstrike, microsoft_defender_endpoint)
- * @param command - Optional specific command being cancelled for granular permission checking
- * @returns true if the user can cancel the response action, false otherwise
+ * @returns true if cancel feature is available for the agent type
  */
-export const canCancelResponseAction = (
+export const isCancelFeatureAvailable = (
   authz: EndpointAuthz,
   featureFlags: ExperimentalFeatures,
-  agentType: ResponseActionAgentType,
-  command?: ResponseActionsApiCommandNames
+  agentType: ResponseActionAgentType
 ): boolean => {
-  // 1. Check base access to security solution
-  if (!authz.canWriteSecuritySolution) {
+  // Check base access to security solution
+  if (!authz.canReadSecuritySolution) {
     return false;
   }
 
-  // 2. Check if Microsoft Defender Endpoint cancel feature is enabled
-  // (Currently only MDE supports cancel operations)
+  // Check if Microsoft Defender Endpoint cancel feature is enabled
   if (!featureFlags.microsoftDefenderEndpointCancelEnabled) {
     return false;
   }
 
-  // 3. Check if agent type supports cancel operations
-  if (!doesAgentTypeSupportCancel(agentType)) {
-    return false;
-  }
-
-  // 4. If specific command provided, check command-specific authorization
-  if (command) {
-    return canUserCancelCommand(authz, command);
-  }
-
-  // 5. General cancel capability (for UI visibility without specific command)
-  return true;
-};
-
-/**
- * Checks if the specified agent type supports cancel operations.
- * This function follows the same pattern as other agent type support checks
- * in the Security Solution codebase.
- *
- * @param agentType - The agent type to check
- * @returns true if the agent type supports cancel operations
- */
-export const doesAgentTypeSupportCancel = (agentType: ResponseActionAgentType): boolean => {
-  // Use existing pattern from is_response_action_supported.ts
-  // Currently only Microsoft Defender Endpoint supports cancel in manual mode
+  // Check if agent type supports cancel operations
   return isActionSupportedByAgentType(agentType, 'cancel', 'manual');
 };
 
 /**
- * Determines if a user has the necessary permissions to cancel a specific response action command.
- * Maps each command to its required permission using the established authorization patterns.
+ * Checks if user can cancel a specific command.
+ * Assumes cancel feature is available (checked separately).
  *
  * @param authz - The user's endpoint authorization permissions
  * @param command - The response action command being cancelled
@@ -83,22 +57,34 @@ export const canUserCancelCommand = (
   authz: EndpointAuthz,
   command: ResponseActionsApiCommandNames
 ): boolean => {
-  // Map each command to its required permission
-  // This mapping ensures users can only cancel commands they have permission to execute
-  const permissionMapping: Record<ResponseActionsApiCommandNames, keyof EndpointAuthz> = {
-    isolate: 'canIsolateHost',
-    unisolate: 'canUnIsolateHost',
-    'kill-process': 'canKillProcess',
-    'suspend-process': 'canSuspendProcess',
-    'running-processes': 'canGetRunningProcesses',
-    'get-file': 'canWriteFileOperations',
-    execute: 'canWriteExecuteOperations',
-    upload: 'canWriteFileOperations',
-    scan: 'canWriteScanOperations',
-    runscript: 'canWriteExecuteOperations',
-    cancel: 'canWriteSecuritySolution', // Cancel does not require any specific command access
-  };
-
-  const requiredPermission = permissionMapping[command];
+  const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+  const requiredPermission = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
   return requiredPermission ? (authz[requiredPermission] as boolean) : false;
+};
+
+/**
+ * Complete check for cancel permission
+ * Combines feature availability and command-specific permission.
+ *
+ * @param authz - The user's endpoint authorization permissions
+ * @param featureFlags - Experimental features configuration
+ * @param agentType - The agent type
+ * @param command - The response action command being cancelled
+ * @returns true if the user has permission to cancel the command
+ */
+export const checkCancelPermission = (
+  authz: EndpointAuthz,
+  featureFlags: ExperimentalFeatures,
+  agentType: ResponseActionAgentType,
+  command: ResponseActionsApiCommandNames
+): boolean => {
+  if (!isCancelFeatureAvailable(authz, featureFlags, agentType)) {
+    return false;
+  }
+
+  if (!canUserCancelCommand(authz, command)) {
+    return false;
+  }
+
+  return true;
 };

@@ -16,6 +16,11 @@ import type { BaseSelectorState } from './types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
+import {
+  getCancelPermissionDeniedMessage,
+  getPendingActionDescription,
+  UNKNOWN_HOST,
+} from '../../../common/translations';
 
 /**
  * Type representing a pending action item for cancellation
@@ -112,7 +117,7 @@ export const checkActionCancelPermission = (
     if (!canCancel) {
       return {
         canCancel: false,
-        reason: `You don't have permission to run ${displayCommand} action.`,
+        reason: getCancelPermissionDeniedMessage(displayCommand),
       };
     }
 
@@ -134,7 +139,7 @@ export const transformPendingActionsToOptions = (
   response: ActionListApiResponse[],
   selectedValue?: string,
   privilegeChecker?: (command: string) => { canCancel: boolean; reason?: string }
-): EuiSelectableOption<Partial<{ description: string; actionItem: ActionDetails }>>[] => {
+): EuiSelectableOption[] => {
   // The hook returns a single response object, but our data parameter is an array
   // So we need to handle both cases
   if (!response || response.length === 0) {
@@ -167,19 +172,17 @@ export const transformPendingActionsToOptions = (
         command as ResponseActionsApiCommandNames
       ] || command;
 
-    const description = `${displayCommand} on ${
-      hostName || 'Unknown host'
-    } by ${createdBy} at ${timestamp}`;
+    const description = getPendingActionDescription(displayCommand, hostName, createdBy, timestamp);
 
     // Check if user has permission to cancel this action
-    const permissionCheck = privilegeChecker ? privilegeChecker(command) : { canCancel: true };
+    const permissionCheck = privilegeChecker ? privilegeChecker(command) : { canCancel: false };
     const isDisabled = !permissionCheck.canCancel;
 
     return {
       label: `${displayCommand} - ${action.id}`,
       value: action.id,
       description,
-      actionItem: action,
+      data: action,
       checked: isChecked ? 'on' : undefined,
       disabled: isDisabled,
       toolTipContent: isDisabled ? permissionCheck.reason : undefined,

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
-import { canCancelResponseAction } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
+import { isCancelFeatureAvailable } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
@@ -214,10 +214,7 @@ export const getEndpointConsoleCommands = ({
   };
 
   const canCancelForCurrentContext = () => {
-    return (
-      canCancelResponseAction(endpointPrivileges, featureFlags, agentType) &&
-      isActionSupportedByAgentType(agentType, 'cancel', 'manual')
-    );
+    return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
   const consoleCommands: CommandDefinition[] = [
@@ -538,7 +535,7 @@ export const getEndpointConsoleCommands = ({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported: canCancelResponseAction(endpointPrivileges, featureFlags, agentType),
+        isSupported: isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType),
       }),
       RenderComponent: CancelActionResult,
       meta: {

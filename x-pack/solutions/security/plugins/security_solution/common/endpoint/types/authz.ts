@@ -114,7 +114,7 @@ export interface EndpointAuthz {
   canWriteAdminData: boolean;
   /**
    * If user has permissions to cancel response actions. Always false - requires dynamic validation
-   * through utility functions like canCancelResponseAction() to check agent type support and
+   * through utility functions like checkCancelPermission() to check agent type support and
    * command-specific permissions.
    */
   canCancelResponseActions: boolean;

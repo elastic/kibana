@@ -88,9 +88,6 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 
-// Note: NO_SPECIFIC_PRIVILEGE_REQUIRED sentinel value has been removed as part of
-// cancel action permission architecture redesign to follow established Kibana patterns
-
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'
   | 'writeHostIsolationRelease'
@@ -183,7 +180,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
-  cancel: 'canWriteSecuritySolution', // Use base permission for cancel operations
+  cancel: 'canReadSecuritySolution', // Use read permission for cancel operations - users with read access can cancel actions
 });
 
 // 4 hrs in seconds

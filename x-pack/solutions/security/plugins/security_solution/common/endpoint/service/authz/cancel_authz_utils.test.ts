@@ -12,10 +12,11 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../response_actions/constants';
 import {
-  canCancelResponseAction,
-  doesAgentTypeSupportCancel,
   canUserCancelCommand,
+  isCancelFeatureAvailable,
+  checkCancelPermission,
 } from './cancel_authz_utils';
+import { isActionSupportedByAgentType } from '../response_actions/is_response_action_supported';
 import { getEndpointAuthzInitialState } from './authz';
 import { allowedExperimentalValues } from '../../../experimental_features';
 
@@ -26,6 +27,7 @@ describe('cancel authorization utilities', () => {
   beforeEach(() => {
     mockAuthz = {
       ...getEndpointAuthzInitialState(),
+      canReadSecuritySolution: true,
       canWriteSecuritySolution: true,
       canIsolateHost: true,
       canUnIsolateHost: true,
@@ -43,26 +45,23 @@ describe('cancel authorization utilities', () => {
     } as ExperimentalFeatures;
   });
 
-  describe('canCancelResponseAction', () => {
-    it('should return true when user has permissions and feature is enabled for MDE agent', () => {
-      const result = canCancelResponseAction(
+  describe('isCancelFeatureAvailable', () => {
+    it('should return true when all conditions are met', () => {
+      const result = isCancelFeatureAvailable(
         mockAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint'
       );
-
       expect(result).toBe(true);
     });
 
     it('should return false when user lacks base security solution access', () => {
-      mockAuthz.canWriteSecuritySolution = false;
-
-      const result = canCancelResponseAction(
+      mockAuthz.canReadSecuritySolution = false;
+      const result = isCancelFeatureAvailable(
         mockAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint'
       );
-
       expect(result).toBe(false);
     });
 
@@ -71,73 +70,86 @@ describe('cancel authorization utilities', () => {
         ...allowedExperimentalValues,
         microsoftDefenderEndpointCancelEnabled: false,
       } as ExperimentalFeatures;
-
-      const result = canCancelResponseAction(
+      const result = isCancelFeatureAvailable(
         mockAuthz,
         disabledFeatures,
         'microsoft_defender_endpoint'
       );
-
       expect(result).toBe(false);
     });
 
-    it('should return false for agent types that do not support cancel', () => {
+    it('should return false for unsupported agent types', () => {
       const unsupportedAgentTypes: ResponseActionAgentType[] = [
         'endpoint',
         'sentinel_one',
         'crowdstrike',
       ];
-
       unsupportedAgentTypes.forEach((agentType) => {
-        const result = canCancelResponseAction(mockAuthz, mockExperimentalFeatures, agentType);
-
+        const result = isCancelFeatureAvailable(mockAuthz, mockExperimentalFeatures, agentType);
         expect(result).toBe(false);
       });
     });
+  });
 
-    it('should check specific command permissions when command is provided', () => {
-      mockAuthz.canIsolateHost = false;
-
-      const result = canCancelResponseAction(
+  describe('checkCancelPermission', () => {
+    it('should return true when all conditions are met', () => {
+      const result = checkCancelPermission(
         mockAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint',
         'isolate'
       );
+      expect(result).toBe(true);
+    });
 
+    it('should return false when feature is not available', () => {
+      const disabledFeatures = {
+        ...allowedExperimentalValues,
+        microsoftDefenderEndpointCancelEnabled: false,
+      } as ExperimentalFeatures;
+      const result = checkCancelPermission(
+        mockAuthz,
+        disabledFeatures,
+        'microsoft_defender_endpoint',
+        'isolate'
+      );
       expect(result).toBe(false);
     });
 
-    it('should allow cancel when user has permission for the specific command', () => {
-      const result = canCancelResponseAction(
+    it('should return false when user lacks command permission', () => {
+      mockAuthz.canIsolateHost = false;
+      const result = checkCancelPermission(
         mockAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint',
         'isolate'
       );
-
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
   });
 
-  describe('doesAgentTypeSupportCancel', () => {
+  describe('agent type support (via isActionSupportedByAgentType)', () => {
     it('should return true for microsoft_defender_endpoint', () => {
-      const result = doesAgentTypeSupportCancel('microsoft_defender_endpoint');
+      const result = isActionSupportedByAgentType(
+        'microsoft_defender_endpoint',
+        'cancel',
+        'manual'
+      );
       expect(result).toBe(true);
     });
 
     it('should return false for endpoint agent', () => {
-      const result = doesAgentTypeSupportCancel('endpoint');
+      const result = isActionSupportedByAgentType('endpoint', 'cancel', 'manual');
       expect(result).toBe(false);
     });
 
     it('should return false for sentinel_one agent', () => {
-      const result = doesAgentTypeSupportCancel('sentinel_one');
+      const result = isActionSupportedByAgentType('sentinel_one', 'cancel', 'manual');
       expect(result).toBe(false);
     });
 
     it('should return false for crowdstrike agent', () => {
-      const result = doesAgentTypeSupportCancel('crowdstrike');
+      const result = isActionSupportedByAgentType('crowdstrike', 'cancel', 'manual');
       expect(result).toBe(false);
     });
   });
@@ -157,7 +169,6 @@ describe('cancel authorization utilities', () => {
       { command: 'upload', permission: 'canWriteFileOperations' },
       { command: 'scan', permission: 'canWriteScanOperations' },
       { command: 'runscript', permission: 'canWriteExecuteOperations' },
-      { command: 'cancel', permission: 'canWriteSecuritySolution' },
     ];
 
     commandPermissionTests.forEach(({ command, permission }) => {
@@ -185,17 +196,18 @@ describe('cancel authorization utilities', () => {
       const command = 'isolate';
 
       // Check overall permission
-      const canCancel = canCancelResponseAction(
+      const result = checkCancelPermission(
         mockAuthz,
         mockExperimentalFeatures,
         agentType,
         command
       );
+      const canCancel = result;
 
       // Verify individual checks
-      const hasBaseAccess = mockAuthz.canWriteSecuritySolution;
+      const hasBaseAccess = mockAuthz.canReadSecuritySolution;
       const featureEnabled = mockExperimentalFeatures.microsoftDefenderEndpointCancelEnabled;
-      const agentSupportsCancel = doesAgentTypeSupportCancel(agentType);
+      const agentSupportsCancel = isActionSupportedByAgentType(agentType, 'cancel', 'manual');
       const hasCommandPermission = canUserCancelCommand(mockAuthz, command);
 
       expect(hasBaseAccess).toBe(true);
@@ -210,7 +222,7 @@ describe('cancel authorization utilities', () => {
         {
           name: 'no base access',
           setup: () => {
-            mockAuthz.canWriteSecuritySolution = false;
+            mockAuthz.canReadSecuritySolution = false;
           },
         },
         {
@@ -240,7 +252,7 @@ describe('cancel authorization utilities', () => {
         // Reset to clean state
         mockAuthz = {
           ...getEndpointAuthzInitialState(),
-          canWriteSecuritySolution: true,
+          canReadSecuritySolution: true,
           canIsolateHost: true,
         };
         mockExperimentalFeatures = {
@@ -252,7 +264,7 @@ describe('cancel authorization utilities', () => {
 
         const agentType =
           name === 'unsupported agent type' ? 'endpoint' : 'microsoft_defender_endpoint';
-        const result = canCancelResponseAction(
+        const result = checkCancelPermission(
           mockAuthz,
           mockExperimentalFeatures,
           agentType as ResponseActionAgentType,
@@ -263,8 +275,8 @@ describe('cancel authorization utilities', () => {
       });
     });
 
-    it('should allow general cancel capability check without specific command', () => {
-      const result = canCancelResponseAction(
+    it('should handle feature availability check separately', () => {
+      const result = isCancelFeatureAvailable(
         mockAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint'
@@ -276,26 +288,26 @@ describe('cancel authorization utilities', () => {
     it('should handle edge case with minimal permissions', () => {
       const minimalAuthz: EndpointAuthz = {
         ...getEndpointAuthzInitialState(),
-        canWriteSecuritySolution: true, // Only base permission
+        canReadSecuritySolution: true, // Only base permission
       };
 
-      const result = canCancelResponseAction(
+      const result = isCancelFeatureAvailable(
         minimalAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint'
       );
 
-      expect(result).toBe(true); // Should pass without specific command
+      expect(result).toBe(true); // Feature should be available
     });
 
     it('should deny specific command cancel with minimal permissions', () => {
       const minimalAuthz: EndpointAuthz = {
         ...getEndpointAuthzInitialState(),
-        canWriteSecuritySolution: true, // Only base permission
+        canReadSecuritySolution: true, // Only base permission
         canIsolateHost: false, // No isolate permission
       };
 
-      const result = canCancelResponseAction(
+      const result = checkCancelPermission(
         minimalAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint',

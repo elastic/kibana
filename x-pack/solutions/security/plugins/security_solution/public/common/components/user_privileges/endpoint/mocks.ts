@@ -13,9 +13,7 @@ export const getEndpointPrivilegesInitialStateMock = ({
   ...overrides
 }: Partial<EndpointPrivileges> = {}): EndpointPrivileges => {
   const endpointPrivilegesMock: EndpointPrivileges = {
-    ...getEndpointAuthzInitialStateMock({
-      ...overrides,
-    }),
+    ...getEndpointAuthzInitialStateMock(overrides),
     loading,
   };
 
