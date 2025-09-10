@@ -37,7 +37,6 @@ jobs:
         debug: true
         packs: |
           githubsecuritylab/codeql-${{ matrix.language }}-queries
-          github/codeql:${{ matrix.language }}-queries
 
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
