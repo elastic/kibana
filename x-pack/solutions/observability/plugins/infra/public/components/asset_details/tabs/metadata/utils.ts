@@ -14,30 +14,25 @@ export interface Field {
   value?: string | string[];
 }
 interface FieldsByCategory {
-  [key: string]: string | boolean | string[] | { [key: string]: string };
+  [key: string]:
+    | string
+    | boolean
+    | string[]
+    | { [key: string]: string | string[] | undefined }
+    | undefined;
 }
 
-type FieldCategory =
-  | 'cloud'
-  | 'host'
-  | 'agent'
-  | 'container'
-  | 'resource.attributes.os'
-  | 'resource.attributes.host'
-  | 'resource.attributes.agent'
-  | 'resource.attributes.cloud';
+type FieldCategory = 'cloud' | 'host' | 'agent' | 'container' | 'resource.attributes';
 
 export const getAllFields = (
   metadata: InfraMetadata | undefined,
   schema: DataSchemaFormat | null
 ) => {
   if (!metadata?.info) return [];
-
   const mapNestedProperties = (category: FieldCategory, property: string) => {
     const fieldsByCategory: FieldsByCategory = get(metadata?.info, category) ?? {};
     if (Object.hasOwn(fieldsByCategory, property)) {
       const value = fieldsByCategory[property];
-
       if (typeof value === 'boolean') {
         return {
           name: `${category}.${property}`,
@@ -69,29 +64,12 @@ export const getAllFields = (
 
   const additionalCategories = [];
   if (schema === 'semconv') {
-    const osResourceAttributes = Object.keys(
-      metadata?.info?.resource?.attributes?.os ?? {}
-    ).flatMap((prop) => mapNestedProperties('resource.attributes.os', prop));
-
-    const hostResourceAttributes = Object.keys(
-      metadata?.info?.resource?.attributes?.host ?? {}
-    ).flatMap((prop) => mapNestedProperties('resource.attributes.host', prop));
-
-    const agentResourceAttributes = Object.keys(
-      metadata?.info?.resource?.attributes?.agent ?? {}
-    ).flatMap((prop) => mapNestedProperties('resource.attributes.agent', prop));
-
-    const cloudResourceAttributes = Object.keys(
-      metadata?.info?.resource?.attributes?.cloud ?? {}
-    ).flatMap((prop) => mapNestedProperties('resource.attributes.cloud', prop));
-
-    additionalCategories.push(
-      ...osResourceAttributes,
-      ...hostResourceAttributes,
-      ...agentResourceAttributes,
-      ...cloudResourceAttributes
+    const resourceAttributes = Object.keys(metadata?.info?.resource?.attributes ?? {}).flatMap(
+      (prop) => mapNestedProperties('resource.attributes', prop)
     );
+    additionalCategories.push(...resourceAttributes);
   }
+
   const agent = Object.keys(metadata.info.agent ?? {}).flatMap((prop) =>
     mapNestedProperties('agent', prop)
   );
