@@ -37,7 +37,6 @@ export const TimeSaved: React.FC<Props> = ({
     >
       <TimeSavedMetric minutesPerAlert={minutesPerAlert} from={from} to={to} />
       <ComparePercentage
-        // description={i18n.TIME_SAVED_DESC}
         positionForLens
         currentCount={hoursSaved}
         previousCount={hoursSavedCompare}

@@ -38,7 +38,7 @@ describe('AlertProcessingKeyInsight', () => {
   });
 
   it('renders the component with correct markup', () => {
-    render(<AlertProcessingKeyInsight valueMetrics={defaultValueMetrics} />);
+    render(<AlertProcessingKeyInsight isLoading={false} valueMetrics={defaultValueMetrics} />);
     expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
     expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
     expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('AlertProcessingKeyInsight', () => {
   });
 
   it('calls formatters with correct values', () => {
-    render(<AlertProcessingKeyInsight valueMetrics={defaultValueMetrics} />);
+    render(<AlertProcessingKeyInsight isLoading={false} valueMetrics={defaultValueMetrics} />);
 
     expect(mockFormatPercent).toHaveBeenCalledWith(80.0);
     expect(mockFormatThousands).toHaveBeenCalledWith(800);

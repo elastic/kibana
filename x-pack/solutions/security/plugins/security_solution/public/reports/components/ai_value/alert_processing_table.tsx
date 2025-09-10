@@ -6,12 +6,20 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiHealth,
+  useEuiTheme,
+  EuiSkeletonText,
+} from '@elastic/eui';
 import * as i18n from './translations';
 
 interface Props {
   filteredAlerts: number;
   escalatedAlerts: number;
+  isLoading: boolean;
   filteredAlertsPerc: string;
   escalatedAlertsPerc: string;
 }
@@ -19,6 +27,7 @@ interface Props {
 export const AlertsProcessingTable: React.FC<Props> = ({
   filteredAlerts,
   escalatedAlerts,
+  isLoading,
   filteredAlertsPerc,
   escalatedAlertsPerc,
 }) => {
@@ -42,10 +51,14 @@ export const AlertsProcessingTable: React.FC<Props> = ({
               <p>{i18n.AI_FILTERED}</p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{`${filteredAlerts} (${filteredAlertsPerc})`}</strong>
-            </EuiText>
+          <EuiFlexItem grow={isLoading}>
+            {isLoading ? (
+              <EuiSkeletonText lines={1} size="xs" isLoading={true} />
+            ) : (
+              <EuiText size="s">
+                <strong>{`${filteredAlerts} (${filteredAlertsPerc})`}</strong>
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -60,10 +73,14 @@ export const AlertsProcessingTable: React.FC<Props> = ({
               <p>{i18n.ESCALATED}</p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{`${escalatedAlerts} (${escalatedAlertsPerc})`}</strong>
-            </EuiText>
+          <EuiFlexItem grow={isLoading}>
+            {isLoading ? (
+              <EuiSkeletonText lines={1} size="xs" isLoading={true} />
+            ) : (
+              <EuiText size="s">
+                <strong>{`${escalatedAlerts} (${escalatedAlertsPerc})`}</strong>
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

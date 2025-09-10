@@ -54,8 +54,7 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
     setHasAttackDiscoveries(hasAttackDiscoveries);
   }, [hasAttackDiscoveries, setHasAttackDiscoveries]);
 
-  // TODO loading state UI
-  return isLoading ? null : (
+  return (
     <div
       css={css`
         background: ${colors.backgroundBaseSubdued};
@@ -68,16 +67,18 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
         analystHourlyRate={analystHourlyRate}
         hasAttackDiscoveries={hasAttackDiscoveries}
         minutesPerAlert={minutesPerAlert}
+        isLoading={isLoading}
         from={from}
         to={to}
         valueMetrics={valueMetrics}
         valueMetricsCompare={valueMetricsCompare}
       />
       <EuiHorizontalRule />
-      {hasAttackDiscoveries && (
+      {(isLoading || hasAttackDiscoveries) && (
         <>
           <AlertProcessing
             attackAlertIds={attackAlertIds}
+            isLoading={isLoading}
             valueMetrics={valueMetrics}
             from={from}
             to={to}
@@ -85,13 +86,14 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
           <EuiHorizontalRule />
         </>
       )}
-      {hasAttackDiscoveries && (
+      {(isLoading || hasAttackDiscoveries) && (
         <>
           <CostSavingsTrend
             analystHourlyRate={analystHourlyRate}
             minutesPerAlert={minutesPerAlert}
             from={from}
             to={to}
+            isLoading={isLoading}
           />
           <EuiHorizontalRule />
         </>

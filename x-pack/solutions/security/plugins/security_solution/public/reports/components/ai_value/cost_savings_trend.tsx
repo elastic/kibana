@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +29,7 @@ import { CostSavingsKeyInsight } from './cost_savings_key_insight';
 
 interface Props {
   from: string;
+  isLoading: boolean;
   to: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
@@ -44,6 +45,7 @@ const ID = 'CostSavingsTrendQuery';
 const CostSavingsTrendComponent: React.FC<Props> = ({
   minutesPerAlert,
   analystHourlyRate,
+  isLoading,
   from,
   to,
 }) => {
@@ -65,6 +67,10 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       setLensResponse(data.tables);
     }
   }, []);
+  useEffect(() => {
+    // when timerange changes, reset lens response
+    setLensResponse(null);
+  }, [timerange]);
 
   return (
     <div
@@ -107,7 +113,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             max-width: ${isSmall ? 'auto' : '300px'};
           `}
         >
-          <CostSavingsKeyInsight lensResponse={lensResponse} />
+          <CostSavingsKeyInsight isLoading={isLoading} lensResponse={lensResponse} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

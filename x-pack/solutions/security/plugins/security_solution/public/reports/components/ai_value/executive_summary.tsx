@@ -16,6 +16,7 @@ import {
   EuiInlineEditTitle,
   useEuiTheme,
   useIsWithinMaxBreakpoint,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_VALUE_REPORT_TITLE } from '../../../../common/constants';
@@ -32,6 +33,7 @@ interface Props {
   attackAlertIds: string[];
   from: string;
   to: string;
+  isLoading: boolean;
   hasAttackDiscoveries: boolean;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
@@ -44,6 +46,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
   minutesPerAlert,
   analystHourlyRate,
   hasAttackDiscoveries,
+  isLoading,
   from,
   to,
   valueMetrics,
@@ -130,7 +133,9 @@ export const ExecutiveSummary: React.FC<Props> = ({
         >
           <span>
             <EuiText size="s">
-              {hasAttackDiscoveries && (
+              {isLoading ? (
+                <EuiSkeletonText lines={3} size="s" isLoading={true} />
+              ) : hasAttackDiscoveries ? (
                 <p data-test-subj="executiveSummaryMessage">
                   {i18n.EXECUTIVE_SUMMARY_SUBTITLE}
                   <strong>
@@ -148,8 +153,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   <br />
                   {i18n.EXECUTIVE_SUMMARY_SECONDARY_TEXT}
                 </p>
-              )}
-              {!hasAttackDiscoveries && (
+              ) : (
                 <p data-test-subj="executiveSummaryNoAttacks">
                   {i18n.EXECUTIVE_MESSAGE_NO_ATTACKS}
                 </p>
@@ -159,7 +163,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
         </EuiFlexItem>
 
         {/* Right side - Only Cost Savings card */}
-        {hasAttackDiscoveries && (
+        {(isLoading || hasAttackDiscoveries) && (
           <EuiFlexItem
             css={css`
               min-width: 300px;
@@ -181,7 +185,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
       </EuiFlexGroup>
 
       {/* Bottom row - Three KPI cards */}
-      {hasAttackDiscoveries && (
+      {(isLoading || hasAttackDiscoveries) && (
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup direction={isSmall ? 'column' : 'row'} gutterSize="m">

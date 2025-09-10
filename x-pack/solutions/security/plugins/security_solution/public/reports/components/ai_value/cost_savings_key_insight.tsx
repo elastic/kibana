@@ -27,10 +27,11 @@ import { useAssistantAvailability } from '../../../assistant/use_assistant_avail
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
 
 interface Props {
+  isLoading: boolean;
   lensResponse: VisualizationTablesWithMeta | null;
 }
 
-export const CostSavingsKeyInsight: React.FC<Props> = ({ lensResponse }) => {
+export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse }) => {
   const {
     euiTheme: { size },
   } = useEuiTheme();
@@ -69,6 +70,9 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ lensResponse }) => {
   useEffect(() => {
     fetchInsight();
   }, [fetchInsight]);
+  useEffect(() => {
+    if (!lensResponse) setInsightResult('');
+  }, [lensResponse]);
   return (
     <div
       data-test-subj="alertProcessingKeyInsightsContainer"
@@ -102,7 +106,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ lensResponse }) => {
 
         <EuiSpacer size="m" />
 
-        {insightResult ? (
+        {insightResult && !isLoading ? (
           <Markdown markdown={insightResult} />
         ) : (
           <EuiSkeletonText lines={3} size="s" isLoading={true} />

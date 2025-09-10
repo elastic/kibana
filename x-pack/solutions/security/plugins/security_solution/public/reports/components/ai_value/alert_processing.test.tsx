@@ -46,6 +46,7 @@ const defaultValueMetrics: ValueMetrics = {
 const defaultProps = {
   valueMetrics: defaultValueMetrics,
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
+  isLoading: false,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
 };

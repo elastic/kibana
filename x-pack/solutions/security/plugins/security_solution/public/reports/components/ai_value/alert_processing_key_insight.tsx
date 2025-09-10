@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -22,10 +23,11 @@ import type { ValueMetrics } from './metrics';
 import { formatThousands, formatPercent } from './metrics';
 
 interface Props {
+  isLoading: boolean;
   valueMetrics: ValueMetrics;
 }
 
-export const AlertProcessingKeyInsight: React.FC<Props> = ({ valueMetrics }) => {
+export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMetrics }) => {
   const {
     euiTheme: { size },
   } = useEuiTheme();
@@ -61,40 +63,48 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ valueMetrics }) => 
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
-
-        <EuiText
-          size="s"
-          css={css`
-            line-height: 1.6em;
-          `}
-        >
-          <ul>
-            <li
-              css={css`
-                margin-bottom: 5px;
-              `}
-            >
-              <strong>
-                {i18n.FILTERED_ALERTS_1({
-                  percentage: formatPercent(valueMetrics.filteredAlertsPerc),
-                  count: formatThousands(valueMetrics.filteredAlerts),
-                })}
-              </strong>
-              {i18n.FILTERED_ALERTS_2}
-            </li>
-            <li>
-              <strong>
-                {i18n.ESCALATED_ALERTS_1({
-                  percentage: formatPercent(valueMetrics.escalatedAlertsPerc),
-                  count: formatThousands(valueMetrics.totalAlerts - valueMetrics.filteredAlerts),
-                })}
-              </strong>
-              {i18n.ESCALATED_ALERTS_2}
-            </li>
-          </ul>
-          <EuiHorizontalRule />
-          <p>{i18n.MINIMIZE_ALERT_FATIGUE}</p>
-        </EuiText>
+        {isLoading ? (
+          <>
+            <EuiSkeletonText lines={3} size="s" isLoading={true} />
+            <EuiSkeletonText lines={3} size="s" isLoading={true} />
+            <EuiHorizontalRule />
+            <EuiSkeletonText lines={2} size="s" isLoading={true} />
+          </>
+        ) : (
+          <EuiText
+            size="s"
+            css={css`
+              line-height: 1.6em;
+            `}
+          >
+            <ul>
+              <li
+                css={css`
+                  margin-bottom: 5px;
+                `}
+              >
+                <strong>
+                  {i18n.FILTERED_ALERTS_1({
+                    percentage: formatPercent(valueMetrics.filteredAlertsPerc),
+                    count: formatThousands(valueMetrics.filteredAlerts),
+                  })}
+                </strong>
+                {i18n.FILTERED_ALERTS_2}
+              </li>
+              <li>
+                <strong>
+                  {i18n.ESCALATED_ALERTS_1({
+                    percentage: formatPercent(valueMetrics.escalatedAlertsPerc),
+                    count: formatThousands(valueMetrics.totalAlerts - valueMetrics.filteredAlerts),
+                  })}
+                </strong>
+                {i18n.ESCALATED_ALERTS_2}
+              </li>
+            </ul>
+            <EuiHorizontalRule />
+            <p>{i18n.MINIMIZE_ALERT_FATIGUE}</p>
+          </EuiText>
+        )}
       </span>
     </div>
   );

@@ -54,6 +54,7 @@ const mockLensResponse = {
 } as unknown as VisualizationTablesWithMeta;
 
 const defaultProps = {
+  isLoading: false,
   lensResponse: mockLensResponse,
 };
 
