@@ -2348,7 +2348,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       */
     upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(
+        .put(
           getRouteUrlForSpace(
             replaceParams('/api/entity_store/entities/{entityType}', props.params),
             kibanaSpace
