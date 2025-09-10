@@ -99,6 +99,7 @@ import {
   deleteAllEntitySnapshotIndices,
   createEntityResetIndex,
   deleteEntityResetIndex,
+  getEntityResetIndexStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
@@ -122,6 +123,7 @@ import { convertToEntityManagerDefinition } from './entity_definitions/entity_ma
 import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from './saved_object';
+import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -248,6 +250,15 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
+          getEntityResetIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+          }),
+          ...(await getEntityILMPolicyStatuses({
+            definition,
+            esClient: this.esClient,
+          })),
           getEntityIndexComponentTemplateStatus({
             definitionId: definition.id,
             esClient: this.esClient,

@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type EntityType } from '../../../../../common/api/entity_analytics';
+import {
+  type EngineComponentStatus,
+  EngineComponentResourceEnum,
+  type EntityType,
+} from '../../../../../common/api/entity_analytics';
 import { getEntitiesResetIndexName } from '../utils';
 
 interface Options {
@@ -31,3 +35,21 @@ export function deleteEntityResetIndex({ entityType, esClient, namespace }: Opti
     }
   );
 }
+
+export const getEntityResetIndexStatus = async ({
+  entityType,
+  esClient,
+  namespace,
+}: Pick<Options, 'entityType' | 'namespace' | 'esClient'>): Promise<EngineComponentStatus> => {
+  const index = getEntitiesResetIndexName(entityType, namespace);
+  const exists = await esClient.indices.exists(
+    {
+      index,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  return { id: index, installed: exists, resource: EngineComponentResourceEnum.index };
+};
