@@ -48,8 +48,7 @@ describe('AddFilter', () => {
     renderAddFilterComponent({ onAddFilter });
 
     await user.type(screen.getByTestId('fieldFilterInput'), 'tim*');
-
-    await user.click(screen.getByTestId('addFieldFilterButton'));
+    await user.click(screen.getByText('Add'));
     expect(onAddFilter).toBeCalledWith('tim*');
   });
 
@@ -61,7 +60,7 @@ describe('AddFilter', () => {
 
     // Set a value in the input field
     await user.type(screen.getByTestId('fieldFilterInput'), ' ');
-    await user.click(screen.getByTestId('addFieldFilterButton'));
+    await user.click(screen.getByText('Add'));
     expect(onAddFilter).not.toBeCalled();
   });
 
