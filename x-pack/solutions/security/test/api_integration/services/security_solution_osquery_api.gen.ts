@@ -49,7 +49,7 @@ import {
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
 import { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
