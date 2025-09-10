@@ -90,7 +90,13 @@ export function LogsOverviewHighlights({
       title: traceLabel,
       formatter: (value: unknown, formattedValue: string) => (
         <HighlightField value={value as string} formattedValue={formattedValue}>
-          {({ content }) => <TraceIdLink traceId={value as string} formattedTraceId={content} />}
+          {({ content }) => (
+            <TraceIdLink
+              traceId={value as string}
+              formattedTraceId={content}
+              data-test-subj="unifiedDocViewLogsOverviewTraceIdHighlightLink"
+            />
+          )}
         </HighlightField>
       ),
     },
