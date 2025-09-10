@@ -32,6 +32,22 @@ export const reactFatalErrorSchema = {
       optional: false as const,
     },
   },
+  component_render_min_duration_ms: {
+    type: 'long' as const,
+    _meta: {
+      description:
+        'Minimum duration in milliseconds that the fatal error component stayed rendered (before unmount). A max value of 120,000 (2 minutes) is enforced to prevent excessive, indefinite or indeterminable durations.',
+      optional: false as const,
+    },
+  },
+  has_subsequent_navigation: {
+    type: 'boolean' as const,
+    _meta: {
+      description:
+        'Indicates if there was a navigation after the error occurred. This helps identify transient navigation related errors.',
+      optional: false as const,
+    },
+  },
   error_message: {
     type: 'keyword' as const,
     _meta: {

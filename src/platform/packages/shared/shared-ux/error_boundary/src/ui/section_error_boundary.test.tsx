@@ -15,7 +15,7 @@ import { apm } from '@elastic/apm-rum';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import type { KibanaErrorBoundaryServices } from '../../types';
-import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
 import { KibanaErrorService } from '../services/error_service';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
