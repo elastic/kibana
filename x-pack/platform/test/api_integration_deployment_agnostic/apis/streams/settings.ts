@@ -18,9 +18,34 @@ import type { StreamsSupertestRepositoryClient } from './helpers/repository_clie
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
   let apiClient: StreamsSupertestRepositoryClient;
+
+  async function updateDefinition(
+    definition: Streams.ingest.all.GetResponse,
+    settings: IngestStreamSettings
+  ) {
+    const request = {
+      dashboards: [],
+      queries: [],
+      rules: [],
+      stream: {
+        description: '',
+        ingest: {
+          ...definition.stream.ingest,
+          settings,
+        },
+      },
+    };
+    return await putStream(
+      apiClient,
+      definition.stream.name,
+      request as Streams.ingest.all.UpsertRequest
+    );
+  }
 
   async function expectSettings(
     streams: string[],
@@ -41,7 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
   }
 
-  describe('Settings', () => {
+  describe.only('Settings', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -54,20 +79,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Wired streams update', () => {
       it('updates settings', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
-
-        const response = await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
-          rules: [],
-          stream: {
-            description: '',
-            ingest: {
-              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
-              settings: {
-                'index.refresh_interval': { value: '10s' },
-              },
-            },
-          },
+        const response = await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
+          'index.refresh_interval': { value: '10s' },
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -87,10 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               settings: {},
               processing: { steps: [] },
               lifecycle: { inherit: {} },
-              wired: {
-                fields: {},
-                routing: [],
-              },
+              wired: { fields: {}, routing: [] },
             },
           },
         });
@@ -100,24 +110,117 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const rootDefinition = await getStream(apiClient, 'logs');
+        await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
+          'index.refresh_interval': { value: '20s' },
+        });
 
-        await putStream(apiClient, 'logs', {
+        await expectSettings(['logs', 'logs.foo', 'logs.foo.bar'], {
+          'index.refresh_interval': { value: '20s', from: 'logs' },
+        });
+      });
+
+      it('allows local overrides', async () => {
+        await putStream(apiClient, 'logs.override', {
           dashboards: [],
           queries: [],
           rules: [],
           stream: {
             description: '',
             ingest: {
-              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               settings: {
-                'index.refresh_interval': { value: '20s' },
+                'index.refresh_interval': { value: '30s' },
               },
+              processing: { steps: [] },
+              lifecycle: { inherit: {} },
+              wired: { fields: {}, routing: [] },
             },
           },
         });
 
-        await expectSettings(['logs', 'logs.foo', 'logs.foo.bar'], {
-          'index.refresh_interval': { value: '20s', from: 'logs' },
+        await expectSettings(['logs.override'], {
+          'index.refresh_interval': { value: '30s', from: 'logs.override' },
+        });
+
+        const rootDefinition = await getStream(apiClient, 'logs');
+        await updateDefinition(rootDefinition as Streams.WiredStream.GetResponse, {
+          'index.refresh_interval': { value: '40s' },
+        });
+
+        // override is preserved
+        await expectSettings(['logs.override'], {
+          'index.refresh_interval': { value: '30s', from: 'logs.override' },
+        });
+      });
+
+      if (!isServerless) {
+        it('allows all settings', async () => {
+          await putStream(apiClient, 'logs.allsettings', {
+            dashboards: [],
+            queries: [],
+            rules: [],
+            stream: {
+              description: '',
+              ingest: {
+                settings: {
+                  'index.refresh_interval': { value: '30s' },
+                  'index.number_of_shards': { value: 3 },
+                  'index.number_of_replicas': { value: 2 },
+                },
+                processing: { steps: [] },
+                lifecycle: { inherit: {} },
+                wired: { fields: {}, routing: [] },
+              },
+            },
+          });
+
+          await expectSettings(['logs.allsettings'], {
+            'index.refresh_interval': { value: '30s', from: 'logs.allsettings' },
+            'index.number_of_shards': { value: 3, from: 'logs.allsettings' },
+            'index.number_of_replicas': { value: 2, from: 'logs.allsettings' },
+          });
+        });
+      }
+    });
+
+    describe('Classic streams update', () => {
+      const name = 'logs-settings-overrides';
+      before(async () => {
+        await esClient.indices.createDataStream({ name });
+      });
+
+      after(async () => {
+        await esClient.indices.deleteDataStream({ name });
+      });
+
+      it('updates settings', async () => {
+        await putStream(apiClient, 'logs-settings-overrides', {
+          dashboards: [],
+          queries: [],
+          rules: [],
+          stream: {
+            description: '',
+            ingest: {
+              settings: {
+                'index.refresh_interval': { value: '30s' },
+              },
+              processing: { steps: [] },
+              lifecycle: { inherit: {} },
+              classic: {},
+            },
+          },
+        });
+
+        await expectSettings(['logs-settings-overrides'], {
+          'index.refresh_interval': { value: '30s' },
+        });
+
+        const definition = await getStream(apiClient, 'logs-settings-overrides');
+        await updateDefinition(definition as Streams.ClassicStream.GetResponse, {
+          'index.refresh_interval': { value: '40s' },
+        });
+
+        await expectSettings(['logs-settings-overrides'], {
+          'index.refresh_interval': { value: '40s' },
         });
       });
     });
