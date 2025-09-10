@@ -143,10 +143,10 @@ describe('buildDatasourceStates', () => {
           query: 'from test | limit 10',
         },
         metric: {
+          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
-          show_array_values: false,
           alignments: { labels: 'left', value: 'left' },
         },
         sampling: 1,

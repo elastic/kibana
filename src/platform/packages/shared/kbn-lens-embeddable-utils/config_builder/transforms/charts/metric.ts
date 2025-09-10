@@ -73,7 +73,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           secondaryMetricAccessor: getAccessorName('secondary'),
           secondaryPrefix: layer.secondary_metric.prefix,
           secondaryAlign: layer.metric.alignments.value,
-          secondaryLabelPosition: layer.metric.alignments.labels,
+          // secondaryLabelPosition: layer.metric.alignments.labels,
           // secondaryLabel: '',
         }
       : {}),

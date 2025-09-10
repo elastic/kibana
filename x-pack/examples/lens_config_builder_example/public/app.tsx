@@ -92,6 +92,7 @@ export const App = (props: {
       console.log('finalLensState', finalLensState);
       return finalLensState as TypedLensByValueInput['attributes'];
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
     }
   }, [lensConfig]);
