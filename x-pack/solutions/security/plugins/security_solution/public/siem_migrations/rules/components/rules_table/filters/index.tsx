@@ -39,18 +39,20 @@ export const MigrationRulesFilter: React.FC<MigrationRulesFilterProps> = React.m
       [filterOptions, onFilterOptionsChanged]
     );
 
+    const statusFilterOptions = [
+      ...statusFilterBaseOptions,
+      {
+        label: i18n.INDEX_PATTERN_MISSING_FILTER_OPTION,
+        data: { status: RulesSpecificStatusFilter.INDEX_PATTERN_MISSING },
+      },
+    ];
+
     return (
       <EuiFilterGroup>
         <StatusFilterButton
           status={filterOptions?.status}
           onStatusChanged={handleOnStatusChanged}
-          statusFilterOptions={[
-            ...statusFilterBaseOptions,
-            {
-              label: i18n.INDEX_PATTERN_MISSING_FILTER_OPTION,
-              data: { status: RulesSpecificStatusFilter.INDEX_PATTERN_MISSING },
-            },
-          ]}
+          statusFilterOptions={statusFilterOptions}
         />
         <AuthorFilterButton
           author={filterOptions?.author}
