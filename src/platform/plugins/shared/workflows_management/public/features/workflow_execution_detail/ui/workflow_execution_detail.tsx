@@ -20,7 +20,7 @@ export interface WorkflowExecutionProps {
   workflowExecutionId: string;
   workflowYaml: string;
   fields?: Array<keyof EsWorkflowStepExecution>;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
@@ -137,7 +137,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
         onStepExecutionClick={(stepExecutionId) => {
           setSelectedStepExecution(stepExecutionId);
         }}
-        onClose={onClose}
+        onClose={onClose || (() => {})}
         selectedId={selectedStepExecutionId ?? null}
       />
     </>

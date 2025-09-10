@@ -28,6 +28,7 @@ import { WorkflowExecutionList } from '../../../features/workflow_execution_list
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
+import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -49,6 +50,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     isLoading: isLoadingWorkflow,
     error: workflowError,
   } = useWorkflowDetail(id);
+
+  useEffect(() => {
+    console.log(workflow);
+  }, [workflow]);
+
+  useEffect(() => {
+    console.log(workflow);
+  }, [workflow]);
 
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
@@ -123,6 +132,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
+  const [testStepId, setTestStepId] = useState<string | null>(null);
 
   const handleRunClick = () => {
     let needInput: boolean | undefined = false;
@@ -222,13 +232,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
     if (params.actionType === 'run') {
-      const response = await runIndividualStep.mutateAsync({
-        stepId: params.stepId,
-        workflowYaml,
-        stepInputs: {},
-      });
-      setSelectedExecution(response.workflowExecutionId);
+      setTestStepId(params.stepId);
     }
+  };
+
+  const submitStepRun = async () => {
+    const response = await runIndividualStep.mutateAsync({
+      stepId: testStepId!,
+      workflowYaml,
+      stepInputs: {},
+    });
+    setSelectedExecution(response.workflowExecutionId);
+    setTestStepId(null);
   };
 
   if (workflowError) {
@@ -325,6 +340,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         <TestWorkflowModal
           workflowYaml={workflowYaml}
           onClose={() => setTestWorkflowModalOpen(false)}
+        />
+      )}
+      {testStepId && (
+        <TestStepModal
+          stepId={testStepId}
+          workflowYaml={workflowYaml}
+          onSubmit={() => submitStepRun()}
+          onClose={() => setTestStepId(null)}
         />
       )}
     </div>
