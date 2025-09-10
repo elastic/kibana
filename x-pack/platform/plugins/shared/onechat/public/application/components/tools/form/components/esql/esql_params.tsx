@@ -23,11 +23,11 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { defer } from 'lodash';
 import React, { useCallback } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { useEsqlEditorParams } from '../hooks/use_esql_editor_params';
-import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
-import { i18nMessages } from '../i18n';
-import type { EsqlParamFormData } from '../types/tool_form_types';
-import { EsqlParamSource, type EsqlToolFormData } from '../types/tool_form_types';
+import { useEsqlEditorParams } from '../../hooks/use_esql_editor_params';
+import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
+import { i18nMessages } from '../../i18n';
+import type { EsqlParamFormData } from '../../types/tool_form_types';
+import { EsqlParamSource, type EsqlToolFormData } from '../../types/tool_form_types';
 import { EsqlParamRow } from './esql_param_row';
 
 interface EsqlParamActionsProps {

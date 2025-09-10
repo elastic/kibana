@@ -9,16 +9,9 @@ import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { NullGroupProps } from './types';
 
-export const NullGroup = ({
-  title,
-  field,
-  unit,
-}: {
-  title: string;
-  field: string;
-  unit: string;
-}) => {
+export const NullGroup = ({ title, field, unit }: NullGroupProps) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <strong>{title}</strong>
@@ -31,13 +24,13 @@ export const NullGroup = ({
         content={
           <>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.grouping.nullGroupTooltip"
+              id="securitySolutionPackages.cloudSecurityGrouping.nullGroupTooltip"
               defaultMessage="The selected {groupingTitle} field, {field} is missing a value for this group of {unit}."
               values={{
                 groupingTitle: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.securitySolution.assetInventory.grouping.nullGroupTooltip.groupingTitle"
+                      id="securitySolutionPackages.cloudSecurityGrouping.nullGroupTooltip.groupingTitle"
                       defaultMessage="group by"
                     />
                   </strong>
