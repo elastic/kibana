@@ -63,7 +63,6 @@ export const calculateScoresWithESQL = async (
       .search<never, RiskScoreCompositeBuckets>(compositeQuery)
       .catch((e) => {
         logger.error(`Error executing composite query: ${e.message}`);
-        console.log(JSON.stringify(compositeQuery));
       });
 
     if (!response?.aggregations) {
@@ -80,10 +79,16 @@ export const calculateScoresWithESQL = async (
             { afterKey, scores: [] },
           ] satisfies ESQLResults[number]);
         }
+        const bounds = {
+          lower: params.afterKeys[entityType]?.[EntityTypeToIdentifierField[entityType]],
+          upper: afterKey?.[EntityTypeToIdentifierField[entityType]],
+        };
+
         const query = getESQL(
           entityType as EntityType,
-          entities,
-          params.alertSampleSizePerShard || 10000
+          bounds,
+          params.alertSampleSizePerShard || 10000,
+          params.pageSize
         );
         return esClient.esql
           .query({ query })
@@ -189,7 +194,7 @@ export const getCompositeQuery = (
         ...aggs,
         [entityType]: {
           composite: {
-            size: 500,
+            size: params.pageSize,
             sources: [{ [idField]: { terms: { field: idField } } }],
             after: params.afterKeys[entityType],
           },
@@ -199,28 +204,42 @@ export const getCompositeQuery = (
   };
 };
 
-export const getESQL = (entityType: EntityType, entities: string[], sampleSize: number) => {
+export const getESQL = (
+  entityType: EntityType,
+  afterKeys: {
+    lower?: string;
+    upper?: string;
+  },
+  sampleSize: number,
+  pageSize: number
+) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
-  const query = /* SQL */ `
 
+  const lower = afterKeys.lower ? `${identifierField} >= ${afterKeys.lower}` : undefined;
+  const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
+  if (!lower && !upper) {
+    throw new Error('Either lower or upper after key must be provided for pagination');
+  }
+  const rangeClause = [lower, upper].filter(Boolean).join(' and ');
+
+  const query = /* SQL */ `
   FROM .alerts-security.alerts-default
+    | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              @timestamp as time
-    | KEEP ${identifierField}, risk_score, rule_name, rule_id, alert_id, time
-    | WHERE ${identifierField} IN (${entities.map((e) => `"${e}"`).join(',')})
-      AND risk_score IS NOT NULL
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "timestamp": """", time::keyword, """", "description": """", rule_name, """\", "id": \"""", alert_id, """\" } """)
-
     | STATS
-         alert_count = count(risk_score),
-         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), 1.5),
-         risk_inputs = TOP(input, 10, "desc")
-      BY ${identifierField}
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc")
+    BY ${identifierField}
     | SORT scores DESC
-    `;
+    | LIMIT ${pageSize}
+  `;
+
   return query;
 };
 
