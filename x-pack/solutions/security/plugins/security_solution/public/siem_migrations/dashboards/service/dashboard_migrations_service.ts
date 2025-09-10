@@ -215,4 +215,14 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   protected sendFinishedMigrationNotification(taskStats: DashboardMigrationTaskStats) {
     this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
   }
+
+  /** Deletes a rule migration by its ID, refreshing the stats to remove it from the list */
+  public async deleteMigration(migrationId: string): Promise<string> {
+    await api.deleteDashboardMigration({ migrationId });
+
+    // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
+    await this.getMigrationsStats();
+
+    return migrationId;
+  }
 }
