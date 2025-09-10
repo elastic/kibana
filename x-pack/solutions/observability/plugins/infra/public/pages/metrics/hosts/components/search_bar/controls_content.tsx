@@ -16,7 +16,6 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
@@ -49,42 +48,11 @@ export const ControlsContent = ({
   const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
   const [controlPanels, setControlPanels] = useControlPanels(controlConfigs.controls, dataView);
   const controlGroupAPI = useRef<ControlGroupRendererApi | undefined>();
-  const schemaSelectorContainer = useRef<HTMLLIElement | null>(null);
   const subscriptions = useRef<Subscription>(new Subscription());
   const { onPreferredSchemaChange } = useUnifiedSearchContext();
   const { status } = useTimeRangeMetadataContext();
 
   const isLoading = isPending(status);
-
-  const appendSchemaSelector = useCallback(() => {
-    const controlsWrapper = document.querySelector('[data-control-id="service.name"]');
-    if (controlsWrapper && !schemaSelectorContainer.current) {
-      const container = document.createElement('li');
-
-      controlsWrapper?.parentElement?.insertBefore(container, controlsWrapper.nextSibling);
-
-      ReactDOM.render(
-        <SchemaSelector
-          isHostsView
-          onChange={onPreferredSchemaChange}
-          schemas={schemas}
-          value={schema}
-          isLoading={isLoading}
-        />,
-        container
-      );
-
-      schemaSelectorContainer.current = container;
-    }
-  }, [onPreferredSchemaChange, schema, schemas, isLoading]);
-
-  const cleanupSchemaSelector = useCallback(() => {
-    if (schemaSelectorContainer.current) {
-      ReactDOM.unmountComponentAtNode(schemaSelectorContainer.current);
-      schemaSelectorContainer.current.remove();
-      schemaSelectorContainer.current = null;
-    }
-  }, []);
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
@@ -116,11 +84,6 @@ export const ControlsContent = ({
     });
   }, [schema, controlConfigs, dataView?.id]);
 
-  useEffect(() => {
-    cleanupSchemaSelector();
-    appendSchemaSelector();
-  }, [schema, schemas, isLoading, appendSchemaSelector, cleanupSchemaSelector]);
-
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupRendererApi) => {
       if (!controlGroup) return;
@@ -128,8 +91,6 @@ export const ControlsContent = ({
       controlGroupAPI.current = controlGroup;
 
       controlGroup.untilInitialized().then(() => {
-        appendSchemaSelector();
-
         subscriptions.current.add(
           controlGroup.children$.subscribe((children) => {
             Object.keys(children).map((childId) => {
@@ -155,7 +116,7 @@ export const ControlsContent = ({
           .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
       );
     },
-    [onFiltersChange, setControlPanels, appendSchemaSelector]
+    [onFiltersChange, setControlPanels]
   );
 
   useEffect(() => {
@@ -163,9 +124,8 @@ export const ControlsContent = ({
 
     return () => {
       currentSubscriptions.unsubscribe();
-      cleanupSchemaSelector();
     };
-  }, [cleanupSchemaSelector]);
+  }, []);
 
   if (!dataView) {
     return null;
@@ -180,6 +140,13 @@ export const ControlsContent = ({
         query={query}
         filters={filters}
       />
+      <SchemaSelector
+        isHostsView
+        onChange={onPreferredSchemaChange}
+        schemas={schemas}
+        value={schema}
+        isLoading={isLoading}
+      />
     </ControlGroupContainer>
   );
 };
@@ -188,5 +155,6 @@ const ControlGroupContainer = styled.div`
   .controlGroup {
     min-height: ${(props) => props.theme.euiTheme.size.xxl};
     align-items: start;
+    margin-bottom: ${(props) => props.theme.euiTheme.size.s};
   }
 `;
