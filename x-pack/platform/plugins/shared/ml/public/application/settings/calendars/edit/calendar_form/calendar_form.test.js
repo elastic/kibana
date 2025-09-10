@@ -13,7 +13,7 @@ import { CalendarForm } from './calendar_form';
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToManagementMlLink: jest.fn(),
 }));
-jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
   usePermissionCheck: () => [true, true],
 }));
 

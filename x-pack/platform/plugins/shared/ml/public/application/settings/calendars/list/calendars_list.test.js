@@ -43,7 +43,7 @@ jest.mock('@kbn/ml-services/capabilities/get_capabilities', () => ({
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
 }));
-jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
   usePermissionCheck: () => [true, true],
 }));
 

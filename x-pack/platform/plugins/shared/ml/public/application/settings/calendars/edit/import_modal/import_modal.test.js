@@ -10,7 +10,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ImportModal } from './import_modal';
 
-jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
   usePermissionCheck: () => [true, true],
 }));
 
