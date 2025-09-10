@@ -12,7 +12,7 @@
  *
  * See https://github.com/elastic/elasticsearch/blob/main/modules/ingest-otel/src/main/java/org/elasticsearch/ingest/otel/EcsOTelResourceAttributes.java
  */
-export const RESOURCE_FIELDS: string[] = [
+export const RESOURCE_ECS_FIELDS: string[] = [
   'agent.type',
   'agent.build.original',
   'agent.name',
@@ -52,3 +52,8 @@ export const RESOURCE_FIELDS: string[] = [
   'process.command_line',
   'faas.version',
 ];
+
+export function prefixOTelField(ecsFieldName: string, otelFieldName: string): string {
+  const prefix = RESOURCE_ECS_FIELDS.includes(ecsFieldName) ? `resource.attributes` : `attributes`; // Resource fields are stored under `resource.attributes`, all other fields under `attributes`.
+  return `${prefix}.${otelFieldName}`;
+}

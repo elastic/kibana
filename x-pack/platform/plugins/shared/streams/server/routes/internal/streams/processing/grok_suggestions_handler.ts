@@ -11,8 +11,8 @@ import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { InferenceClient } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { StreamsClient } from '../../../../lib/streams/client';
-import { getOtelFieldName } from './convert_ecs_fields_to_otel';
 
 export interface ProcessingGrokSuggestionsParams {
   path: {
@@ -89,7 +89,9 @@ export const handleProcessingGrokSuggestions = async ({
         ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
         : field.ecs_field;
       return {
-        name: useOtelFieldNames ? getOtelFieldName(name, fieldMetadata[field.ecs_field]) : name,
+        name: useOtelFieldNames
+          ? fieldMetadata[field.ecs_field]?.otel_equivalent ?? prefixOTelField(name)
+          : name,
         columns: field.columns,
         grok_components: field.grok_components,
       };

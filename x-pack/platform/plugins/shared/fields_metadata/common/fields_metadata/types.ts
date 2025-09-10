@@ -129,6 +129,7 @@ const optionalMetadataPlainRT = rt.partial({
   source: fieldSourceRT,
   type: rt.string,
   documentation_url: rt.string,
+  otel_equivalent: rt.string,
 });
 
 export const partialFieldMetadataPlainRT = rt.intersection([
