@@ -24,6 +24,8 @@ import type {
   OnechatStartDependencies,
 } from './types';
 
+import { registerLocators } from './locator/register_locators';
+
 export class OnechatPlugin
   implements
     Plugin<
@@ -39,7 +41,10 @@ export class OnechatPlugin
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
+  setup(
+    core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
+    deps: OnechatSetupDependencies
+  ): OnechatPluginSetup {
     const isOnechatUiEnabled = core.uiSettings.get<boolean>(
       AGENT_BUILDER_ENABLED_SETTING_ID,
       false
@@ -57,6 +62,7 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
+      registerLocators(deps.share);
     }
 
     return {};

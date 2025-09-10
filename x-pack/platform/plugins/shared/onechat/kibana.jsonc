@@ -16,7 +16,8 @@
       "features",
       "inference",
       "kibanaUtils",
-      "lens"
+      "lens",
+      "share",
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],
