@@ -7,8 +7,10 @@
 
 import type { EventTypeOpts } from '@kbn/core/public';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
+import { type Connector, connectorSchema } from './connector';
+import { type Scope, scopeSchema } from './scope';
 
-export interface InsightResponse {
+export interface InsightResponse extends Connector, Scope {
   '@timestamp': string;
 }
 
@@ -21,5 +23,9 @@ export const insightResponseEventSchema: EventTypeOpts<InsightResponse> = {
         description: 'The timestamp of the last response from the LLM.',
       },
     },
+    connector: {
+      properties: connectorSchema,
+    },
+    scopes: scopeSchema,
   },
 };

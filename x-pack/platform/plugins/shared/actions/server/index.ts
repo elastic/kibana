@@ -26,7 +26,10 @@ export type {
   SSLSettings,
 } from './types';
 
-export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
+export type {
+  ConnectorWithExtraFindData as FindActionResult,
+  Connector,
+} from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 

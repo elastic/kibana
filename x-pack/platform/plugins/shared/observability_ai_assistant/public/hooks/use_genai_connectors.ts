@@ -7,6 +7,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
+import {
+  getConnectorProvider,
+  getConnectorFamily,
+  getConnectorModel,
+  type InferenceConnector,
+  type InferenceConnectorType,
+  type ModelFamily,
+  type ModelProvider,
+} from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
@@ -21,6 +30,14 @@ export interface UseGenAIConnectorsResult {
   error?: Error;
   selectConnector: (id: string) => void;
   reloadConnectors: () => void;
+  getConnector: (id: string) => {
+    connectorId: string;
+    name: string;
+    type: InferenceConnectorType;
+    family: ModelFamily;
+    provider: ModelProvider;
+    modelId: string | undefined;
+  };
 }
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
@@ -99,6 +116,30 @@ export function useGenAIConnectorsWithoutContext(
     };
   }, [assistant, controller, fetchConnectors, setSelectedConnector]);
 
+  const getConnector = (id: string) => {
+    const connector = connectors?.find((_connector) => _connector.id === id);
+
+    const inferenceConnector: InferenceConnector = {
+      connectorId: connector?.id || '',
+      type: (connector?.actionTypeId || '') as InferenceConnector['type'],
+      name: connector?.name || '',
+      config: connector?.config || {},
+      capabilities: {},
+    };
+    const family = getConnectorFamily(inferenceConnector);
+    const provider = getConnectorProvider(inferenceConnector);
+    const modelId = getConnectorModel(inferenceConnector);
+
+    return {
+      connectorId: inferenceConnector.connectorId,
+      name: inferenceConnector.name,
+      type: inferenceConnector.type,
+      family,
+      provider,
+      modelId,
+    };
+  };
+
   return {
     connectors,
     loading,
@@ -110,5 +151,6 @@ export function useGenAIConnectorsWithoutContext(
     reloadConnectors: () => {
       fetchConnectors();
     },
+    getConnector,
   };
 }
