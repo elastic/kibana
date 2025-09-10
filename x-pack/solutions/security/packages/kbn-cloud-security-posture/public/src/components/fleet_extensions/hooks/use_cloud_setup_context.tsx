@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext, useRef } from 'react';
+import { useContext, useMemo } from 'react';
 import semverGte from 'semver/functions/gte';
 import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
 import { i18n } from '@kbn/i18n';
@@ -102,6 +102,8 @@ const getCloudConnectorRemoteRoleTemplate: (
   const accountType =
     input?.streams?.[0]?.vars?.[ProviderAccountTypeInputNames[typedProvider]]?.value ??
     defaultAccountType;
+
+  console.log('accountType:', accountType);
 
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
 
@@ -368,18 +370,21 @@ export function useCloudSetup(): CloudSetupContextValue {
   const cloudConnectorsFeatureEnabled =
     context.uiSettings.get<boolean>(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
 
-  const processedCloudSetupValues = useRef<CloudSetupContextValue | null>(null);
-
-  // Only rebuild the state if we don't have it yet or if critical dependencies change
-  if (!processedCloudSetupValues.current) {
-    processedCloudSetupValues.current = buildCloudSetupState({
-      config: context.config,
-      cloud: context.cloud,
-      newPolicy: context.packagePolicy,
-      packageInfo: context.packageInfo,
+  return useMemo(
+    () =>
+      buildCloudSetupState({
+        config: context.config,
+        cloud: context.cloud,
+        newPolicy: context.packagePolicy,
+        packageInfo: context.packageInfo,
+        cloudConnectorsFeatureEnabled,
+      }),
+    [
+      context.config,
+      context.cloud,
+      context.packagePolicy,
+      context.packageInfo,
       cloudConnectorsFeatureEnabled,
-    });
-  }
-
-  return processedCloudSetupValues.current;
+    ]
+  );
 }
