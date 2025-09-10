@@ -8,7 +8,7 @@
 import { cloneDeep, each, find, get } from 'lodash';
 
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { createDatafeedId } from '@kbn/ml-common-utils/job_utils';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils/create_datafeed_id';
 import { isWebUrl } from '@kbn/ml-common-utils/url_utils';
 
 let jobs = [];

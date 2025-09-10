@@ -31,11 +31,9 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import {
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isSourceDataChartableForDetector,
-} from '@kbn/ml-common-utils/job_utils';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
 import type { MlJobService } from '@kbn/ml-services/job_service';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import { MAX_CATEGORY_EXAMPLES } from '@kbn/ml-common-constants/explorer';

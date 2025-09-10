@@ -22,7 +22,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '@kbn/ml-common-constants/states';
 import { MESSAGE_LEVEL } from '@kbn/ml-common-constants/message_levels';
-import { isJobVersionGte } from '@kbn/ml-common-utils/job_utils';
+import { isJobVersionGte } from '@kbn/ml-common-utils/job_utils/is_job_version_gte';
 
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';

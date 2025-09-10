@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { composeValidators, maxLengthValidator } from '@kbn/ml-validators';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import type { JobOverride } from '@kbn/ml-common-types/modules';
-import { isJobIdValid } from '@kbn/ml-common-utils/job_utils';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils/is_job_id_valid';
 
 import { usePartialState } from '../../../../components/custom_hooks';
 import { JobGroupsInput } from '../../common/components';

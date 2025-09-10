@@ -14,7 +14,8 @@ import type { MessageId, JobValidationMessage } from '@kbn/ml-common-constants/m
 import { getMessages } from '@kbn/ml-common-constants/messages';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { MlClient } from '@kbn/ml-client';
-import { basicJobValidation, uniqWithIsEqual } from '@kbn/ml-common-utils/job_utils';
+import { basicJobValidation } from '@kbn/ml-common-utils/job_utils/basic_job_validation';
+import { uniqWithIsEqual } from '@kbn/ml-common-utils/job_utils/uniq_with_is_equal';
 import type { validateJobSchema } from '@kbn/ml-server-api-schemas/job_validation_schema';
 import { getDatafeedAggregations, getIndicesOptions } from '@kbn/ml-common-utils/datafeed_utils';
 

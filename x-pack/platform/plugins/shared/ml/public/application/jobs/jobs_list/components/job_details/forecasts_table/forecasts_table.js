@@ -24,10 +24,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { FORECAST_REQUEST_STATE } from '@kbn/ml-common-constants/states';
-import {
-  getLatestDataOrBucketTimestamp,
-  isTimeSeriesViewJob,
-} from '@kbn/ml-common-utils/job_utils';
+import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 

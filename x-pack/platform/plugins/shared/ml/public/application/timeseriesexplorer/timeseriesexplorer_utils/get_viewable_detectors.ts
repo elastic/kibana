@@ -6,7 +6,7 @@
  */
 
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import { isTimeSeriesViewDetector } from '@kbn/ml-common-utils/job_utils';
+import { isTimeSeriesViewDetector } from '@kbn/ml-common-utils/job_utils/is_time_series_view_detector';
 
 export interface ViewableDetector {
   index: number;

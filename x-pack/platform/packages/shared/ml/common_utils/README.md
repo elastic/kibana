@@ -6,7 +6,7 @@ Shared utility functions for ML data transformation, validation, and common oper
 
 ```typescript
 // Use specific imports to reduce bundle size
-import { isValidJobId } from '@kbn/ml-common-utils/job_utils';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils/is_job_id_valid';
 import { escapeForElasticsearchQuery } from '@kbn/ml-common-utils/string_utils/escape_for_elasticsearch_query';
 
 // Rather than importing everything
