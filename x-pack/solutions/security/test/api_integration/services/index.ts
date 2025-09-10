@@ -6,7 +6,10 @@
  */
 
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
+// @ts-ignore not ts yet
+import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 
 export const services = {
   ...platformServices,
+  esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
 };
