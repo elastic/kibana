@@ -9,6 +9,7 @@ import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/p
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,
@@ -195,6 +196,9 @@ export class SyntheticsPrivateLocation {
           }
         }
       } catch (e) {
+        e.message = `Error creating package policy for monitor ${config[ConfigKey.NAME]}: ${
+          e.message
+        }`;
         this.server.logger.error(e);
         throw e;
       }
@@ -203,6 +207,10 @@ export class SyntheticsPrivateLocation {
     if (newPolicies.length === 0) {
       throw new Error('Failed to build package policies for all monitors');
     }
+
+    this.server.logger.debug(
+      `[createPackagePolicies] Creating ${newPolicies.length} policies for space ${spaceId}`
+    );
 
     try {
       const result = await this.createPolicyBulk(newPolicies, spaceId);
@@ -374,15 +382,56 @@ export class SyntheticsPrivateLocation {
     return (
       (await this.server.fleet.packagePolicyService.getByIDs(soClient, listOfPolicies, {
         ignoreMissing: true,
+        spaceIds: [ALL_SPACES_ID],
       })) ?? []
     );
   }
 
   async createPolicyBulk(newPolicies: NewPackagePolicyWithId[], spaceId: string) {
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    const agentPolicyIds = Array.from(new Set(newPolicies.map((policy) => policy.policy_id!)));
+    if (agentPolicyIds.length > 1) {
+      console.log(agentPolicyIds);
+      const agentPolicies = await this.getAgentPoliciesByIds(Array.from(agentPolicyIds));
+      const agentPolicySpaceIds = new Set(
+        agentPolicies?.map((policy) => policy?.space_ids || []).flat() || []
+      );
+      console.log(agentPolicySpaceIds);
+      if (agentPolicySpaceIds.size > 1) {
+        // if more than one space id exists, then we have to call one by one grouped by policy id
+        const results = [];
+        for (const agentPolicyId of agentPolicyIds) {
+          const agentPolicySpaceId =
+            agentPolicies?.find((policy) => policy?.id === agentPolicyId)?.space_ids?.[0] ??
+            DEFAULT_NAMESPACE_STRING;
+          const soClient = this.server.coreStart.savedObjects
+            .getUnsafeInternalClient()
+            .asScopedToNamespace(agentPolicySpaceId);
+          const agentPolicyPolicies = newPolicies.filter(
+            (policy) => policy.policy_id === agentPolicyId
+          );
+          if (agentPolicyPolicies.length > 0) {
+            const res = await this.server.fleet.packagePolicyService.bulkCreate(
+              soClient,
+              esClient,
+              agentPolicyPolicies,
+              {
+                asyncDeploy: true,
+              }
+            );
+            results.push(res);
+          }
+        }
+        return {
+          created: results.map((r) => r.created).flat(),
+          failed: results.map((r) => r.failed).flat(),
+        };
+      }
+    }
+
     const soClient = this.server.coreStart.savedObjects
       .getUnsafeInternalClient()
       .asScopedToNamespace(spaceId);
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (esClient && newPolicies.length > 0) {
       return await this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
@@ -424,6 +473,7 @@ export class SyntheticsPrivateLocation {
           {
             force: true,
             asyncDeploy: true,
+            spaceId: ALL_SPACES_ID,
           }
         );
       } catch (e) {
@@ -464,6 +514,11 @@ export class SyntheticsPrivateLocation {
       }
       return result;
     }
+  }
+
+  async getAgentPoliciesByIds(ids: string[]) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    return this.server.fleet?.agentPolicyService.getByIds(soClient, ids);
   }
 
   async getAgentPolicies() {
