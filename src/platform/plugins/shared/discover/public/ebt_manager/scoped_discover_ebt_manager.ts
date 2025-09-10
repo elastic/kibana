@@ -265,7 +265,7 @@ export class ScopedDiscoverEBTManager {
       // KQL query
 
       if (
-        query.language !== 'kuery' || // TODO in issue #234590
+        query.language !== 'kuery' || // TODO for Lucene support in issue #234590
         typeof query.query !== 'string' ||
         query.query.trim() === ''
       ) {
