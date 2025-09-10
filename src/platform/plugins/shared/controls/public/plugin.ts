@@ -20,6 +20,11 @@ import { registerTimeSliderControl } from './controls/timeslider_control/registe
 import { setKibanaServices } from './services/kibana_services';
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
 
+const CONTROL_PANEL_PLACEMENT = {
+  placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
+  resizeSettings: { maxHeight: 2, minHeight: 2 },
+};
+
 export class ControlsPlugin
   implements Plugin<void, void, ControlsPluginSetupDeps, ControlsPluginStartDeps>
 {
@@ -43,17 +48,11 @@ export class ControlsPlugin
     registerActions(startPlugins.uiActions);
 
     startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
-      return {
-        placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
-        resizeSettings: { maxHeight: 2, minHeight: 2 },
-      };
+      return CONTROL_PANEL_PLACEMENT;
     });
 
     startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
-      return {
-        placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
-        resizeSettings: { maxHeight: 2, minHeight: 2 },
-      };
+      return CONTROL_PANEL_PLACEMENT;
     });
   }
 
