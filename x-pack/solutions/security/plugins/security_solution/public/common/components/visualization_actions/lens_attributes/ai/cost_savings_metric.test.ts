@@ -55,7 +55,6 @@ describe('getCostSavingsMetricLensAttributes', () => {
       ...defaultParams,
     });
     expect(result).toHaveProperty('title', 'Cost Savings Metric');
-    expect(result).toHaveProperty('type', 'lens');
     expect(result).toHaveProperty('visualizationType', 'lnsMetric');
     expect(result).toHaveProperty('state');
     expect(result).toHaveProperty('references');

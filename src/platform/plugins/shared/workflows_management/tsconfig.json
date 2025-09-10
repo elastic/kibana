@@ -42,8 +42,12 @@
     "@kbn/discover-utils",
     "@kbn/field-utils",
     "@kbn/storybook",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-chrome-layout",
     "@kbn/core-security-browser",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/storage-adapter",
+    "@kbn/core-i18n-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

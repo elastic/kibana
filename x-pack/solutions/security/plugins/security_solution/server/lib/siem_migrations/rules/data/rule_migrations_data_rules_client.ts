@@ -21,25 +21,19 @@ import {
   type RuleMigrationAllIntegrationsStats,
   type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { getSortingOptions, type RuleMigrationSort } from './sort';
-import { dsl } from './dsl_queries';
-import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
-import type {
-  CreateMigrationItemInput,
-  SiemMigrationItemSort,
-} from '../../common/data/siem_migrations_data_item_client';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
+import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
 import { SiemMigrationsDataItemClient } from '../../common/data/siem_migrations_data_item_client';
+import { MAX_ES_SEARCH_SIZE } from '../../common/data/constants';
+import type { SiemMigrationGetItemsOptions, SiemMigrationSort } from '../../common/data/types';
+import { getSortingOptions } from './sort';
+import { dsl } from './dsl_queries';
 
 export type CreateRuleMigrationRulesInput = CreateMigrationItemInput<RuleMigrationRule>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationGetRulesOptions {
-  filters?: RuleMigrationFilters;
-  sort?: RuleMigrationSort;
-  from?: number;
-  size?: number;
-}
+export type RuleMigrationGetRulesOptions = SiemMigrationGetItemsOptions<RuleMigrationFilters>;
 
 export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<RuleMigrationRule> {
   protected type = 'rule' as const;
@@ -142,7 +136,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
     return { bool: { filter } };
   }
 
-  protected getSortOptions(sort: SiemMigrationItemSort = {}): estypes.Sort {
+  protected getSortOptions(sort: SiemMigrationSort = {}): estypes.Sort {
     return getSortingOptions(sort);
   }
 
@@ -164,12 +158,16 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query,
+        refresh: true,
       })
       .catch((error) => {
         this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);
