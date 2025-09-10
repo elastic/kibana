@@ -199,8 +199,8 @@ const floatingActionsStyles = {
       // slower transition on hover leave in case the user accidentally stops hover
       transition: `opacity ${euiTheme.animation.slow}`,
       position: 'absolute',
-      top: '90%',
-      transform: 'translateY(-50%)',
+      top: '100%',
+      transform: 'translateY(-20%)',
       zIndex: euiTheme.levels.toast,
       display: 'flex',
       flexDirection: 'row',
@@ -212,14 +212,14 @@ const floatingActionsStyles = {
         boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
       },
       '&.controlFrameFloatingActions--twoLine': {
-        top: '90%',
-        transform: 'translateY(-50%)',
+        top: '100%',
+        transform: 'translateY(-10%)',
       },
       '&.controlFrameFloatingActions--right': {
-        left: `100%`,
+        left: `calc(100% - 8px)`,
       },
       '&.controlFrameFloatingActions--left': {
-        right: `100%`,
+        right: `calc(100% - 8px)`,
       },
     }),
 };
