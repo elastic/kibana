@@ -10,10 +10,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
-import { EuiSpacer, useResizeObserver } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
@@ -68,6 +69,7 @@ export function ContentFrameworkTable({
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
+  const { euiTheme } = useEuiTheme();
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
@@ -156,13 +158,15 @@ export function ContentFrameworkTable({
         return (
           <>
             <EuiSpacer size="s" />
-            {fieldConfig.name}
+            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold }}>
+              {fieldConfig.name}
+            </EuiText>
           </>
         );
       }
-      return fieldConfig.valueCellContent;
+      return fieldConfig.valueCellContent ? fieldConfig.valueCellContent() : null;
     },
-    [rows, fields]
+    [rows, fields, euiTheme.font.weight.bold]
   );
 
   const cellPopoverRenderer = useCallback(
@@ -190,7 +194,15 @@ export function ContentFrameworkTable({
   }
 
   return (
-    <div ref={setContainerRef}>
+    <div
+      ref={setContainerRef}
+      // EUI Override: This is necessary to prevent a blank space at the bottom of the grid due to an internal height calculation
+      css={css`
+        .euiDataGrid__virtualized {
+          height: auto !important;
+        }
+      `}
+    >
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"
         id={title}
@@ -204,8 +216,7 @@ export function ContentFrameworkTable({
         initialPageSize={DEFAULT_INITIAL_PAGE_SIZE}
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
-        gridStyle={{ stripes: false, rowHover: 'none' }}
-        hideDataGridHeader
+        gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
       />
     </div>
   );
