@@ -26,10 +26,10 @@ import { useLayoutState } from './layout_state_context';
  *   --kbn-layout--footer-[height|top|bottom|left|width]
  *
  * Navigation:
- *   --kbn-layout--navigation-[top|bottom|height|width|panel-width]
+ *   --kbn-layout--navigation-[top|bottom|height|width]
  *
  * Sidebar:
- *   --kbn-layout--sidebar-[top|bottom|height|width|panel-width]
+ *   --kbn-layout--sidebar-[top|bottom|height|width]
  *
  * Application:
  *   --kbn-layout--application-[top|bottom|left|right|height|width]
@@ -56,7 +56,6 @@ export const LayoutGlobalCSS = () => {
     headerHeight,
     navigationWidth,
     sidebarWidth,
-    sidebarPanelWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
   } = useLayoutState();
@@ -71,7 +70,7 @@ export const LayoutGlobalCSS = () => {
   const header = css`
     --kbn-layout--header-top: var(--kbn-layout--banner-height);
     --kbn-layout--header-left: ${navigationWidth}px;
-    --kbn-layout--header-right: ${sidebarWidth + sidebarPanelWidth}px;
+    --kbn-layout--header-right: ${sidebarWidth}px;
     --kbn-layout--header-height: ${headerHeight}px;
     --kbn-layout--header-width: calc(
       100vw - var(--kbn-layout--header-left) - var(--kbn-layout--header-right)
@@ -100,12 +99,11 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--sidebar-top: var(--kbn-layout--banner-height);
     --kbn-layout--sidebar-bottom: var(--kbn-layout--footer-height);
     --kbn-layout--sidebar-right: 0;
-    --kbn-layout--sidebar-left: calc(100vw - ${sidebarWidth + sidebarPanelWidth}px);
+    --kbn-layout--sidebar-left: calc(100vw - ${sidebarWidth}px);
     --kbn-layout--sidebar-height: calc(
       100vh - var(--kbn-layout--sidebar-top) - var(--kbn-layout--sidebar-bottom)
     );
     --kbn-layout--sidebar-width: ${sidebarWidth}px;
-    --kbn-layout--sidebar-panel-width: ${sidebarPanelWidth}px;
   `;
 
   const application = css`
@@ -114,9 +112,7 @@ export const LayoutGlobalCSS = () => {
     );
     --kbn-layout--application-bottom: var(--kbn-layout--footer-height);
     --kbn-layout--application-left: var(--kbn-layout--navigation-width);
-    --kbn-layout--application-right: calc(
-      var(--kbn-layout--sidebar-width) + var(--kbn-layout--sidebar-panel-width)
-    );
+    --kbn-layout--application-right: var(--kbn-layout--sidebar-width);
     --kbn-layout--application-height: calc(
       100vh - var(--kbn-layout--application-top) - var(--kbn-layout--application-bottom)
     );

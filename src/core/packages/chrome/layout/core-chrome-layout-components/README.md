@@ -4,7 +4,7 @@ Composable React layout primitives for Kibana's Chrome application shell. Provid
 
 ## Features
 
-- Modular layout regions: Header, Footer, Navigation, Sidebar, Banner, Navigation Panel, Sidebar Panel, Application content
+- Modular layout regions: Header, Footer, Navigation, Sidebar, Banner, Application content
 - Customizable dimensions for each region via context
 - Slot-based API: pass React nodes or render functions for each region
 - Responsive and accessible by design
@@ -27,7 +27,6 @@ Available slots:
 - `footer`
 - `navigation`
 - `sidebar`
-- `sidebarPanel`
 - `banner`
 - `applicationTopBar`
 - `applicationBottomBar`
@@ -47,7 +46,6 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
     footerHeight: 24,
     navigationWidth: 200,
     sidebarWidth: 300,
-    sidebarPanelWidth: 280,
     applicationTopBarHeight: 40,
     applicationBottomBarHeight: 36,
   }}
@@ -57,7 +55,6 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
     footer={<MyFooter />}
     navigation={<MyNav />}
     sidebar={<MySidebar />}
-    sidebarPanel={<MySidebarPanel />}
     banner={<MyBanner />}
     applicationTopBar={<MyAppTopBar />}
     applicationBottomBar={<MyAppBottomBar />}
@@ -86,7 +83,7 @@ This package exposes layout dimensions and positions as global CSS variables (cu
 - **Navigation**
   - `--kbn-layout--navigation-[top|bottom|height|width]`
 - **Sidebar**
-  - `--kbn-layout--sidebar-[top|bottom|height|width|panel-width]`
+  - `--kbn-layout--sidebar-[top|bottom|height|width]`
 - **Application**
   - `--kbn-layout--application-[top|bottom|left|right|height|width]`
 - **Application Top Bar**
@@ -103,7 +100,7 @@ These variables are set at the `:root` level and update automatically based on t
 ## Examples
 
 See [Storybook stories](./__stories__/layout.stories.tsx) for more usage examples.
-Run with `yarn storybook sharedux` and look for "Layout" in the stories list.
+Run with `yarn storybook shared_ux` and look for "Layout" in the stories list.
 
 ## Types
 
