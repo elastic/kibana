@@ -238,7 +238,7 @@ export function TableGrid({
         defaultMessage: 'Field values',
       })}
       className="kbnDocViewer__fieldsGrid"
-      css={[styles.fieldsGrid]}
+      css={styles.fieldsGrid}
       columns={gridColumns}
       toolbarVisibility={false}
       rowCount={rows.length}
