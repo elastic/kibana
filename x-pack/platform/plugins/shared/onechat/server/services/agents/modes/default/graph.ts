@@ -7,6 +7,8 @@
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
@@ -20,11 +22,13 @@ const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  maxToolCalls: Annotation<number>({ value: (_, b) => b, default: () => 3 }),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  toolCallCount: Annotation<number>({ value: (_, b) => b, default: () => 0 }),
 });
 
 export type StateType = typeof StateAnnotation.State;
@@ -35,12 +39,14 @@ export const createAgentGraph = ({
   customInstructions,
   noPrompt,
   logger,
+  maxToolCalls = 3,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   customInstructions?: string;
   noPrompt?: boolean;
   logger: Logger;
+  maxToolCalls?: number;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
@@ -49,12 +55,16 @@ export const createAgentGraph = ({
   });
 
   const callModel = async (state: StateType) => {
+    const used = state.toolCallCount;
+    const max = state.maxToolCalls ?? maxToolCalls;
+    const remaining = Math.max(0, max - used);
     const response = await model.invoke(
       noPrompt
         ? [...state.initialMessages, ...state.addedMessages]
         : getActPrompt({
             customInstructions,
             messages: [...state.initialMessages, ...state.addedMessages],
+            toolBudget: { used, max, remaining },
           })
     );
     return {
@@ -66,6 +76,13 @@ export const createAgentGraph = ({
     const messages = state.addedMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
+      const pendingCalls = lastMessage.tool_calls.length;
+      const current = state.toolCallCount;
+      const budget = state.maxToolCalls ?? maxToolCalls;
+      if (current + pendingCalls > budget) {
+        // budget exhausted -> finalize without executing these calls
+        return 'finalize';
+      }
       return 'tools';
     }
     return '__end__';
@@ -73,22 +90,55 @@ export const createAgentGraph = ({
 
   const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
+    const executedToolMessages = toolNodeResult.filter((m) => isToolMessage(m));
+    const increment = executedToolMessages.length;
 
     return {
       addedMessages: [...toolNodeResult],
+      toolCallCount: state.toolCallCount + increment,
     };
+  };
+
+  const finalizeAnswer = async (state: StateType) => {
+    // Safety: handle last AI message if it attempted new tool calls we didn't execute.
+    const added: BaseMessage[] = [...state.addedMessages];
+    const last = added[added.length - 1] as AIMessage | undefined;
+    if (last && last.tool_calls && last.tool_calls.length > 0) {
+      const textOnly = extractTextContent(last).trim();
+      if (!textOnly) {
+        added.pop();
+      } else {
+        // Replace with a simple assistant tuple to avoid lingering provider metadata/tool_call chunks
+        (added as any)[added.length - 1] = ['assistant', textOnly];
+      }
+    }
+    const used = state.toolCallCount;
+    const max = state.maxToolCalls ?? maxToolCalls;
+    const response = await model.invoke(
+      noPrompt
+        ? [...state.initialMessages, ...added]
+        : getActPrompt({
+            customInstructions,
+            messages: [...state.initialMessages, ...added],
+            toolBudget: { used, max, remaining: 0 },
+          })
+    );
+    return { addedMessages: [response] };
   };
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
+    .addNode('finalize', finalizeAnswer)
     .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue, {
       tools: 'tools',
+      finalize: 'finalize',
       __end__: '__end__',
     })
+    .addEdge('finalize', '__end__')
     .compile();
 
   return graph;

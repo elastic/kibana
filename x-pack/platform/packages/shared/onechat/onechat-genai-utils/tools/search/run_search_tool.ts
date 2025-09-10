@@ -21,6 +21,7 @@ export const runSearchTool = async ({
   esClient,
   logger,
   events,
+  maxAttempts = 3,
 }: {
   nlQuery: string;
   index?: string;
@@ -28,6 +29,7 @@ export const runSearchTool = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
+  maxAttempts?: number;
 }): Promise<ToolResult[]> => {
   const toolGraph = createSearchToolGraph({ model, esClient, logger, events });
 
@@ -40,7 +42,7 @@ export const runSearchTool = async ({
     },
     async () => {
       const outState = await toolGraph.invoke(
-        { nlQuery, targetPattern: index },
+        { nlQuery, targetPattern: index, maxAttempts },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
       );
 
@@ -49,6 +51,16 @@ export const runSearchTool = async ({
           {
             type: ToolResultType.error,
             data: { message: outState.error },
+          },
+        ];
+      }
+
+      const hasUseful = outState.results.some((r) => r.type !== ToolResultType.error);
+      if (!hasUseful && outState.failureSummary) {
+        return [
+          {
+            type: ToolResultType.error,
+            data: { message: outState.failureSummary },
           },
         ];
       }

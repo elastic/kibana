@@ -20,14 +20,25 @@ const tools = {
 export const getActPrompt = ({
   customInstructions,
   messages,
+  toolBudget,
 }: {
   customInstructions?: string;
   messages: BaseMessageLike[];
+  toolBudget?: { used: number; max: number; remaining: number };
 }): BaseMessageLike[] => {
+  const budgetLine = toolBudget
+    ? `\nTOOL CALL BUDGET STATUS: used ${toolBudget.used} / ${toolBudget.max} (remaining ${toolBudget.remaining}).$${
+        toolBudget.remaining === 0
+          ? ' When remaining is 0 you MUST NOT call tools again; synthesize the best grounded answer only.'
+          : ' Use remaining calls only if they are likely to retrieve clearly missing evidence; otherwise synthesize now.'
+      }\n`
+    : '';
   return [
     [
       'system',
       `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+
+        ${budgetLine}
 
         PRIORITY ORDER (read first)
         1) NON-NEGOTIABLE RULES (highest priority)
@@ -125,7 +136,7 @@ export const getActPrompt = ({
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
-        - Current date: ${formatDate()}`,
+  - Current date: ${formatDate()}`,
     ],
     ...messages,
   ];
