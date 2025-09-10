@@ -268,17 +268,7 @@ export const DiscoverTopNav = ({
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
-    <span
-      css={css({
-        '.controlFrameFloatingActions': {
-          top: '100%',
-          transform: 'translate(calc(100% - 8px), -20%)',
-        },
-        '.controlsWrapper li:last-child .controlFrameFloatingActions': {
-          transform: 'translate(-8px, -20%)',
-        },
-      })}
-    >
+    <span css={floatingActionStyles}>
       <SearchBar
         {...topNavProps}
         appName="discover"
@@ -347,3 +337,15 @@ export const DiscoverTopNav = ({
     </span>
   );
 };
+
+const floatingActionStyles = css({
+  '.controlFrameFloatingActions': {
+    top: '100%',
+    transform: 'translate(calc(100% - 8px), -20%)',
+  },
+  '.controlsWrapper li:last-child .controlFrameFloatingActions': {
+    transform: 'translate(0, -20%)',
+    left: '-8px',
+    right: 'auto',
+  },
+});
