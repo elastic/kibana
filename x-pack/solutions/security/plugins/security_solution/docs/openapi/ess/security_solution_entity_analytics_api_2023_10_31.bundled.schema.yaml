@@ -969,7 +969,7 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/{entityType}:
-    get:
+    put:
       description: >
         Given an entity type and the contents of an entity, update (or create)
         the contents of an entity. By default only a specific set of fields are
