@@ -17,7 +17,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
-import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { kibanaContextMock } from '@kbn/ml-kibana-context/__mocks__/kibana_context';
 
 const utilityProps = {
   timeBuckets: timeBucketsMock,
