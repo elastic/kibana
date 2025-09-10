@@ -116,7 +116,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'onechat:tools' },
                     { link: 'onechat:agents' },
                   ],
-                  iconV2: 'comment' /* TODO: review icon */,
+                  iconV2: 'comment',
                   id: 'chat',
                   renderAs: 'panelOpener',
                   sideNavVersion: 'v2',

@@ -199,7 +199,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
         expect(foundNavItemIds).to.have.length(
           navItemIds.length,
-          `Found nav item list length (${foundNavItemIds.length}) does not match expected length (${navItemIds.length}) of side nav items`
+          `Found nav item list length (${foundNavItemIds.length}) does not match expected length (${
+            navItemIds.length
+          }) of side nav items.\nFound items with nav ids:${JSON.stringify(foundNavItemIds)}`
         );
         if (options?.checkOrder !== false) {
           for (let i = 0; i < foundNavItemIds.length; i++) {
