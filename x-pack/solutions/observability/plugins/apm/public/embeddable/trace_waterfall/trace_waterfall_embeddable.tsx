@@ -18,7 +18,7 @@ export function TraceWaterfallEmbeddable({
   scrollElement,
   onNodeClick,
   getRelatedErrorsHref,
-}: ApmTraceWaterfallEmbeddableEntryProps) {
+}: Omit<ApmTraceWaterfallEmbeddableEntryProps, 'mode'>) {
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}', {

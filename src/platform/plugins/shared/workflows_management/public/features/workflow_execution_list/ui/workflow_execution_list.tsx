@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   type EuiEmptyPromptProps,
@@ -14,16 +15,22 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  useEuiTheme,
   EuiTitle,
+  EuiFlexItem,
 } from '@elastic/eui';
-import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import { type WorkflowExecutionListDto } from '@kbn/workflows';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
+import { ExecutionListFilters } from './workflow_execution_list_filters';
+import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
 
 export interface WorkflowExecutionListProps {
   executions: WorkflowExecutionListDto | null;
+  filters: ExecutionListFiltersQueryParams;
+  onFiltersChange: (filters: ExecutionListFiltersQueryParams) => void;
   isLoading: boolean;
   error: Error | null;
   onExecutionClick: (executionId: string) => void;
@@ -32,26 +39,26 @@ export interface WorkflowExecutionListProps {
 
 // TODO: use custom table? add pagination and search
 
-const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
+const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 'm' };
 
 export const WorkflowExecutionList = ({
+  filters,
+  onFiltersChange,
   isLoading,
   error,
   executions,
   onExecutionClick,
   selectedId,
 }: WorkflowExecutionListProps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
 
-  const containerCss = {
-    padding: euiTheme.size.s,
-  };
+  let content: React.ReactNode = null;
 
   if (isLoading) {
-    return (
+    content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        css={containerCss}
+        css={styles.container}
         icon={<EuiLoadingSpinner size="l" />}
         title={
           <h2>
@@ -63,13 +70,11 @@ export const WorkflowExecutionList = ({
         }
       />
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        css={containerCss}
+        css={styles.container}
         icon={<EuiIcon type="error" size="l" />}
         title={
           <h2>
@@ -82,12 +87,11 @@ export const WorkflowExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  }
-  if (!executions?.results?.length) {
-    return (
+  } else if (!executions || !executions.results.length) {
+    content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        css={containerCss}
+        css={styles.container}
         icon={<EuiIcon type="play" size="l" />}
         title={
           <h2>
@@ -107,27 +111,51 @@ export const WorkflowExecutionList = ({
         }
       />
     );
+  } else {
+    content = executions.results.map((execution) => (
+      <WorkflowExecutionListItem
+        key={execution.id}
+        status={execution.status}
+        startedAt={new Date(execution.startedAt)}
+        duration={execution.duration}
+        selected={execution.id === selectedId}
+        onClick={() => onExecutionClick(execution.id)}
+      />
+    ));
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart" css={containerCss}>
-      <EuiTitle size="xxs">
-        <h2>
-          <FormattedMessage
-            id="workflows.workflowExecutionList.title"
-            defaultMessage="Workflow Executions"
-          />
-        </h2>
-      </EuiTitle>
-      {executions.results.map((execution) => (
-        <WorkflowExecutionListItem
-          key={execution.id}
-          status={execution.status}
-          startedAt={new Date(execution.startedAt)}
-          selected={execution.id === selectedId}
-          onClick={() => onExecutionClick(execution.id)}
-        />
-      ))}
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      justifyContent="flexStart"
+      css={styles.container}
+    >
+      <header>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h2>
+                <FormattedMessage
+                  id="workflows.workflowExecutionList.title"
+                  defaultMessage="Execution history"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ExecutionListFilters filters={filters} onFiltersChange={onFiltersChange} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </header>
+      {content}
     </EuiFlexGroup>
   );
+};
+
+const componentStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+    }),
 };
