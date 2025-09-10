@@ -191,25 +191,6 @@ export const DashboardMigrationDashboard = z
   .merge(DashboardMigrationDashboardData);
 
 /**
- * The dashboard migration task stats object.
- */
-export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
-export const DashboardMigrationTaskStats = MigrationTaskStats;
-
-/**
- * The dashboard migration task execution settings.
- */
-export type DashboardMigrationTaskExecutionSettings = z.infer<
-  typeof DashboardMigrationTaskExecutionSettings
->;
-export const DashboardMigrationTaskExecutionSettings = z.object({
-  /**
-   * The connector ID used in the last execution.
-   */
-  connector_id: z.string(),
-});
-
-/**
  * The dashboard migration data object for dashboard update operation
  */
 export type UpdateMigrationDashboard = z.infer<typeof UpdateMigrationDashboard>;
@@ -226,6 +207,25 @@ export const UpdateMigrationDashboard = z.object({
    * The comments for the migration including a summary from the LLM in markdown.
    */
   comments: MigrationComments.optional(),
+});
+
+/**
+ * The dashboard migration task stats object.
+ */
+export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
+export const DashboardMigrationTaskStats = MigrationTaskStats;
+
+/**
+ * The dashboard migration task execution settings.
+ */
+export type DashboardMigrationTaskExecutionSettings = z.infer<
+  typeof DashboardMigrationTaskExecutionSettings
+>;
+export const DashboardMigrationTaskExecutionSettings = z.object({
+  /**
+   * The connector ID used in the last execution.
+   */
+  connector_id: z.string(),
 });
 
 /**
