@@ -33,25 +33,37 @@ export type Endpoint<M = unknown> = CreateRouteDefinition<
   FilesClient['create']
 >;
 
-export const handler: CreateHandler<Endpoint> = async ({ core, fileKind, files }, req, res) => {
-  const [{ security }, { fileService }] = await Promise.all([core, files]);
-  const {
-    body: { name, alt, meta, mimeType },
-  } = req;
-  const user = security.authc.getCurrentUser();
-  const file = await fileService.asCurrentUser().create({
-    fileKind,
-    name,
-    alt,
-    meta,
-    user: user ? { name: user.username, id: user.profile_uid } : undefined,
-    mime: mimeType,
-  });
-  const body: Endpoint['output'] = {
-    file: file.toJSON(),
+const createHandler =
+  (fileKindDefinition: FileKind): CreateHandler<Endpoint> =>
+  async ({ core, fileKind, files }, req, res) => {
+    const [{ security }, { fileService }] = await Promise.all([core, files]);
+    const {
+      body: { name, alt, meta, mimeType },
+    } = req;
+    const user = security.authc.getCurrentUser();
+
+    // Validate MIME type if provided and file kind has restrictions
+    if (mimeType && fileKindDefinition.allowedMimeTypes) {
+      if (!fileKindDefinition.allowedMimeTypes.includes(mimeType)) {
+        return res.badRequest({
+          body: { message: `MIME type is not allowed for file kind "${fileKind}"}` },
+        });
+      }
+    }
+
+    const file = await fileService.asCurrentUser().create({
+      fileKind,
+      name,
+      alt,
+      meta,
+      user: user ? { name: user.username, id: user.profile_uid } : undefined,
+      mime: mimeType,
+    });
+    const body: Endpoint['output'] = {
+      file: file.toJSON(),
+    };
+    return res.ok({ body });
   };
-  return res.ok({ body });
-};
 
 export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
   if (fileKind.http.create) {
@@ -67,7 +79,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
           },
         },
       },
-      handler
+      createHandler(fileKind)
     );
   }
 }
