@@ -16,6 +16,7 @@ import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { WiredAdvancedView } from './wired_advanced_view';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
@@ -24,6 +25,7 @@ const wiredStreamManagementSubTabs = [
   'retention',
   'advanced',
   'significantEvents',
+  'dataQuality',
   'references',
 ] as const;
 
@@ -92,6 +94,22 @@ export function WiredStreamDetailManagement({
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema',
       }),
+    },
+    dataQuality: {
+      content: <StreamDetailDataQuality definition={definition} />,
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+            defaultMessage: 'View details about this classic stream’s data quality',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+              defaultMessage: 'Data quality',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
     },
     ...otherTabs,
     ...(definition.privileges.manage
