@@ -30,7 +30,7 @@ export interface ResizableLayoutProps {
   /**
    * Current size of the fixed panel in pixels
    */
-  fixedPanelSize: number;
+  fixedPanelSize: number | 'max-content';
   /**
    * Minimum size of the fixed panel in pixels
    */

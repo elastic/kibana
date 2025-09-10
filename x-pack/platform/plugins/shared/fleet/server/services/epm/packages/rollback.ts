@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { PackageRollbackError } from '../../../errors';
-import { appContextService, packagePolicyService } from '../..';
+import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 
 import { getPackageSavedObjects } from './get';
 import { installPackage } from './install';
@@ -60,6 +61,22 @@ export async function rollbackInstallation(options: {
     }
   );
   const packagePolicySOs = packagePolicySORes.saved_objects;
+
+  const managedRollbackError = new PackageRollbackError(
+    `Cannot rollback integration with managed package policies`
+  );
+  if (packagePolicySOs.some((so) => so.attributes.is_managed)) {
+    throw managedRollbackError;
+  }
+  // checking is_managed flag on agent policy, it is not always set on package policy
+  const agentPolicyIds = uniq(packagePolicySOs.flatMap((so) => so.attributes.policy_ids ?? []));
+  const agentPolicies = await agentPolicyService.getByIds(
+    savedObjectsClient,
+    agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
+  );
+  if (agentPolicies.some((agentPolicy) => agentPolicy.is_managed)) {
+    throw managedRollbackError;
+  }
 
   if (packagePolicySOs.length > 0) {
     const policyIds = packagePolicySOs.map((so) => so.id);

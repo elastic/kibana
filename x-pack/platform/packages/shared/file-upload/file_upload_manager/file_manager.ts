@@ -483,13 +483,19 @@ export class FileUploadManager {
     let pipelinesCreated = false;
     let initializeImportResp: InitializeImportResponse | undefined;
 
+    this.docCountService.resetInitialDocCount();
+    const isExistingIndex = this.isExistingIndexUpload();
+    if (isExistingIndex) {
+      await this.docCountService.loadInitialIndexCount(indexName);
+    }
+
     try {
       initializeImportResp = await this.importer.initializeImport(
         indexName,
         this.getSettings().json,
         mappings,
         pipelines,
-        this.isExistingIndexUpload()
+        isExistingIndex
       );
 
       this.docCountService.startIndexSearchableCheck(indexName);
