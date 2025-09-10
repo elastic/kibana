@@ -15,6 +15,7 @@ import {
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
+import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
 
 export const buildActionResultsQuery = ({
   actionId,
@@ -23,6 +24,7 @@ export const buildActionResultsQuery = ({
   sort,
   componentTemplateExists,
   useNewDataStream,
+  integrationNamespaces,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   let filter = `action_id: ${actionId}`;
   if (!isEmpty(kuery)) {
@@ -45,13 +47,22 @@ export const buildActionResultsQuery = ({
 
   const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
-  let index: string;
+  let baseIndex: string;
   if (useNewDataStream) {
-    index = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
+    baseIndex = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
   } else if (componentTemplateExists) {
-    index = `${ACTION_RESPONSES_INDEX}*`;
+    baseIndex = `${ACTION_RESPONSES_INDEX}*`;
   } else {
-    index = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
+    baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
+  }
+
+  let index: string;
+  if (integrationNamespaces && integrationNamespaces.length > 0) {
+    index = integrationNamespaces
+      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
+      .join(',');
+  } else {
+    index = baseIndex;
   }
 
   return {

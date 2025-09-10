@@ -8,7 +8,6 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';
@@ -41,7 +40,7 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       align: 'right',
       render: (tool: ToolDefinitionWithSchema) => (
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-          {isEsqlTool(tool) && <ToolQuickActions tool={tool} />}
+          {!tool.readonly && <ToolQuickActions tool={tool} />}
           <ToolContextMenu tool={tool} />
         </EuiFlexGroup>
       ),
