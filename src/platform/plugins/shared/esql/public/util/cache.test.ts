@@ -267,4 +267,36 @@ describe('cacheParametrizedAsyncFunction', () => {
     expect(thirdResult).toBe('refreshed_value');
     expect(fn).toHaveBeenCalledTimes(2); // Now fn has been called for refresh
   });
+
+  it('should bypass and update the cache when function context has force refresh set to true', async () => {
+    const fn = jest.fn().mockResolvedValue('initial_value');
+    const maxCacheDuration = 1000 * 60 * 5; // 5 minutes
+    const refreshAfter = 1000 * 15; // 15 seconds
+
+    const cachedFn = cacheParametrizedAsyncFunction(
+      fn,
+      undefined,
+      maxCacheDuration,
+      refreshAfter,
+      mockNow
+    );
+
+    const firstResult = await cachedFn('argC', 3); // Caches 'initial_value'
+    expect(firstResult).toBe('initial_value');
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    fn.mockResolvedValueOnce('new_value');
+
+    const secondResult = await cachedFn('argC', 3); // Caches 'initial_value'
+    expect(secondResult).toBe('initial_value');
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    const forcedResult = await cachedFn.call({ forceRefresh: true }, 'argC', 3); // Caches 'initial_value'
+    expect(forcedResult).toBe('new_value');
+    expect(fn).toHaveBeenCalledTimes(2);
+
+    const finalResult = await cachedFn('argC', 3);
+    expect(finalResult).toBe('new_value');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
 });

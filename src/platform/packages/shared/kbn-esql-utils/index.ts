@@ -45,6 +45,7 @@ export {
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
+  getRemoteClustersFromESQLQuery,
   getLookupIndicesFromQuery,
 } from './src';
 
