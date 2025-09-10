@@ -20,5 +20,6 @@
     "@kbn/navigation-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
   ]
 }
