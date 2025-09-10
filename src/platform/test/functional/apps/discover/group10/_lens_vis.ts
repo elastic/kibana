@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      await checkNoVis('10');
+      await checkNoVis('50');
     });
 
     it('should show ESQL histogram for ES|QL query', async () => {
