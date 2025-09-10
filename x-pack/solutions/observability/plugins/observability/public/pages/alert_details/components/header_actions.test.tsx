@@ -53,12 +53,16 @@ const mockKibana = () => {
       cases: mockCases,
       http: mockHttp,
       application: mockNavigateToApp,
+      telemetryClient: {
+        reportAlertAddedToCase: jest.fn(),
+      },
     },
   });
 };
 
 const mockRuleId = '123';
 const mockRuleName = '456';
+const mockRuleTypeId = 'mocked-type-id';
 
 const mockUseFetchRuleWithData = () => {
   useFetchRuleMock.mockReturnValue({
@@ -110,11 +114,12 @@ describe('Header Actions', () => {
           rule={{
             id: mockRuleId,
             name: mockRuleName,
+            ruleTypeId: mockRuleTypeId,
           }}
         />
       );
 
-      fireEvent.click(getByTestId('add-to-case-button'));
+      fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([
         {
