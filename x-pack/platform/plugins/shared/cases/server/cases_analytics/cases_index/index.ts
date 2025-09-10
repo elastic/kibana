@@ -37,10 +37,8 @@ export const createCasesAnalyticsIndex = ({
   taskManager: TaskManagerStartContract;
   spaceId: string;
   owner: Owner;
-}): AnalyticsIndex => {
-  console.log(`!!!!! destIndex: ${getCasesDestinationIndexName(spaceId, owner)}`);
-  console.log(`!!!!! owner: ${owner}`);
-  return new AnalyticsIndex({
+}): AnalyticsIndex =>
+  new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
@@ -55,7 +53,6 @@ export const createCasesAnalyticsIndex = ({
     sourceIndex: CAI_CASES_SOURCE_INDEX,
     sourceQuery: getCasesSourceQuery(spaceId, owner),
   });
-};
 
 export const scheduleCasesAnalyticsSyncTask = ({
   taskManager,
