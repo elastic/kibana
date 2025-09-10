@@ -36,7 +36,7 @@ export interface TableFieldConfiguration {
   value: unknown;
   description?: string;
   type?: string;
-  valueCellContent?: React.ReactNode;
+  valueCellContent?: (params?: { truncate?: boolean }) => React.ReactNode;
 }
 
 export interface ContentFrameworkTableProps
@@ -108,11 +108,13 @@ export function ContentFrameworkTable({
             value,
             description: fieldDescription,
             type: fieldsMetadata[fieldName]?.type,
-            valueCellContent: fieldConfiguration?.formatter ? (
-              <>{fieldConfiguration.formatter(value, formattedValue)}</>
-            ) : (
-              <FormattedValue value={formattedValue} />
-            ),
+            valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
+              return fieldConfiguration?.formatter ? (
+                <>{fieldConfiguration.formatter(value, formattedValue)}</>
+              ) : (
+                <FormattedValue value={formattedValue} truncate={truncate} />
+              );
+            },
           };
 
           acc.rows.push(
