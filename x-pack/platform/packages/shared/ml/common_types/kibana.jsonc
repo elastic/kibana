@@ -5,5 +5,5 @@
     "@elastic/ml-ui"
   ],
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }
