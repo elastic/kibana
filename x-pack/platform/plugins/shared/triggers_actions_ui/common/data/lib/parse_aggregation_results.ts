@@ -115,7 +115,8 @@ export const parseAggregationResults = ({
     if (generateSourceFieldsFromHits) {
       sourceFieldsParams.forEach((field) => {
         const fieldsSet: string[] = [];
-        groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
+        const hits = groupBucket?.topHitsAgg?.hits?.hits ?? [];
+        hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
           const sourceField = get(hit._source, field.label);
           if (sourceField) {
             fieldsSet.push(sourceField);
