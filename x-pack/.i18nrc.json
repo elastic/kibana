@@ -95,6 +95,7 @@
       "platform/packages/shared/ml/node_checks",
       "platform/packages/shared/ml/saved_objects",
       "platform/packages/shared/ml/server_api_schemas",
+      "platform/packages/shared/ml/server_services",
       "platform/packages/shared/ml/services",
       "platform/packages/shared/ml/trained_models_utils",
       "platform/packages/shared/ml/ui_actions",
