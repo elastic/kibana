@@ -240,7 +240,7 @@ export class ScopedDiscoverEBTManager {
       }
 
       const esqlColumns = getQueryColumnsFromESQLQuery(query.esql);
-      const embeddedQueries = getSearchQueries(query.esql); // KQL or Lucene embedded within ES|QL query
+      const embeddedQueries = getSearchQueries(query.esql); // KQL embedded within ES|QL query
 
       const embeddedQueryColumns = embeddedQueries
         ? embeddedQueries

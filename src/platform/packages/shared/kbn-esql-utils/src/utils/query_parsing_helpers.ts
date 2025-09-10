@@ -179,7 +179,7 @@ export const getSearchQueries = (esql: string) => {
     visitFunction: (node) => functions.push(node),
   });
 
-  const queryStringFunctions = ['kql', 'qstr'];
+  const queryStringFunctions = ['kql'];
   const searchFunctions = functions.filter(({ name }) => queryStringFunctions.includes(name));
 
   return searchFunctions
