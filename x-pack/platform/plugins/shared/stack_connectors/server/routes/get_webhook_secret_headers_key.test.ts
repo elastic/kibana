@@ -39,6 +39,11 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
           }),
         }),
       },
+      spaces: {
+        spacesService: {
+          getSpaceId: jest.fn().mockReturnValue('default'),
+        },
+      },
     },
   ]);
 
@@ -86,6 +91,11 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
             }),
           }),
         },
+        spaces: {
+          spacesService: {
+            getSpaceId: jest.fn().mockReturnValue('default'),
+          },
+        },
       },
     ]);
     const mockResponse = httpServerMock.createResponseFactory();
@@ -124,6 +134,11 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
               attributes: {},
             }),
           }),
+        },
+        spaces: {
+          spacesService: {
+            getSpaceId: jest.fn().mockReturnValue('default'),
+          },
         },
       },
     ]);

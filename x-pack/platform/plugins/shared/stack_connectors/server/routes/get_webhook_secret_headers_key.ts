@@ -19,11 +19,13 @@ import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 
 export interface ConnectorsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   actions: ActionsPluginStartContract;
+  spaces: SpacesPluginSetup;
 }
 
 export interface ConnectorAttributes {
@@ -63,9 +65,11 @@ export const getWebhookSecretHeadersKeyRoute = (
     ): Promise<IKibanaResponse> => {
       const { id } = req.params;
 
-      const [, { encryptedSavedObjects, actions }] = await getStartServices();
+      const [, { encryptedSavedObjects, actions, spaces }] = await getStartServices();
+
       const actionsClient = await actions.getActionsClientWithRequest(req);
       const connector = await actionsClient.get({ id });
+      const spaceId = spaces.spacesService.getSpaceId(req);
 
       if (!['.webhook', '.cases-webhook'].includes(connector.actionTypeId)) {
         return res.badRequest({
@@ -79,7 +83,8 @@ export const getWebhookSecretHeadersKeyRoute = (
       const decryptedConnector =
         await encryptedClient.getDecryptedAsInternalUser<ConnectorAttributes>(
           ACTION_SAVED_OBJECT_TYPE,
-          id
+          id,
+          { namespace: spaceId }
         );
 
       const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || {};
