@@ -3,5 +3,5 @@
   "id": "@kbn/ml-node-checks",
   "owner": "@elastic/ml-ui",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }
