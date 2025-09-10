@@ -6038,7 +6038,25 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nHuman-readable name"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewListItem.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [
+              "\nTime field name if applicable"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -13748,6 +13766,14 @@
                 "path": "x-pack/platform/plugins/private/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.sagas.ts"
               },
@@ -13760,10 +13786,6 @@
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/persistence.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
               },
@@ -13774,10 +13796,6 @@
               {
                 "plugin": "@kbn/ml-data-view-utils",
                 "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
               {
                 "plugin": "ml",
@@ -13894,6 +13912,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/indicators/hooks/use_ti_data_view.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
@@ -21648,7 +21670,25 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nHuman-readable name"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewListItem.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [
+              "\nTime field name if applicable"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -26380,7 +26420,7 @@
         "label": "DataViewSavedObjectAttrs",
         "description": [],
         "signature": [
-          "{ type?: string | undefined; name?: string | undefined; title: string; typeMeta?: string | undefined; }"
+          "{ type?: string | undefined; name?: string | undefined; title: string; typeMeta?: string | undefined; timeFieldName?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
         "deprecated": false,

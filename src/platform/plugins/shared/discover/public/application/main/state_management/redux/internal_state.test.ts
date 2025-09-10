@@ -12,7 +12,6 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
-  selectTab,
   selectTabRuntimeState,
 } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -21,7 +20,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
 
 describe('InternalStateStore', () => {
-  it('should set data view', () => {
+  it('should set data view', async () => {
     const services = createDiscoverServicesMock();
     const urlStateStorage = createKbnUrlStateStorage();
     const runtimeStateManager = createRuntimeStateManager();
@@ -36,16 +35,12 @@ describe('InternalStateStore', () => {
       urlStateStorage,
       tabsStorageManager,
     });
-    store.dispatch(
-      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
-    );
+    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
     const tabId = store.getState().tabs.unsafeCurrentId;
-    expect(selectTab(store.getState(), tabId).dataViewId).toBeUndefined();
     expect(
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
     ).toBeUndefined();
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    expect(selectTab(store.getState(), tabId).dataViewId).toBe(dataViewMock.id);
     expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
       dataViewMock
     );
