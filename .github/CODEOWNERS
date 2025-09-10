@@ -1252,11 +1252,18 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 
 # Observability UI
-/x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/observability-ui @elastic/appex-qa
-/x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
-/x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts @elastic/observability-ui @elastic/appex-qa
-/x-pack/test_serverless/api_integration/test_suites/observability/index.logs_essentials.ts @elastic/observability-ui
-/x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/observability-ui
+/x-pack/solutions/observability/test/README.md @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/README.md @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/api_integration/ftr_provider_context.d.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/api_integration/services/ @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts @elastic/observability-ui @elastic/appex-qa
+/x-pack/solutions/observability/test/serverless/api_integration/configs/index.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/api_integration/configs/config.logs_essentials.ts @elastic/observability-ui @elastic/appex-qa
+/x-pack/solutions/observability/test/serverless/api_integration/configs/index.logs_essentials.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/api_integration/test_suites/logs_essentials_only @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/functional/services/ @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/functional/page_objects/ @elastic/observability-ui
+/x-pack/solutions/observability/test/serverless/functional/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.index.ts @elastic/observability-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/kibana.jsonc @elastic/observability-ui
@@ -1755,11 +1762,21 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/dev/performance @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/README.md @elastic/appex-qa
+/x-pack/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa # Maybe this should be a glob?
+/x-pack/test/accessibility/services.ts @elastic/appex-qa
+/x-pack/test/accessibility/page_objects.ts @elastic/appex-qa
+/x-pack/test/accessibility/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/test_serverless/tsconfig.json @elastic/appex-qa
+/x-pack/test_serverless/kibana.jsonc @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/common/README.md @elastic/appex-qa
+/x-pack/test_serverless/functional/page_objects/index.ts @elastic/appex-qa
+/x-pack/test_serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/management/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/examples/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
 /x-pack/platform/test/README.md @elastic/appex-qa
 /x-pack/platform/test/serverless/README.md @elastic/appex-qa
+/x-pack/test_serverless/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/api_integration/test_suites/README.md @elastic/appex-qa
 /src/dev/code_coverage @elastic/appex-qa
 /src/platform/test/functional/services/common @elastic/appex-qa
@@ -1787,11 +1804,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/tsconfig.json @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/config.basic_license.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/kibana.jsonc @elastic/appex-qa
-/x-pack/solutions/observability/test/tsconfig.json @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration/config.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/solutions/security/test/README.md @elastic/appex-qa
 /x-pack/solutions/security/test/kibana.jsonc @elastic/appex-qa
 /x-pack/solutions/security/test/tsconfig.json @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/config.ts @elastic/appex-qa

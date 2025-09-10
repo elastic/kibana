@@ -2301,6 +2301,17 @@ module.exports = {
         ],
       },
     },
+    {
+      // Custom rules for scout tests
+      files: [
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/plugins/test/scout/**/*.ts',
+      ],
+      rules: {
+        '@kbn/eslint/scout_no_describe_configure': 'error',
+      },
+    },
   ],
 };
 
