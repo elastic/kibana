@@ -62,7 +62,7 @@ export interface ScoutParallelWorkerFixtures {
 }
 
 /**
- * Pre-creates Elasticsearch Security indexes (.security, .security-tokens, .security-profile)
+ * Pre-creates Elasticsearch Security indexes (.security-tokens, .security-profile)
  * during global setup to prevent race conditions when parallel tests perform their first SAML authentication.
  */
 const preCreateSecurityIndexesFixture = coreWorkerFixtures.extend<
