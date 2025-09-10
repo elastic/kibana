@@ -8,7 +8,6 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   MigrationTranslationResult,
-  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 
@@ -36,18 +35,5 @@ export const dsl = {
   },
   isNotFailed(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isFailed() } };
-  },
-  isInstallable(): QueryDslQueryContainer {
-    return { bool: { must: dsl.isFullyTranslated() } };
-  },
-  isNotInstallable(): QueryDslQueryContainer {
-    return { bool: { must_not: dsl.isFullyTranslated() } };
-  },
-  isMissingIndex(): QueryDslQueryContainer {
-    return {
-      query_string: {
-        query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
-      },
-    };
   },
 };
