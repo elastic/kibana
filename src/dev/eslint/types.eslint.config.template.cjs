@@ -30,6 +30,7 @@ module.exports = {
       files: [
         'server/**/*',
         'accessibility/apps/**/*',
+        'analytics/tests/**/*',
         '*functional*/**/*',
         '*api_integration*/**/*',
         'cloud_integration/tests/**/*',
@@ -38,6 +39,7 @@ module.exports = {
         'examples/**/*',
         'fleet_multi_cluster/apps/**/*',
         'ftr_apis/**/*',
+        'health_gateway/tests/**/*',
         'localization/tests/**/*',
         'plugin_api_perf/test_suites/**/*',
         'rule_registry/**/*',
@@ -45,6 +47,7 @@ module.exports = {
         'screenshot_creation/apps/**/*',
         'serverless/api_integration/**/*',
         'serverless/functional/**/*',
+        'ui_capabilities/**/*',
         'upgrade/apps/**/*',
         'usage_collection/test_suites/**/*',
       ],
