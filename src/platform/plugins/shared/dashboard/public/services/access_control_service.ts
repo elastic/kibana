@@ -8,7 +8,7 @@
  */
 
 import { AccessControlClient } from '@kbn/content-management-access-control-public';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices } from './kibana_services';
 
 let accessControlClient: AccessControlClient | null = null;
 

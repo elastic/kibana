@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { getAccessControlClient } from '../dashboard_app/access_control/get_access_control_client';
+import { getAccessControlClient } from '../services/access_control_service';
 import { CONTENT_ID } from '../../common/content_management';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 

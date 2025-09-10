@@ -18,7 +18,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { CONTENT_ID } from '../../../common/content_management';
 import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
-import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
+import { getAccessControlClient } from '../../services/access_control_service';
 import type { DashboardSearchOut } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
