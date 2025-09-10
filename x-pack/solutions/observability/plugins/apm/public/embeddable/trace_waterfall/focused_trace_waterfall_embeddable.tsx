@@ -16,13 +16,13 @@ export function FocusedTraceWaterfallEmbeddable({
   rangeTo,
   traceId,
   docId,
-}: ApmTraceWaterfallEmbeddableFocusedProps) {
+}: Omit<ApmTraceWaterfallEmbeddableFocusedProps, 'mode'>) {
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/traces/{traceId}/{docId}', {
+      return callApmApi('GET /internal/apm/unified_traces/{traceId}/summary', {
         params: {
-          path: { traceId, docId },
-          query: { start: rangeFrom, end: rangeTo },
+          path: { traceId },
+          query: { start: rangeFrom, end: rangeTo, docId },
         },
       });
     },
@@ -44,5 +44,5 @@ export function FocusedTraceWaterfallEmbeddable({
     );
   }
 
-  return <FocusedTraceWaterfall items={data} />;
+  return <FocusedTraceWaterfall items={data} isEmbeddable />;
 }
