@@ -67,7 +67,6 @@ describe('bedrockClaudeAdapter', () => {
               content: [
                 {
                   text: 'question',
-                  type: 'text',
                 },
               ],
               role: 'user',
@@ -223,9 +222,9 @@ Human:`,
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
-        { role: 'user', content: [{ text: 'question', type: 'text' }] },
-        { role: 'assistant', content: [{ type: 'text', text: 'answer' }] },
-        { role: 'user', content: [{ text: 'another question', type: 'text' }] },
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'assistant', content: [{ text: 'answer' }] },
+        { role: 'user', content: [{ text: 'another question' }] },
         {
           role: 'assistant',
           content: [{ toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } }],
@@ -304,8 +303,8 @@ Human:`,
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
-        { role: 'user', content: [{ text: 'question', type: 'text' }] },
-        { role: 'assistant', content: [{ type: 'text', text: 'answer' }] },
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'assistant', content: [{ text: 'answer' }] },
         {
           role: 'user',
           content: [
