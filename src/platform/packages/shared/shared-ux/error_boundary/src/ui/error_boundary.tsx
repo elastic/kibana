@@ -13,10 +13,10 @@ import React from 'react';
 import { getErrorBoundaryLabels } from '../../lib';
 import { useErrorBoundary } from '../services';
 import { FatalPrompt, RecoverablePrompt } from './message_components';
-import type {
+import {
   BaseErrorBoundary,
-  BaseErrorBoundaryState,
-  BaseErrorBoundaryProps,
+  type BaseErrorBoundaryState,
+  type BaseErrorBoundaryProps,
 } from './base_error_boundary';
 
 class ErrorBoundaryInternal extends BaseErrorBoundary<
