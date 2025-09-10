@@ -126,7 +126,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
             />
 
-            {renderFlyoutStreamField && renderFlyoutStreamField({ doc: hit })}
+            <div>{renderFlyoutStreamField && renderFlyoutStreamField({ doc: hit })}</div>
 
             <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
             {isStacktraceAvailable && (

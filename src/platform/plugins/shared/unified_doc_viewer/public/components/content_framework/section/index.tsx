@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import type { EuiAccordionProps, IconType } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiBetaBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -42,7 +43,7 @@ export interface ContentFrameworkSectionProps {
   'data-test-subj'?: string;
   onToggle?: () => {};
   forceState?: EuiAccordionProps['forceState'];
-  showSeparator?: boolean;
+  isTechPreview?: boolean;
 }
 
 export function ContentFrameworkSection({
@@ -54,6 +55,7 @@ export function ContentFrameworkSection({
   onToggle,
   forceState = 'open',
   'data-test-subj': accordionDataTestSubj,
+  isTechPreview = false,
 }: ContentFrameworkSectionProps) {
   const [isAccordionExpanded, setIsAccordionExpanded] = useState(
     forceState ? forceState === 'open' : true
@@ -120,16 +122,26 @@ export function ContentFrameworkSection({
                 <h3>{title}</h3>
               </EuiTitle>
             </EuiFlexItem>
-            {description && (
+            {description ? (
               <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={description}
-                  size="s"
-                  color="subdued"
-                  aria-label={description}
-                />
+                {isTechPreview ? (
+                  <EuiBetaBadge
+                    size="s"
+                    label={description}
+                    color="hollow"
+                    iconType="beaker"
+                    title={title}
+                  />
+                ) : (
+                  <EuiIconTip
+                    content={description}
+                    size="s"
+                    color="subdued"
+                    aria-label={description}
+                  />
+                )}
               </EuiFlexItem>
-            )}
+            ) : null}
           </EuiFlexGroup>
         }
         extraAction={
