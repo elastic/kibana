@@ -2503,6 +2503,29 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.emptyAssets",
+        "type": "Object",
+        "tags": [],
+        "label": "emptyAssets",
+        "description": [],
+        "signature": [
+          "{ readonly dashboards: string[]; readonly rules: string[]; readonly queries: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/empty_assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.fieldDefinitionConfigSchema",
         "type": "Object",
         "tags": [],
