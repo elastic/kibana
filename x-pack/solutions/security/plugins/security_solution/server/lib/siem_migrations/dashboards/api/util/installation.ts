@@ -160,7 +160,7 @@ const installDashboards = async (
         );
 
         dashboardsToUpdate.push({
-          ...dashboard,
+          id: dashboard.id,
           elastic_dashboard: {
             id: dashboard.id,
             title: dashboard.original_dashboard.title,
