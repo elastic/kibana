@@ -128,6 +128,7 @@ export function ContentFrameworkSection({
                   <EuiBetaBadge
                     size="s"
                     label={description}
+                    alignment="middle"
                     color="hollow"
                     iconType="beaker"
                     title={title}
