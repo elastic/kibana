@@ -52,11 +52,11 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await otelHostFlowPage.clickHostsOverviewCTA();
     await hostsOverviewPage.assertCpuPercentageNotEmpty();
   } else {
-    await page.waitForTimeout(3 * 60000);
-    
+    // logs essentials mode
     await otelHostFlowPage.clickLogsExplorationCTA();
     
-    const discoverValidation = new (await import('./pom/pages/discover_validation')).DiscoverValidation(page);
+    const { DiscoverValidation } = await import('./pom/pages/discover_validation');
+    const discoverValidation = new DiscoverValidation(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
   }
