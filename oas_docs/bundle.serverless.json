@@ -42949,6 +42949,7 @@
         "operationId": "get-maintenance-window-find",
         "parameters": [
           {
+            "description": "The title of the maintenance window.",
             "in": "query",
             "name": "title",
             "required": false,
@@ -42957,6 +42958,7 @@
             }
           },
           {
+            "description": "The user who created the maintenance window.",
             "in": "query",
             "name": "created_by",
             "required": false,
@@ -42965,6 +42967,7 @@
             }
           },
           {
+            "description": "The status of the maintenance window. One of \"running\", \"upcoming\", \"finished\" or \"archived\".",
             "in": "query",
             "name": "status",
             "required": false,
