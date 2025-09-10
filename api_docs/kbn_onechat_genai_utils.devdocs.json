@@ -8940,7 +8940,7 @@
         "label": "runSearchTool",
         "description": [],
         "signature": [
-          "({ nlQuery, index, model, esClient, logger, }: { nlQuery: string; index?: string | undefined; model: ",
+          "({ nlQuery, index, model, esClient, logger, events, }: { nlQuery: string; index?: string | undefined; model: ",
           {
             "pluginId": "@kbn/onechat-server",
             "scope": "common",
@@ -8957,6 +8957,14 @@
             "docId": "kibKbnLoggingPluginApi",
             "section": "def-common.Logger",
             "text": "Logger"
+          },
+          "; events: ",
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.ToolEventEmitter",
+            "text": "ToolEventEmitter"
           },
           "; }) => Promise<",
           {
@@ -8977,7 +8985,7 @@
             "id": "def-server.runSearchTool.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  nlQuery,\n  index,\n  model,\n  esClient,\n  logger,\n}",
+            "label": "{\n  nlQuery,\n  index,\n  model,\n  esClient,\n  logger,\n  events,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
             "deprecated": false,
@@ -10042,6 +10050,26 @@
                     "docId": "kibKbnLoggingPluginApi",
                     "section": "def-common.Logger",
                     "text": "Logger"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/onechat-genai-utils",
+                "id": "def-server.runSearchTool.$1.events",
+                "type": "Object",
+                "tags": [],
+                "label": "events",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.ToolEventEmitter",
+                    "text": "ToolEventEmitter"
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",

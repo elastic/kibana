@@ -30,6 +30,7 @@ import {
 import type { EMSTermJoinConfig, TableSourceDescriptor } from '@kbn/maps-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import type { Writable } from '@kbn/utility-types';
 import { useMlKibana } from '../contexts/kibana';
 
 const MAX_ENTITY_VALUES = 3;
@@ -217,7 +218,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   // set the layer with anomalies to visible
   if (layersWithAnomalies.length > 0) {
-    layersWithAnomalies[0].visible = true;
+    (layersWithAnomalies[0] as Writable<VectorLayerDescriptor>).visible = true;
   }
 
   if (EMSSuggestions?.length === 0 || layersWithAnomalies.length === 0) {

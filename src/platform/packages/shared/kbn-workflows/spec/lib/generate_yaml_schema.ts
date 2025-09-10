@@ -17,6 +17,7 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
@@ -84,6 +85,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
   });
 }

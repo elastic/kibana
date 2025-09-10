@@ -497,6 +497,12 @@ export interface ValueListIndicatorMatchResponseAggregation {
   };
 }
 
+export interface TelemetryQueryConfiguration {
+  pageSize: number;
+  maxResponseSize: number;
+  maxCompressedResponseSize: number;
+}
+
 export interface TelemetryConfiguration {
   telemetry_max_buffer_size: number;
   max_security_list_telemetry_batch: number;
@@ -511,6 +517,7 @@ export interface TelemetryConfiguration {
   indices_metadata_config?: IndicesMetadataConfiguration;
   ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
   health_diagnostic_config?: HealthDiagnosticConfiguration;
+  query_config?: TelemetryQueryConfiguration;
 }
 
 export interface IndicesMetadataConfiguration {

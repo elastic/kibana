@@ -43,6 +43,7 @@ export {
 } from './v1';
 
 export type {
+  GraphNode,
   AtomicGraphNode,
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,

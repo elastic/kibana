@@ -17,7 +17,7 @@ export interface PlaygroundNameProps {
 
 const EDIT_NAME_LABEL = i18n.translate(
   'xpack.searchPlayground.savedPlayground.editPlaygroundName.ariaLabel',
-  { defaultMessage: 'Edit RAG playground name' }
+  { defaultMessage: 'Edit playground name' }
 );
 
 export const PlaygroundName = ({ playgroundName, onEditName }: PlaygroundNameProps) => {

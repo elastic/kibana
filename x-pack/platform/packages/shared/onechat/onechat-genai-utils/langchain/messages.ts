@@ -77,10 +77,9 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
     if (content.startsWith('Error:')) {
       return {
         results: [{ type: ToolResultType.error, data: { message: content } }],
-        runId: 'unknown',
       };
     } else {
-      throw new Error('No artifact attached to tool message');
+      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
     }
   }
 };

@@ -7,9 +7,9 @@
 
 import {
   DATE_PICKER_APPLY_BUTTON_TIMELINE,
+  DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
-  DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
 } from '../../../screens/date_picker';
 import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
@@ -19,8 +19,8 @@ import {
   EXPLORE_PANEL_BTN,
   HOSTS,
   KQL_INPUT,
-  NETWORK,
   LOADING_INDICATOR,
+  NETWORK,
   openNavigationPanel as toggleNavigationPanel,
 } from '../../../screens/security_header';
 import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../../screens/timeline';
@@ -28,9 +28,9 @@ import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../../screens
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  updateDates,
-  setStartDate,
   setEndDate,
+  setStartDate,
+  updateDates,
   updateTimelineDates,
 } from '../../../tasks/date_picker';
 import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
@@ -207,12 +207,12 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
 
   it('sets kql on network page', () => {
     visit(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
@@ -307,7 +307,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
   it('Do not clears kql when navigating to a new page', () => {
     visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
-    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {

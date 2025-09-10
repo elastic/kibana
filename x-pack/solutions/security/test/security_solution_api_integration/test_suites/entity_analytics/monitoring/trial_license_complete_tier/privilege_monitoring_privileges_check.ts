@@ -15,7 +15,7 @@ import {
   READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,
   READ_PRIV_MON_INDICES_ROLE,
   USER_PASSWORD,
-} from './role_utils';
+} from './utils/role_utils';
 import { PrivMonUtils } from './privileged_users/utils';
 
 export default ({ getService }: FtrProviderContext) => {

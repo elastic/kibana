@@ -46,7 +46,6 @@ describe('extractToolReturn', () => {
           },
         },
       ],
-      runId: 'unknown',
     });
   });
 

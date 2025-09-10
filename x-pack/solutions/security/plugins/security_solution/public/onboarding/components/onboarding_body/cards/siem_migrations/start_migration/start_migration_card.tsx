@@ -8,9 +8,9 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
-  MissingPrivilegesCallOut,
+  BasicMissingPrivilegesCallOut,
   MissingPrivilegesDescription,
-} from '../../../../../../common/missing_privileges';
+} from '../../../../../../common/components/missing_privileges';
 import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
 import { PanelText } from '../../../../../../common/components/panel_text';
 import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
@@ -103,9 +103,9 @@ export const StartMigrationCard: OnboardingCardComponent<StartMigrationCardMetad
     if (missingCapabilities.length > 0) {
       return (
         <OnboardingCardContentPanel>
-          <MissingPrivilegesCallOut>
+          <BasicMissingPrivilegesCallOut>
             <MissingPrivilegesDescription privileges={missingCapabilities} />
-          </MissingPrivilegesCallOut>
+          </BasicMissingPrivilegesCallOut>
         </OnboardingCardContentPanel>
       );
     }

@@ -12,4 +12,8 @@ export default class lexer_config extends Lexer {
   isDevVersion() {
     return true;
   }
+
+  hasMetricsCommand() {
+    return true;
+  }
 }

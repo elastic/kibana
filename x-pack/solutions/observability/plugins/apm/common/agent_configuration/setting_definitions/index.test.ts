@@ -206,7 +206,14 @@ describe('filterByAgent', () => {
 
     it('opentelemetry/nodejs/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/nodejs/elastic')).toEqual(
-        expect.arrayContaining(['logging_level'])
+        expect.arrayContaining([
+          'deactivate_all_instrumentations',
+          'deactivate_instrumentations',
+          'logging_level',
+          'send_logs',
+          'send_metrics',
+          'send_traces',
+        ])
       );
     });
 

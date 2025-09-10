@@ -46,6 +46,7 @@ export function initializeMetadata({
     organizationKey: cloud.organizationId,
     trial_end_date: cloud.trialEndDate,
     is_elastic_staff: cloud.isElasticStaffOwned,
+    in_trial: cloud.serverless?.organizationInTrial,
   });
 
   // Update the client's contexts when we get any updates in the metadata.

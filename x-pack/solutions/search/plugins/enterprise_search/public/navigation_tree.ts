@@ -149,10 +149,6 @@ export const getNavigationTreeDefinition = ({
                       link: 'searchPlayground',
                     },
                     {
-                      link: 'enterpriseSearchContent:connectors',
-                      iconV2: 'link' /* TODO: review icon */,
-                    },
-                    {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         const someSubItemSelected = searchApps?.some((app) =>
                           app.items?.some((item) => item.isSelected)

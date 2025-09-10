@@ -126,10 +126,13 @@ export class WorkflowExecutionRuntimeManager {
     this.currentStepIndex = -1;
   }
 
-  public enterScope(): void {
-    const currentStep = this.getCurrentStep();
+  public enterScope(scopeId?: string): void {
+    if (!scopeId) {
+      scopeId = this.getCurrentStep().id;
+    }
+
     const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
-    stack.push(currentStep.id);
+    stack.push(scopeId as string);
     this.workflowExecutionState.updateWorkflowExecution({
       stack,
     });
@@ -222,6 +225,7 @@ export class WorkflowExecutionRuntimeManager {
 
         const stepExecution = {
           stepId: nodeId,
+          path: [...(workflowExecution.stack || [])],
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
           status: ExecutionStatus.RUNNING,
           startedAt: stepStartedAt.toISOString(),
