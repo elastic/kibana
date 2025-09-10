@@ -15,12 +15,13 @@ import type {
   CumulativeSumIndexPatternColumn,
   CounterRateIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import type {
-  LensApiMovingAverageOperation,
-  LensApiCumulativeSumOperation,
-  LensApiCountMetricOperation,
-  LensApiUniqueCountMetricOperation,
-  LensApiFormulaOperation,
+import type { LensApiMetricOperation } from '../../schema/metric_ops';
+import {
+  type LensApiMovingAverageOperation,
+  type LensApiCumulativeSumOperation,
+  type LensApiCountMetricOperation,
+  type LensApiUniqueCountMetricOperation,
+  type LensApiFormulaOperation,
 } from '../../schema/metric_ops';
 import {
   LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
@@ -190,12 +191,18 @@ describe('Metric Transforms', () => {
 
     it('should reverse transform basic metric', () => {
       const result = getMetricApiColumnFromLensState(columns.col1, columns);
+      if (!isAPIColumnOfType<LensApiMetricOperation>('average', result)) {
+        fail();
+      }
       expect(result?.operation).toBe('average');
       expect(result?.field).toBe('value');
     });
 
     it('should reverse transform moving average with reference', () => {
       const result = getMetricApiColumnFromLensState(columns.col2, columns);
+      if (!isAPIColumnOfType<LensApiMovingAverageOperation>('moving_average', result)) {
+        fail();
+      }
       expect(result?.operation).toBe('moving_average');
       expect(result?.of?.operation).toBe('average');
     });
