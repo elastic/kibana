@@ -17,13 +17,16 @@ import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 const classicStreamManagementSubTabs = [
   'processing',
   'advanced',
+  'dataQuality',
   'retention',
   'significantEvents',
+  'schemaEditor',
   'schema',
   'references',
 ] as const;
@@ -121,6 +124,23 @@ export function ClassicStreamDetailManagement({
     };
     tabs.processing = processing;
   }
+
+  tabs.dataQuality = {
+    content: <StreamDetailDataQuality definition={definition} />,
+    label: (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+          defaultMessage: 'View details about this classic stream’s data quality',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+            defaultMessage: 'Data quality',
+          })}
+        </span>
+      </EuiToolTip>
+    ),
+  };
 
   if (definition.privileges.manage) {
     tabs.advanced = {

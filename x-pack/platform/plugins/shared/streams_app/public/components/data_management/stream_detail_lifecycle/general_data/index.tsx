@@ -112,13 +112,13 @@ export const StreamDetailGeneralData = ({
         </h4>
       </EuiText>
       <EuiFlexGroup gutterSize="m" css={flexRowCss}>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} css={flexItemCss}>
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} css={flexItemCss}>
           <StorageSizeCard definition={definition} stats={stats} statsError={statsError} />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} css={flexItemCss}>
           <IngestionCard definition={definition} stats={stats} statsError={statsError} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -136,6 +136,13 @@ export const StreamDetailGeneralData = ({
   );
 };
 
+const flexItemCss = css`
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+`;
+
 const flexRowCss = css`
   flex-grow: 0;
+  align-items: stretch;
 `;

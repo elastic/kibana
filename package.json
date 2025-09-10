@@ -465,6 +465,7 @@
     "@kbn/data-forge": "link:x-pack/platform/packages/shared/kbn-data-forge",
     "@kbn/data-grid-in-table-search": "link:src/platform/packages/shared/kbn-data-grid-in-table-search",
     "@kbn/data-plugin": "link:src/platform/plugins/shared/data",
+    "@kbn/data-quality": "link:x-pack/platform/packages/private/kbn-data-quality",
     "@kbn/data-quality-plugin": "link:x-pack/platform/plugins/shared/data_quality",
     "@kbn/data-search-plugin": "link:src/platform/test/plugin_functional/plugins/data_search",
     "@kbn/data-service": "link:src/platform/packages/shared/kbn-data-service",
