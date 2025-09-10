@@ -584,9 +584,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
               response: {
                 200: {
                   body: () => BulkRollbackPackagesResponseSchema,
+                  description: 'OK',
                 },
                 400: {
                   body: genericErrorResponse,
+                  description: 'Bad Request',
                 },
               },
             },
@@ -611,9 +613,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
               response: {
                 200: {
                   body: () => GetOneBulkOperationPackagesResponseSchema,
+                  description: 'OK',
                 },
                 400: {
                   body: genericErrorResponse,
+                  description: 'Bad Request',
                 },
               },
             },
