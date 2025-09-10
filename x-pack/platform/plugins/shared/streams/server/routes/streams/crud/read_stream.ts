@@ -12,6 +12,7 @@ import {
   getInheritedSettings,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
@@ -77,14 +78,14 @@ export async function readStream({
   const [ancestors, dataStream, privileges, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name).catch((e) => {
-      if (e.statusCode === 404) {
+      if (isNotFoundError(e)) {
         return null;
       }
       throw e;
     }),
     streamsClient.getPrivileges(name),
     scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
-      if (e.statusCode === 404) {
+      if (isNotFoundError(e)) {
         return null;
       }
       throw e;
