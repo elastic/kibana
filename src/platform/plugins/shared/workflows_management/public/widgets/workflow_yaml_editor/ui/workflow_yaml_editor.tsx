@@ -15,11 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import YAML, { isPair, isScalar, visit } from 'yaml';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
@@ -244,24 +243,30 @@ export const WorkflowYAMLEditor = ({
         validateVariables(editor);
         try {
           const parsedDocument = YAML.parseDocument(value);
-          // Use flushSync to ensure yamlDocument is set synchronously
-          // before isEditorMounted is set, preventing race conditions
-          flushSync(() => {
+          // Use setTimeout to defer state updates until after the current render cycle
+          // This prevents the flushSync warning while maintaining the correct order
+          setTimeout(() => {
             setYamlDocument(parsedDocument);
-          });
+            setIsEditorMounted(true);
+          }, 0);
         } catch (error) {
-          flushSync(() => {
+          setTimeout(() => {
             setYamlDocument(null);
-          });
+            setIsEditorMounted(true);
+          }, 0);
         }
+      } else {
+        // If no content, just set the mounted state
+        setTimeout(() => {
+          setIsEditorMounted(true);
+        }, 0);
       }
+    } else {
+      // If no model, just set the mounted state
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
     }
-
-    // Use flushSync here too to ensure isEditorMounted is set synchronously
-    // after yamlDocument, guaranteeing the decoration effect has both values
-    flushSync(() => {
-      setIsEditorMounted(true);
-    });
   };
 
   useEffect(() => {
