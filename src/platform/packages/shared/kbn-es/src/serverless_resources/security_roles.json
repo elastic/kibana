@@ -337,6 +337,7 @@
           "securitySolutionCasesV2": ["all"],
           "securitySolutionTimeline": ["all"],
           "securitySolutionNotes": ["all"],
+          "securitySolutionRulesV1": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "dev_tools": ["all"]
@@ -396,6 +397,7 @@
           "securitySolutionCasesV2": ["all"],
           "securitySolutionTimeline": ["all"],
           "securitySolutionNotes": ["all"],
+          "securitySolutionRulesV1": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },

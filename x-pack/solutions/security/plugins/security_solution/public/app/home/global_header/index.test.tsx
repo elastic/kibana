@@ -76,6 +76,7 @@ describe('global header', () => {
             [SECURITY_FEATURE_ID]: {
               configurations: false,
             },
+            fleet: { read: true },
           },
         },
       },
@@ -110,6 +111,7 @@ describe('global header', () => {
             [SECURITY_FEATURE_ID]: {
               configurations: true,
             },
+            fleet: { read: true },
           },
         },
       },
