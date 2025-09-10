@@ -9,6 +9,7 @@
 import { Parser } from '../../parser';
 import type { SupportedDataType } from '../types';
 import { FunctionDefinitionTypes } from '../types';
+import type { ESQLColumnData } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
@@ -127,27 +128,25 @@ describe('getExpressionType', () => {
               {
                 name: 'fieldName',
                 type: 'geo_shape',
+                userDefined: false,
               },
             ],
-          ]),
-          new Map()
+          ])
         )
       ).toBe('geo_shape');
 
       expect(
         getExpressionType(
           getASTForExpression('col0'),
-          new Map(),
           new Map([
             [
               'col0',
-              [
-                {
-                  name: 'col0',
-                  type: 'long',
-                  location: { min: 0, max: 0 },
-                },
-              ],
+              {
+                name: 'col0',
+                type: 'long',
+                location: { min: 0, max: 0 },
+                userDefined: true,
+              },
             ],
           ])
         )
@@ -155,9 +154,7 @@ describe('getExpressionType', () => {
     });
 
     it('handles fields and userDefinedColumns which do not exist', () => {
-      expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
-        'unknown'
-      );
+      expect(getExpressionType(getASTForExpression('fieldName'), new Map())).toBe('unknown');
     });
 
     // this is here to fix https://github.com/elastic/kibana/issues/215157
@@ -172,16 +169,16 @@ describe('getExpressionType', () => {
                 name: 'fieldName',
                 type: 'unsupported',
                 hasConflict: true,
+                userDefined: false,
               },
             ],
-          ]),
-          new Map()
+          ])
         )
       ).toBe('unknown');
     });
 
     it('handles fields defined by a named param', () => {
-      expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
+      expect(getExpressionType(getASTForExpression('??field'), new Map())).toBe('param');
     });
   });
 
@@ -279,17 +276,23 @@ describe('getExpressionType', () => {
       expect(
         getExpressionType(
           getASTForExpression('CASE(true, "", true, "", keywordField)'),
-          new Map([[`keywordField`, { name: 'keywordField', type: 'keyword' }]]),
-          new Map()
+          new Map([[`keywordField`, { name: 'keywordField', type: 'keyword', userDefined: false }]])
         )
       ).toBe('keyword');
 
       expect(
         getExpressionType(
           getASTForExpression('CASE(true, "", true, "", keywordVar)'),
-          new Map(),
-          new Map([
-            [`keywordVar`, [{ name: 'keywordVar', type: 'keyword', location: { min: 0, max: 0 } }]],
+          new Map<string, ESQLColumnData>([
+            [
+              `keywordVar`,
+              {
+                name: 'keywordVar',
+                type: 'keyword',
+                location: { min: 0, max: 0 },
+                userDefined: true,
+              },
+            ],
           ])
         )
       ).toBe('keyword');

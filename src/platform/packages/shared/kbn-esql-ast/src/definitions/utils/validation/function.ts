@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { uniqBy } from 'lodash';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes, within } from '../../../..';
 import {
@@ -35,8 +34,8 @@ import {
   getSignaturesWithMatchingArity,
   matchesArity,
 } from '../expressions';
-import { ColumnValidator } from './column';
 import { isArrayType } from '../operators';
+import { ColumnValidator } from './column';
 
 export function validateFunction({
   fn,
@@ -74,9 +73,7 @@ class FunctionValidator {
   ) {
     this.definition = getFunctionDefinition(fn.name);
     for (const arg of this.fn.args) {
-      this.argTypes.push(
-        getExpressionType(arg, this.context.fields, this.context.userDefinedColumns)
-      );
+      this.argTypes.push(getExpressionType(arg, this.context.columns));
       this.argLiteralsMask.push(isLiteral(arg));
     }
   }
@@ -155,20 +152,24 @@ class FunctionValidator {
     }
 
     // Validate column arguments
-    const columnMessages = this.fn.args.flat().flatMap((arg) => {
-      if (isColumn(arg) || isIdentifier(arg)) {
-        return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
+    const columnsToValidate = [];
+    const flatArgs = this.fn.args.flat();
+    for (let i = 0; i < flatArgs.length; i++) {
+      const arg = flatArgs[i];
+      if (
+        (isColumn(arg) || isIdentifier(arg)) &&
+        !(this.definition.name === '=' && i === 0) && // don't validate left-hand side of assignment
+        !(this.definition.name === 'as' && i === 1) // don't validate right-hand side of AS
+      ) {
+        columnsToValidate.push(arg);
       }
-      return [];
+    }
+
+    const columnMessages = columnsToValidate.flatMap((arg) => {
+      return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
     });
 
-    // uniqBy is used to cover a special case in ENRICH where an implicit assignment is possible
-    // so the AST actually stores an explicit "columnX = columnX" which duplicates the message
-    //
-    // @TODO - we will no longer need to store an assignment in the AST approach when we
-    // align field availability detection with the system used by autocomplete
-    // (start using columnsAfter instead of collectUserDefinedColumns)
-    this.report(...uniqBy(columnMessages, ({ location }) => `${location.min}-${location.max}`));
+    this.report(...columnMessages);
   }
 
   /**

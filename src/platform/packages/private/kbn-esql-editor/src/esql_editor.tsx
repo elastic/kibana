@@ -493,6 +493,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   name: c.name,
                   type: c.meta.esType as FieldType,
                   hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+                  userDefined: false,
                 };
               }) || [];
 

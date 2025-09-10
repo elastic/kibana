@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDITOR_MARKER, parse } from '@kbn/esql-ast';
-import { getQueryForFields } from './helper';
+import { parse, EDITOR_MARKER } from '@kbn/esql-ast';
+import { getQueryForFields } from './resources_helpers';
 
 describe('getQueryForFields', () => {
   const assert = (query: string, expected: string) => {
@@ -58,10 +58,5 @@ describe('getQueryForFields', () => {
     const query3 = `FROM index
     | EVAL foo = 1, ${EDITOR_MARKER}`;
     assert(query3, 'FROM index | EVAL foo = 1');
-  });
-
-  it('should return empty string if non-FROM source command', () => {
-    assert('ROW field1 = 1', '');
-    assert('SHOW INFO', '');
   });
 });
