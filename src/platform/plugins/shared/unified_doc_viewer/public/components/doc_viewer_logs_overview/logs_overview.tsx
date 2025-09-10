@@ -113,25 +113,21 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             }
           >
             <EuiSpacer size="m" />
-            <LogsOverviewHeader
-              formattedDoc={parsedDoc}
-              doc={hit}
-              renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-            />
+
             <LogsOverviewHighlights
               formattedDoc={parsedDoc}
               doc={hit}
               renderFlyoutStreamField={renderFlyoutStreamField}
               dataView={dataView}
             />
-            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-            {isStacktraceAvailable && (
-              <LogsOverviewStacktraceSection
-                ref={stackTraceSectionRef}
-                hit={hit}
-                dataView={dataView}
-              />
-            )}
+            <LogsOverviewHeader
+              formattedDoc={parsedDoc}
+              doc={hit}
+              renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+            />
+
+            {renderFlyoutStreamField && renderFlyoutStreamField({ doc: hit })}
+
             <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
             {isStacktraceAvailable && (
               <LogsOverviewStacktraceSection
