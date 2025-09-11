@@ -16,6 +16,9 @@
 
 import { z } from '@kbn/zod';
 
+/**
+ * The status of the Privilege Monitoring Engine
+ */
 export type PrivilegeMonitoringEngineStatus = z.infer<typeof PrivilegeMonitoringEngineStatus>;
 export const PrivilegeMonitoringEngineStatus = z.enum([
   'started',
@@ -29,6 +32,14 @@ export const PrivilegeMonitoringEngineStatusEnum = PrivilegeMonitoringEngineStat
 export type MonitoringEngineDescriptor = z.infer<typeof MonitoringEngineDescriptor>;
 export const MonitoringEngineDescriptor = z.object({
   status: PrivilegeMonitoringEngineStatus,
+  error: z
+    .object({
+      /**
+       * Error message typically only present if the engine is in error state
+       */
+      message: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type MonitoringEngineComponentResource = z.infer<typeof MonitoringEngineComponentResource>;
