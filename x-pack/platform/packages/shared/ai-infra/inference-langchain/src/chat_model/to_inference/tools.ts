@@ -30,7 +30,8 @@ export const toolDefinitionToInference = (
         description: tool.description ?? tool.name,
         schema: tool.schema
           ? isZodSchema(tool.schema)
-            ? zodSchemaToInference(tool.schema)
+            // TODO: remove type casting with zod v4 bump
+            ? zodSchemaToInference(tool.schema as unknown as ZodSchema)
             : jsonSchemaToInference(tool.schema)
           : undefined,
       };
@@ -38,7 +39,8 @@ export const toolDefinitionToInference = (
       definitions[tool.function.name] = {
         description: tool.function.description ?? tool.function.name,
         schema: isZodSchema(tool.function.parameters)
-          ? zodSchemaToInference(tool.function.parameters)
+          // TODO: remove type casting with zod v4 bump
+          ? zodSchemaToInference(tool.function.parameters as unknown as ZodSchema)
           : (pick(tool.function.parameters, ['type', 'properties', 'required']) as ToolSchema),
       };
     }

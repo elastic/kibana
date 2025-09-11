@@ -78,7 +78,7 @@
   "resolutions": {
     "**/@babel/parser": "7.24.7",
     "**/@hello-pangea/dnd": "18.0.1",
-    "**/@langchain/core": "^0.3.73",
+    "**/@langchain/core": "^0.3.75",
     "**/@langchain/google-common": "^0.2.17",
     "**/@types/node": "22.15.3",
     "**/@typescript-eslint/utils": "8.16.0",
@@ -87,7 +87,7 @@
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-fetch/node-fetch": "^2.6.7",
-    "**/langchain": "^0.3.32",
+    "**/langchain": "^0.3.33",
     "**/remark-parse/trim": "1.0.1",
     "**/sharp": "0.32.6",
     "**/typescript": "5.4.5",
@@ -1138,8 +1138,8 @@
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
     "@langchain/aws": "^0.1.15",
-    "@langchain/community": "^0.3.54",
-    "@langchain/core": "^0.3.73",
+    "@langchain/community": "^0.3.55",
+    "@langchain/core": "^0.3.75",
     "@langchain/google-common": "^0.2.17",
     "@langchain/google-genai": "^0.2.17",
     "@langchain/google-vertexai": "^0.2.17",
@@ -1290,8 +1290,8 @@
     "jsonwebtoken": "^9.0.2",
     "jsts": "^1.6.2",
     "kea": "^2.6.0",
-    "langchain": "^0.3.32",
-    "langsmith": "^0.3.7",
+    "langchain": "^0.3.33",
+    "langsmith": "^0.3.67",
     "launchdarkly-js-client-sdk": "^3.8.1",
     "load-json-file": "^6.2.0",
     "lodash": "^4.17.21",
@@ -1421,7 +1421,7 @@
     "yauzl": "^3.2.0",
     "yazl": "^2.5.1",
     "zod": "^3.22.3",
-    "zod-to-json-schema": "^3.23.0"
+    "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",

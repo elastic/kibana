@@ -331,7 +331,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema),
+            parameters: zodToJsonSchema(schema as unknown as ZodSchema),
           },
         },
       ];

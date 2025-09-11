@@ -343,8 +343,8 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
     }
 
-    const [checkpointType, serializedCheckpoint] = this.serde.dumpsTyped(checkpoint);
-    const [metadataType, serializedMetadata] = this.serde.dumpsTyped(metadata);
+    const [checkpointType, serializedCheckpoint] = await this.serde.dumpsTyped(checkpoint);
+    const [metadataType, serializedMetadata] = await this.serde.dumpsTyped(metadata);
     if (checkpointType !== metadataType) {
       throw new Error('Mismatched checkpoint and metadata types.');
     }
@@ -396,11 +396,11 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
     }
 
-    const operations = writes.flatMap((write, idx) => {
+    const operations = writes.flatMap(async (write, idx) => {
       const [channel, value] = write;
 
       const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}|task_id:${taskId}|idx:${idx}`;
-      const [type, serializedValue] = this.serde.dumpsTyped(value);
+      const [type, serializedValue] = await this.serde.dumpsTyped(value);
 
       const doc: WritesDocument = {
         '@timestamp': new Date().toISOString(),
@@ -439,4 +439,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
     }
   }
+
+  // TODO: Implement this
+  async deleteThread() {}
 }
