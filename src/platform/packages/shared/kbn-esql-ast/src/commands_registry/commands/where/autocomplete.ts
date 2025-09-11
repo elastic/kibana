@@ -49,11 +49,7 @@ export async function autocomplete(
 
   // Is this a complete boolean expression?
   // If so, we can call it done and suggest a pipe
-  const expressionType = getExpressionType(
-    expressionRoot,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const expressionType = getExpressionType(expressionRoot, context?.columns);
   if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
     suggestions.push(pipeCompleteItem);
   }
