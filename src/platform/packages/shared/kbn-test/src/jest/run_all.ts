@@ -44,9 +44,9 @@ async function runConfigs(
           'scripts/jest',
           '--config',
           config,
-          '--passWithNoTests',
           '--runInBand',
           '--coverage=false',
+          '--passWithNoTests',
         ];
 
         const proc = spawn(process.execPath, args, {
