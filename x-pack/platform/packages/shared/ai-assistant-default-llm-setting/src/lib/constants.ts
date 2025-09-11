@@ -4,7 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export interface CursorPosition {
-  start: number;
-  end: number;
-}
+
+export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';

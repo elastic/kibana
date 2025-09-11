@@ -18,6 +18,11 @@ import {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { NO_DEFAULT_CONNECTOR } from '../common/constants';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -47,6 +52,24 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.string(),
+        value: NO_DEFAULT_CONNECTOR,
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {

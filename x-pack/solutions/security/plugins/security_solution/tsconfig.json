@@ -241,5 +241,6 @@
     "@kbn/security-ai-prompts",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/core-metrics-server",
+    "@kbn/ai-assistant-default-llm-setting",
   ]
 }
