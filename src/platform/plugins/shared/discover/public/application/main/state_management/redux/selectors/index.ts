@@ -8,3 +8,4 @@
  */
 
 export { selectAllTabs, selectRecentlyClosedTabs, selectTab, selectIsTabsBarHidden } from './tabs';
+export { selectHasUnsavedChanges } from './unsaved_changes';
