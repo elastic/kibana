@@ -6,36 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
+import { UserLimitCallOut as BaseUserLimitCallOut } from '../../user_limit_callout';
 
-export const UserLimitCallOut: React.FC = () => {
-  const { config } = useKibana().services;
-
-  const maxPrivilegedUsersAllowed =
-    config?.entityAnalytics?.monitoring?.privileges?.users?.maxPrivilegedUsersAllowed ?? 10000;
-
-  return (
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.title"
-          defaultMessage="User limit information"
-        />
-      }
-      color="primary"
-      iconType="info"
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.description"
-          defaultMessage="Maximum number of privileged users allowed: {maxUsers}"
-          values={{
-            maxUsers: <strong>{maxPrivilegedUsersAllowed}</strong>,
-          }}
-        />
-      </p>
-    </EuiCallOut>
-  );
+export const UserLimitCallOut: React.FC<{ variant?: 'compact' | 'full' }> = ({
+  variant = 'compact',
+}) => {
+  return <BaseUserLimitCallOut variant={variant} />;
 };

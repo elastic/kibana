@@ -49,12 +49,24 @@ export const healthCheckPrivilegeMonitoringRoute = (
         );
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
         const soClient = dataClient.getScopedSoClient(request);
+        const config = secSol.getConfig();
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
 
         const statusService = createEngineStatusService(dataClient, soClient);
 
         try {
           const body = await statusService.get();
-          return response.ok({ body });
+          const userCountResponse = await statusService.getCurrentUserCount();
+          return response.ok({
+            body: {
+              ...body,
+              users: {
+                current_count: userCountResponse.count,
+                max_allowed: maxUsersAllowed,
+              },
+            },
+          });
         } catch (e) {
           const error = transformError(e);
 

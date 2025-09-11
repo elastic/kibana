@@ -27,7 +27,7 @@ export const createPrivilegedUsersCrudService = ({
     source: PrivMonUserSource,
     maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
-    deps.logger.info(`Maximum allowed privileged users : ${maxUsersAllowed}`);
+    deps.logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
     const currentUserCount = await esClient.count({
       index,
       query: {

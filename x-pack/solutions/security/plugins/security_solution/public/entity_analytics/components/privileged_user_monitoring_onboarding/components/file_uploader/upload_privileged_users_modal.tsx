@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegedUsersFileUploader } from './privileged_users_file_uploader';
-import { UserLimitCallOut } from '../user_limit_callout';
+import { UserLimitCallOut } from '../../../user_limit_callout';
 
 interface ImportPrivilegedUsersModalProps {
   onClose: () => void;
@@ -51,7 +51,7 @@ export const UploadPrivilegedUsersModal: React.FC<ImportPrivilegedUsersModalProp
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <UserLimitCallOut />
+        <UserLimitCallOut variant="compact" />
         <EuiSpacer size="m" />
         <PrivilegedUsersFileUploader onFileUploaded={onImport} onClose={onClose} />
       </EuiModalBody>

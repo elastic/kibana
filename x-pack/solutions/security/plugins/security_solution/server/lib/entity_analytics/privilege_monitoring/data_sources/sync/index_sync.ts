@@ -62,7 +62,7 @@ export const createIndexSyncService = (
 
     dataClient.log(
       'info',
-      `Privilege monitoring sync started - Max allowed users: ${maxUsersAllowed}`
+      `Privilege monitoring sync started - Maximum supported number of privileged users allowed: ${maxUsersAllowed}`
     );
 
     const allStaleUsers: PrivMonBulkUser[] = [];
