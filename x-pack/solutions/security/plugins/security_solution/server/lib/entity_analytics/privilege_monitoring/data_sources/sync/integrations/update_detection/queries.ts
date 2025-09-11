@@ -10,6 +10,7 @@ import type { Matcher } from '../../../constants';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { AfterKey } from './privileged_status_match';
 import type { PrivMonOktaIntegrationsUser } from '../../../../types';
+import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
 
 // First step -- see which are privileged via matchers
 export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
@@ -155,15 +156,11 @@ export const applyPrivilegedUpdates = async ({
 
   const chunkSize = 500;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-
+  const opsForIntegration = makeIntegrationOpsBuilder(dataClient);
   try {
-    for (let i = 0; i < users.length; i += chunkSize) {
-      const chunk = users.slice(i, i + chunkSize);
-      const operations = await buildBulkUpsertBody(
-        chunk,
-        'entity_analytics_integration',
-        dataClient
-      );
+    for (let start = 0; start < users.length; start += chunkSize) {
+      const chunk = users.slice(start, start + chunkSize);
+      const operations = opsForIntegration(chunk);
       await esClient.bulk({
         refresh: 'wait_for',
         body: operations,

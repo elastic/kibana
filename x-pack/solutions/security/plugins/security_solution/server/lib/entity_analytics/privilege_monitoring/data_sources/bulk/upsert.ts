@@ -6,8 +6,25 @@
  */
 
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
-import type { PrivMonBulkUser } from '../../types';
+import type { PrivMonBulkUser, PrivMonOktaIntegrationsUser } from '../../types';
+import { UPDATE_SCRIPT_SOURCE } from '../sync/integrations/update_detection/queries';
 
+export const INDEX_SCRIPT = `
+              if (ctx._source.labels == null) {
+                ctx._source.labels = new HashMap();
+              }
+              if (ctx._source.labels.source_ids == null) {
+                ctx._source.labels.source_ids = new ArrayList();
+              }
+              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
+                ctx._source.labels.source_ids.add(params.source_id);
+              }
+              if (!ctx._source.labels.sources.contains("index")) {
+                ctx._source.labels.sources.add("index");
+              }
+
+              ctx._source.user.is_privileged = true;
+            `;
 /**
  * Builds a list of Elasticsearch bulk operations to upsert privileged users.
  *
@@ -80,3 +97,67 @@ export const bulkUpsertOperationsFactory =
     dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
     return ops;
   };
+
+type ParamsBuilder<T extends PrivMonBulkUser> = (
+  user: T,
+  sourceLabel: string
+) => Record<string, unknown>;
+
+export const bulkUpsertOperationsFactoryShared =
+  (dataClient: PrivilegeMonitoringDataClient) =>
+  <T extends PrivMonBulkUser>(
+    users: T[],
+    sourceLabel: string,
+    updateScriptSource: string,
+    opts: {
+      buildUpdateParams: ParamsBuilder<T>;
+      buildCreateDoc: ParamsBuilder<T>;
+      shouldCreate?: (user: T) => boolean;
+    }
+  ): object[] => {
+    const { buildUpdateParams, buildCreateDoc, shouldCreate = () => true } = opts;
+    const ops: object[] = [];
+    dataClient.log('info', `Building bulk operations for ${users.length} users`);
+
+    for (const user of users) {
+      if (user.existingUserId) {
+        ops.push(
+          { update: { _index: dataClient.index, _id: user.existingUserId } },
+          { script: { source: updateScriptSource, params: buildUpdateParams(user, sourceLabel) } }
+        );
+      } else if (shouldCreate(user)) {
+        ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
+      }
+    }
+    return ops;
+  };
+
+export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
+  const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
+  return (usersChunk: PrivMonOktaIntegrationsUser[]) =>
+    buildOps(usersChunk, 'entity_analytics_integration', UPDATE_SCRIPT_SOURCE, {
+      buildUpdateParams: (user, sourceLabel) => ({
+        new_privileged_status: user.isPrivileged,
+        sourceLabel,
+      }),
+      buildCreateDoc: (user, sourceLabel) => ({
+        user: { name: user.username, is_privileged: user.isPrivileged },
+        roles: user.roles ?? [],
+        labels: { sources: [sourceLabel] },
+        last_seen: user.lastSeen,
+      }),
+      shouldCreate: (user) => user.isPrivileged,
+    });
+};
+
+export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
+  const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
+  return (usersChunk: PrivMonBulkUser[]) =>
+    buildOps(usersChunk, 'index', INDEX_SCRIPT, {
+      buildUpdateParams: (user) => ({ source_id: user.sourceId }),
+      buildCreateDoc: (user, sourceLabel) => ({
+        user: { name: user.username, is_privileged: true },
+        labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
+      }),
+    });
+};
