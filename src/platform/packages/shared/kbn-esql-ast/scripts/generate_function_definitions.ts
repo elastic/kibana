@@ -327,7 +327,7 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
   locationsAvailable: [${locationsAvailable.join(', ')}],
   ${licenseField}
   ${obsrvTierField}
-  examples: ${JSON.stringify(functionDefinition.examples || [])},${
+  examples: ${JSON.stringify(functionDefinition.examples?.filter(Boolean) || [])},${
       customParametersSnippet
         ? `\ncustomParametersSnippet: ${JSON.stringify(customParametersSnippet)},`
         : ''
