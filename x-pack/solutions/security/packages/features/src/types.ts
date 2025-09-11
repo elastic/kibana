@@ -23,7 +23,7 @@ import type {
   ProductFeatureSiemMigrationsKey,
   ProductFeatureTimelineKey,
   ProductFeatureNotesKey,
-  ProductFeatureRulesFeatureKey,
+  ProductFeatureRulesKey,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -95,7 +95,7 @@ export type TimelineProductFeaturesConfig = ProductFeaturesConfig<ProductFeature
 export type NotesProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureNotesKey>;
 export type SiemMigrationsProductFeaturesConfig =
   ProductFeaturesConfig<ProductFeatureSiemMigrationsKey>;
-export type ProductFeaturesRulesConfig = ProductFeaturesConfig<ProductFeatureRulesFeatureKey>;
+export type RulesProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureRulesKey>;
 
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;
 
@@ -124,7 +124,7 @@ interface ProductFeatureConfigExtensions {
   timeline: ConfigExtensions<TimelineProductFeaturesConfig>;
   notes: ConfigExtensions<NotesProductFeaturesConfig>;
   siemMigrations: ConfigExtensions<SiemMigrationsProductFeaturesConfig>;
-  rules: ConfigExtensions<ProductFeaturesRulesConfig>;
+  rules: ConfigExtensions<RulesProductFeaturesConfig>;
 }
 
 export type ProductFeaturesConfiguratorExtensions = Partial<ProductFeatureConfigExtensions>;
