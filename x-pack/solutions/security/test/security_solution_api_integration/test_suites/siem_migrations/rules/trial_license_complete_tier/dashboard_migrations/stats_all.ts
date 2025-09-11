@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Dashboard Migrations All Stats', () => {
     beforeEach(async () => {
-      deleteAllDashboardMigrations(es);
+      await deleteAllDashboardMigrations(es);
     });
 
     it('should return 200 with empty array when no migrations exist', async () => {
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
       const migrationId = migrationResponse.body.migration_id;
 
       let response = await dashboardMigrationRoutes.allStats({});
-      expect(response.body).toHaveLength(1);
+      expect(response.body).toHaveLength(0);
 
       await dashboardMigrationRoutes.get({
         migrationId,

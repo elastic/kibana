@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Dashboard Migrations Translation Stats', () => {
     let migrationId: string;
     beforeEach(async () => {
-      deleteAllDashboardMigrations(es);
+      await deleteAllDashboardMigrations(es);
       const response = await dashboardMigrationRoutes.create({});
       migrationId = response.body.migration_id;
     });
