@@ -229,6 +229,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with no data', async () => {
+        // click on the breadcrumbs to dismiss the tooltip (prevents flakiness)
+        await testSubjects.click('breadcrumbs');
         await reporting.setTimepickerInEcommerceNoDataRange();
         await discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
