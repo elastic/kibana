@@ -61600,7 +61600,7 @@ components:
         - id
         - type
     Security_AI_Assistant_API_BaseInterruptResumeValue:
-      description: The basis of a interrupt resume value
+      description: The basis of an interrupt resume value
       type: object
       properties:
         type:
@@ -61610,7 +61610,7 @@ components:
       required:
         - type
     Security_AI_Assistant_API_BaseInterruptValue:
-      description: The basis of a agent interrupt
+      description: The basis of an agent interrupt
       type: object
       properties:
         expired:
@@ -62590,7 +62590,7 @@ components:
           description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
         interruptValue:
           $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptValue'
-          description: When the agent is interrupted (e.g. user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
