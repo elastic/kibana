@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const profilingSetupStatusResponseSchema = schema.object({
-  has_setup: schema.boolean(),
-  has_data: schema.boolean(),
-  pre_8_9_1_data: schema.boolean(),
-  has_required_role: schema.boolean(),
-  unauthorized: schema.maybe(schema.boolean()),
-});
-
 export interface ProfilingSetupStatusResponse {
   has_setup: boolean;
   has_data: boolean;

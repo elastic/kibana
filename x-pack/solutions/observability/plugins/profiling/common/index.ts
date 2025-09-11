@@ -48,7 +48,4 @@ export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.profiling.notAvailableL
   defaultMessage: 'N/A',
 });
 
-export {
-  profilingSetupStatusResponseSchema,
-  type ProfilingSetupStatusResponse,
-} from './setup_api_schema';
+export { type ProfilingSetupStatusResponse } from './setup_api_schema';
