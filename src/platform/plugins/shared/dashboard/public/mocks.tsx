@@ -99,6 +99,7 @@ export function buildMockDashboardApi({
       },
       references: [],
     },
+    user: { uid: 'test-user-uid', hasGlobalAccessControlPrivilege: true },
   });
   results.internalApi.setControlGroupApi(mockControlGroupApi);
   return results;
