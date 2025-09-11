@@ -102,14 +102,18 @@ const getBrowserFieldProps = (
 
 const isPopulatedColumn = (column: EuiDataGridColumn) => Boolean(column.schema);
 
-/**
- * @param columns Columns to be considered in the alerts table
- * @param browserFields constant object with all field capabilities
- * @returns columns but with the info needed by the data grid to work as expected, e.g sorting
- */
 const populateColumns = (
+  /**
+   * Columns to be augmented with fields data
+   */
   columns: EuiDataGridColumn[],
+  /**
+   * Alert field specs
+   */
   browserFields: BrowserFields,
+  /**
+   * Default columns configuration
+   */
   defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn[] => {
   return columns.map((column: EuiDataGridColumn) => {
