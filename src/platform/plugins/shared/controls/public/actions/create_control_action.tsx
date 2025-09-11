@@ -88,7 +88,9 @@ export const createDataControlOfType = <
           rawState: state,
         },
       },
-      true
+      {
+        displaySuccessMessage: true, // shows a toast and scrolls to panel
+      }
     );
   }
 };

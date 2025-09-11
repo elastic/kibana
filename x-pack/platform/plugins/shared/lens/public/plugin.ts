@@ -411,7 +411,9 @@ export class LensPlugin {
                 ],
               },
             },
-            true
+            {
+              displaySuccessMessage: true, // shows a toast and scrolls to panel
+            }
           );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,

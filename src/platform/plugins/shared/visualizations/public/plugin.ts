@@ -482,7 +482,9 @@ export class VisualizationsPlugin
               ],
             },
           },
-          true
+          {
+            displaySuccessMessage: true, // shows a toast and scrolls to panel
+          }
         );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,

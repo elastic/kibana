@@ -43,7 +43,9 @@ export function createAddErrorBudgetPanelAction(
             panelType: SLO_ERROR_BUDGET_ID,
             serializedState: { rawState: initialState },
           },
-          true
+          {
+            displaySuccessMessage: true, // shows a toast and scrolls to panel
+          }
         );
       } catch (e) {
         return Promise.reject();

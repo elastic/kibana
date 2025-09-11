@@ -40,7 +40,9 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
             ],
           },
         },
-        true
+        {
+          displaySuccessMessage: true, // shows a toast and scrolls to panel
+        }
       );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,

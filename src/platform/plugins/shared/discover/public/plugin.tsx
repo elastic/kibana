@@ -415,7 +415,9 @@ export class DiscoverPlugin
               ],
             },
           },
-          true
+          {
+            displaySuccessMessage: true, // shows a toast and scrolls to panel
+          }
         );
       },
       savedObjectType: SavedSearchType,

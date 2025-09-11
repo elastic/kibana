@@ -44,7 +44,9 @@ export function createAddAlertsPanelAction(
             panelType: SLO_ALERTS_EMBEDDABLE_ID,
             serializedState: { rawState: initialState },
           },
-          true
+          {
+            displaySuccessMessage: true, // shows a toast and scrolls to panel
+          }
         );
       } catch (e) {
         return Promise.reject();

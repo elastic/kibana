@@ -15,7 +15,10 @@ import type { PanelPackage } from './presentation_container';
 export interface CanAddNewPanel {
   addNewPanel: <StateType extends object, ApiType extends unknown = unknown>(
     panel: PanelPackage<StateType>,
-    displaySuccessMessage?: boolean
+    options?: {
+      displaySuccessMessage?: boolean;
+      beside?: string; // ID of an existing panel to place the new panel beside
+    }
   ) => Promise<ApiType | undefined>;
 }
 
