@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { flattenProps } from '../utils/flatten_props';
+import { getFlattenedObject } from '@kbn/std';
 import { buildUpdateEntityPainlessScript } from './build_update_script';
 
 describe('buildUpdateEntityPainlessScript', () => {
   it('returns empty if no update', () => {
     const script = buildUpdateEntityPainlessScript(
-      flattenProps({
+      getFlattenedObject({
         entity: {
           id: '1',
         },
@@ -23,7 +23,7 @@ describe('buildUpdateEntityPainlessScript', () => {
 
   it('assigns entity fields', () => {
     const script = buildUpdateEntityPainlessScript(
-      flattenProps({
+      getFlattenedObject({
         entity: {
           id: '1',
           type: 'test-type',
@@ -41,7 +41,7 @@ describe('buildUpdateEntityPainlessScript', () => {
 
   it('assigns nested entity fields', () => {
     const script = buildUpdateEntityPainlessScript(
-      flattenProps({
+      getFlattenedObject({
         entity: {
           id: '1',
           attributes: {
@@ -62,7 +62,7 @@ describe('buildUpdateEntityPainlessScript', () => {
 
   it('full example', () => {
     const script = buildUpdateEntityPainlessScript(
-      flattenProps({
+      getFlattenedObject({
         user: {
           domain: ['val1', 'val2'],
         },
