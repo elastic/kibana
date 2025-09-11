@@ -387,7 +387,7 @@ components:
           description: Data referred to by the message content.
         interruptValue:
           $ref: '#/components/schemas/InterruptValue'
-          description: When the agent is interrupted (e.g. user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
         interruptResumeValue:
           $ref: '#/components/schemas/InterruptResumeValue'
           description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
