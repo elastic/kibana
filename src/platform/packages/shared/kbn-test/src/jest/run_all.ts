@@ -11,8 +11,11 @@ import getopts from 'getopts';
 import { spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { relative } from 'path';
+import path, { relative, dirname, resolve, isAbsolute } from 'path';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
+import { readConfig } from 'jest-config';
+import fg from 'fast-glob';
+import type { Config } from '@jest/types';
 
 interface JestConfigResult {
   config: string;
@@ -48,14 +51,138 @@ export async function runJestAll() {
     process.exit(1);
   }
 
-  const configs = configsArg
+  const configPaths = configsArg
     .split(',')
     .map((c) => c.trim())
     .filter(Boolean);
 
-  if (!configs.length) {
+  if (!configPaths.length) {
     log.error('No configs found after parsing --configs');
     process.exit(1);
+  }
+
+  interface ResolvedConfigMeta {
+    path: string;
+    options: Config.InitialOptions;
+    matchedTests: string[];
+  }
+
+  const resolvedConfigs: ResolvedConfigMeta[] = [];
+  const skippedConfigs: string[] = [];
+
+  const disableFilter = process.env.JEST_ALL_DISABLE_FILTER === 'true';
+  for (const cfgPath of configPaths) {
+    try {
+      // readConfig fully materializes the Jest configuration (resolving preset/extends, etc.)
+      const loaded = await readConfig({} as any, cfgPath);
+      const jestConfig = loaded.projectConfig;
+      const configDir = dirname(cfgPath);
+      // If rootDir is provided and relative, resolve it against the config file directory
+      const rootDir = jestConfig.rootDir
+        ? isAbsolute(jestConfig.rootDir)
+          ? jestConfig.rootDir
+          : resolve(configDir, jestConfig.rootDir)
+        : configDir;
+
+      const testMatch: string[] = Array.isArray(jestConfig.testMatch) ? jestConfig.testMatch : [];
+
+      const testRegex: (string | RegExp)[] = Array.isArray(jestConfig.testRegex)
+        ? jestConfig.testRegex
+        : jestConfig.testRegex
+        ? [jestConfig.testRegex]
+        : [];
+
+      const roots: string[] = Array.isArray(jestConfig.roots) ? jestConfig.roots : [];
+
+      const searchRoots = roots.length
+        ? roots.map((r) => (isAbsolute(r) ? r : resolve(rootDir, r)))
+        : [rootDir];
+
+      log.verbose?.(
+        `Config ${cfgPath} using ${searchRoots.length} root(s): ${searchRoots
+          .map((r) => relative(process.cwd(), r))
+          .join(', ')}`
+      );
+
+      const matches: string[] = [];
+
+      if (testMatch.length > 0) {
+        for (const sr of searchRoots) {
+          const normalized = testMatch
+            .map((p) => {
+              if (p.startsWith('<rootDir>/')) {
+                return p.replace('<rootDir>/', '');
+              }
+              return p.startsWith('<rootDir>') ? p.replace('<rootDir>', rootDir) : p;
+            })
+            .map((p) => path.join(sr, p));
+
+          console.log({
+            normalized,
+          });
+
+          const found = await fg(normalized, {
+            onlyFiles: true,
+            cwd: rootDir,
+            absolute: true,
+          });
+          if (found.length) {
+            matches.push(...found);
+          }
+        }
+      }
+
+      if (matches.length === 0 && testRegex.length > 0) {
+        const regs = testRegex.map((r) => (r instanceof RegExp ? r : new RegExp(r)));
+        for (const sr of searchRoots) {
+          const candidateFiles = await fg(['**/*.{js,ts,jsx,tsx}'], { cwd: sr, onlyFiles: true });
+          const filtered = candidateFiles
+            .filter((f) => regs.some((re) => re.test(f)))
+            .map((f) => resolve(sr, f));
+          if (filtered.length) {
+            matches.push(...filtered);
+          }
+        }
+      }
+
+      if (matches.length === 0) {
+        log.debug?.(
+          `No tests found for config ${cfgPath} rootDir=${rootDir} patterns=${testMatch.join(',')}`
+        );
+        if (!disableFilter) {
+          skippedConfigs.push(cfgPath);
+          continue;
+        } else {
+          log.info(
+            `No matching tests, but including config due to JEST_ALL_DISABLE_FILTER=true: ${cfgPath}`
+          );
+        }
+      } else {
+        log.verbose?.(`Config ${cfgPath} matched ${matches.length} tests`);
+      }
+
+      resolvedConfigs.push({ path: cfgPath, options: jestConfig, matchedTests: matches });
+    } catch (e) {
+      log.warning(`Failed to read config ${cfgPath}: ${(e as Error).message}. Including anyway.`);
+      resolvedConfigs.push({
+        path: cfgPath,
+        options: { rootDir: process.cwd() },
+        matchedTests: [],
+      });
+    }
+  }
+
+  if (skippedConfigs.length) {
+    log.info('Configs skipped (no matching test files):');
+    for (const s of skippedConfigs) {
+      log.info(`  - ${s}`);
+    }
+  }
+
+  const configs = resolvedConfigs.map((r) => r.path);
+  if (configs.length === 0) {
+    log.info('All provided configs were skipped (no tests). Exiting successfully.');
+    process.exit(0);
   }
 
   log.info(
