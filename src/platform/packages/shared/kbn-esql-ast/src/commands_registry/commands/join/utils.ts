@@ -8,23 +8,24 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { handleFragment, columnExists } from '../../../definitions/utils/autocomplete/helpers';
+import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils';
+import { isColumn } from '../../../ast/is';
+import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
-import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils/functions';
-import type { ICommand } from '../../registry';
 import type { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import type { ICommand } from '../../registry';
 import type {
+  ESQLColumnData,
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
-  ISuggestionItem,
   ICommandContext,
+  ISuggestionItem,
 } from '../../types';
 import type { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { isColumn } from '../../../ast/is';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O)((?<after_on>\s+(?<cond>[^\s])?)?))?))?))?))?))?))?))?/i;
@@ -153,7 +154,7 @@ export const suggestFields = async (
   innerText: string,
   command: ESQLCommand,
   getColumnsByType: GetColumnsByTypeFn,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  getColumnsForQuery: (query: string) => Promise<ESQLColumnData[]>,
   context?: ICommandContext
 ) => {
   if (!context) {
@@ -163,7 +164,9 @@ export const suggestFields = async (
   const { suggestions: fieldSuggestions, lookupIndexFieldExists } = await getFieldSuggestions(
     command,
     getColumnsByType,
-    getColumnsForQuery,
+    // this type cast is ok because getFieldSuggestions only ever fetches columns
+    // from a bare FROM clause, so they will always be fields, not user-defined columns
+    getColumnsForQuery as (query: string) => Promise<ESQLFieldWithMetadata[]>,
     context
   );
 
