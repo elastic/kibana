@@ -15,6 +15,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { useRuleTemplate } from '../../hooks/use_rule_template';
+import { RuleTemplateError } from './components/rule_template_error';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 export const RuleFormRoute = () => {
   const {
@@ -67,8 +69,9 @@ export const RuleFormRoute = () => {
 
   const {
     data: ruleTemplate,
-    isLoading,
-    isError,
+    error: ruleTemplateError,
+    isLoading: isLoadingRuleTemplate,
+    isError: isErrorRuleTemplate,
   } = useRuleTemplate({
     templateId,
     enabled: !!templateId,
@@ -84,12 +87,12 @@ export const RuleFormRoute = () => {
     }
   }, [history, ruleTypeId, ruleTemplate, templateId, application]);
 
-  if (isLoading) {
-    return <>loading</>; // TODO
+  if (isLoadingRuleTemplate) {
+    return <CenterJustifiedSpinner />;
   }
 
-  if (isError) {
-    return <>error</>; // TODO
+  if (isErrorRuleTemplate) {
+    return <RuleTemplateError error={ruleTemplateError as Error} />; // TODO
   }
 
   return (

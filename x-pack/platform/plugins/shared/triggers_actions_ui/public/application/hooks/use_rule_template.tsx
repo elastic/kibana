@@ -26,7 +26,7 @@ export function useRuleTemplate(props: UseRuleTemplateProps) {
     return loadRuleTemplate({ http, templateId });
   };
 
-  const { data, isFetching, isError, isLoadingError, isLoading } = useQuery({
+  const { data, error, isFetching, isError, isLoadingError, isLoading } = useQuery({
     queryKey: ['getQueryDelaySettings'],
     queryFn,
     enabled,
@@ -37,6 +37,7 @@ export function useRuleTemplate(props: UseRuleTemplateProps) {
   return {
     isLoading: enabled && (isLoading || isFetching),
     isError: isError || isLoadingError,
+    error,
     data,
   };
 }
