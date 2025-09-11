@@ -38,6 +38,25 @@ paths:
                     description: The migration id created.
                     $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
+  /internal/siem_migrations/dashboards/stats:
+    get:
+      summary: Retrieves the stats for all dashboard migrations
+      operationId: GetAllDashboardMigrationsStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the dashboard migrations stats for all migrations stored in the system
+      tags:
+        - SIEM Dashboard Migrations
+      responses:
+        200:
+          description: Indicates dashboard migrations stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskStats'
+
   ## Specific dashboard migration APIs
   /internal/siem_migrations/dashboards/{migration_id}:
     get:
@@ -93,6 +112,100 @@ paths:
       responses:
         200:
           description: Indicates dashboards have been added to the migration successfully.
+    get:
+      summary: Retrieves dashboards for a migration
+      operationId: GetDashboardMigrationDashboards
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the dashboards added to an existing dashboard migration
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: search_term
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              description: The rule migration id
+              $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: is_installed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_fully_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_partially_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_untranslatable
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_failed
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: Indicates dashboards have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: number
+                    description: The total number of rules in migration.
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationDashboard'
 
   /internal/siem_migrations/dashboards/{migration_id}/start:
     post:

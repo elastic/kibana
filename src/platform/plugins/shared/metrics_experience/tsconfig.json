@@ -16,7 +16,6 @@
     "@kbn/traced-es-client",
     "@kbn/es-query",
     "@kbn/datemath",
-    "@kbn/discover-utils",
     "@kbn/field-types",
     "@kbn/zod",
     "@kbn/es-types",

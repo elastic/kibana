@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
@@ -25,4 +26,16 @@ export interface SiemMigrationFilters {
   partiallyTranslated?: boolean;
   untranslatable?: boolean;
   searchTerm?: string;
+}
+
+export interface SiemMigrationSort {
+  sortField?: string;
+  sortDirection?: estypes.SortOrder;
+}
+
+export interface SiemMigrationGetItemsOptions<F extends object = object> {
+  filters?: F;
+  sort?: SiemMigrationSort;
+  from?: number;
+  size?: number;
 }

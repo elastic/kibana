@@ -8,12 +8,12 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENGINE_INIT_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
@@ -29,7 +29,7 @@ export const initPrivilegeMonitoringEngineRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/engine/init',
+      path: MONITORING_ENGINE_INIT_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

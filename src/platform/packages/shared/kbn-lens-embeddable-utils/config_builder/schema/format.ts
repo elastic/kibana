@@ -8,9 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-// @TODO: move it to shared type/values package
-const LENS_FORMAT_NUMBER_DECIMALS_DEFAULT = 2;
+import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
 
 const numericFormatSchema = schema.object({
   type: schema.oneOf([schema.literal('number'), schema.literal('percent')]),
@@ -28,7 +26,6 @@ const numericFormatSchema = schema.object({
    */
   suffix: schema.maybe(
     schema.string({
-      defaultValue: '',
       meta: {
         description: 'Suffix',
       },
@@ -37,14 +34,12 @@ const numericFormatSchema = schema.object({
   /**
    * Whether to use compact notation
    */
-  compact: schema.maybe(
-    schema.boolean({
-      defaultValue: false,
-      meta: {
-        description: 'Whether to use compact notation',
-      },
-    })
-  ),
+  compact: schema.boolean({
+    defaultValue: LENS_FORMAT_COMPACT_DEFAULT,
+    meta: {
+      description: 'Whether to use compact notation',
+    },
+  }),
 });
 
 const byteFormatSchema = schema.object({
@@ -52,13 +47,12 @@ const byteFormatSchema = schema.object({
   /**
    * Number of decimals
    */
-  decimals: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'Number of decimals',
-      },
-    })
-  ),
+  decimals: schema.number({
+    defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
+    meta: {
+      description: 'Number of decimals',
+    },
+  }),
   /**
    * Suffix
    */
@@ -123,9 +117,9 @@ export const formatTypeSchema = schema.oneOf([
   customFormatSchema,
 ]);
 
-export const formatSchema = schema.object({
+export const formatSchema = {
   /**
    * Format configuration
    */
   format: schema.maybe(formatTypeSchema),
-});
+};

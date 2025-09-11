@@ -27,6 +27,7 @@ export interface Config {
   inferenceId: string;
   provider: string;
   providerConfig?: Record<string, unknown>;
+  contextWindowLength?: number;
 }
 
 export interface Secrets {

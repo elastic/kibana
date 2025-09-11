@@ -8,10 +8,10 @@
 import type {
   ToolMessage,
   UserMessage,
-  ToolCallsOf,
   ToolChoice,
   AssistantMessageOf,
   InferenceClient,
+  ToolCallOfToolOptions,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
@@ -65,14 +65,14 @@ export type RootCauseAnalysisEvent =
   | UserMessage
   | AssistantMessageOf<{
       tools: typeof RCA_TOOLS;
-      toolChoice?: ToolChoice<keyof typeof RCA_TOOLS>;
+      toolChoice: ToolChoice<keyof typeof RCA_TOOLS>;
     }>;
 
 export type RootCauseAnalysisToolRequest<
   TToolName extends keyof typeof RCA_TOOLS = keyof typeof RCA_TOOLS
-> = ToolCallsOf<{
+> = ToolCallOfToolOptions<{
   tools: Pick<typeof RCA_TOOLS, TToolName>;
-}>['toolCalls'][number];
+}>;
 
 export type RootCauseAnalysisToolMessage =
   | EndProcessToolMessage

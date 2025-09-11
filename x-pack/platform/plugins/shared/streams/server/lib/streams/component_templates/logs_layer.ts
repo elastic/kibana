@@ -6,9 +6,12 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import type { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import { namespacePrefixes } from '@kbn/streams-schema';
+import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 
 // This map is used to find the ECS equivalent field for a given OpenTelemetry attribute.
 export const otelEquivalentLookupMap = Object.fromEntries(
@@ -102,7 +105,7 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-export const baseMappings: Record<string, MappingProperty> = {
+export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
     properties: {

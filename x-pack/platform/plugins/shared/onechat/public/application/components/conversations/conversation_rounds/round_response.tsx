@@ -41,7 +41,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} />
+        <ChatMessageText content={message} steps={steps} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

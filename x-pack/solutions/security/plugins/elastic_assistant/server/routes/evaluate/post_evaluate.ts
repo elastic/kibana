@@ -465,6 +465,7 @@ export const postEvaluateRoute = (
                   actionsClient,
                   savedObjectsClient,
                   tools,
+                  checkpointSaver: await assistantContext.getCheckpointSaver(),
                 }),
               };
             })

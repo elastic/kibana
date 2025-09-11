@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { StyledNodeExpandButton, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { NODE_EXPAND_BUTTON_TEST_ID } from '../test_ids';
@@ -17,7 +18,9 @@ export interface NodeExpandButtonProps {
   onClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
 }
 
-export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps) => {
+export const NodeExpandButton = ({ x, y, color, onClick, ...props }: NodeExpandButtonProps) => {
+  const { euiTheme } = useEuiTheme();
+
   // State to track whether the icon is "plus" or "minus"
   const [isToggled, setIsToggled] = useState(false);
 
@@ -34,9 +37,10 @@ export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps
   );
 
   return (
-    <StyledNodeExpandButton x={x} y={y} className={isToggled ? 'toggled' : undefined}>
+    <StyledNodeExpandButton x={x} y={y} className={isToggled ? 'toggled' : undefined} {...props}>
       <RoundEuiButtonIcon
         color={color ?? 'primary'}
+        backgroundColor={euiTheme.colors.backgroundBasePlain}
         iconType={isToggled ? 'minusInCircleFilled' : 'plusInCircleFilled'}
         onClick={onClickHandler}
         iconSize="m"

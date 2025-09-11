@@ -12,7 +12,7 @@ import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import type { NodeViewModel } from '../types';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
+import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } from '.';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from '../graph/styles';
@@ -25,7 +25,7 @@ const meta: Meta<NodeViewModel> = {
       control: { type: 'radio' },
     },
     shape: {
-      options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond', 'label'],
+      options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond'],
       control: { type: 'radio' },
     },
     expandButtonClick: { action: 'expandButtonClick' },
@@ -60,7 +60,6 @@ const nodeTypes = {
   ellipse: EllipseNode,
   rectangle: RectangleNode,
   diamond: DiamondNode,
-  label: LabelNode,
 };
 
 const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (

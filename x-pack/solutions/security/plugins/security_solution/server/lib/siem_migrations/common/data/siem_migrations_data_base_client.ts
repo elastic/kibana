@@ -23,9 +23,7 @@ import type { Stored } from '../../types';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
 
-export class SiemMigrationsDataBaseClient<
-  D extends SiemMigrationsClientDependencies = SiemMigrationsClientDependencies
-> {
+export class SiemMigrationsDataBaseClient {
   protected esClient: ElasticsearchClient;
 
   constructor(
@@ -33,7 +31,7 @@ export class SiemMigrationsDataBaseClient<
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
     protected logger: Logger,
-    protected dependencies: D
+    protected dependencies: SiemMigrationsClientDependencies
   ) {
     this.esClient = esScopedClient.asInternalUser;
   }

@@ -70,6 +70,7 @@ export const EsAssetReferenceSchema = schema.object({
     schema.literal('data_stream_ilm_policy'),
     schema.literal('transform'),
     schema.literal('ml_model'),
+    schema.literal('knowledge_base'),
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
@@ -127,6 +128,7 @@ export const InstallationInfoSchema = schema.object({
       error: schema.maybe(schema.string()),
     })
   ),
+  previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
 });
 
 const PackageIconSchema = schema.object({
@@ -325,6 +327,20 @@ export const GetInfoResponseSchema = schema.object({
   item: GetPackageInfoSchema,
   metadata: schema.maybe(PackageMetadataSchema),
 });
+export const GetKnowledgeBaseResponseSchema = schema.object({
+  package: schema.object({
+    name: schema.string(),
+  }),
+  items: schema.arrayOf(
+    schema.object({
+      fileName: schema.string(),
+      content: schema.string(),
+      path: schema.string(),
+      installed_at: schema.string(),
+      version: schema.string(),
+    })
+  ),
+});
 
 export const UpdatePackageResponseSchema = schema.object({
   item: GetPackageInfoSchema,
@@ -501,6 +517,11 @@ export const GetInfoRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
     withMetadata: schema.boolean({ defaultValue: false }),
+  }),
+};
+export const GetKnowledgeBaseRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };
 

@@ -78,7 +78,43 @@
               "section": "def-common.RouteRepositoryClient",
               "text": "RouteRepositoryClient"
             },
-            "<{ \"POST /api/streams/{name}/queries/_bulk 2023-10-31\": ",
+            "<{ \"DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; ruleId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; ruleId: string; }, { name: string; ruleId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; ruleId: string; }; }, { path: { name: string; ruleId: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "UnlinkRuleResponse",
+            ", undefined>; \"PUT /api/streams/{name}/rules/{ruleId} 2023-10-31\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"PUT /api/streams/{name}/rules/{ruleId} 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; ruleId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; ruleId: string; }, { name: string; ruleId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; ruleId: string; }; }, { path: { name: string; ruleId: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "LinkRuleResponse",
+            ", undefined>; \"GET /api/streams/{name}/rules 2023-10-31\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /api/streams/{name}/rules 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "ListRulesResponse",
+            ", undefined>; \"POST /api/streams/{name}/queries/_bulk 2023-10-31\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1238,7 +1274,43 @@
         "label": "StreamsRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /api/streams/{name}/queries/_bulk 2023-10-31\": ",
+          "{ \"DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; ruleId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; ruleId: string; }, { name: string; ruleId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; ruleId: string; }; }, { path: { name: string; ruleId: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "UnlinkRuleResponse",
+          ", undefined>; \"PUT /api/streams/{name}/rules/{ruleId} 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /api/streams/{name}/rules/{ruleId} 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; ruleId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; ruleId: string; }, { name: string; ruleId: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; ruleId: string; }; }, { path: { name: string; ruleId: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "LinkRuleResponse",
+          ", undefined>; \"GET /api/streams/{name}/rules 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/streams/{name}/rules 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "ListRulesResponse",
+          ", undefined>; \"POST /api/streams/{name}/queries/_bulk 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

@@ -65,6 +65,8 @@ import {
   DeletePackageDatastreamAssetsResponseSchema,
   RollbackPackageRequestSchema,
   RollbackPackageResponseSchema,
+  GetKnowledgeBaseRequestSchema,
+  GetKnowledgeBaseResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -89,6 +91,7 @@ import {
   createCustomIntegrationHandler,
   getInputsHandler,
   updateCustomIntegrationHandler,
+  getKnowledgeBaseHandler,
   rollbackPackageHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
@@ -356,6 +359,45 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getInfoHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN,
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN)
+        ).granted,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route uses Fleet authorization via fleetAuthz instead of standard Kibana authorization',
+        },
+      },
+      summary: `Get all knowledge base content for a package`,
+      options: {
+        tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+      },
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetKnowledgeBaseRequestSchema,
+          response: {
+            200: {
+              body: () => GetKnowledgeBaseResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getKnowledgeBaseHandler
     );
 
   router.versioned

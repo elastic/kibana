@@ -57,7 +57,7 @@ export const SavedPlaygroundInvalidStateModal = ({
           errorsTypes.has(InvalidPlaygroundType.MissingModel) ? (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.invalidPlayground.title"
-              defaultMessage="Invalid RAG playground values"
+              defaultMessage="Invalid playground values"
             />
           ) : errorsTypes.has(InvalidPlaygroundType.MissingModel) ? (
             <FormattedMessage
@@ -79,7 +79,7 @@ export const SavedPlaygroundInvalidStateModal = ({
               <p>
                 <FormattedMessage
                   id="xpack.searchPlayground.savedPlayground.invalidDataSources.description"
-                  defaultMessage="Some indices were not found. These indices will be removed from your data source selection for this RAG playground."
+                  defaultMessage="Some indices were not found. These indices will be removed from your data source selection for this playground."
                 />
               </p>
               <ul>
@@ -93,7 +93,7 @@ export const SavedPlaygroundInvalidStateModal = ({
             <p>
               <FormattedMessage
                 id="xpack.searchPlayground.savedPlayground.invalidModelConnector.description"
-                defaultMessage="The selected LLM connector for this RAG playground was not found. Please select a different LLM for use with this RAG playground."
+                defaultMessage="The selected LLM connector for this playground was not found. Please select a different LLM for use with this playground."
               />
             </p>
           )}

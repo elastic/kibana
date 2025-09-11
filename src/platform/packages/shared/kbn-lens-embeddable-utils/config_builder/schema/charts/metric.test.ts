@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import { metricStateSchema } from './metric';
 
 describe('Metric Schema', () => {
@@ -30,7 +31,9 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'count' as const,
           field: 'test_field',
+          fit: false,
           sub_label: 'Count of records',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: {
             labels: 'left' as const,
             value: 'right' as const,
@@ -48,23 +51,31 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'price',
+          fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           icon: {
             name: 'visMetric',
             align: 'left' as const,
           },
+          alignments: { labels: 'left', value: 'left' },
         },
       };
 
       const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+      });
     });
 
     it('validates metric with color configuration', () => {
       const input = {
         ...baseMetricConfig,
         metric: {
-          operation: 'avg' as const,
+          operation: 'average' as const,
           field: 'temperature',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
           color: {
             type: 'dynamic' as const,
             min: 0,
@@ -88,6 +99,8 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'max' as const,
           field: 'cpu_usage',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
           background_chart: {
             type: 'bar' as const,
             direction: 'horizontal' as const,
@@ -111,12 +124,16 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'revenue',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         secondary_metric: {
           operation: 'sum' as const,
           field: 'cost',
           prefix: '$',
           compare_to: 'previous_period',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       };
 
@@ -130,10 +147,15 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'revenue',
+          fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          alignments: { labels: 'left', value: 'left' },
         },
         secondary_metric: {
           operation: 'sum' as const,
           field: 'profit',
+          prefix: '',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           color: {
             type: 'static' as const,
             color: '#green',
@@ -153,6 +175,9 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'sales',
+          fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          alignments: { labels: 'left', value: 'left' },
         },
         breakdown_by: {
           operation: 'terms' as const,
@@ -176,10 +201,16 @@ describe('Metric Schema', () => {
         metric: {
           operation: 'sum' as const,
           field: 'sales',
+          fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          alignments: { labels: 'left', value: 'left' },
         },
         breakdown_by: {
           operation: 'date_histogram' as const,
           field: 'timestamp',
+          suggested_interval: 'auto',
+          include_empty_rows: true,
+          use_original_time_range: true,
           columns: 4,
           collapse_by: 'avg' as const,
         },
@@ -245,6 +276,8 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'sales',
           sub_label: 'Total Sales',
+          fit: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignments: {
             labels: 'left' as const,
             value: 'right' as const,
@@ -272,6 +305,7 @@ describe('Metric Schema', () => {
           field: 'profit',
           prefix: '$',
           compare_to: 'previous_year',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         breakdown_by: {
           operation: 'terms' as const,
@@ -287,6 +321,24 @@ describe('Metric Schema', () => {
         ...input,
         breakdown_by: { ...input.breakdown_by, size: 5 },
       });
+    });
+
+    it('validates esql configuration', () => {
+      const input = {
+        type: 'metric' as const,
+        dataset: {
+          type: 'esql' as const,
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metric: {
+          column: 'unique_count' as const,
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      };
+
+      const validated = metricStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
 });

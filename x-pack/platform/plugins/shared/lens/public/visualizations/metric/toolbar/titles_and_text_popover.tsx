@@ -10,13 +10,24 @@ import React from 'react';
 
 import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { MetricStyle } from '@elastic/charts';
 import type { ToolbarPopoverProps } from '../../../shared_components';
 import { ToolbarPopover } from '../../../shared_components';
 import type { MetricVisualizationState, ValueFontMode } from '../types';
-import { metricStateDefaults } from '../constants';
+import {
+  METRIC_LAYOUT_BY_POSITION,
+  legacyMetricStateDefaults,
+  metricStateDefaults,
+  type MetricLayoutWithDefault,
+} from '../constants';
+import {
+  PrimaryAlignmentOption,
+  SecondaryAlignmentOption,
+  TitlesAlignmentOption,
+} from './text_alignment_options';
+import { TitleWeightOption } from './title_weight_option';
+import { PrimaryPositionOption } from './primary_position_option';
 
 export interface TitlesAndTextPopoverProps {
   state: MetricVisualizationState;
@@ -24,11 +35,32 @@ export interface TitlesAndTextPopoverProps {
   groupPosition?: ToolbarPopoverProps['groupPosition'];
 }
 
+const getDefaultLayoutConfig = (
+  newPrimaryPosition: 'bottom' | 'top',
+  { hasIcon, hasSecondaryMetric }: { hasIcon: boolean; hasSecondaryMetric: boolean }
+): MetricLayoutWithDefault => {
+  let config = { ...METRIC_LAYOUT_BY_POSITION[newPrimaryPosition] };
+
+  if (!hasIcon) {
+    const { iconAlign, ...rest } = config;
+    config = rest;
+  }
+
+  if (!hasSecondaryMetric) {
+    const { secondaryAlign, ...rest } = config;
+    config = rest;
+  }
+
+  return config;
+};
+
 export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
   state,
   setState,
   groupPosition,
 }) => {
+  const hasSecondaryMetric = !!state.secondaryMetricAccessor;
+  const hasIcon = !!(state.icon && state.icon !== 'empty');
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.metric.toolbarTitlesText.label', {
@@ -42,31 +74,74 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
         <SubtitleOption
           value={state.subtitle}
           onChange={(subtitle) => {
-            setState({ ...state, subtitle });
+            setState({
+              ...state,
+              subtitle,
+            });
           }}
         />
       )}
 
       <TitlesAlignmentOption
         value={state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign}
-        onChange={(titlesTextAlign) => {
-          setState({ ...state, titlesTextAlign });
+        onChange={(newTitlesTextAlign) => {
+          setState({
+            ...state,
+            titlesTextAlign: newTitlesTextAlign,
+          });
         }}
       />
 
-      {state.icon && state.icon !== 'empty' && (
+      <TitleWeightOption
+        value={state.titleWeight ?? metricStateDefaults.titleWeight}
+        onChange={(newTitleWeight) => {
+          setState({
+            ...state,
+            titleWeight: newTitleWeight,
+          });
+        }}
+      />
+
+      <PrimaryPositionOption
+        value={state.primaryPosition ?? metricStateDefaults.primaryPosition}
+        onChange={(newPrimaryPosition) => {
+          // Avoid changing the configuration when the position option clicked is already selected
+          if (
+            newPrimaryPosition === state.primaryPosition ||
+            (newPrimaryPosition === 'bottom' && !state.primaryPosition)
+          )
+            return;
+          setState({
+            ...state,
+            primaryPosition: newPrimaryPosition,
+            ...getDefaultLayoutConfig(newPrimaryPosition, { hasIcon, hasSecondaryMetric }),
+          });
+        }}
+      />
+
+      {hasIcon && (
         <IconAlignmentOption
-          value={state.iconAlign ?? metricStateDefaults.iconAlign}
-          onChange={(iconAlign) => {
-            setState({ ...state, iconAlign });
+          // Use 'left' as the legacy default if iconAlign is not set
+          value={state.iconAlign ?? legacyMetricStateDefaults.iconAlign}
+          onChange={(newIconAlign) => {
+            const prevIconAlign = state.iconAlign ?? legacyMetricStateDefaults.iconAlign;
+            if (prevIconAlign !== newIconAlign) {
+              setState({
+                ...state,
+                iconAlign: newIconAlign,
+              });
+            }
           }}
         />
       )}
 
-      <ValuesAlignmentOption
-        value={state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign}
-        onChange={(valuesTextAlign) => {
-          setState({ ...state, valuesTextAlign });
+      <PrimaryAlignmentOption
+        value={state.primaryAlign ?? metricStateDefaults.primaryAlign}
+        onChange={(newPrimaryAlign) => {
+          setState({
+            ...state,
+            primaryAlign: newPrimaryAlign,
+          });
         }}
       />
 
@@ -76,6 +151,18 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
           setState({ ...state, valueFontMode: value });
         }}
       />
+
+      {hasSecondaryMetric && (
+        <SecondaryAlignmentOption
+          value={state.secondaryAlign ?? metricStateDefaults.secondaryAlign}
+          onChange={(newSecondaryAlign) => {
+            setState({
+              ...state,
+              secondaryAlign: newSecondaryAlign,
+            });
+          }}
+        />
+      )}
     </ToolbarPopover>
   );
 };
@@ -139,7 +226,7 @@ function ValueFontSizeOption({
   onChange: (mode: ValueFontMode) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.valueFontSize', {
-    defaultMessage: 'Value font size',
+    defaultMessage: 'Primary font size',
   });
 
   return (
@@ -152,9 +239,7 @@ function ValueFontSizeOption({
             content={i18n.translate('xpack.lens.metric.toolbarTitlesText.valueFontSizeTip', {
               defaultMessage: 'Font size of the Primary metric value',
             })}
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
+            iconProps={{ className: 'eui-alignTop' }}
             color="subdued"
             position="top"
             size="s"
@@ -178,126 +263,8 @@ function ValueFontSizeOption({
   );
 }
 
-const alignmentOptions: Array<{
-  id: MetricStyle['titlesTextAlign'] | MetricStyle['valuesTextAlign'];
-  label: string;
-}> = [
-  {
-    id: 'left',
-    label: i18n.translate('xpack.lens.shared.left', {
-      defaultMessage: 'Left',
-    }),
-  },
-  {
-    id: 'center',
-    label: i18n.translate('xpack.lens.shared.center', {
-      defaultMessage: 'Center',
-    }),
-  },
-  {
-    id: 'right',
-    label: i18n.translate('xpack.lens.shared.right', {
-      defaultMessage: 'Right',
-    }),
-  },
-];
-
-function TitlesAlignmentOption({
-  value,
-  onChange,
-}: {
-  value: MetricStyle['titlesTextAlign'];
-  onChange: (alignment: MetricStyle['titlesTextAlign']) => void;
-}) {
-  const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.titlesAlignment', {
-    defaultMessage: 'Titles alignment',
-  });
-
-  return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={
-        <span>
-          {label}{' '}
-          <EuiIconTip
-            content={i18n.translate('xpack.lens.metric.toolbarTitlesText.titlesAlignmentTip', {
-              defaultMessage: 'Alignment of the Title and Subtitle',
-            })}
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
-            color="subdued"
-            position="top"
-            size="s"
-            type="question"
-          />
-        </span>
-      }
-    >
-      <EuiButtonGroup
-        isFullWidth
-        legend={label}
-        data-test-subj="lens-titles-alignment-btn"
-        buttonSize="compressed"
-        options={alignmentOptions}
-        idSelected={value}
-        onChange={(alignment) => {
-          onChange(alignment as MetricStyle['titlesTextAlign']);
-        }}
-      />
-    </EuiFormRow>
-  );
-}
-
-function ValuesAlignmentOption({
-  value,
-  onChange,
-}: {
-  value: MetricStyle['valuesTextAlign'];
-  onChange: (alignment: MetricStyle['valuesTextAlign']) => void;
-}) {
-  const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.valuesAlignment', {
-    defaultMessage: 'Values alignment',
-  });
-
-  return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={
-        <span>
-          {label}{' '}
-          <EuiIconTip
-            color="subdued"
-            content={i18n.translate('xpack.lens.metric.toolbarTitlesText.valuesAlignmentTip', {
-              defaultMessage: 'Alignment of the Primary and Secondary Metrics',
-            })}
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
-            position="top"
-            size="s"
-            type="question"
-          />
-        </span>
-      }
-    >
-      <EuiButtonGroup
-        isFullWidth
-        legend={label}
-        data-test-subj="lens-values-alignment-btn"
-        buttonSize="compressed"
-        options={alignmentOptions}
-        idSelected={value}
-        onChange={(alignment) => {
-          onChange(alignment as MetricStyle['valuesTextAlign']);
-        }}
-      />
-    </EuiFormRow>
-  );
-}
-
 const iconAlignmentOptions: Array<{
-  id: MetricStyle['titlesTextAlign'] | MetricStyle['valuesTextAlign'];
+  id: MetricStyle['titlesTextAlign'] | MetricStyle['valueTextAlign'];
   label: string;
 }> = [
   {

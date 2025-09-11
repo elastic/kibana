@@ -25,7 +25,7 @@ import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
-} from '../../../../utils/translation_results';
+} from '../../../../../common/utils';
 import { TranslationCallOut } from './callout';
 import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 

@@ -713,6 +713,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('POLICY_CHANGE'),
         schema.literal('INPUT_ACTION'),
         schema.literal('MIGRATE'),
+        schema.literal('PRIVILEGE_LEVEL_CHANGE'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -780,4 +781,24 @@ export const GetActionStatusResponseSchema = schema.object({
 
 export const GetAvailableAgentVersionsResponseSchema = schema.object({
   items: schema.arrayOf(schema.string()),
+});
+
+export const ChangeAgentPrivilegeLevelRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.nullable(
+    schema.object({
+      user_info: schema.maybe(
+        schema.object({
+          username: schema.maybe(schema.string()),
+          groupname: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        })
+      ),
+    })
+  ),
+};
+export const ChangeAgentPrivilegeLevelResponseSchema = schema.object({
+  actionId: schema.string(),
 });

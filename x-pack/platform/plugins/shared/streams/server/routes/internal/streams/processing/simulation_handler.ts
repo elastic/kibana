@@ -37,6 +37,8 @@ import {
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
+import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
 export interface ProcessingSimulationParams {
@@ -154,10 +156,11 @@ export const simulateProcessing = async ({
     ]);
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = prepareSimulationData(params);
+  const simulationData = prepareSimulationData(params, stream);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
+    stream,
     streamIndexState,
     params
   );
@@ -276,12 +279,19 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
   return [...dotExpanderProcessors, ...formattedProcessors];
 };
 
-const prepareSimulationData = (params: ProcessingSimulationParams) => {
-  const { path, body } = params;
+const prepareSimulationData = (
+  params: ProcessingSimulationParams,
+  stream: Streams.all.Definition
+) => {
+  const { body } = params;
   const { processing, documents } = body;
 
+  const targetStreamName = Streams.WiredStream.Definition.is(stream)
+    ? getRoot(stream.name)
+    : stream.name;
+
   return {
-    docs: prepareSimulationDocs(documents, path.name),
+    docs: prepareSimulationDocs(documents, targetStreamName),
     processors: prepareSimulationProcessors(processing),
   };
 };
@@ -300,6 +310,7 @@ const preparePipelineSimulationBody = (
 
 const prepareIngestSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>,
+  stream: Streams.all.Definition,
   streamIndex: IndicesIndexState,
   params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
@@ -311,15 +322,29 @@ const prepareIngestSimulationBody = (
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
   const mappings = streamIndex.mappings;
 
+  const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
+
+  if (defaultPipelineName) {
+    pipelineSubstitutions[defaultPipelineName] = {
+      processors,
+    };
+  }
+  if (Streams.WiredStream.Definition.is(stream)) {
+    // need to reroute from the root
+    pipelineSubstitutions[getProcessingPipelineName(getRoot(stream.name))] = {
+      processors: [
+        {
+          reroute: {
+            destination: stream.name,
+          },
+        },
+      ],
+    };
+  }
+
   const simulationBody: SimulateIngestRequest = {
     docs,
-    ...(defaultPipelineName && {
-      pipeline_substitutions: {
-        [defaultPipelineName]: {
-          processors,
-        },
-      },
-    }),
+    pipeline_substitutions: pipelineSubstitutions,
     // Ideally we should not need to retrieve and merge the mappings from the stream index.
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.

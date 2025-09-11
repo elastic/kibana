@@ -11005,7 +11005,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
+              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -11458,7 +11458,7 @@
             "label": "returnType",
             "description": [],
             "signature": [
-              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -11848,6 +11848,34 @@
             "type": "Object",
             "tags": [],
             "label": "dropTimestampWarning",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.inferenceIdRequired",
+            "type": "Object",
+            "tags": [],
+            "label": "inferenceIdRequired",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.unsupportedQueryType",
+            "type": "Object",
+            "tags": [],
+            "label": "unsupportedQueryType",
             "description": [],
             "signature": [
               "{ message: string; type: {}; }"
@@ -14354,7 +14382,7 @@
           "\nThis is the type of a parameter in a function definition."
         ],
         "signature": [
-          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
+          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -14371,7 +14399,7 @@
           "\nThis is the return type of a function definition.\n\nTODO: remove `any`"
         ],
         "signature": [
-          "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+          "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -14592,7 +14620,7 @@
         "label": "SupportedDataType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"unsupported\" | \"null\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"unsupported\" | \"null\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -15076,7 +15104,7 @@
           "\nThis is the list of all data types that are supported in ES|QL.\n\nNot all of these can be used as field types. Some can only be literals,\nothers may be the value of a field, but cannot be used in the index mapping.\n\nThis is a partial list. The full list is here and we may need to expand this type as\nthe capabilities of the client-side engines grow.\nhttps://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java"
         ],
         "signature": [
-          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\"]"
+          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\", \"geohash\", \"geohex\", \"geotile\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
