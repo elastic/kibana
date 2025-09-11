@@ -482,7 +482,9 @@ export class VisualizationsPlugin
               ],
             },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,

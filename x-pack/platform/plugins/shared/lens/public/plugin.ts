@@ -411,7 +411,9 @@ export class LensPlugin {
                 ],
               },
             },
-            true
+            {
+              displaySuccessMessage: true,
+            }
           );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,

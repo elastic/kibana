@@ -415,7 +415,9 @@ export class DiscoverPlugin
               ],
             },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       },
       savedObjectType: SavedSearchType,

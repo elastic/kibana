@@ -27,7 +27,9 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
         {
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
         },
-        true
+        {
+          displaySuccessMessage: true,
+        }
       )
       .catch(() => {
         // ignore error - its an example
