@@ -44,7 +44,12 @@ export async function autocomplete(
     return [];
   }
 
-  const { position, context: positionContext } = getPosition(innerText, command);
+  const { position, context: positionContext } = getPosition(
+    innerText,
+    command,
+    context,
+    cursorPosition
+  );
 
   const insideFunctionSuggestions = await getInsideFunctionsSuggestions(
     innerText,
@@ -61,6 +66,7 @@ export async function autocomplete(
     case CaretPosition.RERANK_KEYWORD: {
       const targetFieldName = callbacks?.getSuggestedUserDefinedColumnName?.() || '';
       const targetField = getNewUserDefinedColumnSuggestion(targetFieldName);
+
       return [targetField, ...createBasicConstants()];
     }
 
@@ -85,8 +91,12 @@ export async function autocomplete(
       });
     }
 
+    case CaretPosition.ON_AFTER_POTENTIAL_CUSTOM_FIELD: {
+      return [assignCompletionItem];
+    }
+
     case CaretPosition.ON_AFTER_FIELD_COMPLETE: {
-      return buildNextActions({ includeAssign: true });
+      return buildNextActions();
     }
 
     case CaretPosition.WITHIN_BOOLEAN_EXPRESSION: {
@@ -141,22 +151,28 @@ async function getContextualSuggestions({
         (await callbacks.getByType(['keyword', 'text', 'boolean', 'integer', 'double', 'long'])) ??
         [];
 
+      const targetFieldName = callbacks?.getSuggestedUserDefinedColumnName?.() || '';
+      const targetField = getNewUserDefinedColumnSuggestion(targetFieldName);
+
       return handleFragment(
         innerText,
         // check if fragment is completed
         (fragment) => !!columnExists(fragment, context),
         // incomplete: get available fields suggestions
         (_: string, rangeToReplace?: { start: number; end: number }) => {
-          return fieldSuggestions.map((suggestion) => ({
-            ...suggestion,
-            text: `${suggestion.text}`,
-            rangeToReplace,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }));
+          return [
+            targetField,
+            ...fieldSuggestions.map((suggestion) => ({
+              ...suggestion,
+              text: `${suggestion.text}`,
+              rangeToReplace,
+              command: TRIGGER_SUGGESTION_COMMAND,
+            })),
+          ];
         },
         // complete: get next actions suggestions for completed field
         (fragment: string, rangeToReplace: { start: number; end: number }) => {
-          const suggestions = buildNextActions({ includeAssign: true, withSpaces: true });
+          const suggestions = buildNextActions({ withSpaces: true });
 
           return suggestions.map((suggestion) => ({
             ...suggestion,
@@ -231,15 +247,10 @@ function createBasicConstants(): ISuggestionItem[] {
 }
 
 function buildNextActions(options?: {
-  includeAssign?: boolean;
   withSpaces?: boolean;
   includeBinaryOperators?: boolean;
 }): ISuggestionItem[] {
-  const {
-    includeAssign = false,
-    withSpaces = false,
-    includeBinaryOperators = false,
-  } = options || {};
+  const { withSpaces = false, includeBinaryOperators = false } = options || {};
 
   const items: ISuggestionItem[] = [];
 
@@ -261,11 +272,6 @@ function buildNextActions(options?: {
     text: withSpaces ? ' ' + pipeCompleteItem.text : pipeCompleteItem.text,
     sortText: '04',
   });
-
-  // Add assignment operator to the next actions, after a field name (ON clause)
-  if (includeAssign) {
-    items.push({ ...assignCompletionItem, text: ' = ', sortText: '02' });
-  }
 
   // Add AND/OR operators to the next actions, after a boolean expression is completed
   if (includeBinaryOperators) {
