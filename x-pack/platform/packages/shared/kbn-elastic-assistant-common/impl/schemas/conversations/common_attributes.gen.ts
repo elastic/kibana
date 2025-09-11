@@ -366,7 +366,7 @@ export const MessageMetadata = z.object({
    */
   contentReferences: ContentReferences.optional(),
   /**
-   * When the agent is interrupted (e.g. user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
+   * When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
    */
   interruptValue: InterruptValue.optional(),
   /**
