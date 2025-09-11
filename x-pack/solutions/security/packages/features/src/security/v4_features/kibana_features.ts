@@ -39,10 +39,6 @@ export const getSecurityV4BaseKibanaFeature = ({
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
-  management: {
-    // TODO should it be inside the rules feature?
-    insightsAndAlerting: ['triggersActions'],
-  },
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
     {
@@ -67,10 +63,6 @@ export const getSecurityV4BaseKibanaFeature = ({
         all: ['alert', ...savedObjects],
         read: [],
       },
-      management: {
-        // TODO should it be inside the rules feature?
-        insightsAndAlerting: ['triggersActions'],
-      },
       ui: [SECURITY_UI_SHOW, SECURITY_UI_CRUD],
     },
     read: {
@@ -80,10 +72,6 @@ export const getSecurityV4BaseKibanaFeature = ({
       savedObject: {
         all: [],
         read: [...savedObjects],
-      },
-      management: {
-        // TODO should it be inside the rules feature?
-        insightsAndAlerting: ['triggersActions'],
       },
       ui: [SECURITY_UI_SHOW],
     },

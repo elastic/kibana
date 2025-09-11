@@ -74,6 +74,9 @@ export const getRulesBaseKibanaFeature = (
   app: [RULES_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
+  management: {
+    insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+  },
   privileges: {
     all: {
       app: [RULES_FEATURE_ID, 'kibana'],
@@ -85,6 +88,9 @@ export const getRulesBaseKibanaFeature = (
       alerting: {
         rule: { all: alertingFeatures },
         alert: { all: alertingFeatures },
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
       ui: [RULES_UI_READ, RULES_UI_EDIT],
       api: [
@@ -111,6 +117,9 @@ export const getRulesBaseKibanaFeature = (
       alerting: {
         rule: { read: alertingFeatures },
         alert: { read: alertingFeatures },
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
       ui: [RULES_UI_READ],
       api: [
