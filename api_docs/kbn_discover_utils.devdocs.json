@@ -4513,6 +4513,34 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.transaction.id",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.span.id",
+            "type": "string",
+            "tags": [],
+            "label": "'span.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.LogDocumentOverview.log.file.path",
             "type": "string",
             "tags": [],
@@ -7755,7 +7783,7 @@
         "label": "RESOURCE_FIELDS",
         "description": [],
         "signature": [
-          "readonly [\"service.name\", \"container.name\", \"host.name\", \"orchestrator.resource.id\", \"orchestrator.cluster.name\", \"orchestrator.cluster.id\", \"container.id\", \"agent.name\"]"
+          "readonly [\"service.name\", \"container.name\", \"host.name\", \"orchestrator.resource.id\", \"orchestrator.cluster.name\", \"orchestrator.cluster.id\", \"container.id\", \"agent.name\", \"resource.attributes.telemetry.sdk.language\"]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,
