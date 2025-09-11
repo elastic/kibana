@@ -73,13 +73,17 @@ const ToolCallDisplay: React.FC<{
           <p>
             <FormattedMessage
               id="xpack.onechat.thinking.toolCallThinkingItem"
-              defaultMessage="Calling tool "
+              defaultMessage="Calling tool {tool}"
+              values={{
+                tool: (
+                  <code>
+                    <EuiLink href={toolHref} target="_blank">
+                      {toolId}
+                    </EuiLink>
+                  </code>
+                ),
+              }}
             />
-            <code>
-              <EuiLink href={toolHref} target="_blank">
-                {toolId}
-              </EuiLink>
-            </code>
           </p>
         </EuiText>
       }
@@ -134,19 +138,21 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
   // an item for the tool call, items for the progression, and items for the tool call results
   return (
     <ol css={stepsListStyles} aria-label={labels.roundThinkingSteps}>
-      {steps.flatMap((step, index): ReactNode => {
+      {steps.flatMap((step, stepIndex): ReactNode => {
         if (isToolCallStep(step)) {
           return [
-            <ToolCallDisplay key={`step-${index}-tool-call`} step={step} />,
-            ...getProgressionItems({ step, stepIndex: index }),
-            ...getResultItems({ step, stepIndex: index }),
+            <ToolCallDisplay key={`step-${stepIndex}-tool-call`} step={step} />,
+            ...getProgressionItems({ step, stepIndex }),
+            ...getResultItems({ step, stepIndex }),
           ];
         }
 
         // What is the difference between a reasoning step and a tool call progression message. When does the agent produce one over the other?
         // Is there any difference for how we should display reasoning and progression?
         if (isReasoningStep(step)) {
-          return [<ThinkingItemLayout key={`step-reasoning-${index}`} content={step.reasoning} />];
+          return [
+            <ThinkingItemLayout key={`step-reasoning-${stepIndex}`} content={step.reasoning} />,
+          ];
         }
 
         return [];
