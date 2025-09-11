@@ -61,11 +61,14 @@ export const useChatSend = ({
   const { setLastConversation } = useAssistantLastConversation({ spaceId });
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
-  const { isLoading, sendMessage, abortStream } = useSendMessage();
+  const { sendMessage, abortStream } = useSendMessage();
   const { clearConversation, createConversation, getConversation, removeLastMessage } =
     useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
+
+  // Local loading state that persists until the entire message flow is complete
+  const [isLoadingChatSend, setIsLoadingChatSend] = useState(false);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -99,61 +102,80 @@ export const useChatSend = ({
         selectedPromptContexts,
       });
 
-      const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
+        const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
 
-      const selectedPromptContextsReplacements = Object.values(
-        selectedPromptContexts
-      ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
+        const selectedPromptContextsReplacements = Object.values(
+          selectedPromptContexts
+        ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
 
-      const replacements: Replacements = {
-        ...baseReplacements,
-        ...selectedPromptContextsReplacements,
-      };
-      const updatedMessages = [...convo.messages, userMessage].map((m) => ({
-        ...m,
-        content: m.content ?? '',
-      }));
-      setCurrentConversation({
-        ...convo,
-        replacements,
-        messages: updatedMessages,
-      });
+        const replacements: Replacements = {
+          ...baseReplacements,
+          ...selectedPromptContextsReplacements,
+        };
+        const updatedMessages = [...convo.messages, userMessage].map((m) => ({
+          ...m,
+          content: m.content ?? '',
+        }));
+        setCurrentConversation({
+          ...convo,
+          replacements,
+          messages: updatedMessages,
+        });
 
-      // Reset prompt context selection and preview before sending:
-      setSelectedPromptContexts({});
+        // Reset prompt context selection and preview before sending:
+        setSelectedPromptContexts({});
 
-      const rawResponse = await sendMessage({
-        apiConfig,
-        http,
-        message: userMessage.content ?? '',
-        conversationId: convo.id,
-        replacements,
-      });
+        const rawResponse = await sendMessage({
+          apiConfig,
+          http,
+          message: userMessage.content ?? '',
+          conversationId: convo.id,
+          replacements,
+        });
 
-      assistantTelemetry?.reportAssistantMessageSent({
-        role: userMessage.role,
-        actionTypeId: apiConfig.actionTypeId,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-        isEnabledKnowledgeBase: isSetupComplete ?? false,
-      });
+        assistantTelemetry?.reportAssistantMessageSent({
+          role: userMessage.role,
+          actionTypeId: apiConfig.actionTypeId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+          isEnabledKnowledgeBase: isSetupComplete ?? false,
+        });
 
-      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
-      if (convo.title === '') {
-        convo.title = (await getConversation(convo.id))?.title ?? '';
+        const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+        if (convo.title === '') {
+          // Retry getConversation up to 5 times if title is empty
+          let retryCount = 0;
+          const maxRetries = 5;
+          while (retryCount < maxRetries) {
+            const conversation = await getConversation(convo.id);
+            convo.title = conversation?.title ?? '';
+
+            if (convo.title !== '') {
+              break; // Title found, exit retry loop
+            }
+
+            retryCount++;
+            if (retryCount < maxRetries) {
+              // Wait 1 second before next retry
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+          }
+        }
+        setCurrentConversation({
+          ...convo,
+          replacements,
+          messages: [...updatedMessages, responseMessage],
+        });
+        assistantTelemetry?.reportAssistantMessageSent({
+          role: responseMessage.role,
+          actionTypeId: apiConfig.actionTypeId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+          isEnabledKnowledgeBase: isSetupComplete ?? false,
+        });
+      } finally {
+        setIsLoadingChatSend(false);
       }
-      setCurrentConversation({
-        ...convo,
-        replacements,
-        messages: [...updatedMessages, responseMessage],
-      });
-      assistantTelemetry?.reportAssistantMessageSent({
-        role: responseMessage.role,
-        actionTypeId: apiConfig.actionTypeId,
-        model: apiConfig.model,
-        provider: apiConfig.provider,
-        isEnabledKnowledgeBase: isSetupComplete ?? false,
-      });
     },
     [
       assistantTelemetry,
@@ -241,7 +263,7 @@ export const useChatSend = ({
     handleChatSend,
     abortStream,
     handleRegenerateResponse,
-    isLoading,
+    isLoading: isLoadingChatSend,
     userPrompt,
     setUserPrompt,
   };

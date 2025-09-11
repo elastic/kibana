@@ -43,7 +43,6 @@ export const getConversationWithNewMessage = async (params: Params) => {
     params.logger.debug(`No conversation found for id: ${conversationId}`);
     return params.newMessages;
   }
-
   const updatedConversation = await conversationsDataClient.appendConversationMessages({
     existingConversation,
     messages: params.newMessages.map((newMessage) => {
