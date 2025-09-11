@@ -341,9 +341,6 @@ export const DiscoverTopNav = ({
 const floatingActionStyles = css({
   '.controlFrameFloatingActions': {
     top: '100%',
-    transform: 'translate(calc(100% - 8px), -20%)',
-  },
-  '.controlsWrapper li:last-child .controlFrameFloatingActions': {
     transform: 'translate(0, -20%)',
     left: '-8px',
     right: 'auto',
