@@ -42,6 +42,7 @@ export enum AppMenuActionId {
   alerts = 'alerts',
   inspect = 'inspect',
   createRule = 'createRule',
+  backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
 }
 

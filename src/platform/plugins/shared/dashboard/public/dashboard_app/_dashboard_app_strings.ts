@@ -246,6 +246,14 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  backgroundSearch: {
+    label: i18n.translate('dashboard.topNave.backgroundSearchButtonAriaLabel', {
+      defaultMessage: 'background search',
+    }),
+    description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
+      defaultMessage: 'Open background search',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>
