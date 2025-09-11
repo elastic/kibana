@@ -16,6 +16,8 @@ import type { DeepPartial } from '@kbn/utility-types';
 import { PipelinesList } from './main';
 import type { PipelineTable } from './table';
 import type { SectionLoading, useKibana } from '../../../shared_imports';
+import { PipelineFlyout } from './pipeline_flyout';
+import { PipelineDeleteModal } from './delete_modal';
 
 const mockUseKibana = jest.fn();
 const mockUseCheckManageProcessorsPrivileges = jest.fn();
@@ -83,21 +85,12 @@ jest.mock('./empty_list', () => ({
 
 const editName = 'p!@# name';
 const cloneName = 'clone$%^name';
-const unknownCreateName = 'create&*()name';
 
 jest.mock('./table', () => ({
   ...jest.requireActual('./table'),
   PipelineTable: (props: ComponentProps<typeof PipelineTable>) => (
     <div data-test-subj="pipelineTable">
       PIPELINE_TABLE
-      <button
-        data-test-subj="openFlyout"
-        onClick={() => {
-          props.openFlyout('from-table');
-        }}
-      >
-        openFlyout
-      </button>
       <button
         data-test-subj="editPipeline"
         onClick={() => {
@@ -120,24 +113,16 @@ jest.mock('./table', () => ({
 
 jest.mock('./delete_modal', () => ({
   ...jest.requireActual('./delete_modal'),
-  PipelineDeleteModal: ({ pipelinesToDelete }: { pipelinesToDelete?: unknown[] }) => (
+  PipelineDeleteModal: ({ pipelinesToDelete }: ComponentProps<typeof PipelineDeleteModal>) => (
     <div data-test-subj="pipelineDeleteModal">DELETE {pipelinesToDelete?.length ?? 0}</div>
   ),
 }));
 
 jest.mock('./pipeline_flyout', () => ({
   ...jest.requireActual('./pipeline_flyout'),
-  PipelineFlyout: (props: { ingestPipeline: string; onCreateClick: (name: string) => void }) => (
+  PipelineFlyout: (props: ComponentProps<typeof PipelineFlyout>) => (
     <div data-test-subj="pipelineFlyout">
-      <h1>FLYOUT {props.ingestPipeline}</h1>
-      <button
-        data-test-subj="createUnknownPipeline"
-        onClick={() => {
-          props.onCreateClick(props.ingestPipeline);
-        }}
-      >
-        Create pipeline
-      </button>
+      <h1>FLYOUT {props.pipeline}</h1>
     </div>
   ),
 }));
@@ -224,27 +209,6 @@ describe('PipelinesList section', () => {
         });
       });
 
-      it('SHOULD render the PipelineTable and allow opening the flyout via table callback', () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        const historyPushSpy = jest.spyOn(history, 'push');
-        mockUseKibana.mockReturnValue({ services });
-
-        render(
-          <I18nProvider>
-            <Router history={history}>
-              <Routes>
-                <Route exact path={'/'} component={PipelinesList} />
-              </Routes>
-            </Router>
-          </I18nProvider>
-        );
-
-        expect(screen.getByTestId('pipelineTable')).toBeInTheDocument();
-
-        fireEvent.click(screen.getByTestId('openFlyout'));
-        expect(historyPushSpy).toHaveBeenCalled();
-      });
-
       describe('AND WHEN the user clicks edit on a pipeline in the list', () => {
         it('SHOULD double encode pipeline name and push encoded path', () => {
           const history = createMemoryHistory({ initialEntries: ['/'] });
@@ -311,37 +275,6 @@ describe('PipelinesList section', () => {
 
           expect(screen.getByTestId('pipelineFlyout')).toBeInTheDocument();
           expect(screen.getByText('FLYOUT my-pipeline')).toBeInTheDocument();
-        });
-
-        describe('AND WHEN the URL contains an unknown pipeline query name', () => {
-          describe('AND WHEN the user clicks "Create pipeline" button', () => {
-            it('SHOULD navigate to create page with prefilled single encoded name', () => {
-              const history = createMemoryHistory({
-                initialEntries: [`/?pipeline=${encodeURIComponent(unknownCreateName)}`],
-              });
-              const historyPushSpy = jest.spyOn(history, 'push');
-              mockUseKibana.mockReturnValue({ services });
-
-              render(
-                <I18nProvider>
-                  <Router history={history}>
-                    <Routes>
-                      <Route exact path={'/'} component={PipelinesList} />
-                    </Routes>
-                  </Router>
-                </I18nProvider>
-              );
-
-              expect(screen.getByTestId('pipelineFlyout')).toBeInTheDocument();
-              expect(screen.getByText(`FLYOUT ${unknownCreateName}`)).toBeInTheDocument();
-
-              fireEvent.click(screen.getByTestId('createUnknownPipeline'));
-
-              expect(historyPushSpy).toHaveBeenCalledWith(
-                `/create?name=${encodeURIComponent(unknownCreateName)}`
-              );
-            });
-          });
         });
       });
 
