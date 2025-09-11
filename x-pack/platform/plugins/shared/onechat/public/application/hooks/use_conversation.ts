@@ -63,7 +63,7 @@ export const useConversationRounds = () => {
     if (Boolean(error) && pendingMessage) {
       return [
         ...rounds,
-        { input: { message: pendingMessage }, response: { message: '' }, steps: [] },
+        { id: '', input: { message: pendingMessage }, response: { message: '' }, steps: [] },
       ];
     }
     return rounds;
