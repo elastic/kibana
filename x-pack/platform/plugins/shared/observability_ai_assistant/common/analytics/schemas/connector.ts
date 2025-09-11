@@ -6,19 +6,10 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { InferenceConnectorType, ModelFamily, ModelProvider } from '@kbn/inference-common';
+import type { InferenceConnector } from '../../utils/get_inference_connector';
 
 export interface Connector {
-  connector:
-    | {
-        connectorId: string;
-        name: string;
-        type: InferenceConnectorType;
-        family: ModelFamily;
-        provider: ModelProvider;
-        modelId: string | undefined;
-      }
-    | undefined;
+  connector: InferenceConnector | undefined;
 }
 
 export const connectorSchema: RootSchema<Connector['connector']> = {

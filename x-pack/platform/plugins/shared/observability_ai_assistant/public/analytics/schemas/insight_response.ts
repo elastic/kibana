@@ -7,8 +7,12 @@
 
 import type { EventTypeOpts } from '@kbn/core/public';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
-import { type Connector, connectorSchema } from './connector';
-import { type Scope, scopeSchema } from './scope';
+import {
+  type Connector,
+  type Scope,
+  connectorSchema,
+  scopeSchema,
+} from '../../../common/analytics';
 
 export interface InsightResponse extends Connector, Scope {
   '@timestamp': string;

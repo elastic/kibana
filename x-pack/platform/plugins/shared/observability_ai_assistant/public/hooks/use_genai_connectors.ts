@@ -7,21 +7,16 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
-import {
-  getConnectorProvider,
-  getConnectorFamily,
-  getConnectorModel,
-  type InferenceConnector,
-  type InferenceConnectorType,
-  type ModelFamily,
-  type ModelProvider,
-} from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 import { useKibana } from './use_kibana';
 import { isInferenceEndpointExists } from './inference_endpoint_exists';
 import { INFERENCE_CONNECTOR_ACTION_TYPE_ID } from '../utils/get_elastic_managed_llm_connector';
+import {
+  type InferenceConnector,
+  getInferenceConnectorInfo,
+} from '../../common/utils/get_inference_connector';
 
 export interface UseGenAIConnectorsResult {
   connectors?: FindActionResult[];
@@ -30,16 +25,7 @@ export interface UseGenAIConnectorsResult {
   error?: Error;
   selectConnector: (id: string) => void;
   reloadConnectors: () => void;
-  getConnector: (id: string) =>
-    | {
-        connectorId: string;
-        name: string;
-        type: InferenceConnectorType;
-        family: ModelFamily;
-        provider: ModelProvider;
-        modelId: string | undefined;
-      }
-    | undefined;
+  getConnector: (id: string) => InferenceConnector | undefined;
 }
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
@@ -120,29 +106,7 @@ export function useGenAIConnectorsWithoutContext(
 
   const getConnector = (id: string) => {
     const connector = connectors?.find((_connector) => _connector.id === id);
-    if (!connector) {
-      return;
-    }
-
-    const inferenceConnector: InferenceConnector = {
-      connectorId: connector.id,
-      type: connector.actionTypeId as InferenceConnector['type'],
-      name: connector.name,
-      config: connector?.config || {},
-      capabilities: {},
-    };
-    const family = getConnectorFamily(inferenceConnector);
-    const provider = getConnectorProvider(inferenceConnector);
-    const modelId = getConnectorModel(inferenceConnector);
-
-    return {
-      connectorId: inferenceConnector.connectorId,
-      name: inferenceConnector.name,
-      type: inferenceConnector.type,
-      family,
-      provider,
-      modelId,
-    };
+    return getInferenceConnectorInfo(connector);
   };
 
   return {
