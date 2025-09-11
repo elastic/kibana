@@ -31,8 +31,22 @@ interface RoundThinkingProps {
   timer: Timer;
 }
 
-const fullWidthStyles = css`
-  width: 100%;
+const buttonContentClassName = 'thinkingButtonContent';
+
+const thinkingButtonStyles = css`
+  margin-right: 4px;
+  & .${buttonContentClassName} {
+    /*
+      From what I can tell this is by far the easiest solution to limit the content to one line.
+      Other solutions require managing the width of the content, changing for if the timer
+      is displayed or not.
+      These CSS properties are supported by all modern browsers https://developer.mozilla.org/en-US/docs/Web/CSS/line-clamp
+    */
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 `;
 
 const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
@@ -78,6 +92,8 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
     // Otherwise fallback to default thinking label
     thinkingButtonLabel = toolProgress ?? defaultThinkingLabel;
   }
+  thinkingButtonLabel =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
   };
@@ -88,9 +104,10 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
       arrowDisplay="left"
       css={accordionStyles}
       buttonProps={{
-        css: fullWidthStyles,
+        css: thinkingButtonStyles,
       }}
       buttonContent={thinkingButtonLabel}
+      buttonContentClassName={buttonContentClassName}
       extraAction={
         timer.showTimer ? (
           <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
