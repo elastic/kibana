@@ -13,18 +13,23 @@ import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowStepExecutionList } from './workflow_step_execution_list';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
 
-export interface WorkflowExecutionProps {
+export interface ExecutionProps {
   workflowExecutionId: string;
   workflowYaml: string;
   fields?: Array<keyof EsWorkflowStepExecution>;
+  setSelectedStepExecution: (stepExecutionId: string | null) => void;
+  selectedStepExecutionId: string | undefined;
+  setSelectedStep: (stepId: string | null) => void;
   onClose?: () => void;
 }
 
-export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
+export const ExecutionDetail: React.FC<ExecutionProps> = ({
   workflowExecutionId,
+  setSelectedStepExecution,
+  selectedStepExecutionId,
+  setSelectedStep,
   onClose,
 }) => {
   const {
@@ -33,13 +38,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     error,
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
-
-  const {
-    setSelectedStepExecution,
-    selectedStepExecutionId,
-    setSelectedExecution,
-    setSelectedStep,
-  } = useWorkflowUrlState();
 
   const closeFlyout = useCallback(() => {
     setSelectedStepExecution(null);
