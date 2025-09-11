@@ -25,13 +25,11 @@ import {
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
+import type { SearchEmbeddableSerializedState } from '../../../common/embeddable/types';
 import type { DiscoverServices } from '../../build_services';
-import {
-  EDITABLE_PANEL_KEYS,
-  EDITABLE_SAVED_SEARCH_KEYS,
-  SEARCH_EMBEDDABLE_TYPE,
-} from '../constants';
-import type { SearchEmbeddableRuntimeState, SearchEmbeddableSerializedState } from '../types';
+import { EDITABLE_PANEL_KEYS, SEARCH_EMBEDDABLE_TYPE } from '../constants';
+import type { SearchEmbeddableRuntimeState } from '../types';
 
 export const deserializeState = async ({
   serializedState,

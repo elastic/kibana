@@ -8,7 +8,7 @@
  */
 
 import { searchEmbeddableTransforms } from './search_embeddable_transforms';
-import type { SearchEmbeddableSerializedState } from '../../public';
+import type { SearchEmbeddableSerializedState } from './types';
 
 describe('searchEmbeddableTransforms', () => {
   describe('transformOut', () => {
