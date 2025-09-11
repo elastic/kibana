@@ -112,7 +112,7 @@ export const useDashboardMenuItems = ({
         }
       }, viewMode);
     },
-    [dashboardApi, hasUnsavedChanges, isMounted, viewMode]
+    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
 
   /**
@@ -233,19 +233,19 @@ export const useDashboardMenuItems = ({
       },
     };
   }, [
-    dashboardApi,
-    dashboardInteractiveSave,
     disableTopNav,
-    hasUnsavedChanges,
-    isLabsShown,
     isSaveInProgress,
+    hasUnsavedChanges,
     lastSavedId,
-    quickSaveDashboard,
-    setIsLabsShown,
-    showShare,
+    dashboardInteractiveSave,
     viewMode,
-    isResetting,
+    showShare,
+    dashboardApi,
+    isLabsShown,
+    quickSaveDashboard,
     resetChanges,
+    setIsLabsShown,
+    isResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -263,12 +263,12 @@ export const useDashboardMenuItems = ({
     };
   }, [
     hasOverlays,
-    hasUnsavedChanges,
-    isResetting,
-    isSaveInProgress,
     lastSavedId,
     resetChanges,
     viewMode,
+    isSaveInProgress,
+    hasUnsavedChanges,
+    isResetting,
   ]);
 
   /**
@@ -305,17 +305,17 @@ export const useDashboardMenuItems = ({
       ...editMenuItem,
     ];
   }, [
-    dashboardApi.isManaged,
-    hasExportIntegration,
     isLabsEnabled,
-    menuItems.edit,
-    menuItems.export,
-    menuItems.fullScreen,
-    menuItems.interactiveSave,
     menuItems.labs,
+    menuItems.export,
     menuItems.share,
-    resetChangesMenuItem,
+    menuItems.interactiveSave,
+    menuItems.edit,
+    menuItems.fullScreen,
+    hasExportIntegration,
+    dashboardApi.isManaged,
     showResetChange,
+    resetChangesMenuItem,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -349,19 +349,19 @@ export const useDashboardMenuItems = ({
 
     return editModeTopNavConfigItems;
   }, [
-    hasExportIntegration,
     isLabsEnabled,
-    lastSavedId,
-    menuItems.add,
-    menuItems.export,
-    menuItems.interactiveSave,
     menuItems.labs,
-    menuItems.quickSave,
-    menuItems.settings,
+    menuItems.export,
     menuItems.share,
+    menuItems.settings,
+    menuItems.interactiveSave,
     menuItems.switchToViewMode,
-    resetChangesMenuItem,
+    menuItems.quickSave,
+    menuItems.add,
+    hasExportIntegration,
+    lastSavedId,
     showResetChange,
+    resetChangesMenuItem,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
