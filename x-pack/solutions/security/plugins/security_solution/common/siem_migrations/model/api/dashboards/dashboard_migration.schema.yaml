@@ -109,6 +109,58 @@ paths:
                 $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigration'
         404:
           description: Indicates the migration id was not found.
+    delete:
+      summary: Deletes a dashboard migration
+      operationId: DeleteDashboardMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Deletes a SIEM dashboards migration using the migration id provided
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to delete
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates the migration has been deleted successfully.
+        404:
+          description: Indicates the migration id was not found.
+
+    patch:
+      summary: Updates a dashboard migration
+      operationId: UpdateDashboardMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Updates mutable fields of an existing dashboard migration
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to update
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: The dashboard migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+              additionalProperties: false
+      responses:
+        200:
+          description: Indicates dashboard migration has been updated successfully.
+        404:
+          description: Indicates the migration id was not found.
 
   /internal/siem_migrations/dashboards/{migration_id}/dashboards:
     post:
@@ -454,3 +506,46 @@ paths:
                 description: The identified resources missing
                 items:
                   $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
+
+  /internal/siem_migrations/dashboards/{migration_id}/install:
+    post:
+      summary: Installs translated migration dashboards
+      operationId: InstallMigrationDashboards
+      x-codegen-enabled: true
+      x-internal: true
+      description: Installs migration dashboards
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to install
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: The list of dashboard migration ids to install
+                  items:
+                    description: The dashboard migration id
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates dashboards migrations have been installed correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - installed
+                properties:
+                  installed:
+                    type: number
+                    description: The number of dashboards that were installed.
