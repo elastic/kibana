@@ -9,8 +9,9 @@
 
 import { castDraft, produce } from 'immer';
 import type { TableState, ExpandedState } from '@tanstack/react-table';
-export type { TableState } from '@tanstack/react-table';
 import { getLeafIdFromCacheKey } from '../lib/utils';
+
+export type { TableState };
 
 /**
  * Represents a document, with a base expectation that specifies
