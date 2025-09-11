@@ -204,8 +204,6 @@ const controlPanelStyles = {
       width: '100%',
       maxInlineSize: '100% !important',
       height: euiTheme.size.xl,
-      boxShadow: 'none !important',
-      borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 !important`,
     }),
   containerRoundedBorders: ({ euiTheme }: UseEuiTheme) =>
     css({

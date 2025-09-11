@@ -2203,9 +2203,21 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-amsterdam@file:./eui_106.4.0_super_date_picker_time_window_01.tgz", "@elastic/eui@file:./eui_106.4.0_super_date_picker_time_window_01.tgz":
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.2_form_control_button_01.tgz":
+  version "3.3.2"
+  resolved "file:./eui_theme_borealis_3.3.2_form_control_button_01.tgz#e4fe317283043e1e721fc9e29ec00cfbd32ccb16"
+
+"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_form_control_button_01.tgz":
+  version "4.0.0"
+  resolved "file:./eui_theme_common_4.0.0_form_control_button_01.tgz#b979d193738fdee265b215b930feb8c70e7ca859"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./eui_106.4.0_form_control_button_02.tgz":
   version "106.4.0"
-  resolved "file:./eui_106.4.0_super_date_picker_time_window_01.tgz#42068f3d12c0b1fecbf00298043a9806384583fb"
+  resolved "file:./eui_106.4.0_form_control_button_02.tgz#584bef4cdc2a3ec0670259a897dc83c55f45cecc"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -2241,18 +2253,6 @@
     url-parse "^1.5.10"
     uuid "^8.3.0"
     vfile "^4.2.1"
-
-"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.2_super_date_picker_time_window_01.tgz":
-  version "3.3.2"
-  resolved "file:./eui_theme_borealis_3.3.2_super_date_picker_time_window_01.tgz#e4fe317283043e1e721fc9e29ec00cfbd32ccb16"
-
-"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_super_date_picker_time_window_01.tgz":
-  version "4.0.0"
-  resolved "file:./eui_theme_common_4.0.0_super_date_picker_time_window_01.tgz#b979d193738fdee265b215b930feb8c70e7ca859"
-  dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
