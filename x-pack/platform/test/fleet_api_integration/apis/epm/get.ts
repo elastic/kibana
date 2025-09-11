@@ -463,7 +463,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it.only('includes knowledge base information in package info assets when fetching from the info endpoint', async function () {
+      it('includes knowledge base information in package info assets when fetching from the info endpoint', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         //  Since KB indexing is async, wait for knowledge base items to be ready in package info
         // This is due to the ML model needing to get deployed first which can take a bit
