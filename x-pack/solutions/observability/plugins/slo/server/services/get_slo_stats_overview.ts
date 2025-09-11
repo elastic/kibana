@@ -88,7 +88,7 @@ export class GetSLOStatsOverview {
       if (querySLOsForIds) {
         do {
           const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
-            size: ES_PAGESIZE_LIMIT,
+            size: 0,
             aggs: {
               sloIds: {
                 composite: {
