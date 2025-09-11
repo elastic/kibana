@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-} from '@kbn/controls-schemas';
+import type { OptionsListControlState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState } from '@kbn/esql-types';
@@ -23,27 +19,8 @@ import type { DefaultDataControlState } from '..';
  * ----------------------------------------------------------------
  */
 
-export interface OptionsListDisplaySettings {
-  placeholder?: string;
-  hideActionBar?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  hideSort?: boolean;
-}
-
-type OptionsListBaseControlState = OptionsListDisplaySettings & {
-  searchTechnique?: OptionsListSearchTechnique;
-  sort?: OptionsListSortingType;
-  selectedOptions?: OptionsListSelection[];
-  existsSelected?: boolean;
-  runPastTimeout?: boolean;
-  singleSelect?: boolean;
-  exclude?: boolean;
-};
-export type OptionsListDSLControlState = DefaultDataControlState & OptionsListBaseControlState;
-export type OptionsListESQLControlState = ESQLControlState & OptionsListBaseControlState;
-
-export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
+export type OptionsListDSLControlState = DefaultDataControlState & OptionsListControlState;
+export type OptionsListESQLControlState = ESQLControlState & OptionsListControlState; // TODO: This should be defined via a schema
 
 export const isOptionsListESQLControlState = (
   state: OptionsListControlState | undefined
