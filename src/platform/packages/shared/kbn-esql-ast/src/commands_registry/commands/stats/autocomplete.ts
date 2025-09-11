@@ -62,6 +62,8 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+  const isInlineStats = command.name === 'inlinestats';
+
   const columnExists = (name: string) => _columnExists(name, context);
 
   const innerText = query.substring(0, cursorPosition);
@@ -91,7 +93,9 @@ export async function autocomplete(
 
   switch (pos) {
     case 'expression_without_assignment': {
-      const expressionRoot = /,\s*$/.test(innerText)
+      const isNewMultipleExpression = /,\s*$/.test(innerText);
+
+      const expressionRoot = isNewMultipleExpression
         ? undefined // we're in a new expression, but there isn't an AST node for it yet
         : command.args[command.args.length - 1];
 
@@ -106,6 +110,14 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
+          ...(!isNewMultipleExpression && !isInlineStats
+            ? [
+                {
+                  ...byCompleteItem,
+                  sortText: 'D',
+                },
+              ]
+            : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
         ],
         afterCompleteSuggestions: [
@@ -176,11 +188,7 @@ export async function autocomplete(
 
       // Is this a complete boolean expression?
       // If so, we can call it done and suggest a pipe
-      const expressionType = getExpressionType(
-        expressionRoot,
-        context?.fields,
-        context?.userDefinedColumns
-      );
+      const expressionType = getExpressionType(expressionRoot, context?.columns);
       if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
         suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
       }
@@ -306,12 +314,7 @@ async function getExpressionSuggestions({
     suggestions.push(...emptySuggestions);
   }
 
-  if (
-    isExpressionComplete(
-      getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-      innerText
-    )
-  ) {
+  if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
     suggestions.push(...afterCompleteSuggestions);
   }
 

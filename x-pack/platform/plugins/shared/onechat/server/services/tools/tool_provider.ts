@@ -8,7 +8,7 @@
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import type { ToolHandlerFn } from '@kbn/onechat-server';
+import type { ToolHandlerFn, LlmDescriptionHandler } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 export interface InternalToolDefinition<
@@ -23,6 +23,11 @@ export interface InternalToolDefinition<
    * Run handler that can be used to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<TSchema>>;
+  /**
+   * Optional handled to add additional instructions to the LLM
+   * when specified, this will fully replace the description when converting to LLM tools.
+   */
+  llmDescription?: LlmDescriptionHandler<TConfig>;
 }
 
 export interface ToolCreateParams<TConfig extends object = {}> {
