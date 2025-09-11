@@ -18,7 +18,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   align-self: start;
   height: 100%;
   width: ${layoutVar('navigation.width')};
-  z-index: ${layoutLevels.navigation}
+  z-index: ${layoutLevels.navigation};
   display: flex;
 `;
 
