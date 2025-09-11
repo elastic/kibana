@@ -10,8 +10,8 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
 import { getRelatedColumns } from './get_related_columns';
 import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
 import type { AlertData } from '../../../../hooks/use_fetch_alert_detail';
@@ -31,15 +31,21 @@ interface Props {
 }
 
 const columns = getRelatedColumns();
-const initialSort: Array<Record<string, SortOrder>> = [
+const initialSort: AlertsTableSortCombinations[] = [
   {
-    _score: 'desc',
+    _score: {
+      order: 'desc',
+    },
   },
   {
-    [ALERT_START]: 'desc',
+    [ALERT_START]: {
+      order: 'desc',
+    },
   },
   {
-    [ALERT_UUID]: 'desc',
+    [ALERT_UUID]: {
+      order: 'desc',
+    },
   },
 ];
 

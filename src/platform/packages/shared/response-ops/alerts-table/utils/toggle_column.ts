@@ -42,19 +42,23 @@ const insert = ({
   return [columns[0], { id: columnId }, ...columns.slice(1)];
 };
 
-/**
- * @param param.column column to be removed/inserted
- * @param param.columns current array of columns in the grid
- * @param param.defaultColumns Initial columns set up in the configuration before being modified by the user
- * @returns the new list of columns
- */
 export const toggleColumn = ({
   columnId,
   columns,
   defaultColumns,
 }: {
+  /**
+   * The id of the column to be removed/inserted
+   */
   columnId: string;
+  /**
+   * The current columns configuration
+   */
   columns: EuiDataGridColumn[];
+  /**
+   * The default columns configuration, used to determine the position of the column
+   * when inserting it back in
+   */
   defaultColumns: EuiDataGridColumn[];
 }): EuiDataGridColumn[] => {
   const currentIndex = columns.findIndex(({ id }) => id === columnId);
