@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
@@ -46,25 +55,36 @@ export function WorkflowsEmptyState({
           <p>
             <FormattedMessage
               id="workflows.emptyState.body.firstParagraph"
-              defaultMessage="Workflows let you automate and orchestrate security actions across your environment. Build step-by-step processes to enrich alerts, trigger responses, or streamline investigations—all in one place."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="workflows.emptyState.body.secondParagraph"
-              defaultMessage="Start by creating a workflow to simplify repetitive tasks and improve efficiency."
+              defaultMessage="Workflows let you automate and orchestrate security actions across your environment. Build step-by-step processes to enrich alerts, trigger responses, or streamline investigations—all in one place. Start by creating a workflow to simplify repetitive tasks and improve efficiency."
             />
           </p>
         </>
       }
       actions={
         canCreateWorkflow && onCreateWorkflow ? (
-          <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusInCircle">
-            <FormattedMessage
-              id="workflows.emptyState.createButton"
-              defaultMessage="Create a new workflow"
-            />
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusInCircle">
+                <FormattedMessage
+                  id="workflows.emptyState.createButton"
+                  defaultMessage="Create a new workflow"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href="https://github.com/elastic/workflow-examples"
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                <FormattedMessage
+                  id="workflows.emptyState.exampleWorkflowsButton"
+                  defaultMessage="Example workflows"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : null
       }
       footer={

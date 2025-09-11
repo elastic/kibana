@@ -14,11 +14,10 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import YAML, { isPair, isScalar, visit } from 'yaml';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
@@ -98,6 +97,9 @@ export interface WorkflowYAMLEditorProps {
   onChange?: (value: string | undefined) => void;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
   onSave?: (value: string) => void;
+  activeTab?: string;
+  selectedExecutionId?: string;
+  originalValue?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -112,6 +114,9 @@ export const WorkflowYAMLEditor = ({
   onChange,
   onSave,
   onValidationErrors,
+  activeTab,
+  selectedExecutionId,
+  originalValue,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -137,6 +142,8 @@ export const WorkflowYAMLEditor = ({
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const changesHighlightDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const {
     error: errorValidating,
@@ -149,6 +156,49 @@ export const WorkflowYAMLEditor = ({
   });
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  const [showDiffHighlight, setShowDiffHighlight] = useState(false);
+
+  // Helper to compute diff lines
+  const calculateLineDifferences = useCallback((original: string, current: string) => {
+    const originalLines = (original ?? '').split('\n');
+    const currentLines = (current ?? '').split('\n');
+    const changed: number[] = [];
+    const max = Math.max(originalLines.length, currentLines.length);
+    for (let i = 0; i < max; i++) {
+      if ((originalLines[i] ?? '') !== (currentLines[i] ?? '')) changed.push(i + 1);
+    }
+    return changed;
+  }, []);
+
+  // Apply diff highlight when toggled
+  useEffect(() => {
+    if (!showDiffHighlight || !originalValue || !editorRef.current || !isEditorMounted) {
+      if (changesHighlightDecorationCollectionRef.current) {
+        changesHighlightDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const model = editorRef.current.getModel();
+    if (!model) return;
+    if (changesHighlightDecorationCollectionRef.current) {
+      changesHighlightDecorationCollectionRef.current.clear();
+    }
+    const changedLines = calculateLineDifferences(originalValue, props.value ?? '');
+    if (changedLines.length === 0) return;
+    const decorations = changedLines.map((lineNumber) => ({
+      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
+      options: {
+        className: 'changed-line-highlight',
+        isWholeLine: true,
+        marginClassName: 'changed-line-margin',
+      },
+    }));
+    changesHighlightDecorationCollectionRef.current =
+      editorRef.current.createDecorationsCollection(decorations);
+    return () => {
+      changesHighlightDecorationCollectionRef.current?.clear();
+    };
+  }, [showDiffHighlight, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
 
   const changeSideEffects = useCallback(() => {
     if (editorRef.current) {
@@ -193,24 +243,30 @@ export const WorkflowYAMLEditor = ({
         validateVariables(editor);
         try {
           const parsedDocument = YAML.parseDocument(value);
-          // Use flushSync to ensure yamlDocument is set synchronously
-          // before isEditorMounted is set, preventing race conditions
-          flushSync(() => {
+          // Use setTimeout to defer state updates until after the current render cycle
+          // This prevents the flushSync warning while maintaining the correct order
+          setTimeout(() => {
             setYamlDocument(parsedDocument);
-          });
+            setIsEditorMounted(true);
+          }, 0);
         } catch (error) {
-          flushSync(() => {
+          setTimeout(() => {
             setYamlDocument(null);
-          });
+            setIsEditorMounted(true);
+          }, 0);
         }
+      } else {
+        // If no content, just set the mounted state
+        setTimeout(() => {
+          setIsEditorMounted(true);
+        }, 0);
       }
+    } else {
+      // If no model, just set the mounted state
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
     }
-
-    // Use flushSync here too to ensure isEditorMounted is set synchronously
-    // after yamlDocument, guaranteeing the decoration effect has both values
-    flushSync(() => {
-      setIsEditorMounted(true);
-    });
   };
 
   useEffect(() => {
@@ -497,7 +553,7 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <div css={styles.container}>
-      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
+      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
@@ -510,7 +566,29 @@ export const WorkflowYAMLEditor = ({
               gap: '4px',
               padding: '4px 6px',
               color: euiTheme.colors.accent,
+              cursor: 'pointer',
+              borderRadius: euiTheme.border.radius.small,
+              '&:hover': {
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              },
             }}
+            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={showDiffHighlight}
+            aria-label={
+              showDiffHighlight
+                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
+                    defaultMessage: 'Hide diff highlighting',
+                  })
+                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
+                    defaultMessage: 'Show diff highlighting',
+                  })
+            }
+            onKeyDown={() => {}}
+            title={
+              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
+            }
           >
             <EuiIcon type="dot" />
             <span>
@@ -693,6 +771,16 @@ const componentStyles = {
         color: 'transparent',
         textShadow: 'none',
         fontSize: 0,
+      },
+      '.changed-line-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        borderLeft: `2px solid ${euiTheme.colors.warning}`,
+        opacity: 0.7,
+      },
+      '.changed-line-margin': {
+        backgroundColor: euiTheme.colors.warning,
+        width: '2px',
+        opacity: 0.7,
       },
     }),
   editorContainer: css({
