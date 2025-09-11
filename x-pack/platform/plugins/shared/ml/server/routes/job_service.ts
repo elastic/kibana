@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
@@ -932,29 +931,19 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const { datafeedId, job, datafeed } = request.body;
 
-          // delete unexpected types from payload as a temporary workaround
-          // https://github.com/elastic/elasticsearch/issues/134467
-          const jobConfig = omit(job, [
-            'job_type',
-            'job_version',
-            'create_time',
-            'finished_time',
-            'model_snapshot_id',
-          ]);
-
           const payload =
             datafeedId !== undefined
               ? {
                   datafeed_id: datafeedId,
                 }
-              : {
+              : ({
                   body: {
-                    job_config: jobConfig,
+                    job_config: job,
                     datafeed_config: datafeed,
                   },
-                };
+                } as estypes.MlPreviewDatafeedRequest);
 
-          const body = await mlClient.previewDatafeed(payload as estypes.MlPreviewDatafeedRequest, {
+          const body = await mlClient.previewDatafeed(payload, {
             ...getAuthorizationHeader(request),
             maxRetries: 0,
           });
