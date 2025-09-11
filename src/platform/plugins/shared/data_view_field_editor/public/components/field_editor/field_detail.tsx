@@ -93,7 +93,7 @@ export const FieldDetail = ({ isDisabled }: { isDisabled?: boolean }) => {
         data-test-subj="customLabelRow"
         withDividerRule
       >
-        <CustomLabelField />
+        <CustomLabelField disabled={isDisabled} />
       </FormRow>
 
       {/* Set custom description */}
@@ -105,7 +105,7 @@ export const FieldDetail = ({ isDisabled }: { isDisabled?: boolean }) => {
         data-test-subj="customDescriptionRow"
         withDividerRule
       >
-        <CustomDescriptionField />
+        <CustomDescriptionField disabled={isDisabled} />
       </FormRow>
 
       {/* Set value */}
@@ -118,7 +118,7 @@ export const FieldDetail = ({ isDisabled }: { isDisabled?: boolean }) => {
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField links={links} />
+          <ScriptField links={links} disabled={isDisabled} />
         </FormRow>
       )}
 
@@ -131,7 +131,7 @@ export const FieldDetail = ({ isDisabled }: { isDisabled?: boolean }) => {
         data-test-subj="formatRow"
         withDividerRule
       >
-        <FormatField />
+        <FormatField disabled={isDisabled} />
       </FormRow>
 
       {/* Advanced settings */}
@@ -145,7 +145,7 @@ export const FieldDetail = ({ isDisabled }: { isDisabled?: boolean }) => {
           data-test-subj="popularityRow"
           withDividerRule
         >
-          <PopularityField />
+          <PopularityField disabled={isDisabled} />
         </FormRow>
       </AdvancedParametersSection>
     </>

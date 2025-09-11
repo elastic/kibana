@@ -283,20 +283,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [setUnifiedFieldListSidebarContainerApi, scheduleFieldsExistenceInfoFetchRef]
   );
 
-  const closeDataViewEditor = useRef<() => void | undefined>();
-
-  useEffect(() => {
-    const cleanup = () => {
-      if (closeDataViewEditor?.current) {
-        closeDataViewEditor?.current();
-      }
-    };
-    return () => {
-      // Make sure to close the editor when unmounting
-      cleanup();
-    };
-  }, []);
-
   const { dataViewEditor } = services;
 
   const canEditDataView =

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
@@ -105,6 +105,17 @@ export function ChangeDataView({
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
   }, [adHocDataViews, currentDataViewId]);
 
+  const closeDataViewEditor = useRef<() => void | undefined>();
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editors when unmounting
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
+      }
+    };
+  }, []);
+
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
@@ -149,7 +160,7 @@ export function ChangeDataView({
       managed: false,
     });
 
-    dataViewEditor.openEditor({
+    closeDataViewEditor.current = dataViewEditor.openEditor({
       editData,
       onSave: (newDataView) => {
         onDataViewCreated(newDataView);
@@ -162,7 +173,7 @@ export function ChangeDataView({
   const onEdit = useCallback(async () => {
     if (onEditDataView && currentDataViewId) {
       const dataView = await dataViews.get(currentDataViewId);
-      dataViewEditor.openEditor({
+      closeDataViewEditor.current = dataViewEditor.openEditor({
         editData: dataView,
         onSave: (updatedDataView) => {
           onEditDataView(updatedDataView);
@@ -189,7 +200,7 @@ export function ChangeDataView({
 
   const onCreate = useCallback(() => {
     if (onDataViewCreated) {
-      dataViewEditor.openEditor({
+      closeDataViewEditor.current = dataViewEditor.openEditor({
         onSave: (newDataView) => {
           onDataViewCreated(newDataView);
         },

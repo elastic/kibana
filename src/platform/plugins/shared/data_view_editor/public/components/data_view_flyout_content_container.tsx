@@ -69,7 +69,7 @@ const DataViewFlyoutContentContainer = ({
           const editDataSpec = editData.toSpec();
           dataViewSpec = {
             ...editDataSpec,
-            id: undefined,
+            id: dataViewSpec.id,
             name: dataViewSpec.name,
             timeFieldName: dataViewSpec.timeFieldName,
             title: dataViewSpec.title,

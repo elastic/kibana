@@ -50,7 +50,7 @@ export const AdvancedParamsContent = ({
           componentProps={{
             euiFieldProps: {
               'aria-label': allowHiddenAriaLabel,
-              disabled: disableAllowHidden || disableId,
+              disabled: disableAllowHidden,
             },
           }}
           onChange={onAllowHiddenChange}

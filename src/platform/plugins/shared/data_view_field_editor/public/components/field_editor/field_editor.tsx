@@ -308,7 +308,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
       {updatedType && updatedType[0].value !== 'composite' ? (
         <FieldDetail isDisabled={isDisabled} />
       ) : (
-        <CompositeEditor onReset={resetTypes} />
+        <CompositeEditor onReset={resetTypes} isDisabled={isDisabled} />
       )}
     </Form>
   );

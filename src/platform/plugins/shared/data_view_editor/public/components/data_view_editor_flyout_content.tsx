@@ -21,6 +21,7 @@ import {
   EuiCallOut,
   type UseEuiTheme,
   useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -99,6 +100,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   isDuplicating,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['s', 'xs']);
 
   const {
@@ -342,7 +344,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
               color="primary"
               iconType="info"
               size="s"
-              style={{ marginTop: '10px' }}
+              css={{ marginTop: euiTheme.base }}
             />
           )}
           <Form
@@ -388,8 +390,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <AdvancedParamsContent
-              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-              disableId={isManaged}
+              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP || isManaged}
+              disableId={isEditingExisting || isManaged}
               onAllowHiddenChange={() => {
                 form.getFields().title.validate();
               }}
