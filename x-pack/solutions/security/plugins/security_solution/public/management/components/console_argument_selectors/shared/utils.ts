@@ -41,8 +41,8 @@ export const createSelectionHandler = <T extends BaseSelectorState>(
         selectedOption: changedOption.data,
       };
       onChange({
-        value: changedOption.value,
-        valueText: changedOption.value,
+        value: String(changedOption.value || ''),
+        valueText: String(changedOption.value || ''),
         store: newState,
       });
     } else {
