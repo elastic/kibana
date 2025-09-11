@@ -13,6 +13,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createFileServiceFactoryMock, createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -66,6 +67,7 @@ describe('Cases Plugin', () => {
       licensing: licensingMock.createSetup(),
       usageCollection: usageCollectionPluginMock.createSetupContract(),
       features: featuresPluginMock.createSetup(),
+      spaces: spacesMock.createSetup(),
     };
 
     pluginsStart = {
@@ -77,6 +79,7 @@ describe('Cases Plugin', () => {
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
+      spaces: spacesMock.createStart(),
     };
   });
 

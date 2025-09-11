@@ -34,6 +34,7 @@ export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   unsafe: schema.maybe(
     schema.object({
+      enableCaseSuggestions: schema.boolean({ defaultValue: false }),
       enableCaseSummary: schema.boolean({ defaultValue: false }),
     })
   ),
