@@ -920,7 +920,7 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Cannot create a saved object of type \"accessControlType\" with \"read_only\" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+            `Unable to create \"read_only\" \"accessControlType\" saved object. User profile ID not found.: Bad Request`
           )
         );
         expect(client.create).not.toHaveBeenCalled();
