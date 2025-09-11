@@ -34,7 +34,9 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  OTelCollectorComponentID,
   OTelCollectorConfig,
+  OTelCollectorPipelineID,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
@@ -896,7 +898,7 @@ export function getBinarySourceSettings(
 export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
   dataOutput?: Output
-) {
+): OTelCollectorConfig {
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
     .flatMap((input) => {
@@ -952,7 +954,7 @@ function generateOTelAttributesTransform(
   dataset: string,
   namespace: string,
   suffix: string
-) {
+): Record<OTelCollectorComponentID, any> {
   let otelType: string;
   let context: string;
   switch (type) {
@@ -1015,7 +1017,7 @@ function addSuffixToOtelcolComponentsConfig(
   type: string,
   suffix: string,
   components: Record<string, any>
-) {
+): Record<OTelCollectorComponentID, any> {
   if (!components) {
     return {};
   }
@@ -1028,9 +1030,12 @@ function addSuffixToOtelcolComponentsConfig(
   return { [type]: generated };
 }
 
-function addSuffixToOtelcolPipelinesComponents(pipelines: any, suffix: string) {
-  const result: Record<string, any> = {};
-  Object.entries(pipelines as Record<string, Record<string, string[]>>).forEach(
+function addSuffixToOtelcolPipelinesComponents(
+  pipelines: any,
+  suffix: string
+): Record<OTelCollectorPipelineID, any> {
+  const result: Record<OTelCollectorPipelineID, any> = {};
+  Object.entries(pipelines as Record<OTelCollectorPipelineID, Record<string, string[]>>).forEach(
     ([pipelineID, pipeline]) => {
       const newPipeline: Record<string, any> = {};
       Object.entries(pipeline).forEach(([type, componentIDs]) => {
@@ -1042,7 +1047,7 @@ function addSuffixToOtelcolPipelinesComponents(pipelines: any, suffix: string) {
   return result;
 }
 
-function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {
+function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorConfig {
   return otelConfigs.reduce((merged, next) => {
     if (!next) {
       return merged;
@@ -1091,7 +1096,7 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]) {
   });
 }
 
-function attachExporter(config: OTelCollectorConfig, dataOutput?: Output) {
+function attachExporter(config: OTelCollectorConfig, dataOutput?: Output): OTelCollectorConfig {
   if (!dataOutput) {
     return config;
   }
@@ -1127,7 +1132,7 @@ function attachExporter(config: OTelCollectorConfig, dataOutput?: Output) {
   return config;
 }
 
-function generateExporter(dataOutput: Output) {
+function generateExporter(dataOutput: Output): Record<OTelCollectorComponentID, any> {
   switch (dataOutput.type) {
     case outputType.Elasticsearch:
       return {
