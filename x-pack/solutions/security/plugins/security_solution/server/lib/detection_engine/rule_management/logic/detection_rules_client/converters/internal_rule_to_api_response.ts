@@ -19,7 +19,7 @@ import {
   transformToActionFrequency,
 } from '../../../normalization/rule_actions';
 import { typeSpecificCamelToSnake } from './type_specific_camel_to_snake';
-import { normalizedCommonParamsCamelToSnake } from './common_params_camel_to_snake';
+import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 import { normalizeRuleParams } from './normalize_rule_params';
 
 export const internalRuleToAPIResponse = (
@@ -39,7 +39,7 @@ export const internalRuleToAPIResponse = (
     const transformedAction = transformAlertToRuleSystemAction(action);
     return transformedAction;
   });
-  const normalizedRuleParams = normalizeRuleParams(rule.params);
+  const normalizedRuleParams = convertObjectKeysToSnakeCase(normalizeRuleParams(rule.params));
 
   return {
     // saved object properties
@@ -58,7 +58,7 @@ export const internalRuleToAPIResponse = (
     enabled: rule.enabled,
     revision: rule.revision,
     // Security solution shared rule params
-    ...normalizedCommonParamsCamelToSnake(normalizedRuleParams),
+    ...normalizedRuleParams,
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions

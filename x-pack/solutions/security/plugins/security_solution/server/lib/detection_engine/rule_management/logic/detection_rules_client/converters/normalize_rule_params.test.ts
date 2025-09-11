@@ -19,7 +19,7 @@ describe('normalizeRuleSource', () => {
     });
   });
 
-  it('should return rule_source of type `external` and `isCustomized: false` when immutable is true and ruleSource is undefined', () => {
+  it('should return rule_source of type `external` and default customization field values when immutable is true and ruleSource is undefined', () => {
     const result = normalizeRuleSource({
       immutable: true,
       ruleSource: undefined,
@@ -27,6 +27,8 @@ describe('normalizeRuleSource', () => {
     expect(result).toEqual({
       type: 'external',
       isCustomized: false,
+      customizedFields: [],
+      hasBaseVersion: true,
     });
   });
 
@@ -34,11 +36,15 @@ describe('normalizeRuleSource', () => {
     const externalRuleSource: BaseRuleParams['ruleSource'] = {
       type: 'external',
       isCustomized: true,
+      customizedFields: [{ fieldName: 'name' }],
+      hasBaseVersion: true,
     };
     const externalResult = normalizeRuleSource({ immutable: true, ruleSource: externalRuleSource });
     expect(externalResult).toEqual({
       type: externalRuleSource.type,
       isCustomized: externalRuleSource.isCustomized,
+      customizedFields: externalRuleSource.customizedFields,
+      hasBaseVersion: externalRuleSource.hasBaseVersion,
     });
 
     const internalRuleSource: BaseRuleParams['ruleSource'] = {
@@ -50,6 +56,21 @@ describe('normalizeRuleSource', () => {
     });
     expect(internalResult).toEqual({
       type: internalRuleSource.type,
+    });
+  });
+
+  it('should return ruleSource with default customization field values when they are missing in the existing ruleSource object', () => {
+    // We are purposefully setting this to a value that omits fields
+    const externalRuleSource: BaseRuleParams['ruleSource'] = {
+      type: 'external',
+      isCustomized: false,
+    };
+    const externalResult = normalizeRuleSource({ immutable: true, ruleSource: externalRuleSource });
+    expect(externalResult).toEqual({
+      type: 'external',
+      isCustomized: false,
+      customizedFields: [],
+      hasBaseVersion: true,
     });
   });
 });
