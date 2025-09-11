@@ -54,8 +54,6 @@ const validateBenchmarkScoreTemplate = async (
   logger: Logger
 ): Promise<void> => {
   try {
-    logger.debug('Checking benchmark score template mapping against expected mapping');
-    
     const templateResponse = await esClient.indices.getIndexTemplate({ 
       name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME 
     });
@@ -79,18 +77,13 @@ const validateBenchmarkScoreTemplate = async (
     let hasFieldMismatch = false;
 
     // Check all expected fields against template fields
-    for (const [fieldName, expectedField] of Object.entries(expectedProperties)) {
+    for (const [fieldName] of Object.entries(expectedProperties)) {
       const templateField = templateProperties[fieldName];
       
       if (!templateField) {
         logger.warn(`${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} field missing '${fieldName}'`);
         hasFieldMismatch = true;
-      } else if (templateField.type !== expectedField?.type) {
-        logger.warn(
-          `Field '${fieldName}' type mismatch in template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}: expected ${expectedField?.type}, got ${templateField.type}`
-        );
-        hasFieldMismatch = true;
-      }
+      } 
     }
 
     if (hasFieldMismatch) {
