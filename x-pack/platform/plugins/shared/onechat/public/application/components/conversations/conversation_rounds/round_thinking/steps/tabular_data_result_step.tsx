@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
@@ -25,7 +24,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
 
   const discoverUrl = useMemo(() => {
     if (!esqlQuery) return undefined;
-    return locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
+    return locators.get('DISCOVER_APP_LOCATOR')?.getRedirectUrl({
       query: { esql: esqlQuery },
     });
   }, [locators, esqlQuery]);
