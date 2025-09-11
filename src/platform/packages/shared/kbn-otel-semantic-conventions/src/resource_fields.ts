@@ -53,7 +53,7 @@ export const RESOURCE_ECS_FIELDS: string[] = [
   'faas.version',
 ];
 
-export function prefixOTelField(ecsFieldName: string, otelFieldName: string): string {
+export function prefixOTelField(ecsFieldName: string, otelFieldName?: string): string {
   const prefix = RESOURCE_ECS_FIELDS.includes(ecsFieldName) ? `resource.attributes` : `attributes`; // Resource fields are stored under `resource.attributes`, all other fields under `attributes`.
-  return `${prefix}.${otelFieldName}`;
+  return `${prefix}.${otelFieldName ?? ecsFieldName}`;
 }
