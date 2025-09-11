@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLStatsQueryMeta, constructCascadeQuery } from './util';
 
 describe('utils', () => {
   describe('getESQLStatsQueryMeta', () => {
     it('should return an array of the columns the query has been denoted to be grouped by with the STATS command', () => {
       const queryString = `
-    FROM kibana_sample_data_logs, another_index
-    | KEEP bytes, clientip, url.keyword, response.keyword
-    | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip),
-        p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes)
-            BY type, url.keyword
-    | EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)
-    | DROP count_4xx, count_rest, total_records
-    | LIMIT 123`;
+        FROM kibana_sample_data_logs, another_index
+        | KEEP bytes, clientip, url.keyword, response.keyword
+        | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip),
+            p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes)
+                BY type, url.keyword
+        | EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)
+        | DROP count_4xx, count_rest, total_records
+        | LIMIT 123
+      `;
 
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([
@@ -108,12 +110,12 @@ describe('utils', () => {
       describe('column options', () => {
         describe('group queries', () => {
           it('returns the query without a limit when a group query is requested but there is only one column specified for the stats by option?', () => {
-            const editorQuery = {
+            const editorQuery: AggregateQuery = {
               esql: `
-          FROM kibana_sample_data_logs
-          | STATS count() BY clientip
-          | LIMIT 100
-          `,
+                FROM kibana_sample_data_logs
+                | STATS COUNT() BY clientip
+                | LIMIT 100
+              `,
             };
 
             const nodeType = 'group';
@@ -127,18 +129,18 @@ describe('utils', () => {
               nodePathMap,
             });
 
-            expect(cascadeQuery).toEqual({
-              esql: 'FROM kibana_sample_data_logs | STATS COUNT() BY clientip',
-            });
+            expect(cascadeQuery.esql).toEqual(
+              'FROM kibana_sample_data_logs | STATS COUNT() BY clientip'
+            );
           });
 
           it('returns a valid group query, when one is requested in an instance where the editor query has multiple columns specified for the stats by option', () => {
-            const editorQuery = {
+            const editorQuery: AggregateQuery = {
               esql: `
-          FROM kibana_sample_data_logs
-          | STATS count() BY clientip, url.keyword
-          | LIMIT 100
-          `,
+                FROM kibana_sample_data_logs
+                | STATS COUNT() BY clientip, url.keyword
+                | LIMIT 100
+              `,
             };
 
             const nodeType = 'group';
@@ -152,23 +154,24 @@ describe('utils', () => {
               nodePathMap,
             });
 
-            expect(cascadeQuery).toEqual({
-              esql: 'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS COUNT() BY url.keyword',
-            });
+            expect(cascadeQuery.esql).toEqual(
+              'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS COUNT() BY url.keyword'
+            );
           });
         });
 
         describe('leaf queries', () => {
+          const nodeType = 'leaf';
+
           it('should construct a valid cascade leaf query for a query with just one column', () => {
-            const editorQuery = {
+            const editorQuery: AggregateQuery = {
               esql: `
-          FROM kibana_sample_data_logs
-          | STATS count() BY clientip
-          | LIMIT 100
-          `,
+                FROM kibana_sample_data_logs
+                | STATS count() BY clientip
+                | LIMIT 100
+              `,
             };
 
-            const nodeType = 'leaf';
             const nodePath = ['clientip'];
             const nodePathMap = { clientip: '192.168.1.1' };
 
@@ -179,9 +182,55 @@ describe('utils', () => {
               nodePathMap,
             });
 
-            expect(cascadeQuery).toEqual({
-              esql: 'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"',
+            expect(cascadeQuery.esql).toEqual(
+              'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
+            );
+          });
+
+          it('should construct a valid cascade leaf query for a query with multiple columns and multiple STATS commands', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                FROM kibana_sample_data_logs
+                // First aggregate per client + per URL
+                | STATS
+                    visits_per_client =
+                      COUNT(), // how many hits this client made to this URL
+                    p95_bytes_client =
+                      PERCENTILE(bytes, 95), // 95th percentile of bytes for this client+URL
+                    median_bytes_client =
+                      MEDIAN(bytes) // median of bytes for this client+URL
+                      BY url.keyword, clientip
+                // Now roll up those per-client stats to the URL level
+                | STATS
+                    unique_visitors =
+                      COUNT_DISTINCT(clientip), // how many distinct clients hit this URL
+                    total_visits =
+                      SUM(visits_per_client), // median across client-level medians
+                    p95_bytes_url =
+                      PERCENTILE(p95_bytes_client, 95), // 95th percentile across client-level p95s
+                    median_bytes_url =
+                      MEDIAN(median_bytes_client) // median across client-level medians
+                      BY url.keyword
+                // Sort to see the busiest URLs on top
+                | SORT total_visits DESC
+              `,
+            };
+
+            const nodePath = ['url.keyword'];
+            const nodePathMap = {
+              'url.keyword': 'https://www.elastic.co/downloads/beats/metricbeat',
+            };
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              nodeType,
+              nodePath,
+              nodePathMap,
             });
+
+            expect(cascadeQuery.esql).toEqual(
+              'FROM kibana_sample_data_logs | WHERE url.keyword == "https://www.elastic.co/downloads/beats/metricbeat" | STATS visits_per_client = COUNT(), p95_bytes_client = PERCENTILE(bytes, 95), median_bytes_client = MEDIAN(bytes) BY url.keyword, clientip | SORT total_visits DESC'
+            );
           });
         });
       });
