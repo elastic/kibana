@@ -49,7 +49,11 @@ export const McpConnectionButton = () => {
     >
       <EuiContextMenuPanel
         items={[
-          <EuiCopy textToCopy={mcpServerUrl} tooltipProps={{ anchorClassName: 'eui-fullWidth' }}>
+          <EuiCopy
+            key="copy"
+            textToCopy={mcpServerUrl}
+            tooltipProps={{ anchorClassName: 'eui-fullWidth' }}
+          >
             {(copy) => (
               <EuiContextMenuItem key="copy" icon="copy" onClick={copy}>
                 {i18n.translate('xpack.onechat.tools.copyMcpServerUrlButton', {
