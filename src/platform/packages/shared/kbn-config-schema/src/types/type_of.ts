@@ -61,7 +61,7 @@ export type TypeOfOutput<RT extends GeneralSchemaType> = Simplify<
     ? ObjectTypeOutput<V>
     : RT extends Type<infer V, infer D>
     ? V extends ObjectResultType<infer P>
-      ? ObjectTypeOutput<P>
+      ? V
       : Type<V, D>['_output']
     : never
 >;
@@ -104,7 +104,7 @@ export type TypeOfInput<RT extends GeneralSchemaType> = Simplify<
       : ObjectTypeInput<V> | undefined
     : RT extends TypeOrLazyType<infer V, infer D>
     ? V extends ObjectResultType<infer P>
-      ? ObjectTypeInput<P>
+      ? V
       : Type<V, D>['_input']
     : never
 >;
