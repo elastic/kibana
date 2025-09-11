@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/onechat-common';
 import type { ExecutableTool } from '@kbn/onechat-server';
-import { createToolIdMappings, toolToLangchain } from './tools';
+import { createToolIdMappings, toolToLangchain, sanitizeToolId } from './tools';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const createTool = (
@@ -99,5 +99,17 @@ describe('createToolIdMappings', () => {
       '^some_tool': 'some_tool',
       some_tool: 'some_tool_1',
     });
+  });
+});
+
+describe('sanitizeToolId', () => {
+  it('replace `.` with `_` in tool names', () => {
+    expect(sanitizeToolId('test.foo')).toEqual('test_foo');
+    expect(sanitizeToolId('platform.core.search')).toEqual('platform_core_search');
+  });
+
+  it('removes forbidden characters', () => {
+    expect(sanitizeToolId('test+()')).toEqual('test');
+    expect(sanitizeToolId('a&b^c')).toEqual('abc');
   });
 });

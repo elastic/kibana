@@ -1,23 +1,51 @@
-# RFC: Alert telemetry to track customized rule fields
+# RFC: Alert telemetry to track customized rule fields <!-- omit from toc -->
 
 **Author(s)**: @dplumlee
-**Status**: Awaiting comments
+**Status**: Approved
 **Created**: August 4 2025
 **Reviewers**: @security-detection-rule-management, @security-detection-engine, @marshallmain
 
----
-
-## Summary
+## Summary <!-- omit from toc -->
 
 This RFC is being written to gather comments about different approaches towards enhancing our alert telemetry data. Currently, we collect alert telemetry from prebuilt rules to gather metrics for rule tuning and global threat reports, but when certain rule fields are customized, this data can become skewed and less reliable. We're aiming to add this context to the existing alert telemetry snapshots so that we can filter alerts from rules with certain edited fields out of the overall metrics data.
 
----
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
+
+- [Background \& Context](#background--context)
+  - [Why this alert telemetry is needed](#why-this-alert-telemetry-is-needed)
+  - [Why this alert telemetry needs to contain information about which fields are customized](#why-this-alert-telemetry-needs-to-contain-information-about-which-fields-are-customized)
+  - [What existing tools do we have at our disposal?](#what-existing-tools-do-we-have-at-our-disposal)
+  - [Calculating the rule diff for alert objects in snapshot telemetry](#calculating-the-rule-diff-for-alert-objects-in-snapshot-telemetry)
+  - [An overview of the `calculateRuleDiff` function and its performance issues](#an-overview-of-the-calculaterulediff-function-and-its-performance-issues)
+- [Problem Statement](#problem-statement)
+- [Goals](#goals)
+- [Non-Goals](#non-goals)
+- [Rejected Solutions](#rejected-solutions)
+  - [Calculating the rule diff during rule execution](#calculating-the-rule-diff-during-rule-execution)
+  - [Using a hash of functional fields to quickly compare changes](#using-a-hash-of-functional-fields-to-quickly-compare-changes)
+- [Proposed Solution: Adding a field to the rule schema to track specific customized fields](#proposed-solution-adding-a-field-to-the-rule-schema-to-track-specific-customized-fields)
+  - [Approach and technical details](#approach-and-technical-details)
+  - [Missing base versions](#missing-base-versions)
+  - [Rule customization diff return value proposal](#rule-customization-diff-return-value-proposal)
+  - [Functional field definition](#functional-field-definition)
+  - [Schema definitions](#schema-definitions)
+  - [Examples](#examples)
+  - [Pros \& Cons](#pros--cons)
+  - [Complexity \& Cost](#complexity--cost)
+- [Appendix](#appendix)
+  - [Defining functional rule fields](#defining-functional-rule-fields)
 
 ## Background & Context
 
-**Related tickets**: 
- - https://github.com/elastic/security-team/issues/12507 (primary ticket)
- - https://github.com/elastic/kibana/issues/140369
+**Related tickets**:
+
+- [Telemetry for detection alerts to keep track of customized rule fields](https://github.com/elastic/security-team/issues/12507) (primary ticket)
+- [Collect usage statistics for prebuilt rule customization](https://github.com/elastic/kibana/issues/140369)
 
 ### Why this alert telemetry is needed
 
@@ -67,36 +95,28 @@ If we think about this process as two sections, the fetching of rule objects/ver
 
 The descriptions in these go into a lot more detail about the incidents that were taking place, but, to summarize, we were running into OOM errors and crashes in Kibana due to inefficient logic paths and some duplicated requests which led to big scalability problems. There was also an issue with the size of the package being served by fleet, we had originally wanted it to contain all rule versions (not just the past 3), but it was far too large which is why we shrunk it down to its current size. A lot of these problems were mitigated by the team through various means (caching the routes, paginating the requests, etc.) but the underlying issues with memory consumption and speed still exist when working at scale. We still have open issues on how to handle some of them that will hopefully be worked on soon:
 
- - https://github.com/elastic/kibana/issues/210544
- - https://github.com/elastic/kibana/issues/199101
+- https://github.com/elastic/kibana/issues/210544
+- https://github.com/elastic/kibana/issues/199101
 
 Some of these issues are tied with the endpoints themselves, but the core logic for each, and certainly most of the performance issues, are coming from this `calculateRuleDiff` function and its surrounding dependencies (i.e. fetching rule versions). There's a more [in depth ticket](https://github.com/elastic/kibana/issues/187649) about switching away from the fleet package distribution. This would ideally allow for a much less performance intensive fetching of rule versions and way quicker runtimes, but it has yet to be worked on outside of some initial architecture discussion.
-
----
 
 ## Problem Statement
 
 We need to establish a method to add which specific rule fields are customized to the alert documents so that the telemetry data is able to visualize which alerts are coming from prebuilt rules with functional fields that have been modified, and filter those alerts in a trivial manner.
 
----
-
 ## Goals
 
- - This solution should be efficient in performance
-   - At some point we will need to do the rule diff calculation, that's unavoidable. Given how much performance trouble it's caused us in the past to do this calculation at scale, we need a way to make sure this doesn't cause performance issues elsewhere in the app or telemetry endpoints.
- - This solution needs to be extensible
-   - We are inevitably going to add more fields, both functional and non-functional to our rule schema. These fields also need to be easily added to this telemetry calculation, ideally without any additional code being written on the telemetry side of things
- - This solution should be quick to implement
-   - Given enough time and resources, we could probably create a whole new telemetry system specifically for customized rule fields with the greatest analytics data this company has ever seen. However we don't have all those things and should prioritize using existing tools and telemetry data wherever possible. 
-
----
+- This solution should be efficient in performance
+  - At some point we will need to do the rule diff calculation, that's unavoidable. Given how much performance trouble it's caused us in the past to do this calculation at scale, we need a way to make sure this doesn't cause performance issues elsewhere in the app or telemetry endpoints.
+- This solution needs to be extensible
+  - We are inevitably going to add more fields, both functional and non-functional to our rule schema. These fields also need to be easily added to this telemetry calculation, ideally without any additional code being written on the telemetry side of things
+- This solution should be quick to implement
+  - Given enough time and resources, we could probably create a whole new telemetry system specifically for customized rule fields with the greatest analytics data this company has ever seen. However we don't have all those things and should prioritize using existing tools and telemetry data wherever possible.
 
 ## Non-Goals
 
- - Though we want any solution to be extensible, this RFC is not attempting to discuss any specific rule schema changes coming in the future that aren't related to this issue.
- - We also want to limit the scope of this solution to *what* has been changed on the rule object, not *how*. Any discussion of the how starts to evolve into the rule auditing conversation which is outside the scope of this feature.
-
----
+- Though we want any solution to be extensible, this RFC is not attempting to discuss any specific rule schema changes coming in the future that aren't related to this issue.
+- We also want to limit the scope of this solution to *what* has been changed on the rule object, not *how*. Any discussion of the how starts to evolve into the rule auditing conversation which is outside the scope of this feature.
 
 ## Rejected Solutions
 
@@ -115,6 +135,7 @@ This solution would have compared a hash of functional fields (most notably quer
 ## Proposed Solution: Adding a field to the rule schema to track specific customized fields
 
 ### Approach and technical details
+
 At its core, this solution is pretty simple: adding a new field to the rule schema that would keep track of which field(s) were customized on the rule object. This would allow us to write the customized field list to the alert object at rule execution the same as we do any rule field, without any runtime calculations that'd slow down rule execution. The field would be updated in the same places `rule_source` is currently updated (basically any CRUD operation on the rule object), and would be either omitted or defaulted to an empty array if a rule's base version didn't exist as there'd be no way to accurately calculate the field list.
 
 This field would be an array and it would contain a list of objects that have . It was considered to have this field be a key/value pair with the key being the field name and the value be the original, unmodified rule field but was rejected. Having the original values would no doubt be helpful in some cases but would also introduce a whole host of new edge cases and potentially double the size of the rule object if most fields were customized. Having the names of the fields customized and whether or not they're functional fields is all we'd need for our use case and some of the previously linked telemetry tickets. Furthermore, the querying of an array within the alerts telemetry cluster would be far more straightforward than querying for keys on an object, as KQL doesn't support the direct querying of object keys and we'd have to rely on wildcard queries or some other syntax. Arrays also allow us to easily chain together multiple clauses in order to be extremely granular with our telemetry analysis. I've listed some example KQL queries below. 
@@ -124,9 +145,11 @@ This field would live under the `rule_source` field object. Given its relation t
 A good name for this field would be `customized_fields` because of the existing language we have in `rule_source` with `is_customized`. It's also a fairly good descriptor of exactly what the field contains.
 
 ### Missing base versions
+
 We would also add a boolean field to the `rule_source` object that would specify whether or not the base version of the rule existed during rule source calculation. This would be used to explicitly determine whether or not the rule had all data available to it during calculation or if we were defaulting to the `is_customized: true` state that we do currently when a base version doesn't exist. This field could also be used to filter out telemetry alerts we couldn't determine to have functional changes or not.
 
 ### Rule customization diff return value proposal
+
 The value we currently return from the `calculateRuleDiff` function is based off the `DiffableRule` schema - a schema that is similar to our overall detection rule schema but groups certain fields into one (for instance: `query`, `filters`, and `language` become `kql_query`) and omits other fields that we don't intend on diffing (e.g. `exception_list`, `actions`, etc.). This is the implementation currently used for the existing endpoints that run the `calculateRuleDiff` function, most notably the `upgrade/_review` and `upgrade/_perform` routes, but would not be a good return structure for our use case. The grouped fields are essentially an implementation detail and the mixing of the two schemas could cause lots of maintenance pain as well as confusion for consumers of the data on the telemetry side of things. Instead we will need to divide this data up into its original one-to-one field name match with our detection rule schema. 
 
 This work has been done before on the front-end for our per-field rule diff flyout, but proved to be pretty difficult to write due to typing conflicts. Furthermore, extracting the individual fields from the nested, post-diff structure we return from the `calculateRuleDiff` function requires us to essentially compare these grouped fields twice - one during the diffing and then another to know how to extract them out of the diffed result.
@@ -134,6 +157,7 @@ This work has been done before on the front-end for our per-field rule diff flyo
 In order to properly return these fields I believe some refactoring of the `calculateRuleDiff` will need to be done to somehow return these ungrouped fields during the diffing process so that we aren't repeating comparisions needlessly. This work shouldn't need to change the underlying implemetation of the function in any of these endpoints, and with our current test coverage, I think it would be safe enough to refactor this isolated step within the rule diffing process.
 
 ### Functional field definition
+
 A functional field is defined as a field that, when modified, has the ability to change whether or not an alert is generated for the purpose of analyzing how often a rule is generating alerts. There are fields that fully meet these criteria (`query`, `filters`, etc.) but also fields that partially meet this criteria - for instance, the `index` field would obviously change how an alert is written, and changing it would have an impact on what events are queried on, but it's more about changing the rule to suit a user's environment rather than changing the output of the rule itself. For fields like these in this "gray area" between a functional field and a definitively non-functional field (something like `description` which has absolutely no impact on alert generation), we can define as supporting fields: fields that affect rule behavior and operation, but don't change the execution outcome. 
 
 With this definition, we will be conservative in the fields we are defining as "functional" and only the 100%, unarguable fields will be labeled as such. Given we have a list of fields to query on in the telemetry data, alerts can be filtered upon in a more nuanced way on the telemetry side of things if needed.
@@ -146,28 +170,28 @@ We will want to map this new field to the existing `rule_source` field mapping. 
 
 Putting it all together under one field also makes it very easy to allowlist into the alert telemetry schema they already have without including the rest of the `kibana.alert.rule.parameters` field. Including this whole parameters object could increase the size of the alert document by a lot and wouldn't really add a lot of useful data at scale. Plus, if this data *was* ever needed further down the line, it wouldn't be that difficult to add on the telemetry side of things.
 
-**Mapping example of new rule source object for prebuilt rules**
+**Mapping example of new rule source object for prebuilt rules**:
 
-```js
+```ts
 rule_source: {
-    type: 'external';
-    is_customized: boolean;
-    customized_fields: Array<{
-        field_name: string;
-    }>;
-    missing_base_version: boolean;
+  type: 'external';
+  is_customized: boolean;
+  customized_fields: Array<{
+    field_name: string;
+  }>;
+  missing_base_version: boolean;
 };
 ```
 
 The mapping for our detection rules is carried over onto the alert document schema as the flattened `kibana.alert.rule.parameters` field. Changing the rule schema here should carry the same change to the detection alert schema on the kibana side of things.
 
-**Alert telemetry schema**
+**Alert telemetry schema**:
 
 We will want to enrich this data in the telemetry pipeline with functional field markers so that we can easily filter on this data on the telemetry side of things. We wait till the telemetry endpoint to do this comparison and enrichment because the information is not needed on the rule object or alert documents themselves - we could always calculate it on the fly if need be later on.
 
 The current implementation of the prebuilt rule alert schema uses [this list](https://github.com/elastic/kibana/blob/0ad59fab8835d67b476ffbdb82850649e70ab4d9/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/filterlists/prebuilt_rules_alerts.ts) to include alert fields onto the sanitized alert documents. In order to include the `rule_source` object and *not* the rest of the `kibana.alert.rule.parameters` field we would need to include the following mapping:
 
-```js
+```ts
 'kibana.alert.rule.parameters': {
   rule_source: true,
 }
@@ -175,7 +199,7 @@ The current implementation of the prebuilt rule alert schema uses [this list](ht
 
 We also want to add a field to the alert telemetry schema to contain this enriched data with the functional field comparison. Placing it at the alert framework level as `kibana.alert.rule.customizations` would be a good option. We could define this enriched telemetry-specific schema as such:
 
-```js
+```json
 "customizations": {
   "customized_fields": ["query", "filters", "name"],
   "num_functional_fields": 2,
@@ -189,9 +213,9 @@ We could also add more field counters in the future (e.g. `num_non_functional_fi
 
 ### Examples
 
-**Example rule object with new field**
+**Example rule object with new field**:
 
-```js
+```json
 {
     ...
     "rule_source": {
@@ -209,36 +233,40 @@ We could also add more field counters in the future (e.g. `num_non_functional_fi
 }
 ```
 
-**Example KQL queries in the alerts telemetry cluster**
+**Example KQL queries in the alerts telemetry cluster**:
 
-```
+```txt
 not (kibana.alert.rule.customizations.num_functional_fields : 0 and kibana.alert.rule.customizations.missing_base_version : false)
 ```
+
 A query we could use to filter out any alerts generated by prebuilt rules that have functional fields customized and rules that have a missing base version.
 
-### Pros  
+### Pros & Cons
+
+Pros:
+
 - Would have a negligible effect on performance
   - We already calculate the rule diff everywhere we'd modify this field, would just need to carry over the field names.
   - No need to run the rule diff calculation at rule execution time, just copy it to the alert object like we do any other field
 - Easy to query on the telemetry side
   - Building aggregation visualizations and dashboards in the alert telemetry cluster would be fairly straightforward with this implementation. As shown in some of the examples above, we can be granular and specific with our queries.
 
-### Cons 
+Cons:
+
 - Once we add it there's (basically) no going back
-  - Not necessarily a con but something to consider in terms of longevity 
+  - Not necessarily a con but something to consider in terms of longevity
 
 ### Complexity & Cost
 
 This effort would involve:
- -  adding a new field to our rule schemas
- -  updating all dependent schemas
- -  adding the logic to update this field all the same places we update `rule_source`
- -  writing the new field to the alert documents during rule execution
- -  writing tests to cover the new field and resulting logic additions
+
+- adding a new field to our rule schemas
+- updating all dependent schemas
+- adding the logic to update this field all the same places we update `rule_source`
+- writing the new field to the alert documents during rule execution
+- writing tests to cover the new field and resulting logic additions
 
 This is all in addition to the then-unblocked telemetry work that could take place once this was implemented.
-
----
 
 ## Appendix
 
@@ -296,4 +324,3 @@ This is all in addition to the then-unblocked telemetry work that could take pla
 | `machine_learning_job_id`             | yes               |
 | `new_terms_fields`                    | yes               |
 | `history_window_start`                | yes               |
-
