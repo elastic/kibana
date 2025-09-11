@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 const influencers = [
   {
     influencer_field_name: 'geo.dest',
@@ -150,4 +152,4 @@ export const typicalToActualExpected = {
 
 export const mlResultsServiceMock = {
   anomalySearch: () => results,
-};
+} as unknown as MlApi['results'];

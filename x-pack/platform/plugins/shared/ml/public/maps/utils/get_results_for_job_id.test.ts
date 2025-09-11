@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { getResultsForJobId } from './util';
+import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
+
+import { getResultsForJobId } from './get_results_for_job_id';
 import {
   mlResultsServiceMock,
   typicalExpected,
@@ -19,7 +21,7 @@ describe('Maps util', () => {
     const searchFilters = {
       timeFilters: { from: 'now-2y', to: 'now' },
       query: { language: 'kuery', query: '' },
-    };
+    } as unknown as VectorSourceRequestMeta;
 
     test('should get map features from job anomalies results for typical layer', async () => {
       const actual = await getResultsForJobId(
