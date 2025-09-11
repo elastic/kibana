@@ -8,8 +8,8 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import type { DiscoverInternalState, RecentlyClosedTabState } from './types';
-import { TabsBarVisibility } from './types';
+import type { DiscoverInternalState, RecentlyClosedTabState } from '../types';
+import { TabsBarVisibility } from '../types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
 
