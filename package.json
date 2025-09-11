@@ -1121,7 +1121,6 @@
     "@kbn/wci-common": "link:x-pack/solutions/chat/packages/wci-common",
     "@kbn/wci-server": "link:x-pack/solutions/chat/packages/wci-server",
     "@kbn/workchat-app": "link:x-pack/solutions/chat/plugins/workchat_app",
-    "@kbn/workchat-framework-plugin": "link:x-pack/solutions/chat/plugins/workchat_framework",
     "@kbn/workflows": "link:src/platform/packages/shared/kbn-workflows",
     "@kbn/workflows-execution-engine": "link:src/platform/plugins/shared/workflows_execution_engine",
     "@kbn/workflows-management-plugin": "link:src/platform/plugins/shared/workflows_management",

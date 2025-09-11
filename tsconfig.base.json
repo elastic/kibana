@@ -2334,8 +2334,6 @@
       "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/workchat-app": ["x-pack/solutions/chat/plugins/workchat_app"],
       "@kbn/workchat-app/*": ["x-pack/solutions/chat/plugins/workchat_app/*"],
-      "@kbn/workchat-framework-plugin": ["x-pack/solutions/chat/plugins/workchat_framework"],
-      "@kbn/workchat-framework-plugin/*": ["x-pack/solutions/chat/plugins/workchat_framework/*"],
       "@kbn/workflows": ["src/platform/packages/shared/kbn-workflows"],
       "@kbn/workflows/*": ["src/platform/packages/shared/kbn-workflows/*"],
       "@kbn/workflows-execution-engine": ["src/platform/plugins/shared/workflows_execution_engine"],

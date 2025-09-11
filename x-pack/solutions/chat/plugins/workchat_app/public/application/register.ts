@@ -25,10 +25,6 @@ export const registerApp = ({
     status: AppStatus.accessible,
     title: 'WorkChat',
     updater$: undefined,
-    deepLinks: [
-      { id: 'agents', path: '/assistants', title: 'Assistants' },
-      { id: 'integrations', path: '/tools', title: 'Tools' },
-    ],
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {
       const [coreStart, startPluginDeps] = await core.getStartServices();
