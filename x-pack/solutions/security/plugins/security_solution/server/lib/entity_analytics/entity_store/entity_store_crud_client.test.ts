@@ -9,12 +9,7 @@ import { EntityStoreCrudClient } from './entity_store_crud_client';
 import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
-import type {
-  Entity,
-  EngineDescriptor,
-  EntityType,
-} from '../../../../common/api/entity_analytics/entity_store';
-import type { EntityStoreDataClient } from './entity_store_data_client';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
 import * as uuid from 'uuid';
 
 describe('EntityStoreCrudClient', () => {
@@ -37,9 +32,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when Entity Store completely disabled throw error', async () => {
-      dataClientMock.status.mockReturnValueOnce(
-        Promise.resolve({ status: 'not_installed', engines: [] })
-      );
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
 
       await expect(async () =>
         client.upsertEntity('host', {
@@ -49,33 +42,11 @@ describe('EntityStoreCrudClient', () => {
         })
       ).rejects.toThrow(new EngineNotRunningError('host'));
 
-      expect(dataClientMock.status).toBeCalledWith({ include_components: true });
-    });
-
-    it('when Entity Store enabled, but engine not started, throw error', async () => {
-      dataClientMock.status.mockReturnValueOnce(
-        Promise.resolve({
-          status: 'running',
-          engines: [
-            { type: 'host', status: 'started' } as EngineDescriptor,
-            { type: 'user', status: 'updating' } as EngineDescriptor,
-          ],
-        })
-      );
-
-      await expect(async () =>
-        client.upsertEntity('user', {
-          entity: {
-            id: 'user-id',
-          },
-        })
-      ).rejects.toThrow(new EngineNotRunningError('user'));
-
-      expect(dataClientMock.status).toBeCalledWith({ include_components: true });
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
     });
 
     it('when not allowed attributes are updated, throw error', async () => {
-      mockStatusRunning(dataClientMock, 'host');
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       const doc: Entity = {
         user: {
           name: 'not-allowed',
@@ -100,7 +71,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when entity not found throw', async () => {
-      mockStatusRunning(dataClientMock, 'host');
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
 
       const doc: Entity = {
@@ -121,7 +92,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when valid update entity', async () => {
-      mockStatusRunning(dataClientMock, 'host');
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
@@ -146,7 +117,7 @@ describe('EntityStoreCrudClient', () => {
 
       await client.upsertEntity('host', doc);
 
-      expect(dataClientMock.status).toBeCalledWith({ include_components: true });
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
       expect(esClientMock.updateByQuery).toBeCalledWith({
         index: '.entities.v1.latest.security_host_default',
         query: {
@@ -183,7 +154,7 @@ describe('EntityStoreCrudClient', () => {
     });
 
     it('when valid update entity using force', async () => {
-      mockStatusRunning(dataClientMock, 'host');
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
@@ -212,7 +183,7 @@ describe('EntityStoreCrudClient', () => {
 
       await client.upsertEntity('host', doc, true);
 
-      expect(dataClientMock.status).toBeCalledWith({ include_components: true });
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
       expect(esClientMock.updateByQuery).toBeCalledWith({
         index: '.entities.v1.latest.security_host_default',
         query: {
@@ -252,11 +223,3 @@ describe('EntityStoreCrudClient', () => {
     });
   });
 });
-
-const mockStatusRunning = (mock: jest.Mocked<EntityStoreDataClient>, type: EntityType) =>
-  mock.status.mockReturnValueOnce(
-    Promise.resolve({
-      status: 'running',
-      engines: [{ type, status: 'started' } as EngineDescriptor],
-    })
-  );
