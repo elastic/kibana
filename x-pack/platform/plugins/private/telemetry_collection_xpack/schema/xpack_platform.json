@@ -5746,11 +5746,67 @@
     },
     "reporting": {
       "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
         "available": {
           "type": "boolean"
         },
         "enabled": {
           "type": "boolean"
+        },
+        "number_of_scheduled_reports": {
+          "type": "long"
+        },
+        "number_of_enabled_scheduled_reports": {
+          "type": "long"
+        },
+        "number_of_scheduled_reports_by_type": {
+          "properties": {
+            "csv_searchsource": {
+              "type": "long"
+            },
+            "csv_v2": {
+              "type": "long"
+            },
+            "printable_pdf_v2": {
+              "type": "long"
+            },
+            "printable_pdf": {
+              "type": "long"
+            },
+            "PNGV2": {
+              "type": "long"
+            }
+          }
+        },
+        "number_of_enabled_scheduled_reports_by_type": {
+          "properties": {
+            "csv_searchsource": {
+              "type": "long"
+            },
+            "csv_v2": {
+              "type": "long"
+            },
+            "printable_pdf_v2": {
+              "type": "long"
+            },
+            "printable_pdf": {
+              "type": "long"
+            },
+            "PNGV2": {
+              "type": "long"
+            }
+          }
+        },
+        "number_of_scheduled_reports_with_notifications": {
+          "type": "long"
         }
       }
     },
@@ -5891,6 +5947,16 @@
               }
             },
             "osquery-saved-query": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "alerting_rule_template": {
               "properties": {
                 "usedTags": {
                   "type": "integer"

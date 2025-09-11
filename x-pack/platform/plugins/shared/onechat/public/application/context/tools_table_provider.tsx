@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { createContext, useCallback, useContext } from 'react';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import type { ToolType } from '@kbn/onechat-common';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
-import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/esql/create_esql_tool';
+import {
+  OPEN_TEST_FLYOUT_QUERY_PARAM,
+  TOOL_SOURCE_QUERY_PARAM,
+  TOOL_TYPE_QUERY_PARAM,
+} from '../components/tools/create_tool';
 
 export interface ToolsActionsContextType {
-  createTool: () => void;
+  createTool: (toolType: ToolType) => void;
   editTool: (toolId: string) => void;
+  viewTool: (toolId: string) => void;
   deleteTool: (toolId: string) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
   cloneTool: (toolId: string) => void;
   testTool: (toolId: string) => void;
-  getCreateToolUrl: () => string;
+  getCreateToolUrl: (toolType: ToolType) => string;
   getEditToolUrl: (toolId: string) => string;
   getCloneToolUrl: (toolId: string) => string;
+  getViewToolUrl: (toolId: string) => string;
 }
 
 export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
@@ -33,38 +39,71 @@ export const ToolsTableActionsContext = createContext<ToolsActionsContextType | 
 export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) => {
   const { navigateToOnechatUrl, createOnechatUrl } = useNavigation();
 
-  const createTool = useCallback(() => {
-    navigateToOnechatUrl(appPaths.tools.new);
-  }, [navigateToOnechatUrl]);
+  const createTool = useCallback(
+    (toolType: ToolType) => {
+      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_TYPE_QUERY_PARAM]: toolType });
+    },
+    [navigateToOnechatUrl]
+  );
 
-  const getCreateToolUrl = useCallback(() => {
-    return createOnechatUrl(appPaths.tools.new);
-  }, [createOnechatUrl]);
+  const getCreateToolUrl = useCallback(
+    (toolType: ToolType) => {
+      return createOnechatUrl(appPaths.tools.new, { [TOOL_TYPE_QUERY_PARAM]: toolType });
+    },
+    [createOnechatUrl]
+  );
 
   const editTool = useCallback(
     (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.edit({ toolId }));
+      navigateToOnechatUrl(appPaths.tools.details({ toolId }));
+    },
+    [navigateToOnechatUrl]
+  );
+
+  const viewTool = useCallback(
+    (toolId: string) => {
+      navigateToOnechatUrl(appPaths.tools.details({ toolId }));
+    },
+    [navigateToOnechatUrl]
+  );
+
+  const testTool = useCallback(
+    (toolId: string) => {
+      navigateToOnechatUrl(appPaths.tools.details({ toolId }), {
+        [OPEN_TEST_FLYOUT_QUERY_PARAM]: 'true',
+      });
     },
     [navigateToOnechatUrl]
   );
 
   const getEditToolUrl = useCallback(
     (toolId: string) => {
-      return createOnechatUrl(appPaths.tools.edit({ toolId }));
+      return createOnechatUrl(appPaths.tools.details({ toolId }));
+    },
+    [createOnechatUrl]
+  );
+
+  const getViewToolUrl = useCallback(
+    (toolId: string) => {
+      return createOnechatUrl(appPaths.tools.details({ toolId }));
     },
     [createOnechatUrl]
   );
 
   const cloneTool = useCallback(
     (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+      navigateToOnechatUrl(appPaths.tools.new, {
+        [TOOL_SOURCE_QUERY_PARAM]: toolId,
+      });
     },
     [navigateToOnechatUrl]
   );
 
   const getCloneToolUrl = useCallback(
     (toolId: string) => {
-      return createOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+      return createOnechatUrl(appPaths.tools.new, {
+        [TOOL_SOURCE_QUERY_PARAM]: toolId,
+      });
     },
     [createOnechatUrl]
   );
@@ -102,10 +141,12 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
         bulkDeleteTools,
         createTool,
         editTool,
+        viewTool,
         cloneTool,
-        testTool: noop, // TODO: integrate with tool testing modal
+        testTool,
         getCreateToolUrl,
         getEditToolUrl,
+        getViewToolUrl,
         getCloneToolUrl,
       }}
     >

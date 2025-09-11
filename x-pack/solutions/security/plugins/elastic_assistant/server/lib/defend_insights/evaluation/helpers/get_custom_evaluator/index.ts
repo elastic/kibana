@@ -10,6 +10,7 @@ import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { InvalidDefendInsightTypeError } from '../../../errors';
 import { customIncompatibleAntivirusEvaluator } from './customIncompatibleAntivirusEvaluator';
+import { customPolicyResponseFailureEvaluator } from './customPolicyResponseFailureEvaluator';
 
 export const getDefendInsightsCustomEvaluator = ({
   insightType,
@@ -19,6 +20,8 @@ export const getDefendInsightsCustomEvaluator = ({
   switch (insightType) {
     case DefendInsightType.Enum.incompatible_antivirus:
       return customIncompatibleAntivirusEvaluator;
+    case DefendInsightType.Enum.policy_response_failure:
+      return customPolicyResponseFailureEvaluator;
     default:
       throw new InvalidDefendInsightTypeError();
   }
