@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { getFlattenedObject } from '@kbn/std';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
@@ -14,8 +15,6 @@ import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } fro
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
 import { getEntityUpdatesIndexName } from './elasticsearch_assets/updates_entity_index';
-import type { FlattenProps } from './utils/flatten_props';
-import { flattenProps } from './utils/flatten_props';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -24,11 +23,11 @@ interface EntityStoreClientOpts {
   dataClient: EntityStoreDataClient;
 }
 
-const nonForcedAttributesPath = [
-  ['entity', 'id'],
-  ['entity', 'attributes', '*'],
-  ['entity', 'lifecycle', '*'],
-  ['entity', 'behavior', '*'],
+const nonForcedAttributesPathRegex = [
+  /entity\.id/,
+  /entity\.attributes\..*/,
+  /entity\.lifecycle\..*/,
+  /entity\.behavior\..*/,
 ];
 
 export class EntityStoreCrudClient {
@@ -46,7 +45,7 @@ export class EntityStoreCrudClient {
 
   public async upsertEntity(type: EntityType, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
-    const flatProps = flattenProps(doc);
+    const flatProps = getFlattenedObject(doc);
 
     if (!force) {
       assertOnlyNonForcedAttributesInReq(flatProps);
@@ -110,16 +109,17 @@ export class EntityStoreCrudClient {
   }
 }
 
-function assertOnlyNonForcedAttributesInReq(flatProps: FlattenProps[]) {
+function assertOnlyNonForcedAttributesInReq(flatProps: Record<string, unknown>) {
   const notAllowedProps = [];
-  for (let i = 0; i < flatProps.length; i++) {
-    if (!isPropAllowed(flatProps[i])) {
-      notAllowedProps.push(flatProps[i]);
+  const keys = Object.keys(flatProps);
+  for (const key of keys) {
+    if (!isPropAllowed(key)) {
+      notAllowedProps.push(key);
     }
   }
 
   if (notAllowedProps.length > 0) {
-    const notAllowedPropsString = notAllowedProps.map(({ path }) => path.join('.')).join(', ');
+    const notAllowedPropsString = notAllowedProps.join(', ');
     throw new BadCRUDRequestError(
       `The following attributes are not allowed to be ` +
         `updated without forcing it (?force=true): ${notAllowedPropsString}`
@@ -127,37 +127,12 @@ function assertOnlyNonForcedAttributesInReq(flatProps: FlattenProps[]) {
   }
 }
 
-function isPropAllowed(prop: FlattenProps) {
-  for (let i = 0; i < nonForcedAttributesPath.length; i++) {
-    const nonForcedPropPath = nonForcedAttributesPath[i];
-    let isMatch = false;
-    if (nonForcedPropPath[nonForcedPropPath.length - 1] === '*') {
-      isMatch = isExactMatch(
-        nonForcedPropPath.slice(0, -1),
-        prop.path.slice(0, prop.path.length - nonForcedPropPath.length - 1)
-      );
-    } else {
-      isMatch = isExactMatch(nonForcedPropPath, prop.path);
-    }
-
-    if (isMatch) {
+function isPropAllowed(prop: string) {
+  for (const regex of nonForcedAttributesPathRegex) {
+    if (regex.test(prop)) {
       return true;
     }
   }
 
   return false;
-}
-
-function isExactMatch(arr1: string[], arr2: string[]) {
-  if (arr1.length !== arr2.length) {
-    return false;
-  }
-
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) {
-      return false;
-    }
-  }
-
-  return true;
 }
