@@ -27,6 +27,12 @@ export const labels = {
     readOnly: i18n.translate('xpack.onechat.tools.readOnly', {
       defaultMessage: 'Read-only',
     }),
+    newIndexSearchToolTitle: i18n.translate('xpack.onechat.tools.newIndexSearchTool.title', {
+      defaultMessage: 'New index search tool',
+    }),
+    editIndexSearchToolTitle: i18n.translate('xpack.onechat.tools.editIndexSearchTool.title', {
+      defaultMessage: 'Edit index search tool',
+    }),
 
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
@@ -42,6 +48,20 @@ export const labels = {
     toolIdLabel: i18n.translate('xpack.onechat.tools.idLabel', { defaultMessage: 'ID' }),
     tagsLabel: i18n.translate('xpack.onechat.tools.tagsLabel', { defaultMessage: 'Labels' }),
     toolsLabel: i18n.translate('xpack.onechat.tools.toolsLabel', { defaultMessage: 'Tools' }),
+
+    // Tool types
+    esqlLabel: i18n.translate('xpack.onechat.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
+    builtinLabel: i18n.translate('xpack.onechat.tools.builtinLabel', { defaultMessage: 'System' }),
+    searchLabel: i18n.translate('xpack.onechat.tools.searchLabel', { defaultMessage: 'Search' }),
+    indexTypeLabel: i18n.translate('xpack.onechat.tools.indexTypeLabel', {
+      defaultMessage: 'Index',
+    }),
+    aliasTypeLabel: i18n.translate('xpack.onechat.tools.aliasTypeLabel', {
+      defaultMessage: 'Alias',
+    }),
+    dataStreamTypeLabel: i18n.translate('xpack.onechat.tools.dataStreamTypeLabel', {
+      defaultMessage: 'Data stream',
+    }),
 
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
@@ -118,6 +138,16 @@ export const labels = {
       }),
     editEsqlToolSuccessToast: (toolId: string) =>
       i18n.translate('xpack.onechat.tools.editEsqlToolSuccessToast', {
+        defaultMessage: 'Tool "{toolId}" updated',
+        values: { toolId },
+      }),
+    createIndexSearchToolSuccessToast: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.createIndexSearchToolSuccessToast', {
+        defaultMessage: 'Tool "{toolId}" created',
+        values: { toolId },
+      }),
+    editIndexSearchToolSuccessToast: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.editIndexSearchToolSuccessToast', {
         defaultMessage: 'Tool "{toolId}" updated',
         values: { toolId },
       }),
