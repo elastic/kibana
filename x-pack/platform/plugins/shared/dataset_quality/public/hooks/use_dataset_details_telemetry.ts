@@ -70,7 +70,13 @@ export function useDatasetDetailsTelemetry() {
   useEffect(() => {
     const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
     if (datasetDetailsTrackingState === 'started' && ebtProps) {
-      telemetryClient.trackDatasetDetailsOpened(ebtProps);
+      telemetryClient.trackDatasetDetailsOpened({
+        ...ebtProps,
+        data_stream: {
+          ...ebtProps.data_stream,
+          namespace: ebtProps.data_stream.namespace || '',
+        },
+      });
     }
   }, [ebtProps, telemetryClient]);
 
