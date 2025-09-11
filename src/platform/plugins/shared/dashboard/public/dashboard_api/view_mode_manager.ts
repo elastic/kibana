@@ -23,13 +23,20 @@ export function initializeViewModeManager(
 ) {
   const dashboardBackupService = getDashboardBackupService();
   const accessControlClient = getAccessControlClient();
-  const canUserEditDashboard =
+
+  const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(
+    savedObjectResult?.accessControl
+  );
+
+  const canUserManageAccessControl =
     user.hasGlobalAccessControlPrivilege ||
     accessControlClient.checkUserAccessControl({
       accessControl: savedObjectResult?.accessControl,
       createdBy: savedObjectResult?.createdBy,
       userId: user.uid,
     });
+
+  const canUserEditDashboard = isDashboardInEditAccessMode || canUserManageAccessControl;
 
   function getInitialViewMode() {
     if (
