@@ -10,12 +10,7 @@
 /** Controls group state */
 export const CONTROLS_GROUP_TYPE = 'control_group';
 
-export const DEFAULT_IGNORE_PARENT_SETTINGS = {
-  ignoreFilters: false,
-  ignoreQuery: false,
-  ignoreTimerange: false,
-  ignoreValidations: false,
-} as const;
+export const DEFAULT_USE_GLOBAL_FILTERS = true;
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
 
 /** This state is only relevant for sticky controls */

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-constants';
+import { DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
@@ -31,8 +31,7 @@ export const dataControlSchema = controlSchema.extends({
   }),
   useGlobalFilters: schema.maybe(
     schema.boolean({
-      defaultValue:
-        DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters || DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
+      defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
     })
   ),
 });

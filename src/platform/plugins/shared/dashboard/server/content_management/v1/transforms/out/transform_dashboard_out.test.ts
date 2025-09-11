@@ -10,9 +10,7 @@
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
 import type {
   DashboardSavedObjectAttributes,
@@ -56,8 +54,8 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
-        labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
-        ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
+        labelPosition: '', // TODO: Remove
+        ignoreParentSettings: {}, // TODO: Remove
         autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [
           {

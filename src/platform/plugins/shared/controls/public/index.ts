@@ -41,8 +41,6 @@ export type {
 } from '../common';
 export type { OptionsListDSLControlState } from '../common/options_list';
 
-export { serializeRuntimeState } from './control_group/utils/serialize_runtime_state';
-
 export function plugin() {
   return new ControlsPlugin();
 }
