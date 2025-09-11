@@ -4,43 +4,67 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiCode } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
-import React from 'react';
+import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
 
 interface TabularDataResultStepProps {
   result: TabularDataResult;
 }
 
-const formatCellValue = (value: unknown): React.ReactNode => {
-  if (value === null || value === undefined) {
-    return '—';
-  }
-  if (typeof value === 'object') {
-    try {
-      return <EuiCode>{JSON.stringify(value)}</EuiCode>;
-    } catch (e) {
-      return String(value);
-    }
-  }
-  return String(value);
-};
-
 export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
   result: { data },
 }) => {
+  const { startDependencies } = useOnechatServices();
+
+  const locators = startDependencies.share.url.locators;
+  const { query: esqlQuery } = data;
+
+  const discoverUrl = useMemo(() => {
+    if (!esqlQuery) return undefined;
+    return locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
+      query: { esql: esqlQuery },
+    });
+  }, [locators, esqlQuery]);
+
   return (
-    <EuiBasicTable
-      columns={data.columns.map((column) => {
-        return {
-          field: column.name,
-          name: column.name,
-          render: (value: unknown) => formatCellValue(value),
-        };
-      })}
-      items={data.values.map((row) => {
-        return Object.fromEntries(data.columns.map((col, idx) => [col.name, row[idx]]));
-      })}
-    />
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.onechat.conversation.thinking.tabularDataResultStep.foundDocumentsMessage',
+          {
+            defaultMessage: 'Found {totalDocuments} documents. ',
+            values: {
+              totalDocuments: data.values.length,
+            },
+          }
+        )}
+      </EuiText>
+      <EuiLink
+        href={discoverUrl}
+        aria-label={i18n.translate(
+          'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
+          {
+            defaultMessage: 'See documents in Discover',
+          }
+        )}
+      >
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiIcon type="discoverApp" />
+          {i18n.translate(
+            'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscover',
+            {
+              defaultMessage: 'See in Discover',
+              values: {
+                totalDocuments: data.columns.length,
+              },
+            }
+          )}
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiFlexGroup>
   );
 };
