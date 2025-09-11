@@ -43,7 +43,7 @@ export class DiscoverPageObject extends FtrService {
   public async saveSearch(
     searchName: string,
     saveAsNew?: boolean,
-    options: { tags: string[] } = { tags: [] }
+    { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
@@ -56,12 +56,24 @@ export class DiscoverPageObject extends FtrService {
       }
     );
 
-    if (options.tags.length) {
+    if (tags.length) {
       await this.testSubjects.click('savedObjectTagSelector');
-      for (const tagName of options.tags) {
+      for (const tagName of tags) {
         await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
       }
       await this.testSubjects.click('savedObjectTitle');
+    }
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
     }
 
     if (saveAsNew !== undefined) {
@@ -140,8 +152,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getSavedSearchTitle() {
-    const breadcrumb = await this.find.byCssSelector('[data-test-subj="breadcrumb last"]');
-    return await breadcrumb.getVisibleText();
+    if (await this.testSubjects.exists('breadcrumb last')) {
+      const breadcrumb = await this.testSubjects.find('breadcrumb last');
+      return await breadcrumb.getVisibleText();
+    }
   }
 
   public async loadSavedSearch(searchName: string) {
@@ -234,6 +248,10 @@ export class DiscoverPageObject extends FtrService {
     await this.find.clickDisplayedByCssSelector(
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
+
+    await this.retry.waitFor('the dropdown to close', async () => {
+      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
+    });
 
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
@@ -418,8 +436,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
-    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
-    await fieldSearch.type(name);
+    await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
+      const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+      await fieldSearch.clearValue();
+      await fieldSearch.type(name);
+      return (await fieldSearch.getAttribute('value')) === name;
+    });
   }
 
   public async openFilterByFieldTypeInDocViewer() {

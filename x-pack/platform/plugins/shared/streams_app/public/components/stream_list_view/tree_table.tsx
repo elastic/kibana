@@ -19,6 +19,7 @@ import {
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isEmpty } from 'lodash';
+import { Streams } from '@kbn/streams-schema';
 import type { TableRow, SortableField } from './utils';
 import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -27,13 +28,14 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
-  DOCUMENTS_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
+  DOCUMENTS_COLUMN_HEADER,
 } from './translations';
+import { DiscoverBadgeButton } from '../stream_badges';
 
 export function StreamsTreeTable({
   loading,
@@ -50,7 +52,12 @@ export function StreamsTreeTable({
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const enrichedStreams = React.useMemo(() => {
-    const streamList = shouldComposeTree(sortField, searchQuery) ? asTrees(streams) : streams;
+    const ingestStreams = streams.filter((stream) =>
+      Streams.ingest.all.Definition.is(stream.stream)
+    );
+    const streamList = shouldComposeTree(sortField, searchQuery)
+      ? asTrees(ingestStreams)
+      : ingestStreams;
     return streamList.map(enrichStream);
   }, [sortField, searchQuery, streams]);
 
@@ -129,8 +136,9 @@ export function StreamsTreeTable({
         {
           field: 'documentsCount',
           name: DOCUMENTS_COLUMN_HEADER,
-          width: '280px',
+          width: '180px',
           sortable: false,
+          align: 'right',
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
@@ -142,17 +150,35 @@ export function StreamsTreeTable({
           name: (
             <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
           ),
-          width: '160px',
           align: 'left',
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
+          width: '220px',
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
-              lifecycle={item.effective_lifecycle}
+              lifecycle={item.effective_lifecycle!}
               aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
               })}
+            />
+          ),
+        },
+        {
+          field: 'definition',
+          name: 'Actions',
+          width: '60px',
+          align: 'left',
+          sortable: false,
+          dataType: 'string',
+          render: (_: unknown, item: TableRow) => (
+            <DiscoverBadgeButton
+              definition={
+                {
+                  stream: item.stream,
+                  data_stream_exists: !!item.data_stream,
+                } as Streams.ingest.all.GetResponse
+              }
             />
           ),
         },

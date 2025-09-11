@@ -10,6 +10,7 @@ import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { ScheduleType } from '@kbn/reporting-server';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -62,7 +63,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           runAt,
           kibanaId: this.kibanaId!,
           kibanaName: this.kibanaName!,
-          queueTimeout: this.queueTimeout,
+          queueTimeout: this.getQueueTimeout().asMilliseconds(),
           scheduledReport,
           spaceId: reportSpaceId,
         })
@@ -72,6 +73,15 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       if (!jobId) {
         throw new Error(`Unable to store report document in ReportingStore`);
       }
+
+      // event tracking of claimed job
+      const eventTracker = this.getEventTracker(report);
+      const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      eventTracker?.claimJob({
+        timeSinceCreation,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+      });
     } catch (failedToClaim) {
       // error claiming report - log the error
       errorLogger(
@@ -82,7 +92,6 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     }
 
     return {
-      isLastAttempt: false,
       jobId: jobId!,
       report,
       task: report?.toReportTaskJSON(),
@@ -91,7 +100,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   protected getMaxAttempts() {
-    return undefined;
+    const maxAttempts = this.opts.config.capture.maxAttempts ?? 1;
+    return {
+      maxTaskAttempts: 1,
+      maxRetries: maxAttempts - 1,
+    };
   }
 
   protected async notify(
@@ -146,9 +159,25 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             spaceId,
           },
         });
+
+        // event tracking of successful notification
+        const eventTracker = this.getEventTracker(report);
+        eventTracker?.completeNotification({
+          byteSize,
+          scheduledTaskId: report.scheduled_report_id,
+          scheduleType: ScheduleType.SCHEDULED,
+        });
       }
     } catch (error) {
       const message = `Error sending notification for scheduled report: ${error.message}`;
+      // event tracking of successful notification
+      const eventTracker = this.getEventTracker(report);
+      eventTracker?.failedNotification({
+        byteSize,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+        errorMessage: message,
+      });
       this.saveExecutionWarning(
         report,
         {
@@ -167,7 +196,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   public getTaskDefinition() {
-    const queueTimeout = this.getQueueTimeout();
+    const queueTimeout = this.getQueueTimeoutAsInterval();
     const maxConcurrency = this.getMaxConcurrency();
 
     return {

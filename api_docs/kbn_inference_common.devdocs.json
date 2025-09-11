@@ -1098,7 +1098,17 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<string>>) => boolean"
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
         "deprecated": false,
@@ -1127,7 +1137,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string>>"
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>>>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
             "deprecated": false,
@@ -1249,7 +1269,17 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<string>>) => boolean"
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
         "deprecated": false,
@@ -1278,7 +1308,17 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string>>"
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>>>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
             "deprecated": false,
@@ -2113,55 +2153,6 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.AnonymizationRegexWorkerTaskPayload",
-        "type": "Interface",
-        "tags": [],
-        "label": "AnonymizationRegexWorkerTaskPayload",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.AnonymizationRegexWorkerTaskPayload.rules",
-            "type": "Array",
-            "tags": [],
-            "label": "rules",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.RegexAnonymizationRule",
-                "text": "RegexAnonymizationRule"
-              },
-              "[]"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.AnonymizationRegexWorkerTaskPayload.records",
-            "type": "Array",
-            "tags": [],
-            "label": "records",
-            "description": [],
-            "signature": [
-              "Record<string, string>[]"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.AnonymizationSettings",
         "type": "Interface",
         "tags": [],
@@ -2385,14 +2376,8 @@
                 "text": "PromptVersion"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>[]>, TPromptOptions extends Omit<",
+              "ToolDefinitions",
+              " | undefined>[]>, TPromptOptions extends Omit<",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2678,7 +2663,7 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ChatCompleteResponse.toolCalls",
-            "type": "Uncategorized",
+            "type": "Array",
             "tags": [],
             "label": "toolCalls",
             "description": [
@@ -2689,10 +2674,10 @@
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
                 "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolCallsOf",
-                "text": "ToolCallsOf"
+                "section": "def-common.ToolCallOfToolOptions",
+                "text": "ToolCallOfToolOptions"
               },
-              "<TOptions>[\"toolCalls\"]"
+              "<TOptions>[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
             "deprecated": false,
@@ -2959,6 +2944,46 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.CustomToolChoice",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomToolChoice",
+        "description": [
+          "\nRepresent a tool choice where the LLM is forced to call a specific tool.\n\nRefer to {@link ToolChoice} for more details."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.CustomToolChoice",
+            "text": "CustomToolChoice"
+          },
+          "<TToolName>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.CustomToolChoice.function",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "function",
+            "description": [],
+            "signature": [
+              "TToolName"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.Deanonymization",
         "type": "Interface",
         "tags": [],
@@ -3197,14 +3222,8 @@
                 "text": "PromptVersion"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>[]>, TPromptOptions extends ",
+              "ToolDefinitions",
+              " | undefined>[]>, TPromptOptions extends ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -3229,14 +3248,8 @@
                 "text": "PromptVersion"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>[]>>>(options: ",
+              "ToolDefinitions",
+              " | undefined>[]>>>(options: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -4083,7 +4096,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Prompt",
-        "description": [],
+        "description": [
+          "\nA Prompt defines the request that will be send over to the LLM.\nBy specifying versions, you can use specific system and user prompt\ntemplates for specific models."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/inference-common",
@@ -4104,7 +4119,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nThe name of the prompt. Used for telemetry"
+            ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4115,7 +4132,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "\nA human-readable description of what the prompt does. Used for evaluations."
+            ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4126,7 +4145,9 @@
             "type": "Object",
             "tags": [],
             "label": "input",
-            "description": [],
+            "description": [
+              "\nA zod schema that will validate and transform the input variables for a prompt."
+            ],
             "signature": [
               "Zod.ZodType<TInput, Zod.ZodTypeDef, TInput>"
             ],
@@ -4140,7 +4161,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "versions",
-            "description": [],
+            "description": [
+              "\nThe model-specific variants of the prompt."
+            ],
             "signature": [
               "TPromptVersions"
             ],
@@ -4157,7 +4180,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PromptFactory",
-        "description": [],
+        "description": [
+          "\nUtility function that creates a fully typed Prompt"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/inference-common",
@@ -4189,14 +4214,8 @@
                 "text": "PromptVersion"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>>(version: TNextPromptVersion) => ",
+              "ToolDefinitions",
+              " | undefined>>(version: TNextPromptVersion) => ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -4332,6 +4351,119 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.PromptVersion",
+        "type": "Interface",
+        "tags": [],
+        "label": "PromptVersion",
+        "description": [
+          "\nThe variant of a prompt which will be used in the request if it's the\nbest fit for the given model."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.PromptVersion",
+            "text": "PromptVersion"
+          },
+          "<TTools>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.PromptVersion.models",
+            "type": "Array",
+            "tags": [],
+            "label": "models",
+            "description": [
+              "\nA list of {@link ModelMatch} objects. If none are given, it will be\ninterpreted as a fallback match-all version."
+            ],
+            "signature": [
+              "ModelMatch",
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.PromptVersion.system",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "system",
+            "description": [
+              "\nThe system prompt or template to be used."
+            ],
+            "signature": [
+              "string | ",
+              "MustachePromptTemplate",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.PromptVersion.template",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "template",
+            "description": [
+              "\nThe user or chat prompt template to be used."
+            ],
+            "signature": [
+              "MustachePromptTemplate",
+              " | ",
+              "ChatPromptTemplate",
+              " | ",
+              "StaticPromptTemplate"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.PromptVersion.temperature",
+            "type": "number",
+            "tags": [],
+            "label": "temperature",
+            "description": [
+              "\nThe temperature for the chatComplete request."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.PromptVersion.tools",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "tools",
+            "description": [
+              "\nTool definitions that will be send over to the LLM."
+            ],
+            "signature": [
+              "TTools | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.RegexAnonymizationRule",
         "type": "Interface",
         "tags": [],
@@ -4443,12 +4575,42 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ToolCall.function",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "function",
             "description": [],
             "signature": [
-              "{ name: TName; } & (TArguments extends Record<string, any> ? { arguments: TArguments; } : {})"
+              "{ name: TName; arguments: TArguments; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ToolCallArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolCallArguments",
+        "description": [
+          "\nThe shape of tool call arguments (`toolCalls[number].arguments`)."
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ToolCallArguments.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[x: string]: unknown",
+            "description": [],
+            "signature": [
+              "[x: string]:  unknown"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -4465,6 +4627,16 @@
         "label": "ToolDefinition",
         "description": [
           "\nThe definition of a tool that will be provided to the LLM for it to eventually call."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          },
+          "<TToolSchema>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
         "deprecated": false,
@@ -4486,15 +4658,14 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ToolDefinition.schema",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "schema",
             "description": [
               "\nThe input schema for the tool, representing the shape of the tool's parameters\n\nEven if optional, it is highly recommended to define a schema for all tool definitions, unless\nthe tool is supposed to be called without parameters."
             ],
             "signature": [
-              "ToolSchemaTypeObject",
-              " | undefined"
+              "TToolSchema | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -4520,7 +4691,7 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<TToolNames>"
+          "<TToolDefinitions, TToolChoice>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
         "deprecated": false,
@@ -4529,21 +4700,14 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ToolOptions.toolChoice",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "toolChoice",
             "description": [
               "\nThe choice of tool execution.\n\nRefer to {@link ToolChoice}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolChoice",
-                "text": "ToolChoice"
-              },
-              "<TToolNames> | undefined"
+              "TToolChoice | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -4552,22 +4716,14 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ToolOptions.tools",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "tools",
             "description": [
               "\nThe list of tool definitions that will be exposed to the LLM.\n\nRefer to {@link ToolDefinition}."
             ],
             "signature": [
-              "Record<TToolNames, ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolDefinition",
-                "text": "ToolDefinition"
-              },
-              "> | undefined"
+              "TToolDefinitions | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -4584,6 +4740,16 @@
         "label": "UnvalidatedToolCall",
         "description": [
           "\nRepresents a tool call from the LLM before correctly converted to the schema type.\n\nOnly publicly exposed because referenced by {@link ChatCompletionToolValidationError}"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.UnvalidatedToolCall",
+            "text": "UnvalidatedToolCall"
+          },
+          "<TName>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
         "deprecated": false,
@@ -4608,7 +4774,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "{ name: string; arguments: string; }"
+              "{ name: TName; arguments: string; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -4831,7 +4997,7 @@
             "section": "def-common.MessageRole",
             "text": "MessageRole"
           },
-          ".Assistant> & { content: string | null; toolCalls?: ",
+          ".Assistant> & { content: string | null; } & (TToolCalls extends ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -4839,7 +5005,15 @@
             "section": "def-common.ToolCall",
             "text": "ToolCall"
           },
-          "<string, Record<string, any> | undefined>[] | undefined; }"
+          "<string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArguments",
+            "text": "ToolCallArguments"
+          },
+          ">[] ? { toolCalls: TToolCalls; } : { toolCalls?: TToolCalls | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "deprecated": false,
@@ -4856,23 +5030,53 @@
           "\nUtility type to get the Assistant message type of a {@link ToolOptions} type."
         ],
         "signature": [
-          "Omit<",
+          "MessageBase<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.AssistantMessage",
-            "text": "AssistantMessage"
+            "section": "def-common.MessageRole",
+            "text": "MessageRole"
           },
-          ", \"toolCalls\"> & ",
+          ".Assistant> & { content: string | null; } & (",
+          "ToolCallsOfToolOptions",
+          "<TToolOptions> extends ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolCallsOf",
-            "text": "ToolCallsOf"
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
           },
-          "<TToolOptions>"
+          "<string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArguments",
+            "text": "ToolCallArguments"
+          },
+          ">[] ? { toolCalls: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArguments",
+            "text": "ToolCallArguments"
+          },
+          ">[] & ",
+          "ToolCallsOfToolOptions",
+          "<TToolOptions>; } : { toolCalls?: ",
+          "ToolCallsOfToolOptions",
+          "<TToolOptions> | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "deprecated": false,
@@ -5058,14 +5262,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>, TPromptOptions extends Omit<",
+          "ToolDefinitions",
+          " | undefined>[]>, TPromptOptions extends Omit<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5325,7 +5523,17 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<string>"
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
         "deprecated": false,
@@ -5497,15 +5705,7 @@
             "section": "def-common.ChatCompletionEventType",
             "text": "ChatCompletionEventType"
           },
-          ".ChatCompletionTokenCount; }) | ({ content: string; toolCalls: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolCallsOf",
-            "text": "ToolCallsOf"
-          },
-          "<TToolOptions>[\"toolCalls\"]; deanonymized_input?: { message: ",
+          ".ChatCompletionTokenCount; }) | ({ content: string; deanonymized_input?: { message: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5537,7 +5737,15 @@
             "section": "def-common.Deanonymization",
             "text": "Deanonymization"
           },
-          "[]; } | undefined; } & { type: ",
+          "[]; } | undefined; toolCalls: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallOfToolOptions",
+            "text": "ToolCallOfToolOptions"
+          },
+          "<TToolOptions>[]; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5562,15 +5770,7 @@
           "\nMessage event, sent only once, after all the chunks were emitted, and containing\nthe whole text content and potential tool calls of the response."
         ],
         "signature": [
-          "{ content: string; toolCalls: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolCallsOf",
-            "text": "ToolCallsOf"
-          },
-          "<TToolOptions>[\"toolCalls\"]; deanonymized_input?: { message: ",
+          "{ content: string; deanonymized_input?: { message: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5602,7 +5802,15 @@
             "section": "def-common.Deanonymization",
             "text": "Deanonymization"
           },
-          "[]; } | undefined; } & { type: ",
+          "[]; } | undefined; toolCalls: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallOfToolOptions",
+            "text": "ToolCallOfToolOptions"
+          },
+          "<TToolOptions>[]; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5747,7 +5955,7 @@
             "section": "def-common.UnvalidatedToolCall",
             "text": "UnvalidatedToolCall"
           },
-          "[] | undefined; }>"
+          "<string>[] | undefined; content?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
         "deprecated": false,
@@ -6062,7 +6270,23 @@
             "section": "def-common.AssistantMessage",
             "text": "AssistantMessage"
           },
-          " | ",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArguments",
+            "text": "ToolCallArguments"
+          },
+          ">[] | undefined> | ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6070,7 +6294,11 @@
             "section": "def-common.ToolMessage",
             "text": "ToolMessage"
           },
-          "<string, unknown, Record<string, any> | undefined>"
+          "<string, ",
+          "ToolResponse",
+          ", ",
+          "ToolData",
+          " | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "deprecated": false,
@@ -6090,16 +6318,16 @@
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageContentText",
-            "text": "MessageContentText"
+            "section": "def-common.MessageContentImage",
+            "text": "MessageContentImage"
           },
           " | ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageContentImage",
-            "text": "MessageContentImage"
+            "section": "def-common.MessageContentText",
+            "text": "MessageContentText"
           },
           ")[]"
         ],
@@ -6134,14 +6362,24 @@
             "text": "AssistantMessageOf"
           },
           "<TToolOptions> | ",
+          "ValuesType",
+          "<{ [key in ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolMessageOf",
-            "text": "ToolMessageOf"
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
           },
-          "<TToolOptions>"
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "deprecated": false,
@@ -6394,7 +6632,9 @@
         "type": "Type",
         "tags": [],
         "label": "PromptAPI",
-        "description": [],
+        "description": [
+          "\nType for the `prompt` API"
+        ],
         "signature": [
           "<TPrompt extends ",
           {
@@ -6413,14 +6653,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>, TPromptOptions extends ",
+          "ToolDefinitions",
+          " | undefined>[]>, TPromptOptions extends ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6445,14 +6679,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>>>(options: ",
+          "ToolDefinitions",
+          " | undefined>[]>>>(options: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6503,15 +6731,9 @@
           "\nComposite response type from the {@link PromptAPI},\nwhich can be either an observable or a promise depending on\nwhether API was called with stream mode enabled or not."
         ],
         "signature": [
-          "(true extends (Omit<TPromptOptions, \"tools\" | \"toolChoice\"> & MergeToolOptions<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptionsOfPrompt",
-            "text": "ToolOptionsOfPrompt"
-          },
-          "<TPromptOptions[\"prompt\"]>, TPromptOptions>)[\"stream\"] ? ",
+          "(true extends ",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<TPromptOptions>[\"stream\"] ? ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6519,23 +6741,11 @@
             "section": "def-common.ChatCompleteStreamResponse",
             "text": "ChatCompleteStreamResponse"
           },
-          "<Omit<TPromptOptions, \"tools\" | \"toolChoice\"> & MergeToolOptions<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptionsOfPrompt",
-            "text": "ToolOptionsOfPrompt"
-          },
-          "<TPromptOptions[\"prompt\"]>, TPromptOptions>> : never) | (false extends (Omit<TPromptOptions, \"tools\" | \"toolChoice\"> & MergeToolOptions<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptionsOfPrompt",
-            "text": "ToolOptionsOfPrompt"
-          },
-          "<TPromptOptions[\"prompt\"]>, TPromptOptions>)[\"stream\"] ? Promise<",
+          "<",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<TPromptOptions>> : never) | (false extends ",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<TPromptOptions>[\"stream\"] ? Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6543,15 +6753,9 @@
             "section": "def-common.ChatCompleteResponse",
             "text": "ChatCompleteResponse"
           },
-          "<Omit<TPromptOptions, \"tools\" | \"toolChoice\"> & MergeToolOptions<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptionsOfPrompt",
-            "text": "ToolOptionsOfPrompt"
-          },
-          "<TPromptOptions[\"prompt\"]>, TPromptOptions>>> : never)"
+          "<",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<TPromptOptions>>> : never)"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/api.ts",
         "deprecated": false,
@@ -6575,7 +6779,9 @@
             "section": "def-common.ChatCompleteResponse",
             "text": "ChatCompleteResponse"
           },
-          "<ChatCompleteOptionsOfPromptOptions<TPromptOptions>>"
+          "<",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<TPromptOptions>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/api.ts",
         "deprecated": false,
@@ -6601,7 +6807,9 @@
             "section": "def-common.ChatCompletionEvent",
             "text": "ChatCompletionEvent"
           },
-          "<ChatCompleteOptionsOfPromptOptions<TPromptOptions>>>"
+          "<",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<TPromptOptions>>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/api.ts",
         "deprecated": false,
@@ -6610,25 +6818,27 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.PromptVersion",
+        "id": "def-common.ToolCallArgumentsOfToolDefinition",
         "type": "Type",
         "tags": [],
-        "label": "PromptVersion",
-        "description": [],
-        "signature": [
-          "{ models?: ",
-          "ModelMatch",
-          "[] | undefined; system?: string | ",
-          "MustachePromptTemplate",
-          " | undefined; template: ",
-          "MustachePromptTemplate",
-          " | ",
-          "ChatPromptTemplate",
-          " | ",
-          "StaticPromptTemplate",
-          "; temperature?: number | undefined; } & TToolOptions"
+        "label": "ToolCallArgumentsOfToolDefinition",
+        "description": [
+          "\nUtility type to infer the tool call response shape."
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
+        "signature": [
+          "TToolDefinition extends { schema: ",
+          "ToolSchemaTypeObject",
+          "; } ? ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.FromToolSchema",
+            "text": "FromToolSchema"
+          },
+          "<TToolDefinition[\"schema\"]> : {}"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6641,15 +6851,7 @@
         "label": "ToolCallback",
         "description": [],
         "signature": [
-          "(toolCall: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolCall",
-            "text": "ToolCall"
-          },
-          "<string, Record<string, any> | undefined>) => Promise<unknown>"
+          "(toolCall: TToolCall) => Promise<TToolCallbackResult>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
         "deprecated": false,
@@ -6659,19 +6861,12 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.ToolCallback.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "toolCall",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolCall",
-                "text": "ToolCall"
-              },
-              "<string, Record<string, any> | undefined>"
+              "TToolCall"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -6682,13 +6877,15 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.ToolCallbacksOf",
+        "id": "def-common.ToolCallbacksOfToolOptions",
         "type": "Type",
         "tags": [],
-        "label": "ToolCallbacksOf",
-        "description": [],
+        "label": "ToolCallbacksOfToolOptions",
+        "description": [
+          "\nReturns the tool callback shapes from the given tool options."
+        ],
         "signature": [
-          "TToolOptions extends { tools?: Record<string, ",
+          "TToolOptions[\"tools\"] extends Record<string, ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6696,32 +6893,165 @@
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
           },
-          "> | undefined; } ? ToolCallbacksOfTools<TToolOptions[\"tools\"]> : never"
+          "<",
+          "ToolSchemaTypeObject",
+          " | undefined>> ? { [TName in keyof TToolOptions[\"tools\"] & string]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallback",
+            "text": "ToolCallback"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TName, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TToolOptions[\"tools\"][TName]>>, ",
+          "ToolCallbackResult",
+          ">; } : never"
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.ToolCallsOf",
+        "id": "def-common.ToolCallOfToolDefinitions",
         "type": "Type",
         "tags": [],
-        "label": "ToolCallsOf",
+        "label": "ToolCallOfToolDefinitions",
         "description": [
-          "\nUtility type to infer the toolCall type of {@link ChatCompletionMessageEvent}."
+          "\nReturns the tool call shape for the given tool definitions."
         ],
         "signature": [
-          "TToolOptions extends { tools?: Record<string, ",
+          "{ [TToolName in keyof TTools]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolDefinition",
-            "text": "ToolDefinition"
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
           },
-          "> | undefined; } ? TToolOptions extends { toolChoice: ",
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TTools[TToolName]>>; } extends readonly any[] ? (readonly any[] & { [TToolName in keyof TTools]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TTools[TToolName]>>; })[number] : { [TToolName in keyof TTools]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TTools[TToolName]>>; } extends ArrayLike<any> ? (ArrayLike<any> & { [TToolName in keyof TTools]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TTools[TToolName]>>; })[number] : { [TToolName in keyof TTools]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TTools[TToolName]>>; } extends object ? { [TToolName in keyof TTools]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<TTools[TToolName]>>; }[keyof TTools] : never"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ToolCallOfToolOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolCallOfToolOptions",
+        "description": [
+          "\nReturns the tool call shape for the given tool options."
+        ],
+        "signature": [
+          "TToolOptions[\"toolChoice\"] extends ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6729,11 +7059,53 @@
             "section": "def-common.ToolChoiceType",
             "text": "ToolChoiceType"
           },
-          ".none; } ? { toolCalls: []; } : { toolCalls: ",
-          "ToolResponsesOf",
-          "<ToolsOfChoice<TToolOptions>>; } : { toolCalls: []; }"
+          ".none ? never : TToolOptions[\"tools\"] extends undefined ? never : TToolOptions[\"toolChoice\"] extends ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.CustomToolChoice",
+            "text": "CustomToolChoice"
+          },
+          "<string> ? ",
+          "ValuesType",
+          "<{ [TToolName in keyof Pick<NonNullable<TToolOptions[\"tools\"]>, TToolOptions[\"toolChoice\"][\"function\"]>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<Pick<NonNullable<TToolOptions[\"tools\"]>, TToolOptions[\"toolChoice\"][\"function\"]>[TToolName]>>; }> : ",
+          "ValuesType",
+          "<{ [TToolName in keyof NonNullable<TToolOptions[\"tools\"]>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<TToolName & string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArgumentsOfToolDefinition",
+            "text": "ToolCallArgumentsOfToolDefinition"
+          },
+          "<NonNullable<TToolOptions[\"tools\"]>[TToolName]>>; }>"
         ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6755,7 +7127,15 @@
             "section": "def-common.ToolChoiceType",
             "text": "ToolChoiceType"
           },
-          " | CustomToolChoice<TName>"
+          " | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.CustomToolChoice",
+            "text": "CustomToolChoice"
+          },
+          "<TToolName>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
         "deprecated": false,
@@ -6780,7 +7160,9 @@
             "section": "def-common.MessageRole",
             "text": "MessageRole"
           },
-          ".Tool> & { name: TName; toolCallId: string; response: TToolResponse; } & (TToolData extends undefined ? {} : { data: TToolData; })"
+          ".Tool> & { name: TName; toolCallId: string; response: TToolResponse; } & (TToolData extends ",
+          "ToolData",
+          " ? { data: TToolData; } : { data?: TToolData | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
         "deprecated": false,
@@ -6797,21 +7179,130 @@
           "\nUtility type to get the Tool message type of a {@link ToolOptions} type."
         ],
         "signature": [
-          "MessageBase<",
+          "{ [key in ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageRole",
-            "text": "MessageRole"
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
           },
-          ".Tool> & { name: ",
-          "ToolNamesOf",
-          "<TToolOptions>; toolCallId: string; response: ",
-          "ToolResponsesOf",
-          "<TToolOptions[\"tools\"]>; } & ({} | { data: Record<string, any>; })"
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; } extends readonly any[] ? (readonly any[] & { [key in ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
+          },
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; })[number] : { [key in ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
+          },
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; } extends ArrayLike<any> ? (ArrayLike<any> & { [key in ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
+          },
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; })[number] : { [key in ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
+          },
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; } extends object ? { [key in ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
+          },
+          "<TToolOptions>]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<key, TToolResponses[key], any>; }[",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolNamesOf",
+            "text": "ToolNamesOf"
+          },
+          "<TToolOptions>] : never"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/messages.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ToolNamesOf",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolNamesOf",
+        "description": [
+          "\nUtility type to get the tool names of ToolOptions"
+        ],
+        "signature": [
+          "keyof TToolOptions[\"tools\"] & string"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6822,7 +7313,9 @@
         "type": "Type",
         "tags": [],
         "label": "ToolOptionsOfPrompt",
-        "description": [],
+        "description": [
+          "\nUtility function that returns the tool options for a Prompt that\ncan be used to infer the response shape."
+        ],
         "signature": [
           "TPrompt[\"versions\"] extends (infer TPromptVersion)[] ? TPromptVersion extends ",
           {
@@ -6833,14 +7326,10 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>> ? Pick<TPromptVersion, \"tools\" | \"toolChoice\"> : never : never"
+          "ToolDefinitions",
+          " | undefined> ? TPromptVersion extends { tools?: ",
+          "ToolDefinitions",
+          " | undefined; } ? Pick<TPromptVersion, \"tools\"> : {} : {} : {}"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
         "deprecated": false,
@@ -6884,6 +7373,23 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ToolsOfChoice",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolsOfChoice",
+        "description": [
+          "\nFilters the specified tools if ToolChoiceType === CustomToolChoice"
+        ],
+        "signature": [
+          "TToolOptions[\"toolChoice\"] extends { function: infer TToolName; } ? TToolName extends keyof TToolOptions[\"tools\"] ? Pick<TToolOptions[\"tools\"], TToolName> : TToolOptions[\"tools\"] : TToolOptions[\"tools\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.UnboundChatCompleteOptions",
         "type": "Type",
         "tags": [],
@@ -6900,15 +7406,9 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; temperature?: number | undefined; system?: string | undefined; stream?: boolean | undefined; tools?: Record<string, ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolDefinition",
-            "text": "ToolDefinition"
-          },
-          "> | undefined; toolChoice?: ",
+          " | undefined; temperature?: number | undefined; system?: string | undefined; stream?: boolean | undefined; tools?: ",
+          "ToolDefinitions",
+          " | undefined; toolChoice?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -7021,15 +7521,7 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; temperature?: number | undefined; stream?: boolean | undefined; tools?: Record<string, ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolDefinition",
-            "text": "ToolDefinition"
-          },
-          "> | undefined; toolChoice?: ",
+          " | undefined; temperature?: number | undefined; stream?: boolean | undefined; toolChoice?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

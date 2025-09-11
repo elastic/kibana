@@ -5,10 +5,11 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
-import { lastValueFrom } from 'rxjs';
+import { catchError, lastValueFrom, of } from 'rxjs';
 import {
   MessageRole,
   ShortIdTable,
@@ -33,6 +34,7 @@ export async function getRelevantFieldNames({
   chat,
   messages,
   signal,
+  logger,
 }: {
   index: string | string[];
   start?: string;
@@ -43,6 +45,7 @@ export async function getRelevantFieldNames({
   messages: Message[];
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
+  logger: Logger;
 }): Promise<{ fields: string[]; stats: { analyzed: number; total: number } }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
@@ -152,7 +155,31 @@ export async function getRelevantFieldNames({
           ],
           functionCall: SELECT_RELEVANT_FIELDS_NAME,
         })
-      ).pipe(concatenateChatCompletionChunks());
+      ).pipe(
+        concatenateChatCompletionChunks(),
+        catchError((error) => {
+          logger.error(
+            `Encountered error running function ${SELECT_RELEVANT_FIELDS_NAME}: ${JSON.stringify(
+              error
+            )}`
+          );
+
+          if (isInferenceRequestAbortedError(error)) {
+            // return empty fieldIds for chunk
+            return of({
+              message: {
+                content: '',
+                function_call: {
+                  name: SELECT_RELEVANT_FIELDS_NAME,
+                  arguments: JSON.stringify({ fieldIds: [] }),
+                },
+                role: 'assistant',
+              },
+            });
+          }
+          throw error;
+        })
+      );
 
       const chunkResponse = await lastValueFrom(chunkResponse$);
 

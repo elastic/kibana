@@ -15,6 +15,8 @@ import type {
   CreateToolResponse,
   UpdateToolResponse,
   BulkDeleteToolResponse,
+  ExecuteToolResponse,
+  ResolveSearchSourcesResponse,
 } from '../../../common/http_api/tools';
 
 export class ToolsService {
@@ -53,5 +55,21 @@ export class ToolsService {
     return await this.http.put<UpdateToolResponse>(`/api/chat/tools/${id}`, {
       body: JSON.stringify(update),
     });
+  }
+
+  async execute(toolId: string, toolParams: Record<string, unknown>) {
+    return await this.http.post<ExecuteToolResponse>('/api/chat/tools/_execute', {
+      body: JSON.stringify({
+        tool_id: toolId,
+        tool_params: toolParams,
+      }),
+    });
+  }
+
+  async resolveSearchSources({ pattern }: { pattern: string }) {
+    return await this.http.get<ResolveSearchSourcesResponse>(
+      '/internal/chat/tools/_resolve_search_sources',
+      { query: { pattern } }
+    );
   }
 }

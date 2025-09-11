@@ -8,19 +8,28 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
-interface Change {
+interface Change<T> {
   objectId: string;
   changeType: 'create' | 'update';
+  change: Partial<T>;
 }
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
-  private workflowChanges: Map<string, Change> = new Map();
-  private stepChanges: Map<string, Change> = new Map();
+  private workflowChanges: Change<EsWorkflowExecution>[] = [];
+  private stepChanges: Change<EsWorkflowStepExecution>[] = [];
+
+  /**
+   * Maps step IDs to their execution IDs in chronological order.
+   * This index enables efficient lookup of all executions for a given step,
+   * which is especially important for steps that execute multiple times
+   * (e.g., in loops or retries).
+   */
+  private stepIdExecutionIdIndex = new Map<string, string[]>();
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
@@ -34,9 +43,8 @@ export class WorkflowExecutionState {
     const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
       this.workflowExecution.id
     );
-    foundSteps.forEach((stepExecution) => {
-      this.stepExecutions.set(stepExecution.stepId, stepExecution);
-    });
+    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
+    this.buildStepIdExecutionIdIndex();
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -48,90 +56,190 @@ export class WorkflowExecutionState {
       ...this.workflowExecution,
       ...workflowExecution,
     };
-    this.workflowChanges.set(this.workflowExecution.id, {
+    this.workflowChanges.push({
       objectId: this.workflowExecution.id,
       changeType: 'update',
+      change: workflowExecution,
     });
   }
 
-  public getStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
-    return this.stepExecutions.get(stepId);
+  public getAllStepExecutions(): EsWorkflowStepExecution[] {
+    return Array.from(this.stepExecutions.values());
+  }
+
+  /**
+   * Retrieves all executions for a specific workflow step in chronological order.
+   * @param stepId The unique identifier of the step
+   * @returns An array of step execution objects or undefined if no executions exist
+   */
+  public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] {
+    if (!this.stepIdExecutionIdIndex.has(stepId)) {
+      return [];
+    }
+
+    return this.stepIdExecutionIdIndex
+      .get(stepId)!
+      .map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution);
+  }
+
+  /**
+   * Retrieves the latest execution for a specific workflow step.
+   * @param stepId The unique identifier of the step
+   * @returns The latest step execution object or undefined if no executions exist
+   */
+  public getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
+    const allExecutions = this.getStepExecutionsByStepId(stepId);
+
+    if (!allExecutions?.length) {
+      return undefined;
+    }
+
+    return allExecutions[allExecutions.length - 1];
   }
 
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
-    if (!step.stepId) {
-      throw new Error('Step execution ID is required for update');
+    if (!step.id) {
+      throw new Error('WorkflowExecutionState: Step execution must have an ID to be upserted');
     }
 
-    if (!this.stepExecutions.has(step.stepId)) {
-      this.stepExecutions.set(
-        step.stepId as string,
-        {
-          ...step,
-          id: `${this.workflowExecution.id}-${step.stepId}`,
-          workflowRunId: this.workflowExecution.id,
-          workflowId: this.workflowExecution.workflowId,
-        } as EsWorkflowStepExecution
-      );
-      this.stepChanges.set(step.stepId, {
-        objectId: step.stepId,
-        changeType: 'create',
-      });
+    if (!this.stepExecutions.has(step.id!)) {
+      this.createStep(step);
     } else {
-      this.stepExecutions.set(step.stepId, {
-        ...this.stepExecutions.get(step.stepId),
-        ...step,
-      } as EsWorkflowStepExecution);
-
-      // only update if the step is not in changes
-      if (!this.stepChanges.has(step.stepId)) {
-        this.stepChanges.set(step.stepId, {
-          objectId: step.stepId,
-          changeType: 'update',
-        });
-      }
+      this.updateStep(step);
     }
   }
 
   public async flush(): Promise<void> {
-    const workflowChanges = Array.from(this.workflowChanges.values());
-    const tasks: Promise<void>[] = [];
+    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
+  }
 
-    if (workflowChanges.length > 0) {
-      tasks.push(this.workflowExecutionRepository.updateWorkflowExecution(this.workflowExecution));
+  private async flushWorkflowChanges(): Promise<void> {
+    if (!this.workflowChanges.length) {
+      return;
     }
 
+    const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
+      (prev, acc) => ({ ...prev, ...acc.change }),
+      { id: this.workflowExecution.id } as EsWorkflowExecution
+    );
+
+    await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);
+
+    const fetchedWorkflowExecution =
+      await this.workflowExecutionRepository.getWorkflowExecutionById(
+        this.workflowExecution.id,
+        this.workflowExecution.spaceId
+      );
+    this.workflowExecution = fetchedWorkflowExecution!;
+
+    this.workflowChanges = [];
+  }
+
+  private async flushStepChanges(): Promise<void> {
     const stepChanges = Array.from(this.stepChanges.values());
+    const tasks: Promise<void>[] = [];
 
     if (stepChanges.length > 0) {
-      const createChanges = stepChanges.filter((change) => change.changeType === 'create');
+      // const groupedStepChangesById =
+      // Group step changes by objectId to handle multiple changes to the same step
+      const groupedStepChangesById: Record<string, Change<EsWorkflowStepExecution>[]> =
+        stepChanges.reduce<Record<string, Change<EsWorkflowStepExecution>[]>>((acc, change) => {
+          // For each objectId, keep the latest change
+          if (!acc[change.objectId]) {
+            acc[change.objectId] = [] as Change<EsWorkflowStepExecution>[];
+          }
 
-      if (createChanges.length > 0) {
-        createChanges.forEach((change) =>
-          tasks.push(
-            this.workflowStepExecutionRepository.createStepExecution(
-              this.stepExecutions.get(change.objectId) as EsWorkflowStepExecution
-            )
-          )
+          acc[change.objectId].push(change);
+          return acc;
+        }, {});
+
+      const createSteps: Partial<EsWorkflowStepExecution>[] = [];
+      const updateSteps: Partial<EsWorkflowStepExecution>[] = [];
+
+      Object.entries(groupedStepChangesById).forEach(([objectId, changes]) => {
+        const accumulated: Partial<EsWorkflowStepExecution> = changes.reduce(
+          (acc, change) => ({
+            ...acc,
+            ...change.change,
+          }),
+          {}
+        );
+
+        if (changes.some((change) => change.changeType === 'create')) {
+          createSteps.push(accumulated);
+        } else {
+          updateSteps.push(accumulated);
+        }
+      });
+
+      if (createSteps.length > 0) {
+        createSteps.forEach((step) =>
+          tasks.push(this.workflowStepExecutionRepository.createStepExecution(step))
         );
       }
 
-      const updateChanges = stepChanges.filter((change) => change.changeType === 'update');
-
-      if (updateChanges.length > 0) {
-        tasks.push(
-          this.workflowStepExecutionRepository.updateStepExecutions(
-            updateChanges.map(
-              (change) => this.stepExecutions.get(change.objectId) as EsWorkflowStepExecution
-            )
-          )
-        );
+      if (updateSteps.length > 0) {
+        tasks.push(this.workflowStepExecutionRepository.updateStepExecutions(updateSteps));
       }
     }
 
     await Promise.all(tasks);
+    this.stepChanges = [];
+  }
 
-    this.workflowChanges.clear();
-    this.stepChanges.clear();
+  private createStep(step: Partial<EsWorkflowStepExecution>) {
+    const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
+    if (!stepExecutions.length) {
+      this.stepIdExecutionIdIndex.set(step.stepId as string, []);
+    }
+    this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(step.id as string);
+    const newStep: EsWorkflowStepExecution = {
+      ...step,
+      id: step.id,
+      executionIndex: stepExecutions.length,
+      workflowRunId: this.workflowExecution.id,
+      workflowId: this.workflowExecution.workflowId,
+      spaceId: this.workflowExecution.spaceId,
+    } as EsWorkflowStepExecution;
+    this.stepExecutions.set(step.id as string, newStep);
+    this.stepChanges.push({
+      objectId: newStep.id,
+      changeType: 'create',
+      change: newStep,
+    });
+  }
+
+  private updateStep(step: Partial<EsWorkflowStepExecution>) {
+    this.stepExecutions.set(step.id!, {
+      ...this.stepExecutions.get(step.id!),
+      ...step,
+    } as EsWorkflowStepExecution);
+
+    this.stepChanges.push({
+      objectId: step.id!,
+      changeType: 'update',
+      change: step,
+    });
+  }
+
+  private buildStepIdExecutionIdIndex(): void {
+    this.stepIdExecutionIdIndex.clear();
+    for (const step of this.stepExecutions.values()) {
+      if (!this.stepIdExecutionIdIndex.has(step.stepId)) {
+        this.stepIdExecutionIdIndex.set(step.stepId, []);
+      }
+      this.stepIdExecutionIdIndex.get(step.stepId)!.push(step.id);
+    }
+
+    for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {
+      this.stepIdExecutionIdIndex.set(
+        stepId,
+        stepExecutionIds.sort((a, b) => {
+          const aExecution = this.stepExecutions.get(a);
+          const bExecution = this.stepExecutions.get(b);
+          return (aExecution?.executionIndex ?? 0) - (bExecution?.executionIndex ?? 0);
+        })
+      );
+    }
   }
 }

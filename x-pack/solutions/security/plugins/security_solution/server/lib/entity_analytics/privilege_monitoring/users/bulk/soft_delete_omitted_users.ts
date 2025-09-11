@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics';
 import type { BulkProcessingError, BulkProcessingResults, Options } from './types';
 
 export interface SoftDeletionResults {
@@ -36,7 +36,7 @@ export const softDeleteOmittedUsers =
     const errors: BulkProcessingResults['errors'] = [];
 
     const accumulator = { users: usersToDelete, failed: 0, successful: 0, errors };
-
+    const now = new Date().toISOString();
     const stats =
       usersToDelete.length === 0
         ? accumulator
@@ -49,6 +49,8 @@ export const softDeleteOmittedUsers =
                 {
                   script: {
                     source: /* java */ `
+                      ctx._source['@timestamp'] = params.now;
+                      ctx._source.event.ingested = params.now;
                       if (ctx._source.labels != null && ctx._source.labels.sources != null) {
                         ctx._source.labels.sources.removeIf(src -> src == params.to_remove);
                         if (ctx._source.labels.sources.isEmpty()) {
@@ -67,6 +69,7 @@ export const softDeleteOmittedUsers =
                     lang: 'painless',
                     params: {
                       to_remove: 'csv',
+                      now,
                     },
                   },
                 },

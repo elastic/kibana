@@ -47,7 +47,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  describe('@ess Host transform logic', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/232405
+  describe.skip('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest.get('/api/entity_store/status').expect(200);

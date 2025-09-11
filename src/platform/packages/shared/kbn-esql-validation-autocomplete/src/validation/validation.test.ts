@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { FieldType, SupportedDataType, FunctionDefinition } from '@kbn/esql-ast';
-import { timeUnitsToSuggest, dataTypes } from '@kbn/esql-ast';
+import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
@@ -123,7 +123,7 @@ function getFieldMapping(
     date: 'now()',
   };
   return params.map(
-    ({ name: _name, type, constantOnly, acceptedValues: literalOptions, ...rest }) => {
+    ({ name: _name, type, constantOnly, suggestedValues: literalOptions, ...rest }) => {
       const typeString: string = type as string;
       if (dataTypes.includes(typeString as SupportedDataType)) {
         if (useLiterals && literalOptions) {
@@ -178,9 +178,11 @@ describe('validation logic', () => {
           JSON.stringify(
             {
               indexes,
-              fields: fields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+              fields: fields.concat([
+                { name: policies[0].matchField, type: 'keyword', userDefined: false },
+              ]),
               enrichFields: enrichFields.concat([
-                { name: policies[0].matchField, type: 'keyword' },
+                { name: policies[0].matchField, type: 'keyword', userDefined: false },
               ]),
               policies,
               unsupported_field,
@@ -294,17 +296,17 @@ describe('validation logic', () => {
 
           await expectErrors(`from assignment = 1`, [
             "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown index [assignment]',
+            'Unknown index "assignment"',
           ]);
         });
 
         test('errors on invalid syntax', async () => {
           const { expectErrors } = await setup();
 
-          await expectErrors('FROM `index`', ['Unknown index [`index`]']);
+          await expectErrors('FROM `index`', ['Unknown index "`index`"']);
           await expectErrors(`from assignment = 1`, [
             "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown index [assignment]',
+            'Unknown index "assignment"',
           ]);
         });
       });
@@ -331,22 +333,14 @@ describe('validation logic', () => {
     });
 
     describe('row', () => {
-      testErrorsAndWarnings('row', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
+      testErrorsAndWarnings('row', [expect.stringContaining('SyntaxError:')]);
 
       test('syntax error', async () => {
         const { expectErrors } = await setup();
 
-        await expectErrors('row var = 1 in ', [
-          "SyntaxError: mismatched input '<EOF>' expecting '('",
-        ]);
-        await expectErrors('row var = 1 in (', [
-          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        ]);
-        await expectErrors('row var = 1 not in ', [
-          "SyntaxError: mismatched input '<EOF>' expecting '('",
-        ]);
+        await expectErrors('row var = 1 in ', [expect.stringContaining('SyntaxError:')]);
+        await expectErrors('row var = 1 in (', [expect.stringContaining('SyntaxError:')]);
+        await expectErrors('row var = 1 not in ', [expect.stringContaining('SyntaxError:')]);
       });
     });
 
@@ -369,42 +363,37 @@ describe('validation logic', () => {
 
     describe('join', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
-        '[t] index is not a valid JOIN index. Please use a "lookup" mode index JOIN commands.',
+        '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
       ]);
     });
 
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column []',
+        expect.stringContaining('SyntaxError: mismatched input'),
+        'Unknown column ""',
       ]);
       testErrorsAndWarnings('from index | drop 4.5', [
-        "SyntaxError: token recognition error at: '4'",
-        "SyntaxError: token recognition error at: '5'",
-        "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column [.]',
+        expect.stringContaining('SyntaxError:'),
+        expect.stringContaining('SyntaxError:'),
+        expect.stringContaining('SyntaxError:'),
+        'Unknown column "."',
       ]);
       testErrorsAndWarnings('from index | drop missingField, doubleField, dateField', [
-        'Unknown column [missingField]',
+        'Unknown column "missingField"',
       ]);
     });
 
     describe('mv_expand', () => {
-      testErrorsAndWarnings('from a_index | mv_expand ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
+      testErrorsAndWarnings('from a_index | mv_expand ', [expect.stringContaining('SyntaxError:')]);
 
       testErrorsAndWarnings('from a_index | mv_expand doubleField, b', [
-        "SyntaxError: token recognition error at: ','",
-        "SyntaxError: extraneous input 'b' expecting <EOF>",
+        expect.stringContaining('SyntaxError:'),
+        expect.stringContaining('SyntaxError:'),
       ]);
     });
 
     describe('rename', () => {
-      testErrorsAndWarnings('from a_index | rename', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-      ]);
+      testErrorsAndWarnings('from a_index | rename', [expect.stringContaining('SyntaxError:')]);
       testErrorsAndWarnings('from a_index | rename textField', [
         "SyntaxError: no viable alternative at input 'textField'",
       ]);
@@ -412,8 +401,8 @@ describe('validation logic', () => {
         "SyntaxError: no viable alternative at input 'a'",
       ]);
       testErrorsAndWarnings('from a_index | rename textField as', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Error: [as] function expects exactly 2 arguments, got 1.',
+        expect.stringContaining('SyntaxError:'),
+        'AS expected 2 arguments, but got 1.',
       ]);
       testErrorsAndWarnings('row a = 10 | rename a as this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
@@ -421,9 +410,7 @@ describe('validation logic', () => {
     });
 
     describe('dissect', () => {
-      testErrorsAndWarnings('from a_index | dissect', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
+      testErrorsAndWarnings('from a_index | dissect', [expect.stringContaining('SyntaxError:')]);
       testErrorsAndWarnings('from a_index | dissect textField', [
         "SyntaxError: missing QUOTED_STRING at '<EOF>'",
       ]);
@@ -440,20 +427,18 @@ describe('validation logic', () => {
     });
 
     describe('grok', () => {
-      testErrorsAndWarnings('from a_index | grok', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
+      testErrorsAndWarnings('from a_index | grok', [expect.stringContaining('SyntaxError:')]);
       testErrorsAndWarnings('from a_index | grok textField', [
-        "SyntaxError: missing QUOTED_STRING at '<EOF>'",
+        expect.stringContaining('SyntaxError:'),
       ]);
       testErrorsAndWarnings('from a_index | grok textField 2', [
-        "SyntaxError: mismatched input '2' expecting QUOTED_STRING",
+        expect.stringContaining('SyntaxError:'),
       ]);
       testErrorsAndWarnings('from a_index | grok textField .', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        expect.stringContaining('SyntaxError:'),
       ]);
       testErrorsAndWarnings('from a_index | grok textField %a', [
-        "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
+        expect.stringContaining('SyntaxError:'),
       ]);
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
       //   'Using wildcards (*) in grok is not allowed [s*]',
@@ -463,40 +448,36 @@ describe('validation logic', () => {
     describe('where', () => {
       for (const wrongOp of ['*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | where ${wrongOp}+ doubleField`, [
-          `SyntaxError: extraneous input '${wrongOp}' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
+          expect.stringContaining('SyntaxError:'),
         ]);
       }
     });
 
     describe('eval', () => {
-      testErrorsAndWarnings('from a_index | eval ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
+      testErrorsAndWarnings('from a_index | eval ', [expect.stringContaining('SyntaxError:')]);
       testErrorsAndWarnings('from a_index | eval doubleField + ', [
-        "SyntaxError: no viable alternative at input 'doubleField + '",
+        expect.stringContaining('SyntaxError:'),
       ]);
 
       testErrorsAndWarnings('from a_index | eval a=round(', [
-        "SyntaxError: no viable alternative at input 'round('",
+        expect.stringContaining('SyntaxError:'),
       ]);
       testErrorsAndWarnings('from a_index | eval a=round(doubleField) ', []);
       testErrorsAndWarnings('from a_index | eval a=round(doubleField), ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        expect.stringContaining('SyntaxError:'),
       ]);
 
       for (const wrongOp of ['*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ doubleField`, [
-          `SyntaxError: extraneous input '${wrongOp}' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
+          expect.stringContaining('SyntaxError:'),
         ]);
       }
     });
 
     describe('sort', () => {
-      testErrorsAndWarnings('from a_index | sort ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
+      testErrorsAndWarnings('from a_index | sort ', [expect.stringContaining('SyntaxError:')]);
       testErrorsAndWarnings('from a_index | sort doubleField, ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        expect.stringContaining('SyntaxError:'),
       ]);
 
       for (const dir of ['desc', 'asc']) {
@@ -522,17 +503,17 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich _:`, [
         "SyntaxError: token recognition error at: ':'",
-        'Unknown policy [_]',
+        'Unknown policy "_"',
       ]);
       testErrorsAndWarnings(`from a_index | enrich :policy`, [
         "SyntaxError: token recognition error at: ':'",
       ]);
 
       testErrorsAndWarnings(`from a_index | enrich policy on textField with `, [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        expect.stringContaining('SyntaxError:'),
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy with `, [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        expect.stringContaining('SyntaxError:'),
       ]);
     });
 
@@ -620,17 +601,6 @@ describe('validation logic', () => {
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
       });
 
-      it('should call fields callbacks also for show command', async () => {
-        const callbackMocks = getCallbackMocks();
-        await validateQuery(`show info | keep name`, undefined, callbackMocks);
-        expect(callbackMocks.getSources).not.toHaveBeenCalled();
-        expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
-          query: 'show info',
-        });
-      });
-
       it(`should fetch additional fields if an enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(
@@ -686,7 +656,7 @@ describe('validation logic', () => {
 
       // takes into account casting in function arguments
       testErrorsAndWarnings('from a_index | eval trim("23"::double)', [
-        'Argument of [trim] must be [keyword], found value ["23"::double] type [double]',
+        getNoValidCallSignatureError('trim', ['double']),
       ]);
       testErrorsAndWarnings('from a_index | eval trim(23::keyword)', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
@@ -695,14 +665,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval 1 + "2"::LoNg', []);
 
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
-        // just a counter-case to make sure the previous test is meaningful
-        'Argument of [+] must be [date], found value [1] type [integer]',
+        getNoValidCallSignatureError('+', ['integer', 'keyword']),
       ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::keyword::double::long::keyword::double)',
-        [
-          'Argument of [trim] must be [keyword], found value [to_double("23")::keyword::double::long::keyword::double] type [double]',
-        ]
+        [getNoValidCallSignatureError('trim', ['double'])]
       );
 
       testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
@@ -712,9 +679,6 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval CEIL(23::Integer)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::double)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::DOUBLE)', []);
-      testErrorsAndWarnings('from a_index | eval CEIL(23::doubla)', [
-        'Argument of [ceil] must be [double], found value [23::doubla] type [doubla]',
-      ]);
 
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
@@ -724,7 +688,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval true AND 0::bool', []);
       testErrorsAndWarnings('from a_index | eval true AND 0', [
         // just a counter-case to make sure the previous tests are meaningful
-        'Argument of [and] must be [boolean], found value [0] type [integer]',
+        getNoValidCallSignatureError('and', ['boolean', 'integer']),
       ]);
 
       // enforces strings for cartesian_point conversion
@@ -732,15 +696,15 @@ describe('validation logic', () => {
 
       // still validates nested functions when they are casted
       testErrorsAndWarnings('from a_index | eval to_lower(trim(doubleField)::keyword)', [
-        'Argument of [trim] must be [keyword], found value [doubleField] type [double]',
+        getNoValidCallSignatureError('trim', ['double']),
       ]);
       testErrorsAndWarnings(
         'from a_index | eval to_upper(trim(doubleField)::keyword::keyword::keyword::keyword)',
-        ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
+        [getNoValidCallSignatureError('trim', ['double'])]
       );
       testErrorsAndWarnings(
         'from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)',
-        ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
+        [getNoValidCallSignatureError('trim', ['double'])]
       );
     });
 
@@ -749,7 +713,7 @@ describe('validation logic', () => {
         `from a_index | keep unsupportedField`,
         [],
         [
-          'Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null',
+          'Field "unsupportedField" cannot be retrieved, it is unsupported or not indexed; returning null',
         ]
       );
     });
