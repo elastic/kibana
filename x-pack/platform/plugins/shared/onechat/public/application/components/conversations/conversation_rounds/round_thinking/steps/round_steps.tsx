@@ -90,13 +90,17 @@ const ToolCallDisplay: React.FC<{
         <p>
           <FormattedMessage
             id="xpack.onechat.thinking.toolCallThinkingItem"
-            defaultMessage="Calling tool "
+            defaultMessage="Calling tool {tool}"
+            values={{
+              tool: (
+                <code>
+                  <EuiLink href={toolHref} target="_blank">
+                    {toolId}
+                  </EuiLink>
+                </code>
+              ),
+            }}
           />
-          <code>
-            <EuiLink href={toolHref} target="_blank">
-              {toolId}
-            </EuiLink>
-          </code>
         </p>
       </EuiText>
     </ThinkingItemLayout>
@@ -205,15 +209,15 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
   } = useToolResultsFlyout();
 
   const renderedSteps = useMemo(() => {
-    return steps.flatMap((step, index): ReactNode => {
+    return steps.flatMap((step, stepIndex): ReactNode => {
       if (isToolCallStep(step)) {
         return [
-          <ToolCallDisplay key={`step-${index}-tool-call`} step={step} />,
-          ...getProgressionItems({ step, stepIndex: index }),
-          ...getMainThinkingResultItems({ step, stepIndex: index }),
+          <ToolCallDisplay key={`step-${stepIndex}-tool-call`} step={step} />,
+          ...getProgressionItems({ step, stepIndex }),
+          ...getMainThinkingResultItems({ step, stepIndex }),
           ...getFlyoutResultItems({
             step,
-            stepIndex: index,
+            stepIndex,
             onOpenFlyout: openFlyout,
           }),
         ];
@@ -223,7 +227,9 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
       // Is there any difference for how we should display reasoning and progression?
       if (isReasoningStep(step)) {
         return [
-          <ThinkingItemLayout key={`step-reasoning-${index}`}>{step.reasoning}</ThinkingItemLayout>,
+          <ThinkingItemLayout key={`step-reasoning-${stepIndex}`}>
+            {step.reasoning}
+          </ThinkingItemLayout>,
         ];
       }
 

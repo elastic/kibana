@@ -53,7 +53,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
-  const { toolProgress } = useSendMessage();
+  const { agentReasoning } = useSendMessage();
   const [showFlyout, setShowFlyout] = useState(false);
 
   if (steps.length === 0) {
@@ -74,9 +74,10 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
 
   let thinkingButtonLabel = thinkingCompletedLabel;
   if (isLoading) {
-    // While this round is loading, show the progression message as the button label if available
-    // Otherwise fallback to default thinking label
-    thinkingButtonLabel = toolProgress ?? defaultThinkingLabel;
+    // While this round is loading, show the agent reasoning as the button label if available
+    // Otherwise fallback to default thinking label.
+    // Agent reasoning can be reasoning directly from the agent or individual tool call progression
+    thinkingButtonLabel = agentReasoning ?? defaultThinkingLabel;
   }
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
