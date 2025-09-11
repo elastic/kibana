@@ -36,7 +36,7 @@ export const OnechatTools = () => {
           >
             <EuiText size="s">{labels.tools.newToolButton}</EuiText>
           </EuiButton>,
-          <McpConnectionButton key="mcp-connection-button" />,
+          <McpConnectionButton key="mcp-server-connection-button" />,
         ]}
       />
       <KibanaPageTemplate.Section>

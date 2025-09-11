@@ -31,7 +31,7 @@ export const McpConnectionButton = () => {
     <EuiPopover
       button={
         <EuiButtonEmpty
-          key="new-esql-tool-button"
+          key="mcp-server-connection-button"
           iconType="arrowDown"
           onClick={() => setIsContextOpen(true)}
         >
