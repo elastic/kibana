@@ -53,37 +53,40 @@ describe('CreateIndexForm – sample data availability/license', () => {
 
   it('shows SampleDataPanel when sample data is available and license is sufficient', () => {
     mockUseIsSampleDataAvailable.mockReturnValue({
-      isAvailable: true,
+      isPluginAvailable: true,
+      isUsageAvailable: true,
+      hasPrivileges: true,
       hasRequiredLicense: true,
     });
 
     renderWithIntl(<CreateIndexForm {...baseProps} />);
 
     expect(screen.getByTestId('sampleDataPanel')).toBeInTheDocument();
-    expect(screen.queryByTestId('sampleDataLicenseUpgrade')).not.toBeInTheDocument();
   });
 
-  it('shows callout when license is missing (not sufficient) and sample data is unavailable', () => {
+  it('shows nothing when plugin is not available', () => {
     mockUseIsSampleDataAvailable.mockReturnValue({
-      isAvailable: false,
-      hasRequiredLicense: false,
-    });
-
-    renderWithIntl(<CreateIndexForm {...baseProps} />);
-
-    expect(screen.queryByTestId('sampleDataLicenseUpgrade')).toBeInTheDocument();
-    expect(screen.queryByTestId('sampleDataPanel')).not.toBeInTheDocument();
-  });
-
-  it('shows nothing extra when sample data is unavailable but license is sufficient', () => {
-    mockUseIsSampleDataAvailable.mockReturnValue({
-      isAvailable: false,
+      isPluginAvailable: false,
+      isUsageAvailable: false,
+      hasPrivileges: true,
       hasRequiredLicense: true,
     });
 
     renderWithIntl(<CreateIndexForm {...baseProps} />);
 
     expect(screen.queryByTestId('sampleDataPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('sampleDataLicenseUpgrade')).not.toBeInTheDocument();
+  });
+
+  it('shows nothing when user has not required privileges is not available', () => {
+    mockUseIsSampleDataAvailable.mockReturnValue({
+      isPluginAvailable: true,
+      isUsageAvailable: false,
+      hasPrivileges: false,
+      hasRequiredLicense: true,
+    });
+
+    renderWithIntl(<CreateIndexForm {...baseProps} />);
+
+    expect(screen.queryByTestId('sampleDataPanel')).not.toBeInTheDocument();
   });
 });

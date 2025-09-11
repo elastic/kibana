@@ -42,8 +42,10 @@ describe('ConnectToElasticsearchSidePanel', () => {
 
   it('renders nothing when sample data is not available but license is ok', () => {
     mockUseIsSampleDataAvailable.mockReturnValue({
-      isAvailable: false,
+      isPluginAvailable: false,
       hasRequiredLicense: true,
+      hasPrivileges: true,
+      isUsageAvailable: false,
     });
 
     renderWithIntl(<ConnectToElasticsearchSidePanel />);
@@ -52,25 +54,31 @@ describe('ConnectToElasticsearchSidePanel', () => {
     expect(screen.queryByTestId('sampleDataLicenseUpgrade')).not.toBeInTheDocument();
   });
 
-  it('renders a callout when license is missing and sample data is not available', () => {
+  it('renders nothing when user has not required privileges', () => {
     mockUseIsSampleDataAvailable.mockReturnValue({
-      isAvailable: false,
-      hasRequiredLicense: false,
+      isPluginAvailable: true,
+      hasRequiredLicense: true,
+      hasPrivileges: false,
+      isUsageAvailable: true,
     });
 
     renderWithIntl(<ConnectToElasticsearchSidePanel />);
 
-    expect(screen.queryByTestId('sampleDataLicenseUpgrade')).toBeInTheDocument();
+    expect(screen.queryByTestId('sampleDataSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sampleDataLicenseUpgrade')).not.toBeInTheDocument();
   });
 
   it('renders sample data card when sample data is available', () => {
     mockUseIsSampleDataAvailable.mockReturnValue({
-      isAvailable: true,
+      isPluginAvailable: true,
       hasRequiredLicense: true,
+      hasPrivileges: true,
+      isUsageAvailable: false,
     });
 
     renderWithIntl(<ConnectToElasticsearchSidePanel />);
 
     expect(screen.getByTestId('sampleDataSection')).toBeInTheDocument();
+    expect(screen.getByTestId('licenceRequiredBadge')).toBeInTheDocument();
   });
 });

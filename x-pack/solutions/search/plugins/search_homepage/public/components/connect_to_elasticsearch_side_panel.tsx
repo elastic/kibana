@@ -63,25 +63,22 @@ export const ConnectToElasticsearchSidePanel = () => {
             textAlign="left"
             titleSize="xs"
             data-test-subj="sampleDataSection"
-            betaBadgeProps={
-              hasRequiredLicense
-                ? undefined
-                : {
-                    label: i18n.translate(
-                      'xpack.searchHomepage.connectToElasticsearch.licenseBadge.title',
-                      {
-                        defaultMessage: 'Enterprise',
-                      }
-                    ),
-                    tooltipContent: i18n.translate(
-                      'xpack.searchHomepage.connectToElasticsearch.licenseBadge.description',
-                      {
-                        defaultMessage:
-                          'This dataset makes use of AI features that require an Enterprise license.',
-                      }
-                    ),
-                  }
-            }
+            betaBadgeProps={{
+              label: i18n.translate(
+                'xpack.searchHomepage.connectToElasticsearch.licenseBadge.title',
+                {
+                  defaultMessage: 'Enterprise',
+                }
+              ),
+              'data-test-subj': 'licenceRequiredBadge',
+              tooltipContent: i18n.translate(
+                'xpack.searchHomepage.connectToElasticsearch.licenseBadge.description',
+                {
+                  defaultMessage:
+                    'This dataset makes use of AI features that require an Enterprise license.',
+                }
+              ),
+            }}
             title={
               <FormattedMessage
                 id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
@@ -94,7 +91,12 @@ export const ConnectToElasticsearchSidePanel = () => {
                 defaultMessage="Add data sets with sample visualizations, dashboards, and more."
               />
             }
-            footer={<SampleDataActionButton hasRequiredLicense={hasRequiredLicense} />}
+            footer={
+              <SampleDataActionButton
+                data-test-subj="sampleDataActionButton"
+                hasRequiredLicense={hasRequiredLicense}
+              />
+            }
           />
         )}
 
