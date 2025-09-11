@@ -7,6 +7,7 @@
 
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -52,6 +53,7 @@ import type {
   CaseSummaryResponse,
   InferenceConnectorsResponse,
 } from '../types/api';
+import { DataTableRecord } from '@kbn/discover-utils';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -362,3 +364,8 @@ export type CaseViewAlertsTableProps = Pick<
   services?: AlertsTableProps['services'];
   caseData: CaseUI;
 };
+
+export interface CaseViewEventsTableProps {
+  dataView: DataView;
+  data: DataTableRecord[];
+}

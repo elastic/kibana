@@ -47,8 +47,7 @@
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjectsFinder",
-      "unifiedDocViewer"
+      "savedObjectsFinder"
     ],
     "extraPublicDirs": [
       "common",

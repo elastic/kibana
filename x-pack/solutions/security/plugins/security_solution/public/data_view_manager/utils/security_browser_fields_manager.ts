@@ -18,6 +18,31 @@ interface BrowserFieldsResult {
 // NOTE:for referential comparison optimization
 const emptyBrowserFields = {};
 
+export const buildBrowserFields = (fields: DataView['fields']): BrowserFieldsResult => {
+  if (fields == null) return { browserFields: emptyBrowserFields };
+
+  if (!fields.length) {
+    return { browserFields: emptyBrowserFields };
+  }
+
+  const browserFields: BrowserFields = {};
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i].spec;
+    const name = field.name;
+    if (name != null) {
+      const category = getCategory(name);
+      if (browserFields[category] == null) {
+        browserFields[category] = { fields: {} };
+      }
+      const categoryFields = browserFields[category].fields;
+      if (categoryFields) {
+        categoryFields[name] = field;
+      }
+    }
+  }
+  return { browserFields };
+};
+
 /**
  * SecurityBrowserFieldsManager is a singleton class that manages the browser fields
  * for the Security Solution. It caches the browser fields to improve performance
@@ -41,28 +66,7 @@ class SecurityBrowserFieldsManager {
    * @returns An object containing the browserFields.
    */
   private buildBrowserFields(fields: DataView['fields']): BrowserFieldsResult {
-    if (fields == null) return { browserFields: emptyBrowserFields };
-
-    if (!fields.length) {
-      return { browserFields: emptyBrowserFields };
-    }
-
-    const browserFields: BrowserFields = {};
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i].spec;
-      const name = field.name;
-      if (name != null) {
-        const category = getCategory(name);
-        if (browserFields[category] == null) {
-          browserFields[category] = { fields: {} };
-        }
-        const categoryFields = browserFields[category].fields;
-        if (categoryFields) {
-          categoryFields[name] = field;
-        }
-      }
-    }
-    return { browserFields };
+    return buildBrowserFields(fields);
   }
 
   /**
@@ -122,7 +126,7 @@ class SecurityBrowserFieldsManager {
         return cachedResult;
       }
       // If the browser fields for this indexPatterns are not cached, build them
-      const result = this.buildBrowserFields(fields);
+      const result = SecurityBrowserFieldsManager.buildBrowserFields(fields);
       this.dataViewIndexPatternsToBrowserFieldsCache.set(indexPatterns, result);
       return result;
     }

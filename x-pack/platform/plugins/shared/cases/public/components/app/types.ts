@@ -7,7 +7,11 @@
 
 import type { ComponentType, MutableRefObject } from 'react';
 import type { CaseViewAlertsTableProps } from '../../../common';
-import type { CaseViewRefreshPropInterface, UseFetchAlertData } from '../../../common/ui/types';
+import type {
+  CaseViewEventsTableProps,
+  CaseViewRefreshPropInterface,
+  UseFetchAlertData,
+} from '../../../common/ui/types';
 import type { CasesNavigation } from '../links';
 import type { CasesTimelineIntegration } from '../timeline_context';
 
@@ -24,4 +28,5 @@ export interface CasesRoutesProps {
   timelineIntegration?: CasesTimelineIntegration;
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
   renderAlertsTable?: ComponentType<CaseViewAlertsTableProps>;
+  renderEventsTable?: ComponentType<CaseViewEventsTableProps>;
 }

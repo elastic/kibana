@@ -45,6 +45,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     useFetchAlertData,
     onAlertsTableLoaded,
     renderAlertsTable,
+    renderEventsTable,
   }) => {
     const { features } = useCasesContext();
     const { urlParams } = useUrlParams();
@@ -135,7 +136,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
-            <CaseViewEvents caseData={caseData} />
+            <CaseViewEvents caseData={caseData} renderEventsTable={renderEventsTable} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
           {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (

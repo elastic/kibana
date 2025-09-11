@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NO_EVENTS = i18n.translate('xpack.cases.caseView.events.noeventsAvailable', {
-  defaultMessage: 'No events available',
-});
-
-export const SHOWING_EVENTS = (totalevents: number) =>
-  i18n.translate('xpack.cases.caseView.events.showingeventsTitle', {
-    values: { totalevents },
-    defaultMessage: 'Showing {totalevents} {totalevents, plural, =1 {event} other {events}}',
-  });
-
-export const EVENTS_TABLE = i18n.translate('xpack.cases.caseView.events.eventsTable', {
-  defaultMessage: 'Events table',
-});
-
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseView.events.searchPlaceholder', {
   defaultMessage: 'Search events',
 });
