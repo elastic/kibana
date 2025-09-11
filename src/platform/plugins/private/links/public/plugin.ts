@@ -68,7 +68,7 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          container.addNewPanel<LinksEmbeddableState>(
+          return container.addNewPanel<LinksEmbeddableState>(
             {
               panelType: LINKS_EMBEDDABLE_TYPE,
               serializedState: {

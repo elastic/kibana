@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { initializeStateManager } from '@kbn/presentation-publishing';
+import { initializeStateManager, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';
@@ -33,6 +33,8 @@ export const createSavedBookAction = (core: CoreStart) => {
         defaultBookState,
         defaultBookState
       );
+      let newlyCreatedPanel: unknown;
+
       openLazyFlyout({
         core,
         parentApi: parent,
@@ -43,7 +45,7 @@ export const createSavedBookAction = (core: CoreStart) => {
             stateManager: newBookStateManager,
             isCreate: true,
             onSubmit: async ({ savedObjectId }) => {
-              embeddable.addNewPanel<BookEmbeddableState>({
+              newlyCreatedPanel = await embeddable.addNewPanel<BookEmbeddableState>({
                 panelType: BOOK_EMBEDDABLE_TYPE,
                 serializedState: {
                   rawState: savedObjectId
@@ -53,6 +55,13 @@ export const createSavedBookAction = (core: CoreStart) => {
               });
             },
           });
+        },
+        flyoutProps: {
+          determineFocusTargetAfterClose: () => {
+            return apiHasUniqueId(newlyCreatedPanel)
+              ? document.getElementById(`panel-${newlyCreatedPanel.uuid}`)
+              : document.getElementById(`dashboardEditorMenuButton`);
+          },
         },
       });
     },

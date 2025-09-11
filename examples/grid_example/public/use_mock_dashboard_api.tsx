@@ -111,6 +111,7 @@ export const useMockDashboardApi = ({
             },
           },
         });
+        return newId;
       },
       canRemovePanels: () => true,
       getChildApi: () => {

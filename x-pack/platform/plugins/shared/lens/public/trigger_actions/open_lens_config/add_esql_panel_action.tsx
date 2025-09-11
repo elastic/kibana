@@ -72,7 +72,12 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           showOnly: true,
         });
       },
-      options: { uuid },
+      options: {
+        uuid,
+        determineFocusTargetAfterClose: () =>
+          document.getElementById(`panel-${uuid}`) ??
+          document.getElementById('dashboardEditorMenuButton'),
+      },
     });
   }
 }

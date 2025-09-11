@@ -400,7 +400,7 @@ export class DiscoverPlugin
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
         const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
-        container.addNewPanel(
+        return container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {

@@ -164,10 +164,12 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
             serializedState: { rawState: newState },
           });
         }
+        return controlId;
       },
       initialState: {
         ...initialState,
       },
+      isNew: false,
       controlType,
       controlId,
       initialDefaultPanelTitle: defaultTitle$.getValue(),

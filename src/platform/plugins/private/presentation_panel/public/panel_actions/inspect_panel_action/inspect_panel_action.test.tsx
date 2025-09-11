@@ -82,6 +82,7 @@ describe('Inspect panel action', () => {
         flyoutProps: {
           focusedPanelId: 'some-uuid',
           type: 'push',
+          determineFocusTargetAfterClose: expect.any(Function),
         },
       },
       context.embeddable.parentApi

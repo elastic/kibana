@@ -22,7 +22,7 @@ export const mountInlinePanel = async ({
   core,
   api,
   loadContent,
-  options: { dataTestSubj, uuid, container } = {},
+  options: { dataTestSubj, uuid, container, determineFocusTargetAfterClose } = {},
 }: {
   core: CoreStart;
   api?: unknown;
@@ -36,6 +36,7 @@ export const mountInlinePanel = async ({
     dataTestSubj?: string;
     uuid?: string;
     container?: HTMLElement | null;
+    determineFocusTargetAfterClose?: () => Element | null;
   };
 }) => {
   if (container) {
@@ -53,6 +54,17 @@ export const mountInlinePanel = async ({
       ...lensFlyoutProps,
       'data-test-subj': dataTestSubj ?? 'customizeLens',
       focusedPanelId: uuid,
+      determineFocusTargetAfterClose: () => {
+        console.log('determineFocusTargetAfterClose');
+        console.log(
+          document.getElementById(`panel-${uuid}`) ??
+            document.getElementById('dashboardEditorMenuButton')
+        );
+        return (
+          document.getElementById(`panel-${uuid}`) ??
+          document.getElementById('dashboardEditorMenuButton')
+        );
+      }, // TODO
     },
   });
 };

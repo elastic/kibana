@@ -73,62 +73,57 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
     });
   }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
 
-  const titleId = 'copyToDashboardTitle';
-  const descriptionId = 'copyToDashboardDescription';
-
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
+    <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId} component="h2">
+        <EuiModalHeaderTitle component="h2">
           {dashboardCopyToDashboardActionStrings.getDisplayName()}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <>
-          <EuiFormRow hasChildLabel={false}>
-            <div data-test-subj="add-to-dashboard-options">
-              {canEditExisting && (
-                <>
-                  <EuiRadio
-                    checked={dashboardOption === 'existing'}
-                    data-test-subj="add-to-existing-dashboard-option"
-                    id="existing-dashboard-option"
-                    name="dashboard-option"
-                    label={dashboardCopyToDashboardActionStrings.getExistingDashboardOption()}
-                    onChange={() => setDashboardOption('existing')}
+        <EuiFormRow hasChildLabel={false}>
+          <div data-test-subj="add-to-dashboard-options">
+            {canEditExisting && (
+              <>
+                <EuiRadio
+                  checked={dashboardOption === 'existing'}
+                  data-test-subj="add-to-existing-dashboard-option"
+                  id="existing-dashboard-option"
+                  name="dashboard-option"
+                  label={dashboardCopyToDashboardActionStrings.getExistingDashboardOption()}
+                  onChange={() => setDashboardOption('existing')}
+                />
+                <EuiSpacer size="s" />
+                <div>
+                  <DashboardPicker
+                    isDisabled={dashboardOption !== 'existing'}
+                    idsToOmit={dashboardId ? [dashboardId] : undefined}
+                    onChange={(dashboard) => {
+                      setSelectedDashboard(dashboard);
+                      setDashboardOption('existing');
+                    }}
                   />
-                  <EuiSpacer size="s" />
-                  <div>
-                    <DashboardPicker
-                      isDisabled={dashboardOption !== 'existing'}
-                      idsToOmit={dashboardId ? [dashboardId] : undefined}
-                      onChange={(dashboard) => {
-                        setSelectedDashboard(dashboard);
-                        setDashboardOption('existing');
-                      }}
-                    />
-                  </div>
-                  <EuiSpacer size="s" />
-                </>
-              )}
-              {canCreateNew && (
-                <>
-                  <EuiRadio
-                    checked={dashboardOption === 'new'}
-                    data-test-subj="add-to-new-dashboard-option"
-                    id="new-dashboard-option"
-                    name="dashboard-option"
-                    disabled={!dashboardId}
-                    label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
-                    onChange={() => setDashboardOption('new')}
-                  />
-                  <EuiSpacer size="s" />
-                </>
-              )}
-            </div>
-          </EuiFormRow>
-        </>
+                </div>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            {canCreateNew && (
+              <>
+                <EuiRadio
+                  checked={dashboardOption === 'new'}
+                  data-test-subj="add-to-new-dashboard-option"
+                  id="new-dashboard-option"
+                  name="dashboard-option"
+                  disabled={!dashboardId}
+                  label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
+                  onChange={() => setDashboardOption('new')}
+                />
+                <EuiSpacer size="s" />
+              </>
+            )}
+          </div>
+        </EuiFormRow>
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -144,6 +139,6 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
           {dashboardCopyToDashboardActionStrings.getAcceptButtonName()}
         </EuiButton>
       </EuiModalFooter>
-    </div>
+    </>
   );
 }

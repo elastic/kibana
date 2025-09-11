@@ -51,6 +51,10 @@ export interface OpenFieldEditorOptions {
    * pre-selectable options for new field creation
    */
   fieldToCreate?: Field;
+  /**
+   * determines which element to focus after the flyout is closed
+   */
+  determineFocusTargetAfterClose?: () => Element | null;
 }
 
 interface Dependencies {
@@ -98,6 +102,7 @@ export const getFieldEditorOpener =
       fieldName: fieldNameToEdit,
       fieldToCreate,
       ctx: { dataView: dataViewLazyOrNot },
+      determineFocusTargetAfterClose,
     }: OpenFieldEditorOptions): Promise<CloseEditor> => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -248,6 +253,7 @@ export const getFieldEditorOpener =
             // // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
             style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
+          determineFocusTargetAfterClose,
         }
       );
 

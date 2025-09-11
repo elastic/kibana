@@ -15,7 +15,7 @@ import { ConfigEditorContent } from './config_editor_content';
 export interface ConfigEditorProps {
   coreServices: CoreStart;
   initialConfig?: EmbeddableAlertsTableConfig;
-  onSave: (newConfig: EmbeddableAlertsTableConfig) => void;
+  onSave: (newConfig: EmbeddableAlertsTableConfig) => Promise<void>;
   closeFlyout: () => void;
   ariaLabelledBy: string;
 }
@@ -34,8 +34,8 @@ export const ConfigEditor = ({
       <ConfigEditorContent
         ariaLabelledBy={ariaLabelledBy}
         initialConfig={initialConfig}
-        onSave={(newConfig: EmbeddableAlertsTableConfig) => {
-          onSave(newConfig);
+        onSave={async (newConfig: EmbeddableAlertsTableConfig) => {
+          await onSave(newConfig);
           closeFlyout();
         }}
         onCancel={closeFlyout}

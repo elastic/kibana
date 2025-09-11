@@ -17,7 +17,7 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
   onAdd: (
     container: CanAddNewPanel,
     savedObject: SavedObjectCommon<TSavedObjectAttributes>
-  ) => void;
+  ) => Promise<unknown>;
   savedObjectMetaData: SavedObjectMetaData;
 };
 

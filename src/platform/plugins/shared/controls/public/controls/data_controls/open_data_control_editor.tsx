@@ -25,13 +25,15 @@ export const openDataControlEditor = <
   initialDefaultPanelTitle,
   onSave,
   controlGroupApi,
+  isNew,
 }: {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
-  onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
+  onSave: ({ type, state }: { type: string; state: Partial<State> }) => string;
   controlGroupApi: ControlGroupApi;
+  isNew?: boolean;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -63,6 +65,8 @@ export const openDataControlEditor = <
       });
   };
 
+  let newlyCreatedId: string;
+
   openLazyFlyout({
     core: coreServices,
     parentApi: controlGroupApi.parentApi,
@@ -75,19 +79,25 @@ export const openDataControlEditor = <
           initialState={initialState}
           controlType={controlType}
           controlId={controlId}
+          isNew={isNew}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}
-          onSave={(state, selectedControlType) => {
+          onSave={async (state, selectedControlType) => {
+            await onSave({ type: selectedControlType, state });
             closeFlyout();
-            onSave({ type: selectedControlType, state });
           }}
         />
       );
     },
     flyoutProps: {
-      triggerId: 'dashboard-controls-menu-button',
+      determineFocusTargetAfterClose: () => {
+        return (
+          document.getElementById(`control-title-${controlId || newlyCreatedId}`) ||
+          document.getElementById('dashboard-controls-menu-button')
+        );
+      },
     },
   });
 };

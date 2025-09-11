@@ -17,3 +17,5 @@ export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 export const ACTION_ADD_SECTION = 'addCollapsibleSection';
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
+
+export const copyToDashboardDescriptionId = 'copyToDashboardDescription';

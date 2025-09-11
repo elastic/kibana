@@ -9,8 +9,13 @@ import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiHasUniqueId,
+  apiPublishesTimeRange,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import { focusFirstFocusable } from '@kbn/presentation-util';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../common';
@@ -66,6 +71,11 @@ export function openModal(
   const cleanupDom = (shouldCleanup?: boolean) => {
     if (targetDomElement != null && shouldCleanup) {
       unmountComponentAtNode(targetDomElement);
+    }
+    // focus the panel
+    const triggerId = apiHasUniqueId(lensApi) ? `panel-${lensApi.uuid}` : undefined;
+    if (triggerId) {
+      focusFirstFocusable(document.getElementById(triggerId));
     }
   };
 

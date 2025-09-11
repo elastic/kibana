@@ -26,7 +26,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerAddFromLibraryType<MapAttributes>({
     onAdd: async (container, savedObject) => {
       const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
-      container.addNewPanel<MapSerializedState>(
+      return container.addNewPanel<MapSerializedState>(
         {
           panelType: MAP_SAVED_OBJECT_TYPE,
           serializedState: {

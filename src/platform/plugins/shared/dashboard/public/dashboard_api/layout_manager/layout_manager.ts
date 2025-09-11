@@ -442,7 +442,16 @@ export function initializeLayoutManager(
           ...currentLayout,
           sections,
         });
-        trackPanel.scrollToBottom$.next();
+
+        console.log('waht is this', newId);
+        trackPanel.setScrollToPanelId(newId);
+        // complete.then(() => {
+        //   // focus the new section
+        //   console.log('is happens')
+        //   focusFirstFocusable(
+        //     document.getElementById(`kbnGridSectionTitle-${newId}`)
+        //   );
+        // });
       },
     },
     cleanup: () => {
