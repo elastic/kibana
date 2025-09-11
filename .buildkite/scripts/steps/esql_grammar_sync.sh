@@ -4,19 +4,10 @@ set -euo pipefail
 synchronize_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
-  source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/lexer"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
-  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
-  destination_lib_dir="$destination_lib_parent_dir/lexer"
 
-
-  # Copy the files
-  echo "Copying base lexer file..."
+  # Copy the file
   cp "$source_file" "$destination_file"
-  echo "Copying lexer lib files..."
-  rm -rf "$destination_lib_dir"
-  cp -r "$source_lib_dir" "$destination_lib_parent_dir"
-
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -35,17 +26,10 @@ synchronize_lexer_grammar () {
 synchronize_parser_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
-  source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/parser"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_parser.g4"
-  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
-  destination_lib_dir="$destination_lib_parent_dir/parser"
 
-  # Copy the files
-  echo "Copying base parser file..."
+  # Copy the file
   cp "$source_file" "$destination_file"
-  echo "Copying parser lib files..."
-  rm -rf "$destination_lib_dir"
-  cp -r "$source_lib_dir" "$destination_lib_parent_dir"
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -76,6 +60,15 @@ main () {
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
 
+  
+  cd "$PARENT_DIR/elasticsearch"
+  echo "FETCHING 8.19 branch"
+  git fetch origin 8.19
+
+  echo "CHECKING OUT 8.19 branch"
+  git checkout FETCH_HEAD -b 8.19
+
+
   cd "$KIBANA_DIR"
 
   license_header=$(cat "$KIBANA_DIR/licenses/ELASTIC-LICENSE-2.0-HEADER.txt")
@@ -101,18 +94,8 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update grammars'
+  PR_TITLE='[ES|QL] Update grammars on 8.19'
   PR_BODY='This PR updates the ES|QL grammars (lexer and parser) to match the latest version in Elasticsearch.'
-
-  # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
-
-  if [ "$pr_search_result" == "$PR_TITLE" ]; then
-    echo "PR already exists. Exiting."
-    exit
-  fi
-
-  echo "No existing PR found. Proceeding."
 
   report_main_step "Building ANTLR artifacts."
 
@@ -120,7 +103,7 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
-  cd ./src/platform/packages/shared/kbn-esql-ast
+  cd ./src/platform/packages/shared/kbn-esql-ast/src
   yarn build:antlr4:esql
 
   # Make a commit
@@ -128,7 +111,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add src/antlr/*
+  git add antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."
@@ -136,7 +119,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base 8.19 --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
 }
 
 main
