@@ -144,7 +144,7 @@ export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?:
     ? getLocatorParamsMap[rule.ruleTypeId](rule)
     : undefined;
 
-  if (!alert || !params || !discover.locator) return { discoverUrl: null };
+  if (!alert || !params || !discover?.locator) return { discoverUrl: null };
 
   return {
     discoverUrl: discover.locator.getRedirectUrl({
