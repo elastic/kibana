@@ -35,7 +35,7 @@ export function IlmField({
 }: ModalOptions) {
   const existingLifecycle = definition.effective_lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
-    isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
+    isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm?.policy : undefined
   );
   const [policies, setPolicies] = useState<Array<EuiSelectableOption<IlmOptionData>>>([]);
   const [isLoading, setIsLoading] = useState(false);

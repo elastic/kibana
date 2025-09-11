@@ -64,6 +64,7 @@ export function DslField({ definition, isDisabled, setLifecycle, setSaveButtonDi
           data_retention: `${Number(retentionValue)}${selectedUnit.value}`,
         },
       });
+      setSaveButtonDisabled(false);
     } else {
       setSaveButtonDisabled(true);
     }

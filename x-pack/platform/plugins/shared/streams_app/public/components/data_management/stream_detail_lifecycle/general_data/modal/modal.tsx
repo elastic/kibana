@@ -66,7 +66,9 @@ export function EditLifecycleModal({
     definition.effective_lifecycle as IngestStreamLifecycle
   );
 
-  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(false);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
+    selectedAction === 'ilm'
+  );
 
   const isWired = Streams.WiredStream.GetResponse.is(definition);
 
@@ -160,7 +162,13 @@ export function EditLifecycleModal({
                     setIsSaveButtonDisabled(false);
                   } else {
                     setIsInherit(false);
-                    setIsSaveButtonDisabled(selectedAction === 'ilm' && !isIlmLifecycle(lifecycle));
+                    setIsSaveButtonDisabled(selectedAction === 'ilm');
+                    if (selectedAction === 'forever') {
+                      setLifecycle({ dsl: {} });
+                    }
+                    if (selectedAction === 'custom') {
+                      setLifecycle({ dsl: { data_retention: initialCustomPeriodValue } });
+                    }
                   }
                 }}
                 data-test-subj="inheritDataRetentionSwitch"
@@ -191,7 +199,7 @@ export function EditLifecycleModal({
                   setIsSaveButtonDisabled(false);
                 }
                 if (value === 'ilm') {
-                  setIsSaveButtonDisabled(!isIlmLifecycle(lifecycle));
+                  setIsSaveButtonDisabled(true);
                 }
                 setSelectedAction(value as LifecycleEditAction);
               }}
