@@ -6,7 +6,7 @@
  */
 
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { catchError, lastValueFrom, map, tap, throwError } from 'rxjs';
+import { catchError, filter, lastValueFrom, map, tap, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { Logger } from '@kbn/core/server';
 import type { AsyncSearchClient } from '../task_runner/types';
@@ -64,13 +64,12 @@ export function wrapAsyncSearchClient<P extends AsyncSearchParams>({
               }
               return throwError(() => error);
             }),
+            filter((response) => !isRunningResponse(response)),
             tap((response) => {
-              if (!isRunningResponse(response)) {
-                const durationMs = Date.now() - start;
-                numSearches++;
-                esSearchDurationMs += response.rawResponse.took ?? 0;
-                totalSearchDurationMs += durationMs;
-              }
+              const durationMs = Date.now() - start;
+              numSearches++;
+              esSearchDurationMs += response.rawResponse.took ?? 0;
+              totalSearchDurationMs += durationMs;
             }),
             map((response) => {
               return response.rawResponse;

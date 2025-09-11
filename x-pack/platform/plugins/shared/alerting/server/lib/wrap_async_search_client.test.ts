@@ -33,6 +33,8 @@ const fakeRequest = {
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
 describe('wrapScopedClusterClient', () => {
+  const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
+
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
@@ -52,11 +54,10 @@ describe('wrapScopedClusterClient', () => {
 
   test('searches with the correct params', async () => {
     const abortController = new AbortController();
-    const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
     client.search = jest.fn().mockImplementation(
       (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of({
-          isRunning: true,
+          isRunning: false,
           rawResponse: { took: 1, columns: [], values: [] },
         })
     );
@@ -93,11 +94,10 @@ describe('wrapScopedClusterClient', () => {
 
   test('returns the rawResponse', async () => {
     const abortController = new AbortController();
-    const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
     client.search = jest.fn().mockImplementation(
       (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of({
-          isRunning: true,
+          isRunning: false,
           rawResponse: { took: 1, columns: [], values: [] },
         })
     );
@@ -127,7 +127,6 @@ describe('wrapScopedClusterClient', () => {
 
   test('re-throws error when search throws error', async () => {
     const abortController = new AbortController();
-    const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
     client.search = jest.fn().mockReturnValue(throwError(() => new Error('something went wrong!')));
 
     const asyncSearchClient = wrapAsyncSearchClient({
@@ -151,7 +150,6 @@ describe('wrapScopedClusterClient', () => {
   test('throws error when search throws abort error', async () => {
     const abortController = new AbortController();
     abortController.abort();
-    const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
     client.search = jest.fn().mockReturnValue(throwError(() => new Error()));
 
     const asyncSearchClient = wrapAsyncSearchClient({
@@ -176,7 +174,6 @@ describe('wrapScopedClusterClient', () => {
 
   test('keeps the metrics', async () => {
     const abortController = new AbortController();
-    const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
     client.search = jest.fn().mockImplementation(
       (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of(
