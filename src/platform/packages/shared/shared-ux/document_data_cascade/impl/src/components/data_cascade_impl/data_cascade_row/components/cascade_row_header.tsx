@@ -62,6 +62,11 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     rowCanSelect,
   } = useAdaptedTableRows<G, L>({ rowInstance });
 
+  const headerMetaSlots = useMemo(
+    () => rowHeaderMetaSlots?.({ row: rowInstance }) ?? [],
+    [rowHeaderMetaSlots, rowInstance]
+  );
+
   const fetchGroupNodeData = useCallback(() => {
     const dataFetchFn = async () => {
       const groupNodeData = await onCascadeGroupNodeExpanded({
@@ -146,7 +151,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
             <EuiFlexItem>
               <EuiButtonIcon
                 color="text"
-                iconType={rowIsExpanded ? 'arrowUp' : 'arrowDown'}
+                iconType={rowIsExpanded ? 'arrowDown' : 'arrowRight'}
                 onClick={rowToggleFn}
                 aria-label={i18n.translate('sharedUXPackages.dataCascade.toggleRowButtonLabel', {
                   defaultMessage: 'toggle row',
@@ -158,28 +163,29 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         </EuiFlexItem>
         <EuiFlexItem css={{ minWidth: 0, maxWidth: '100%' }}>
           <EuiFlexGroup justifyContent="spaceBetween" direction="row">
-            <EuiFlexItem
-              grow={4}
-              css={{
-                minWidth: 0,
-                maxWidth: '35%',
-                overflow: 'hidden',
-                justifyContent: 'center',
-              }}
-            >
+            <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot row={rowInstance} />
             </EuiFlexItem>
-            <EuiFlexItem grow={6} css={{ minWidth: 0, maxWidth: '60%', overflow: 'hidden' }}>
+            <EuiFlexItem
+              grow={6}
+              css={{
+                minWidth: 0,
+                overflow: 'hidden',
+              }}
+              style={{
+                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots.length, 1) * 20, 60)}%`,
+              }}
+            >
               <EuiFlexGroup
                 direction="row"
                 gutterSize={size}
                 alignItems="center"
                 justifyContent="flexEnd"
-                style={{ overflow: 'scroll' }}
+                css={styles.rowHeaderSlotWrapper}
               >
                 <React.Fragment>
-                  {rowHeaderMetaSlots?.({ row: rowInstance }).map((metaSlot, index) => (
-                    <EuiFlexItem css={styles.rowHeaderSlotWrapper} key={index} grow>
+                  {headerMetaSlots.map((metaSlot, index) => (
+                    <EuiFlexItem css={styles.rowHeaderSlotInner} key={index} grow>
                       {metaSlot}
                     </EuiFlexItem>
                   ))}
@@ -189,7 +195,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                     <EuiFlexItem
                       key="actions"
                       css={[
-                        styles.rowHeaderSlotWrapper,
+                        styles.rowHeaderSlotInner,
                         {
                           paddingLeft: euiTheme.size[size],
                         },

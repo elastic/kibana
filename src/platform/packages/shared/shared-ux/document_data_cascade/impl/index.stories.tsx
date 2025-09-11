@@ -147,10 +147,10 @@ export const CascadeGridImplementation: StoryObj<
                   : baseSlotDef;
               }}
               rowHeaderActions={({ row }) => [
-                <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+                <EuiButtonEmpty color="text" iconSide="right" iconType="arrowDown" flush="right">
                   <FormattedMessage
                     id="sharedUXPackages.data_cascade.demo.row.action"
-                    defaultMessage="Take Action"
+                    defaultMessage="Take action"
                   />
                 </EuiButtonEmpty>,
               ]}
