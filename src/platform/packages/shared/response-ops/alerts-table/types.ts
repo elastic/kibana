@@ -579,7 +579,7 @@ export interface ContentPanelConfig extends PanelConfig {
   items?: never;
 }
 
-export interface ItemsPanelConfig extends PanelConfig {
+interface ItemsPanelConfig extends PanelConfig {
   content?: never;
   items: BulkActionsConfig[];
 }

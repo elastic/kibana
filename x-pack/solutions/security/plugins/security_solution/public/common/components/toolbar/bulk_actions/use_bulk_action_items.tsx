@@ -13,6 +13,7 @@ import type {
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
+  AlertClosingReason,
 } from '../../../../../common/types';
 import * as i18n from './translations';
 import { updateAlertStatus } from './update_alerts';
@@ -22,7 +23,6 @@ import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
-import type { AlertClosingReason } from '../../../../../common/constants';
 import { useBulkAlertClosingReasonItems } from './use_bulk_alert_closing_reason_items';
 
 export interface BulkActionsProps {

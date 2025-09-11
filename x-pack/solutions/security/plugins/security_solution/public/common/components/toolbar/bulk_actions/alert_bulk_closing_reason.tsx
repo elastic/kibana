@@ -9,43 +9,42 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import * as i18n from './translations';
-import {
-  CLOSING_REASON_DUPLICATE,
-  CLOSING_REASON_FALSE_POSITIVE,
-  CLOSING_REASON_CLOSE_WITHOUT_REASON,
-  CLOSING_REASON_TRUE_POSITIVE,
-  CLOSING_REASON_BENIGN_POSITIVE,
-  CLOSING_REASON_AUTOMATED_CLOSURE,
-  CLOSING_REASON_OTHER,
-} from '../../../../../common/translations';
-import { AlertClosingReasonValues } from '../../../../../common/constants';
-import type { AlertClosingReason } from '../../../../../common/constants';
+import { AlertClosingReasonValues } from '../../../../../common/types';
+import type { AlertClosingReason } from '../../../../../common/types';
 
-const closingReasons: EuiSelectableOption<{
+export const closingReasons: EuiSelectableOption<{
   key?: AlertClosingReason;
 }>[] = [
-  { label: CLOSING_REASON_CLOSE_WITHOUT_REASON, key: undefined },
+  { label: i18n.CLOSING_REASON_CLOSE_WITHOUT_REASON, key: undefined },
 
-  { label: CLOSING_REASON_DUPLICATE, key: AlertClosingReasonValues.duplicate },
-  { label: CLOSING_REASON_FALSE_POSITIVE, key: AlertClosingReasonValues.false_positive },
-  { label: CLOSING_REASON_TRUE_POSITIVE, key: AlertClosingReasonValues.true_positive },
-  { label: CLOSING_REASON_BENIGN_POSITIVE, key: AlertClosingReasonValues.benign_positive },
-  { label: CLOSING_REASON_AUTOMATED_CLOSURE, key: AlertClosingReasonValues.automated_closure },
-  { label: CLOSING_REASON_OTHER, key: AlertClosingReasonValues.other },
+  { label: i18n.CLOSING_REASON_DUPLICATE, key: AlertClosingReasonValues.duplicate },
+  { label: i18n.CLOSING_REASON_FALSE_POSITIVE, key: AlertClosingReasonValues.false_positive },
+  { label: i18n.CLOSING_REASON_TRUE_POSITIVE, key: AlertClosingReasonValues.true_positive },
+  { label: i18n.CLOSING_REASON_BENIGN_POSITIVE, key: AlertClosingReasonValues.benign_positive },
+  { label: i18n.CLOSING_REASON_AUTOMATED_CLOSURE, key: AlertClosingReasonValues.automated_closure },
+  { label: i18n.CLOSING_REASON_OTHER, key: AlertClosingReasonValues.other },
 ];
 
 interface BulkAlertClosingReasonComponentProps {
+  /**
+   * Callback call once the user confirm their selection.
+   * The reason passed is of type AlertClosingReasonValues or
+   * `undefined` in case the user selected the option "close without reason"
+   * @param reason
+   */
   onSubmit(reason?: AlertClosingReason): void;
 }
 
+/**
+ * Renders the list of available closing action for
+ * the alerts and the confirm button
+ */
 const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentProps> = ({
   onSubmit,
 }) => {
   const [options, setOptions] = useState(closingReasons);
 
-  const selectedOption = useMemo(() => {
-    return options.find((option) => option.checked);
-  }, [options]);
+  const selectedOption = useMemo(() => options.find((option) => option.checked), [options]);
 
   const onSubmitHandler = useCallback(() => {
     if (!selectedOption) return;
@@ -59,8 +58,6 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
         options={options}
         onChange={(updatedOptions) => setOptions(updatedOptions)}
         singleSelection="always"
-        // This should be "full" but for some reason it's not working properly
-        // height={'full'}
         height={options.length * 32}
       >
         {(list) => list}

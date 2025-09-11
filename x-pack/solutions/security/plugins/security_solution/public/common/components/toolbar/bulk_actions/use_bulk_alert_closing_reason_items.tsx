@@ -13,19 +13,28 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 import { BulkAlertClosingReason } from './alert_bulk_closing_reason';
 import * as i18n from './translations';
-import type { AlertClosingReason } from '../../../../../common/constants';
+import type { AlertClosingReason } from '../../../../../common/types';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID';
+export const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID';
 
 interface OnSubmitCloseReasonParams extends RenderContentPanelProps {
+  /**
+   * The reason the alert(s) are being closed
+   */
   reason?: AlertClosingReason;
 }
 
-interface UseBulkAlertClosingReasonItemsProps {
+export interface UseBulkAlertClosingReasonItemsProps {
+  /**
+   * Called once the user confirms the closing reason
+   */
   onSubmitCloseReason: (params: OnSubmitCloseReasonParams) => void;
 }
 
+/**
+ * Returns items and panels to be used in a EuiContextMenu component
+ */
 export const useBulkAlertClosingReasonItems = ({
   onSubmitCloseReason,
 }: UseBulkAlertClosingReasonItemsProps) => {

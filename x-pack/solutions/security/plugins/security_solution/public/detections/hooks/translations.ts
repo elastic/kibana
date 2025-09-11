@@ -132,38 +132,3 @@ export const ALERT_CLOSE_INFO_MODAL_DO_NOT_SHOW_AGAIN_LABEL = i18n.translate(
     defaultMessage: 'Do not show this message again.',
   }
 );
-
-export const BULK_ACTION_CLOSING_PANEL_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkActions.closingPanelTitle',
-  {
-    defaultMessage: 'Select a reason for closing',
-  }
-);
-
-export const BULK_ACTION_CLOSE_SELECTED_AS_NONE = i18n.translate(
-  'xpack.securitySolution.bulkActions.closeSelectedAsNone',
-  {
-    defaultMessage: 'None',
-  }
-);
-
-export const BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE = i18n.translate(
-  'xpack.securitySolution.bulkActions.closeSelectedAsDuplicate',
-  {
-    defaultMessage: 'Duplicate',
-  }
-);
-
-export const BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE = i18n.translate(
-  'xpack.securitySolution.bulkActions.closeSelectedAsFalsePositive',
-  {
-    defaultMessage: 'False positive',
-  }
-);
-
-export const BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED = i18n.translate(
-  'xpack.securitySolution.bulkActions.closeSelectedAsInvestigationRequired',
-  {
-    defaultMessage: 'Investigation required',
-  }
-);

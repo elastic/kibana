@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertClosingReason } from '../../../../../common/constants';
+import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 
 export interface BasicSignals {

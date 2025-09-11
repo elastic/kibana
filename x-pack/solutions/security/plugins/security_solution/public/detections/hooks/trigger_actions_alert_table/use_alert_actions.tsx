@@ -13,7 +13,7 @@ import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { AlertClosingReason } from '../../../../common/constants';
+import type { AlertClosingReason } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -26,7 +26,7 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
 import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 
-interface UseBulkAlertActionItemsArgs {
+export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
   tableId: TableId;
   /* start time being passed to the Events Table */
