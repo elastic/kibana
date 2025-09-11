@@ -8,7 +8,7 @@
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { MapAttributes } from '../../common/content_management';
-import { injectReferences } from '../../common/migrations/references';
+import { extractReferences, injectReferences } from '../../common/migrations/references';
 
 export function inject(
   state: EmbeddableStateWithType & { attributes?: MapAttributes },
@@ -21,8 +21,13 @@ export function inject(
 
   // by-value embeddable
   try {
-    const { attributes: attributesWithInjectedIds } = injectReferences({
+    // run state through extract logic to ensure any state with hard coded ids is replace with refNames
+    // refName generation will produce consistent values allowing inject logic to then replace refNames with current ids.
+    const attributesWithNoHardCodedIds = extractReferences({
       attributes: state.attributes,
+    }).attributes;
+    const { attributes: attributesWithInjectedIds } = injectReferences({
+      attributes: attributesWithNoHardCodedIds,
       references,
     });
     return {
