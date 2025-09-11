@@ -11,19 +11,31 @@ results=()
 configs=""
 failedConfigs=""
 
+# Parallel execution tuning (can be overridden via env)
+#   JEST_MAX_PARALLEL: number of concurrent Jest config processes
+#   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
+# NOTE: MAX_PARALLEL default now depends on TEST_TYPE (unit=3, integration=1).
+# It can still be overridden by exporting JEST_MAX_PARALLEL.
+MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
+MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-6144}"
+
 if [[ "$1" == 'jest.config.js' ]]; then
-  # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
-  # https://github.com/elastic/kibana/issues/141477
-  # parallelism="-w2"
-  parallelism="--runInBand"
+  # unit tests
   TEST_TYPE="unit"
 else
-  # run integration tests in-band
-  parallelism="--runInBand"
   TEST_TYPE="integration"
 fi
 
 export TEST_TYPE
+
+# Adjust default MAX_PARALLEL after TEST_TYPE is known unless user overrode.
+if [[ -z "${JEST_MAX_PARALLEL:-}" ]]; then
+  if [[ "$TEST_TYPE" == "unit" ]]; then
+    MAX_PARALLEL=3
+  else
+    MAX_PARALLEL=1
+  fi
+fi
 
 # Added section for tracking and retrying failed configs
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${TEST_TYPE}${JOB}"
@@ -54,65 +66,34 @@ echo "
   output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 
-while read -r config; do
-  echo "--- $ node scripts/jest --config $config"
+# Execute all configs through the combined jest_all runner.
+# The new runner will handle iterating through configs and reporting.
 
-  # --trace-warnings to debug
-  # Node.js process-warning detected:
-  # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+# Flatten configs (newline separated) into comma-separated list for flag usage.
+CONFIGS_CSV=$(echo "$configs" | tr '\n' ',' | sed 's/,$//')
 
-  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
-    cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
-  fi
+echo "--- Running combined jest_all for configs ($TEST_TYPE)"
+echo "$configs"
 
-  cmd=$cmd"\" NODE_ENV=test node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
-
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
-
-  start=$(date +%s)
-
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  eval "$cmd"
-  lastCode=$?
-  set -e;
-
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
-done <<< "$configs"
-
-if [[ "$failedConfigs" ]]; then
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
+node_opts="--max-old-space-size=${MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
+if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+  node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
 
-echo "--- Jest configs complete"
-printf "%s\n" "${results[@]}"
+echo "actual full command is:"
+echo "NODE_OPTIONS=\"$node_opts\" NODE_ENV="test" node ./scripts/jest_all --configs=\"$CONFIGS_CSV\" --coverage=false --passWithNoTests"
 echo ""
+
+set +e
+NODE_OPTIONS="$node_opts" node ./scripts/jest_all --configs="$CONFIGS_CSV" --coverage=false --passWithNoTests
+code=$?
+set -e
+
+if [ $code -ne 0 ]; then
+  exitCode=10
+fi
+
+echo "--- Jest configs complete (combined)"
 
 # Scout reporter
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
