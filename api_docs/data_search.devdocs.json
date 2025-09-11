@@ -12898,7 +12898,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          ") => [",
+          ", options?: { refNamePrefix?: string | undefined; } | undefined) => [",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12934,6 +12934,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.extractReferences.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.extractReferences.$2.refNamePrefix",
+                "type": "string",
+                "tags": [],
+                "label": "refNamePrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
