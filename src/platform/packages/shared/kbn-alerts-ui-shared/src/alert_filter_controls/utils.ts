@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ControlGroupRuntimeState,
-  OptionsListDSLControlState,
-  ControlPanelState,
-} from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/controls-plugin/public';
 
 import { isEmpty, isEqual, pick } from 'lodash';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {

@@ -8,12 +8,12 @@
  */
 
 import { DEFAULT_SEARCH_TECHNIQUE } from '@kbn/controls-constants';
-import type { OptionsListControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 
 export type EditorState = Pick<
-  OptionsListControlState,
+  OptionsListDSLControlState,
   'searchTechnique' | 'singleSelect' | 'runPastTimeout'
 >;
 

@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ControlGroupRuntimeState,
-  OptionsListDSLControlState,
-} from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter } from '@kbn/es-query';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 

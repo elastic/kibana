@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OptionsListControlState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   type Filter,
@@ -20,7 +20,7 @@ export const buildFilter = (
   dataView: DataView,
   controlId: string,
   filterState: Pick<
-    OptionsListControlState,
+    OptionsListDSLControlState,
     'fieldName' | 'existsSelected' | 'exclude' | 'selectedOptions'
   >
 ) => {
