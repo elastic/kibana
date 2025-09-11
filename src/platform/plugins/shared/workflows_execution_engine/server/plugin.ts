@@ -292,6 +292,7 @@ async function createContainer(
       workflowId: workflowExecution.workflowId,
       workflowName: workflowExecution.workflowDefinition.name,
       executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
     },
     {
       enableConsoleLogging: config.logging.console,
