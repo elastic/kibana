@@ -14,7 +14,6 @@ import { promises as fs } from 'fs';
 import { spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import { readConfig } from 'jest-config';
 import fg from 'fast-glob';
 import type { Config } from '@jest/types';
@@ -49,10 +48,6 @@ async function runConfigs(
           '--runInBand',
           '--coverage=false',
         ];
-
-        if (SCOUT_REPORTER_ENABLED) {
-          process.env.JEST_CONFIG_PATH = config;
-        }
 
         const proc = spawn(process.execPath, args, {
           env: process.env,
