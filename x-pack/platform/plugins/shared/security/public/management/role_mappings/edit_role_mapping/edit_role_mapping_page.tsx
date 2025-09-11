@@ -213,6 +213,9 @@ export class EditRoleMappingPage extends Component<Props, State> {
                 />
               }
               data-test-subj="readOnlyRoleMappingTooltip"
+              iconProps={{
+                style: { verticalAlign: 'super' },
+              }}
               type="lock"
             />
           )}
