@@ -69,17 +69,19 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   public appendConversationMessages = async ({
     existingConversation,
     messages,
+    authenticatedUser,
   }: {
     existingConversation: ConversationResponse;
     messages: Message[];
+    authenticatedUser?: AuthenticatedUser | null;
   }): Promise<ConversationResponse | null> => {
-    const esClient = await this.options.elasticsearchClientPromise;
+    const dataWriter = await this.getWriter();
     return appendConversationMessages({
-      esClient,
+      dataWriter,
       logger: this.options.logger,
-      conversationIndex: this.indexTemplateAndPattern.alias,
       existingConversation,
       messages,
+      authenticatedUser: authenticatedUser ?? this.options.currentUser ?? undefined,
     });
   };
 
