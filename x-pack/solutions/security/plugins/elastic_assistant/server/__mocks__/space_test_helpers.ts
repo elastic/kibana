@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { ElasticAssistantApiRequestHandlerContext } from '../types';
+
 /**
  * Helper to override the getSpaceId mock for a specific space in tests
  */
-export const withSpace = (spaceId: string) => (context: any) => {
+export const withSpace = (spaceId: string) => (context: ElasticAssistantApiRequestHandlerContext) => {
   if (context.elasticAssistant?.getSpaceId) {
     context.elasticAssistant.getSpaceId = jest.fn().mockReturnValue(spaceId);
   }
@@ -17,8 +19,10 @@ export const withSpace = (spaceId: string) => (context: any) => {
 
 /**
  * Helper to verify that space-scoped index names are used correctly
+ * @param mockClient - Mock Elasticsearch client with search calls
+ * @param spaceId - Expected space ID to be found in index names
  */
-export const expectSpaceScopedIndex = (mockClient: any, spaceId: string) => {
+export const expectSpaceScopedIndex = (mockClient: jest.Mocked<any>, spaceId: string): void => {
   const calls = mockClient.search?.mock?.calls || [];
   if (calls.length > 0) {
     const lastCall = calls[calls.length - 1];
@@ -31,11 +35,13 @@ export const expectSpaceScopedIndex = (mockClient: any, spaceId: string) => {
 
 /**
  * Helper to verify that data client was initialized with the correct spaceId
+ * @param dataClientGetter - Jest mock of the data client getter function
+ * @param expectedSpaceId - Expected space ID that should be passed to the data client
  */
 export const expectDataClientWithSpaceId = (
   dataClientGetter: jest.Mock,
   expectedSpaceId: string
-) => {
+): void => {
   expect(dataClientGetter).toHaveBeenCalledWith(
     expect.objectContaining({
       spaceId: expectedSpaceId,
@@ -44,63 +50,14 @@ export const expectDataClientWithSpaceId = (
 };
 
 /**
- * Test factory for creating space isolation tests
- */
-export const createSpaceIsolationTestFactory = (
-  testName: string,
-  setupSpaceData: (spaceId: string, context: any, server: any) => Promise<any>,
-  verifyDataNotAccessible: (context: any, server: any, dataId?: string) => Promise<void>
-) => {
-  return () => {
-    it(`should not access ${testName} from other spaces`, async () => {
-      // This would be implemented per test case
-      // Left as a template for specific implementations
-    });
-  };
-};
-
-/**
  * Common space test scenarios that can be applied to any route
+ * These provide consistent space IDs for testing different scenarios
  */
 export const spaceTestScenarios = {
+  /** Non-default space for testing functionality in custom spaces */
   nonDefaultSpace: 'marketing-team',
+  /** Alternative space for testing space isolation */
   alternativeSpace: 'engineering-team',
+  /** Default Kibana space */
   defaultSpace: 'default',
-};
-
-/**
- * Helper to create consistent space test suite structure
- */
-export const createSpaceTestSuite = (
-  routeName: string,
-  testImplementations: {
-    testNonDefaultSpaceFunctionality: () => Promise<void>;
-    testSpaceScopedIndices?: () => Promise<void>;
-    testSpaceIsolation?: () => Promise<void>;
-  }
-) => {
-  return {
-    [`${routeName} with Spaces`]: () => {
-      describe('non-default space behavior', () => {
-        beforeEach(() => {
-          // Override will be done in individual test files
-        });
-
-        it(
-          'should work correctly in non-default space',
-          testImplementations.testNonDefaultSpaceFunctionality
-        );
-
-        if (testImplementations.testSpaceScopedIndices) {
-          it('should use space-scoped indices', testImplementations.testSpaceScopedIndices);
-        }
-      });
-
-      if (testImplementations.testSpaceIsolation) {
-        describe('space isolation', () => {
-          it('should not access data from other spaces', testImplementations.testSpaceIsolation);
-        });
-      }
-    },
-  };
-};
+} as const;
