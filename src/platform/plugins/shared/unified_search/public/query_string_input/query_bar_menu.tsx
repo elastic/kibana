@@ -148,7 +148,11 @@ function QueryBarMenuComponent({
   };
 
   const button = (
-    <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()} disableScreenReaderOutput>
+    <EuiToolTip
+      delay="regular"
+      content={strings.getFilterSetButtonLabel()}
+      disableScreenReaderOutput
+    >
       <EuiButtonIcon
         {...buttonProps}
         size="s"
