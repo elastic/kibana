@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ ...getSimpleAttackDiscoverySchedule() })
           );
 
-          checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
+          await checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
         });
       });
     });
