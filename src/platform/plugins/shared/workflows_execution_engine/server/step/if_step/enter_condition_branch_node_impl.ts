@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EnterConditionBranchNode } from '@kbn/workflows';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class EnterConditionBranchNodeImpl implements StepImplementation {
-  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
+  constructor(
+    private node: EnterConditionBranchNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
+    if (this.node.type === 'enter-then-branch') {
+      this.wfExecutionRuntimeManager.enterScope('true');
+    } else {
+      this.wfExecutionRuntimeManager.enterScope('false');
+    }
     this.wfExecutionRuntimeManager.goToNextStep();
   }
 }

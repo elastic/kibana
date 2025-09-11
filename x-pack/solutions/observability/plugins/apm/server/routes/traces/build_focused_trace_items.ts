@@ -55,6 +55,10 @@ export interface FocusedTraceItems {
   focusedTraceTree: Child[];
 }
 
+export function findRootItem(traceItems: TraceItem[]) {
+  return traceItems.find((item) => !item.parentId);
+}
+
 export function buildFocusedTraceItems({
   traceItems,
   docId,

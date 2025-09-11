@@ -10,6 +10,7 @@
 export type {
   GraphNode,
   AtomicGraphNode,
+  AtomicGraphNodeSchema,
   HttpGraphNode,
   HttpGraphNodeSchema,
   WaitGraphNode,
@@ -19,16 +20,26 @@ export type {
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,
   EnterIfNode,
+  EnterIfNodeSchema,
   ExitConditionBranchNode,
   ExitConditionBranchNodeSchema,
   ExitIfNode,
 } from './nodes/branching_nodes';
-export type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
+export type {
+  EnterForeachNode,
+  EnterForeachNodeSchema,
+  ExitForeachNode,
+  ExitForeachNodeSchema,
+} from './nodes/loop_nodes';
 export type {
   EnterRetryNode,
+  EnterRetryNodeSchema,
   ExitRetryNode,
+  ExitRetryNodeSchema,
   EnterContinueNode,
+  EnterContinueNodeSchema,
   ExitContinueNode,
+  ExitContinueNodeSchema,
   EnterTryBlockNodeSchema,
   EnterTryBlockNode,
   ExitTryBlockNodeSchema,
@@ -42,3 +53,5 @@ export type {
   ExitFallbackPathNodeSchema,
   ExitFallbackPathNode,
 } from './nodes/on_failure_nodes';
+
+export type { UnionExecutionGraphNode } from './nodes/union';

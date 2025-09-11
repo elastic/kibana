@@ -51,7 +51,21 @@ export interface ExecutableTool<
    * Run handler that can be used to execute the tool.
    */
   execute: ExecutableToolHandlerFn<z.infer<TSchema>>;
+  /**
+   * Optional handled to add additional instructions to the LLM.
+   * When provided, will replace the description when converting to llm tool.
+   */
+  llmDescription?: LlmDescriptionHandler<TConfig>;
 }
+
+export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {
+  config: TConfig;
+  description: string;
+}
+
+export type LlmDescriptionHandler<TConfig extends object = {}> = (
+  params: LLmDescriptionHandlerParams<TConfig>
+) => string;
 
 /**
  * Param type for {@link ExecutableToolHandlerFn}

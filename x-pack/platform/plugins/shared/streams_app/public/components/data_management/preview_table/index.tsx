@@ -18,6 +18,8 @@ import { css } from '@emotion/css';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
+const emptyCell = <>&nbsp;</>;
+
 export function PreviewTable({
   documents,
   displayColumns,
@@ -189,7 +191,7 @@ export function PreviewTable({
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
-          return '';
+          return emptyCell;
         }
 
         if (renderCellValue) {
@@ -201,12 +203,12 @@ export function PreviewTable({
 
         const value = doc[columnId];
         if (value === undefined || value === null) {
-          return '';
+          return emptyCell;
         }
         if (typeof value === 'object') {
           return JSON.stringify(value);
         }
-        return String(value);
+        return String(value) || emptyCell;
       }}
     />
   );

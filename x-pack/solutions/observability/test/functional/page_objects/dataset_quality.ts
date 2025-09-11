@@ -11,7 +11,7 @@ import {
   datasetQualityDetailsUrlSchemaV1,
   datasetQualityUrlSchemaV1,
   datasetQualityDetailsUrlSchemaV2,
-} from '@kbn/data-quality-plugin/common';
+} from '@kbn/data-quality/common';
 import {
   DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
@@ -184,6 +184,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     editFailureStoreModal: 'editFailureStoreModal',
     enableFailureStoreToggle: 'enableFailureStoreToggle',
     failureStoreModalSaveButton: 'failureStoreModalSaveButton',
+    editFailureStoreIcon: 'datasetQualityDetailsEditFailureStore',
   };
 
   return {

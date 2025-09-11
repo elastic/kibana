@@ -20,8 +20,8 @@ import {
   buildTable,
   buildXY,
   buildPartitionChart,
-  fromMetricLegacyToAPI,
 } from './charts';
+import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
 import type { LensApiState } from './schema';
 import { isLensLegacyFormat } from './utils';
 
@@ -43,13 +43,13 @@ export class LensConfigBuilder {
   };
 
   private apiConvertersByChart = {
-    metric: fromMetricLegacyToAPI,
+    metric: { fromAPItoLensState, fromLensStateToAPI },
   };
   private formulaAPI: FormulaPublicApi | undefined;
-  private dataViewsAPI: DataViewsCommon;
+  private dataViewsAPI: DataViewsCommon | undefined;
 
   // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
-  constructor(dataViewsAPI: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
+  constructor(dataViewsAPI?: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
   }
@@ -64,6 +64,10 @@ export class LensConfigBuilder {
     config: LensConfig | LensApiState,
     options: LensConfigOptions = {}
   ): Promise<LensAttributes | LensEmbeddableInput> {
+    if (!this.dataViewsAPI) {
+      throw new Error('DataViews API is required to build Lens configurations');
+    }
+
     const chartType = isLensLegacyFormat(config) ? config.chartType : config.type;
     const chartBuilderFn = this.charts[chartType];
     const chartConfig = await chartBuilderFn(config as any, {
@@ -92,14 +96,21 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  async toAPIFormat(config: LensAttributes): Promise<LensApiState> {
-    const chartType = config.visualizationType;
+  fromAPIFormat(config: LensApiState): LensAttributes {
+    // Currently we only support metric conversion from API to attributes
+    const chartType = config.type;
     if (chartType === 'metric') {
       const converter = this.apiConvertersByChart[chartType];
-      return converter(config, {
-        formulaAPI: this.formulaAPI,
-        dataViewsAPI: this.dataViewsAPI,
-      });
+      return converter.fromAPItoLensState(config);
+    }
+    throw new Error(`No attributes converter found for chart type: ${chartType}`);
+  }
+
+  toAPIFormat(config: LensAttributes): LensApiState {
+    const chartType = config.visualizationType;
+    if (chartType === 'lnsMetric') {
+      const converter = this.apiConvertersByChart.metric;
+      return converter.fromLensStateToAPI(config);
     }
     throw new Error(`No API converter found for chart type: ${chartType}`);
   }

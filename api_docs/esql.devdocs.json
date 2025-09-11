@@ -228,7 +228,7 @@
           "label": "getJoinIndicesAutocomplete",
           "description": [],
           "signature": [
-            "() => Promise<",
+            "(remoteClusters?: string | undefined) => Promise<",
             {
               "pluginId": "@kbn/esql-types",
               "scope": "common",
@@ -241,7 +241,23 @@
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [],
+          "children": [
+            {
+              "parentPluginId": "esql",
+              "id": "def-public.EsqlPluginStart.getJoinIndicesAutocomplete.$1",
+              "type": "string",
+              "tags": [],
+              "label": "remoteClusters",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
           "returnComment": []
         },
         {

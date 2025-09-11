@@ -9,6 +9,7 @@ import type { AnyAction, Dispatch } from 'redux';
 import type { ThunkDispatch } from 'redux-thunk';
 import type { Query } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Writable } from '@kbn/utility-types';
 import type { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -48,6 +49,7 @@ import type {
   Attribution,
   JoinDescriptor,
   LayerDescriptor,
+  LayerGroupDescriptor,
   StyleDescriptor,
   TileError,
   TileMetaFeature,
@@ -867,7 +869,7 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const group = LayerGroup.createDescriptor({});
+    const group = LayerGroup.createDescriptor({}) as Writable<LayerGroupDescriptor>;
     const combineLayerDescriptor = getLayerDescriptor(getState(), combineLayerId);
     if (combineLayerDescriptor?.parent) {
       group.parent = combineLayerDescriptor.parent;

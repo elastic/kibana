@@ -205,6 +205,7 @@ export const specialIndicesToSuggestions = (
         aliasSuggestions.push({
           label: alias,
           text: alias + ' $0',
+          asSnippet: true,
           kind: 'Issue',
           detail: i18n.translate('kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.alias', {
             defaultMessage: 'Alias',

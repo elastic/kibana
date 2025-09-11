@@ -18,7 +18,7 @@ import type { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 import { getPresentationCapabilities } from '../utils/get_presentation_capabilities';
 
-function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
+function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<T>) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
@@ -72,7 +72,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     setCopyOnSave(newCopyOnSave);
   };
 
-  const onModalSave = (onSaveProps: OnSaveProps) => {
+  const onModalSave = async (onSaveProps: OnSaveProps): Promise<void> => {
     let dashboardId = null;
 
     // Don't save with a dashboard ID if we're
@@ -85,7 +85,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       }
     }
 
-    props.onSave({ ...onSaveProps, dashboardId, addToLibrary: isAddToLibrarySelected });
+    await props.onSave({ ...onSaveProps, dashboardId, addToLibrary: isAddToLibrarySelected });
   };
 
   const saveLibraryLabel =

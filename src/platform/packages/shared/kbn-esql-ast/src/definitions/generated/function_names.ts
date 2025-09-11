@@ -186,6 +186,7 @@ export const esqlFunctionNames = [
   'TO_VERSION',
   'TOP',
   'TRIM',
+  'URL_DECODE',
   'URL_ENCODE',
   'V_COSINE',
   'V_DOT_PRODUCT',

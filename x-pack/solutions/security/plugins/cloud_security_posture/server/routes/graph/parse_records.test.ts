@@ -46,17 +46,17 @@ describe('parseRecords', () => {
     const ids = result.nodes.map((n) => n.id);
     expect(ids).toContain('actor1');
     expect(ids).toContain('target1');
-    expect(ids.some((id) => id.includes('label(login)'))).toBe(true);
+    expect(ids.some((id) => id.includes('label(login)oe(1)oa(0)'))).toBe(true);
 
     // Should have 2 edges: actor->label, label->target
     expect(result.edges.length).toBe(2);
     expect(result.edges[0].source).toBe('actor1');
-    expect(result.edges[0].target).toContain('label(login)');
-    expect(result.edges[1].source).toContain('label(login)');
+    expect(result.edges[0].target).toContain('label(login)oe(1)oa(0)');
+    expect(result.edges[1].source).toContain('label(login)oe(1)oa(0)');
     expect(result.edges[1].target).toBe('target1');
 
     // Label node should have correct label and documentsData
-    const labelNode = result.nodes.find((n) => n.id.includes('label(login)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(login)oe(1)oa(0)'));
     expect(labelNode).toBeDefined();
     expect(labelNode!.label).toBe('login');
     expect(labelNode).toHaveProperty('documentsData', [{ foo: 'bar' }]);
@@ -78,7 +78,7 @@ describe('parseRecords', () => {
       },
     ];
     const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.id.includes('label(foo)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(foo)oe(1)oa(0)'));
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('documentsData', [{ a: 1 }]);
   });
@@ -160,7 +160,7 @@ describe('parseRecords', () => {
       },
     ];
     const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)oe(1)oa(1)'));
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('color', 'danger');
   });
@@ -179,9 +179,57 @@ describe('parseRecords', () => {
       },
     ];
     const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)oe(1)oa(0)'));
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('color', 'danger');
+  });
+
+  it('sets label node id based on action, isOrigin and isOriginAlert fields', () => {
+    const actorId = 'actor1';
+    const targetId = 'target1';
+    const baseLabelNodeData = {
+      actorIds: actorId,
+      targetIds: targetId,
+      docs: ['{"foo":"bar"}'],
+      badge: 1,
+      isAlert: true,
+    };
+
+    const records: GraphEdge[] = [
+      {
+        ...baseLabelNodeData,
+        action: 'action1',
+        isOrigin: false,
+        isOriginAlert: false,
+      },
+      {
+        ...baseLabelNodeData,
+        action: 'action2',
+        isOrigin: true,
+        isOriginAlert: false,
+      },
+      {
+        ...baseLabelNodeData,
+        action: 'action3',
+        isOrigin: false,
+        isOriginAlert: true,
+      },
+      {
+        ...baseLabelNodeData,
+        action: 'action4',
+        isOrigin: true,
+        isOriginAlert: true,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+    const labelNodes = result.nodes.filter((n) => n.shape === 'label');
+
+    expect(labelNodes.map((n) => n.id)).toStrictEqual([
+      `a(${actorId})-b(${targetId})label(action1)oe(0)oa(0)`,
+      `a(${actorId})-b(${targetId})label(action2)oe(1)oa(0)`,
+      `a(${actorId})-b(${targetId})label(action3)oe(0)oa(1)`,
+      `a(${actorId})-b(${targetId})label(action4)oe(1)oa(1)`,
+    ]);
   });
 
   it('handles unknown target ids', () => {

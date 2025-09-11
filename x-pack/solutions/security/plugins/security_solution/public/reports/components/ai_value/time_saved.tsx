@@ -6,10 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getTimeRangeAsDays, formatThousands } from './metrics';
-import { ComparePercentageBadge } from './compare_percentage_badge';
+import { ComparePercentage } from './compare_percentage';
 import * as i18n from './translations';
 import { TimeSavedMetric } from './time_saved_metric';
 
@@ -31,17 +30,13 @@ export const TimeSaved: React.FC<Props> = ({
   const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
 
   return (
-    <EuiPanel
+    <span
       css={css`
-        min-height: 140px;
+        min-height: 160px;
       `}
-      hasBorder
-      hasShadow={false}
-      paddingSize="none"
     >
       <TimeSavedMetric minutesPerAlert={minutesPerAlert} from={from} to={to} />
-      <ComparePercentageBadge
-        description={i18n.TIME_SAVED_DESC}
+      <ComparePercentage
         positionForLens
         currentCount={hoursSaved}
         previousCount={hoursSavedCompare}
@@ -49,6 +44,6 @@ export const TimeSaved: React.FC<Props> = ({
         statType={i18n.TIME_SAVED_DESC.toLowerCase()}
         timeRange={timerangeAsDays}
       />
-    </EuiPanel>
+    </span>
   );
 };

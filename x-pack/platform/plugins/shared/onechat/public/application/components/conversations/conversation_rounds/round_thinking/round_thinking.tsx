@@ -7,6 +7,7 @@
 
 import {
   EuiAccordion,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -15,13 +16,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
-import React from 'react';
+import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../../context/send_message_context';
 import type { Timer } from '../../../../hooks/use_timer';
+import { RoundFlyout } from '../round_flyout';
 import { RoundTimer } from './round_timer';
 import { RoundSteps } from './steps/round_steps';
 
 interface RoundThinkingProps {
+  rawRound: ConversationRound;
   steps: ConversationRoundStep[];
   isLoading: boolean;
   timer: Timer;
@@ -31,16 +35,26 @@ const fullWidthStyles = css`
   width: 100%;
 `;
 
-const thinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
+const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
 });
 const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinking.completed', {
   defaultMessage: 'Thinking completed',
 });
+const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
+  defaultMessage: 'View raw response',
+});
 
-export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, timer }) => {
+export const RoundThinking: React.FC<RoundThinkingProps> = ({
+  steps,
+  isLoading,
+  timer,
+  rawRound,
+}) => {
   const { euiTheme } = useEuiTheme();
   const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
+  const { toolProgress } = useSendMessage();
+  const [showFlyout, setShowFlyout] = useState(false);
 
   if (steps.length === 0) {
     return timer.showTimer ? (
@@ -58,6 +72,16 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     }
   `;
 
+  let thinkingButtonLabel = thinkingCompletedLabel;
+  if (isLoading) {
+    // While this round is loading, show the progression message as the button label if available
+    // Otherwise fallback to default thinking label
+    thinkingButtonLabel = toolProgress ?? defaultThinkingLabel;
+  }
+  const toggleFlyout = () => {
+    setShowFlyout(!showFlyout);
+  };
+
   return (
     <EuiAccordion
       id={thinkingAccordionId}
@@ -66,7 +90,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
       buttonProps={{
         css: fullWidthStyles,
       }}
-      buttonContent={isLoading ? thinkingLabel : thinkingCompletedLabel}
+      buttonContent={thinkingButtonLabel}
       extraAction={
         timer.showTimer ? (
           <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
@@ -75,7 +99,13 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     >
       <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
         <RoundSteps steps={steps} />
+        {!isLoading && (
+          <EuiButton iconType={'code'} color="primary" iconSide="left" onClick={toggleFlyout}>
+            {rawResponseButtonLabel}
+          </EuiButton>
+        )}
       </EuiPanel>
+      <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
     </EuiAccordion>
   );
 };

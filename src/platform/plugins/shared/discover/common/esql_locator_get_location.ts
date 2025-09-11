@@ -22,7 +22,7 @@ export const esqlLocatorGetLocation = async ({
 }): ReturnType<DiscoverESQLLocatorGetLocation> => {
   const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
   const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
-  const esql = getInitialESQLQuery(dataView);
+  const esql = getInitialESQLQuery(dataView, true);
 
   const params = {
     query: { esql },

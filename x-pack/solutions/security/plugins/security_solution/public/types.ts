@@ -62,6 +62,7 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -77,6 +78,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
+import type { SiemReadiness } from './siem_readiness';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
@@ -154,6 +156,7 @@ export interface StartPlugins {
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
+  inference: InferencePublicStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -240,6 +243,7 @@ export interface SubPlugins {
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
   siemMigrations: SiemMigrations;
+  siemReadiness: SiemReadiness;
   configurations: Configurations;
 }
 
@@ -262,5 +266,6 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
+  siemReadiness: ReturnType<SiemReadiness['start']>;
   configurations: ReturnType<Configurations['start']>;
 }

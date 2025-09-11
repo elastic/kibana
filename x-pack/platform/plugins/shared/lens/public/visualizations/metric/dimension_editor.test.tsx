@@ -45,6 +45,7 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
+// Failing: See https://github.com/elastic/kibana/issues/234063
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
@@ -191,9 +192,20 @@ describe('dimension editor', () => {
       };
       const clearIcon = async () => {
         const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
+        // Type 'None' to filter the options list to the "None" option
         fireEvent.input(iconInput, { target: { value: 'None' } });
-        const noneOption = screen.getByRole('option', { name: 'None' });
-        await userEvent.click(noneOption);
+        // Wait for the options list popover to appear
+        const optionsList = await screen.findByTestId(
+          'comboBoxOptionsList lns-icon-select-optionsList'
+        );
+        // Find the "None" option in the options list
+        const noneOption = within(optionsList).getByText('None', { exact: true });
+        // Click the "None" option to clear the icon selection
+        if (noneOption) {
+          await userEvent.click(noneOption);
+        } else {
+          throw new Error(`none option not found`);
+        }
       };
 
       return {

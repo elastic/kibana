@@ -393,7 +393,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     }, []);
 
     const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-      ({ dashboardId, newTitle, newDescription }) => {
+      async ({ dashboardId, newTitle, newDescription }) => {
         if (!selectedJobs) return;
 
         const stateTransfer = embeddable!.getStateTransfer();

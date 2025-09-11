@@ -17,7 +17,7 @@ const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
 interface ServiceNameLinkProps {
   serviceName: string;
-  agentName: string;
+  agentName?: string;
   formattedServiceName: React.ReactNode;
 }
 

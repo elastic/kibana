@@ -112,6 +112,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       actorIds,
       action,
       targetIds,
+      isOrigin,
       isOriginAlert,
       actorsDocData,
       targetsDocData,
@@ -183,7 +184,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         }
 
         const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})`,
+          id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
           label: action,
           color: isOriginAlert || isAlert ? 'danger' : 'primary',
           shape: 'label',

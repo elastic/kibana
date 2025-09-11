@@ -70,3 +70,7 @@ export type AnyBucketLensStateColumn =
   | TermsIndexPatternColumn;
 
 export type AnyLensStateColumn = AnyMetricLensStateColumn | AnyBucketLensStateColumn;
+export type ReferenceMetricLensStateColumn = Exclude<
+  AnyLensStateColumn,
+  ReferableMetricLensStateColumn | AnyBucketLensStateColumn
+>;

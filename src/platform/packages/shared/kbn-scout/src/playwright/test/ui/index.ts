@@ -8,7 +8,7 @@
  */
 
 import { scoutFixtures, lighthouseFixtures } from './single_thread_fixtures';
-import { scoutParallelFixtures, globalSetup } from './parallel_run_fixtures';
+import { scoutParallelFixtures, globalSetupFixtures } from './parallel_run_fixtures';
 
 // Scout UI test fixtures: single-threaded
 export const test = scoutFixtures;
@@ -16,8 +16,8 @@ export const test = scoutFixtures;
 export const lighthouseTest = lighthouseFixtures;
 // Scout core 'space aware' fixtures: parallel execution
 export const spaceTest = scoutParallelFixtures;
-// Scout global setup hook for parallel execution
-export const globalSetupHook = globalSetup;
+// Scout global 'setup' hook for parallel execution
+export const globalSetupHook = globalSetupFixtures;
 
 export type { ScoutTestFixtures, ScoutWorkerFixtures } from './single_thread_fixtures';
 export type {

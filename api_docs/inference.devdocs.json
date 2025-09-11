@@ -381,7 +381,7 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "(options: ",
           "NlToEsqlTaskParams",
           "<TToolOptions>) => ",
           "Observable",
@@ -398,11 +398,105 @@
             "id": "def-server.naturalLanguageToEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}",
+            "label": "options",
             "description": [],
             "signature": [
               "NlToEsqlTaskParams",
               "<TToolOptions>"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.naturalLanguageToEsql",
+        "type": "Function",
+        "tags": [],
+        "label": "naturalLanguageToEsql",
+        "description": [],
+        "signature": [
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "NlToEsqlTaskParams",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>) => ",
+          "Observable",
+          "<",
+          "NlToEsqlTaskEvent",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.naturalLanguageToEsql.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "NlToEsqlTaskParams",
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>>>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
             "deprecated": false,
@@ -423,23 +517,9 @@
         "signature": [
           "({\n  query,\n  client,\n}: { query: string; client: ",
           "ElasticsearchClient",
-          "; }) => Promise<{ columns?: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[] | undefined; rows?: ",
-          {
-            "pluginId": "@kbn/es-types",
-            "scope": "common",
-            "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-common.ESQLRow",
-            "text": "ESQLRow"
-          },
-          "[] | undefined; error?: Error | undefined; errorMessages?: string[] | undefined; }>"
+          "; }) => Promise<",
+          "QueryValidateRunOutput",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
         "deprecated": false,
@@ -2179,7 +2259,17 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<string>"
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
         "deprecated": false,
@@ -2212,14 +2302,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>, \"input\">; prevMessages?: ",
+          "ToolDefinitions",
+          " | undefined>[]>, \"input\">; prevMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

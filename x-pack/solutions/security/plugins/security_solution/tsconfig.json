@@ -212,6 +212,7 @@
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture-graph",
+    "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
@@ -258,5 +259,6 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
+    "@kbn/core-analytics-server-mocks",
   ]
 }

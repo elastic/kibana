@@ -17,10 +17,7 @@ All features in the Onechat plugin are developed behind UI settings (feature fla
 
 ```yml
 uiSettings.overrides:
-  onechat:mcp:enabled: true
-  onechat:a2a:enabled: true
-  onechat:api:enabled: true
-  onechat:ui:enabled: true
+  agentBuilder:enabled: true
 ```
 
 This will ensure all Onechat features are available in your Kibana instance.
@@ -31,17 +28,14 @@ If running in Serverless or Cloud dev environments, it may be more practical to 
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "onechat:mcp:enabled": true,
-      "onechat:a2a:enabled": true,
-      "onechat:api:enabled": true,
-      "onechat:ui:enabled": true
+      "agentBuilder:enabled": true
    }
 }
 ```
 
 ## Enabling tracing
 
-Onechat agents are compatible with the Kibana inference tracing. 
+Onechat agents are compatible with the Kibana inference tracing.
 
 You can enable tracing on your local instance by adding the following config parameters:
 
@@ -289,12 +283,6 @@ The MCP server provides a standardized interface for external MCP clients to acc
 
 ### Running with Claude Desktop
 
-To enable the MCP server, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:mcp:enabled: true
-```
 Configure Claude Desktop by adding this to its configuration:
 ```json
 {
@@ -342,18 +330,4 @@ POST kbn://api/chat/tools
   "type": "esql",
   "tags": ["salesforce"]
 }
-```
-
-To enable the API, add the following to your Kibana config
-
-```yaml
-uiSettings.overrides:
-  onechat:api:enabled: true
-```
-## Chat UI
-To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:ui:enabled: true
 ```
