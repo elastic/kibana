@@ -101,7 +101,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - wait
+  - wait: ~
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
