@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
-import { isIlmLifecycle } from '@kbn/streams-schema';
+import { isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiHighlight, EuiPanel, EuiSelectable, EuiText } from '@elastic/eui';
 import { rolloverCondition } from '../../helpers/rollover_condition';
@@ -22,10 +22,17 @@ interface ModalOptions {
   getIlmPolicies: () => Promise<PolicyFromES[]>;
   definition: Streams.ingest.all.GetResponse;
   setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  setSaveButtonDisabled: (isDisabled: boolean) => void;
   readOnly: boolean;
 }
 
-export function IlmField({ getIlmPolicies, definition, setLifecycle, readOnly }: ModalOptions) {
+export function IlmField({
+  getIlmPolicies,
+  definition,
+  setLifecycle,
+  setSaveButtonDisabled,
+  readOnly,
+}: ModalOptions) {
   const existingLifecycle = definition.effective_lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
@@ -85,18 +92,23 @@ export function IlmField({ getIlmPolicies, definition, setLifecycle, readOnly }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const selectedOption = policies.find((option) => option.label === selectedPolicy);
+  const existingPolicyOption = isIlmLifecycle(existingLifecycle)
+    ? policies.find((option) => option.label === existingLifecycle.ilm.policy)
+    : undefined;
 
-  if (readOnly && selectedOption) {
+  if (readOnly) {
     return (
-      <EuiPanel hasBorder hasShadow={false} paddingSize="s" color="subdued">
-        <>
-          {selectedOption.label}
-          <EuiText size="xs" color="subdued" className="eui-displayBlock">
-            <small>{selectedOption.data?.phases || ''}</small>
-          </EuiText>
-        </>
-      </EuiPanel>
+      existingPolicyOption &&
+      isInheritLifecycle(definition.stream.ingest.lifecycle) && (
+        <EuiPanel hasBorder hasShadow={false} paddingSize="s" color="subdued">
+          <>
+            {existingPolicyOption.label}
+            <EuiText size="xs" color="subdued" className="eui-displayBlock">
+              <small>{existingPolicyOption.data?.phases || ''}</small>
+            </EuiText>
+          </>
+        </EuiPanel>
+      )
     );
   }
 
@@ -113,7 +125,10 @@ export function IlmField({ getIlmPolicies, definition, setLifecycle, readOnly }:
           setSelectedPolicy(newSelectedPolicy);
           setPolicies(options);
           if (newSelectedPolicy) {
+            setSaveButtonDisabled(false);
             setLifecycle({ ilm: { policy: newSelectedPolicy } });
+          } else {
+            setSaveButtonDisabled(true);
           }
         }}
         listProps={{

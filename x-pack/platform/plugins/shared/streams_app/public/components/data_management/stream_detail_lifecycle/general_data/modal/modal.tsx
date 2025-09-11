@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamLifecycle, IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IlmField } from './ilm';
-import { DslField } from './dsl';
+import { DslField, DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE } from './dsl';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
 export type LifecycleEditAction = 'ilm' | 'custom' | 'forever';
@@ -40,8 +40,6 @@ interface Props {
   definition: Streams.ingest.all.GetResponse;
   updateInProgress: boolean;
 }
-
-const DEFAULT_CUSTOM_RETENTION = '90d';
 
 export function EditLifecycleModal({
   closeModal,
@@ -68,37 +66,41 @@ export function EditLifecycleModal({
     definition.effective_lifecycle as IngestStreamLifecycle
   );
 
-  const confirmationIsDisabled = false;
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(false);
 
   const isWired = Streams.WiredStream.GetResponse.is(definition);
 
-  const toggleButtonsCompressed = [
-    {
-      id: 'forever',
-      label: i18n.translate('xpack.streams.streamDetailLifecycle.forever', {
-        defaultMessage: 'Forever',
-      }),
-    },
-    {
-      id: 'custom',
-      label: i18n.translate('xpack.streams.streamDetailLifecycle.customPeriod', {
-        defaultMessage: 'Custom period',
-      }),
-    },
-  ];
+  const toggleButtonsCompressed = useMemo(() => {
+    const buttons = [
+      {
+        id: 'forever',
+        label: i18n.translate('xpack.streams.streamDetailLifecycle.forever', {
+          defaultMessage: 'Forever',
+        }),
+      },
+      {
+        id: 'custom',
+        label: i18n.translate('xpack.streams.streamDetailLifecycle.customPeriod', {
+          defaultMessage: 'Custom period',
+        }),
+      },
+    ];
 
-  if (!isServerless) {
-    toggleButtonsCompressed.push({
-      id: 'ilm',
-      label: i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicy', {
-        defaultMessage: 'ILM policy',
-      }),
-    });
-  }
+    if (!isServerless) {
+      buttons.push({
+        id: 'ilm',
+        label: i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicy', {
+          defaultMessage: 'ILM policy',
+        }),
+      });
+    }
+
+    return buttons;
+  }, [isServerless]);
 
   const initialCustomPeriodValue =
     (definition.effective_lifecycle as IngestStreamLifecycleDSL).dsl?.data_retention ??
-    DEFAULT_CUSTOM_RETENTION;
+    `${DEFAULT_RETENTION_VALUE}${DEFAULT_RETENTION_UNIT.value}`;
 
   return (
     <EuiModal onClose={closeModal} aria-labelledby={modalTitleId} css={{ width: '600px' }}>
@@ -151,9 +153,15 @@ export function EditLifecycleModal({
                       )
                 }
                 checked={isInherit}
-                onChange={() => {
-                  setLifecycle({ inherit: {} });
-                  setIsInherit(!isInherit);
+                onChange={(event) => {
+                  if (event.target.checked) {
+                    setLifecycle({ inherit: {} });
+                    setIsInherit(true);
+                    setIsSaveButtonDisabled(false);
+                  } else {
+                    setIsInherit(false);
+                    setIsSaveButtonDisabled(selectedAction === 'ilm' && !isIlmLifecycle(lifecycle));
+                  }
                 }}
                 data-test-subj="inheritDataRetentionSwitch"
               />
@@ -176,9 +184,14 @@ export function EditLifecycleModal({
               onChange={(value) => {
                 if (value === 'forever') {
                   setLifecycle({ dsl: {} });
+                  setIsSaveButtonDisabled(false);
                 }
                 if (value === 'custom') {
                   setLifecycle({ dsl: { data_retention: initialCustomPeriodValue } });
+                  setIsSaveButtonDisabled(false);
+                }
+                if (value === 'ilm') {
+                  setIsSaveButtonDisabled(!isIlmLifecycle(lifecycle));
                 }
                 setSelectedAction(value as LifecycleEditAction);
               }}
@@ -195,6 +208,7 @@ export function EditLifecycleModal({
                 getIlmPolicies={getIlmPolicies}
                 definition={definition}
                 setLifecycle={setLifecycle}
+                setSaveButtonDisabled={setIsSaveButtonDisabled}
                 readOnly={isInherit}
               />
             )}
@@ -203,8 +217,8 @@ export function EditLifecycleModal({
               <DslField
                 definition={definition}
                 isDisabled={isInherit}
-                value={initialCustomPeriodValue}
                 setLifecycle={setLifecycle}
+                setSaveButtonDisabled={setIsSaveButtonDisabled}
               />
             )}
 
@@ -239,7 +253,7 @@ export function EditLifecycleModal({
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
               fill
-              disabled={confirmationIsDisabled}
+              disabled={isSaveButtonDisabled}
               isLoading={updateInProgress}
               onClick={() => updateLifecycle(lifecycle)}
             >

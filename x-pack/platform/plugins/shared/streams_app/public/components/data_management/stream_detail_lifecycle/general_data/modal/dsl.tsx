@@ -24,8 +24,8 @@ import { parseDuration } from '../../helpers/helpers';
 interface Props {
   definition: Streams.ingest.all.GetResponse;
   isDisabled: boolean;
-  value?: string;
   setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  setSaveButtonDisabled: (isDisabled: boolean) => void;
 }
 
 const isInvalidRetention = (value: string) => {
@@ -33,7 +33,10 @@ const isInvalidRetention = (value: string) => {
   return isNaN(num) || num < 1 || num % 1 > 0;
 };
 
-export function DslField({ definition, isDisabled, value, setLifecycle }: Props) {
+export const DEFAULT_RETENTION_VALUE = '90';
+export const DEFAULT_RETENTION_UNIT = { name: 'Days', value: 'd' };
+
+export function DslField({ definition, isDisabled, setLifecycle, setSaveButtonDisabled }: Props) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -41,17 +44,15 @@ export function DslField({ definition, isDisabled, value, setLifecycle }: Props)
     { name: 'Seconds', value: 's' },
   ];
 
-  const existingRetention = value
-    ? parseDuration(value)
-    : isDslLifecycle(definition.effective_lifecycle)
+  const existingRetention = isDslLifecycle(definition.effective_lifecycle)
     ? parseDuration(definition.effective_lifecycle.dsl.data_retention)
     : undefined;
   const [selectedUnit, setSelectedUnit] = useState(
     (existingRetention && timeUnits.find((unit) => unit.value === existingRetention.unit)) ||
-      timeUnits[0]
+      DEFAULT_RETENTION_UNIT
   );
   const [retentionValue, setRetentionValue] = useState(
-    (existingRetention && existingRetention.value?.toString()) || '90'
+    (existingRetention && existingRetention.value?.toString()) || DEFAULT_RETENTION_VALUE
   );
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
   const invalidRetention = useMemo(() => isInvalidRetention(retentionValue), [retentionValue]);
@@ -63,6 +64,8 @@ export function DslField({ definition, isDisabled, value, setLifecycle }: Props)
           data_retention: `${Number(retentionValue)}${selectedUnit.value}`,
         },
       });
+    } else {
+      setSaveButtonDisabled(true);
     }
   }, [retentionValue, selectedUnit.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
