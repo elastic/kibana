@@ -40,7 +40,9 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
             ],
           },
         },
-        true
+        {
+          displaySuccessMessage: true,
+        }
       );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,

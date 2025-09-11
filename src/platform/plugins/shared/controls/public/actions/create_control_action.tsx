@@ -88,7 +88,9 @@ export const createDataControlOfType = <
           rawState: state,
         },
       },
-      true
+      {
+        displaySuccessMessage: true,
+      }
     );
   }
 };

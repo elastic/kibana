@@ -154,7 +154,8 @@ export function initializeLayoutManager(
   const placeNewPanel = async (
     uuid: string,
     panelPackage: PanelPackage,
-    gridData?: DashboardPanel['gridData']
+    gridData?: DashboardPanel['gridData'],
+    beside?: string
   ): Promise<DashboardLayout> => {
     const { panelType: type, serializedState } = panelPackage;
     if (gridData) {
@@ -179,6 +180,7 @@ export function initializeLayoutManager(
         currentPanels: layout$.value.panels,
         height: panelPlacementSettings.height,
         width: panelPlacementSettings.width,
+        beside,
       }
     );
     return {
@@ -247,7 +249,10 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   const addNewPanel = async <ApiType>(
     panelPackage: PanelPackage,
-    displaySuccessMessage?: boolean,
+    options?: {
+      displaySuccessMessage?: boolean;
+      beside?: string;
+    },
     gridData?: DashboardPanel['gridData']
   ) => {
     const { panelType: type, serializedState, maybePanelId } = panelPackage;
@@ -256,9 +261,9 @@ export function initializeLayoutManager(
 
     if (serializedState) currentChildState[uuid] = serializedState;
 
-    layout$.next(await placeNewPanel(uuid, panelPackage, gridData));
+    layout$.next(await placeNewPanel(uuid, panelPackage, gridData, options?.beside));
 
-    if (displaySuccessMessage) {
+    if (options?.displaySuccessMessage) {
       const title = (serializedState?.rawState as SerializedTitles)?.title;
       coreServices.notifications.toasts.addSuccess({
         title: getPanelAddedSuccessString(title),
@@ -291,7 +296,11 @@ export function initializeLayoutManager(
     if (!existingGridData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
-    const newPanel = await addNewPanel<DefaultEmbeddableApi>(panelPackage, false, existingGridData);
+    const newPanel = await addNewPanel<DefaultEmbeddableApi>(
+      panelPackage,
+      { displaySuccessMessage: false },
+      existingGridData
+    );
     return newPanel.uuid;
   };
 
