@@ -39,8 +39,9 @@ import {
   AnomalySourceTooltipProperty,
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
-import type { MlAnomalyLayersType } from './util';
-import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
+import type { MlAnomalyLayersType } from './utils/constants';
+import { getResultsForJobId } from './utils/get_results_for_job_id';
+import { ML_ANOMALY_LAYERS } from './utils/constants';
 import { UpdateAnomalySourceEditorLazy } from './update_anomaly_source_editor_lazy';
 
 const RESULT_LIMIT = 1000;

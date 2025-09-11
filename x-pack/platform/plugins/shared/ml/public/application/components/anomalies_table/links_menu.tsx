@@ -58,7 +58,8 @@ import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils/
 import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
 import { findMessageField } from '../../util/index_utils';
-import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
+import { getInitialAnomaliesLayers } from '../../../maps/utils/get_initial_anomalies_layers';
+import { getInitialSourceIndexFieldLayers } from '../../../maps/utils/get_initial_source_index_field_layers';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
 import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
