@@ -53,7 +53,7 @@ export const registerSiemDashboardMigrationsTranslationStatsRoute = (
                 migrationId
               );
 
-              if (stats.items.total === 0) {
+              if (stats.dashboards.total === 0) {
                 return res.noContent();
               }
               return res.ok({ body: stats });
