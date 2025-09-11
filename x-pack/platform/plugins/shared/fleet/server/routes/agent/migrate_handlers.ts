@@ -54,16 +54,15 @@ export const bulkMigrateAgentsHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
-  // // First validate all agents exist
-  const agents = await AgentService.getByIds(esClient, soClient, request.body.agents, {
-    ignoreMissing: false, // throw error if any agents are missing
-  });
 
-  // then get all the policies for the agents
-  const agentPolicies = await AgentService.getAgentPolicyForAgents(soClient, agents);
+  const agentOptions = Array.isArray(request.body.agents)
+    ? { agentIds: request.body.agents }
+    : { kuery: request.body.agents };
 
-  const body = await AgentService.bulkMigrateAgents(esClient, agents, agentPolicies, {
+  const body = await AgentService.bulkMigrateAgents(esClient, soClient, {
     ...options,
+    ...agentOptions,
   });
+
   return response.ok({ body });
 };
