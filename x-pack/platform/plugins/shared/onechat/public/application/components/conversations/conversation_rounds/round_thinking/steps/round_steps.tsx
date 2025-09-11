@@ -147,8 +147,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
           ];
         }
 
-        // What is the difference between a reasoning step and a tool call progression message. When does the agent produce one over the other?
-        // Is there any difference for how we should display reasoning and progression?
+        // Display agent reasoning the same as tool call progress
         if (isReasoningStep(step)) {
           return [
             <ThinkingItemLayout key={`step-reasoning-${stepIndex}`} content={step.reasoning} />,
