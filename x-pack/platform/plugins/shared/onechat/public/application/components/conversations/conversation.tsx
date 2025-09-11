@@ -119,7 +119,7 @@ export const Conversation: React.FC<{}> = () => {
                 starterPrompt={starterPrompt}
                 contextPrompt={conversationSettings?.contextPrompt}
                 onSubmit={() => {
-                  scrollToMostRecentRoundTop
+                  scrollToMostRecentRoundTop;
                 }}
               />
             </EuiResizablePanel>

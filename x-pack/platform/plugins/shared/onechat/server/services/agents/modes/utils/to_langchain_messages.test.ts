@@ -238,7 +238,11 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationToLangchainMessages({ previousRounds, nextInput, toolParameters: {} });
+    const result = conversationToLangchainMessages({
+      previousRounds,
+      nextInput,
+      toolParameters: {},
+    });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
     const [_human, toolCallAIMessage] = result;
