@@ -52,6 +52,7 @@ export class DashboardPageControls extends FtrService {
   private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   /* -----------------------------------------------------------
      General controls functions
@@ -129,6 +130,7 @@ export class DashboardPageControls extends FtrService {
 
   public async openControlGroupSettingsFlyout() {
     this.log.debug('Open controls group settings flyout');
+    await this.dashboard.openSettingsFlyout();
     await this.openControlsMenu();
     await this.testSubjects.click('controls-settings-button');
     await this.retry.try(async () => {
