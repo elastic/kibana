@@ -240,7 +240,7 @@ describe('#delete', () => {
         );
         mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!'));
         await repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace });
-        expect(client.get).toHaveBeenCalledTimes(2);
+        expect(client.get).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledWith(
           'Unable to delete aliases when deleting an object: Oh no!'
@@ -283,7 +283,7 @@ describe('#delete', () => {
           } as estypes.GetResponse)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(2);
+        expect(client.get).toHaveBeenCalledTimes(1);
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
@@ -293,7 +293,7 @@ describe('#delete', () => {
           })
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(2);
+        expect(client.get).toHaveBeenCalledTimes(1);
       });
 
       it(`throws when the type is multi-namespace and the document exists, but not in this namespace`, async () => {
@@ -308,7 +308,7 @@ describe('#delete', () => {
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id, {
           namespace: 'bar-namespace',
         });
-        expect(client.get).toHaveBeenCalledTimes(2);
+        expect(client.get).toHaveBeenCalledTimes(1);
       });
 
       it(`throws when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`, async () => {
@@ -325,7 +325,7 @@ describe('#delete', () => {
         ).rejects.toThrowError(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-        expect(client.get).toHaveBeenCalledTimes(2);
+        expect(client.get).toHaveBeenCalledTimes(1);
         client.get.mockClear();
       });
 
@@ -344,7 +344,7 @@ describe('#delete', () => {
         ).rejects.toThrowError(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-        expect(client.get).toHaveBeenCalledTimes(2);
+        expect(client.get).toHaveBeenCalledTimes(1);
         client.get.mockClear();
       });
 
