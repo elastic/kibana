@@ -34,10 +34,3 @@ export const FAILED_FILTER_OPTION = i18n.translate(
     defaultMessage: 'Failed',
   }
 );
-
-export const INDEX_PATTERN_MISSING_FILTER_OPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.filters.statusIndexPatternMissingOption',
-  {
-    defaultMessage: 'Index pattern missing',
-  }
-);

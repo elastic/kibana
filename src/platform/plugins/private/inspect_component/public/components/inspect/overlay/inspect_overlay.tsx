@@ -14,6 +14,7 @@ import { Global } from '@emotion/react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { findFirstFiberWithDebugSource } from '../../../lib/fiber/find_first_fiber_with_debug_source';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
@@ -53,6 +54,16 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
       pointer-events: none;
     `,
     [euiTheme.colors.backgroundFilledText, euiTheme.levels.toast]
+  );
+
+  const handleKeydown = useCallback(
+    (event: KeyboardEvent) => {
+      if (isEscapeKey(event)) {
+        event.preventDefault();
+        setIsInspecting(false);
+      }
+    },
+    [setIsInspecting]
   );
 
   const handlePointerMove = useCallback((event: PointerEvent) => {
@@ -154,6 +165,7 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
           id={INSPECT_OVERLAY_ID}
           data-test-subj="inspectOverlayContainer"
         >
+          <EuiWindowEvent event="keydown" handler={handleKeydown} />
           <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
           <InspectHighlight
             currentPosition={highlightPosition}
@@ -162,7 +174,7 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
         </div>
       </React.Fragment>
     ),
-    [overlayCss, highlightPosition, sourceComponent?.type, handlePointerMove]
+    [overlayCss, highlightPosition, sourceComponent?.type, handlePointerMove, handleKeydown]
   );
 
   return <EuiPortal>{overlayContent}</EuiPortal>;

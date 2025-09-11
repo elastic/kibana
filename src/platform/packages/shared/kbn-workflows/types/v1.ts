@@ -24,6 +24,15 @@ export enum ExecutionStatus {
   CANCELLED = 'cancelled',
   SKIPPED = 'skipped',
 }
+export type ExecutionStatusUnion = `${ExecutionStatus}`;
+export const ExecutionStatusValues = Object.values(ExecutionStatus);
+
+export enum ExecutionType {
+  TEST = 'test',
+  PRODUCTION = 'production',
+}
+export type ExecutionTypeUnion = `${ExecutionType}`;
+export const ExecutionTypeValues = Object.values(ExecutionType);
 
 export interface EsWorkflowExecution {
   spaceId: string;
@@ -41,6 +50,9 @@ export interface EsWorkflowExecution {
   createdBy: string;
   startedAt: string;
   finishedAt: string;
+  cancelRequested: boolean;
+  cancelledAt?: string;
+  cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
@@ -63,6 +75,10 @@ export interface EsWorkflowStepExecution {
   spaceId: string;
   id: string;
   stepId: string;
+  stepType?: string;
+
+  /** Current step's scope path */
+  path: string[];
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
@@ -76,6 +92,8 @@ export interface EsWorkflowStepExecution {
   input?: Record<string, any> | null;
   state?: Record<string, any>;
 }
+
+export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;
@@ -102,13 +120,17 @@ export interface WorkflowExecutionDto {
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
-  stepExecutions: EsWorkflowStepExecution[];
+  workflowDefinition: WorkflowYaml;
+  stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
 }
 
-export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions' | 'yaml'>;
+export type WorkflowExecutionListItemDto = Omit<
+  WorkflowExecutionDto,
+  'stepExecutions' | 'yaml' | 'workflowDefinition'
+>;
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
