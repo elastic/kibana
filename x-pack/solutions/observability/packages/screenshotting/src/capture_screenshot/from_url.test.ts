@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+// @ts-expect-error - this module has no exported types
+import domtoimage from 'dom-to-image-more';
 import { captureScreenshotFromUrl } from './from_url';
 import * as utils from './utils';
-import domtoimage from 'dom-to-image-more';
 
 jest.mock('dom-to-image-more', () => ({
   toCanvas: jest.fn(),
