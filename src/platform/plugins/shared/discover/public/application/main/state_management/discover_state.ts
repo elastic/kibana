@@ -361,7 +361,7 @@ export function getDiscoverStateContainer({
     const appState = appStateContainer.get();
     const { query } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, filterQuery);
+    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
 
     appStateContainer.update({
       query: { esql: queryString },
