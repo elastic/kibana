@@ -17,6 +17,7 @@ export const executeAgent$ = ({
   conversation$,
   nextInput,
   abortSignal,
+  toolParameters,
   defaultConnectorId,
 }: {
   agentId: string;
@@ -25,6 +26,7 @@ export const executeAgent$ = ({
   conversation$: Observable<Conversation>;
   nextInput: RoundInput;
   abortSignal?: AbortSignal;
+  toolParameters?: Record<string, any>;
   defaultConnectorId?: string;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
@@ -39,6 +41,7 @@ export const executeAgent$ = ({
             agentParams: {
               nextInput,
               conversation: conversation.rounds,
+              toolParameters,
             },
             onEvent: (event) => {
               observer.next(event);

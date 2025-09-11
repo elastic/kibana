@@ -32,4 +32,8 @@ export class ConversationsService {
   async get({ conversationId }: ConversationGetOptions) {
     return await this.http.get<Conversation>(`/api/chat/conversations/${conversationId}`);
   }
+
+  async delete({ conversationId }: { conversationId: string }): Promise<void> {
+    await this.http.delete(`/api/chat/conversations/${conversationId}`);
+  }
 }

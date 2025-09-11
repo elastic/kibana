@@ -18,15 +18,17 @@ export const conversationToLangchainMessages = ({
   previousRounds,
   nextInput,
   ignoreSteps = false,
+  toolParameters,
 }: {
   previousRounds: ConversationRound[];
   nextInput: RoundInput;
   ignoreSteps?: boolean;
+  toolParameters?: Record<string, any>;
 }): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
   for (const round of previousRounds) {
-    messages.push(...roundToLangchain(round, { ignoreSteps }));
+    messages.push(...roundToLangchain(round, { ignoreSteps, toolParameters }));
   }
 
   messages.push(createUserMessage({ content: nextInput.message }));
@@ -36,18 +38,25 @@ export const conversationToLangchainMessages = ({
 
 export const roundToLangchain = (
   round: ConversationRound,
-  { ignoreSteps = false }: { ignoreSteps?: boolean } = {}
+  {
+    ignoreSteps = false,
+    toolParameters,
+  }: { ignoreSteps?: boolean; toolParameters?: Record<string, any> } = {}
 ): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(createUserMessage({ content: round.input.message }));
+  messages.push(
+    createUserMessage({
+      content: round.input.message,
+    })
+  );
 
   // steps
   if (!ignoreSteps) {
     for (const step of round.steps) {
       if (isToolCallStep(step)) {
-        messages.push(...createToolCallMessages(step));
+        messages.push(...createToolCallMessages(step, toolParameters));
       }
     }
   }
@@ -59,15 +68,29 @@ export const roundToLangchain = (
 };
 
 const createUserMessage = ({ content }: { content: string }): HumanMessage => {
-  return new HumanMessage({ content });
+  return new HumanMessage({
+    content,
+  });
 };
 
 const createAssistantMessage = ({ content }: { content: string }): AIMessage => {
   return new AIMessage({ content });
 };
 
-export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage, ToolMessage] => {
+export const createToolCallMessages = (
+  toolCall: ToolCallWithResult,
+  toolParameters?: Record<string, any>
+): [AIMessage, ToolMessage] => {
   const toolName = sanitizeToolId(toolCall.tool_id);
+
+  // Merge tool parameters with the tool call params if toolParameters are provided
+  let args = toolCall.params;
+  if (toolParameters && Object.keys(toolParameters).length > 0) {
+    args = {
+      ...toolCall.params,
+      ...toolParameters,
+    };
+  }
 
   const toolCallMessage = new AIMessage({
     content: '',
@@ -75,7 +98,7 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
       {
         id: toolCall.tool_call_id,
         name: toolName,
-        args: toolCall.params,
+        args,
         type: 'tool_call',
       },
     ],

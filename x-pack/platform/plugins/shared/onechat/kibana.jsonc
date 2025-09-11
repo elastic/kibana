@@ -10,13 +10,16 @@
     "browser": true,
     "configPath": ["xpack", "onechat"],
     "requiredPlugins": [
+      "actions",
       "data",
       "dataViews",
       "esql",
       "features",
       "inference",
       "kibanaUtils",
-      "lens"
+      "lens",
+      "spaces",
+      "triggersActionsUi"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],

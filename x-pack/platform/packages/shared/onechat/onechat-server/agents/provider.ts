@@ -88,6 +88,10 @@ export interface AgentParams {
    * The input triggering this round.
    */
   nextInput: RoundInput;
+  /**
+   * Optional tool parameters to pass to the agent.
+   */
+  toolParameters?: Record<string, any>;
 }
 
 export interface AgentResponse {

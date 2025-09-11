@@ -16,6 +16,8 @@ import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerAnalytics, registerApp } from './register';
 import type { OnechatInternalService } from './services';
 import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
+import { ConversationSettingsService } from './services/conversations/conversations_settings';
+
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -35,9 +37,11 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
+  private conversationSettingsService: ConversationSettingsService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.conversationSettingsService = new ConversationSettingsService();
   }
   setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
     const isOnechatUiEnabled = core.uiSettings.get<boolean>(
@@ -66,6 +70,7 @@ export class OnechatPlugin
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
+    const conversationSettingsService = this.conversationSettingsService.start();
     const toolsService = new ToolsService({ http });
 
     this.internalServices = {
@@ -74,8 +79,15 @@ export class OnechatPlugin
       conversationsService,
       toolsService,
       startDependencies,
+      conversationSettingsService,
     };
 
-    return {};
+    return {
+      internalServices: this.internalServices,
+    };
+  }
+
+  stop() {
+    this.conversationSettingsService.stop();
   }
 }

@@ -6,22 +6,46 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../services/types';
 import { ConversationContent } from './conversation_grid';
+import { StarterPrompts } from './starter_prompts';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const NewConversationPrompt: React.FC<{}> = () => {
+interface NewConversationPromptProps {
+  setStarterPrompt: (prompt: string) => void;
+}
+
+export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({
+  setStarterPrompt,
+}) => {
   const { euiTheme } = useEuiTheme();
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the newConversationSubtitle
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
   const promptStyles = css`
     max-inline-size: calc(${euiTheme.size.l} * 19);
     padding: ${euiTheme.size.l};
     margin: 0 auto;
   `;
+
+  const defaultSubtitle = i18n.translate('xpack.onechat.newConversationPrompt.subtitle', {
+    defaultMessage:
+      "Whether you're starting something new or jumping back into an old thread, I am ready when you are 💪",
+  });
+
   const labels = {
     container: i18n.translate('xpack.onechat.newConversationPrompt.container', {
       defaultMessage: 'New conversation welcome prompt',
@@ -29,11 +53,17 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     title: i18n.translate('xpack.onechat.newConversationPrompt.title', {
       defaultMessage: 'How can I help today?',
     }),
-    subtitle: i18n.translate('xpack.onechat.newConversationPrompt.subtitle', {
-      defaultMessage:
-        "Whether you're starting something new or jumping back into an old thread, I am ready when you are 💪",
-    }),
+    subtitle: conversationSettings?.newConversationSubtitle || defaultSubtitle,
   };
+
+  const handleSelectPrompt = useCallback(
+    (prompt: string, title: string) => {
+      setStarterPrompt(prompt);
+      conversationSettings?.onSelectPrompt?.(prompt, title);
+    },
+    [setStarterPrompt, conversationSettings]
+  );
+
   return (
     <ConversationContent css={fullHeightStyles}>
       <EuiFlexGroup
@@ -55,6 +85,13 @@ export const NewConversationPrompt: React.FC<{}> = () => {
           <EuiText textAlign="center" color="subdued">
             <p>{labels.subtitle}</p>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <StarterPrompts
+            fetchedPromptGroups={conversationSettings?.newConversationPrompts || []}
+            onSelectPrompt={handleSelectPrompt}
+            compressed={true}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ConversationContent>

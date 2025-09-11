@@ -68,5 +68,15 @@
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
     "@kbn/scout",
+    "@kbn/spaces-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/ai-assistant-icon",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/cases-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/spaces-utils",
   ]
 }
