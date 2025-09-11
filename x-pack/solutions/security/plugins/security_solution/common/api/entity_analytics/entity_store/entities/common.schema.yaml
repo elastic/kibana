@@ -34,14 +34,14 @@ components:
         attributes:
           type: object
           properties:
-            Privileged:
+            privileged:
               type: boolean
         behavior: 
           type: object
         lifecycle:
           type: object
           properties:
-            FirstSeen:
+            first_seen:
               type: string
               format: date-time
 

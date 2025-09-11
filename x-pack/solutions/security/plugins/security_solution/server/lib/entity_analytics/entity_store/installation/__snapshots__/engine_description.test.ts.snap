@@ -95,8 +95,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.lifecycle.FirstSeen",
-      "source": "entity.lifecycle.FirstSeen",
+      "destination": "entity.lifecycle.First_seen",
+      "source": "entity.lifecycle.First_seen",
     },
     Object {
       "aggregation": Object {
@@ -723,7 +723,7 @@ Object {
     "entity.id": Object {
       "type": "keyword",
     },
-    "entity.lifecycle.FirstSeen": Object {
+    "entity.lifecycle.First_seen": Object {
       "type": "keyword",
     },
     "entity.name": Object {
@@ -1101,8 +1101,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.lifecycle.FirstSeen",
-      "source": "host.entity.lifecycle.FirstSeen",
+      "destination": "entity.lifecycle.First_seen",
+      "source": "host.entity.lifecycle.First_seen",
     },
   ],
   "name": "Security 'host' Entity Store Definition",
@@ -1123,7 +1123,7 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "keyword",
     },
-    "entity.lifecycle.FirstSeen": Object {
+    "entity.lifecycle.First_seen": Object {
       "type": "keyword",
     },
     "entity.name": Object {
@@ -1418,8 +1418,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.lifecycle.FirstSeen",
-      "source": "service.entity.lifecycle.FirstSeen",
+      "destination": "entity.lifecycle.First_seen",
+      "source": "service.entity.lifecycle.First_seen",
     },
   ],
   "name": "Security 'service' Entity Store Definition",
@@ -1440,7 +1440,7 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "keyword",
     },
-    "entity.lifecycle.FirstSeen": Object {
+    "entity.lifecycle.First_seen": Object {
       "type": "keyword",
     },
     "entity.name": Object {
@@ -1697,8 +1697,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.lifecycle.FirstSeen",
-      "source": "user.entity.lifecycle.FirstSeen",
+      "destination": "entity.lifecycle.First_seen",
+      "source": "user.entity.lifecycle.First_seen",
     },
   ],
   "name": "Security 'user' Entity Store Definition",
@@ -1719,7 +1719,7 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "keyword",
     },
-    "entity.lifecycle.FirstSeen": Object {
+    "entity.lifecycle.First_seen": Object {
       "type": "keyword",
     },
     "entity.name": Object {
