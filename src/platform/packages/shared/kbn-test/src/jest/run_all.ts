@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { relative, dirname, resolve, isAbsolute } from 'path';
+
 import getopts from 'getopts';
+import { promises as fs } from 'fs';
 import { spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import path, { relative, dirname, resolve, isAbsolute } from 'path';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import { readConfig } from 'jest-config';
 import fg from 'fast-glob';
@@ -21,6 +23,73 @@ interface JestConfigResult {
   config: string;
   code: number;
   durationMs: number;
+}
+
+async function runConfigs(
+  configs: string[],
+  maxParallel: number,
+  log: ToolingLog
+): Promise<JestConfigResult[]> {
+  const results: JestConfigResult[] = [];
+  let active = 0;
+  let index = 0;
+
+  await new Promise<void>((resolveAll) => {
+    const launchNext = () => {
+      while (active < maxParallel && index < configs.length) {
+        const config = configs[index++];
+        const start = Date.now();
+        active += 1;
+
+        const args = [
+          'scripts/jest',
+          '--config',
+          config,
+          '--passWithNoTests',
+          '--runInBand',
+          '--coverage=false',
+        ];
+
+        if (SCOUT_REPORTER_ENABLED) {
+          process.env.JEST_CONFIG_PATH = config;
+        }
+
+        const proc = spawn(process.execPath, args, {
+          env: process.env,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        let buffer = '';
+
+        proc.stdout.on('data', (d) => {
+          buffer += d.toString();
+        });
+        proc.stderr.on('data', (d) => {
+          buffer += d.toString();
+        });
+
+        proc.on('exit', (c) => {
+          const code = c == null ? 1 : c;
+          const durationMs = Date.now() - start;
+          results.push({ config, code, durationMs });
+
+          // Print buffered output after completion to keep logs grouped per config
+          const sec = Math.round(durationMs / 1000);
+          // eslint-disable-next-line no-console
+          console.log(`\n+++ Output for ${config} (exit ${code}, ${sec}s)\n` + buffer + '\n');
+
+          active -= 1;
+          if (index < configs.length) {
+            launchNext();
+          } else if (active === 0) {
+            resolveAll();
+          }
+        });
+      }
+    };
+    launchNext();
+  });
+
+  return results;
 }
 
 // Run multiple Jest configs in parallel using separate Jest processes (one per config).
@@ -63,7 +132,7 @@ export async function runJestAll() {
 
   interface ResolvedConfigMeta {
     path: string;
-    options: Config.InitialOptions;
+    options: Config.ProjectConfig; // fully materialized jest config
     matchedTests: string[];
   }
 
@@ -108,24 +177,12 @@ export async function runJestAll() {
 
       if (testMatch.length > 0) {
         for (const sr of searchRoots) {
-          const normalized = testMatch
-            .map((p) => {
-              if (p.startsWith('<rootDir>/')) {
-                return p.replace('<rootDir>/', '');
-              }
-              return p.startsWith('<rootDir>') ? p.replace('<rootDir>', rootDir) : p;
-            })
-            .map((p) => path.join(sr, p));
-
-          console.log({
-            normalized,
+          const normalized = testMatch.map((p) => {
+            if (p.startsWith('<rootDir>/')) return p.replace('<rootDir>/', '');
+            if (p.startsWith('<rootDir>')) return p.replace('<rootDir>', '');
+            return p;
           });
-
-          const found = await fg(normalized, {
-            onlyFiles: true,
-            cwd: rootDir,
-            absolute: true,
-          });
+          const found = await fg(normalized, { onlyFiles: true, cwd: sr, absolute: true });
           if (found.length) {
             matches.push(...found);
           }
@@ -160,12 +217,13 @@ export async function runJestAll() {
       } else {
         log.verbose?.(`Config ${cfgPath} matched ${matches.length} tests`);
       }
-
       resolvedConfigs.push({ path: cfgPath, options: jestConfig, matchedTests: matches });
     } catch (e) {
       log.warning(`Failed to read config ${cfgPath}: ${(e as Error).message}. Including anyway.`);
       resolvedConfigs.push({
         path: cfgPath,
+        // Minimal fallback; jestConfig failed to load. Only rootDir is required for relative path logging.
+        // @ts-expect-error intentionally partial ProjectConfig fallback
         options: { rootDir: process.cwd() },
         matchedTests: [],
       });
@@ -190,76 +248,58 @@ export async function runJestAll() {
   );
   // legacy --parallelism flag removed
 
-  const results: JestConfigResult[] = [];
-  let globalExit = 0;
+  // First pass
+  const firstPass = await runConfigs(configs, maxParallel, log);
+  let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
 
-  let active = 0;
-  let index = 0;
+  let retryResults: JestConfigResult[] = [];
+  if (failing.length > 0) {
+    log.info('--- Detected failing configs, starting retry pass (maxParallel=1)');
+    retryResults = await runConfigs(failing, 1, log);
 
-  await new Promise<void>((resolveAll) => {
-    const launchNext = () => {
-      while (active < maxParallel && index < configs.length) {
-        const config = configs[index++];
-        const start = Date.now();
-        active += 1;
+    const fixed = retryResults.filter((r) => r.code === 0).map((r) => r.config);
+    const stillFailing = retryResults.filter((r) => r.code !== 0).map((r) => r.config);
+    if (fixed.length) {
+      log.info('Configs fixed after retry:');
+      for (const f of fixed) log.info(`  - ${f}`);
+    }
+    if (stillFailing.length) {
+      log.info('Configs still failing after retry:');
+      for (const f of stillFailing) log.info(`  - ${f}`);
+    }
+    failing = stillFailing; // update failing list to post-retry
+  }
 
-        // Prepare args (always run tests in-band inside each process to avoid nested worker contention)
-        const args = [
-          'scripts/jest',
-          '--config',
-          config,
-          '--passWithNoTests',
-          '--runInBand',
-          '--coverage=false',
-        ];
+  const results = retryResults.length
+    ? // merge: prefer retry result for retried configs
+      firstPass.map((r) => {
+        const retried = retryResults.find((rr) => rr.config === r.config);
+        return retried ? retried : r;
+      })
+    : firstPass;
 
-        if (SCOUT_REPORTER_ENABLED) {
-          process.env.JEST_CONFIG_PATH = config;
-        }
-
-        const proc = spawn(process.execPath, args, {
-          env: process.env,
-          stdio: ['ignore', 'pipe', 'pipe'],
-        });
-        let buffer = '';
-
-        proc.stdout.on('data', (d) => {
-          buffer += d.toString();
-        });
-        proc.stderr.on('data', (d) => {
-          buffer += d.toString();
-        });
-
-        proc.on('exit', (c) => {
-          const code = c == null ? 1 : c;
-          const durationMs = Date.now() - start;
-          results.push({ config, code, durationMs });
-          if (code !== 0) {
-            globalExit = 10; // Align with previous shell script behaviour
-          }
-
-          // Print buffered output after completion to keep logs grouped per config
-          const sec = Math.round(durationMs / 1000);
-          // eslint-disable-next-line no-console
-          console.log(`\n+++ Output for ${config} (exit ${code}, ${sec}s)\n` + buffer + '\n');
-
-          active -= 1;
-          if (index < configs.length) {
-            launchNext();
-          } else if (active === 0) {
-            resolveAll();
-          }
-        });
-      }
-    };
-    launchNext();
-  });
+  const globalExit = failing.length > 0 ? 10 : 0; // maintain previous non-zero code
 
   const totalMs = Date.now() - startAll;
   reporter(startAll, 'total', {
     success: globalExit === 0,
     testFiles: results.map((r) => relative(process.cwd(), r.config)),
   });
+
+  // Persist failed configs for retry logic if requested
+  if (process.env.JEST_ALL_FAILED_CONFIGS_PATH) {
+    const failed = results.filter((r) => r.code !== 0).map((r) => r.config);
+    try {
+      await fs.mkdir(dirname(process.env.JEST_ALL_FAILED_CONFIGS_PATH), { recursive: true });
+      await fs.writeFile(
+        process.env.JEST_ALL_FAILED_CONFIGS_PATH,
+        JSON.stringify(failed, null, 2),
+        'utf8'
+      );
+    } catch (err) {
+      log.warning(`Unable to write failed configs file: ${(err as Error).message}`);
+    }
+  }
 
   log.info('--- Combined Jest run summary');
   for (const r of results) {
