@@ -12,7 +12,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {
-    const defaultConnector: AIConnector = {
+    const connector1: AIConnector = {
       actionTypeId: '.gen-ai',
       isPreconfigured: false,
       isDeprecated: false,
@@ -24,6 +24,16 @@ describe('helpers', () => {
       name: 'OpenAI',
       config: {
         apiProvider: 'OpenAI',
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+      },
+    };
+
+    const connector2: AIConnector = {
+      ...connector1,
+      id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
+      name: 'OpenAI',
+      config: {
+        apiProvider: 'OpenAI 2',
         apiUrl: 'https://api.openai.com/v1/chat/completions',
       },
     };
@@ -61,27 +71,22 @@ describe('helpers', () => {
     });
 
     it('should return the connector id if there is only one connector', () => {
-      const connectors: AIConnector[] = [defaultConnector];
+      const connectors: AIConnector[] = [connector1];
       const result = getDefaultConnector(connectors, settings);
 
       expect(result).toBe(connectors[0]);
     });
 
     it('should return the default connector id if there are multiple connectors and default connector is defined', () => {
-      const connectors: AIConnector[] = [
-        {
-          ...defaultConnector,
-          id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
-          name: 'OpenAI',
-          config: {
-            apiProvider: 'OpenAI 2',
-            apiUrl: 'https://api.openai.com/v1/chat/completions',
-          },
-        },
-        defaultConnector,
-      ];
+      const connectors: AIConnector[] = [connector1, connector2];
       const result = getDefaultConnector(connectors, settings);
-      expect(result).toBe(connectors[1]);
+      expect(result).toBe(connector1);
+    });
+
+    it('should return the default connector id if there are multiple connectors and default connector is defined but they are in a different order', () => {
+      const connectors: AIConnector[] = [connector2, connector1];
+      const result = getDefaultConnector(connectors, settings);
+      expect(result).toBe(connector1);
     });
 
     it('should return the first connector if there are multiple connectors and no default connector is defined', () => {
@@ -89,18 +94,7 @@ describe('helpers', () => {
         return undefined;
       });
 
-      const connectors: AIConnector[] = [
-        {
-          ...defaultConnector,
-          id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
-          name: 'OpenAI',
-          config: {
-            apiProvider: 'OpenAI 2',
-            apiUrl: 'https://api.openai.com/v1/chat/completions',
-          },
-        },
-        defaultConnector,
-      ];
+      const connectors: AIConnector[] = [connector2, connector1];
       const result = getDefaultConnector(connectors, settings);
       expect(result).toBe(connectors[0]);
     });
@@ -113,18 +107,7 @@ describe('helpers', () => {
         return undefined;
       });
 
-      const connectors: AIConnector[] = [
-        {
-          ...defaultConnector,
-          id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
-          name: 'OpenAI',
-          config: {
-            apiProvider: 'OpenAI 2',
-            apiUrl: 'https://api.openai.com/v1/chat/completions',
-          },
-        },
-        defaultConnector,
-      ];
+      const connectors: AIConnector[] = [connector2, connector1];
       const result = getDefaultConnector(connectors, settings);
       expect(result).toBe(connectors[0]);
     });
