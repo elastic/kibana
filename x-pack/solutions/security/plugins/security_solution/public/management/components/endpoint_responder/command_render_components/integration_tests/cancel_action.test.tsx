@@ -108,7 +108,7 @@ describe('When using cancel action from response actions console', () => {
 
     it('should not show cancel command in help when user lacks write permissions', async () => {
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
-        canWriteSecuritySolution: false,
+        canReadSecuritySolution: false,
       });
 
       await enterConsoleCommand(renderResult, user, 'help');
@@ -146,7 +146,7 @@ describe('When using cancel action from response actions console', () => {
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
       // Should show the pending actions selector
-      expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
+      expect(renderResult.getByTestId('cancel-action-arg-0')).toBeTruthy();
     });
 
     it('should call cancel API when command is entered with valid action ID', async () => {
@@ -176,13 +176,13 @@ describe('When using cancel action from response actions console', () => {
       apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
-        canWriteSecuritySolution: true,
+        canReadSecuritySolution: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
+        expect(renderResult.getByTestId('cancel-action-arg-0')).toBeTruthy();
       });
     });
 
@@ -204,13 +204,13 @@ describe('When using cancel action from response actions console', () => {
       // Render with user who cannot kill processes but has general write permissions
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
         canKillProcess: false,
-        canWriteSecuritySolution: true,
+        canReadSecuritySolution: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
+        expect(renderResult.getByTestId('cancel-action-arg-0')).toBeTruthy();
       });
     });
 
@@ -234,13 +234,13 @@ describe('When using cancel action from response actions console', () => {
       apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
-        canWriteSecuritySolution: true,
+        canReadSecuritySolution: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('cancel-action-arg')).toBeTruthy();
+        expect(renderResult.getByTestId('cancel-action-arg-0')).toBeTruthy();
       });
     });
   });
@@ -257,7 +257,7 @@ describe('When using cancel action from response actions console', () => {
 
     it('should show error when trying to use cancel command with endpoint agent', async () => {
       await render('endpoint', [...ENDPOINT_CAPABILITIES], {
-        canWriteSecuritySolution: true,
+        canReadSecuritySolution: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel');
