@@ -21,14 +21,14 @@ pipeline:
 
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.
-#unstable_remote:
-#  host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
-#  api: http
-#  cache:
-#    localReadOnly: true
-#  auth:
-#    headers:
-#      Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
+unstable_remote:
+  host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
+  api: http
+  cache:
+    localReadOnly: true
+  auth:
+    headers:
+      Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
 
 
 telemetry: false

@@ -96,6 +96,7 @@ steps:
       diskSizeGb: 85
     key: check_types
     timeout_in_minutes: 60
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
