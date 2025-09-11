@@ -12,8 +12,6 @@ if [[ "${RUN_FULL_CHECK:-}" == "true" ]]; then
   node scripts/type_check
 else
   echo "Running type-check with caches..."
-  yarn moon ci :typecheck -c 3 \
-    --job $BUILDKITE_PARALLEL_JOB \
-    --jobTotal $BUILDKITE_PARALLEL_JOB_COUNT \
+  yarn moon ci :typecheck -c 1 \
     --base $BUILDKITE_PULL_REQUEST_BASE_BRANCH
 fi
