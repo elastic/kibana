@@ -18,7 +18,7 @@ import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
-import { installTranslated } from '../../common/api/util/installation';
+import { installTranslated } from './util/installation';
 
 export const registerSiemDashboardMigrationsInstallRoute = (
   router: SecuritySolutionPluginRouter,
