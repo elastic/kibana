@@ -9,7 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction } from 'lodash';
+import { isString, once, pull, isFunction, last } from 'lodash';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
@@ -78,18 +78,35 @@ export class LlmProxy {
         }
 
         const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
-        const availableInterceptorNames = this.interceptors.map(({ name }) => name);
+
         this.log.warning(
-          `Available interceptors: ${JSON.stringify(availableInterceptorNames, null, 2)}`
+          `${errorMessage}. Messages: ${JSON.stringify(
+            requestBody.messages,
+            null,
+            2
+          )} Tool choice: ${JSON.stringify(requestBody.tool_choice, null, 2)}`
         );
 
         this.log.warning(
-          `${errorMessage}. Messages: ${JSON.stringify(requestBody.messages, null, 2)}`
+          `Available interceptors: ${JSON.stringify(
+            this.interceptors.map(({ name, when }) => ({
+              name,
+              when: when.toString(),
+            })),
+            null,
+            2
+          )}`
         );
+
         response.writeHead(500, {
           'Elastic-Interceptor': 'Interceptor not found',
         });
-        response.write(sseEvent({ errorMessage, availableInterceptorNames }));
+        response.write(
+          sseEvent({
+            errorMessage,
+            availableInterceptors: this.interceptors.map(({ name }) => name),
+          })
+        );
         response.end();
       })
       .on('error', (error) => {
@@ -192,10 +209,50 @@ export class LlmProxy {
     ).completeAfterIntercept();
   }
 
+  interceptToolChoice({
+    name,
+    arguments: argumentsCallback,
+  }: {
+    name: string;
+    arguments: (body: ChatCompletionStreamParams) => string;
+  }) {
+    return this.intercept(
+      `interceptToolChoice: "${name}"`,
+      // @ts-expect-error
+      (body) => body.tool_choice?.function?.name === name,
+      // @ts-expect-error
+      (body) => {
+        return {
+          content: '',
+          tool_calls: [
+            {
+              function: {
+                name,
+                arguments: argumentsCallback(body),
+              },
+              index: 0,
+              id: `call_${uuidv4()}`,
+            },
+          ],
+        };
+      }
+    ).completeAfterIntercept();
+  }
+
+  interceptUserMessage(
+    responseMock: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage)
+  ) {
+    return this.intercept(
+      `interceptUserMessage`,
+      (body) => last(body.messages)?.role === 'user',
+      responseMock
+    ).completeAfterIntercept();
+  }
+
   intercept(
     name: string,
     when: RequestInterceptor['when'],
-    responseChunks?: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage)
+    responseMock?: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage)
   ): {
     waitForIntercept: () => Promise<LlmResponseSimulator>;
     completeAfterIntercept: () => Promise<LlmResponseSimulator>;
@@ -261,9 +318,9 @@ export class LlmProxy {
         const simulator = await waitForInterceptPromise;
 
         function getParsedChunks(): Array<string | ToolMessage> {
-          const llmMessage = isFunction(responseChunks)
-            ? responseChunks(simulator.requestBody)
-            : responseChunks;
+          const llmMessage = isFunction(responseMock)
+            ? responseMock(simulator.requestBody)
+            : responseMock;
 
           if (!llmMessage) {
             return [];

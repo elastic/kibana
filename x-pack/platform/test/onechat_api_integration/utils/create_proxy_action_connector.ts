@@ -15,13 +15,8 @@ export async function createProxyActionConnector(
   const samlAuth = getService('samlAuth');
   const logger = getService('log');
 
-  logger.info('Creating Proxy Action Connector');
-
   const internalReqHeader = samlAuth.getInternalRequestHeader();
-  logger.info(`internalReqHeader ${JSON.stringify(internalReqHeader)}`);
   const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-
-  logger.info(`role ${roleAuthc.apiKey}`);
 
   try {
     const res = await supertestWithoutAuth

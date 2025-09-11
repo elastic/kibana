@@ -10,16 +10,19 @@ import type {
   ChatRequestBodyPayload,
   ChatResponse,
 } from '@kbn/onechat-plugin/common/http_api/chat';
+import type { Conversation } from '@kbn/onechat-common';
 
 export function createOneChatApiClient(supertest: Agent) {
   return {
     async converse(payload: ChatRequestBodyPayload): Promise<ChatResponse> {
-      const res = await supertest
-        .post('/api/chat/converse')
-        .set('kbn-xsrf', 'true')
-        .send(payload)
-        .expect(200);
+      const res = await supertest.post('/api/chat/converse').set('kbn-xsrf', 'true').send(payload);
+      return res.body;
+    },
 
+    async getConversation(conversationId: string): Promise<Conversation> {
+      const res = await supertest
+        .get(`/api/chat/conversations/${conversationId}`)
+        .set('kbn-xsrf', 'true');
       return res.body;
     },
   };
