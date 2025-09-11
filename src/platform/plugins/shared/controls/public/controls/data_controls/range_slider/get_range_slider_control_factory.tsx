@@ -62,8 +62,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         state,
         parentApi,
         editorStateManager,
-        // willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
-        // getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
         titlesManager,
       });
 
@@ -147,7 +145,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
         controlFetch$,
-        appliedFilters$: dataControlManager.api.appliedFilters$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
         setIsLoading: (isLoading: boolean) => {
@@ -199,6 +196,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             rangeFilter.meta.key = fieldName;
             rangeFilter.meta.type = 'range';
             rangeFilter.meta.params = params;
+            rangeFilter.meta.controlledBy = uuid;
           }
           dataControlManager.internalApi.setOutputFilter(rangeFilter);
         });
