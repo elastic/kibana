@@ -18,7 +18,5 @@ export const getRbacControl = ({
   commandName: ConsoleResponseActionCommands;
   privileges: EndpointPrivileges;
 }): boolean => {
-  const requiredPrivilege = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName];
-
-  return Boolean(privileges[requiredPrivilege]);
+  return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
 };

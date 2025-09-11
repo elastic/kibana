@@ -842,8 +842,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         isPending = false;
         isError = true;
         message = `Response action was canceled by [${
-          // TODO does requestor make more sense?
-          machineAction.requestor
+          machineAction.cancellationRequestor
         }] (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})${
           machineAction.cancellationComment ? `: ${machineAction.cancellationComment}` : ''
         }`;

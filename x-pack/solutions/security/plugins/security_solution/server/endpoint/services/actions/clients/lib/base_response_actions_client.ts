@@ -1049,7 +1049,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   public async cancel(
     actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
     options?: CommonResponseActionMethodOptions
-    // TODO TC: check if we need outputcontent type
   ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('cancel');
   }

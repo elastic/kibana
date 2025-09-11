@@ -535,7 +535,7 @@ export const getEndpointConsoleCommands = ({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported: isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType),
+        isSupported: canCancelForCurrentContext(),
       }),
       RenderComponent: CancelActionResult,
       meta: {
