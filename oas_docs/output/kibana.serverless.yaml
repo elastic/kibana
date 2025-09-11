@@ -71787,7 +71787,7 @@ components:
         attributes:
           type: object
           properties:
-            Privileged:
+            privileged:
               type: boolean
         behavior:
           type: object
@@ -71798,7 +71798,7 @@ components:
         lifecycle:
           type: object
           properties:
-            FirstSeen:
+            first_seen:
               format: date-time
               type: string
         name:
