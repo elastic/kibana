@@ -8,15 +8,15 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder, EDITOR_MARKER, EsqlQuery } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Builder, EDITOR_MARKER } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
   ESQLPolicy,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLCallbacks } from './types';
-import { getFieldsFromES, getCurrentQueryAvailableColumns } from './helpers';
 import { expandEvals } from './expand_evals';
+import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
+import type { ESQLCallbacks } from './types';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -101,8 +101,8 @@ export function getColumnsByTypeHelper(
   originalQueryText: string,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(originalQueryText, query);
-  const root = EsqlQuery.fromSrc(queryForFields).ast;
+  const root = getQueryForFields(originalQueryText, query);
+  const queryForFields = BasicPrettyPrinter.print(root);
 
   const cacheColumns = async () => {
     if (!queryForFields) {
@@ -195,11 +195,16 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
  * Generally, this is the user's query up to the end of the previous command, but there
  * are special cases for multi-expression EVAL and FORK branches.
  *
+ * IMPORTANT: the AST nodes in the new query still reference locations in the original query text
+ *
  * @param queryString The original query string
  * @param commands
  * @returns
  */
-export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
+export function getQueryForFields(
+  queryString: string,
+  root: ESQLAstQueryExpression
+): ESQLAstQueryExpression {
   const commands = root.commands;
   const lastCommand = commands[commands.length - 1];
   if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
@@ -215,7 +220,7 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
      */
     const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
     const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
-    return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+    return { ...root, commands: newCommands };
   }
 
   if (lastCommand && lastCommand.name === 'eval') {
@@ -235,7 +240,7 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
        */
       const expanded = expandEvals(commands);
       const newCommands = expanded.slice(0, endsWithComma ? undefined : -1);
-      return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+      return { ...root, commands: newCommands };
     }
   }
 
@@ -244,8 +249,8 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
 
 function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
   if (root.commands.length === 1) {
-    return BasicPrettyPrinter.print({ ...root.commands[0] });
+    return { ...root.commands[0] };
   } else {
-    return BasicPrettyPrinter.print({ ...root, commands: root.commands.slice(0, -1) });
+    return { ...root, commands: root.commands.slice(0, -1) };
   }
 }
