@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -15,7 +14,6 @@ import { getPrivateLocations } from '../../../synthetics_service/get_private_loc
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 
 const EditPrivateLocationQuery = schema.object({
@@ -51,11 +49,7 @@ const checkPrivileges = async ({
   }
 };
 
-export const resetPrivateLocationRoute: SyntheticsRestApiRouteFactory<
-  PrivateLocation,
-  TypeOf<typeof EditPrivateLocationQuery>,
-  any
-> = () => ({
+export const resetPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}/reset',
   validate: {},
@@ -92,8 +86,6 @@ export const resetPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         routeContext,
         monitorsInLocation,
       });
-
-      return true;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return response.notFound({

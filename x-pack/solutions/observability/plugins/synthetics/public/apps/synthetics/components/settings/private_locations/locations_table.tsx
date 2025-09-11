@@ -58,6 +58,9 @@ export const PrivateLocationsTable = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const [isDeleteOpen, setIsDeleteOpen] = useState<PrivateLocation | null>(null);
+  const [isResetOpen, setIsResetOpen] = useState<PrivateLocation | null>(null);
+
   const { locationMonitors, loading } = useLocationMonitors();
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
@@ -123,14 +126,16 @@ export const PrivateLocationsTable = ({
         {
           name: RESET_LABEL,
           description: RESET_LABEL,
-          render: (item: ListItem) => (
-            <ResetLocation
-              id={item.id}
-              label={item.label}
-              onReset={onReset}
-              locationMonitors={locationMonitors}
-            />
-          ),
+          isPrimary: true,
+          'data-test-subj': 'action-reset',
+          onClick: (item: ListItem) => setIsResetOpen(item),
+          icon: 'refresh',
+          type: 'icon',
+          enabled: (item) => {
+            const monCount = locationMonitors?.find((l) => l.id === item.id)?.count ?? 0;
+            const canReset = monCount > 0;
+            return canSave && canReset && canManagePrivateLocations;
+          },
         },
         {
           name: EDIT_LOCATION,
@@ -140,21 +145,22 @@ export const PrivateLocationsTable = ({
           onClick: onEdit,
           icon: 'pencil',
           type: 'icon',
+          enabled: () => canSave && canManagePrivateLocations,
         },
         {
           name: DELETE_LOCATION,
           description: DELETE_LOCATION,
-          render: (item: ListItem) => (
-            <DeleteLocation
-              id={item.id}
-              label={item.label}
-              locationMonitors={locationMonitors}
-              onDelete={onDelete}
-              loading={deleteLoading}
-            />
-          ),
+          onClick: (item: ListItem) => setIsDeleteOpen(item),
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
           isPrimary: true,
           'data-test-subj': 'action-delete',
+          enabled: (item) => {
+            const monCount = locationMonitors?.find((l) => l.id === item.id)?.count ?? 0;
+            const canDelete = monCount === 0;
+            return canSave && canDelete && canManagePrivateLocations;
+          },
         },
       ],
     },
@@ -236,6 +242,22 @@ export const PrivateLocationsTable = ({
           ],
         }}
       />
+      {isResetOpen && (
+        <ResetLocation
+          id={isResetOpen.id}
+          label={isResetOpen.label}
+          onReset={onReset}
+          setIsModalOpen={setIsResetOpen}
+        />
+      )}
+      {isDeleteOpen && (
+        <DeleteLocation
+          id={isDeleteOpen.id}
+          label={isDeleteOpen.label}
+          onDelete={onDelete}
+          setIsModalOpen={setIsDeleteOpen}
+        />
+      )}
     </div>
   );
 };
@@ -259,12 +281,12 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',
   {
-    defaultMessage: 'Delete private location',
+    defaultMessage: 'Delete location',
   }
 );
 
 const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLocations.editLabel', {
-  defaultMessage: 'Edit private location',
+  defaultMessage: 'Edit location',
 });
 
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {

@@ -5,80 +5,47 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
+import React from 'react';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSelector } from 'react-redux';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
+import { selectPrivateLocationsState } from '../../../state/private_locations/selectors';
 
 export const DeleteLocation = ({
-  loading,
   id,
   label,
-  locationMonitors,
   onDelete,
+  setIsModalOpen,
 }: {
   id: string;
   label: string;
-  loading?: boolean;
   onDelete: (id: string) => void;
-  locationMonitors: Array<{ id: string; count: number }>;
+  setIsModalOpen: (isOpen: PrivateLocation | null) => void;
 }) => {
-  const monCount = locationMonitors?.find((l) => l.id === id)?.count ?? 0;
-  const canDelete = monCount === 0;
-
-  const { canSave } = useSyntheticsSettingsContext();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const deleteDisabledReason = i18n.translate(
-    'xpack.synthetics.monitorManagement.cannotDelete.description',
-    {
-      defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}.
-                Remove all monitors from this location first.`,
-      values: { monCount },
-    }
-  );
+  const { deleteLoading } = useSelector(selectPrivateLocationsState);
 
   const confirmModalTitleId = useGeneratedHtmlId();
 
-  const deleteModal = (
-    <EuiConfirmModal
-      aria-labelledby={confirmModalTitleId}
-      title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
-        defaultMessage: 'Delete "{location}"',
-        values: { location: label },
-      })}
-      titleProps={{ id: confirmModalTitleId }}
-      onCancel={() => setIsModalOpen(false)}
-      onConfirm={() => onDelete(id)}
-      cancelButtonText={CANCEL_LABEL}
-      confirmButtonText={DELETE_LABEL}
-      buttonColor="danger"
-      defaultFocusedButton="confirm"
-      isLoading={loading}
-    >
-      <p>{ARE_YOU_SURE_LABEL}</p>
-    </EuiConfirmModal>
-  );
-
   return (
     <>
-      {isModalOpen && deleteModal}
-      <EuiToolTip content={canDelete ? DELETE_LABEL : deleteDisabledReason}>
-        <EuiButtonEmpty
-          data-test-subj={`deleteLocation-${id}`}
-          isLoading={loading}
-          iconType="trash"
-          color="danger"
-          aria-label={DELETE_LABEL}
-          onClick={() => {
-            setIsModalOpen(true);
-          }}
-          isDisabled={!canDelete || !canSave}
-        >
-          {DELETE_LABEL}
-        </EuiButtonEmpty>
-      </EuiToolTip>
+      <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
+          defaultMessage: 'Delete "{location}"',
+          values: { location: label },
+        })}
+        titleProps={{ id: confirmModalTitleId }}
+        onCancel={() => setIsModalOpen(null)}
+        onConfirm={() => onDelete(id)}
+        cancelButtonText={CANCEL_LABEL}
+        confirmButtonText={DELETE_LABEL}
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+        isLoading={deleteLoading}
+      >
+        <p>{ARE_YOU_SURE_LABEL}</p>
+      </EuiConfirmModal>
     </>
   );
 };
