@@ -36,10 +36,10 @@ export function updateSavedSearch({
   useFilterAndQueryServices = false,
 }: {
   savedSearch: SavedSearch;
-  dataView?: DataView;
-  initialInternalState?: TabState['initialInternalState'];
-  appState?: DiscoverAppState;
-  globalState?: TabStateGlobalState;
+  dataView: DataView | undefined;
+  initialInternalState: TabState['initialInternalState'] | undefined;
+  appState: DiscoverAppState | undefined;
+  globalState: TabStateGlobalState | undefined;
   services: DiscoverServices;
   useFilterAndQueryServices?: boolean;
 }) {

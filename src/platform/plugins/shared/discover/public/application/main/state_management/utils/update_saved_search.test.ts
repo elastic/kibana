@@ -61,7 +61,10 @@ describe('updateSavedSearch', () => {
     };
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
       initialInternalState: { visContext: { foo: 'bar' } },
+      appState: undefined,
+      globalState: undefined,
       services: discoverServiceMock,
     });
     expect(savedSearch.visContext).toEqual({ foo: 'bar' });
@@ -76,6 +79,8 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.searchSource.getField('filter')).toBeUndefined();
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -95,6 +100,8 @@ describe('updateSavedSearch', () => {
     };
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -122,6 +129,8 @@ describe('updateSavedSearch', () => {
     };
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -149,6 +158,8 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.breakdownField).toBeUndefined();
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -166,6 +177,8 @@ describe('updateSavedSearch', () => {
     };
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -188,6 +201,9 @@ describe('updateSavedSearch', () => {
     jest.spyOn(discoverServiceMock.data.query.queryString, 'getQuery').mockReturnValue(query);
     updateSavedSearch({
       savedSearch,
+      dataView: undefined,
+      initialInternalState: undefined,
+      appState: undefined,
       globalState,
       services: discoverServiceMock,
       useFilterAndQueryServices: true,
