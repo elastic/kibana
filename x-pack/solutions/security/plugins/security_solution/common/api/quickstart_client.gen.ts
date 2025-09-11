@@ -1479,7 +1479,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieves the stats of a SIEM dashboards migration using the migration id provided
+   * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
    */
   async getAllTranslationStatsDashboardMigration(
     props: GetAllTranslationStatsDashboardMigrationProps

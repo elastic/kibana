@@ -18,7 +18,6 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import {
-  MigrationTranslationStats,
   MigrationLastExecution,
   MigrationTranslationResult,
   MigrationStatus,
@@ -73,7 +72,55 @@ export const DashboardMigration = z
  * The dashboard migration translation stats object.
  */
 export type DashboardMigrationTranslationStats = z.infer<typeof DashboardMigrationTranslationStats>;
-export const DashboardMigrationTranslationStats = MigrationTranslationStats;
+export const DashboardMigrationTranslationStats = z.object({
+  /**
+   * The migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The dashboards migration translation stats.
+   */
+  dashboards: z.object({
+    /**
+     * The total number of dashboards in the migration.
+     */
+    total: z.number().int(),
+    /**
+     * The number of dashboards that have been successfully translated.
+     */
+    success: z.object({
+      /**
+       * The total number of dashboards that have been successfully translated.
+       */
+      total: z.number().int(),
+      /**
+       * The translation results
+       */
+      result: z.object({
+        /**
+         * The number of dashboards that have been fully translated.
+         */
+        full: z.number().int(),
+        /**
+         * The number of dashboards that have been partially translated.
+         */
+        partial: z.number().int(),
+        /**
+         * The number of dashboards that could not be translated.
+         */
+        untranslatable: z.number().int(),
+      }),
+      /**
+       * The number of dashboards that have been successfully translated and can be installed.
+       */
+      installable: z.number().int(),
+    }),
+    /**
+     * The number of dashboards that have failed translation.
+     */
+    failed: z.number().int(),
+  }),
+});
 
 /**
  * The raw dashboard object from different vendors

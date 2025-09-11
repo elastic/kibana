@@ -48,6 +48,9 @@ const mockReq = {
   params: {
     migration_id: 'test-migration-id',
   },
+  route: {
+    path: '/internal/siem_migrations/rules/test-migration-id',
+  },
 } as unknown as KibanaRequest<{ migration_id: string }, unknown, unknown, never>;
 
 const mockRes = {

@@ -1018,7 +1018,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Retrieves the stats of a SIEM dashboards migration using the migration id provided
+     * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
      */
     getAllTranslationStatsDashboardMigration(
       props: GetAllTranslationStatsDashboardMigrationProps,

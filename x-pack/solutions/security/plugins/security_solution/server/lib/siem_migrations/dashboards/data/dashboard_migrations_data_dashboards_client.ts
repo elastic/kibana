@@ -78,7 +78,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
     const translationResultsAgg = successAgg.result as AggregationsStringTermsAggregate;
     return {
       id: migrationId,
-      items: {
+      dashboards: {
         total,
         success: {
           total: (successAgg as AggregationsFilterAggregate)?.doc_count ?? 0,

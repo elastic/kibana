@@ -13,7 +13,7 @@ import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from '../../common/api/util/authz';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,7 +33,7 @@ export const registerSiemDashboardMigrationsStatsRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,
