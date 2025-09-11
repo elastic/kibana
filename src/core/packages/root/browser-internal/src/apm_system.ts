@@ -72,11 +72,10 @@ export class ApmSystem {
     this.holdPageLoadTransaction(apm);
 
     apm.observe('transaction:start', (transaction) => {
+      // Warning: This will not be called when a transaction is redefined (i.e for route-change)
+      // More info: https://github.com/elastic/observability-dev/issues/4744#issuecomment-3137090243
       if (['page-load', 'route-change', 'app-change'].includes(transaction.type)) {
-        console.log(
-          `--------------> New ${transaction.type} transaction started:`,
-          transaction.name
-        );
+        console.log(`--------------> New ${transaction.type} transaction started:`, transaction);
       }
     });
 
