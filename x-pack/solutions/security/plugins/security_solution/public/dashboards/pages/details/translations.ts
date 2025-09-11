@@ -51,7 +51,7 @@ export const EDIT_DASHBOARD_TITLE = i18n.translate(
 export const VIEW_DASHBOARD_BUTTON_TITLE = i18n.translate(
   'xpack.securitySolution.dashboards.dashboard.viewDashboardButtonTitle',
   {
-    defaultMessage: `Exit edit`,
+    defaultMessage: `Switch to view mode`,
   }
 );
 

@@ -208,7 +208,7 @@ export const topNavStrings = {
   },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'Exit edit',
+      defaultMessage: 'Switch to view mode',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',
