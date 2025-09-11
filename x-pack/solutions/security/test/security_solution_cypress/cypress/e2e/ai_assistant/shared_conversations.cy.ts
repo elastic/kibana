@@ -250,10 +250,22 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     duplicateFromMenu(mockConvo1.title);
   });
 
-  it('Duplicate conversation from conversation side menu creates a duplicate', () => {
+  it('Duplicate conversation from conversation side menu creates a duplicate and secondary user cannot access', () => {
     openAssistant();
     toggleConversationSideMenu();
     duplicateFromConversationSideContextMenu(mockConvo2.title);
+
+    cy.clearCookies();
+
+    // Login as elastic user who should have access to shared conversations
+    loginSecondaryUser(isServerless, secondaryUser);
+    visitGetStartedPage();
+    openAssistant();
+
+    // Check if the shared conversations are visible
+    toggleConversationSideMenu();
+    cy.contains(mockConvo2.title).should('not.exist');
+    cy.contains(`[Duplicate] ${mockConvo2.title}`).should('not.exist');
   });
 
   it('Copy URL copies the proper url from conversation menu', () => {
