@@ -1,6 +1,6 @@
 # @kbn/core-chrome-layout-constants
 
-Type-safe CSS variables and constants for Kibana's layout system using elegant dot notation.
+Type-safe CSS variables and constants for Kibana's layout system.
 
 ## Quick Usage
 
@@ -8,18 +8,11 @@ Type-safe CSS variables and constants for Kibana's layout system using elegant d
 import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 const styles = css`
-  height: ${layoutVar('header.height')};
-  width: ${layoutVar('banner.width', '100%')};
-  top: ${layoutVar('application.topBar.top')};
+  height: ${layoutVar('header.height')}; // resolves to var(--kbn-layout--header-height)
+  width: ${layoutVar('banner.width', '100%')}; // resolves to var(--kbn-layout--banner-width, 100%)
+  top: ${layoutVar('application.topBar.top')}; // resolves to var(--kbn-application--top-bar-top)
 `;
 ```
-
-## Features
-
-- **Dot notation API**: `layoutVar('header.height')` instead of `layoutVar('header-height')`
-- **Type safety**: Full TypeScript support with autocomplete
-- **Automatic prefixing**: Generates `--kbn-layout--` and `--kbn-application--` prefixed variables
-- **Fallback support**: Optional fallback values for CSS variables
 
 ## Available Variables
 
