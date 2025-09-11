@@ -401,7 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // This tests the same API as x-pack/test/api_integration/apis/security/privileges.ts, but it uses the non-deprecated config
+    // This tests the same API as x-pack/platform/test/api_integration/apis/security/privileges.ts, but it uses the non-deprecated config
     it('should register reporting privileges with the security privileges API', async () => {
       await supertest
         .get('/api/security/privileges')

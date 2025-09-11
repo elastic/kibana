@@ -31,6 +31,13 @@ describe('AISettings', () => {
             securitySolutionAssistant: { 'ai-assistant': true },
           },
         },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
+          },
+        },
         data: { dataViews: {} },
       },
     });
@@ -74,6 +81,13 @@ describe('AISettings', () => {
           navigateToApp: mockNavigateToApp,
           capabilities: {
             securitySolutionAssistant: { 'ai-assistant': false },
+          },
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
           },
         },
         data: { dataViews: {} },

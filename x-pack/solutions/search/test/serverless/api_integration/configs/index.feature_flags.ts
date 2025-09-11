@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless search API - feature flags', function () {
     loadTestFile(require.resolve('../test_suites/search_indices'));

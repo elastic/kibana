@@ -259,5 +259,6 @@
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
     "@kbn/core-metrics-server",
+    "@kbn/ai-assistant-default-llm-setting",
   ]
 }

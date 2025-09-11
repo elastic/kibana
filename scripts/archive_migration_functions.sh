@@ -6,9 +6,9 @@
 #   ### Saved Object type(s) that we care about:
 #     index-pattern
 #   ### Test file(s) that use it:
-#     x-pack/test/api_integration/apis/security_solution/timeline_migrations.ts
+#     x-pack/solutions/security/test/api_integration/apis/security_solution/timeline_migrations.ts
 #   ### Config(s) that govern the test file(s):
-#     x-pack/test/api_integration/config.ts
+#     x-pack/solutions/security/test/api_integration/config.ts
 # The other types it contains:
 # config
 # index-pattern
@@ -44,7 +44,7 @@ list_stragglers() {
     if [ -n "$b" ]; then
       echo "${b%/mappings.json}"
     fi
-  done <<<"$(find x-pack/test/functional/es_archives -name mappings.json)"
+  done <<<"$(find x-pack/platform/test/fixtures/es_archives -name mappings.json)"
 
 }
 
@@ -257,7 +257,8 @@ usages_list() {
   local found_usages=()
 
   if [[ $isInXpack = 0 ]]; then
-    found_usages+=($(find x-pack/test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
+    found_usages+=($(find x-pack/platform/test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
+    found_usages+=($(find x-pack/solutions/*/test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
   else
     found_usages+=($(find test -type f -print0 | xargs -0 grep -n "$archive" | cut -d ':' -f 1 | uniq))
   fi
@@ -350,7 +351,7 @@ migrate() {
 
 load_logstash() {
   set -x
-  node scripts/es_archiver.js load x-pack/test/functional/es_archives/logstash_functional --config "$test_config"
+  node scripts/es_archiver.js load x-pack/platform/test/fixtures/es_archives/logstash_functional --config "$test_config"
   set +x
 }
 

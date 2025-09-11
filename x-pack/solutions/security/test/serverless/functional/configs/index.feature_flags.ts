@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless security UI - feature flags', function () {
     // add tests that require feature flags, defined in config.feature_flags.ts
