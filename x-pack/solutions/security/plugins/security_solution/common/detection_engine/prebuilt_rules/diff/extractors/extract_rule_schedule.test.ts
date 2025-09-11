@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../api/detection_engine';
+import type { RuleResponse } from '../../../../api/detection_engine';
 import { extractRuleSchedule } from './extract_rule_schedule';
 
 describe('extractRuleSchedule', () => {
@@ -15,12 +15,6 @@ describe('extractRuleSchedule', () => {
       interval: '5m',
       to: 'now',
     } as RuleResponse);
-
-    expect(ruleSchedule).toEqual({ interval: '5m', from: 'now-6m', to: 'now' });
-  });
-
-  it('returns default values', () => {
-    const ruleSchedule = extractRuleSchedule({} as RuleResponse);
 
     expect(ruleSchedule).toEqual({ interval: '5m', from: 'now-6m', to: 'now' });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Threshold } from '../../../api/detection_engine/model/rule_schema';
+import type { Threshold } from '../../../../api/detection_engine/model/rule_schema';
 
 export const normalizeRuleThreshold = (threshold: Threshold): Threshold => {
   const cardinality =

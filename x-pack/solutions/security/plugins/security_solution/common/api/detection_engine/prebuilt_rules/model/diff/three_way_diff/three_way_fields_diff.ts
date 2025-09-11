@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ThreeWayDiff, ThreeWayDiffAlgorithm } from '../three_way_diff/three_way_diff';
+import type { ThreeWayDiff, ThreeWayDiffAlgorithm } from './three_way_diff';
 
-export type FieldsDiff<TObject> = Required<{
+export type ThreeWayFieldsDiff<TObject> = Required<{
   [Field in keyof TObject]: ThreeWayDiff<TObject[Field]>;
 }>;
 
-export type FieldsDiffAlgorithmsFor<TObject> = Required<{
+export type ThreeWayFieldsDiffAlgorithmsFor<TObject> = Required<{
   [Field in keyof TObject]: ThreeWayDiffAlgorithm<TObject[Field]>;
 }>;
