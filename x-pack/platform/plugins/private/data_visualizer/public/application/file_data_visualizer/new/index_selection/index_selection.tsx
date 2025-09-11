@@ -34,16 +34,23 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
     setIndexCreateMode,
     indices,
     existingIndexName,
-    setExistingIndexName,
+    fileUploadManager,
   } = useFileUploadContext();
   const setSelectedOptions = useCallback(
     (selected: any[]) => {
-      if (setExistingIndexName === undefined) {
-        return;
-      }
-      setExistingIndexName(selected.length > 0 ? selected[0].label : null);
+      fileUploadManager.setExistingIndexName(selected.length > 0 ? selected[0].label : null);
     },
-    [setExistingIndexName]
+    [fileUploadManager]
+  );
+
+  const setIndexCreateModeWrapper = useCallback(
+    (mode: UPLOAD_TYPE) => {
+      setIndexCreateMode(mode);
+      if (mode === UPLOAD_TYPE.NEW) {
+        fileUploadManager.setExistingIndexName(null);
+      }
+    },
+    [setIndexCreateMode, fileUploadManager]
   );
 
   const selectedOptions = useMemo(() => {
@@ -105,7 +112,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
                 },
               ]}
               idSelected={indexCreateMode}
-              onChange={(id) => setIndexCreateMode(id as UPLOAD_TYPE)}
+              onChange={(id) => setIndexCreateModeWrapper(id as UPLOAD_TYPE)}
             />
 
             <EuiSpacer size="m" />

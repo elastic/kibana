@@ -27,7 +27,7 @@ interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  reset?: () => void;
+  reset?: (existingIndex?: string) => void;
   onClose?: () => void;
 }
 
@@ -41,6 +41,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
     onImportClick,
     canImport,
     importResults,
+    indexName,
   } = useFileUploadContext();
 
   const showImportControls =
@@ -49,8 +50,8 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
     uploadStatus.analysisStatus !== STATUS.STARTED &&
     filesStatus.length > 0;
 
-  const resetForm = () => {
-    reset?.();
+  const resetForm = (reuseIndex: boolean = false) => {
+    reset?.(reuseIndex ? indexName : undefined);
   };
 
   return (
@@ -118,7 +119,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
 
       <EuiSpacer />
 
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {showImportControls ? (
             <EuiButton disabled={canImport === false} onClick={onImportClick}>
@@ -135,12 +136,24 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
 
       {uploadStatus.overallImportStatus === STATUS.COMPLETED && importResults !== null ? (
         <>
-          <EuiButton onClick={resetForm}>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
-              defaultMessage="Upload another file"
-            />
-          </EuiButton>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => resetForm()}>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                  defaultMessage="Upload another file"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => resetForm(true)}>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                  defaultMessage="Upload file to same index"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiSpacer />
 

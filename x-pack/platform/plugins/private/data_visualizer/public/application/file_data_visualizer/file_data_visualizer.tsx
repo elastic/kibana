@@ -43,33 +43,35 @@ export const FileDataVisualizer: FC<Props> = ({
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
-  const existingIndex = undefined;
+  // const existingIndex = undefined;
   const autoAddInference = undefined;
   const autoCreateDataView = true;
   const indexSettings = undefined;
 
-  const createFileUploadManager = useCallback(() => {
-    return new FileUploadManager(
-      fileUpload,
+  const createFileUploadManager = useCallback(
+    (existingIndex?: string) => {
+      return new FileUploadManager(
+        fileUpload,
+        coreStart.http,
+        data,
+        services.notifications,
+        autoAddInference ?? null,
+        autoCreateDataView,
+        true,
+        existingIndex ?? null,
+        indexSettings
+      );
+    },
+    [
+      autoAddInference,
+      autoCreateDataView,
       coreStart.http,
       data,
+      fileUpload,
+      indexSettings,
       services.notifications,
-      autoAddInference ?? null,
-      autoCreateDataView,
-      true,
-      existingIndex ?? null,
-      indexSettings
-    );
-  }, [
-    autoAddInference,
-    autoCreateDataView,
-    coreStart.http,
-    data,
-    existingIndex,
-    fileUpload,
-    indexSettings,
-    services.notifications,
-  ]);
+    ]
+  );
 
   const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>
     createFileUploadManager()
@@ -84,9 +86,12 @@ export const FileDataVisualizer: FC<Props> = ({
     undefined
   );
 
-  const reset = useCallback(() => {
-    setFileUploadManager(createFileUploadManager());
-  }, [createFileUploadManager]);
+  const reset = useCallback(
+    (existingIndex?: string) => {
+      setFileUploadManager(createFileUploadManager(existingIndex));
+    },
+    [createFileUploadManager]
+  );
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -97,8 +102,8 @@ export const FileDataVisualizer: FC<Props> = ({
               getAdditionalLinks={getAdditionalLinks}
               resultLinks={resultLinks}
               setUploadResults={setUploadResults}
-              reset={() => {
-                reset();
+              reset={(existingIndex?: string) => {
+                reset(existingIndex);
               }}
               onClose={() => {}}
             />

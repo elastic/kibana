@@ -112,6 +112,7 @@ export class FileUploadManager {
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
   private docCountService: DocCountService;
+  private initializedWithExistingIndex: boolean = false;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -150,6 +151,7 @@ export class FileUploadManager {
     onAllDocsSearchable?: (indexName: string) => void
   ) {
     this.setExistingIndexName(existingIndexName);
+    this.initializedWithExistingIndex = existingIndexName !== null;
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
@@ -312,6 +314,10 @@ export class FileUploadManager {
 
   public getUploadStatus() {
     return this._uploadStatus$.getValue();
+  }
+
+  public getInitializedWithExistingIndex() {
+    return this.initializedWithExistingIndex;
   }
 
   public getExistingIndexName() {
