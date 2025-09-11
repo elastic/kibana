@@ -30,10 +30,6 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
     // the current total height of all app-area headers, this variable can be used for sticky headers offset relative to the top of the application area
     --kbnAppHeadersOffset: ${layoutVar('application.topBar.height', '0px')};
-    --kbn-application--sticky-headers-offset: ${layoutVar(
-      'application.topBar.height',
-      '0px'
-    )}; // better name alias to --kbnAppHeadersOffset
 
     // height of the project header app action menu which is part of the application area
     --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};

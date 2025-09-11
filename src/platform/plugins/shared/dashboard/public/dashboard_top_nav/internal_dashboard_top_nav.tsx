@@ -29,6 +29,7 @@ import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plug
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -406,7 +407,7 @@ const topNavStyles = {
         width: '100%',
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
-        top: `var(--kbn-application--sticky-headers-offset, 0px)`,
+        top: layoutVar('application.topBar.height', '0px'),
         background: euiTheme.colors.backgroundBasePlain,
 
         [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {

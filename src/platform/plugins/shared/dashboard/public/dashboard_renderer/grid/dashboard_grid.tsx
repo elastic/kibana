@@ -17,6 +17,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
 import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import type { GridData } from '../../../server/content_management';
@@ -254,7 +255,7 @@ const dashboardGridStyles = {
 
         [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
           // on smaller screens, the maximized panel should take the full height of the screen minus the sticky top nav
-          minHeight: 'calc(100vh - var(--kbn-application--sticky-headers-offset, 0px))',
+          minHeight: `calc(100vh - ${layoutVar('application.topBar.height', '0px')})`,
         },
       },
       // LAYOUT MODES
