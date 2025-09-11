@@ -148,7 +148,11 @@ export const ConvertToLookupIndexModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onCloseModal()}>
+        <EuiButtonEmpty
+          data-test-subj="cancelButton"
+          onClick={() => onCloseModal()}
+          disabled={isConverting}
+        >
           <FormattedMessage
             id="xpack.idxMgmt.convertToLookupIndexModal.cancelButton"
             defaultMessage="Cancel"
