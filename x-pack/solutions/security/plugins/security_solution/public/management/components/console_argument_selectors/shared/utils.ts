@@ -27,8 +27,7 @@ export type PendingActionItem = ActionDetails;
  */
 export const createSelectionHandler = <T extends BaseSelectorState>(
   onChange: Function,
-  state: T,
-  onSelectionChange?: (option: EuiSelectableOption | undefined, state: T) => void
+  state: T
 ) => {
   return (
     _newOptions: EuiSelectableOption[],
@@ -46,7 +45,6 @@ export const createSelectionHandler = <T extends BaseSelectorState>(
         valueText: changedOption.value,
         store: newState,
       });
-      onSelectionChange?.(changedOption, newState);
     } else {
       const newState = {
         ...state,
@@ -58,7 +56,6 @@ export const createSelectionHandler = <T extends BaseSelectorState>(
         valueText: '',
         store: newState,
       });
-      onSelectionChange?.(undefined, newState);
     }
   };
 };

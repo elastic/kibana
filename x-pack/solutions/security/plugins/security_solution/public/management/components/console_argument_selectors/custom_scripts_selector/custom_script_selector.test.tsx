@@ -398,7 +398,7 @@ describe('CustomScriptSelector', () => {
     );
 
     expect(
-      getByTestId(`scriptSelector-${defaultProps.command.commandDefinition.name}-noMultipleArgs`)
+      getByTestId(`scriptSelector-${defaultProps.command.commandDefinition.name}-1-noMultipleArgs`)
         .textContent
     ).toEqual(' Argument is only supported once per command');
   });

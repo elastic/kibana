@@ -54,13 +54,13 @@ export const CustomScriptSelector = memo<
     EndpointCommandDefinitionMeta
   >
 >(({ value, valueText, argName, argIndex, onChange, store: _store, command, requestFocus }) => {
-  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}`);
   const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
     if (agentType === 'sentinel_one' && platform) {
       return { osType: platform };
     }
+
     return {};
   }, [agentType, platform]);
 
@@ -77,28 +77,12 @@ export const CustomScriptSelector = memo<
     error: scriptsError,
   } = useGetCustomScripts(agentType, scriptsApiQueryParams, { enabled: shouldRender });
 
-  const options = useMemo(() => {
-    return transformCustomScriptsToOptions(scripts, value);
-  }, [scripts, value]);
+  const scriptsOptions = useMemo(() => {
+    return transformCustomScriptsToOptions(data, value);
+  }, [data, value]);
+  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}-${argIndex}`);
 
-  // SentinelOne selection change handler for pre-selection logic
-  const handleSentinelOneSelectionChange = useCallback(
-    (selectedOption: unknown, newState: CustomScriptSelectorState) => {
-      // Handle pre-selection logic for SentinelOne when component is initialized from history
-      if (agentType === 'sentinel_one' && value && !store?.selectedOption) {
-        const script = selectedOption as ResponseActionScript;
-        if (script && script.name !== value) {
-          // Script not found, reset value
-          onChange({
-            value: '',
-            valueText: '',
-            store: newState,
-          });
-        }
-      }
-    },
-    [agentType, value, store?.selectedOption, onChange]
-  );
+  const state = useBaseSelectorState(_store, value);
 
   useEffect(() => {
     // If the argument selector should not be rendered, then at least set the `value` to a string
@@ -145,9 +129,6 @@ export const CustomScriptSelector = memo<
     services: { notifications },
   } = useKibana();
 
-  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}-${argIndex}`);
-
-  const state = useBaseSelectorState(store, value);
   const { handleOpenPopover, handleClosePopover } = useBaseSelectorHandlers(
     state,
     onChange,
@@ -159,26 +140,25 @@ export const CustomScriptSelector = memo<
 
   useFocusManagement(state.isPopoverOpen, requestFocus);
 
-  useGenericErrorToast(error, notifications, ERROR_LOADING_CUSTOM_SCRIPTS);
+  useGenericErrorToast(scriptsError, notifications, ERROR_LOADING_CUSTOM_SCRIPTS);
 
   const handleSelection = useCallback(
     (newOptions: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
-      const handler = createSelectionHandler(onChange, state, handleSentinelOneSelectionChange);
+      const handler = createSelectionHandler(onChange, state);
       handler(newOptions, _event, changedOption);
     },
-    [onChange, state, handleSentinelOneSelectionChange]
+    [onChange, state]
   );
 
   const renderOption = useCallback(
     (option: EuiSelectableOption) => {
       const hasDescription = 'description' in option && option.description;
       const hasToolTipContent = 'toolTipContent' in option && option.toolTipContent;
-      const testIdPrefix = testId();
       const descriptionText = hasDescription ? String(option.description) : '';
       const toolTipText = hasToolTipContent ? String(option.toolTipContent) : '';
 
       const content = (
-        <div data-test-subj={`${testIdPrefix}-script`}>
+        <div data-test-subj={testId('script')}>
           <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
             <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
           </EuiText>
@@ -206,12 +186,9 @@ export const CustomScriptSelector = memo<
     [testId]
   );
 
-  if (isAwaitingRenderDelay || (isLoading && !error)) {
-    const testIdPrefix = testId();
-    return <EuiLoadingSpinner data-test-subj={`${testIdPrefix}-loading`} size="m" />;
+  if (isAwaitingRenderDelay || (isLoadingScripts && !scriptsError)) {
+    return <EuiLoadingSpinner data-test-subj={testId('loading')} size="m" />;
   }
-
-  const testIdPrefix = testId();
 
   return shouldRender ? (
     <EuiPopover
@@ -221,9 +198,9 @@ export const CustomScriptSelector = memo<
         padding: 0,
         minWidth: CUSTOM_SCRIPTS_CONFIG.minWidth,
       }}
-      data-test-subj={testIdPrefix}
+      data-test-subj={testId()}
       closePopover={handleClosePopover}
-      panelProps={{ 'data-test-subj': `${testIdPrefix}-popoverPanel` }}
+      panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       button={
         <EuiToolTip content={CUSTOM_SCRIPTS_CONFIG.tooltipText} position="top" display="block">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
@@ -238,7 +215,7 @@ export const CustomScriptSelector = memo<
         <EuiSelectable
           id={CUSTOM_SCRIPTS_CONFIG.selectableId}
           searchable={true}
-          options={options}
+          options={scriptsOptions}
           onChange={handleSelection}
           renderOption={renderOption}
           singleSelection
@@ -253,7 +230,7 @@ export const CustomScriptSelector = memo<
             textWrap: 'truncate',
           }}
           errorMessage={
-            error ? (
+            scriptsError ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.customScriptSelector.errorLoading"
                 defaultMessage="Error loading scripts"
