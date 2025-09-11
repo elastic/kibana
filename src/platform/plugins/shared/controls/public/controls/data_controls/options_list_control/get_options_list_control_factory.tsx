@@ -70,7 +70,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
       }
@@ -342,7 +341,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
         allowExpensiveQueries$,
       };
-
+      console.log('READY', { api });
       return {
         /** TODO: Do this in a better way */
         api: { ...api, parentApi: omit(api.parentApi, ['expandPanel']) },

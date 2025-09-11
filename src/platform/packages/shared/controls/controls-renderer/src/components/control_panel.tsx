@@ -8,11 +8,10 @@
  */
 
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFormControlLayout,
@@ -22,10 +21,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { ControlState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { HasSerializedChildState } from '@kbn/presentation-containers';
 import {
+  PublishesDisabledActionIds,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
@@ -40,11 +41,20 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
   parentApi,
   uuid,
   type,
+  grow,
+  width,
 }: {
-  parentApi: HasSerializedChildState<object>;
+  parentApi: HasSerializedChildState<object> & Partial<PublishesDisabledActionIds>;
   uuid: string;
   type: string;
+  grow: ControlState['grow'];
+  width: ControlState['width'];
 }) => {
+  // const internalApi = useMemo(() => {
+  //   const state = parentApi.getSerializedStateForChild(uuid);
+  //   console.log({ state });
+  // }, []);
+
   const [api, setApi] = useState<ApiType | null>(null);
   const {
     attributes,
@@ -75,8 +85,6 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
     blockingError,
     panelTitle,
     defaultPanelTitle,
-    // grow,
-    // width,
     disabledActionIds,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
@@ -84,12 +92,9 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
     api?.blockingError$,
     api?.title$,
     api?.defaultTitle$,
-    // api?.grow$,
-    // api?.width$,
-    api?.parentApi?.disabledActionIds$,
+    parentApi.disabledActionIds$,
     viewModeSubject
   );
-  const controlType = api ? api.type : undefined;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
@@ -98,17 +103,17 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
 
   const viewMode = rawViewMode ?? 'view';
   const isEditable = viewMode === 'edit';
-  const controlWidth = DEFAULT_CONTROL_WIDTH;
-  const controlGrow = DEFAULT_CONTROL_GROW;
+  const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
+  const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
   const controlLabel = undefined;
   // const hasRoundedBorders = !api?.CustomPrependComponent && !isEditable && isTwoLine;
-  // const shouldHideComponent = Boolean(blockingError);
+  const shouldHideComponent = Boolean(blockingError);
 
   const insertBefore = isOver && (index ?? -1) < (activeIndex ?? -1);
   const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
   const styles = useMemoCss(controlPanelStyles);
-
+  console.log({ isEditable });
   return (
     <EuiFlexItem
       component="li"
@@ -141,6 +146,14 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
           label={controlLabel}
           id={`control-title-${uuid}`}
           aria-label={`Control for ${controlLabel}`}
+          css={css({
+            '.euiFormControlLayout__childrenWrapper': {
+              '.euiPopover, .euiFilterGroup': {
+                // TODO: Remove options list styles
+                height: '100%',
+              },
+            },
+          })}
         >
           <EuiFormControlLayout
             fullWidth
@@ -149,9 +162,9 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
               'controlFrame__formControlLayout--edit': isEditable,
               'controlFrame_formControlAfter--insertBefore': insertBefore,
               'controlFrame_formControlAfter--insertAfter': insertAfter,
-              controlType,
+              type,
             })}
-            css={css(styles.formControl)}
+            // css={css(styles.formControl)}
             prepend={
               <>
                 <DragHandle
@@ -165,7 +178,7 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
                 ) : */}
                 <EuiToolTip
                   content={panelTitle || defaultPanelTitle}
-                  anchorProps={{ css: styles.tooltipAnchor, className: 'eui-textTruncate' }}
+                  anchorProps={{ className: 'eui-textTruncate' }}
                 >
                   <EuiFormLabel className="controlPanel--label">
                     {panelTitle || defaultPanelTitle}
@@ -177,21 +190,21 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
             // compressed={isCompressed(api)}
             compressed={true}
           >
-            <>
-              {blockingError && <ControlError error={blockingError} />}
-              <EmbeddableRenderer
-                key={uuid}
-                maybeId={uuid}
-                type={type}
-                getParentApi={() => parentApi}
-                onApiAvailable={(api) => {
-                  console.log('REFIST', api);
-                  setApi(api);
-                  api.parentApi.registerChildApi(api);
-                }}
-                hidePanelChrome
-              />
-            </>
+            {/* {blockingError && <ControlError error={blockingError} />} */}
+            {/* <span css={shouldHideComponent && styles.containerHidden}> */}
+            <EmbeddableRenderer
+              key={uuid}
+              maybeId={uuid}
+              type={type}
+              getParentApi={() => parentApi}
+              onApiAvailable={(api) => {
+                console.log('REFIST', api);
+                setApi(api);
+                parentApi.registerChildApi(api);
+              }}
+              hidePanelChrome
+            />
+            {/* </span> */}
           </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>
@@ -200,88 +213,11 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
 };
 
 const controlPanelStyles = {
-  containerBase: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      maxInlineSize: '100% !important',
-      height: euiTheme.size.xl,
-      boxShadow: 'none !important',
-      borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 !important`,
-    }),
-  containerRoundedBorders: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderRadius: `${euiTheme.border.radius.medium} !important`,
-    }),
-  containerHidden: css({
-    display: 'none', // Don't unmount, just hide
-  }),
-  formControl: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '.euiFormControlLayout__prepend': {
-        paddingLeft: 0,
-        gap: 0,
-        '&.timeSlider': {
-          paddingInlineStart: `0 !important`,
-        },
-        '.euiFormControlLayout__prepend': {
-          // non-editable one line
-          paddingInlineStart: `${euiTheme.size.s} !important`,
-        },
-      },
-      '&.controlFrame__formControlLayout--edit': {
-        // editable one line
-        '.euiFormControlLayout__prepend': {
-          paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
-        },
-      },
-      '&.controlFrame__formControlLayout--twoLine': {
-        // non-editable two lines
-        '.euiFormControlLayout__prepend': {
-          paddingInline: `0 !important`,
-        },
-      },
-      '&.controlFrame__formControlLayout--twoLine.controlFrame__formControlLayout--edit': {
-        // editable two lines
-        '.euiFormControlLayout__prepend': {
-          paddingInlineStart: `0 !important`,
-          paddingInlineEnd: `0 !important`,
-        },
-      },
-      '&.controlFrame_formControlAfter--insertBefore': {
-        '&:after': {
-          content: "''",
-          position: 'absolute' as const,
-          borderRadius: euiTheme.border.radius.medium,
-          top: 0,
-          bottom: 0,
-          width: euiTheme.size.xxs,
-          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
-          left: `calc(-${euiTheme.size.xs} - 1px)`,
-        },
-      },
-      '&.controlFrame_formControlAfter--insertAfter': {
-        '&:after': {
-          content: "''",
-          position: 'absolute' as const,
-          borderRadius: euiTheme.border.radius.medium,
-          top: 0,
-          bottom: 0,
-          width: euiTheme.size.xxs,
-          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
-          right: `calc(-${euiTheme.size.xs} - 1px)`,
-        },
-      },
-      '.controlPanel--label': {
-        padding: '0 !important',
-        height: '100%',
-        maxWidth: '100%',
-      },
-    }),
-  tooltipAnchor: css({
-    height: '100%',
-  }),
   draggingItem: css({
     opacity: 0,
   }),
   controlWidthStyles,
+  containerHidden: css({
+    display: 'none', // Don't unmount, just hide
+  }),
 };
