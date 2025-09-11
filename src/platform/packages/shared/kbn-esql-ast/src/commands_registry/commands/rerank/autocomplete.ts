@@ -6,30 +6,31 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLCommand, ESQLAstRerankCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
 import { getPosition, CaretPosition } from './utils';
-import { getNewUserDefinedColumnSuggestion, onCompleteItem } from '../../complete_items';
 import {
-  handleFragment,
-  columnExists,
+  getNewUserDefinedColumnSuggestion,
+  onCompleteItem,
+  assignCompletionItem,
+} from '../../complete_items';
+import {
   suggestForExpression,
   withinQuotes,
   createInferenceEndpointToCompletionItem,
+  createBasicConstants,
+  handleFragment,
+  columnExists,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import {
-  pipeCompleteItem,
-  commaCompleteItem,
-  withCompleteItem,
-  assignCompletionItem,
-} from '../../complete_items';
+import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
-import { logicalOperators } from '../../../definitions/all_operators';
+
+export const QUERY_TEXT = 'Your search query.' as const;
+const FIELD_LIST_TYPES = ['keyword', 'text', 'boolean', 'integer', 'double', 'long'] as const;
 
 export async function autocomplete(
   query: string,
@@ -38,18 +39,14 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(0, cursorPosition);
 
   if (!callbacks?.getByType || withinQuotes(innerText)) {
     return [];
   }
 
-  const { position, context: positionContext } = getPosition(
-    innerText,
-    command,
-    context,
-    cursorPosition
-  );
+  const { position, context: positionContext } = getPosition(innerText, command);
 
   const insideFunctionSuggestions = await getInsideFunctionsSuggestions(
     innerText,
@@ -64,10 +61,11 @@ export async function autocomplete(
 
   switch (position) {
     case CaretPosition.RERANK_KEYWORD: {
-      const targetFieldName = callbacks?.getSuggestedUserDefinedColumnName?.() || '';
-      const targetField = getNewUserDefinedColumnSuggestion(targetFieldName);
+      const targetField = getNewUserDefinedColumnSuggestion(
+        callbacks.getSuggestedUserDefinedColumnName?.() || ''
+      );
 
-      return [targetField, ...createBasicConstants()];
+      return [targetField, ...createBasicConstants(QUERY_TEXT)];
     }
 
     case CaretPosition.RERANK_AFTER_TARGET_FIELD: {
@@ -75,7 +73,7 @@ export async function autocomplete(
     }
 
     case CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT: {
-      return createBasicConstants();
+      return createBasicConstants(QUERY_TEXT);
     }
 
     case CaretPosition.ON_KEYWORD: {
@@ -83,35 +81,41 @@ export async function autocomplete(
     }
 
     case CaretPosition.ON_WITHIN_FIELD_LIST: {
-      return getContextualSuggestions({
+      return handleOnFieldList({
         innerText,
         callbacks,
         context,
-        suggestionType: 'field_list',
+        rerankCommand,
       });
     }
 
-    case CaretPosition.ON_AFTER_POTENTIAL_CUSTOM_FIELD: {
-      return [assignCompletionItem];
-    }
+    case CaretPosition.ON_KEEP_OPERATOR_AFTER_TRAILING_SPACE: {
+      const lastOnField = rerankCommand.fields?.[rerankCommand.fields.length - 1];
+      const isAssignmentContext = !!(lastOnField && !context?.columns?.has(lastOnField.name));
+      // ON col0␣ → '=' suggestion using lastField from the ON clause
+      if (isAssignmentContext) {
+        return [assignCompletionItem];
+      }
 
-    case CaretPosition.ON_AFTER_FIELD_COMPLETE: {
       return buildNextActions();
     }
 
-    case CaretPosition.WITHIN_BOOLEAN_EXPRESSION: {
-      return getContextualSuggestions({
+    case CaretPosition.ON_EXPRESSION: {
+      return handleOnExpression({
         innerText,
         callbacks,
         context,
-        suggestionType: 'boolean_expression',
         expressionRoot: positionContext?.expressionRoot,
       });
     }
 
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
       const endpoints = context?.inferenceEndpoints;
-      return handleMapExpression(innerText, endpoints);
+      const availableParameters = {
+        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+      };
+
+      return getCommandMapExpressionSuggestions(innerText, availableParameters);
     }
 
     case CaretPosition.AFTER_COMMAND: {
@@ -128,129 +132,87 @@ export async function autocomplete(
 // Suggestion Handlers
 // ============================================================================
 
-async function getContextualSuggestions({
+async function handleOnFieldList({
   innerText,
   callbacks,
   context,
-  suggestionType,
+  rerankCommand,
+}: {
+  innerText: string;
+  callbacks: ICommandCallbacks;
+  context: ICommandContext | undefined;
+  rerankCommand: ESQLAstRerankCommand;
+}): Promise<ISuggestionItem[]> {
+  const fieldSuggestions = (await callbacks.getByType?.(FIELD_LIST_TYPES)) ?? [];
+
+  const suggestions = await handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment, context),
+    // incomplete: get available fields suggestions
+    (_: string, rangeToReplace?: { start: number; end: number }) => {
+      const customFieldSuggestion = getNewUserDefinedColumnSuggestion(
+        callbacks.getSuggestedUserDefinedColumnName?.() || ''
+      );
+
+      return [customFieldSuggestion, ...fieldSuggestions].map((suggestion) => ({
+        ...suggestion,
+        rangeToReplace,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }));
+    },
+    // complete: get next actions suggestions for completed field
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      const results = buildNextActions({ withSpaces: true });
+
+      return results.map((suggestion) => ({
+        ...suggestion,
+        filterText: fragment,
+        text: fragment + suggestion.text,
+        rangeToReplace,
+      }));
+    }
+  );
+
+  return suggestions;
+}
+
+async function handleOnExpression({
+  innerText,
+  callbacks,
+  context,
   expressionRoot,
 }: {
   innerText: string;
-  callbacks?: ICommandCallbacks;
-  context?: ICommandContext;
-  suggestionType: 'field_list' | 'boolean_expression';
-  expressionRoot?: ESQLSingleAstItem;
+  callbacks: ICommandCallbacks;
+  context: ICommandContext | undefined;
+  expressionRoot: ESQLSingleAstItem | undefined;
 }): Promise<ISuggestionItem[]> {
-  if (!callbacks?.getByType) {
-    return [];
+  let suggestions = await suggestForExpression({
+    innerText,
+    getColumnsByType: callbacks.getByType,
+    expressionRoot,
+    location: Location.RERANK,
+    preferredExpressionType: 'boolean',
+    context,
+    hasMinimumLicenseRequired: callbacks.hasMinimumLicenseRequired,
+    activeProduct: context?.activeProduct,
+  });
+
+  if (expressionRoot) {
+    const expressionType = getExpressionType(expressionRoot, context?.columns);
+
+    if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+      const allowed = new Set(['AND', 'OR']); // TODO: this filter should be unnecessary. Need to fix suggestForExpression
+      suggestions = suggestions.filter(({ label }) => allowed.has(label.toUpperCase()));
+      suggestions.push(...buildNextActions());
+    }
   }
 
-  switch (suggestionType) {
-    case 'field_list': {
-      const fieldSuggestions =
-        (await callbacks.getByType(['keyword', 'text', 'boolean', 'integer', 'double', 'long'])) ??
-        [];
-
-      const targetFieldName = callbacks?.getSuggestedUserDefinedColumnName?.() || '';
-      const targetField = getNewUserDefinedColumnSuggestion(targetFieldName);
-
-      return handleFragment(
-        innerText,
-        // check if fragment is completed
-        (fragment) => !!columnExists(fragment, context),
-        // incomplete: get available fields suggestions
-        (_: string, rangeToReplace?: { start: number; end: number }) => {
-          return [
-            targetField,
-            ...fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              text: `${suggestion.text}`,
-              rangeToReplace,
-              command: TRIGGER_SUGGESTION_COMMAND,
-            })),
-          ];
-        },
-        // complete: get next actions suggestions for completed field
-        (fragment: string, rangeToReplace: { start: number; end: number }) => {
-          const suggestions = buildNextActions({ withSpaces: true });
-
-          return suggestions.map((suggestion) => ({
-            ...suggestion,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-            rangeToReplace,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }));
-        }
-      );
-    }
-
-    case 'boolean_expression': {
-      if (expressionRoot) {
-        const expressionType = getExpressionType(
-          expressionRoot,
-          context?.fields,
-          context?.userDefinedColumns
-        );
-
-        if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
-          return buildNextActions({ includeBinaryOperators: true });
-        }
-      }
-
-      return await suggestForExpression({
-        innerText,
-        getColumnsByType: callbacks.getByType,
-        expressionRoot,
-        location: Location.RERANK,
-        preferredExpressionType: 'boolean',
-        context,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-        activeProduct: context?.activeProduct,
-      });
-    }
-
-    default:
-      return [];
-  }
+  return suggestions;
 }
 
-/**
- * Handles suggestions within WITH map expressions
- */
-function handleMapExpression(
-  innerText: string,
-  endpoints?: InferenceEndpointAutocompleteItem[]
-): ISuggestionItem[] {
-  const availableParameters = {
-    inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
-  };
-
-  return getCommandMapExpressionSuggestions(innerText, availableParameters);
-}
-
-// ============================================================================
-// Suggestion Builders and Formatters
-// ============================================================================
-
-function createBasicConstants(): ISuggestionItem[] {
-  return [
-    {
-      label: 'Your search query',
-      text: '"${0:Your search query.}"',
-      asSnippet: true,
-      kind: 'Constant',
-      sortText: '1',
-      detail: '',
-    },
-  ];
-}
-
-function buildNextActions(options?: {
-  withSpaces?: boolean;
-  includeBinaryOperators?: boolean;
-}): ISuggestionItem[] {
-  const { withSpaces = false, includeBinaryOperators = false } = options || {};
+export function buildNextActions(options?: { withSpaces?: boolean }): ISuggestionItem[] {
+  const { withSpaces = false } = options || {};
 
   const items: ISuggestionItem[] = [];
 
@@ -264,40 +226,14 @@ function buildNextActions(options?: {
   items.push({
     ...withCompleteItem,
     text: withSpaces ? ' ' + withCompleteItem.text + ' ' : withCompleteItem.text,
-    sortText: '03',
+    sortText: '02',
   });
 
   items.push({
     ...pipeCompleteItem,
     text: withSpaces ? ' ' + pipeCompleteItem.text : pipeCompleteItem.text,
-    sortText: '04',
+    sortText: '03',
   });
-
-  // Add AND/OR operators to the next actions, after a boolean expression is completed
-  if (includeBinaryOperators) {
-    const andOperator = logicalOperators.find((op) => op.name === 'and')!;
-    const orOperator = logicalOperators.find((op) => op.name === 'or')!;
-
-    items.push(
-      {
-        // AND operator suggestion
-        label: andOperator.name.toUpperCase(),
-        text: ` ${andOperator.name.toUpperCase()} `,
-        kind: 'Keyword',
-        detail: andOperator.description,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        sortText: '05',
-      },
-      {
-        label: orOperator.name.toUpperCase(),
-        text: ` ${orOperator.name.toUpperCase()} `,
-        kind: 'Keyword',
-        detail: orOperator.description,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        sortText: '06',
-      }
-    );
-  }
 
   return items;
 }

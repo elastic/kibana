@@ -718,3 +718,16 @@ export function createInferenceEndpointToCompletionItem(
     text: inferenceEndpoint.inference_id,
   };
 }
+
+export function createBasicConstants(label: string): ISuggestionItem[] {
+  return [
+    {
+      label,
+      text: `"\${0:${label}}"`,
+      asSnippet: true,
+      kind: 'Constant',
+      sortText: '1',
+      detail: '',
+    },
+  ];
+}

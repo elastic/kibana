@@ -24,6 +24,7 @@ import {
   handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
+  createBasicConstants,
 } from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
@@ -85,22 +86,7 @@ function getPosition(
 
   return undefined;
 }
-
-const defaultPrompt: ISuggestionItem = {
-  detail: '',
-  kind: 'Constant',
-  asSnippet: true,
-  label: 'Your prompt to the LLM',
-  sortText: '1',
-  text: '"${0:Your prompt to the LLM.}"',
-};
-
-const withCompletionItem: ISuggestionItem = {
-  ...withCompleteItem,
-  detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
-    defaultMessage: 'Provide additional parameters for the LLM prompt.',
-  }),
-};
+const promptText = 'Your prompt to the LLM.';
 
 export async function autocomplete(
   query: string,
@@ -112,6 +98,7 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+
   const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
   const position = getPosition(innerText, command, context);
@@ -167,7 +154,7 @@ export async function autocomplete(
       const lastWord = findFinalWord(innerText);
 
       if (!lastWord) {
-        suggestions.push(defaultPrompt);
+        suggestions.push(...createBasicConstants(promptText));
       }
 
       if (position !== CompletionPosition.AFTER_TARGET_ID) {
@@ -180,7 +167,14 @@ export async function autocomplete(
     }
 
     case CompletionPosition.AFTER_PROMPT:
-      return [withCompletionItem];
+      return [
+        {
+          ...withCompleteItem,
+          detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
+            defaultMessage: 'Provide additional parameters for the LLM prompt.',
+          }),
+        },
+      ];
 
     case CompletionPosition.AFTER_PROMPT_OR_TARGET: {
       const lastWord = findFinalWord(query);
@@ -193,7 +187,14 @@ export async function autocomplete(
         return [assignCompletionItem];
       }
 
-      return [withCompletionItem];
+      return [
+        {
+          ...withCompleteItem,
+          detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
+            defaultMessage: 'Provide additional parameters for the LLM prompt.',
+          }),
+        },
+      ];
     }
 
     case CompletionPosition.WITHIN_MAP_EXPRESSION:

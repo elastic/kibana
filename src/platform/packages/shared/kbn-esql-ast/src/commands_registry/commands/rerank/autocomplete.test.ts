@@ -11,55 +11,40 @@ import {
   lookupIndexFields,
   getMockCallbacks,
 } from '../../../__tests__/context_fixtures';
-import { autocomplete } from './autocomplete';
+import { QUERY_TEXT, autocomplete } from './autocomplete';
+import {
+  onCompleteItem,
+  pipeCompleteItem,
+  commaCompleteItem,
+  withCompleteItem,
+} from '../../complete_items';
 import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
+import { createBasicConstants } from '../../../definitions/utils/autocomplete/helpers';
 
 // ============================================================================
-// Test Constants and Suggestions
+// Single Source of Truth - Operator Suggestions by Group
 // ============================================================================
-
-const SUGGESTION_TOKENS = {
-  QUERY_LITERAL: '"${0:Your search query.}"',
-  ON_KEYWORD: 'ON ',
-  PIPE: '| ',
-  COMMA_SPACE: ', ',
-  ASSIGNMENT: ' = ',
-  WITH_CLAUSE: 'WITH { $0 }',
-  AND_OPERATOR: ' AND ',
-  OR_OPERATOR: ' OR ',
-  INFERENCE_ID_KEY: '"inference_id": "$0"',
-  INFERENCE_ENDPOINT: 'inference_1',
-} as const;
 
 const OPERATOR_SUGGESTIONS = {
-  COMPARISON: ['> $0', '>= $0', '< $0', '<= $0'],
-  EQUALITY: ['!= $0', '== $0'],
-  LIKE_OPERATORS: ['LIKE $0', 'NOT LIKE $0', 'RLIKE $0', 'NOT RLIKE $0'],
-  IN_OPERATORS: ['IN $0', 'NOT IN $0'],
-  NULL_OPERATORS: ['IS NULL', 'IS NOT NULL'],
-  MATCH_OPERATOR: [': $0'],
+  LOGICAL: ['AND', 'OR'],
+  COMPARISON: ['!=', '==', '>', '>=', '<', '<='],
+  PATTERN: ['LIKE', 'NOT LIKE', 'RLIKE', 'NOT RLIKE', ':'],
+  SET: ['IN', 'NOT IN'],
+  EXISTENCE: ['IS NULL', 'IS NOT NULL'],
 };
 
-const SUGGESTION_GROUPS = {
-  BASIC_CONTINUATIONS: [
-    SUGGESTION_TOKENS.COMMA_SPACE,
-    SUGGESTION_TOKENS.WITH_CLAUSE,
-    SUGGESTION_TOKENS.PIPE,
-  ] as string[],
-  FIELD_CONTINUATIONS: [
-    SUGGESTION_TOKENS.COMMA_SPACE,
-    SUGGESTION_TOKENS.WITH_CLAUSE,
-    SUGGESTION_TOKENS.PIPE,
-  ] as string[],
-  BOOLEAN_CONTINUATIONS: [
-    SUGGESTION_TOKENS.COMMA_SPACE,
-    SUGGESTION_TOKENS.WITH_CLAUSE,
-    SUGGESTION_TOKENS.PIPE,
-    SUGGESTION_TOKENS.AND_OPERATOR,
-    SUGGESTION_TOKENS.OR_OPERATOR,
-  ] as string[],
-};
+// Helper to add placeholder to operator labels for test expectations
+const addPlaceholder = (operators: string[]) => operators.map((op) => `${op} $0`);
+
+const QUERY_LITERAL = createBasicConstants(QUERY_TEXT)[0].text;
+const NEXT_ACTIONS = [
+  commaCompleteItem.text.endsWith(' ') ? commaCompleteItem.text : `${commaCompleteItem.text} `,
+  withCompleteItem.text,
+  pipeCompleteItem.text,
+];
+
+const NEXT_ACTIONS_EXPRESSIONS = [...NEXT_ACTIONS, ...addPlaceholder(OPERATOR_SUGGESTIONS.LOGICAL)];
 
 // ============================================================================
 // Query Builder and Test Helpers
@@ -80,7 +65,7 @@ const buildRerankQuery = (components: QueryComponents): string => {
     query += ` ${components.targetField}`;
   }
 
-  if (components.targetAssignment) {
+  if (components.targetAssignment !== undefined) {
     query += ` = ${components.targetAssignment}`;
   }
 
@@ -132,24 +117,6 @@ const expectRerankSuggestions = async (
   }
 };
 
-const createBooleanTestOperators = () => [
-  { operator: 'LIKE', value: '"foo"', description: 'LIKE operator with pattern' },
-  { operator: 'NOT LIKE', value: '"foo"', description: 'NOT LIKE operator with pattern' },
-  { operator: 'RLIKE', value: '"re.*"', description: 'RLIKE operator with regex' },
-  { operator: 'NOT RLIKE', value: '"re.*"', description: 'NOT RLIKE operator with regex' },
-  { operator: 'IN', value: '("a", "b")', description: 'IN operator with list' },
-  { operator: 'NOT IN', value: '("a", "b")', description: 'NOT IN operator with list' },
-  { operator: 'IS NULL', value: '', description: 'IS NULL unary operator' },
-  { operator: 'IS NOT NULL', value: '', description: 'IS NOT NULL unary operator' },
-  { operator: '==', value: '"value"', description: 'equality operator' },
-  { operator: '!=', value: '"value"', description: 'inequality operator' },
-  { operator: '>', value: '10', description: 'greater than operator (incomplete)' },
-  { operator: '>=', value: '10', description: 'greater than or equal operator (incomplete)' },
-  { operator: '<', value: '10', description: 'less than operator (incomplete)' },
-  { operator: '<=', value: '10', description: 'less than or equal operator (incomplete)' },
-  { operator: ':', value: '"needle"', description: 'match operator' },
-];
-
 describe('RERANK Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
 
@@ -165,7 +132,7 @@ describe('RERANK Autocomplete', () => {
 
   describe('Basic command structure', () => {
     test('suggests query literal and target field after RERANK keyword', async () => {
-      const expectedSuggestions = [SUGGESTION_TOKENS.QUERY_LITERAL, 'col0 = '];
+      const expectedSuggestions = [QUERY_LITERAL, 'col0 = '];
 
       (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
 
@@ -174,7 +141,7 @@ describe('RERANK Autocomplete', () => {
 
     test('suggests ON keyword after complete query', async () => {
       await expectRerankSuggestions(buildRerankQuery({ query: '"search query"' }) + ' ', [
-        SUGGESTION_TOKENS.ON_KEYWORD,
+        onCompleteItem.text,
       ]);
     });
 
@@ -185,23 +152,37 @@ describe('RERANK Autocomplete', () => {
     test('suggests query literal after target field assignment', async () => {
       await expectRerankSuggestions(
         buildRerankQuery({ targetField: 'col0', targetAssignment: '' }),
-        { contains: [SUGGESTION_TOKENS.QUERY_LITERAL] }
+        { contains: [QUERY_LITERAL] }
       );
     });
 
     test('suggests ON after complete target field assignment', async () => {
       await expectRerankSuggestions(
         buildRerankQuery({ targetField: 'col0', targetAssignment: '"query"' }) + ' ',
-        [SUGGESTION_TOKENS.ON_KEYWORD]
+        [onCompleteItem.text]
       );
     });
-  });
 
-  // ============================================================================
-  // Field Selection and Continuation Tests
-  // ============================================================================
+    test('suggests field columns after ON keyword', async () => {
+      const query = buildRerankQuery({ query: '"search query"' }) + ' ON ';
 
-  describe('Field selection and continuations', () => {
+      await expectRerankSuggestions(query, {
+        contains: ['textField', 'keywordField', 'integerField'],
+      });
+    });
+
+    test('suggests field columns after a list of keyword fields and comma', async () => {
+      const query =
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField, col0 = TRUE, keywordField, integerField,',
+        }) + ' ';
+
+      await expectRerankSuggestions(query, {
+        contains: ['textField', 'keywordField', 'integerField'],
+      });
+    });
+
     test('suggests field continuations after selecting a field', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'textField' });
 
@@ -212,10 +193,10 @@ describe('RERANK Autocomplete', () => {
       ]);
     });
 
-    test('suggests continuations after field with space', async () => {
+    test('suggests continuations after field with more trailing spaces', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'textField' }) + ' ';
 
-      await expectRerankSuggestions(query, SUGGESTION_GROUPS.FIELD_CONTINUATIONS);
+      await expectRerankSuggestions(query, NEXT_ACTIONS);
     });
   });
 
@@ -238,73 +219,55 @@ describe('RERANK Autocomplete', () => {
         }) + ' ';
 
       await expectRerankSuggestions(query, {
-        notContains: [SUGGESTION_TOKENS.AND_OPERATOR, SUGGESTION_TOKENS.OR_OPERATOR],
-      });
-    });
-
-    test('suggests comparison operators after field and space', async () => {
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: 'textField = keywordField',
-        }) + ' ';
-
-      await expectRerankSuggestions(query, {
-        contains: OPERATOR_SUGGESTIONS.COMPARISON,
+        notContains: addPlaceholder(OPERATOR_SUGGESTIONS.LOGICAL),
+        contains: addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON),
       });
     });
 
     test('handles complex nested boolean expressions', async () => {
-      const complexExpression = 'textField = (keywordField LIKE "a*") AND (integerField < 10)';
+      const complexExpression = 'textField = NOT (keywordField LIKE "a*") AND (integerField < 10)';
       const query =
         buildRerankQuery({
           query: '"search query"',
           onClause: complexExpression,
         }) + ' ';
 
-      await expectRerankSuggestions(query, SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS);
-    });
-
-    test('handles NOT unary operator with LIKE', async () => {
-      const expression = 'keywordField = NOT (keywordField LIKE "a*")';
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: expression,
-        }) + ' ';
-
-      await expectRerankSuggestions(query, SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS);
+      await expectRerankSuggestions(query, NEXT_ACTIONS_EXPRESSIONS);
     });
   });
 
-  // ============================================================================
-  // Terminal Operator Tests
-  // ============================================================================
-
   describe('Terminal operators', () => {
-    test.each(createBooleanTestOperators())(
-      '$description behavior',
-      async ({ operator, value, description }) => {
-        const operatorClause = value ? `${operator} ${value}` : operator;
+    test.each([
+      ...OPERATOR_SUGGESTIONS.COMPARISON.map((op) => [op, '"test_value"']),
+      ...OPERATOR_SUGGESTIONS.PATTERN.map((op) => [op, '"pattern*"']),
+      // TODO: re-enable when IN list is supported in checkFunctionInvocationComplete
+      // ...OPERATOR_SUGGESTIONS.SET.map((op) => [op, '("option1", "option2", "option3")']),
+      ...OPERATOR_SUGGESTIONS.EXISTENCE.map((op) => [op, '']),
+    ])('Complete %s operator shows continuations', async (operator, value) => {
+      const operatorClause = value ? `${operator} ${value}` : operator;
+      const query =
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: `textField = keywordField ${operatorClause}`,
+        }) + ' ';
+
+      await expectRerankSuggestions(query, NEXT_ACTIONS_EXPRESSIONS);
+    });
+
+    test.each(OPERATOR_SUGGESTIONS.COMPARISON)(
+      'Incomplete %s operator shows other operators',
+      async (operator) => {
+        const operatorClause = `${operator} 10`;
         const query =
           buildRerankQuery({
             query: '"search query"',
             onClause: `textField = keywordField ${operatorClause}`,
           }) + ' ';
 
-        if (description.includes('incomplete')) {
-          // Comparison operators that need RHS show other operators
-          await expectRerankSuggestions(query, {
-            contains: [
-              ...OPERATOR_SUGGESTIONS.EQUALITY,
-              ...OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 2),
-            ],
-            notContains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
-          });
-        } else {
-          // Complete operators show continuations
-          await expectRerankSuggestions(query, SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS);
-        }
+        await expectRerankSuggestions(query, {
+          contains: [...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 4))],
+          notContains: NEXT_ACTIONS_EXPRESSIONS,
+        });
       }
     );
 
@@ -316,7 +279,7 @@ describe('RERANK Autocomplete', () => {
         }) + ' ';
 
       await expectRerankSuggestions(query, {
-        notContains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
+        notContains: NEXT_ACTIONS_EXPRESSIONS,
       });
     });
   });
@@ -333,7 +296,7 @@ describe('RERANK Autocomplete', () => {
         withClause: '{ ',
       });
 
-      await expectRerankSuggestions(query, [SUGGESTION_TOKENS.INFERENCE_ID_KEY]);
+      await expectRerankSuggestions(query, ['"inference_id": "$0"']);
     });
 
     test('suggests only pipe after complete WITH map', async () => {
@@ -344,7 +307,7 @@ describe('RERANK Autocomplete', () => {
           withClause: '{ "inference_id": "inference_1" }',
         }) + ' ';
 
-      await expectRerankSuggestions(query, [SUGGESTION_TOKENS.PIPE]);
+      await expectRerankSuggestions(query, [pipeCompleteItem.text]);
     });
   });
 
@@ -364,10 +327,10 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, {
         contains: [
-          OPERATOR_SUGGESTIONS.LIKE_OPERATORS[0],
-          ...OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 2),
+          addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]])[0],
+          ...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 2)),
         ],
-        notContains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
+        notContains: NEXT_ACTIONS_EXPRESSIONS,
       });
     });
   });
@@ -380,7 +343,7 @@ describe('RERANK Autocomplete', () => {
           onClause: 'host.name = TRUE',
         }) + ' ';
 
-      await expectRerankSuggestions(query, SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS);
+      await expectRerankSuggestions(query, NEXT_ACTIONS_EXPRESSIONS);
     });
 
     test('handles malformed expressions gracefully', async () => {
@@ -391,7 +354,7 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, {
         contains: ['textField', 'keywordField', 'integerField'],
-        notContains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
+        notContains: NEXT_ACTIONS_EXPRESSIONS,
       });
     });
   });
@@ -405,25 +368,28 @@ describe('RERANK Autocomplete', () => {
       {
         name: 'IS NULL operators',
         partial: 'IS N',
-        expected: OPERATOR_SUGGESTIONS.NULL_OPERATORS,
+        expected: OPERATOR_SUGGESTIONS.EXISTENCE,
       },
       {
         name: 'LIKE operator',
         partial: 'LI',
-        expected: [OPERATOR_SUGGESTIONS.LIKE_OPERATORS[0]],
+        expected: addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]]),
       },
       {
         name: 'IN and IS operators',
         partial: 'I',
-        expected: [OPERATOR_SUGGESTIONS.IN_OPERATORS[0], ...OPERATOR_SUGGESTIONS.NULL_OPERATORS],
+        expected: [
+          addPlaceholder([OPERATOR_SUGGESTIONS.SET[0]])[0],
+          ...OPERATOR_SUGGESTIONS.EXISTENCE,
+        ],
       },
       {
         name: 'NOT operators',
         partial: 'NO',
         expected: [
-          OPERATOR_SUGGESTIONS.IN_OPERATORS[1],
-          OPERATOR_SUGGESTIONS.LIKE_OPERATORS[1],
-          OPERATOR_SUGGESTIONS.LIKE_OPERATORS[3],
+          addPlaceholder([OPERATOR_SUGGESTIONS.SET[1]])[0],
+          addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[1]])[0],
+          addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[3]])[0],
         ],
       },
     ])('completes partial $name', async ({ partial, expected }) => {

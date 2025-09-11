@@ -2561,6 +2561,7 @@ const decayDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| EVAL decay_result = decay(salary, 0, 100000, {"offset": 5, "decay": 0.5, "type": "linear"})\n| SORT decay_result DESC',
@@ -13667,6 +13668,7 @@ const toDenseVectorDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['row ints = [1, 2, 3]\n| eval vector = to_dense_vector(ints)\n| keep vector'],
 };
