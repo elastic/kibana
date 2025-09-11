@@ -41,6 +41,49 @@ describe('utils', () => {
       ]);
     });
 
+    it('should return the appropriate metadata when there are multiple stats commands in the query', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        // First aggregate per client + per URL
+        | STATS
+            visits_per_client =
+              COUNT(), // how many hits this client made to this URL
+            p95_bytes_client =
+              PERCENTILE(bytes, 95), // 95th percentile of bytes for this client+URL
+            median_bytes_client =
+              MEDIAN(bytes) // median of bytes for this client+URL
+              BY url.keyword, clientip
+        // Now roll up those per-client stats to the URL level
+        | STATS
+            unique_visitors =
+              COUNT_DISTINCT(clientip), // how many distinct clients hit this URL
+            total_visits =
+              SUM(visits_per_client), // median across client-level medians
+            p95_bytes_url =
+              PERCENTILE(p95_bytes_client, 95), // 95th percentile across client-level p95s
+            median_bytes_url =
+              MEDIAN(median_bytes_client) // median across client-level medians
+              BY url.keyword
+        // Sort to see the busiest URLs on top
+        | SORT total_visits DESC
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        {
+          field: 'url.keyword',
+          type: 'column',
+        },
+      ]);
+      expect(result.appliedFunctions).toEqual([
+        { identifier: 'unique_visitors', operator: 'COUNT_DISTINCT' },
+        { identifier: 'total_visits', operator: 'SUM' },
+        { identifier: 'p95_bytes_url', operator: 'PERCENTILE' },
+        { identifier: 'median_bytes_url', operator: 'MEDIAN' },
+      ]);
+    });
+
     it(`should return the correct metadata when the stats query provides functions as the by option`, () => {
       const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY BUCKET(@timestamp, 1 hour), ABS(bytes)`;
 
