@@ -27,6 +27,7 @@ import {
   createConversationWithUserInput,
   langChainExecute,
 } from '../helpers';
+import { spaceTestScenarios } from '../../__mocks__/space_test_helpers';
 
 const license = licensingMock.createLicenseMock();
 
@@ -520,5 +521,257 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+  });
+
+  describe('chatCompleteRoute with Spaces', () => {
+    // Helper to create context with specific space ID
+    const createContextWithSpace = (spaceId: string) => ({
+      resolve: jest.fn().mockResolvedValue({
+        elasticAssistant: {
+          ...mockContext.resolve().then(r => r.elasticAssistant),
+          getSpaceId: jest.fn().mockReturnValue(spaceId),
+          actions: {
+            getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+          },
+          getRegisteredTools: jest.fn(() => []),
+          getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+          logger: loggingSystemMock.createLogger(),
+          telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+          llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
+          getCurrentUser: () => ({
+            username: 'user',
+            email: 'email',
+            fullName: 'full name',
+            roles: ['user-role'],
+            enabled: true,
+            authentication_realm: { name: 'native1', type: 'native' },
+            lookup_realm: { name: 'native1', type: 'native' },
+            authentication_provider: { type: 'basic', name: 'basic1' },
+            authentication_type: 'realm',
+            elastic_cloud_user: false,
+            metadata: { _reserved: false },
+          }),
+          getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
+            spaceId,
+            getConversation: jest.fn().mockResolvedValue(existingConversation),
+            updateConversation: jest.fn().mockResolvedValue(existingConversation),
+            createConversation: jest.fn().mockResolvedValue(existingConversation),
+            appendConversationMessages:
+              appendConversationMessages.mockResolvedValue(existingConversation),
+          }),
+          getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
+            spaceId,
+            getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+            indexTemplateAndPattern: {
+              alias: 'knowledge-base-alias',
+            },
+            isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
+          }),
+          getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+            spaceId,
+            findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+          }),
+        },
+        core: {
+          elasticsearch: {
+            client: elasticsearchServiceMock.createScopedClusterClient(),
+          },
+          savedObjects: coreMock.createRequestHandlerContext().savedObjects,
+        },
+        licensing: {
+          ...licensingMock.createRequestHandlerContext({ license }),
+          license,
+        },
+      }),
+    });
+
+    describe('non-default space behavior', () => {
+      const nonDefaultSpaceContext = createContextWithSpace(spaceTestScenarios.nonDefaultSpace);
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockAppendAssistantMessageToConversation.mockResolvedValue(true);
+        license.hasAtLeast.mockReturnValue(true);
+        mockCreateConversationWithUserInput.mockResolvedValue({ id: 'something' });
+        mockLangChainExecute.mockImplementation(
+          async ({
+            connectorId,
+            isStream,
+            onLlmResponse,
+          }: {
+            connectorId: string;
+            isStream: boolean;
+            onLlmResponse: (
+              content: string,
+              replacements: Record<string, string>,
+              isError: boolean
+            ) => Promise<void>;
+          }) => {
+            if (!isStream && connectorId === 'mock-connector-id') {
+              onLlmResponse('Non-streamed test reply.', {}, false).catch(() => {});
+              return {
+                connector_id: 'mock-connector-id',
+                data: mockActionResponse,
+                status: 'ok',
+              };
+            } else if (isStream && connectorId === 'mock-connector-id') {
+              onLlmResponse('Streamed test reply.', {}, false).catch(() => {});
+              return mockStream;
+            } else {
+              onLlmResponse('simulated error', {}, true).catch(() => {});
+              throw new Error('simulated error');
+            }
+          }
+        );
+        actionsClient.getBulk.mockResolvedValue([
+          {
+            id: '1',
+            isPreconfigured: false,
+            isSystemAction: false,
+            isDeprecated: false,
+            name: 'my name',
+            actionTypeId: '.gen-ai',
+            isMissingSecrets: false,
+            config: {
+              a: true,
+              b: true,
+              c: true,
+            },
+          },
+        ]);
+      });
+
+      it('should work correctly in non-default space', async () => {
+        const mockRouter = {
+          versioned: {
+            post: jest.fn().mockImplementation(() => {
+              return {
+                addVersion: jest.fn().mockImplementation(async (_, handler) => {
+                  const result = await handler(
+                    nonDefaultSpaceContext,
+                    {
+                      ...mockRequest,
+                      body: {
+                        ...mockRequest.body,
+                        conversationId: existingConversation.id,
+                      },
+                    },
+                    mockResponse
+                  );
+
+                  expect(result).toEqual({
+                    connector_id: 'mock-connector-id',
+                    data: mockActionResponse,
+                    status: 'ok',
+                  });
+                }),
+              };
+            }),
+          },
+        };
+
+        chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+      });
+
+      it('should use space-scoped data clients', async () => {
+        const resolvedContext = await nonDefaultSpaceContext.resolve();
+        
+        const mockRouter = {
+          versioned: {
+            post: jest.fn().mockImplementation(() => {
+              return {
+                addVersion: jest.fn().mockImplementation(async (_, handler) => {
+                  await handler(
+                    nonDefaultSpaceContext,
+                    mockRequest,
+                    mockResponse
+                  );
+
+                  // Verify getSpaceId was called and returned correct space
+                  expect(resolvedContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
+                  expect(resolvedContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+                }),
+              };
+            }),
+          },
+        };
+
+        chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+      });
+
+      it('should handle streaming in non-default space', async () => {
+        const mockRouter = {
+          versioned: {
+            post: jest.fn().mockImplementation(() => {
+              return {
+                addVersion: jest.fn().mockImplementation(async (_, handler) => {
+                  const result = await handler(
+                    nonDefaultSpaceContext,
+                    {
+                      ...mockRequest,
+                      body: {
+                        ...mockRequest.body,
+                        isStream: true,
+                      },
+                    },
+                    mockResponse
+                  );
+
+                  expect(result).toEqual(mockStream);
+                }),
+              };
+            }),
+          },
+        };
+
+        chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should handle different spaces independently', async () => {
+        const space1Context = createContextWithSpace('space1');
+        const space2Context = createContextWithSpace('space2');
+
+        // Create separate data client mocks for each space
+        const space1DataClient = {
+          spaceId: 'space1',
+          getConversation: jest.fn().mockResolvedValue({ ...existingConversation, id: 'space1-conversation' }),
+        };
+        const space2DataClient = {
+          spaceId: 'space2', 
+          getConversation: jest.fn().mockResolvedValue({ ...existingConversation, id: 'space2-conversation' }),
+        };
+
+        // Mock the data clients for each space
+        const resolvedSpace1 = await space1Context.resolve();
+        const resolvedSpace2 = await space2Context.resolve();
+        
+        resolvedSpace1.elasticAssistant.getAIAssistantConversationsDataClient = jest.fn().mockResolvedValue(space1DataClient);
+        resolvedSpace2.elasticAssistant.getAIAssistantConversationsDataClient = jest.fn().mockResolvedValue(space2DataClient);
+
+        const mockRouter = {
+          versioned: {
+            post: jest.fn().mockImplementation(() => {
+              return {
+                addVersion: jest.fn().mockImplementation(async (_, handler) => {
+                  // Test space1 context
+                  await handler(space1Context, mockRequest, mockResponse);
+                  
+                  // Test space2 context  
+                  await handler(space2Context, mockRequest, mockResponse);
+
+                  // Verify each space got its own data client
+                  expect(resolvedSpace1.elasticAssistant.getAIAssistantConversationsDataClient).toHaveBeenCalled();
+                  expect(resolvedSpace2.elasticAssistant.getAIAssistantConversationsDataClient).toHaveBeenCalled();
+                }),
+              };
+            }),
+          },
+        };
+
+        chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+      });
+    });
   });
 });

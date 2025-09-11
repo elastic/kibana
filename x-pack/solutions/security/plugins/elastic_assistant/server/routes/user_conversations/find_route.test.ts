@@ -11,6 +11,7 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
 import { findUserConversationsRoute } from './find_route';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Find user conversations route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -105,6 +106,101 @@ describe('Find user conversations route', () => {
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+  });
+
+  describe('Find user conversations route with Spaces', () => {
+    describe('non-default space behavior', () => {
+      it('should work correctly in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve(getFindConversationsResultWithSingleHit())
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue({
+          username: 'elastic',
+          authentication_realm: {
+            type: 'my_realm_type',
+            name: 'my_realm_name',
+          },
+        } as AuthenticatedUser);
+
+        const spaceServer = serverMock.create();
+        findUserConversationsRoute(spaceServer.router);
+
+        const response = await spaceServer.inject(
+          getCurrentUserFindRequest(),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should only find conversations in the current space', async () => {
+        // Setup space1 with one conversation
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve({
+            total: 1,
+            perPage: 100,
+            page: 1,
+            data: [{ id: 'space1-conversation', title: 'Space1 Conversation' }],
+          })
+        );
+
+        // Setup space2 with different conversation
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+        space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve({
+            total: 1,
+            perPage: 100,
+            page: 1,
+            data: [{ id: 'space2-conversation', title: 'Space2 Conversation' }],
+          })
+        );
+
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue({
+          username: 'elastic',
+          authentication_realm: { type: 'my_realm_type', name: 'my_realm_name' },
+        } as AuthenticatedUser);
+
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue({
+          username: 'elastic',
+          authentication_realm: { type: 'my_realm_type', name: 'my_realm_name' },
+        } as AuthenticatedUser);
+
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        findUserConversationsRoute(space1Server.router);
+        findUserConversationsRoute(space2Server.router);
+
+        const space1Response = await space1Server.inject(
+          getCurrentUserFindRequest(),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        const space2Response = await space2Server.inject(
+          getCurrentUserFindRequest(),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(200);
+
+        // Verify each space got its own results
+        expect(space1Response.body.data[0].title).toBe('Space1 Conversation');
+        expect(space2Response.body.data[0].title).toBe('Space2 Conversation');
+
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
+      });
     });
   });
 });

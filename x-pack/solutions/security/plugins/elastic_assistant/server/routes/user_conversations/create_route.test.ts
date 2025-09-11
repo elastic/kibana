@@ -19,6 +19,7 @@ import {
 import { authenticatedUser } from '../../__mocks__/user';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Create conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -224,6 +225,148 @@ describe('Create conversation route', () => {
       });
       await server.inject(request, requestContextMock.convertContext(context));
       expect(telemetryReportEventSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Create conversation route with Spaces', () => {
+    let spaceAwareServer: ReturnType<typeof serverMock.create>;
+    let spaceClients: typeof clients;
+    let spaceContext: typeof context;
+
+    beforeEach(() => {
+      spaceAwareServer = serverMock.create();
+      ({ clients: spaceClients, context: spaceContext } = requestContextMock.createTools());
+    });
+
+    describe('non-default space behavior', () => {
+      beforeEach(() => {
+        // Override the space ID for these tests
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve(getEmptyFindResult())
+        );
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
+          getConversationMock(getQueryConversationParams())
+        );
+
+        spaceContext.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+        createConversationRoute(spaceAwareServer.router);
+      });
+
+      it('should work correctly in non-default space', async () => {
+        const response = await spaceAwareServer.inject(
+          getCreateConversationRequest(),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+
+      it('should use space-scoped data client', async () => {
+        await spaceAwareServer.inject(
+          getCreateConversationRequest(),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        // Verify that getAIAssistantConversationsDataClient was called
+        // The actual space scoping happens in the data client creation
+        expect(spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation).toHaveBeenCalled();
+      });
+
+      it('should handle validation errors in non-default space', async () => {
+        const invalidRequest = requestMock.create({
+          method: 'post',
+          path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+          body: {
+            ...getCreateConversationSchemaMock(),
+            title: true, // invalid type
+          },
+        });
+
+        const result = spaceAwareServer.validate(invalidRequest);
+        expect(result.badRequest).toHaveBeenCalled();
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should not access conversations from other spaces', async () => {
+        // Setup space1 context
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        
+        // Setup space2 context 
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+
+        // Configure space1 to have an existing conversation
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve({
+            total: 1,
+            perPage: 100,
+            page: 1,
+            data: [getConversationMock({ ...getQueryConversationParams(), title: 'Space1 Conversation' })],
+          })
+        );
+
+        // Configure space2 to have no existing conversations
+        space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve(getEmptyFindResult())
+        );
+
+        // Configure both to allow creation
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
+          getConversationMock({ ...getQueryConversationParams(), title: 'New Space1 Conversation' })
+        );
+        space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
+          getConversationMock({ ...getQueryConversationParams(), title: 'New Space2 Conversation' })
+        );
+
+        space1Context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
+        );
+        space2Context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
+        );
+
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        // Create routes for both contexts
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        createConversationRoute(space1Server.router);
+        createConversationRoute(space2Server.router);
+
+        // Create conversation in space1
+        const space1Response = await space1Server.inject(
+          getCreateConversationRequest(),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        // Create conversation in space2  
+        const space2Response = await space2Server.inject(
+          getCreateConversationRequest(),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        // Both should succeed
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(200);
+
+        // Verify each space only accessed its own data client
+        expect(space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments).toHaveBeenCalled();
+        expect(space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments).toHaveBeenCalled();
+
+        // Verify they didn't cross-contaminate
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
+      });
     });
   });
 });

@@ -13,6 +13,7 @@ import { getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
 import { findPromptsRoute } from './find_route';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Find user prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -116,6 +117,101 @@ describe('Find user prompts route', () => {
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+  });
+
+  describe('Find user prompts route with Spaces', () => {
+    describe('non-default space behavior', () => {
+      it('should work correctly in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        const mockUser = {
+          username: 'elastic',
+          authentication_realm: { type: 'my_realm_type', name: 'my_realm_name' },
+        } as AuthenticatedUser;
+
+        spaceClients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve(getFindPromptsResultWithSingleHit())
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
+
+        const spaceServer = serverMock.create();
+        const spaceLogger = loggingSystemMock.createLogger();
+        findPromptsRoute(spaceServer.router, spaceLogger);
+
+        const response = await spaceServer.inject(
+          getCurrentUserPromptsRequest(),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should only find prompts in the current space', async () => {
+        // Setup space1 with space-specific prompts
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        space1Clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve({
+            total: 1,
+            perPage: 100,
+            page: 1,
+            data: [{ id: 'space1-prompt', name: 'Space1 Prompt', isDefault: false }],
+          })
+        );
+
+        // Setup space2 with different prompts
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+        space2Clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
+          Promise.resolve({
+            total: 1,
+            perPage: 100, 
+            page: 1,
+            data: [{ id: 'space2-prompt', name: 'Space2 Prompt', isDefault: false }],
+          })
+        );
+
+        const mockUser = {
+          username: 'elastic',
+          authentication_realm: { type: 'my_realm_type', name: 'my_realm_name' },
+        } as AuthenticatedUser;
+
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
+
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        const logger1 = loggingSystemMock.createLogger();
+        const logger2 = loggingSystemMock.createLogger();
+        findPromptsRoute(space1Server.router, logger1);
+        findPromptsRoute(space2Server.router, logger2);
+
+        const space1Response = await space1Server.inject(
+          getCurrentUserPromptsRequest(),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        const space2Response = await space2Server.inject(
+          getCurrentUserPromptsRequest(),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(200);
+
+        // Verify each space got its own prompts
+        expect(space1Response.body.data[0].name).toBe('Space1 Prompt');
+        expect(space2Response.body.data[0].name).toBe('Space2 Prompt');
+
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
+      });
     });
   });
 });
