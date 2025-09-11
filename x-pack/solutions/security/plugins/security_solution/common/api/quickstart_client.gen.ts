@@ -411,6 +411,9 @@ import type {
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+  InstallMigrationDashboardsResponse,
   StartDashboardsMigrationRequestParamsInput,
   StartDashboardsMigrationRequestBodyInput,
   StartDashboardsMigrationResponse,
@@ -2120,6 +2123,25 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Installs migration dashboards
+   */
+  async installMigrationDashboards(props: InstallMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationDashboards`);
+    return this.kbnClient
+      .request<InstallMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/install',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Installs migration rules
    */
   async installMigrationRules(props: InstallMigrationRulesProps) {
@@ -3265,6 +3287,10 @@ export interface InitEntityEngineProps {
 }
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
+}
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
 }
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
