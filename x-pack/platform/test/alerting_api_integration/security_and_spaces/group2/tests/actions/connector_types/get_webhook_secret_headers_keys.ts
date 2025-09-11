@@ -136,7 +136,6 @@ export default function getWebhookSecretHeaderKeys({ getService }: FtrProviderCo
           updateIncidentMethod: 'put',
           updateIncidentUrl:
             'https://some.non.existent.com/rest/api/2/issue/{{{external.system.id}}}',
-          hasAuth: false,
         },
       })
       .expect(200);
