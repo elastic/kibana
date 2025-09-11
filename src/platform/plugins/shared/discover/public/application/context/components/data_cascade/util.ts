@@ -49,6 +49,8 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   let statsCommand: StatsCommand | null = null;
 
+  // TODO: when a where clause follows the stats command, it would not be regarded as a candidate for the cascade experience
+
   // we always want to operate on the last stats command that has valid grouping options,
   // but allow for the possibility of multiple stats commands in the query
   for (let i = statsCommands.length - 1; i >= 0; i--) {
@@ -119,65 +121,86 @@ export const constructCascadeQuery = ({
     throw new Error(`Query does not include a "stats" command`);
   }
 
-  // Attempt to handle every stats query present appropriately
-  statsCommands.forEach((statsCommand) => {
-    let handled = false;
-    let hasMultipleColumns: boolean;
-    const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommand);
+  let statsCommandToOperateOn: StatsCommand | null = null;
 
-    Object.entries(grouping).forEach(([groupName, groupValue], _, groupingArr) => {
-      if (
-        isColumn(groupValue.definition) &&
-        nodePath.includes(groupName) &&
-        nodePathMap[groupName]
-      ) {
-        if (nodeType === 'leaf') {
+  // we always want to operate on the last stats command that has valid grouping options,
+  // but allow for the possibility of multiple stats commands in the query
+  for (let i = statsCommands.length - 1; i >= 0; i--) {
+    const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommands[i]);
+
+    if (grouping && Object.keys(grouping).length) {
+      statsCommandToOperateOn = statsCommands[i] as StatsCommand;
+      break;
+    }
+  }
+
+  if (!statsCommandToOperateOn) {
+    throw new Error(`No valid "stats" command was found in the query`);
+  }
+
+  let handled = false;
+  let hasMultipleColumns: boolean;
+  const { grouping } = mutate.commands.stats.summarizeCommand(ESQLQuery, statsCommandToOperateOn);
+
+  Object.entries(grouping).forEach(([groupName, groupValue], _, groupingArr) => {
+    if (isColumn(groupValue.definition) && nodePath.includes(groupName) && nodePathMap[groupName]) {
+      switch (nodeType) {
+        case 'leaf': {
           handleStatsByColumnLeafOperation(ESQLQuery, {
             [groupName]: nodePathMap[groupName],
           });
           handled = true;
-        } else if (
-          nodeType === 'group' &&
-          groupingArr.length > 1 &&
-          // it's not enough to check that we have multiple args for the stats by options
-          (typeof hasMultipleColumns === 'undefined'
-            ? (hasMultipleColumns =
-                groupingArr.filter((arg) => isColumn(arg[1].definition)).length > 1)
-            : hasMultipleColumns)
-        ) {
-          handleStatsByColumnGroupOperation(ESQLQuery, statsCommand as StatsCommand, {
-            [groupName]: nodePathMap[groupName],
-          });
-          handled = true;
+          break;
         }
-      } else if (isESQLFunction(groupValue.definition)) {
-        switch (groupValue.definition.name) {
-          case 'categorize': {
-            // TODO: handle categorize option
-            break;
+        case 'group': {
+          if (
+            groupingArr.length > 1 &&
+            // it's not enough to check that we have multiple args for the stats by options
+            (typeof hasMultipleColumns === 'undefined'
+              ? (hasMultipleColumns =
+                  groupingArr.filter((arg) => isColumn(arg[1].definition)).length > 1)
+              : hasMultipleColumns)
+          ) {
+            handleStatsByColumnGroupOperation(ESQLQuery, statsCommandToOperateOn as StatsCommand, {
+              [groupName]: nodePathMap[groupName],
+            });
+            handled = true;
           }
-          case 'bucket': {
-            // TODO: handle bucket option
-            break;
-          }
-          default: {
-            // unsupported by function, nothing to do here
-            break;
-          }
+          break;
+        }
+        default: {
+          // nothing to do for anything other than group or leaf nodes
+          break;
         }
       }
-    });
-
-    if (handled) {
-      // remove the stats command if it has been fully handled,
-      // explore the possibility of scenarios where it might not be necessary to remove the command
-      mutate.generic.commands.remove(ESQLQuery.ast, statsCommand);
+    } else if (isESQLFunction(groupValue.definition)) {
+      switch (groupValue.definition.name) {
+        case 'categorize': {
+          // TODO: handle categorize option
+          break;
+        }
+        case 'bucket': {
+          // TODO: handle bucket option
+          break;
+        }
+        default: {
+          // unsupported by function, nothing to do here
+          break;
+        }
+      }
     }
   });
+
+  if (handled) {
+    // remove the stats command if it has been fully handled,
+    // TODO: explore the possibility of scenarios where it might not be necessary to remove the command
+    mutate.generic.commands.remove(ESQLQuery.ast, statsCommandToOperateOn);
+  }
 
   // open question: should we remove the limit command as well, seems a little naive to assume it's always safe?
   const limitCommands = Array.from(mutate.commands.limit.list(ESQLQuery.ast));
 
+  // ideally we only want to remove limit commands that are after the stats command we operated on,
   limitCommands.forEach((cmd) => {
     mutate.generic.commands.remove(ESQLQuery.ast, cmd);
   });
