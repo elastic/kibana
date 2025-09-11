@@ -26,7 +26,7 @@ export type PendingActionItem = ActionDetails;
  * Generic handler for option selection in selectable components
  */
 export const createSelectionHandler = <T extends BaseSelectorState>(
-  onChange: Function,
+  onChange: (newData: { value: string; valueText: string; store: T }) => void,
   state: T
 ) => {
   return (

@@ -8,11 +8,17 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import type { PendingActionsSelectorState } from './pending_actions_selector';
 import { PendingActionsSelector } from './pending_actions_selector';
 import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
-import { useGenericErrorToast, useBaseSelectorHandlers, useFocusManagement } from '../shared/hooks';
+import {
+  useGenericErrorToast,
+  useBaseSelectorHandlers,
+  useFocusManagement,
+  usePendingActionsOptions,
+} from '../shared/hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionDetails, ActionListApiResponse } from '../../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -24,6 +30,10 @@ import type {
 } from '../../console/types';
 import type { ParsedCommandInterface } from '../../console/service/types';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
+
+type PendingActionOption = EuiSelectableOption<Partial<{ description: string }>> & {
+  data?: ActionDetails;
+};
 
 jest.mock('../../../hooks/response_actions/use_get_pending_actions');
 jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
@@ -37,6 +47,7 @@ jest.mock('../shared/hooks', () => ({
   useBaseSelectorState: jest.fn((store, value) => store ?? { isPopoverOpen: !value }),
   useRenderDelay: jest.fn(() => false),
   useFocusManagement: jest.fn(),
+  usePendingActionsOptions: jest.fn(() => []),
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/user_privileges');
@@ -56,6 +67,9 @@ describe('PendingActionsSelector', () => {
   >;
   const mockUseFocusManagement = useFocusManagement as jest.MockedFunction<
     typeof useFocusManagement
+  >;
+  const mockUsePendingActionsOptions = usePendingActionsOptions as jest.MockedFunction<
+    typeof usePendingActionsOptions
   >;
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
   const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
@@ -202,6 +216,19 @@ describe('PendingActionsSelector', () => {
         loading: false,
       },
     } as ReturnType<typeof useUserPrivileges>);
+
+    // Mock the pending actions options hook
+    mockUsePendingActionsOptions.mockReturnValue([
+      {
+        label: 'isolate',
+        description:
+          'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+        data: mockActionDetails,
+        checked: undefined,
+        disabled: false,
+        toolTipContent: undefined,
+      } as PendingActionOption,
+    ]);
   });
 
   afterEach(() => {
@@ -265,13 +292,19 @@ describe('PendingActionsSelector', () => {
     );
   });
 
-  test('displays action in dropdown with command-actionId format', async () => {
+  test('displays action in dropdown with command format', async () => {
     await renderAndWaitForComponent(
       <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
-    // The action should be displayed with the new format
-    expect(screen.getByText('isolate - action-123-abc')).toBeInTheDocument();
+    // The action should be displayed with the command name
+    expect(screen.getByText('isolate')).toBeInTheDocument();
+    // The description should also be displayed
+    expect(
+      screen.getByText(
+        'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+      )
+    ).toBeInTheDocument();
   });
 
   test('displays action description as tooltip', async () => {
@@ -280,7 +313,7 @@ describe('PendingActionsSelector', () => {
     );
 
     // Check that the description contains expected elements
-    const descriptionText = screen.getByText(/isolate on test-host by test-user at/);
+    const descriptionText = screen.getByText(/Action id action-123-abc submitted by test-user on/);
     expect(descriptionText).toBeInTheDocument();
   });
 
@@ -312,14 +345,62 @@ describe('PendingActionsSelector', () => {
       error: null,
     } as unknown as ReturnType<typeof useGetPendingActions>);
 
+    // Mock the options to return multiple actions
+    mockUsePendingActionsOptions.mockReturnValue([
+      {
+        label: 'isolate',
+        description:
+          'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+        data: mockActionDetails,
+        checked: undefined,
+        disabled: false,
+        toolTipContent: undefined,
+      } as PendingActionOption,
+      {
+        label: 'release',
+        description:
+          'Action id action-456-def submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+        data: { ...mockActionDetails, id: 'action-456-def', command: 'unisolate' },
+        checked: undefined,
+        disabled: false,
+        toolTipContent: undefined,
+      } as PendingActionOption,
+      {
+        label: 'get-file',
+        description:
+          'Action id action-789-ghi submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+        data: { ...mockActionDetails, id: 'action-789-ghi', command: 'get-file' },
+        checked: undefined,
+        disabled: false,
+        toolTipContent: undefined,
+      } as PendingActionOption,
+    ]);
+
     await renderAndWaitForComponent(
       <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
-    // Verify all actions are displayed with correct format
-    expect(screen.getByText('isolate - action-123-abc')).toBeInTheDocument();
-    expect(screen.getByText('release - action-456-def')).toBeInTheDocument();
-    expect(screen.getByText('get-file - action-789-ghi')).toBeInTheDocument();
+    // Verify all actions are displayed with correct labels
+    expect(screen.getByText('isolate')).toBeInTheDocument();
+    expect(screen.getByText('release')).toBeInTheDocument();
+    expect(screen.getByText('get-file')).toBeInTheDocument();
+
+    // Verify all actions have descriptions
+    expect(
+      screen.getByText(
+        'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Action id action-456-def submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Action id action-789-ghi submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+      )
+    ).toBeInTheDocument();
   });
 
   test('calls useGetPendingActions with correct parameters from command meta', async () => {
@@ -366,12 +447,30 @@ describe('PendingActionsSelector', () => {
         },
       } as ReturnType<typeof useUserPrivileges>);
 
+      // Mock disabled options
+      mockUsePendingActionsOptions.mockReturnValue([
+        {
+          label: 'isolate',
+          description:
+            'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+          data: mockActionDetails,
+          checked: undefined,
+          disabled: true,
+          toolTipContent: 'Permission denied',
+        } as PendingActionOption,
+      ]);
+
       await renderAndWaitForComponent(
         <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
-      // The isolate action should be displayed but with privilege restriction tooltip
-      expect(screen.getByText('isolate - action-123-abc')).toBeInTheDocument();
+      // The isolate action should be displayed with label and description
+      expect(screen.getByText('isolate')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+        )
+      ).toBeInTheDocument();
     });
 
     test('shows tooltip message for disabled actions', async () => {
@@ -409,12 +508,30 @@ describe('PendingActionsSelector', () => {
         },
       } as ReturnType<typeof useUserPrivileges>);
 
+      // Mock disabled kill-process option
+      mockUsePendingActionsOptions.mockReturnValue([
+        {
+          label: 'kill-process',
+          description:
+            'Action id action-kill-123 submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+          data: killProcessAction,
+          checked: undefined,
+          disabled: true,
+          toolTipContent: 'Permission denied',
+        } as PendingActionOption,
+      ]);
+
       await renderAndWaitForComponent(
         <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
-      // The action should be displayed
-      expect(screen.getByText('kill-process - action-kill-123')).toBeInTheDocument();
+      // The action should be displayed with label and description
+      expect(screen.getByText('kill-process')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Action id action-kill-123 submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+        )
+      ).toBeInTheDocument();
     });
 
     test('enables actions when user has all required permissions', async () => {
@@ -423,8 +540,13 @@ describe('PendingActionsSelector', () => {
         <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
-      // The action should be displayed and selectable
-      expect(screen.getByText('isolate - action-123-abc')).toBeInTheDocument();
+      // The action should be displayed and selectable with label and description
+      expect(screen.getByText('isolate')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

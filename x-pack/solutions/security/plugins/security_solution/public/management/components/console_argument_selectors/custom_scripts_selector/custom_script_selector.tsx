@@ -23,8 +23,6 @@ import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/typ
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
-import { CUSTOM_SCRIPTS_CONFIG, SHARED_TRUNCATION_STYLE } from '../shared/constants';
-import { useGenericErrorToast, transformCustomScriptsToOptions } from '../shared';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -33,6 +31,9 @@ import {
   useRenderDelay,
   useFocusManagement,
 } from '../shared/hooks';
+
+import { CUSTOM_SCRIPTS_CONFIG, SHARED_TRUNCATION_STYLE } from '../shared/constants';
+import { useGenericErrorToast, transformCustomScriptsToOptions } from '../shared';
 import { createSelectionHandler, createKeyDownHandler } from '../shared/utils';
 import { ERROR_LOADING_CUSTOM_SCRIPTS } from '../../../common/translations';
 
@@ -54,6 +55,7 @@ export const CustomScriptSelector = memo<
     EndpointCommandDefinitionMeta
   >
 >(({ value, valueText, argName, argIndex, onChange, store: _store, command, requestFocus }) => {
+  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}-${argIndex}`);
   const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
@@ -80,7 +82,6 @@ export const CustomScriptSelector = memo<
   const scriptsOptions = useMemo(() => {
     return transformCustomScriptsToOptions(data, value);
   }, [data, value]);
-  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}-${argIndex}`);
 
   const state = useBaseSelectorState(_store, value);
 

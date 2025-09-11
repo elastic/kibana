@@ -52,6 +52,8 @@ export const PendingActionsSelector = memo<
     { agentType?: ResponseActionAgentType; endpointId?: string }
   >
 >(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
+  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg-${argIndex}`);
+
   const agentType = command.commandDefinition.meta?.agentType;
   const endpointId = command.commandDefinition.meta?.endpointId;
 
@@ -81,8 +83,6 @@ export const PendingActionsSelector = memo<
     services: { notifications },
   } = useKibana();
 
-  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg-${argIndex}`);
-
   const state = useBaseSelectorState(store, value);
   const { handleOpenPopover, handleClosePopover } = useBaseSelectorHandlers(
     state,
@@ -109,12 +109,11 @@ export const PendingActionsSelector = memo<
     (option: EuiSelectableOption) => {
       const hasDescription = 'description' in option && option.description;
       const hasToolTipContent = 'toolTipContent' in option && option.toolTipContent;
-      const testIdPrefix = testId();
       const descriptionText = hasDescription ? String(option.description) : '';
       const toolTipText = hasToolTipContent ? String(option.toolTipContent) : '';
 
       const content = (
-        <div data-test-subj={`${testIdPrefix}-script`}>
+        <div data-test-subj={testId('script')}>
           <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
             <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
           </EuiText>
@@ -143,11 +142,8 @@ export const PendingActionsSelector = memo<
   );
 
   if (isAwaitingRenderDelay || (isLoading && !error)) {
-    const testIdPrefix = testId();
-    return <EuiLoadingSpinner data-test-subj={`${testIdPrefix}-loading`} size="m" />;
+    return <EuiLoadingSpinner data-test-subj={testId('loading')} size="m" />;
   }
-
-  const testIdPrefix = testId();
 
   return (
     <EuiPopover
@@ -157,9 +153,9 @@ export const PendingActionsSelector = memo<
         padding: 0,
         minWidth: PENDING_ACTIONS_CONFIG.minWidth,
       }}
-      data-test-subj={testIdPrefix}
+      data-test-subj={testId()}
       closePopover={handleClosePopover}
-      panelProps={{ 'data-test-subj': `${testIdPrefix}-popoverPanel` }}
+      panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       button={
         <EuiToolTip content={PENDING_ACTIONS_CONFIG.tooltipText} position="top" display="block">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
