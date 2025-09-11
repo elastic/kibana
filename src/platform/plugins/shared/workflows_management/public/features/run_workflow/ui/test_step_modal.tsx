@@ -72,8 +72,8 @@ export function TestStepModal({
                 <CodeEditor
                   languageId="json"
                   value={inputsJson}
-                  width={500}
-                  height={200}
+                  width={1000}
+                  height={500}
                   editorDidMount={() => {}}
                   onChange={setInputsJson}
                   suggestionProvider={undefined}
@@ -83,8 +83,14 @@ export function TestStepModal({
                   }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={3}>
-                <EuiButton iconType="play" disabled={!isJsonValid} onClick={handleSubmit}>
+              <EuiFlexItem css={{ alignSelf: 'flex-end' }} grow={false}>
+                <EuiButton
+                  onClick={handleSubmit}
+                  disabled={!isJsonValid}
+                  color="success"
+                  iconType="play"
+                  size="s"
+                >
                   Run
                 </EuiButton>
               </EuiFlexItem>

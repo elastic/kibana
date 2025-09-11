@@ -115,13 +115,13 @@ export class WorkflowContextManager {
 
     if (stepContextMock) {
       stepContextMock.execution = {
-        ...(stepContextMock.execution || {}),
         ...stepContextMock.execution,
+        ...(stepContextMock.execution || {}),
       };
 
       stepContextMock.workflow = {
-        ...(stepContextMock.workflow || {}),
         ...stepContextMock.workflow,
+        ...(stepContextMock.workflow || {}),
       };
 
       if (!stepContextMock.foreach) {
