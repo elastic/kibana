@@ -33,11 +33,11 @@ export const performChangeAccessMode = async (
   const currentUserProfileUid = userHelper.getCurrentUserProfileUid();
 
   if (!currentUserProfileUid) {
-    throw new Error('Unable to determine current user profile.');
+    throw new Error('Unexpected error in changeAccessMode: currentUserProfile is undefined.');
   }
 
   if (!isSavedObjectsChangeAccessModeOptions(options)) {
-    throw new Error('Invalid options provided to change access mode');
+    throw new Error('Unexpected error in changeAccessMode: invalid options');
   }
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);

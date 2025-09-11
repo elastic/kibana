@@ -33,11 +33,11 @@ export const performChangeOwnership = async (
   const currentUserProfileUid = userHelper.getCurrentUserProfileUid();
 
   if (!currentUserProfileUid) {
-    throw new Error('Unable to determine current user profile.');
+    throw new Error('Unexpected error in changeOwnership: currentUserProfile is undefined.');
   }
 
   if (!isSavedObjectsChangeOwnershipOptions(options)) {
-    throw new Error('Invalid options provided to change ownership');
+    throw new Error('Unexpected error in changeOwnership: invalid options');
   }
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);

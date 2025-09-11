@@ -115,7 +115,7 @@ export const performCreate = async <T>(
 
   if (!createdBy && accessMode === 'read_only') {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+      `Unable to create "read_only" "${type}" saved object. User profile ID not found.`
     );
   }
 

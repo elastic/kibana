@@ -95,7 +95,7 @@ const validateChangeAccessControlParams = ({
 
     if (!isValidUserProfileId(newOwnerProfileUid)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        `User profile ID is invalid: ${newOwnerProfileUid}`
+        `User profile ID is invalid: expected "u_<principal>_<version>"`
       );
     }
   }
