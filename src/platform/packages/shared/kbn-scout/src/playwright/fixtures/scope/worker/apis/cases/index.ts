@@ -30,6 +30,7 @@ export interface CreateCaseParams {
 }
 
 export interface UpdateCaseParams {
+  id: string;
   title?: string;
   description?: string;
   status?: 'open' | 'in-progress' | 'closed';
@@ -78,7 +79,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
           log,
           `casesApi.cases.create [${params.title}]`,
           async () => {
-            const response = await kbnClient.request({
+            return await kbnClient.request({
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/api/cases`,
               retries: 3,
@@ -101,19 +102,17 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
                 ...(params.category && { category: params.category }),
               },
             });
-            return response.data;
           }
         );
       },
 
       get: async (caseId: string, spaceId?: string) => {
         return await measurePerformanceAsync(log, `casesApi.cases.get [${caseId}]`, async () => {
-          const response = await kbnClient.request({
+          return await kbnClient.request({
             method: 'GET',
             path: `${buildSpacePath(spaceId)}/api/cases/${caseId}`,
             retries: 3,
           });
-          return response.data;
         });
       },
 
@@ -128,7 +127,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
               retries: 3,
               body: {
                 cases: updates.map((update) => ({
-                  id: (update as any).id, // ID should be included in updates
+                  id: update.id,
                   version: update.version,
                   ...(update.title && { title: update.title }),
                   ...(update.description && { description: update.description }),

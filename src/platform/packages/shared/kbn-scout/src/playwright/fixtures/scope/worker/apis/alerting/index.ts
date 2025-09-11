@@ -58,10 +58,14 @@ export interface UpdateRuleParams {
   notifyWhen?: string;
 }
 
+export interface RequestOptions {
+  ignoreErrors?: number[];
+}
+
 export interface AlertingApiService {
   rules: {
     create: (params: CreateRuleParams, spaceId?: string) => Promise<any>;
-    get: (ruleId: string, spaceId?: string) => Promise<any>;
+    get: (ruleId: string, spaceId?: string, options?: RequestOptions) => Promise<any>;
     update: (ruleId: string, updates: UpdateRuleParams, spaceId?: string) => Promise<any>;
     delete: (ruleId: string, spaceId?: string) => Promise<void>;
     find: (searchParams?: Record<string, any>, spaceId?: string) => Promise<any>;
@@ -71,8 +75,8 @@ export interface AlertingApiService {
     unmuteAll: (ruleId: string, spaceId?: string) => Promise<void>;
     muteAlert: (ruleId: string, alertId: string, spaceId?: string) => Promise<void>;
     unmuteAlert: (ruleId: string, alertId: string, spaceId?: string) => Promise<void>;
-    snooze: (ruleId: string, duration: number, spaceId?: string) => Promise<void>;
-    unsnooze: (ruleId: string, scheduleIds?: string[], spaceId?: string) => Promise<void>;
+    snooze: (ruleId: string, duration: number, spaceId?: string) => Promise<any>;
+    unsnooze: (ruleId: string, scheduleIds?: string[], spaceId?: string) => Promise<any>;
     runSoon: (ruleId: string, spaceId?: string) => Promise<void>;
     getRuleTypes: (spaceId?: string) => Promise<any>;
     getExecutionLog: (ruleId: string, spaceId?: string) => Promise<any>;
@@ -159,7 +163,7 @@ export const getAlertingApiHelper = (
           log,
           `alertingApi.rules.create [${params.name}]`,
           async () => {
-            const response = await kbnClient.request({
+            return await kbnClient.request({
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/api/alerting/rule`,
               retries: 3,
@@ -176,19 +180,18 @@ export const getAlertingApiHelper = (
                 ...(params.throttle && { throttle: params.throttle }),
               },
             });
-            return response.data;
           }
         );
       },
 
-      get: async (ruleId: string, spaceId?: string) => {
+      get: async (ruleId: string, spaceId?: string, options?: RequestOptions) => {
         return await measurePerformanceAsync(log, `alertingApi.rules.get [${ruleId}]`, async () => {
-          const response = await kbnClient.request({
+          return await kbnClient.request({
             method: 'GET',
             path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}`,
             retries: 3,
+            ignoreErrors: options?.ignoreErrors,
           });
-          return response.data;
         });
       },
 
@@ -227,7 +230,7 @@ export const getAlertingApiHelper = (
                 notify_when: updates.notifyWhen || currentRuleData.notify_when,
               },
             });
-            return response.data;
+            return response;
           }
         );
       },
@@ -237,25 +240,25 @@ export const getAlertingApiHelper = (
           log,
           `alertingApi.rules.delete [${ruleId}]`,
           async () => {
-            await kbnClient.request({
+            const response = await kbnClient.request({
               method: 'DELETE',
               path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}`,
-              retries: 3,
-              ignoreErrors: [404],
+              retries: 0,
+              ignoreErrors: [204, 404],
             });
+            log.debug('Delete response:', response);
           }
         );
       },
 
       find: async (searchParams?: Record<string, any>, spaceId?: string) => {
         return await measurePerformanceAsync(log, 'alertingApi.rules.find', async () => {
-          const response = await kbnClient.request({
+          return await kbnClient.request({
             method: 'GET',
             path: `${buildSpacePath(spaceId)}/api/alerting/rules/_find`,
             retries: 3,
             query: searchParams,
           });
-          return response.data;
         });
       },
 
@@ -350,7 +353,7 @@ export const getAlertingApiHelper = (
           log,
           `alertingApi.rules.snooze [${ruleId}]`,
           async () => {
-            await kbnClient.request({
+            return await kbnClient.request({
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_snooze`,
               retries: 3,
@@ -374,7 +377,7 @@ export const getAlertingApiHelper = (
           log,
           `alertingApi.rules.unsnooze [${ruleId}]`,
           async () => {
-            await kbnClient.request({
+            return await kbnClient.request({
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_unsnooze`,
               retries: 3,
