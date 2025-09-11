@@ -10,6 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { OnechatInternalService } from './services';
 import type { OnechatStartDependencies } from './types';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
@@ -56,6 +57,24 @@ export const registerApp = ({
       const services = getServices();
 
       return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
+    },
+  });
+};
+
+export const registerManagementSection = ({
+  core,
+  management,
+}: {
+  core: CoreSetup<OnechatStartDependencies>;
+  management: ManagementSetup;
+}) => {
+  management.sections.section.ai.registerApp({
+    id: 'agentBuilder',
+    title: ONECHAT_TITLE,
+    order: 3,
+    mount: async (mountParams) => {
+      const { mountManagementSection } = await import('./management/mount_management_section');
+      return mountManagementSection({ core, mountParams });
     },
   });
 };
