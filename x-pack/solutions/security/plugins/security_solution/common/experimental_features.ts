@@ -88,7 +88,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneRunScriptEnabled: false,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
    * Space awareness for Elastic Defend management.
@@ -129,6 +129,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables ESQL-based risk scoring
    */
   disableESQLRiskScoring: true,
+  /**
+   * Enables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolEnabled: false,
 
   /**
    * disables ES|QL rules
