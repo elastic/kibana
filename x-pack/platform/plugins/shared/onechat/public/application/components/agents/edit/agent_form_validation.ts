@@ -60,10 +60,6 @@ export const agentFormSchema = z.object({
     .optional(),
   configuration: z.object({
     instructions: z.string().optional(),
-    tools: z.array(z.any()).min(1, {
-      message: i18n.translate('xpack.onechat.agents.form.toolsRequired', {
-        defaultMessage: 'Tools are required.',
-      }),
-    }),
+    tools: z.array(z.any()),
   }),
 });
