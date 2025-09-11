@@ -512,7 +512,7 @@ export const invokeDefendInsightsGraph = async ({
     savedObjectsClient,
   });
 
-  const graph = await getDefaultDefendInsightsGraph({
+  const graph = getDefaultDefendInsightsGraph({
     insightType,
     endpointIds,
     anonymizationFields,
