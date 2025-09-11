@@ -61,7 +61,7 @@ export const BaseInterruptValue = z.object({
 });
 
 /**
- * The basis of a interrupt resume value
+ * The basis of an interrupt resume value
  */
 export type BaseInterruptResumeValue = z.infer<typeof BaseInterruptResumeValue>;
 export const BaseInterruptResumeValue = z.object({
