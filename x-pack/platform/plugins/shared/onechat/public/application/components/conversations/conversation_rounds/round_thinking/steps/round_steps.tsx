@@ -166,7 +166,7 @@ const getFlyoutResultItems = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              iconType={'eye'}
+              iconType="eye"
               color="primary"
               iconSide="left"
               onClick={() => onOpenFlyout(flyoutResultItems)}

@@ -6,21 +6,21 @@
  */
 
 import type { ToolResult } from '@kbn/onechat-common';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export const useToolResultsFlyout = () => {
   const [toolResults, setToolResults] = useState<ToolResult[] | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const openFlyout = (results: ToolResult[]) => {
+  const openFlyout = useCallback((results: ToolResult[]) => {
     setToolResults(results);
     setIsOpen(true);
-  };
+  }, []);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     setToolResults(null);
     setIsOpen(false);
-  };
+  }, []);
 
   return { toolResults, isOpen, openFlyout, closeFlyout };
 };
