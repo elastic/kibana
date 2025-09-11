@@ -6,7 +6,7 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
-import type { VisualizeEditorContext, Suggestion } from '../types';
+import type { VisualizeEditorContext, Suggestion, VisualizationMap } from '../types';
 import type { TypedLensByValueInput } from '../react_embeddable/types';
 
 /**
@@ -73,4 +73,32 @@ export function mergeSuggestionWithVisContext({
   } catch {
     return suggestion;
   }
+}
+
+/**
+ * Switches the visualization type of a suggestion to the specified visualization type
+ * @param visualizationMap the visualization map
+ * @param suggestion the suggestion to be updated
+ * @param visualizationTypeId the visualization type to switch to
+ * @returns updated suggestion
+ */
+export function switchVisualizationType({
+  visualizationMap,
+  suggestion,
+  visualizationTypeId,
+}: {
+  visualizationMap: VisualizationMap;
+  suggestion: Suggestion;
+  visualizationTypeId: string;
+}): Suggestion[] {
+  const visualizationState = visualizationMap[
+    suggestion.visualizationId
+  ]?.switchVisualizationType?.(visualizationTypeId, suggestion?.visualizationState);
+
+  return [
+    {
+      ...suggestion,
+      visualizationState,
+    },
+  ];
 }

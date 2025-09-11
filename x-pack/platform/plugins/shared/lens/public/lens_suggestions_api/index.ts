@@ -11,7 +11,7 @@ import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
 import type { DataViewsState } from '../state_management';
 import type { TypedLensByValueInput } from '../react_embeddable/types';
-import { mergeSuggestionWithVisContext } from './helpers';
+import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -103,16 +103,11 @@ export const suggestionsApi = ({
   // a type can be area, line, area_stacked, area_percentage etc
   const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
   if (XYSuggestion && chartType && isAreaOrLine) {
-    const visualizationState = visualizationMap[
-      XYSuggestion.visualizationId
-    ]?.switchVisualizationType?.(chartType, XYSuggestion?.visualizationState);
-
-    return [
-      {
-        ...XYSuggestion,
-        visualizationState,
-      },
-    ];
+    return switchVisualizationType({
+      visualizationMap,
+      suggestion: XYSuggestion,
+      visualizationTypeId: chartType,
+    });
   }
 
   // check if there is a pie chart suggested
@@ -121,16 +116,11 @@ export const suggestionsApi = ({
   const pieSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsPie');
   const isDonut = preferredChartType === ChartType.Donut;
   if (pieSuggestion && chartType && isDonut) {
-    const visualizationState = visualizationMap[
-      pieSuggestion.visualizationId
-    ]?.switchVisualizationType?.(chartType, pieSuggestion?.visualizationState);
-
-    return [
-      {
-        ...pieSuggestion,
-        visualizationState,
-      },
-    ];
+    return switchVisualizationType({
+      visualizationMap,
+      suggestion: pieSuggestion,
+      visualizationTypeId: chartType,
+    });
   }
 
   // in case the user asks for another type (except from area, line) check if it exists
