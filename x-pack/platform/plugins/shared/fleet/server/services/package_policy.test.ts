@@ -59,7 +59,7 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import { FleetError, PackagePolicyValidationError } from '../errors';
+import { FleetError, PackagePolicyValidationError, PackagePolicyRequestError } from '../errors';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
@@ -71,6 +71,7 @@ import {
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
   _normalizePackagePolicyKuery,
+  validatePackagePolicyId,
 } from './package_policy';
 import { appContextService } from './app_context';
 
@@ -7016,5 +7017,108 @@ describe('_normalizePackagePolicyKuery', () => {
       `fleet-package-policies.name:test`
     );
     expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+});
+
+describe('validatePackagePolicyId', () => {
+  it('should accept valid IDs with letters and numbers', () => {
+    expect(() => validatePackagePolicyId('validId123')).not.toThrow();
+  });
+
+  it('should accept valid IDs with dots', () => {
+    expect(() => validatePackagePolicyId('valid.id.with.dots')).not.toThrow();
+  });
+
+  it('should accept valid IDs with underscores', () => {
+    expect(() => validatePackagePolicyId('valid_id_with_underscores')).not.toThrow();
+  });
+
+  it('should accept valid IDs with hyphens', () => {
+    expect(() => validatePackagePolicyId('valid-id-with-hyphens')).not.toThrow();
+  });
+
+  it('should accept valid IDs with mixed allowed characters', () => {
+    expect(() => validatePackagePolicyId('valid_id-123.mixed')).not.toThrow();
+  });
+
+  it('should reject IDs with spaces', () => {
+    expect(() => validatePackagePolicyId('invalid id with spaces')).toThrow(
+      PackagePolicyRequestError
+    );
+    expect(() => validatePackagePolicyId('invalid id with spaces')).toThrow(
+      "Invalid package policy ID: 'invalid id with spaces'. IDs can only contain letters, numbers, dots, underscores, and hyphens."
+    );
+  });
+
+  it('should reject IDs with special characters', () => {
+    expect(() => validatePackagePolicyId('invalid@id')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalid@id')).toThrow(
+      "Invalid package policy ID: 'invalid@id'. IDs can only contain letters, numbers, dots, underscores, and hyphens."
+    );
+  });
+
+  it('should reject IDs with slashes', () => {
+    expect(() => validatePackagePolicyId('invalid/id')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalid\\id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with parentheses', () => {
+    expect(() => validatePackagePolicyId('invalid(id)')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with brackets', () => {
+    expect(() => validatePackagePolicyId('invalid[id]')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalid{id}')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with colon', () => {
+    expect(() => validatePackagePolicyId('invalid:id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with semicolon', () => {
+    expect(() => validatePackagePolicyId('invalid;id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with plus sign', () => {
+    expect(() => validatePackagePolicyId('invalid+id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with equals sign', () => {
+    expect(() => validatePackagePolicyId('invalid=id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with percent sign', () => {
+    expect(() => validatePackagePolicyId('invalid%id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with dollar sign', () => {
+    expect(() => validatePackagePolicyId('invalid$id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject empty string', () => {
+    expect(() => validatePackagePolicyId('')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should handle edge case - single character IDs', () => {
+    expect(() => validatePackagePolicyId('a')).not.toThrow();
+    expect(() => validatePackagePolicyId('1')).not.toThrow();
+    expect(() => validatePackagePolicyId('.')).not.toThrow();
+    expect(() => validatePackagePolicyId('_')).not.toThrow();
+    expect(() => validatePackagePolicyId('-')).not.toThrow();
+    expect(() => validatePackagePolicyId('!')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should handle unicode characters', () => {
+    expect(() => validatePackagePolicyId('invalid€id')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalidŒid')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should handle numeric-only IDs', () => {
+    expect(() => validatePackagePolicyId('123456')).not.toThrow();
+  });
+
+  it('should handle long valid IDs', () => {
+    const longValidId = 'a'.repeat(100) + '123.' + '_'.repeat(50) + '-test';
+    expect(() => validatePackagePolicyId(longValidId)).not.toThrow();
   });
 });

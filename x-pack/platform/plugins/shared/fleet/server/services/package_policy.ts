@@ -173,7 +173,7 @@ import {
 } from './package_policies/upgrade';
 import { getInputsWithIds } from './package_policies/get_input_with_ids';
 
-function validatePackagePolicyId(id: string): void {
+export function validatePackagePolicyId(id: string): void {
   // Elasticsearch role names should only contain letters, numbers, dots, underscores, and hyphens
   // This validation ensures package policy IDs can be safely used as role descriptor names
   if (!/^[a-zA-Z0-9._-]+$/.test(id)) {
@@ -590,8 +590,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
-    // Validate all agent policy IDs
-    agentPolicyIds.forEach(validatePackagePolicyId);
+    // Validate package policy IDs
+    packagePolicies.forEach((policy) => policy.id && validatePackagePolicyId(policy.id));
 
     const agentPolicies = await agentPolicyService.getByIds(soClient, [...agentPolicyIds]);
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
