@@ -116,19 +116,26 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     const batchUsernames = buckets.map((bucket) => bucket.key.username);
     const existingUserMap = await searchService.getExistingUsersMap(uniq(batchUsernames));
 
-    const topHit: PrivTopHit = buckets[0].latest_doc_for_user.hits.hits[0];
-    const isPriv = topHit.fields?.['user.is_privileged']?.[0];
-    return buckets.map((bucket) => ({
-      //  username: topHit._source?.user?.name || 'unknown',
-      id: topHit._source?.user?.id || 'unknown',
-      username: bucket.key.username,
-      email: topHit._source?.user?.email,
-      roles: topHit._source?.user?.roles || [],
-      sourceId: 'from_matcher', // update placeholder
-      existingUserId: existingUserMap.get(bucket.key.username),
-      lastSeen: topHit._source?.['@timestamp'] || new Date().toISOString(),
-      isPrivileged: isPriv || false,
-    }));
+    const usersProcessed = buckets.map((bucket) => {
+      const topHit: PrivTopHit | undefined = bucket.latest_doc_for_user?.hits?.hits?.[0];
+
+      const isPriv =
+        topHit?.fields?.['user.is_privileged']?.[0] ??
+        topHit?._source?.user?.is_privileged ??
+        false;
+
+      return {
+        id: topHit?._source?.user?.id ?? 'unknown',
+        username: bucket.key.username,
+        email: topHit?._source?.user?.email,
+        roles: topHit?._source?.user?.roles ?? [],
+        sourceId: 'from_matcher',
+        existingUserId: existingUserMap.get(bucket.key.username),
+        lastSeen: topHit?._source?.['@timestamp'] ?? new Date().toISOString(),
+        isPrivileged: Boolean(isPriv),
+      };
+    });
+    return usersProcessed;
   };
   return { findPrivilegedUsersFromMatchers };
 };
