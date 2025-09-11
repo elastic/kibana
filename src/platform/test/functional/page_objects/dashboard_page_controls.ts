@@ -100,7 +100,11 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async openControlsMenu() {
-    await this.testSubjects.click('dashboard-controls-menu-button');
+    const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
+    if (!isOpen) {
+      await this.dashboardAddPanel.clickTopNavAddMenu();
+      await this.testSubjects.click('dashboard-controls-menu-button');
+    }
   }
 
   public async openCreateControlFlyout() {
@@ -127,7 +131,6 @@ export class DashboardPageControls extends FtrService {
   public async openControlGroupSettingsFlyout() {
     this.log.debug('Open controls group settings flyout');
     await this.dashboard.openSettingsFlyout();
-    await this.openControlsMenu();
     await this.testSubjects.click('controls-settings-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-group-settings-flyout');
