@@ -21,5 +21,10 @@ ARTIFACTS_FOLDER = ./.playwright
 # Assuming the working directory is the root of the Kibana repo
 npx playwright test -c ./x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts --project stateful --reporter list --headed
 ```
-1. Once the test reaches one of the required manual steps, like executing auto-detect command snippet, do the step manually.
-2. The test will proceed once the manual step is done.
+For running a specific test, use the following command
+```
+npx playwright test -c ./x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts --reporter list --headed x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/stateful/$
+```
+
+2. Once the test reaches one of the required manual steps, like executing auto-detect command snippet, do the step manually.
+3. The test will proceed once the manual step is done.
