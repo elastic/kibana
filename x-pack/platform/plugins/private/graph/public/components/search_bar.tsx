@@ -132,7 +132,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
         }
       }}
     >
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
