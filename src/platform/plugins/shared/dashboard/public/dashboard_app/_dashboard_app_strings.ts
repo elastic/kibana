@@ -273,7 +273,7 @@ export const getAddESQLControlButtonTitle = () =>
 
 export const getEditControlGroupButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
-    defaultMessage: 'Settings',
+    defaultMessage: 'Controls settings',
   });
 
 export const getOnlyOneTimeSliderControlMsg = () =>
