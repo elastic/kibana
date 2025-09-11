@@ -13,6 +13,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -130,10 +131,19 @@ export function fetchAll(
       'discoverFetchAllRequestsOnly'
     );
 
+    // Calculate query range in seconds
+    const queryRangeSeconds = currentTab.dataRequestParams.timeRangeAbsolute
+      ? getTimeDifferenceInSeconds(currentTab.dataRequestParams.timeRangeAbsolute)
+      : 0;
+
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent({ meta: { fetchType } });
+        fetchAllRequestOnlyTracker.reportEvent({
+          meta: { fetchType },
+          key1: 'query_range_secs',
+          value1: queryRangeSeconds,
+        });
 
         if (isEsqlQuery) {
           const fetchStatus =

@@ -192,7 +192,9 @@ const UsersComponent = () => {
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
+              }
               id={InputsModelId.global}
             />
           </FiltersGlobal>

@@ -15,12 +15,12 @@ import ignore from 'ignore';
 
 const TEST_DIRECTORIES = [
   'test',
-  'x-pack/test',
   'src/platform/test',
   'x-pack/platform/test',
   'x-pack/solutions/search/test',
   'x-pack/solutions/observability/test',
   'x-pack/solutions/security/test',
+  'x-pack/solutions/chat/test',
 ];
 
 export async function checkFTRCodeOwnersCLI() {

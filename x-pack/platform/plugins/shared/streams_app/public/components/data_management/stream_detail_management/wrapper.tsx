@@ -18,6 +18,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -26,6 +27,7 @@ import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../s
 import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
 import { ExportContentPackFlyout } from '../content/export_flyout';
 import { ImportContentPackFlyout } from '../content/import_flyout';
+import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
   string,
@@ -51,6 +53,9 @@ export function Wrapper({
   const {
     core: { featureFlags },
   } = useKibana();
+  const {
+    features: { groupStreams },
+  } = useStreamsPrivileges();
 
   const renderContentPackItems = featureFlags.getBooleanValue(
     FeatureFlagStreamsContentPackUIEnabled,
@@ -137,6 +142,10 @@ export function Wrapper({
                     </EuiButton>
                   </EuiFlexGroup>
                 </EuiFlexItem>
+              )}
+
+              {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                <GroupStreamControls />
               )}
             </EuiFlexGroup>
           </EuiFlexGroup>
