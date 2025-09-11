@@ -23,6 +23,7 @@ import {
   createAction,
   isAnyOf,
 } from '@reduxjs/toolkit';
+import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
@@ -137,6 +138,11 @@ export const internalStateSlice = createSlice({
       state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
     },
 
+    discardFlyoutsOnTabChange: (state) => {
+      state.expandedDoc = undefined;
+      state.initialDocViewerTabId = undefined;
+    },
+
     setDataRequestParams: (
       state,
       action: TabAction<{ dataRequestParams: InternalStateDataRequestParams }>
@@ -197,6 +203,7 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         state.expandedDoc = undefined;
+        state.initialDocViewerTabId = undefined;
       }),
 
     setESQLEditorUiState: (
@@ -332,6 +339,13 @@ const createMiddleware = (options: InternalStateDependencies) => {
       const { tabsStorageManager } = listenerApi.extra;
       const { persistedDiscoverSession } = listenerApi.getState();
       tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
+    },
+  });
+
+  startListening({
+    actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
+    effect: () => {
+      dismissFlyouts([DiscoverFlyouts.lensEdit]);
     },
   });
 
