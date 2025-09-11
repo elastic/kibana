@@ -117,6 +117,7 @@ export function StreamDeleteModal({
           )}
         >
           <EuiFieldText
+            data-test-subj="streamsAppDeleteStreamModalStreamNameInput"
             onChange={(e) => setStreamName(e.target.value)}
             fullWidth
             name={'stream-name-deletion'}
