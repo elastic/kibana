@@ -13,7 +13,7 @@ import type {
   PublishesTitle,
 } from '@kbn/presentation-publishing';
 import type { DefaultControlApi } from '../types';
-import type { OptionsListState } from '../data_controls/options_list_control/types';
+import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultControlApi &
   PublishesESQLVariable &
@@ -21,15 +21,15 @@ export type ESQLControlApi = DefaultControlApi &
   Pick<Required<PublishesTitle>, 'defaultTitle$'> &
   PublishesDataLoading;
 
-type HideExcludeUnusedState = Pick<OptionsListState, 'exclude'>;
-type HideExistsUnusedState = Pick<OptionsListState, 'existsSelected'>;
-type HideSortUnusedState = Pick<OptionsListState, 'sort'>;
+type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
+type HideExistsUnusedState = Pick<OptionsListComponentState, 'existsSelected'>;
+type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
 type DisableLoadSuggestionsUnusedState = Pick<
-  OptionsListState,
+  OptionsListComponentState,
   'dataLoading' | 'requestSize' | 'runPastTimeout'
 >;
-type DisableMultiSelectUnusedState = Pick<OptionsListState, 'singleSelect'>;
-type DisableInvalidSelectionsUnusedState = Pick<OptionsListState, 'invalidSelections'>;
+type DisableMultiSelectUnusedState = Pick<OptionsListComponentState, 'singleSelect'>;
+type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
 
 export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   HideExistsUnusedState &
@@ -37,4 +37,4 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableMultiSelectUnusedState &
   DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListState, 'fieldName'>;
+  Pick<OptionsListComponentState, 'fieldName'>;
