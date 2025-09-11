@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
   position: sticky;
@@ -20,7 +20,7 @@ const root = css`
   align-items: center;
   height: 100%;
   width: ${layoutVar('sidebar-width')};
-  z-index: ${layoutVar('aboveFlyoutLevel')};
+  z-index: ${layoutLevels.sidebar};
 `;
 
 export const styles = {

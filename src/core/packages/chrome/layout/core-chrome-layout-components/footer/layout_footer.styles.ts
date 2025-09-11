@@ -8,14 +8,14 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
   position: sticky;
   grid-area: footer;
   width: ${layoutVar('footer-width')};
   height: ${layoutVar('footer-height')};
-  z-index: ${layoutVar('aboveFlyoutLevel')};
+  z-index: ${layoutLevels.footer};
 `;
 
 export const styles = {

@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const overlayStyle = css`
   pointer-events: none;
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: ${layoutLevels.debug};
 `;
 
 const rectStyle = css`

@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) =>
@@ -17,7 +17,7 @@ const root: EmotionFn = ({ euiTheme }) =>
     height: 100%;
     position: relative;
     width: 100%;
-    z-index: ${euiTheme.levels.content};
+    z-index: ${layoutLevels.content};
 
     display: flex;
     flex-direction: column;
@@ -36,7 +36,7 @@ const content: EmotionFn = () => css`
 const topBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   top: 0;
-  z-index: ${euiTheme.levels.header};
+  z-index: ${layoutLevels.applicationTopBar};
   height: ${layoutVar('application-top-bar-height')};
   flex-shrink: 0;
 `;
@@ -44,7 +44,7 @@ const topBar: EmotionFn = ({ euiTheme }) => css`
 const bottomBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   bottom: 0;
-  z-index: ${euiTheme.levels.header};
+  z-index: ${layoutLevels.applicationBottomBar};
   height: ${layoutVar('application-bottom-bar-height')};
   flex-shrink: 0;
 `;

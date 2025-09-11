@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
@@ -16,7 +16,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: header;
   height: ${layoutVar('header-height')};
   max-width: ${layoutVar('header-width')};
-  z-index: 1; /* has to be just above main application content */
+  z-index: ${layoutLevels.header};
 `;
 
 export const styles = {

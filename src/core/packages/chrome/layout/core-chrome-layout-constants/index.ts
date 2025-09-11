@@ -15,6 +15,7 @@ export type {
   ApplicationComponent,
   ApplicationVarName,
 } from './src/css_variables';
+export { layoutLevels } from './src/levels';
 
 /**
  * The ID of the main scroll container in the application.

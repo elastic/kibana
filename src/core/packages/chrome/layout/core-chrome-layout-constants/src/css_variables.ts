@@ -20,7 +20,7 @@ export type ApplicationComponent =
   | 'application-content';
 export type LayoutProperty = 'top' | 'bottom' | 'left' | 'right' | 'height' | 'width';
 
-export type LayoutVarName = `${LayoutComponent}-${LayoutProperty}` | 'aboveFlyoutLevel';
+export type LayoutVarName = `${LayoutComponent}-${LayoutProperty}`;
 export type ApplicationVarName = `${ApplicationComponent}-${LayoutProperty}`;
 export type CSSVarName = LayoutVarName | ApplicationVarName;
 

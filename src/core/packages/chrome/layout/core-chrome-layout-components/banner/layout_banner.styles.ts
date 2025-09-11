@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
@@ -16,7 +16,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   width: ${layoutVar('banner-width')};
   height: ${layoutVar('banner-height')};
-  z-index: ${layoutVar('aboveFlyoutLevel')};
+  z-index: ${layoutLevels.banner};
 `;
 
 export const styles = {
