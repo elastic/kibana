@@ -85,7 +85,6 @@ jest.mock('./empty_list', () => ({
 
 const editName = 'p!@# name';
 const cloneName = 'clone$%^name';
-const unknownCreateName = 'create&*()name';
 
 jest.mock('./table', () => ({
   ...jest.requireActual('./table'),
