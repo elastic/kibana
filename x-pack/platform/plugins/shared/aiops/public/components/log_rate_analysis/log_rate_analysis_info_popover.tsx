@@ -7,7 +7,14 @@
 
 import React, { useState, type FC } from 'react';
 
-import { useEuiTheme, EuiBadge, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiBadge,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  htmlIdGenerator,
+} from '@elastic/eui';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
@@ -48,6 +55,7 @@ export const LogRateAnalysisInfoPopover: FC = () => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const popoverTitleId = htmlIdGenerator()('logRateAnalysisInfoPopoverTitle');
   const infoTitlePrefix = i18n.translate('xpack.aiops.analysis.analysisTypeInfoTitlePrefix', {
     defaultMessage: 'Analysis type: ',
   });
@@ -107,9 +115,10 @@ export const LogRateAnalysisInfoPopover: FC = () => {
       isOpen={isPopoverOpen}
       ownFocus
       panelPaddingSize="m"
+      aria-labelledby={popoverTitleId}
     >
       {infoTitle && (
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>
           {infoTitlePrefix}
           {infoTitle}
         </EuiPopoverTitle>
