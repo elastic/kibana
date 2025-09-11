@@ -931,19 +931,28 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const { datafeedId, job, datafeed } = request.body;
 
+          // delete unexpected types from payload as a temporary workaround
+          // https://github.com/elastic/elasticsearch/issues/134467
+          const jobConfig = { ...job } as Job;
+          delete jobConfig.job_type;
+          delete jobConfig.job_version;
+          delete jobConfig.create_time;
+          delete jobConfig.finished_time;
+          delete jobConfig.model_snapshot_id;
+
           const payload =
             datafeedId !== undefined
               ? {
                   datafeed_id: datafeedId,
                 }
-              : ({
+              : {
                   body: {
-                    job_config: job,
+                    job_config: jobConfig,
                     datafeed_config: datafeed,
                   },
-                } as estypes.MlPreviewDatafeedRequest);
+                };
 
-          const body = await mlClient.previewDatafeed(payload, {
+          const body = await mlClient.previewDatafeed(payload as estypes.MlPreviewDatafeedRequest, {
             ...getAuthorizationHeader(request),
             maxRetries: 0,
           });
