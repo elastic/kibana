@@ -17,17 +17,24 @@ interface TabularDataResultStepProps {
 export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
   result: { data },
 }) => {
-  const { startDependencies } = useOnechatServices();
+  const {
+    startDependencies: { share },
+  } = useOnechatServices();
 
-  const locators = startDependencies.share.url.locators;
+  const {
+    url: { locators },
+  } = share;
+
+  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+
   const { query: esqlQuery } = data;
 
   const discoverUrl = useMemo(() => {
     if (!esqlQuery) return undefined;
-    return locators.get('DISCOVER_APP_LOCATOR')?.getRedirectUrl({
+    return discoverLocator?.getRedirectUrl({
       query: { esql: esqlQuery },
     });
-  }, [locators, esqlQuery]);
+  }, [discoverLocator, esqlQuery]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
@@ -35,7 +42,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
         {i18n.translate(
           'xpack.onechat.conversation.thinking.tabularDataResultStep.foundDocumentsMessage',
           {
-            defaultMessage: 'Found {totalDocuments} documents. ',
+            defaultMessage: 'Found {totalDocuments} documents.',
             values: {
               totalDocuments: data.values.length,
             },
@@ -44,6 +51,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
       </EuiText>
       <EuiLink
         href={discoverUrl}
+        data-test-subj="onechat-esql-data-result-see-in-discover"
         aria-label={i18n.translate(
           'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
           {
@@ -57,9 +65,6 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
             'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscover',
             {
               defaultMessage: 'See in Discover',
-              values: {
-                totalDocuments: data.columns.length,
-              },
             }
           )}
         </EuiFlexGroup>
