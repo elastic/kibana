@@ -103,7 +103,7 @@ export const Mappings: FC<Props> = ({
         >
           <FormattedMessage
             id="xpack.dataVisualizer.file.advancedImportSettings.mappingsWarning"
-            defaultMessage="You can only edit combined mappings under advanced options. Go to advanced options"
+            defaultMessage="You can only edit combined mappings under advanced options."
           />
         </EuiCallOut>
       ) : null}
