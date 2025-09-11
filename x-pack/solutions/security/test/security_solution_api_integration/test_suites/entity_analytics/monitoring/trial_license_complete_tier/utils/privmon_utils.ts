@@ -17,9 +17,11 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
+type PrivmonUser = ListPrivMonUsersResponse[number];
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
@@ -31,8 +33,27 @@ export const PrivMonUtils = (
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const retry = getService('retry');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
+
+  const _expectDateToBeGreaterThan = (
+    bigDate: string | undefined,
+    smallDate: string | undefined
+  ) => {
+    const bigMoment = moment(bigDate);
+    const smallMoment = moment(smallDate);
+    const isAfter = bigMoment.isAfter(smallMoment);
+    if (!isAfter) {
+      log.error(`Expected ${bigDate} to be after ${smallDate}`);
+    }
+    expect(isAfter).toBeTruthy();
+  };
+
+  const expectTimestampsHaveBeenUpdated = (userBefore?: PrivmonUser, userAfter?: PrivmonUser) => {
+    _expectDateToBeGreaterThan(userAfter?.['@timestamp'], userBefore?.['@timestamp']);
+    _expectDateToBeGreaterThan(userAfter?.event?.ingested, userBefore?.event?.ingested);
+  };
 
   const initPrivMonEngine = async () => {
     log.info(`Initializing Privilege Monitoring engine in namespace ${namespace || 'default'}`);
@@ -114,19 +135,6 @@ export const PrivMonUtils = (
     });
   };
 
-  const retry = async <T>(fn: () => Promise<T>, retries: number = 5, delay: number = 1000) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        return await fn();
-      } catch (error) {
-        if (i === retries - 1) {
-          throw error;
-        }
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-  };
-
   const waitForSyncTaskRun = async (): Promise<void> => {
     const initialTime = new Date();
 
@@ -145,10 +153,7 @@ export const PrivMonUtils = (
     );
   };
 
-  const assertIsPrivileged = (
-    user: ListPrivMonUsersResponse[number] | undefined,
-    isPrivileged: boolean
-  ) => {
+  const assertIsPrivileged = (user: PrivmonUser | undefined, isPrivileged: boolean) => {
     if (isPrivileged) {
       expect(user?.user?.is_privileged).toEqual(true);
     } else {
@@ -161,32 +166,42 @@ export const PrivMonUtils = (
   const findUser = (users: ListPrivMonUsersResponse, username: string) =>
     users.find((user) => user.user?.name === username);
 
-  const createSourceIndex = async (indexName: string) =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
+  const _waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
+    let lastSeenLength = -1;
+
+    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
+      const res = await api.listPrivMonUsers({ query: {} });
+      const currentLength = res.body.length;
+
+      if (currentLength !== lastSeenLength) {
+        log.info(`PrivMon users sync check: found ${currentLength} users`);
+        lastSeenLength = currentLength;
+      }
+
+      return currentLength >= expectedLength;
     });
+  };
+
+  const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
+    log.info(`Scheduling engine and waiting for user count: ${expectedCount}`);
+    await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await waitForSyncTaskRun();
+    await _waitForPrivMonUsersToBeSynced(expectedCount);
+    const res = await api.listPrivMonUsers({ query: {} });
+
+    return res.body;
+  };
 
   return {
+    assertIsPrivileged,
+    bulkUploadUsersCsv,
+    expectTimestampsHaveBeenUpdated,
+    findUser,
     initPrivMonEngine,
     initPrivMonEngineWithoutAuth,
-    bulkUploadUsersCsv,
-    retry,
-    waitForSyncTaskRun,
-    findUser,
-    createSourceIndex,
-    assertIsPrivileged,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
+    waitForSyncTaskRun,
+    scheduleEngineAndWaitForUserCount,
   };
 };

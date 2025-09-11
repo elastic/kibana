@@ -12,7 +12,7 @@ import { LOOKUPS_INDEX_PREFIX } from '../../../../../common/siem_migrations/cons
 
 export type LookupData = object[];
 
-export class RuleMigrationsDataLookupsClient {
+export class SiemMigrationsDataLookupsClient {
   constructor(
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,

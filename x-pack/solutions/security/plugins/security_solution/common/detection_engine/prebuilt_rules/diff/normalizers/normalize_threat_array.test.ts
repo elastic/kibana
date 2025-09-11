@@ -5,39 +5,42 @@
  * 2.0.
  */
 
-import { getRulesSchemaMock } from '../../../api/detection_engine/model/rule_schema/mocks';
-import { getThreatMock } from '../../schemas/types/threat.mock';
-import { extractThreatArray } from './extract_threat_array';
+import { getThreatMock } from '../../../schemas/types/threat.mock';
+import { normalizeThreatArray } from './normalize_threat_array';
 
 const mockThreat = getThreatMock()[0];
 
-describe('extractThreatArray', () => {
+describe('normalizeThreatArray', () => {
+  it('returns an empty array if threat field is undefined', () => {
+    const normalizedThreatArray = normalizeThreatArray(undefined);
+
+    expect(normalizedThreatArray).toEqual([]);
+  });
+
   it('normalizes url ending backslashes', () => {
-    const mockRule = {
-      ...getRulesSchemaMock(),
-      threat: [
-        {
-          ...mockThreat,
-          tactic: {
-            ...mockThreat.tactic,
-            reference: 'https://attack.mitre.org/tactics/TA0000',
-          },
-          technique: [
-            {
-              ...mockThreat.technique![0],
-              reference: 'https://attack.mitre.org/techniques/T0000/',
-              subtechnique: [
-                {
-                  ...mockThreat.technique![0].subtechnique![0],
-                  reference: 'https://attack.mitre.org/techniques/T0000/000',
-                },
-              ],
-            },
-          ],
+    const mockThreatArray = [
+      {
+        ...mockThreat,
+        tactic: {
+          ...mockThreat.tactic,
+          reference: 'https://attack.mitre.org/tactics/TA0000',
         },
-      ],
-    };
-    const normalizedThreatArray = extractThreatArray(mockRule);
+        technique: [
+          {
+            ...mockThreat.technique![0],
+            reference: 'https://attack.mitre.org/techniques/T0000/',
+            subtechnique: [
+              {
+                ...mockThreat.technique![0].subtechnique![0],
+                reference: 'https://attack.mitre.org/techniques/T0000/000',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const normalizedThreatArray = normalizeThreatArray(mockThreatArray);
 
     expect(normalizedThreatArray).toEqual([
       {
@@ -66,20 +69,18 @@ describe('extractThreatArray', () => {
   });
 
   it('normalizes url ending backslashes with query strings', () => {
-    const mockRule = {
-      ...getRulesSchemaMock(),
-      threat: [
-        {
-          ...mockThreat,
-          tactic: {
-            ...mockThreat.tactic,
-            reference: 'https://attack.mitre.org/tactics/TA0000?query=test',
-          },
-          technique: [],
+    const mockThreatArray = [
+      {
+        ...mockThreat,
+        tactic: {
+          ...mockThreat.tactic,
+          reference: 'https://attack.mitre.org/tactics/TA0000?query=test',
         },
-      ],
-    };
-    const normalizedThreatArray = extractThreatArray(mockRule);
+        technique: [],
+      },
+    ];
+
+    const normalizedThreatArray = normalizeThreatArray(mockThreatArray);
 
     expect(normalizedThreatArray).toEqual([
       {
@@ -94,8 +95,8 @@ describe('extractThreatArray', () => {
   });
 
   it('trims empty technique fields from threat object', () => {
-    const mockRule = { ...getRulesSchemaMock(), threat: [{ ...mockThreat, technique: [] }] };
-    const normalizedThreatArray = extractThreatArray(mockRule);
+    const mockThreatArray = [{ ...mockThreat, technique: [] }];
+    const normalizedThreatArray = normalizeThreatArray(mockThreatArray);
 
     expect(normalizedThreatArray).toEqual([
       {
@@ -110,11 +111,10 @@ describe('extractThreatArray', () => {
   });
 
   it('trims empty subtechnique fields from threat object', () => {
-    const mockRule = {
-      ...getRulesSchemaMock(),
-      threat: [{ ...mockThreat, technique: [{ ...mockThreat.technique![0], subtechnique: [] }] }],
-    };
-    const normalizedThreatArray = extractThreatArray(mockRule);
+    const mockThreatArray = [
+      { ...mockThreat, technique: [{ ...mockThreat.technique![0], subtechnique: [] }] },
+    ];
+    const normalizedThreatArray = normalizeThreatArray(mockThreatArray);
 
     expect(normalizedThreatArray).toEqual([
       {
