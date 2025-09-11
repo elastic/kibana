@@ -55,6 +55,8 @@ export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportEr
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
 export const LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX = 'apiCalls.legacyDashboardImport';
 export const LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX = 'apiCalls.legacyDashboardExport';
+export const CHANGE_ACCESS_CONTROL_OWNER_STATS_PREFIX = 'apiCalls.savedObjectsChangeObjectOwner';
+export const CHANGE_ACCESS_CONTROL_MODE_STATS_PREFIX = 'apiCalls.savedObjectsChangeObjectMode';
 
 const ALL_COUNTER_FIELDS = [
   // Saved Objects Client APIs
@@ -69,6 +71,8 @@ const ALL_COUNTER_FIELDS = [
   ...getFieldsForCounter(GET_STATS_PREFIX),
   ...getFieldsForCounter(RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(UPDATE_STATS_PREFIX),
+  ...getFieldsForCounter(CHANGE_ACCESS_CONTROL_OWNER_STATS_PREFIX),
+  ...getFieldsForCounter(CHANGE_ACCESS_CONTROL_MODE_STATS_PREFIX),
   // Saved Objects Management APIs
   ...getFieldsForCounter(IMPORT_STATS_PREFIX),
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
