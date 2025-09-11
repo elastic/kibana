@@ -34,31 +34,13 @@ export const EntityField = z.object({
   EngineMetadata: EngineMetadata.optional(),
   attributes: z
     .object({
-      StorageClass: z.string().optional(),
-      MfaEnabled: z.boolean().optional(),
       Privileged: z.boolean().optional(),
-      GrantedPermissions: z.string().optional(),
-      KnownRedirect: z.boolean().optional(),
-      Asset: z.boolean().optional(),
-      Managed: z.boolean().optional(),
-      OsCurrent: z.string().optional(),
-      OsPatchCurrent: z.string().optional(),
-      OauthConsentRestriction: z.string().optional(),
     })
     .optional(),
-  behavior: z
-    .object({
-      UsedUsbDevice: z.boolean().optional(),
-      BruteForceVictim: z.boolean().optional(),
-      NewCountryLogin: z.boolean().optional(),
-    })
-    .optional(),
+  behavior: z.object({}).optional(),
   lifecycle: z
     .object({
       FirstSeen: z.string().datetime().optional(),
-      LastActivity: z.string().datetime().optional(),
-      IssuedAt: z.string().datetime().optional(),
-      LastPasswordChange: z.string().datetime().optional(),
     })
     .optional(),
 });

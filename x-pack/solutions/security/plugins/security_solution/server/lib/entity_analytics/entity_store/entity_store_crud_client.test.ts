@@ -86,7 +86,7 @@ describe('EntityStoreCrudClient', () => {
           type: 'update',
           sub_type: 'updated-sub',
           attributes: {
-            StorageClass: 'cold',
+            Privileged: true,
           },
         },
       };
@@ -107,11 +107,10 @@ describe('EntityStoreCrudClient', () => {
         entity: {
           id: 'host-1',
           attributes: {
-            StorageClass: 'cold',
-            Managed: true,
+            Privileged: true,
           },
-          behavior: {
-            BruteForceVictim: false,
+          lifecycle: {
+            FirstSeen: new Date().toISOString(),
           },
         },
       };
@@ -137,11 +136,10 @@ describe('EntityStoreCrudClient', () => {
         entity: {
           id: 'host-1',
           attributes: {
-            StorageClass: 'cold',
-            Managed: true,
+            Privileged: true,
           },
-          behavior: {
-            BruteForceVictim: false,
+          lifecycle: {
+            FirstSeen: '1995-12-17T03:24:00',
           },
         },
       };
@@ -161,10 +159,9 @@ describe('EntityStoreCrudClient', () => {
           source:
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
-            `ctx._source['entity']['attributes']['StorageClass'] = 'cold';` +
-            `ctx._source['entity']['attributes']['Managed'] = true;` +
-            `ctx._source['entity']['behavior'] = ctx._source['entity']['behavior'] == null ? [:] : ctx._source['entity']['behavior'];` +
-            `ctx._source['entity']['behavior']['BruteForceVictim'] = false;`,
+            `ctx._source['entity']['attributes']['Privileged'] = true;` +
+            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
+            `ctx._source['entity']['lifecycle']['FirstSeen'] = '1995-12-17T03:24:00';`,
         },
       });
 
@@ -205,11 +202,10 @@ describe('EntityStoreCrudClient', () => {
         entity: {
           id: 'host-1',
           attributes: {
-            StorageClass: 'cold',
-            Managed: true,
+            Privileged: true,
           },
-          behavior: {
-            BruteForceVictim: false,
+          lifecycle: {
+            FirstSeen: '1995-12-17T03:24:00',
           },
         },
       };
@@ -232,10 +228,9 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['host']['id'] = ['123'];` +
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
-            `ctx._source['entity']['attributes']['StorageClass'] = 'cold';` +
-            `ctx._source['entity']['attributes']['Managed'] = true;` +
-            `ctx._source['entity']['behavior'] = ctx._source['entity']['behavior'] == null ? [:] : ctx._source['entity']['behavior'];` +
-            `ctx._source['entity']['behavior']['BruteForceVictim'] = false;`,
+            `ctx._source['entity']['attributes']['Privileged'] = true;` +
+            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
+            `ctx._source['entity']['lifecycle']['FirstSeen'] = '1995-12-17T03:24:00';`,
         },
       });
 

@@ -2343,7 +2343,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
-      * Given an entity type and the contents of an entity, update (or create) the contents of an entity. By default only a specific set of fields are allowed to be modified, being that `entity.attributes.*`, `entity.lifecyle.*` and `entity.behavior.*`. If you wish to update any other field you must use  the query parameter `force=true`. Be aware that some fields always fetch the first seen value, thus new values won't end up in the final index. Also, due to technical limitations, there is no guarantee that collected values will end up in the final list of seen values.
+      * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
 
       */
     upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
