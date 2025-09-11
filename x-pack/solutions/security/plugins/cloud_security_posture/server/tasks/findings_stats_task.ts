@@ -55,15 +55,17 @@ const validateBenchmarkScoreTemplate = async (
 ): Promise<void> => {
   try {
     logger.debug('Checking benchmark score template mapping against expected mapping');
-    
-    const templateResponse = await esClient.indices.getIndexTemplate({ 
-      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME 
+
+    const templateResponse = await esClient.indices.getIndexTemplate({
+      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
     });
-    
+
     const template = templateResponse.index_templates[0]?.index_template;
-    
+
     if (!template?.template?.mappings?.properties) {
-      logger.warn(`Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has no mapping properties, will trigger fixing`);
+      logger.warn(
+        `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has no mapping properties, will trigger fixing`
+      );
       await triggerTemplateFix(esClient, logger);
       return;
     }
@@ -81,7 +83,7 @@ const validateBenchmarkScoreTemplate = async (
     // Check all expected fields against template fields
     for (const [fieldName, expectedField] of Object.entries(expectedProperties)) {
       const templateField = templateProperties[fieldName];
-      
+
       if (!templateField) {
         logger.warn(`${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} field missing '${fieldName}'`);
         hasFieldMismatch = true;
@@ -101,7 +103,9 @@ const validateBenchmarkScoreTemplate = async (
       return;
     }
 
-    logger.debug(`Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} mapping validation passed - all fields match expected mapping`);
+    logger.debug(
+      `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} mapping validation passed - all fields match expected mapping`
+    );
   } catch (error) {
     logger.error('Error during template validation:', error);
     // On error, trigger fixing to be safe
@@ -110,10 +114,7 @@ const validateBenchmarkScoreTemplate = async (
 };
 
 // Helper function to fix only the template mapping (no index creation)
-const triggerTemplateFix = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<void> => {
+const triggerTemplateFix = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
   try {
     logger.info(`Updating template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} to fix mapping issues`);
 
@@ -123,11 +124,11 @@ const triggerTemplateFix = async (
       template: {
         mappings: benchmarkScoreMapping,
         settings: {
-        index: {
-          default_pipeline: scorePipelineIngestConfig.id,
-      },
-      lifecycle: { name: '' },
-    },
+          index: {
+            default_pipeline: scorePipelineIngestConfig.id,
+          },
+          lifecycle: { name: '' },
+        },
       },
       _meta: {
         package: {
