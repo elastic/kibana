@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { ESQL_CONTROL, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 
@@ -37,7 +37,7 @@ export class ControlsPlugin
     _setupPlugins.uiActions.registerTrigger(addControlMenuTrigger);
 
     registerOptionsListControl(embeddable);
-    registerRangeSliderControl();
+    registerRangeSliderControl(embeddable);
     registerTimeSliderControl();
     registerESQLControl(embeddable);
   }
@@ -49,6 +49,13 @@ export class ControlsPlugin
 
     startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
+    });
+
+    startPlugins.dashboard.registerDashboardPanelSettings(RANGE_SLIDER_CONTROL, () => {
+      return {
+        ...CONTROL_PANEL_PLACEMENT,
+        placementSettings: { ...CONTROL_PANEL_PLACEMENT.placementSettings, width: 6 },
+      };
     });
 
     startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {

@@ -16,6 +16,7 @@ import {
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
   OPTIONS_LIST_ACTION,
+  RANGE_SLIDER_ACTION,
 } from './constants';
 import { CONTROL_MENU_TRIGGER } from './control_panel_actions';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from './controls_hover_trigger';
@@ -54,5 +55,10 @@ export function registerActions(uiActions: UiActionsStart) {
   uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, OPTIONS_LIST_ACTION, async () => {
     const { createOptionsListControlAction } = await import('./create_options_list_action');
     return createOptionsListControlAction();
+  });
+
+  uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, RANGE_SLIDER_ACTION, async () => {
+    const { createRangeSliderControlAction } = await import('./create_range_slider_action');
+    return createRangeSliderControlAction();
   });
 }

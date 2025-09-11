@@ -121,17 +121,14 @@ const CompatibleControlTypesComponent = ({
   );
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
-    return Object.values(controlActionRegistry ?? {}).sort(
-      (
-        { order: orderA = 0, getDisplayName: getDisplayNameA },
-        { order: orderB = 0, getDisplayName: getDisplayNameB }
-      ) => {
-        const orderComparison = orderB - orderA; // sort descending by order
-        return orderComparison === 0
-          ? getDisplayNameA().localeCompare(getDisplayNameB()) // if equal order, compare display names
-          : orderComparison;
-      }
-    );
+    // Destructuring `a` and `b` in the sort() call messes with internal binding of `this` within the underlying
+    // action class, so we have to refer to to them directly by name
+    return Object.values(controlActionRegistry ?? {}).sort((a, b) => {
+      const orderComparison = (b.order ?? 0) - (a.order ?? 0); // sort descending by order
+      return orderComparison === 0
+        ? a.getDisplayName().localeCompare(b.getDisplayName()) // if equal order, compare display names
+        : orderComparison;
+    });
   }, [controlActionRegistry]);
 
   useEffect(() => {
