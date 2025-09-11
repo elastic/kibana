@@ -54,7 +54,7 @@ const WorkflowsFilterPopoverComponent = ({
     const newSelectableOptions: EuiSelectableOption[] = values.map(
       ({ label, key }): EuiSelectableOption => {
         return {
-          label: label || key,
+          label: label ?? key,
           key,
           checked: selectedValuesSet.has(key!) ? 'on' : undefined,
         };
