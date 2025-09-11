@@ -41,8 +41,8 @@ const CONTENT_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.content', 
 const OTHER_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
   defaultMessage: 'Other',
 });
-const CHAT_TITLE = i18n.translate('xpack.serverlessSearch.nav.chat', {
-  defaultMessage: 'Chat',
+const AGENTS_TITLE = i18n.translate('xpack.serverlessSearch.nav.agents', {
+  defaultMessage: 'Agents',
 });
 
 export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
@@ -96,7 +96,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             id: 'agent_builder',
             renderAs: 'panelOpener',
             sideNavVersion: 'v2',
-            title: CHAT_TITLE,
+            title: AGENTS_TITLE,
           },
           {
             link: 'discover',
@@ -108,7 +108,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
-            title: CHAT_TITLE,
+            title: AGENTS_TITLE,
             renderAs: 'accordion',
             children: [
               {
