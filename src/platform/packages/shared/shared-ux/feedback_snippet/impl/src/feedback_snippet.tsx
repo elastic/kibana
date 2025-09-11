@@ -20,13 +20,9 @@ interface FeedbackSnippetProps {
    */
   feedbackButtonMessage: React.ReactNode;
   /**
-   * HTML id for click tracking purposes.
+   * Id used for local storage and for HTML ids.
    */
   feedbackSnippetId: string;
-  /**
-   * Key for local storage.
-   */
-  feedbackPanelLocalStorageKey: string;
   /**
    * Message to display during the feedback prompt view.
    */
@@ -46,13 +42,12 @@ export type FeedbackView = 'prompt' | 'positive' | 'negative';
 export const FeedbackSnippet = ({
   feedbackButtonMessage,
   feedbackSnippetId,
-  feedbackPanelLocalStorageKey,
   promptViewMessage,
   surveyUrl,
 }: FeedbackSnippetProps) => {
   const [feedbackView, setFeedbackView] = useState<FeedbackView>('prompt');
   const [showPanel, setShowPanel] = useState(() => {
-    return localStorage.getItem(feedbackPanelLocalStorageKey) === null;
+    return localStorage.getItem(feedbackSnippetId) === null;
   });
 
   const handleOpenSurvey = () => {
@@ -60,8 +55,8 @@ export const FeedbackSnippet = ({
   };
 
   const storeFeedbackInteraction = useCallback(() => {
-    localStorage.setItem(feedbackPanelLocalStorageKey, Date.now().toString());
-  }, [feedbackPanelLocalStorageKey]);
+    localStorage.setItem(feedbackSnippetId, Date.now().toString());
+  }, [feedbackSnippetId]);
 
   const handleDismissPanel = useCallback(() => {
     setShowPanel(false);

@@ -15,7 +15,7 @@ A snippet to gather user feedback. It initially renders as a panel, and once int
 ## Behavior
 The component has two main states:
 - **Panel:** On its first render for a user, the component displays as a full panel with the `promptViewMessage` and options to provide positive ("Yes") or negative ("No") feedback. A "Dismiss" (x) button is also available.
-- **Button:** The component uses the provided `feedbackPanelLocalStorageKey` to track whether the user has interacted with it. If a value is present for that key, the component will render as a button instead.
+- **Button:** The component uses the provided `feedbackSnippetId` to track whether the user has interacted with it. If a value is present for that key, the component will render as a button instead.
 
 ## Feedback Panel Views
 - **Prompt:** The panel shows a custom `promptViewMessage` to gather feedback from the user.
