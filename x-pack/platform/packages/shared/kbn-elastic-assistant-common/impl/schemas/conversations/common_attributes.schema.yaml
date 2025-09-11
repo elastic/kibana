@@ -27,7 +27,7 @@ components:
 
     BaseInterruptValue:
       type: object
-      description: The basis of a agent interrupt
+      description: The basis of an agent interrupt
       required:
         - 'type'
         - 'threadId'
