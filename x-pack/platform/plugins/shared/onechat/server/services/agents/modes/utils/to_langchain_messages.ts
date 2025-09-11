@@ -83,8 +83,6 @@ export const createToolCallMessages = (
 ): [AIMessage, ToolMessage] => {
   const toolName = sanitizeToolId(toolCall.tool_id);
 
-  console.log('toolParameters', toolParameters);
-  console.log('toolCall.tool_id', toolCall.tool_id);
   // Merge tool parameters with the tool call params if toolParameters are provided
   let args = toolCall.params;
   if (toolParameters && Object.keys(toolParameters).length > 0) {
