@@ -33,13 +33,13 @@ import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
 
 export function AddPanelFlyout({
-  ariaLabelledBy,
   dashboardApi,
   closeFlyout,
+  ariaLabelledBy,
 }: {
-  ariaLabelledBy: string;
   dashboardApi: DashboardApi;
   closeFlyout: () => void;
+  ariaLabelledBy: string;
 }) {
   const { euiTheme } = useEuiTheme();
 
