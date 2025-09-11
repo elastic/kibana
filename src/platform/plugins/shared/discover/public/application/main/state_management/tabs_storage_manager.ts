@@ -78,7 +78,8 @@ export interface TabsStorageManager {
   loadLocally: (props: {
     userId: string;
     spaceId: string;
-    persistedDiscoverSession?: DiscoverSession;
+    persistedDiscoverSession: DiscoverSession | undefined;
+    shouldClearAllTabs: boolean | undefined;
     defaultTabState: Omit<TabState, keyof TabItem>;
   }) => TabsInternalStatePayload;
   getNRecentlyClosedTabs: (
@@ -357,6 +358,7 @@ export const createTabsStorageManager = ({
     userId,
     spaceId,
     persistedDiscoverSession,
+    shouldClearAllTabs,
     defaultTabState,
   }) => {
     const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
@@ -388,8 +390,9 @@ export const createTabsStorageManager = ({
       toRecentlyClosedTabState(tab, defaultTabState)
     );
 
-    if (enabled && selectedTabId) {
-      // restore previously opened tabs
+    // restore previously opened tabs
+    if (enabled && selectedTabId && !shouldClearAllTabs) {
+      // try to preselect one of the previously opened tabs
       if (openTabs.find((tab) => tab.id === selectedTabId)) {
         return {
           allTabs: openTabs,
@@ -398,6 +401,7 @@ export const createTabsStorageManager = ({
         };
       }
 
+      // try to reopen some of the previously closed tabs
       if (!persistedDiscoverSession) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
@@ -414,6 +418,7 @@ export const createTabsStorageManager = ({
       }
     }
 
+    // overwise open the first tab from the Discover Session SO or a new default tab as a fallback
     const defaultTab = persistedTabs
       ? persistedTabs[0]
       : {
