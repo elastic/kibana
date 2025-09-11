@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionComponent } from 'react';
+import type { CSSProperties, FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -49,6 +49,8 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
+const panelStyle = { minWidth: '200px' } satisfies CSSProperties;
+
 export const DocumentsDropdown: FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
@@ -81,7 +83,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       panelPaddingSize="none"
       repositionOnScroll
       data-test-subj="documentsDropdown"
-      panelStyle={{ minWidth: '200px' }}
+      panelStyle={panelStyle}
     >
       <EuiSelectable
         singleSelection
