@@ -104,6 +104,20 @@ describe('MetadataService', () => {
         });
       })
     );
+
+    test('accepts inTrial from cloud serverless config', async () => {
+      metadataService.setup({
+        ...initialMetadata,
+        in_trial: true,
+      });
+      await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual({
+        ...multiContextFormat,
+        organization: {
+          ...multiContextFormat.organization,
+          in_trial: true,
+        },
+      });
+    });
   });
 
   describe('start', () => {

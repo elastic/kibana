@@ -28,8 +28,6 @@ export const appPaths = {
   tools: {
     list: '/tools',
     new: '/tools/new',
-    edit: ({ toolId }: { toolId: string }) => {
-      return `/tools/${toolId}`;
-    },
+    details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
   },
 };
