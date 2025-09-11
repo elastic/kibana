@@ -15,7 +15,7 @@ import {
   isToolProgressEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
-import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
+import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
@@ -67,8 +67,19 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
               assistantMessage: event.data.message_content,
             });
           } else if (isToolProgressEvent(event)) {
+            conversationActions.setToolCallProgress({
+              progress: { message: event.data.message },
+              toolCallId: event.data.tool_call_id,
+            });
             // Individual tool progression message should also be displayed as reasoning
             setAgentReasoning(event.data.message);
+          } else if (isReasoningEvent(event)) {
+            conversationActions.addReasoningStep({
+              step: createReasoningStep({
+                reasoning: event.data.reasoning,
+              }),
+            });
+            setAgentReasoning(event.data.reasoning);
           } else if (isToolCallEvent(event)) {
             conversationActions.addToolCall({
               step: createToolCallStep({
@@ -78,8 +89,6 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
                 tool_id: event.data.tool_id,
               }),
             });
-          } else if (isReasoningEvent(event)) {
-            setAgentReasoning(event.data.reasoning);
           } else if (isToolResultEvent(event)) {
             const { tool_call_id: toolCallId, results } = event.data;
             conversationActions.setToolCallResult({ results, toolCallId });
