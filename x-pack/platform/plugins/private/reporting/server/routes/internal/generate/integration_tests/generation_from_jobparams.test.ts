@@ -280,5 +280,10 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       });
 
     expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
+    expect(eventTracker.createReport).toHaveBeenCalledWith({
+      isDeprecated: false,
+      isPublicApi: false,
+      scheduleType: 'single',
+    });
   });
 });

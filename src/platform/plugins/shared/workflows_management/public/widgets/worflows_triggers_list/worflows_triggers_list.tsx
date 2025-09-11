@@ -45,24 +45,29 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
           defaultMessage={capitalize(first.type)}
         />
       </EuiBadge>
-      <PopoverItems
-        items={triggers}
-        popoverTitle={i18n.TRIGGERS_LIST_TITLE}
-        popoverButtonTitle={`+${rest.length.toString()}`}
-        dataTestPrefix="triggers"
-        renderItem={(trigger, idx) => (
-          <EuiBadge
-            key={`${trigger}-${idx}`}
-            color="hollow"
-            iconType={TRIGGERS_ICONS[trigger.type]}
-          >
-            <FormattedMessage
-              id={`workflows.workflowList.trigger.${trigger.type}`}
-              defaultMessage={capitalize(trigger.type)}
-            />
-          </EuiBadge>
-        )}
-      />
+      {rest.length > 0 && (
+        <PopoverItems
+          items={triggers}
+          popoverTitle={i18n.TRIGGERS_LIST_TITLE}
+          popoverButtonTitle={`+${rest.length.toString()}`}
+          dataTestPrefix="triggers"
+          renderItem={(trigger, idx) => (
+            <EuiBadge
+              key={`${trigger}-${idx}`}
+              color="hollow"
+              iconType={TRIGGERS_ICONS[trigger.type]}
+              css={css`
+                margin: 2px 3px 0 0;
+              `}
+            >
+              <FormattedMessage
+                id={`workflows.workflowList.trigger.${trigger.type}`}
+                defaultMessage={capitalize(trigger.type)}
+              />
+            </EuiBadge>
+          )}
+        />
+      )}
     </>
   );
 };
