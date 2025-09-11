@@ -42,7 +42,7 @@ export type InterruptTypeEnum = typeof InterruptType.enum;
 export const InterruptTypeEnum = InterruptType.enum;
 
 /**
- * The basis of a agent interrupt
+ * The basis of an agent interrupt
  */
 export type BaseInterruptValue = z.infer<typeof BaseInterruptValue>;
 export const BaseInterruptValue = z.object({
