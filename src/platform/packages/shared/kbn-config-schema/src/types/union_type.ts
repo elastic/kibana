@@ -16,8 +16,9 @@ import type {
   ObjectProps,
   Props,
   ObjectDefaultValue,
-  ObjectType,
   ObjectResultTypeInput,
+  ObjectResultDefaults,
+  ObjectResultType,
 } from './object_type';
 
 // complex types here mostly due to mixing `Type` and `ObjectType`
@@ -49,26 +50,13 @@ export type UnionResolvedValue<T extends any | ObjectProps<Props>> = T extends O
  *
  * Otherwise, return `D` as is.
  */
-export type UnionResolvedDefault<
-  T extends any | ObjectProps<Props>,
-  D extends UnionTypeDefaultValue<T>
-> = [D] extends [never] ? UnionResolvedValue<T> : D;
+export type UnionDefaultValue<T, D extends DefaultValue<T>> = [D] extends [never]
+  ? T extends ObjectResultType<infer P>
+    ? ObjectResultDefaults<P>
+    : T
+  : D;
 
-/**
- * Resolves base type between `Type` and `ObjectType`
- *
- * @note Must preserve union by disabling distributive conditional
- */
-export type UnionBaseType<
-  T extends any | ObjectProps<Props>,
-  D extends UnionTypeDefaultValue<T>
-> = [T] extends [ObjectProps<Props>]
-  ? [D] extends [never]
-    ? ObjectType<T, ObjectDefaultValue<T>>
-    : [D] extends [ObjectDefaultValue<T>]
-    ? ObjectType<T, D | ObjectDefaultValue<T>>
-    : never
-  : [D] extends [never]
+export type UnionBaseType<T extends any, D extends DefaultValue<T>> = [D] extends [never]
   ? Type<T, DefaultValue<T>>
   : [D] extends [DefaultValue<T>]
   ? Type<T, D | DefaultValue<T>>

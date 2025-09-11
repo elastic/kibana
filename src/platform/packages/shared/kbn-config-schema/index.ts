@@ -72,11 +72,7 @@ import {
 } from './src/types';
 import type { DurationValueType } from './src/types/duration_type';
 import type { ByteSizeValueType } from './src/types/byte_size_type';
-import type {
-  UnionBaseType,
-  UnionResolvedDefault,
-  UnionTypeDefaultValue,
-} from './src/types/union_type';
+import type { UnionBaseType, UnionDefaultValue } from './src/types/union_type';
 
 export type {
   AnyType,
@@ -158,7 +154,7 @@ function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): Typ
 }
 
 /**
- * Create an optional type
+ * Creates an optional type
  *
  * @note wrapping with `maybe` ignores the `defaultValue` on `type` when validating.
  */
@@ -167,13 +163,11 @@ function maybe<V, D extends DefaultValue<V> = never>(type: Type<V, D>): Type<V |
 }
 
 /**
- * Create an nullable type
+ * Creates an nullable type, defaults to `null`.
  *
  * @note wrapping with `nullable` ignores the `defaultValue` on `type` when validating.
  */
-function nullable<V extends any | ObjectProps<Props>, D extends UnionTypeDefaultValue<V> = never>(
-  type: UnionBaseType<V, D>
-) {
+function nullable<V, D extends DefaultValue<V> = never>(type: UnionBaseType<V, D>) {
   return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
@@ -208,43 +202,43 @@ function recordOf<K extends string, V, D extends DefaultValue<Record<K, V>>>(
 }
 
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  G extends any | ObjectProps<Props>,
-  H extends any | ObjectProps<Props>,
-  I extends any | ObjectProps<Props>,
-  J extends any | ObjectProps<Props>,
-  K extends any | ObjectProps<Props>,
-  L extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
-  GDV extends UnionTypeDefaultValue<G> = never,
-  HDV extends UnionTypeDefaultValue<H> = never,
-  IDV extends UnionTypeDefaultValue<I> = never,
-  JDV extends UnionTypeDefaultValue<J> = never,
-  KDV extends UnionTypeDefaultValue<K> = never,
-  LDV extends UnionTypeDefaultValue<L> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  H,
+  I,
+  J,
+  K,
+  L,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
+  GDV extends DefaultValue<G> = never,
+  HDV extends DefaultValue<H> = never,
+  IDV extends DefaultValue<I> = never,
+  JDV extends DefaultValue<J> = never,
+  KDV extends DefaultValue<K> = never,
+  LDV extends DefaultValue<L> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV>
-    | UnionResolvedDefault<G, GDV>
-    | UnionResolvedDefault<H, HDV>
-    | UnionResolvedDefault<I, IDV>
-    | UnionResolvedDefault<J, JDV>
-    | UnionResolvedDefault<K, KDV>
-    | UnionResolvedDefault<L, LDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV>
+    | UnionDefaultValue<G, GDV>
+    | UnionDefaultValue<H, HDV>
+    | UnionDefaultValue<I, IDV>
+    | UnionDefaultValue<J, JDV>
+    | UnionDefaultValue<K, KDV>
+    | UnionDefaultValue<L, LDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -261,42 +255,42 @@ function oneOf<
     UnionBaseType<L, LDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L, DV>
-): UnionBaseType<A | B | C | D | E | F | G | H | I | J | K | L, DV>;
+): Type<A | B | C | D | E | F | G | H | I | J | K | L, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  G extends any | ObjectProps<Props>,
-  H extends any | ObjectProps<Props>,
-  I extends any | ObjectProps<Props>,
-  J extends any | ObjectProps<Props>,
-  K extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
-  GDV extends UnionTypeDefaultValue<G> = never,
-  HDV extends UnionTypeDefaultValue<H> = never,
-  IDV extends UnionTypeDefaultValue<I> = never,
-  JDV extends UnionTypeDefaultValue<J> = never,
-  KDV extends UnionTypeDefaultValue<K> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  H,
+  I,
+  J,
+  K,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
+  GDV extends DefaultValue<G> = never,
+  HDV extends DefaultValue<H> = never,
+  IDV extends DefaultValue<I> = never,
+  JDV extends DefaultValue<J> = never,
+  KDV extends DefaultValue<K> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV>
-    | UnionResolvedDefault<G, GDV>
-    | UnionResolvedDefault<H, HDV>
-    | UnionResolvedDefault<I, IDV>
-    | UnionResolvedDefault<J, JDV>
-    | UnionResolvedDefault<K, KDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV>
+    | UnionDefaultValue<G, GDV>
+    | UnionDefaultValue<H, HDV>
+    | UnionDefaultValue<I, IDV>
+    | UnionDefaultValue<J, JDV>
+    | UnionDefaultValue<K, KDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -312,39 +306,39 @@ function oneOf<
     UnionBaseType<K, KDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K, DV>
-): UnionBaseType<A | B | C | D | E | F | G | H | I | J | K, DV>;
+): Type<A | B | C | D | E | F | G | H | I | J | K, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  G extends any | ObjectProps<Props>,
-  H extends any | ObjectProps<Props>,
-  I extends any | ObjectProps<Props>,
-  J extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
-  GDV extends UnionTypeDefaultValue<G> = never,
-  HDV extends UnionTypeDefaultValue<H> = never,
-  IDV extends UnionTypeDefaultValue<I> = never,
-  JDV extends UnionTypeDefaultValue<J> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  H,
+  I,
+  J,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
+  GDV extends DefaultValue<G> = never,
+  HDV extends DefaultValue<H> = never,
+  IDV extends DefaultValue<I> = never,
+  JDV extends DefaultValue<J> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV>
-    | UnionResolvedDefault<G, GDV>
-    | UnionResolvedDefault<H, HDV>
-    | UnionResolvedDefault<I, IDV>
-    | UnionResolvedDefault<J, JDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV>
+    | UnionDefaultValue<G, GDV>
+    | UnionDefaultValue<H, HDV>
+    | UnionDefaultValue<I, IDV>
+    | UnionDefaultValue<J, JDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -359,36 +353,36 @@ function oneOf<
     UnionBaseType<J, JDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J, DV>
-): UnionBaseType<A | B | C | D | E | F | G | H | I | J, DV>;
+): Type<A | B | C | D | E | F | G | H | I | J, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  G extends any | ObjectProps<Props>,
-  H extends any | ObjectProps<Props>,
-  I extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
-  GDV extends UnionTypeDefaultValue<G> = never,
-  HDV extends UnionTypeDefaultValue<H> = never,
-  IDV extends UnionTypeDefaultValue<I> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  H,
+  I,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
+  GDV extends DefaultValue<G> = never,
+  HDV extends DefaultValue<H> = never,
+  IDV extends DefaultValue<I> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV>
-    | UnionResolvedDefault<G, GDV>
-    | UnionResolvedDefault<H, HDV>
-    | UnionResolvedDefault<I, IDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV>
+    | UnionDefaultValue<G, GDV>
+    | UnionDefaultValue<H, HDV>
+    | UnionDefaultValue<I, IDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -402,33 +396,33 @@ function oneOf<
     UnionBaseType<I, IDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I, DV>
-): UnionBaseType<A | B | C | D | E | F | G | H | I, DV>;
+): Type<A | B | C | D | E | F | G | H | I, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  G extends any | ObjectProps<Props>,
-  H extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
-  GDV extends UnionTypeDefaultValue<G> = never,
-  HDV extends UnionTypeDefaultValue<H> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  H,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
+  GDV extends DefaultValue<G> = never,
+  HDV extends DefaultValue<H> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV>
-    | UnionResolvedDefault<G, GDV>
-    | UnionResolvedDefault<H, HDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV>
+    | UnionDefaultValue<G, GDV>
+    | UnionDefaultValue<H, HDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -441,30 +435,30 @@ function oneOf<
     UnionBaseType<H, HDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H, DV>
-): UnionBaseType<A | B | C | D | E | F | G | H, DV>;
+): Type<A | B | C | D | E | F | G | H, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  G extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
-  GDV extends UnionTypeDefaultValue<G> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  G,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
+  GDV extends DefaultValue<G> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV>
-    | UnionResolvedDefault<G, GDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV>
+    | UnionDefaultValue<G, GDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -476,27 +470,27 @@ function oneOf<
     UnionBaseType<G, GDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G, DV>
-): UnionBaseType<A | B | C | D | E | F | G, DV>;
+): Type<A | B | C | D | E | F | G, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  F extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
-  FDV extends UnionTypeDefaultValue<F> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  F,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
+  FDV extends DefaultValue<F> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV>
-    | UnionResolvedDefault<F, FDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV>
+    | UnionDefaultValue<F, FDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -507,24 +501,24 @@ function oneOf<
     UnionBaseType<F, FDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F, DV>
-): UnionBaseType<A | B | C | D | E | F, DV>;
+): Type<A | B | C | D | E | F, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  E extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
-  EDV extends UnionTypeDefaultValue<E> = never,
+  A,
+  B,
+  C,
+  D,
+  E,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
+  EDV extends DefaultValue<E> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV>
-    | UnionResolvedDefault<E, EDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV>
+    | UnionDefaultValue<E, EDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -534,21 +528,21 @@ function oneOf<
     UnionBaseType<E, EDV>
   ],
   options?: UnionTypeOptions<A | B | C | D | E, DV>
-): UnionBaseType<A | B | C | D | E, DV>;
+): Type<A | B | C | D | E, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  D extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
-  DDV extends UnionTypeDefaultValue<D> = never,
+  A,
+  B,
+  C,
+  D,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DDV extends DefaultValue<D> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV>
-    | UnionResolvedDefault<D, DDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV>
+    | UnionDefaultValue<D, DDV> = never
 >(
   types: [
     UnionBaseType<A, ADV>,
@@ -557,41 +551,41 @@ function oneOf<
     UnionBaseType<D, DDV>
   ],
   options?: UnionTypeOptions<A | B | C | D, DV>
-): UnionBaseType<A | B | C | D, DV>;
+): Type<A | B | C | D, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  C extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  CDV extends UnionTypeDefaultValue<C> = never,
+  A,
+  B,
+  C,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
   DV extends
-    | UnionResolvedDefault<A, ADV>
-    | UnionResolvedDefault<B, BDV>
-    | UnionResolvedDefault<C, CDV> = never
+    | UnionDefaultValue<A, ADV>
+    | UnionDefaultValue<B, BDV>
+    | UnionDefaultValue<C, CDV> = never
 >(
   types: [UnionBaseType<A, ADV>, UnionBaseType<B, BDV>, UnionBaseType<C, CDV>],
   options?: UnionTypeOptions<A | B | C, DV>
-): UnionBaseType<A | B | C, DV>;
+): Type<A | B | C, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  B extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  BDV extends UnionTypeDefaultValue<B> = never,
-  DV extends UnionResolvedDefault<A, ADV> | UnionResolvedDefault<B, BDV> = never
+  A,
+  B,
+  ADV extends DefaultValue<A> = never,
+  BDV extends DefaultValue<B> = never,
+  DV extends UnionDefaultValue<A, ADV> | UnionDefaultValue<B, BDV> = never
 >(
   types: [UnionBaseType<A, ADV>, UnionBaseType<B, BDV>],
   options?: UnionTypeOptions<A | B, DV>
-): UnionBaseType<A | B, DV>;
+): Type<A | B, DV>;
 function oneOf<
-  A extends any | ObjectProps<Props>,
-  ADV extends UnionTypeDefaultValue<A> = never,
-  DV extends UnionResolvedDefault<A, ADV> = never
->(types: [UnionBaseType<A, ADV>], options?: UnionTypeOptions<A, DV>): UnionBaseType<A, DV>;
+  A,
+  ADV extends DefaultValue<A> = never,
+  DV extends UnionDefaultValue<A, ADV> = never
+>(Type: [UnionBaseType<A, ADV>], options?: UnionTypeOptions<A, DV>): Type<A, DV>;
 function oneOf<RTS extends Array<Type<any>>, DV extends DefaultValue<any> = never>(
   types: RTS,
   options?: UnionTypeOptions<any, DV>
-): UnionBaseType<any, any> {
+): Type<any, any> {
   return new UnionType(types, options) as any;
 }
 

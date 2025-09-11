@@ -24,6 +24,8 @@ export type NullableProps = Record<string, Type<any> | undefined | null>;
 
 /**
  * A type used to constrain the object props to preserve the exact type for D
+ *
+ * Without this the defaults will be stripped away from the defined types
  */
 export type ObjectProps<P extends Props> = {
   [K in keyof P]: P[K] extends Type<infer V, infer D> ? D : never;
@@ -44,8 +46,6 @@ export type ObjectTypeOrLazyType<
  * Need to avoid circular ref
  */
 type TypeOf<RT extends TypeOrLazyType> = RT extends () => TypeOrLazyType<infer V, infer D>
-  ? Type<V, D>['_output']
-  : RT extends () => TypeOrLazyType<infer V, infer D>
   ? Type<V, D>['_output']
   : never;
 
@@ -100,6 +100,20 @@ export type ObjectResultType<P extends ObjectProps<Props>> = {
   [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P>>]: TypeOf<P[K]>;
 } & {
   [K in keyof DefaultProperties<P>]?: TypeOf<P[K]>;
+};
+
+export type TypeOfDefault<RT extends TypeOrLazyType> = RT extends TypeOrLazyType<infer V, infer D>
+  ? [D] extends [never]
+    ? V
+    : D
+  : 1;
+
+export type ObjectResultDefaults<P extends ObjectProps<Props>> = {
+  [K in keyof OptionalProperties<P>]?: TypeOfDefault<P[K]>;
+} & {
+  [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P>>]: TypeOfDefault<P[K]>;
+} & {
+  [K in keyof DefaultProperties<P>]?: TypeOfDefault<P[K]>;
 };
 
 export type ObjectResultTypeInput<P extends ObjectProps<Props>> = {
@@ -158,11 +172,7 @@ export type ObjectTypeOptions<
 export class ObjectType<
   P extends ObjectProps<Props>,
   D extends ObjectDefaultValue<P> = never
-> extends Type<
-  ObjectResultType<P>,
-  // @ts-expect-error - The object type allows partial properties based on the defaultValue
-  D
-> {
+> extends Type<ObjectResultType<P>, D> {
   private props: P;
   private options: ObjectTypeOptions<P, D>;
   private propSchemas: Record<string, AnySchema>;
