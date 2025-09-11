@@ -45668,6 +45668,7 @@ paths:
                                     name:
                                       type: string
                                     systems:
+                                      default: []
                                       items:
                                         additionalProperties: false
                                         type: object
@@ -45814,7 +45815,6 @@ paths:
                                   required:
                                     - name
                                     - description
-                                    - systems
                           required:
                             - stream
                         - type: object
@@ -45877,6 +45877,7 @@ paths:
                                         name:
                                           type: string
                                         systems:
+                                          default: []
                                           items:
                                             additionalProperties: false
                                             type: object
@@ -46023,7 +46024,6 @@ paths:
                                       required:
                                         - name
                                         - description
-                                        - systems
                                     - type: object
                                       properties:
                                         ingest:
@@ -47669,6 +47669,7 @@ paths:
                                     name:
                                       type: string
                                     systems:
+                                      default: []
                                       items:
                                         additionalProperties: false
                                         type: object
@@ -47815,7 +47816,6 @@ paths:
                                   required:
                                     - name
                                     - description
-                                    - systems
                           required:
                             - stream
                         - type: object
@@ -49301,6 +49301,7 @@ paths:
                                     name:
                                       type: string
                                     systems:
+                                      default: []
                                       items:
                                         additionalProperties: false
                                         type: object
@@ -49447,7 +49448,6 @@ paths:
                                   required:
                                     - name
                                     - description
-                                    - systems
                           required:
                             - stream
                         - type: object
@@ -49510,6 +49510,7 @@ paths:
                                         name:
                                           type: string
                                         systems:
+                                          default: []
                                           items:
                                             additionalProperties: false
                                             type: object
@@ -49656,7 +49657,6 @@ paths:
                                       required:
                                         - name
                                         - description
-                                        - systems
                                     - type: object
                                       properties:
                                         ingest:
@@ -51152,6 +51152,7 @@ paths:
                                     name:
                                       type: string
                                     systems:
+                                      default: []
                                       items:
                                         additionalProperties: false
                                         type: object
@@ -51298,7 +51299,6 @@ paths:
                                   required:
                                     - name
                                     - description
-                                    - systems
                           required:
                             - stream
                         - type: object
@@ -52784,6 +52784,7 @@ paths:
                                 name:
                                   type: string
                                 systems:
+                                  default: []
                                   items:
                                     additionalProperties: false
                                     type: object
@@ -52930,7 +52931,6 @@ paths:
                               required:
                                 - name
                                 - description
-                                - systems
                       required:
                         - stream
                     - type: object
