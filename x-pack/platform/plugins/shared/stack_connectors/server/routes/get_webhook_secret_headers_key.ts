@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { isBoom } from '@hapi/boom';
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
@@ -63,35 +64,47 @@ export const getWebhookSecretHeadersKeyRoute = (
       req: KibanaRequest<{ id: string }, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> => {
-      const { id } = req.params;
+      try {
+        const { id } = req.params;
 
-      const [, { encryptedSavedObjects, actions, spaces }] = await getStartServices();
+        const [, { encryptedSavedObjects, actions, spaces }] = await getStartServices();
 
-      const actionsClient = await actions.getActionsClientWithRequest(req);
-      const connector = await actionsClient.get({ id });
-      const spaceId = spaces.spacesService.getSpaceId(req);
+        const actionsClient = await actions.getActionsClientWithRequest(req);
+        const connector = await actionsClient.get({ id });
+        const spaceId = spaces.spacesService.getSpaceId(req);
 
-      if (!['.webhook', '.cases-webhook'].includes(connector.actionTypeId)) {
-        return res.badRequest({
-          body: { message: 'Connector must be a webhook or cases webhook' },
+        if (!['.webhook', '.cases-webhook'].includes(connector.actionTypeId)) {
+          return res.badRequest({
+            body: { message: 'Connector must be a webhook or cases webhook' },
+          });
+        }
+        const encryptedClient = encryptedSavedObjects.getClient({
+          includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
+        });
+        const decryptedConnector =
+          await encryptedClient.getDecryptedAsInternalUser<ConnectorAttributes>(
+            ACTION_SAVED_OBJECT_TYPE,
+            id,
+            { namespace: spaceId }
+          );
+        const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || {};
+
+        const secretHeadersArray = Object.keys(secretHeaders) || [];
+
+        return res.ok({ body: secretHeadersArray });
+      } catch (error) {
+        if (isBoom(error)) {
+          return res.customError({
+            statusCode: error.output.statusCode,
+            body: { message: error.output.payload.message },
+          });
+        }
+
+        return res.customError({
+          statusCode: 500,
+          body: { message: error.message },
         });
       }
-      const encryptedClient = encryptedSavedObjects.getClient({
-        includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
-      });
-
-      const decryptedConnector =
-        await encryptedClient.getDecryptedAsInternalUser<ConnectorAttributes>(
-          ACTION_SAVED_OBJECT_TYPE,
-          id,
-          { namespace: spaceId }
-        );
-
-      const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || {};
-
-      const secretHeadersArray = Object.keys(secretHeaders) || [];
-
-      return res.ok({ body: secretHeadersArray });
     }
   );
 };
