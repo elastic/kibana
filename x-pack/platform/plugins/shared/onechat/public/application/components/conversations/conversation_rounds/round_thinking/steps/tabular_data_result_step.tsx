@@ -37,15 +37,12 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
   }, [discoverLocator, esqlQuery]);
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
       <EuiText size="s">
         {i18n.translate(
-          'xpack.onechat.conversation.thinking.tabularDataResultStep.foundDocumentsMessage',
+          'xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessagePrefix',
           {
-            defaultMessage: 'Found {totalDocuments} documents.',
-            values: {
-              totalDocuments: data.values.length,
-            },
+            defaultMessage: 'Found',
           }
         )}
       </EuiText>
@@ -60,14 +57,18 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
             }
           )}
         >
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiIcon type="discoverApp" />
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             {i18n.translate(
-              'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscover',
+              'xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage',
               {
-                defaultMessage: 'See in Discover',
+                defaultMessage:
+                  '{totalDocuments, plural, one {{totalDocuments, number} record} other {{totalDocuments, number} records}}',
+                values: {
+                  totalDocuments: data.values.length,
+                },
               }
             )}
+            <EuiIcon type="popout" />
           </EuiFlexGroup>
         </EuiLink>
       )}
