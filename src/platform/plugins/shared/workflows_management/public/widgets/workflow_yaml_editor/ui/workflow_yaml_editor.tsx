@@ -17,14 +17,16 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import YAML, { isPair, isScalar, isMap, visit } from 'yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { getStepNode } from '../../../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -216,7 +218,7 @@ export interface WorkflowYAMLEditorProps {
   hasChanges?: boolean;
   lastUpdatedAt?: Date;
   highlightStep?: string;
-  stepExecutions?: EsWorkflowStepExecution[];
+  stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
@@ -225,6 +227,9 @@ export interface WorkflowYAMLEditorProps {
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
+  activeTab?: string;
+  selectedExecutionId?: string;
+  originalValue?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -241,6 +246,9 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   esHost = 'http://localhost:9200',
   kibanaHost,
+  activeTab,
+  selectedExecutionId,
+  originalValue,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -296,6 +304,9 @@ export const WorkflowYAMLEditor = ({
     return getWorkflowZodSchemaLoose(); // Now uses lazy loading
   }, []);
 
+  const changesHighlightDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+
   const {
     error: errorValidating,
     validationErrors,
@@ -307,6 +318,49 @@ export const WorkflowYAMLEditor = ({
   });
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  const [showDiffHighlight, setShowDiffHighlight] = useState(false);
+
+  // Helper to compute diff lines
+  const calculateLineDifferences = useCallback((original: string, current: string) => {
+    const originalLines = (original ?? '').split('\n');
+    const currentLines = (current ?? '').split('\n');
+    const changed: number[] = [];
+    const max = Math.max(originalLines.length, currentLines.length);
+    for (let i = 0; i < max; i++) {
+      if ((originalLines[i] ?? '') !== (currentLines[i] ?? '')) changed.push(i + 1);
+    }
+    return changed;
+  }, []);
+
+  // Apply diff highlight when toggled
+  useEffect(() => {
+    if (!showDiffHighlight || !originalValue || !editorRef.current || !isEditorMounted) {
+      if (changesHighlightDecorationCollectionRef.current) {
+        changesHighlightDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const model = editorRef.current.getModel();
+    if (!model) return;
+    if (changesHighlightDecorationCollectionRef.current) {
+      changesHighlightDecorationCollectionRef.current.clear();
+    }
+    const changedLines = calculateLineDifferences(originalValue, props.value ?? '');
+    if (changedLines.length === 0) return;
+    const decorations = changedLines.map((lineNumber) => ({
+      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
+      options: {
+        className: 'changed-line-highlight',
+        isWholeLine: true,
+        marginClassName: 'changed-line-margin',
+      },
+    }));
+    changesHighlightDecorationCollectionRef.current =
+      editorRef.current.createDecorationsCollection(decorations);
+    return () => {
+      changesHighlightDecorationCollectionRef.current?.clear();
+    };
+  }, [showDiffHighlight, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
 
   // Add a ref to track if the last change was just typing
   const lastChangeWasTypingRef = useRef(false);
@@ -403,6 +457,36 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
         
         lastChangeWasTypingRef.current = isSimpleTyping;
       });
+
+      // Initial YAML parsing from main
+      const value = model.getValue();
+      if (value && value.trim() !== '') {
+        validateVariables(editor);
+        try {
+          const parsedDocument = YAML.parseDocument(value);
+          // Use setTimeout to defer state updates until after the current render cycle
+          // This prevents the flushSync warning while maintaining the correct order
+          setTimeout(() => {
+            setYamlDocument(parsedDocument);
+            setIsEditorMounted(true);
+          }, 0);
+        } catch (error) {
+          setTimeout(() => {
+            setYamlDocument(null);
+            setIsEditorMounted(true);
+          }, 0);
+        }
+      } else {
+        // If no content, just set the mounted state
+        setTimeout(() => {
+          setIsEditorMounted(true);
+        }, 0);
+      }
+    } else {
+      // If no model, just set the mounted state
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
     }
 
     // Setup Elasticsearch step providers if we have the required services
@@ -464,8 +548,6 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
     }
 
     onMount?.(editor, monaco);
-
-    setIsEditorMounted(true);
   };
 
   useEffect(() => {
@@ -1252,7 +1334,7 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
 
   return (
     <div css={styles.container}>
-      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
+      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       {unifiedProvidersRef.current?.actions && (
         <EuiFlexGroup
@@ -1288,7 +1370,29 @@ const changeSideEffects = useCallback((isTypingChange = false) => {
               gap: '4px',
               padding: '4px 6px',
               color: euiTheme.colors.accent,
+              cursor: 'pointer',
+              borderRadius: euiTheme.border.radius.small,
+              '&:hover': {
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              },
             }}
+            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={showDiffHighlight}
+            aria-label={
+              showDiffHighlight
+                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
+                    defaultMessage: 'Hide diff highlighting',
+                  })
+                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
+                    defaultMessage: 'Show diff highlighting',
+                  })
+            }
+            onKeyDown={() => {}}
+            title={
+              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
+            }
           >
             <EuiIcon type="dot" />
             <span>
@@ -1550,6 +1654,7 @@ const componentStyles = {
         textShadow: 'none',
         fontSize: 0,
       },
+<<<<<<< HEAD
       '.elasticsearch-step-glyph': {
         '&:before': {
           content: '""',
@@ -1776,7 +1881,16 @@ const componentStyles = {
           'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zLjI5MyA5LjI5MyA0IDEwbC0xIDRoMTBsLTEtNCAuNzA3LS43MDdhMSAxIDAgMCAxIC4yNjMuNDY0bDEgNEExIDEgMCAwIDEgMTMgMTVIM2ExIDEgMCAwIDEtLjk3LTEuMjQybDEtNGExIDEgMCAwIDEgLjI2My0uNDY1Wk04IDljMyAwIDQgMSA0IDEgLjcwNy0uNzA3LjcwNi0uNzA4LjcwNi0uNzA4bC0uMDAxLS4wMDEtLjAwMi0uMDAyLS4wMDUtLjAwNS0uMDEtLjAxYTEuNzk4IDEuNzk4IDAgMCAwLS4xMDEtLjA4OSAyLjkwNyAyLjkwNyAwIDAgMC0uMjM1LS4xNzMgNC42NiA0LjY2IDAgMCAwLS44NTYtLjQ0IDcuMTEgNy4xMSAwIDAgMC0xLjEzNi0uMzQyIDQgNCAwIDEgMC00LjcyIDAgNy4xMSA3LjExIDAgMCAwLTEuMTM2LjM0MiA0LjY2IDQuNjYgMCAwIDAtLjg1Ni40NCAyLjkwOSAyLjkwOSAwIDAgMC0uMzM1LjI2MmwtLjAxMS4wMS0uMDA1LjAwNS0uMDAyLjAwMmgtLjAwMVMzLjI5MyA5LjI5NCA0IDEwYzAgMCAxLTEgNC0xWm0wLTFhMyAzIDAgMSAwIDAtNiAzIDMgMCAwIDAgMCA2WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+Cjwvc3ZnPgo=")',
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
-        display: 'block',
+      '.changed-line-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        borderLeft: `2px solid ${euiTheme.colors.warning}`,
+        opacity: 0.7,
+      },
+      '.changed-line-margin': {
+        backgroundColor: euiTheme.colors.warning,
+        width: '2px',
+        opacity: 0.7,
+      },
       },
     }),
   editorContainer: css({

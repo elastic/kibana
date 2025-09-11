@@ -53,16 +53,17 @@ export class StepFactory {
     step: TStep // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
-
+    const stepId = (step as any).id || (step as any).name;
     if (!stepType) {
       throw new Error('Step type is not defined for step: ' + JSON.stringify(step));
     }
 
-    // Log step creation for debugging
-    this.workflowLogger.logDebug(`Creating step implementation for type: ${stepType}`, {
-      event: { action: 'step-creation', outcome: 'in-progress' },
-      tags: ['step-factory'],
-    });
+    const stepLogger = this.workflowLogger.createStepLogger(
+      this.workflowRuntime.getCurrentStepExecutionId(),
+      stepId,
+      stepId,
+      stepType
+    );
 
     // Check if it's an internal action type
     const isElasticsearchAction = stepType && stepType.startsWith('elasticsearch.');
@@ -74,21 +75,21 @@ export class StepFactory {
           step as any,
           this.workflowRuntime,
           this.contextManager,
-          this.workflowLogger
+          stepLogger
         );
       case 'exit-foreach':
-        return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new ExitForeachNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           step as any,
           this.workflowRuntime,
           this.workflowTaskManager,
-          this.workflowLogger
+          stepLogger
         );
       case 'exit-retry':
-        return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new ExitRetryNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'enter-continue':
-        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
       case 'enter-try-block':
@@ -96,7 +97,7 @@ export class StepFactory {
       case 'exit-try-block':
         return new ExitTryBlockNodeImpl(step as any, this.workflowRuntime);
       case 'enter-normal-path':
-        return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, stepLogger);
       case 'enter-fallback-path':
         return new EnterFallbackPathNodeImpl(this.workflowRuntime);
       case 'exit-normal-path':
@@ -108,7 +109,7 @@ export class StepFactory {
           step as any,
           this.workflowRuntime,
           this.contextManager,
-          this.workflowLogger
+          stepLogger
         );
       case 'enter-then-branch':
       case 'enter-else-branch':
@@ -122,7 +123,7 @@ export class StepFactory {
         return new WaitStepImpl(
           step as any,
           this.workflowRuntime,
-          this.workflowLogger,
+          stepLogger,
           this.workflowTaskManager
         );
       case 'atomic':
@@ -132,13 +133,13 @@ export class StepFactory {
           this.contextManager,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          stepLogger
         );
       case 'http':
         return new HttpStepImpl(
           step as any,
           this.contextManager,
-          this.workflowLogger,
+          stepLogger,
           this.urlValidator,
           this.workflowRuntime
         );
