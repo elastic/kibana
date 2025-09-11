@@ -90,7 +90,12 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
         <h2>{i18n.COST_SAVINGS_TREND}</h2>
       </EuiTitle>
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup
+        gutterSize="xl"
+        css={css`
+          gap: 48px;
+        `}
+      >
         <EuiFlexItem>
           <VisualizationEmbeddable
             data-test-subj="embeddable-area-chart"
