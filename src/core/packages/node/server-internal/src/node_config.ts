@@ -60,13 +60,20 @@ export const rolesConfig = schema.arrayOf(
 /** @internal */
 export type NodeRolesConfig = TypeOf<typeof rolesConfig>;
 
+export const serviceConfig = schema.maybe(schema.oneOf([schema.literal('reporting')]));
+
+/** @internal */
+export type NodeServiceConfig = TypeOf<typeof serviceConfig>;
+
 /** @internal */
 export interface NodeConfigType {
   roles: NodeRolesConfig;
+  service?: NodeServiceConfig;
 }
 
 const configSchema = schema.object({
   roles: rolesConfig,
+  service: serviceConfig
 });
 
 /** @internal */
