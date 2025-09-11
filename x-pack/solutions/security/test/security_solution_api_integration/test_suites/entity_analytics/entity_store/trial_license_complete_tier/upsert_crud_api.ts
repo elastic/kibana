@@ -93,7 +93,7 @@ export default function (providerContext: FtrProviderContext) {
                 Privileged: true,
               },
               lifecycle: {
-                LastPasswordChange: date,
+                FirstSeen: date,
               },
             },
           },
@@ -110,7 +110,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.type).toEqual('user');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.LastPasswordChange).toEqual(date);
+            expect(hit._source?.entity?.lifecycle?.FirstSeen).toEqual(date);
           });
 
           return true;
@@ -139,7 +139,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.type).toEqual('user updated');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.LastPasswordChange).toEqual(date);
+            expect(hit._source?.entity?.lifecycle?.FirstSeen).toEqual(date);
           });
           return true;
         });

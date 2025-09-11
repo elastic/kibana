@@ -18,55 +18,10 @@ Object {
         "host.domain": Object {
           "type": "keyword",
         },
-        "host.entity.attributes.Asset": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.GrantedPermissions": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.KnownRedirect": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.Managed": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.MfaEnabled": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.OauthConsentRestriction": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.OsCurrent": Object {
-          "type": "keyword",
-        },
-        "host.entity.attributes.OsPatchCurrent": Object {
-          "type": "keyword",
-        },
         "host.entity.attributes.Privileged": Object {
           "type": "keyword",
         },
-        "host.entity.attributes.StorageClass": Object {
-          "type": "keyword",
-        },
-        "host.entity.behavior.BruteForceVictim": Object {
-          "type": "keyword",
-        },
-        "host.entity.behavior.NewCountryLogin": Object {
-          "type": "keyword",
-        },
-        "host.entity.behavior.UsedUsbDevice": Object {
-          "type": "keyword",
-        },
         "host.entity.lifecycle.FirstSeen": Object {
-          "type": "keyword",
-        },
-        "host.entity.lifecycle.IssuedAt": Object {
-          "type": "keyword",
-        },
-        "host.entity.lifecycle.LastActivity": Object {
-          "type": "keyword",
-        },
-        "host.entity.lifecycle.LastPasswordChange": Object {
           "type": "keyword",
         },
         "host.entity.name": Object {
