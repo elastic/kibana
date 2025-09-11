@@ -21,6 +21,7 @@ import {
   NODE_CONFIG_PATH,
   NODE_WILDCARD_CHAR,
   NODE_DEFAULT_ROLES,
+  NodeServiceConfig,
 } from './node_config';
 
 const DEFAULT_ROLES = [...NODE_DEFAULT_ROLES];
@@ -66,8 +67,12 @@ export class NodeService {
 
   public async preboot({ loggingSystem }: PrebootDeps): Promise<InternalNodeServicePreboot> {
     const roles = await this.getNodeRoles();
+    const service = await this.getNodeService();
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
+    if (service != null) {
+      this.log.info(`Kibana process configured with service: [${service}]`);
+    }
 
     // We assume the combination of node roles has been validated and avoid doing additional checks here.
     this.roles = NODE_ALL_ROLES.reduce((acc, curr) => {
@@ -92,14 +97,24 @@ export class NodeService {
   }
 
   private async getNodeRoles(): Promise<NodeRolesConfig> {
-    const { roles } = await firstValueFrom(
-      this.configService.atPath<NodeConfigType>(NODE_CONFIG_PATH)
-    );
+    const { roles } = await this.getNodeConfig();
 
     if (containsWildcard(roles)) {
       return DEFAULT_ROLES;
     }
 
     return roles;
+  }
+
+  private async getNodeService(): Promise<NodeServiceConfig> {
+    const { service } = await this.getNodeConfig();
+
+    return service;
+  }
+
+  private async getNodeConfig() : Promise<NodeConfigType> {
+    return await firstValueFrom(
+      this.configService.atPath<NodeConfigType>(NODE_CONFIG_PATH)
+    )
   }
 }
