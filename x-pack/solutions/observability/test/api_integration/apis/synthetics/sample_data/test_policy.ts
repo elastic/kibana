@@ -46,7 +46,6 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
       name: 'synthetics',
       title: 'Elastic Synthetics',
       version: INSTALLED_VERSION,
-      fips_compatible: true,
     },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
