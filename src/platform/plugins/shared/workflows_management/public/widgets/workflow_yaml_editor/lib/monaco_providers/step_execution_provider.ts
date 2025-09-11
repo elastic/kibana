@@ -48,7 +48,10 @@ export class StepExecutionProvider {
    * Get adjusted range for a step node (prevents bleeding into next step)
    * This uses the same logic as UnifiedActionsProvider to ensure consistency
    */
-  private getAdjustedStepRange(model: monaco.editor.ITextModel, stepNode: any): monaco.Range | null {
+  private getAdjustedStepRange(
+    model: monaco.editor.ITextModel,
+    stepNode: any
+  ): monaco.Range | null {
     try {
       if (!stepNode.range) {
         return null;

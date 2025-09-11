@@ -28,7 +28,11 @@ export class WorkflowTaskScheduler {
   /**
    * Schedules tasks for all enabled scheduled triggers in a workflow
    */
-  async scheduleWorkflowTasks(workflow: EsWorkflow, spaceId: string, request?: KibanaRequest): Promise<string[]> {
+  async scheduleWorkflowTasks(
+    workflow: EsWorkflow,
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<string[]> {
     const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
     const scheduledTaskIds: string[] = [];
 
@@ -81,10 +85,10 @@ export class WorkflowTaskScheduler {
 
     // Use Task Manager's first-class API key support by passing the request
     // Task Manager will automatically create and manage the API key for user context
-    const scheduledTask = request 
+    const scheduledTask = request
       ? await this.taskManager.schedule(taskInstance, { request })
       : await this.taskManager.schedule(taskInstance);
-    
+
     return scheduledTask.id;
   }
 
@@ -121,7 +125,11 @@ export class WorkflowTaskScheduler {
   /**
    * Updates scheduled tasks when a workflow is updated
    */
-  async updateWorkflowTasks(workflow: EsWorkflow, spaceId: string, request?: KibanaRequest): Promise<void> {
+  async updateWorkflowTasks(
+    workflow: EsWorkflow,
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<void> {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 

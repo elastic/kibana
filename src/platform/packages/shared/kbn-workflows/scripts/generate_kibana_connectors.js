@@ -547,31 +547,35 @@ function extractFieldsFromSchema(schemaDefinition) {
     if (unionMatch) {
       // Uncomment for debugging: console.log(`🔄 Processing union schema`);
       const unionContent = unionMatch[1];
-      
+
       // Extract schema references from the union
       const schemaRefs = unionContent.match(/[A-Za-z_][A-Za-z0-9_]*/g);
       if (schemaRefs) {
         // Uncomment for debugging: console.log(`🔍 Found union members:`, schemaRefs);
-        
+
         // For union schemas, we'll extract fields from all union members
         // and create a combined field set with optional fields
         const allUnionFields = new Map();
-        
+
         for (const schemaRef of schemaRefs) {
           // Skip common Zod method names
-          if (['z', 'union', 'object', 'string', 'number', 'boolean', 'array'].includes(schemaRef)) {
+          if (
+            ['z', 'union', 'object', 'string', 'number', 'boolean', 'array'].includes(schemaRef)
+          ) {
             continue;
           }
-          
+
           // Try to find and process each union member schema
           const memberFields = extractFieldsFromUnionMember(schemaRef);
           for (const [fieldName, fieldDef] of memberFields) {
             // Mark all union fields as optional since they depend on which union branch is chosen
-            const optionalFieldDef = fieldDef.includes('.optional()') ? fieldDef : `${fieldDef}.optional()`;
+            const optionalFieldDef = fieldDef.includes('.optional()')
+              ? fieldDef
+              : `${fieldDef}.optional()`;
             allUnionFields.set(fieldName, optionalFieldDef);
           }
         }
-        
+
         // Uncomment for debugging: console.log(`📋 Extracted ${allUnionFields.size} fields from union:`, Array.from(allUnionFields.keys()));
         return allUnionFields;
       }
@@ -638,11 +642,11 @@ function extractFieldsFromSchema(schemaDefinition) {
  */
 function extractFieldsFromUnionMember(schemaName) {
   const fields = new Map();
-  
+
   try {
     if (fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
       const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
-      
+
       // Find the union member schema definition
       const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const schemaRegex = new RegExp(
@@ -650,11 +654,11 @@ function extractFieldsFromUnionMember(schemaName) {
         'm'
       );
       const match = schemasContent.match(schemaRegex);
-      
+
       if (match) {
         const memberSchemaDefinition = match[1];
         // Uncomment for debugging: console.log(`🔍 Processing union member ${schemaName}`);
-        
+
         // Recursively extract fields from this member (handles nested objects)
         const memberFields = extractFieldsFromSchema(memberSchemaDefinition);
         return memberFields;
@@ -665,7 +669,7 @@ function extractFieldsFromUnionMember(schemaName) {
   } catch (error) {
     console.warn(`Error extracting fields from union member ${schemaName}:`, error.message);
   }
-  
+
   return fields;
 }
 
@@ -684,7 +688,7 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
           // The schema is a reference to the actual schema object, not a string
           // We need to extract the schema name from the reference
           let schemaName;
-          
+
           // Handle different ways the schema might be represented
           if (typeof param.schema === 'string') {
             schemaName = param.schema;
@@ -697,7 +701,7 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
               schemaName = schemaMatch[1];
             }
           }
-          
+
           if (!schemaName) {
             console.warn(`⚠️ Could not determine schema name for ${operationId} body parameter`);
             continue;

@@ -38,7 +38,13 @@ export function createWorkflowTaskRunner({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actionsClient: IUnsecuredActionsClient;
 }) {
-  return ({ taskInstance, fakeRequest }: { taskInstance: ConcreteTaskInstance; fakeRequest?: KibanaRequest }) => {
+  return ({
+    taskInstance,
+    fakeRequest,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    fakeRequest?: KibanaRequest;
+  }) => {
     const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 

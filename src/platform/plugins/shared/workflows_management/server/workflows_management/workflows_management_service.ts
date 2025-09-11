@@ -267,15 +267,14 @@ export class WorkflowsService {
         updated_at: now.toISOString(),
       };
 
-
       // If yaml is being updated, validate and update definition
       let shouldUpdateScheduler = false;
-      
+
       // Check if enabled state is being changed
       if (workflow.enabled !== undefined && workflow.enabled !== existingDocument._source.enabled) {
         shouldUpdateScheduler = true;
       }
-      
+
       // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
         const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -307,9 +306,9 @@ export class WorkflowsService {
           updatedData.description = workflowDef.description;
           updatedData.tags = workflowDef.tags;
           updatedData.valid = true;
-          shouldUpdateScheduler = true; 
+          shouldUpdateScheduler = true;
           updatedData.valid = true;
-          shouldUpdateScheduler = true; 
+          shouldUpdateScheduler = true;
         }
       }
 
@@ -364,8 +363,10 @@ export class WorkflowsService {
         try {
           if (finalData.definition && finalData.valid && finalData.enabled) {
             // Check if workflow has scheduled triggers before updating scheduler
-            const workflowHasScheduledTriggers = hasScheduledTriggers(finalData.definition.triggers || []);
-            
+            const workflowHasScheduledTriggers = hasScheduledTriggers(
+              finalData.definition.triggers || []
+            );
+
             if (workflowHasScheduledTriggers) {
               // Get the updated workflow from storage
               const updatedWorkflow = await this.getWorkflow(id, spaceId);
@@ -377,19 +378,27 @@ export class WorkflowsService {
                   tags: [], // TODO: Add tags support to WorkflowDetailDto
                   deleted_at: null,
                 };
-                
-                await this.taskScheduler.updateWorkflowTasks(workflowForScheduler, spaceId, request);
+
+                await this.taskScheduler.updateWorkflowTasks(
+                  workflowForScheduler,
+                  spaceId,
+                  request
+                );
                 this.logger.info(`Updated scheduled tasks for workflow ${id}`);
               }
             } else {
               // No scheduled triggers, remove any existing scheduled tasks
               await this.taskScheduler.unscheduleWorkflowTasks(id);
-              this.logger.info(`Removed scheduled tasks for workflow ${id} (no scheduled triggers)`);
+              this.logger.info(
+                `Removed scheduled tasks for workflow ${id} (no scheduled triggers)`
+              );
             }
           } else {
             // If workflow is invalid or disabled, remove all scheduled tasks
             await this.taskScheduler.unscheduleWorkflowTasks(id);
-            this.logger.info(`Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`);
+            this.logger.info(
+              `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
+            );
           }
         } catch (error) {
           this.logger.error(`Failed to update scheduled tasks for workflow ${id}: ${error}`);

@@ -111,22 +111,21 @@ export class UnifiedActionsProvider {
         return;
       }
 
-
       // Check if we're in a different step - only clear and re-highlight if step changed
       const newStepNode = context.stepContext?.stepNode;
       const stepChanged = this.currentStepNode !== newStepNode;
-      
+
       if (stepChanged) {
         // Only clear when we move to a different step
         this.clearHighlightAndActions();
-        
+
         // Update current connector type and step node
         this.currentConnectorType = context.connectorType;
         this.currentStepNode = newStepNode;
-        
+
         // Update highlighting for the new step
         this.updateHighlighting(context);
-        
+
         // Generate action buttons for the new step
         const handler = getMonacoConnectorHandler(context.connectorType);
         if (handler) {

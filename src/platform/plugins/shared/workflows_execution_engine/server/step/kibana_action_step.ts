@@ -174,12 +174,16 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
       } else if (stepType === 'kibana.addCaseCommentDefaultSpace') {
         const caseId = params.caseId;
         if (!caseId) throw new Error('Case ID is required for kibana.addCaseCommentDefaultSpace');
-        
+
         // Build body only with provided parameters, don't include undefined values
         const body: any = {};
-        
+
         // Determine comment type based on provided parameters
-        if (params.alertId !== undefined || params.index !== undefined || params.rule !== undefined) {
+        if (
+          params.alertId !== undefined ||
+          params.index !== undefined ||
+          params.rule !== undefined
+        ) {
           // Alert comment - requires alertId, index, owner, rule, type
           body.type = 'alert';
           if (params.alertId !== undefined) body.alertId = params.alertId;
@@ -200,7 +204,7 @@ export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
           if (params.rule !== undefined) body.rule = params.rule;
           if (params.comment !== undefined) body.comment = params.comment;
         }
-        
+
         return await this.makeHttpRequest(
           {
             method: 'POST',

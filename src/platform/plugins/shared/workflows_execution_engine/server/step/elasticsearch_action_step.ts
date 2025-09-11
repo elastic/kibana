@@ -159,7 +159,11 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         // Helpful: surface per-item errors if any
         if (resp.errors) {
           const itemsWithErrors = resp.items
-            .map((it: any, idx: number) => ({ idx, action: Object.keys(it)[0], result: it[Object.keys(it)[0]] }))
+            .map((it: any, idx: number) => ({
+              idx,
+              action: Object.keys(it)[0],
+              result: it[Object.keys(it)[0]],
+            }))
             .filter((x: any) => x.result.error);
           console.error('Bulk had item errors:', itemsWithErrors);
         }
