@@ -35,7 +35,7 @@ export default function getWebhookSecretHeaderKeys({ getService }: FtrProviderCo
       expect(secretKeys).to.eql(['superSecretKey']);
     });
 
-    it('should return the secrets keys correctly for a webhook connector', async () => {
+    it('should return the secrets keys correctly for a cases webhook connector', async () => {
       const connector = await createCasesWebhookConnector({ superSecretKey: 'superSecretValue' });
       const secretKeys = await getSecretHeadersKeys(connector.id, Superuser);
 
