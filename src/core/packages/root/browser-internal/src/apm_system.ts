@@ -64,9 +64,21 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
 
-    init(apmConfig);
+    init({
+      ...apmConfig,
+      logLevel: 'debug',
+    });
     // hold page load transaction blocks a transaction implicitly created by init.
     this.holdPageLoadTransaction(apm);
+
+    apm.observe('transaction:start', (transaction) => {
+      if (['page-load', 'route-change', 'app-change'].includes(transaction.type)) {
+        console.log(
+          `--------------> New ${transaction.type} transaction started:`,
+          transaction.name
+        );
+      }
+    });
 
     // Registering an event handler to improve user-interaction transaction names based on data-test-subj attribute
     // Context: https://github.com/elastic/observability-dev/issues/4528
