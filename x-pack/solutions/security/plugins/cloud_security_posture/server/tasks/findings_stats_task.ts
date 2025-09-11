@@ -54,8 +54,8 @@ const validateBenchmarkScoreTemplate = async (
   logger: Logger
 ): Promise<void> => {
   try {
-    const templateResponse = await esClient.indices.getIndexTemplate({ 
-      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME 
+    const templateResponse = await esClient.indices.getIndexTemplate({
+      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
     });
 
     const template = templateResponse.index_templates[0]?.index_template;
@@ -85,7 +85,7 @@ const validateBenchmarkScoreTemplate = async (
       if (!templateField) {
         logger.warn(`${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} field missing '${fieldName}'`);
         hasFieldMismatch = true;
-      } 
+      }
     }
 
     if (hasFieldMismatch) {
