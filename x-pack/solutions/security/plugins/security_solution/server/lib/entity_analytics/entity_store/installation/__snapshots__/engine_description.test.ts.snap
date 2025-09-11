@@ -86,26 +86,6 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.StorageClass",
-      "source": "entity.attributes.StorageClass",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.MfaEnabled",
-      "source": "entity.attributes.MfaEnabled",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.attributes.Privileged",
       "source": "entity.attributes.Privileged",
     },
@@ -116,138 +96,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.GrantedPermissions",
-      "source": "entity.attributes.GrantedPermissions",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.KnownRedirect",
-      "source": "entity.attributes.KnownRedirect",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Asset",
-      "source": "entity.attributes.Asset",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Managed",
-      "source": "entity.attributes.Managed",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsCurrent",
-      "source": "entity.attributes.OsCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsPatchCurrent",
-      "source": "entity.attributes.OsPatchCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OauthConsentRestriction",
-      "source": "entity.attributes.OauthConsentRestriction",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.lifecycle.FirstSeen",
       "source": "entity.lifecycle.FirstSeen",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastActivity",
-      "source": "entity.lifecycle.LastActivity",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.IssuedAt",
-      "source": "entity.lifecycle.IssuedAt",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastPasswordChange",
-      "source": "entity.lifecycle.LastPasswordChange",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.UsedUsbDevice",
-      "source": "entity.behavior.UsedUsbDevice",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.BruteForceVictim",
-      "source": "entity.behavior.BruteForceVictim",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.NewCountryLogin",
-      "source": "entity.behavior.NewCountryLogin",
     },
     Object {
       "aggregation": Object {
@@ -868,58 +718,13 @@ Object {
     "cloud.service.name": Object {
       "type": "keyword",
     },
-    "entity.attributes.Asset": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.GrantedPermissions": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.KnownRedirect": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.Managed": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.MfaEnabled": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OauthConsentRestriction": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsCurrent": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsPatchCurrent": Object {
-      "type": "keyword",
-    },
     "entity.attributes.Privileged": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.StorageClass": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.BruteForceVictim": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.NewCountryLogin": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.UsedUsbDevice": Object {
       "type": "keyword",
     },
     "entity.id": Object {
       "type": "keyword",
     },
     "entity.lifecycle.FirstSeen": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.IssuedAt": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastActivity": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastPasswordChange": Object {
       "type": "keyword",
     },
     "entity.name": Object {
@@ -1288,26 +1093,6 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.StorageClass",
-      "source": "host.entity.attributes.StorageClass",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.MfaEnabled",
-      "source": "host.entity.attributes.MfaEnabled",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.attributes.Privileged",
       "source": "host.entity.attributes.Privileged",
     },
@@ -1318,138 +1103,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.GrantedPermissions",
-      "source": "host.entity.attributes.GrantedPermissions",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.KnownRedirect",
-      "source": "host.entity.attributes.KnownRedirect",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Asset",
-      "source": "host.entity.attributes.Asset",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Managed",
-      "source": "host.entity.attributes.Managed",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsCurrent",
-      "source": "host.entity.attributes.OsCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsPatchCurrent",
-      "source": "host.entity.attributes.OsPatchCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OauthConsentRestriction",
-      "source": "host.entity.attributes.OauthConsentRestriction",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.lifecycle.FirstSeen",
       "source": "host.entity.lifecycle.FirstSeen",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastActivity",
-      "source": "host.entity.lifecycle.LastActivity",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.IssuedAt",
-      "source": "host.entity.lifecycle.IssuedAt",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastPasswordChange",
-      "source": "host.entity.lifecycle.LastPasswordChange",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.UsedUsbDevice",
-      "source": "host.entity.behavior.UsedUsbDevice",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.BruteForceVictim",
-      "source": "host.entity.behavior.BruteForceVictim",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.NewCountryLogin",
-      "source": "host.entity.behavior.NewCountryLogin",
     },
   ],
   "name": "Security 'host' Entity Store Definition",
@@ -1467,55 +1122,10 @@ Object {
     "asset.criticality": Object {
       "type": "keyword",
     },
-    "entity.attributes.Asset": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.GrantedPermissions": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.KnownRedirect": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.Managed": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.MfaEnabled": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OauthConsentRestriction": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsCurrent": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsPatchCurrent": Object {
-      "type": "keyword",
-    },
     "entity.attributes.Privileged": Object {
       "type": "keyword",
     },
-    "entity.attributes.StorageClass": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.BruteForceVictim": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.NewCountryLogin": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.UsedUsbDevice": Object {
-      "type": "keyword",
-    },
     "entity.lifecycle.FirstSeen": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.IssuedAt": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastActivity": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastPasswordChange": Object {
       "type": "keyword",
     },
     "entity.name": Object {
@@ -1801,26 +1411,6 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.StorageClass",
-      "source": "service.entity.attributes.StorageClass",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.MfaEnabled",
-      "source": "service.entity.attributes.MfaEnabled",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.attributes.Privileged",
       "source": "service.entity.attributes.Privileged",
     },
@@ -1831,138 +1421,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.GrantedPermissions",
-      "source": "service.entity.attributes.GrantedPermissions",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.KnownRedirect",
-      "source": "service.entity.attributes.KnownRedirect",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Asset",
-      "source": "service.entity.attributes.Asset",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Managed",
-      "source": "service.entity.attributes.Managed",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsCurrent",
-      "source": "service.entity.attributes.OsCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsPatchCurrent",
-      "source": "service.entity.attributes.OsPatchCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OauthConsentRestriction",
-      "source": "service.entity.attributes.OauthConsentRestriction",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.lifecycle.FirstSeen",
       "source": "service.entity.lifecycle.FirstSeen",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastActivity",
-      "source": "service.entity.lifecycle.LastActivity",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.IssuedAt",
-      "source": "service.entity.lifecycle.IssuedAt",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastPasswordChange",
-      "source": "service.entity.lifecycle.LastPasswordChange",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.UsedUsbDevice",
-      "source": "service.entity.behavior.UsedUsbDevice",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.BruteForceVictim",
-      "source": "service.entity.behavior.BruteForceVictim",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.NewCountryLogin",
-      "source": "service.entity.behavior.NewCountryLogin",
     },
   ],
   "name": "Security 'service' Entity Store Definition",
@@ -1980,55 +1440,10 @@ Object {
     "asset.criticality": Object {
       "type": "keyword",
     },
-    "entity.attributes.Asset": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.GrantedPermissions": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.KnownRedirect": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.Managed": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.MfaEnabled": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OauthConsentRestriction": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsCurrent": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsPatchCurrent": Object {
-      "type": "keyword",
-    },
     "entity.attributes.Privileged": Object {
       "type": "keyword",
     },
-    "entity.attributes.StorageClass": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.BruteForceVictim": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.NewCountryLogin": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.UsedUsbDevice": Object {
-      "type": "keyword",
-    },
     "entity.lifecycle.FirstSeen": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.IssuedAt": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastActivity": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastPasswordChange": Object {
       "type": "keyword",
     },
     "entity.name": Object {
@@ -2276,26 +1691,6 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.StorageClass",
-      "source": "user.entity.attributes.StorageClass",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.MfaEnabled",
-      "source": "user.entity.attributes.MfaEnabled",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.attributes.Privileged",
       "source": "user.entity.attributes.Privileged",
     },
@@ -2306,138 +1701,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "entity.attributes.GrantedPermissions",
-      "source": "user.entity.attributes.GrantedPermissions",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.KnownRedirect",
-      "source": "user.entity.attributes.KnownRedirect",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Asset",
-      "source": "user.entity.attributes.Asset",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.Managed",
-      "source": "user.entity.attributes.Managed",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsCurrent",
-      "source": "user.entity.attributes.OsCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OsPatchCurrent",
-      "source": "user.entity.attributes.OsPatchCurrent",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.attributes.OauthConsentRestriction",
-      "source": "user.entity.attributes.OauthConsentRestriction",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
       "destination": "entity.lifecycle.FirstSeen",
       "source": "user.entity.lifecycle.FirstSeen",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastActivity",
-      "source": "user.entity.lifecycle.LastActivity",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.IssuedAt",
-      "source": "user.entity.lifecycle.IssuedAt",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.lifecycle.LastPasswordChange",
-      "source": "user.entity.lifecycle.LastPasswordChange",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.UsedUsbDevice",
-      "source": "user.entity.behavior.UsedUsbDevice",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.BruteForceVictim",
-      "source": "user.entity.behavior.BruteForceVictim",
-    },
-    Object {
-      "aggregation": Object {
-        "sort": Object {
-          "@timestamp": "desc",
-        },
-        "type": "top_value",
-      },
-      "destination": "entity.behavior.NewCountryLogin",
-      "source": "user.entity.behavior.NewCountryLogin",
     },
   ],
   "name": "Security 'user' Entity Store Definition",
@@ -2455,55 +1720,10 @@ Object {
     "asset.criticality": Object {
       "type": "keyword",
     },
-    "entity.attributes.Asset": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.GrantedPermissions": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.KnownRedirect": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.Managed": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.MfaEnabled": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OauthConsentRestriction": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsCurrent": Object {
-      "type": "keyword",
-    },
-    "entity.attributes.OsPatchCurrent": Object {
-      "type": "keyword",
-    },
     "entity.attributes.Privileged": Object {
       "type": "keyword",
     },
-    "entity.attributes.StorageClass": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.BruteForceVictim": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.NewCountryLogin": Object {
-      "type": "keyword",
-    },
-    "entity.behavior.UsedUsbDevice": Object {
-      "type": "keyword",
-    },
     "entity.lifecycle.FirstSeen": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.IssuedAt": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastActivity": Object {
-      "type": "keyword",
-    },
-    "entity.lifecycle.LastPasswordChange": Object {
       "type": "keyword",
     },
     "entity.name": Object {

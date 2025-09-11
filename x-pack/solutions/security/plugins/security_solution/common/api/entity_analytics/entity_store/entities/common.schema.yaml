@@ -34,48 +34,14 @@ components:
         attributes:
           type: object
           properties:
-            StorageClass:
-              type: string
-            MfaEnabled:
-              type: boolean
             Privileged:
               type: boolean
-            GrantedPermissions:
-              type: string
-            KnownRedirect:
-              type: boolean
-            Asset:
-              type: boolean
-            Managed:
-              type: boolean
-            OsCurrent:
-              type: string
-            OsPatchCurrent:
-              type: string
-            OauthConsentRestriction:
-              type: string
         behavior: 
           type: object
-          properties:
-            UsedUsbDevice:
-              type: boolean
-            BruteForceVictim:
-              type: boolean
-            NewCountryLogin:
-              type: boolean
         lifecycle:
           type: object
           properties:
             FirstSeen:
-              type: string
-              format: date-time
-            LastActivity:
-              type: string
-              format: date-time
-            IssuedAt:
-              type: string
-              format: date-time
-            LastPasswordChange:
               type: string
               format: date-time
 

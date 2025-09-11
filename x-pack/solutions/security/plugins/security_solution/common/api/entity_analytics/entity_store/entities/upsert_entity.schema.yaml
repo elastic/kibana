@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   version: '2023-10-31'
-  title: Entity Store - Upsert Entity
+  title: Entity Store - Update or Create Entity
 paths:
   /api/entity_store/entities/{entityType}:
     put:
@@ -10,14 +10,19 @@ paths:
       operationId: UpsertEntity
       summary: Updates or creates an entity in Entity Store
       description: >
-        Given an entity type and the contents of an entity, update (or create) the
-        contents of an entity. By default only a specific set of fields are allowed
-        to be modified, being that `entity.attributes.*`, `entity.lifecyle.*` and
-        `entity.behavior.*`. If you wish to update any other field you must use 
-        the query parameter `force=true`. Be aware that some fields always fetch
-        the first seen value, thus new values won't end up in the final index.
-        Also, due to technical limitations, there is no guarantee that collected
-        values will end up in the final list of seen values.
+        Update or create an entity in Entity Store.
+        
+        If the specified entity already exists, it is updated with the provided values. 
+        If the entity does not exist, a new one is created.
+        By default, only the following fields can be updated:
+        * `entity.attributes.*`
+        * `entity.lifecycle.*`
+        * `entity.behavior.*`
+        To update other fields, set the `force` query parameter to `true`.
+        > info
+        > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+        
+        > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
       parameters:
         - name: entityType
           in: path
@@ -41,11 +46,11 @@ paths:
         '404':
           description: Entity not found
         '403':
-          description: Operation on a not exposed field
+          description: Operation on a restricted field
         '400':
-          description: Operation on a non existent field or on a not initiated Engine
+          description: Operation on a non-existent field or on an uninitialized Engine
         '200':
-          description: Entity Updated or Created
+          description: Entity updated or created
           content:
             application/json:
               schema:
