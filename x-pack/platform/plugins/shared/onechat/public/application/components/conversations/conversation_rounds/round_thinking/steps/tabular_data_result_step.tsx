@@ -49,26 +49,28 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
           }
         )}
       </EuiText>
-      <EuiLink
-        href={discoverUrl}
-        data-test-subj="onechat-esql-data-result-see-in-discover"
-        aria-label={i18n.translate(
-          'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
-          {
-            defaultMessage: 'See documents in Discover',
-          }
-        )}
-      >
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiIcon type="discoverApp" />
-          {i18n.translate(
-            'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscover',
+      {discoverUrl && (
+        <EuiLink
+          href={discoverUrl}
+          data-test-subj="onechat-esql-data-result-see-in-discover"
+          aria-label={i18n.translate(
+            'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
             {
-              defaultMessage: 'See in Discover',
+              defaultMessage: 'See documents in Discover',
             }
           )}
-        </EuiFlexGroup>
-      </EuiLink>
+        >
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiIcon type="discoverApp" />
+            {i18n.translate(
+              'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscover',
+              {
+                defaultMessage: 'See in Discover',
+              }
+            )}
+          </EuiFlexGroup>
+        </EuiLink>
+      )}
     </EuiFlexGroup>
   );
 };
