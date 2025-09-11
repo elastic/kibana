@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mimeTypes from 'mime-types';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
+import mimeTypes from 'mime-types';
 import type { File, FileKind } from '../../../common';
 import type { FileServiceStart } from '../../file_service';
 import { errors } from '../../file_service';
@@ -56,12 +56,16 @@ export function validateMimeType(
     return;
   }
 
-  const allowedMimeTypes = fileKind.allowedMimeTypes ?? null;
+  const allowedMimeTypes = fileKind.allowedMimeTypes;
+
+  if (!allowedMimeTypes || allowedMimeTypes.length === 0) {
+    return;
+  }
 
   if (allowedMimeTypes && !allowedMimeTypes.includes(mimeType)) {
     return kibanaResponseFactory.badRequest({
       body: {
-        message: `MIME type is not allowed for file kind`,
+        message: `File type is not supported`,
       },
     });
   }
@@ -77,23 +81,33 @@ export function validateFileNameExtension(
   fileName: string | undefined,
   file: File | undefined
 ): undefined | IKibanaResponse {
-  if (!fileName || !file) {
+  if (!fileName || !file || !file.data.mimeType) {
     return;
   }
 
-  if (fileName && file.data.mimeType) {
-    const fileMimeType = file.data.mimeType;
-    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+  const fileMimeType = file.data.mimeType.trim();
+  if (!fileMimeType) {
+    return;
+  }
 
-    if (!fileExtension) {
-      return;
-    }
+  // Extract file extension (handle cases with multiple dots)
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex === -1) {
+    // No extension found - this might be intentional for some file types
+    return;
+  }
 
-    const expectedExtensions = mimeTypes.extensions[fileMimeType];
-    if (expectedExtensions && !expectedExtensions.includes(fileExtension)) {
-      return kibanaResponseFactory.badRequest({
-        body: { message: `File extension does not match file MIME type.` },
-      });
-    }
+  const fileExtension = fileName.substring(lastDotIndex + 1).toLowerCase();
+  if (!fileExtension) {
+    return;
+  }
+
+  const expectedExtensions = mimeTypes.extensions[fileMimeType];
+  if (expectedExtensions && !expectedExtensions.includes(fileExtension)) {
+    return kibanaResponseFactory.badRequest({
+      body: {
+        message: `File extension does not match file type`,
+      },
+    });
   }
 }
