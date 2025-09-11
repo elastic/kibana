@@ -222,6 +222,10 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.add,
         id: 'add',
         iconType: 'plusInCircle',
+        color: 'success',
+        fill: false,
+        emphasize: true,
+        type: 'button',
         testId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
         run: (anchorElement: HTMLElement) =>
@@ -332,21 +336,16 @@ export const useDashboardMenuItems = ({
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
-
+      editModeItems.push(menuItems.add);
       editModeItems.push(menuItems.quickSave);
     } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
+      editModeItems.push(menuItems.switchToViewMode, menuItems.add, menuItems.interactiveSave);
     }
 
-    const editModeTopNavConfigItems = [
-      ...labsMenuItem,
-      menuItems.add,
-      menuItems.settings,
-      ...editModeItems,
-    ];
+    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
