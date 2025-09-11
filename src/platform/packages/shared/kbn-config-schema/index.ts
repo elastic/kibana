@@ -184,10 +184,10 @@ function object<P extends ObjectProps<Props>, D extends ObjectDefaultValue<P> = 
   return new ObjectType(props, options);
 }
 
-function arrayOf<T, D extends DefaultValue<T> = never>(
-  itemType: Type<T, D>,
-  options?: ArrayOptions<T, D>
-): Type<T[], D> {
+function arrayOf<V, D extends DefaultValue<V>, DA extends DefaultValue<V[]> = never>(
+  itemType: Type<V, D>,
+  options?: ArrayOptions<V, DA>
+): Type<V[], DA> {
   return new ArrayType(itemType, options);
 }
 

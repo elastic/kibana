@@ -12,17 +12,20 @@ import { internals } from '../internals';
 import type { TypeOptions, ExtendsDeepOptions, UnknownOptions, DefaultValue } from './type';
 import { Type } from './type';
 
-export type ArrayOptions<T, D extends DefaultValue<T>> = TypeOptions<T[], D> &
+export type ArrayOptions<T, D extends DefaultValue<T[]>> = TypeOptions<T[], D> &
   UnknownOptions & {
     minSize?: number;
     maxSize?: number;
   };
 
-export class ArrayType<T, D extends DefaultValue<T>> extends Type<T[], D> {
-  private readonly arrayType: Type<T>;
-  private readonly arrayOptions: ArrayOptions<T, D>;
+export class ArrayType<T, D extends DefaultValue<T>, DA extends DefaultValue<T[]>> extends Type<
+  T[],
+  DA
+> {
+  private readonly arrayType: Type<T, D>;
+  private readonly arrayOptions: ArrayOptions<T, DA>;
 
-  constructor(type: Type<T>, options: ArrayOptions<T, D> = {}) {
+  constructor(type: Type<T, D>, options: ArrayOptions<T, DA> = {}) {
     let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
     if (options.minSize !== undefined) {
