@@ -100,7 +100,7 @@ function getExpressionForLayer(
       type: 'function',
       function: 'lens_map_to_columns',
       arguments: {
-        idMap: [JSON.stringify(idMapper)],
+        idMap: [JSON.stringify(idMapper || '{}')],
         isTextBased: [true],
         query: [JSON.stringify(layer.query)],
       },

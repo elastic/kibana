@@ -28,6 +28,7 @@ import type { TextBasedLayer } from '../types';
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
     expressions: ExpressionsStart;
+    data: DataPublicPluginStart;
   };
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
@@ -62,7 +63,18 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
-          const initialColumns = table.columns.map((col) => {
+
+          const { columns: transformedColumns } = transformEsqlMultiTermBreakdown({
+            columns: table.columns,
+            rows: [],
+            query: query.esql,
+            formatter: props.data.fieldFormats.getInstance(
+              'multi_terms',
+              getMultiTermsFormatterParams(table.columns)
+            ),
+          });
+
+          const columns = transformedColumns.map((col) => {
             return {
               id: col.variable ?? col.id,
               name: col.variable ? `??${col.variable}` : col.name,
@@ -79,16 +91,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             };
           });
 
-          const { columns } = transformEsqlMultiTermBreakdown({
-            columns: initialColumns,
-            rows: [],
-            query: query.esql,
-            formatter: props.core.fieldFormats.getInstance(
-              'multi_terms',
-              getMultiTermsFormatterParams(initialColumns)
-            ),
-          });
-
           setAllColumns(columns);
         }
       }
@@ -103,6 +105,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props.expressions,
     esqlVariables,
     query,
+    props.data,
   ]);
 
   const selectedField = useMemo(() => {
@@ -145,12 +148,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           selectedField={selectedField}
           onChoose={(choice) => {
             const column = allColumns?.find((f) => f.name === choice.field);
+            if (!column) return;
             const newColumn = {
               columnId: props.columnId,
-              fieldName: choice.field,
+              fieldName: column.id,
               meta: column?.meta,
               variable: column?.variable,
-              label: choice.field,
+              label: column.name,
             };
             return props.setState(
               !selectedField

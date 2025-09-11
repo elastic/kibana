@@ -229,13 +229,14 @@ export function getTextBasedDatasource({
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
+      const initialColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
       const { columns: textBasedQueryColumns } = transformEsqlMultiTermBreakdown({
-        columns: context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
+        columns: initialColumns,
         rows: [],
         query: context.query.esql,
         formatter: data.fieldFormats.getInstance(
           'multi_terms',
-          getMultiTermsFormatterParams(context.textBasedColumns ?? [])
+          getMultiTermsFormatterParams(initialColumns)
         ),
       });
 
@@ -250,7 +251,7 @@ export function getTextBasedDatasource({
         );
         return {
           columnId: c.variable ?? c.id,
-          fieldName: c.variable ? `??${c.variable}` : c.id,
+          fieldName: c.id,
           variable: c.variable,
           label: c.name,
           customLabel: c.id !== c.name,
@@ -522,7 +523,9 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      return (
+        <TextBasedDimensionEditor {...props} expressions={expressions} core={core} data={data} />
+      );
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
