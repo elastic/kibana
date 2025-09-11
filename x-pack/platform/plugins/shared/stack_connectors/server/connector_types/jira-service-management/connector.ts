@@ -11,7 +11,6 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { join } from 'path';
 import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
 import type {
   CloseAlertParams,
@@ -22,6 +21,8 @@ import type {
 } from './types';
 import * as i18n from './translations';
 import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
+
+const INTEGRATION_API_BASE_PATH = 'jsm/ops/integration/v2';
 
 export class JiraServiceManagementConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {
@@ -80,7 +81,7 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
     params: CreateAlertParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
-    const url = this.concatPathToURL('alerts').toString();
+    const url = this.concatPathToURL(`${INTEGRATION_API_BASE_PATH}/alerts`).toString();
     const res = await this.request(
       {
         method: 'post',
@@ -129,7 +130,7 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
   ) {
     const newAlias = JiraServiceManagementConnector.createAlias(params.alias);
 
-    const fullURL = this.concatPathToURL(`alerts/${newAlias}/close`);
+    const fullURL = this.concatPathToURL(`${INTEGRATION_API_BASE_PATH}/alerts/${newAlias}/close`);
     fullURL.searchParams.set('identifierType', 'alias');
 
     const { alias, ...paramsWithoutAlias } = params;
@@ -149,6 +150,6 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
   }
 
   private concatPathToURL(path: string) {
-    return new URL(path, join(this.config.apiUrl, '/jsm/ops/integration/v2/'));
+    return new URL(path, this.config.apiUrl);
   }
 }
