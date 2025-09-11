@@ -8,3 +8,4 @@
  */
 export { validateSources } from './sources';
 export { validateCommandArguments } from './commands';
+export { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from './function';

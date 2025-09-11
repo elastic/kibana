@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { parse, mutate, BasicPrettyPrinter, type FunctionParameterType } from '@kbn/esql-ast';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/validation';
 import { sanitazeESQLInput } from './sanitaze_input';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
@@ -46,10 +47,16 @@ export function appendWhereClauseToESQLQuery(
   // Adding the backticks here are they are needed for special char fields
   let fieldName = sanitazeESQLInput(field);
 
-  // casting to string
-  // there are some field types such as the ip that need
+  // Casting to string: There are some field types that need
   // to cast in string first otherwise ES will fail
-  if (fieldType !== 'string' && fieldType !== 'number' && fieldType !== 'boolean') {
+  if (
+    fieldType !== 'string' &&
+    fieldType !== 'number' &&
+    (fieldType === undefined ||
+      !PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(
+        fieldType as FunctionParameterType
+      ))
+  ) {
     fieldName = `${fieldName}::string`;
   }
 
