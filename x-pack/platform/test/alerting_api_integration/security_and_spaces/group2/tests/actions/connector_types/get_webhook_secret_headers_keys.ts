@@ -63,7 +63,7 @@ export default function getWebhookSecretHeaderKeys({ getService }: FtrProviderCo
 
       it('a user without access to connectors should not get the secret headers', async () => {
         const connector = await createWebhookConnector({ superSecretKey: 'superSecretValue' });
-        await getSecretHeadersKeys(connector.id, StackAlertsOnly, 401);
+        await getSecretHeadersKeys(connector.id, StackAlertsOnly, 403);
 
         objectRemover.add('default', connector.id, 'connector', 'actions');
       });
