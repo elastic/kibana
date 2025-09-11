@@ -62,7 +62,7 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
     await hostDetailsPage.assertCpuPercentageNotEmpty();
   } else {
     await autoDetectFlowPage.assertReceivedDataIndicator();
-    
+
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
 
     const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
