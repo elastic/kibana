@@ -11,7 +11,7 @@ import * as i18n from './translations';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { BulkActionsItem } from './types';
 
-interface ReprocessFailedItemsButtonProps {
+export interface ReprocessFailedItemsButtonProps {
   isAuthorized: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
