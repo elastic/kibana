@@ -135,11 +135,10 @@ export async function removeEntityStoreSnapshotTask({
   }
 }
 
-// removeAllFieldsAndResetTimestamp returns a painless function that takes a document,
+// removeAllFieldsAndResetTimestamp is a painless function that takes a document,
 // strips it of all its fields (except for identity fields, like host.name or entity.id),
 // and sets the timestamps to @now. The result is used as a script in reindex operation.
-const removeAllFieldsAndResetTimestamp = (entityType: EntityType): string => {
-  return `
+const removeAllFieldsAndResetTimestamp: string = `
     // Create a new map to hold the filtered fields
     Map newDoc = new HashMap();
 
@@ -149,21 +148,20 @@ const removeAllFieldsAndResetTimestamp = (entityType: EntityType): string => {
       newDoc.entity.id = ctx._source.entity.id;
     }
     // Keep host/user/service identity fields if present
-    if (ctx._source.${entityType}?.name != null) {
-      newDoc.${entityType} = new HashMap();
-      newDoc.${entityType}.name = ctx._source.${entityType}?.name;
+    if (ctx._source[params.entityType]?.name != null) {
+      newDoc[params.entityType] = new HashMap();
+      newDoc[params.entityType].name = ctx._source[params.entityType].name;
     }
 
     // Set the @timestamp field to the current time
-    newDoc['@timestamp'] = new Date();
+    newDoc['@timestamp'] = params.timestampNow;
 
     // Set the entity.last_seen_timestamp field to the current time
-    newDoc.entity.last_seen_timestamp = new Date();
+    newDoc.entity.last_seen_timestamp = params.timestampNow;
 
     // Replace the existing document with the new filtered document
     ctx._source = newDoc;
     `;
-};
 
 export async function runTask({
   logger,
@@ -238,8 +236,12 @@ export async function runTask({
       },
       conflicts: 'proceed',
       script: {
-        source: removeAllFieldsAndResetTimestamp(entityType),
+        source: removeAllFieldsAndResetTimestamp,
         lang: 'painless',
+        params: {
+          entityType,
+          timestampNow: new Date().toISOString(),
+        },
       },
     });
     logger.info(msg(`reindexed to ${resetIndex}: ${prettyReindexResponse(resetReindexResponse)}`));
