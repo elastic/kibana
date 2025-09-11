@@ -87,6 +87,43 @@ query.toRequest();
 query.toRequest().params; // [{ input : 123 }]
 ```
 
+## Conditionally add commands
+
+The simplest way to conditionally add commands to a query is to first construct
+the base `query` object and then use `.pipe` to add commands based on
+conditions:
+
+```ts
+// Build query conditionally
+let query = esql`FROM index`;
+
+if (includeFilters) {
+  query = query.pipe`WHERE foo > 42`;
+}
+
+query = query.limit(10); // or: query.pipe `LIMIT 10`;
+```
+
+Another approach is to inline conditional command into the original query
+using command holes. You can manually insert a no-op command `WHERE TRUE` or
+use the `esql.nop` helper:
+
+```ts
+// Build query with conditional command hole
+const query = esql`FROM index
+  | ${includeFilters ? esql.cmd`WHERE foo > 42` : esql.nop}
+  | LIMIT 10`;
+
+// same as:
+const query = esql`FROM index
+  | ${includeFilters ? esql.cmd`WHERE foo > 42` : esql.cmd`WHERE TRUE`}
+  | LIMIT 10`;
+```
+
+The `WHERE TRUE` commands are automatically removed from the final AST, so the
+resulting query does not contain any no-op commands. However, even if they
+were present, Elasticsearch would simply ignore them.
+
 ## API Reference
 
 ### Basic Usage Patterns

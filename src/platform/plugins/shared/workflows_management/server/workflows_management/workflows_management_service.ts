@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,
   KibanaRequest,
@@ -26,9 +27,17 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+} from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
@@ -50,6 +59,12 @@ import type {
   GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
+
+export interface SearchWorkflowExecutionsParams {
+  workflowId: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+}
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -162,6 +177,17 @@ export class WorkflowsService {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
 
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
+    }
+
+    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -236,20 +262,77 @@ export class WorkflowsService {
       const now = new Date();
 
       const updatedData: Partial<WorkflowProperties> = {
-        ...workflow,
         lastUpdatedBy: authenticatedUser,
         updated_at: now.toISOString(),
       };
 
-      // If yaml is being updated, validate and update definition
+      // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
         const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
         if (!parsedYaml.success) {
-          throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
+          updatedData.definition = undefined;
+          updatedData.enabled = false;
+          updatedData.valid = false;
+        } else {
+          // Validate step name uniqueness
+          const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+          if (!stepValidation.isValid) {
+            const errorMessages = stepValidation.errors.map((error) => error.message);
+            throw new WorkflowValidationError(
+              'Workflow validation failed: Step names must be unique throughout the workflow.',
+              errorMessages
+            );
+          }
+          const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
+            parsedYaml.data as WorkflowYaml
+          );
+          // Update all fields from the transformed YAML, not just definition
+          updatedData.definition = workflowDef.definition;
+          updatedData.name = workflowDef.name;
+          updatedData.enabled = workflowDef.enabled;
+          updatedData.description = workflowDef.description;
+          updatedData.tags = workflowDef.tags;
+          updatedData.valid = true;
         }
-        const workflowDef = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-        updatedData.definition = workflowDef.definition;
-        updatedData.valid = true;
+      }
+
+      // Handle individual field updates only when YAML is not being updated
+      if (!workflow.yaml) {
+        let yamlUpdated = false;
+
+        if (workflow.name !== undefined) {
+          updatedData.name = workflow.name;
+          yamlUpdated = true;
+        }
+        if (workflow.enabled !== undefined) {
+          // If enabling a workflow, ensure it has a valid definition
+          if (workflow.enabled && existingDocument._source?.definition) {
+            updatedData.enabled = true;
+          } else if (!workflow.enabled) {
+            updatedData.enabled = false;
+          }
+          yamlUpdated = true;
+        }
+        if (workflow.description !== undefined) {
+          updatedData.description = workflow.description;
+          yamlUpdated = true;
+        }
+        if (workflow.tags !== undefined) {
+          updatedData.tags = workflow.tags;
+          yamlUpdated = true;
+        }
+
+        // If any individual fields were updated, regenerate the YAML content
+        if (yamlUpdated && existingDocument._source?.definition) {
+          const updatedWorkflowDefinition = {
+            ...existingDocument._source.definition,
+            ...(workflow.name !== undefined && { name: workflow.name }),
+            ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
+            ...(workflow.description !== undefined && { description: workflow.description }),
+            ...(workflow.tags !== undefined && { tags: workflow.tags }),
+          };
+          updatedData.yaml = stringifyWorkflowDefinition(updatedWorkflowDefinition);
+        }
       }
 
       const finalData = { ...existingDocument._source, ...updatedData };
@@ -619,16 +702,45 @@ export class WorkflowsService {
   }
 
   public async getWorkflowExecutions(
-    workflowId: string,
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
+    const must: estypes.QueryDslQueryContainer[] = [
+      { term: { workflowId: params.workflowId } },
+      {
+        bool: {
+          should: [
+            { term: { spaceId } },
+            // Backward compatibility for objects without spaceId
+            { bool: { must_not: { exists: { field: 'spaceId' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
+    if (params.statuses) {
+      must.push({
+        terms: {
+          status: params.statuses,
+        },
+      });
+    }
+    if (params.executionTypes) {
+      must.push({
+        terms: {
+          executionType: params.executionTypes,
+        },
+      });
+    }
+
     return searchWorkflowExecutions({
       esClient: this.esClient!,
       logger: this.logger,
       workflowExecutionIndex: this.workflowsExecutionIndex,
       query: {
         bool: {
-          must: [{ term: { workflowId } }, { term: { spaceId } }],
+          must,
         },
       },
     });
@@ -680,7 +792,7 @@ export class WorkflowsService {
       logger: this.logger,
       stepsExecutionIndex: this.stepsExecutionIndex,
       workflowExecutionId: params.executionId,
-      additionalQuery: { term: { stepId: params.stepId } },
+      additionalQuery: { term: { id: params.id } },
       spaceId,
     });
   }
@@ -704,16 +816,12 @@ export class WorkflowsService {
     params: GetStepExecutionParams,
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
-    const { executionId, stepId } = params;
+    const { executionId, id } = params;
     const response = await this.esClient!.search<EsWorkflowStepExecution>({
       index: this.stepsExecutionIndex,
       query: {
         bool: {
-          must: [
-            { term: { workflowRunId: executionId } },
-            { term: { stepId } },
-            { term: { spaceId } },
-          ],
+          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
         },
       },
       size: 1,
