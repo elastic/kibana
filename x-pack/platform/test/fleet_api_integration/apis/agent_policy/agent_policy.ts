@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('TESTME should get a list of agent policies by kuery', async () => {
+      it('should get a list of agent policies by kuery', async () => {
         await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
