@@ -32,6 +32,9 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
+const AGENTS_TITLE = i18n.translate('xpack.enterpriseSearch.searchNav.agents', {
+  defaultMessage: 'Agents',
+});
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -112,17 +115,15 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'onechat:conversations' },
-                    { link: 'onechat:tools' },
-                    { link: 'onechat:agents' },
+                    { link: 'agent_builder:conversations' },
+                    { link: 'agent_builder:tools' },
+                    { link: 'agent_builder:agents' },
                   ],
                   iconV2: 'comment',
                   id: 'chat',
                   renderAs: 'panelOpener',
                   sideNavVersion: 'v2',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
-                    defaultMessage: 'Chat',
-                  }),
+                  title: AGENTS_TITLE,
                 },
                 {
                   link: 'discover',
@@ -140,9 +141,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'agent_builder:agents' },
                   ],
                   id: 'agent_builder',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
-                    defaultMessage: 'Agents',
-                  }),
+                  title: AGENTS_TITLE,
                   renderAs: 'accordion',
                   sideNavVersion: 'v1',
                 },
