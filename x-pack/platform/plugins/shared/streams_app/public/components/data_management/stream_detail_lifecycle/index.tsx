@@ -152,54 +152,56 @@ export function StreamDetailLifecycle({
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column">
-      <EditLifecycleModal
-        action={openEditModal}
-        definition={definition}
-        closeModal={() => setOpenEditModal('none')}
-        updateLifecycle={updateLifecycle}
-        getIlmPolicies={getIlmPolicies}
-        updateInProgress={updateInProgress}
-      />
-      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
-        <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="m">
-          <RetentionSummary definition={definition} stats={stats} statsError={statsError} />
-        </EuiPanel>
-        <EuiPanel grow hasShadow={false} hasBorder paddingSize="m">
-          <RetentionMetadata
-            definition={definition}
-            lifecycleActions={lifecycleActions}
-            openEditModal={(action) => setOpenEditModal(action)}
-            stats={stats}
-            statsError={statsError}
-          />
-        </EuiPanel>
+    <EuiPanel>
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EditLifecycleModal
+          action={openEditModal}
+          definition={definition}
+          closeModal={() => setOpenEditModal('none')}
+          updateLifecycle={updateLifecycle}
+          getIlmPolicies={getIlmPolicies}
+          updateInProgress={updateInProgress}
+        />
+        <EuiFlexGroup gutterSize="m" css={flexRowCss}>
+          <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="m">
+            <RetentionSummary definition={definition} stats={stats} statsError={statsError} />
+          </EuiPanel>
+          <EuiPanel grow hasShadow={false} hasBorder paddingSize="m">
+            <RetentionMetadata
+              definition={definition}
+              lifecycleActions={lifecycleActions}
+              openEditModal={(action) => setOpenEditModal(action)}
+              stats={stats}
+              statsError={statsError}
+            />
+          </EuiPanel>
+        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="m" css={flexRowCss}>
+          {definition.privileges.monitor && (
+            <EuiFlexItem grow={2}>
+              <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+                <IngestionRate
+                  definition={definition}
+                  isLoadingStats={isLoadingStats}
+                  stats={stats}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
+          {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
+            <EuiFlexItem grow={3}>
+              <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+                <IlmSummary
+                  definition={definition}
+                  stats={stats}
+                  lifecycle={definition.effective_lifecycle}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
-        {definition.privileges.monitor && (
-          <EuiFlexItem grow={2}>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <IngestionRate
-                definition={definition}
-                isLoadingStats={isLoadingStats}
-                stats={stats}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
-        {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
-          <EuiFlexItem grow={3}>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <IlmSummary
-                definition={definition}
-                stats={stats}
-                lifecycle={definition.effective_lifecycle}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiFlexGroup>
+    </EuiPanel>
   );
 }
 

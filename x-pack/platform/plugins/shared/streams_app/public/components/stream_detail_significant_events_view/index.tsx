@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
@@ -158,7 +158,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   }
 
   return (
-    <>
+    <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -204,6 +204,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       {editFlyout}
-    </>
+      </EuiPanel>
   );
 }

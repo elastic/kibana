@@ -113,14 +113,12 @@ export function StreamDetailRoutingImpl() {
     >
       <EuiFlexGroup
         direction="column"
-        gutterSize="s"
         className={css`
           overflow: auto;
         `}
       >
         <EuiPanel
           hasShadow={false}
-          hasBorder
           className={css`
             display: flex;
             max-width: 100%;
@@ -166,16 +164,18 @@ export function StreamDetailRoutingImpl() {
         </EuiPanel>
         {shouldDisplayBottomBar && (
           <EuiFlexItem grow={false}>
-            <ManagementBottomBar
-              confirmButtonText={i18n.translate('xpack.streams.streamDetailRouting.change', {
-                defaultMessage: 'Change routing',
-              })}
-              onCancel={cancelChanges}
-              onConfirm={saveChanges}
-              isLoading={routingSnapshot.matches({ ready: { reorderingRules: 'updatingStream' } })}
-              disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
-              insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
-            />
+            <EuiPanel color='subdued'>
+              <ManagementBottomBar
+                confirmButtonText={i18n.translate('xpack.streams.streamDetailRouting.change', {
+                  defaultMessage: 'Change routing',
+                })}
+                onCancel={cancelChanges}
+                onConfirm={saveChanges}
+                isLoading={routingSnapshot.matches({ ready: { reorderingRules: 'updatingStream' } })}
+                disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
+                insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
+              />
+            </EuiPanel>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

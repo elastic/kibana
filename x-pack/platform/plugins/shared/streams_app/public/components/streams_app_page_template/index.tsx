@@ -31,12 +31,14 @@ StreamsAppPageTemplate.Body = (props: EuiPageSectionProps) => (
     grow
     css={css`
       overflow-y: auto;
+      padding: 0;
     `}
     contentProps={{
       css: css`
         display: flex;
         flex-direction: column;
         height: 100%;
+        padding: 0;
       `,
     }}
     {...props}

@@ -100,7 +100,7 @@ export function StreamDetailEnrichmentContentImpl() {
   }
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer grow hasShadow={false}>
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`

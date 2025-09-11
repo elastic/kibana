@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiToolTip,
   euiDragDropReorder,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -70,41 +71,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         overflow: auto;
       `}
     >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap gutterSize="s">
-          <EuiText
-            size="s"
-            className={css`
-              height: 40px;
-              align-content: center;
-              font-weight: bold;
-            `}
-          >
-            {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
-              defaultMessage: 'Routing rules',
-            })}
-          </EuiText>
-          {shouldDisplayCreateButton && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
-              >
-                <EuiButton
-                  iconType="plus"
-                  size="s"
-                  data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                  onClick={createNewRule}
-                  disabled={!canCreateRoutingRules || maxNestingLevel}
-                >
-                  {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                    defaultMessage: 'Create child stream',
-                  })}
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+   
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"
@@ -155,6 +122,27 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
+        {shouldDisplayCreateButton && (   
+          <EuiPanel color="transparent" hasBorder={false} paddingSize='l'>
+            <EuiFlexGroup justifyContent='center'>
+            <EuiToolTip
+              content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
+            >
+              <EuiButton
+                iconType="plus"
+                size="s"
+                data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                onClick={createNewRule}
+                disabled={!canCreateRoutingRules || maxNestingLevel}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+                  defaultMessage: 'Create child stream',
+                })}
+              </EuiButton>
+            </EuiToolTip>
+            </EuiFlexGroup>
+          </EuiPanel>
+          )}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

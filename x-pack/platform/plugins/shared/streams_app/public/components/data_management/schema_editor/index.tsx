@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiPortal, EuiProgress } from '@elastic/eui';
 import { useControls } from './hooks/use_controls';
 import type { SchemaEditorProps } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
@@ -40,25 +40,27 @@ export function SchemaEditor({
       withFieldSimulation={withFieldSimulation}
       withTableActions={withTableActions}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        {isLoading ? (
-          <EuiPortal>
-            <EuiProgress size="xs" color="accent" position="fixed" />
-          </EuiPortal>
-        ) : null}
-        {withControls && (
-          <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
-        )}
-        <FieldsTable
-          isLoading={isLoading ?? false}
-          controls={controls}
-          withToolbar={withToolbar}
-          defaultColumns={defaultColumns}
-          fields={fields}
-          stream={stream}
-          withTableActions={withTableActions}
-        />
-      </EuiFlexGroup>
+      <EuiPanel>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {isLoading ? (
+            <EuiPortal>
+              <EuiProgress size="xs" color="accent" position="fixed" />
+            </EuiPortal>
+          ) : null}
+          {withControls && (
+            <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
+          )}
+          <FieldsTable
+            isLoading={isLoading ?? false}
+            controls={controls}
+            withToolbar={withToolbar}
+            defaultColumns={defaultColumns}
+            fields={fields}
+            stream={stream}
+            withTableActions={withTableActions}
+          />
+        </EuiFlexGroup>
+      </EuiPanel>
     </SchemaEditorContextProvider>
   );
 }
