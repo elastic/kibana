@@ -2203,47 +2203,6 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@106.4.0-amsterdam.0":
-  version "106.4.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.4.0-amsterdam.0.tgz#cce2a7b51b612f976cb7530416d3d4d7d6773096"
-  integrity sha512-pHTfS3hQhJDnM9QWdwkH8BGijChfFv3D+hjXKln26DXzlFCExE5Y7vVF5Hzb30Nql08KVNBX+/BJUXX/5VUMQQ==
-  dependencies:
-    "@elastic/eui-theme-common" "4.0.0"
-    "@elastic/prismjs-esql" "^1.1.0"
-    "@hello-pangea/dnd" "^16.6.0"
-    "@types/lodash" "^4.14.202"
-    "@types/numeral" "^2.0.5"
-    "@types/react-window" "^1.8.8"
-    "@types/refractor" "^3.4.0"
-    chroma-js "^2.4.2"
-    classnames "^2.5.1"
-    lodash "^4.17.21"
-    mdast-util-to-hast "^10.2.0"
-    numeral "^2.0.6"
-    prop-types "^15.8.1"
-    react-dropzone "^11.7.1"
-    react-element-to-jsx-string "^15.0.0"
-    react-focus-on "^3.9.1"
-    react-is "^17.0.2"
-    react-remove-scroll-bar "^2.3.4"
-    react-virtualized-auto-sizer "^1.0.24"
-    react-window "^1.8.10"
-    refractor "^3.6.0"
-    rehype-raw "^5.1.0"
-    rehype-react "^6.2.1"
-    rehype-stringify "^8.0.0"
-    remark-breaks "^2.0.2"
-    remark-emoji "^2.1.0"
-    remark-parse-no-trim "^8.0.4"
-    remark-rehype "^8.1.0"
-    tabbable "^5.3.3"
-    text-diff "^1.0.1"
-    unified "^9.2.2"
-    unist-util-visit "^2.0.3"
-    url-parse "^1.5.10"
-    uuid "^8.3.0"
-    vfile "^4.2.1"
-
 "@elastic/eui-theme-borealis@3.3.2":
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.2.tgz#b3b6a9bf0df3cbfc4c4e07f24c5a2f8eec2abd94"
@@ -5537,6 +5496,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-quality@link:x-pack/platform/packages/private/kbn-data-quality":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-search-plugin@link:src/platform/test/plugin_functional/plugins/data_search":
   version "0.0.0"
   uid ""
@@ -7254,6 +7217,10 @@
   uid ""
 
 "@kbn/reporting-export-types-png@link:src/platform/packages/private/kbn-reporting/export_types/png":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-fixture@link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture":
   version "0.0.0"
   uid ""
 
@@ -12979,10 +12946,10 @@
   resolved "https://registry.yarnpkg.com/@types/license-checker/-/license-checker-15.0.0.tgz#685d69e2cf61ffd862320434601f51c85e28bba1"
   integrity sha512-dHZdn+VxvPGwKyKUlqi6Dj/t3Q4KFmbmPpsCOwagytr8P98jmz/nXzyxzz9wbfgpw72mVMx7PMlR/PT0xNsF7A==
 
-"@types/linkify-it@*":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-2.1.0.tgz#ea3dd64c4805597311790b61e872cbd1ed2cd806"
-  integrity sha512-Q7DYAOi9O/+cLLhdaSvKdaumWyHbm7HAk/bFwwyTuU0arR5yyCeW5GOoqt4tJTpDRxhpx9Q8kQL6vMpuw9hDSw==
+"@types/linkify-it@^5":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-5.0.0.tgz#21413001973106cda1c3a9b91eedd4ccd5469d76"
+  integrity sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==
 
 "@types/lodash@^4.14.202":
   version "4.17.0"
@@ -13029,13 +12996,13 @@
     "@types/mapbox__point-geometry" "*"
     "@types/pbf" "*"
 
-"@types/markdown-it@^12.2.3":
-  version "12.2.3"
-  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-12.2.3.tgz#0d6f6e5e413f8daaa26522904597be3d6cd93b51"
-  integrity sha512-GKMHFfv3458yYy+v/N8gjufHO6MSZKCOXpZc5GXIWWy8uldwfmPn98vp81gZ5f9SVw8YYBctgfJ22a2d7AOMeQ==
+"@types/markdown-it@^14.1.2":
+  version "14.1.2"
+  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-14.1.2.tgz#57f2532a0800067d9b934f3521429a2e8bfb4c61"
+  integrity sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==
   dependencies:
-    "@types/linkify-it" "*"
-    "@types/mdurl" "*"
+    "@types/linkify-it" "^5"
+    "@types/mdurl" "^2"
 
 "@types/md5@^2.3.2":
   version "2.3.5"
@@ -13049,10 +13016,10 @@
   dependencies:
     "@types/unist" "*"
 
-"@types/mdurl@*":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/mdurl/-/mdurl-1.0.2.tgz#e2ce9d83a613bacf284c7be7d491945e39e1f8e9"
-  integrity sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==
+"@types/mdurl@^2":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/mdurl/-/mdurl-2.0.0.tgz#d43878b5b20222682163ae6f897b20447233bdfd"
+  integrity sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==
 
 "@types/mdx@^2.0.0":
   version "2.0.13"
@@ -13156,10 +13123,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node-forge@^1.3.13":
-  version "1.3.13"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.13.tgz#1797af20f7eccaf5f37b4d1739923bb0519d95b6"
-  integrity sha512-zePQJSW5QkwSHKRApqWCVKeKoSOt4xvEnLENZPjyvm9Ezdf/EyDeJM7jqLzOwjVICQQzvLZ63T55MKdJB5H6ww==
+"@types/node-forge@^1.3.14":
+  version "1.3.14"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.14.tgz#006c2616ccd65550560c2757d8472eb6d3ecea0b"
+  integrity sha512-mhVF2BnD4BO+jtOp7z1CdzaK4mbuK0LLQYAvdOLqHTavxFNq4zA1EmYkpnFjP8HOUzedfQkRnp0E2ulSAYSzAw==
   dependencies:
     "@types/node" "*"
 
@@ -14308,7 +14275,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.3":
+"@xyflow/react@^12.8.4":
   version "12.8.4"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.4.tgz#db0eabd9e356c25f5ebf427413a8c5dd46113394"
   integrity sha512-bqUu4T5QSHiCFPkoH+b+LROKwQJdLvcjhGbNW9c1dLafCBRjmH1IYz0zPE+lRDXCtQ9kRyFxz3tG19+8VORJ1w==
@@ -16278,10 +16245,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^139.0.0:
-  version "139.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-139.0.1.tgz#fa310e81bfc7c302bfc23f31dbda90378839bdbc"
-  integrity sha512-K16mpBWhVMY/85k+1pf2ZuCOCDNJxSfr/OuIh7YbWoVIT+baNlyB6OvVh2WQw+MYQK2fg7CS0rMUE8GvMY6oCA==
+chromedriver@^140.0.0:
+  version "140.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-140.0.0.tgz#11db338c4cfa2c909eaee37c567f9e511a849162"
+  integrity sha512-mv41C2fi4YX27muRMWP035HJUnKatu7gMJqBcVD1tSmufWDxDy0m38YaieKG3pa2aAIYNVhlXqiOnHkvnqNMcw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -25556,7 +25523,7 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.11.0:
+msw@~2.11.1:
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.11.1.tgz#77f7c5c60ffd08e4bc351cca4608418db15e5ac2"
   integrity sha512-dGSRx0AJmQVQfpGXTsAAq4JFdwdhOBdJ6sJS/jnN0ac3s0NZB6daacHF1z5Pefx+IejmvuiLWw260RlyQOf3sQ==
@@ -28190,15 +28157,15 @@ react-error-boundary@^3.1.0:
   dependencies:
     "@babel/runtime" "^7.12.5"
 
-react-fast-compare@^2.0.1, react-fast-compare@^2.0.4:
+react-fast-compare@^2.0.1:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-2.0.4.tgz#e84b4d455b0fec113e0402c329352715196f81f9"
   integrity sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==
 
-react-fast-compare@^3.0.1:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.0.tgz#641a9da81b6a6320f270e89724fb45a0b39e43bb"
-  integrity sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==
+react-fast-compare@^3.0.1, react-fast-compare@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
+  integrity sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==
 
 react-focus-lock@^2.9.4:
   version "2.9.5"
