@@ -15451,7 +15451,9 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Given an entity type and the contents of an entity, update (or create) the contents of an entity. By default only a specific set of fields are allowed to be modified, being that `entity.attributes.*`, `entity.lifecyle.*` and `entity.behavior.*`. If you wish to update any other field you must use  the query parameter `force=true`. Be aware that some fields always fetch the first seen value, thus new values won't end up in the final index. Also, due to technical limitations, there is no guarantee that collected values will end up in the final list of seen values.
+        Update or create an entity in Entity Store.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+        > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
       operationId: UpsertEntity
       parameters:
         - in: path
@@ -15478,11 +15480,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
-          description: Entity Updated or Created
+          description: Entity updated or created
         '400':
-          description: Operation on a non existent field or on a not initiated Engine
+          description: Operation on a non-existent field or on an uninitialized Engine
         '403':
-          description: Operation on a not exposed field
+          description: Operation on a restricted field
         '404':
           description: Entity not found
       summary: Updates or creates an entity in Entity Store
@@ -84840,35 +84842,10 @@ components:
         attributes:
           type: object
           properties:
-            Asset:
-              type: boolean
-            GrantedPermissions:
-              type: string
-            KnownRedirect:
-              type: boolean
-            Managed:
-              type: boolean
-            MfaEnabled:
-              type: boolean
-            OauthConsentRestriction:
-              type: string
-            OsCurrent:
-              type: string
-            OsPatchCurrent:
-              type: string
             Privileged:
               type: boolean
-            StorageClass:
-              type: string
         behavior:
           type: object
-          properties:
-            BruteForceVictim:
-              type: boolean
-            NewCountryLogin:
-              type: boolean
-            UsedUsbDevice:
-              type: boolean
         EngineMetadata:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
         id:
@@ -84877,15 +84854,6 @@ components:
           type: object
           properties:
             FirstSeen:
-              format: date-time
-              type: string
-            IssuedAt:
-              format: date-time
-              type: string
-            LastActivity:
-              format: date-time
-              type: string
-            LastPasswordChange:
               format: date-time
               type: string
         name:
