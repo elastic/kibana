@@ -249,7 +249,7 @@ export function getQueryForFields(
 
 function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
   if (root.commands.length === 1) {
-    return { ...root.commands[0] };
+    return { ...root, commands: [root.commands[0]] };
   } else {
     return { ...root, commands: root.commands.slice(0, -1) };
   }
