@@ -1919,6 +1919,21 @@ export class CstToAstConverter {
       .flat();
   }
 
+  private fromBooleanExpressions(
+    ctx: cst.BooleanExpressionContext[] | undefined
+  ): ast.ESQLAstItem[] {
+    const list: ast.ESQLAstItem[] = [];
+
+    if (!ctx) {
+      return list;
+    }
+
+    for (const expr of ctx) {
+      list.push(...this.collectBooleanExpression(expr));
+    }
+    return list;
+  }
+
   public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
     return this.collectBooleanExpression(ctx)[0] || this.fromParserRuleToUnknown(ctx);
   }
@@ -2303,17 +2318,18 @@ export class CstToAstConverter {
     const functionExpressionCtx = ctx.functionExpression();
     const functionNameCtx = functionExpressionCtx.functionName();
     const mapExpressionCtx = functionExpressionCtx.mapExpression();
+    const args = this.fromBooleanExpressions(functionExpressionCtx.booleanExpression_list());
     const fn: ast.ESQLFunctionCallExpression = {
       type: 'function',
       subtype: 'variadic-call',
       name: functionNameCtx.getText().toLowerCase(),
       text: ctx.getText(),
       location: getPosition(ctx.start, ctx.stop),
-      args: [],
+      args,
       incomplete: Boolean(ctx.exception),
     };
     const identifierOrParameter = functionNameCtx.identifierOrParameter();
-    const asteriskArg = functionExpressionCtx.ASTERISK()
+    const asteriskNode = functionExpressionCtx.ASTERISK()
       ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
       : undefined;
 
@@ -2325,18 +2341,8 @@ export class CstToAstConverter {
       }
     }
 
-    if (asteriskArg) {
-      fn.args.push(asteriskArg);
-    }
-
-    // TODO: Remove array manipulations here.
-    const functionArgs = functionExpressionCtx
-      .booleanExpression_list()
-      .flatMap(this.collectBooleanExpression.bind(this))
-      .filter(nonNullable);
-
-    if (functionArgs.length) {
-      fn.args.push(...(functionArgs as any));
+    if (asteriskNode) {
+      fn.args.push(asteriskNode);
     }
 
     if (mapExpressionCtx) {
