@@ -10,10 +10,6 @@
 /** Controls group state */
 export const CONTROLS_GROUP_TYPE = 'control_group';
 
-export const CONTROLS_LABEL_POSITION_ONE_LINE = 'oneLine';
-export const CONTROLS_LABEL_POSITION_TWO_LINE = 'twoLine';
-
-export const DEFAULT_CONTROLS_LABEL_POSITION = CONTROLS_LABEL_POSITION_ONE_LINE;
 export const DEFAULT_IGNORE_PARENT_SETTINGS = {
   ignoreFilters: false,
   ignoreQuery: false,
@@ -21,3 +17,11 @@ export const DEFAULT_IGNORE_PARENT_SETTINGS = {
   ignoreValidations: false,
 } as const;
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
+
+/** This state is only relevant for sticky controls */
+export const CONTROL_WIDTH_SMALL = 'small';
+export const CONTROL_WIDTH_MEDIUM = 'medium';
+export const CONTROL_WIDTH_LARGE = 'large';
+
+export const DEFAULT_CONTROL_WIDTH = CONTROL_WIDTH_MEDIUM;
+export const DEFAULT_CONTROL_GROW = false;

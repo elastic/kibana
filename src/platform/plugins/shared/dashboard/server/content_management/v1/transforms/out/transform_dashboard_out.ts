@@ -40,14 +40,25 @@ export function transformDashboardOut(
     tags = getTagNamesFromReferences(references);
   }
 
+  let controlGroupOut;
+  if (controlGroupInput) {
+    controlGroupOut = transformControlGroupOut(
+      controlGroupInput,
+      references ?? [],
+      controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
+    );
+  }
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
+    ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
     ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
     }),
-    ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
+    ...(optionsJSON && {
+      options: transformOptionsOut(optionsJSON, controlGroupInput?.showApplySelections),
+    }),
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),

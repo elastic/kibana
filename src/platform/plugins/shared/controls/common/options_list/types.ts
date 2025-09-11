@@ -9,39 +9,7 @@
 
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
-
-import type { DefaultDataControlState } from '../types';
-import type { OptionsListSelection } from './options_list_selections';
-import type { OptionsListSearchTechnique } from './suggestions_searching';
-import type { OptionsListSortingType } from './suggestions_sorting';
-
-/**
- * ----------------------------------------------------------------
- * Options list state types
- * ----------------------------------------------------------------
- */
-
-export interface OptionsListDisplaySettings {
-  placeholder?: string;
-  hideActionBar?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  hideSort?: boolean;
-}
-
-export interface OptionsListControlState
-  extends DefaultDataControlState,
-    SerializedTitles,
-    OptionsListDisplaySettings {
-  searchTechnique?: OptionsListSearchTechnique;
-  sort?: OptionsListSortingType;
-  selectedOptions?: OptionsListSelection[];
-  existsSelected?: boolean;
-  runPastTimeout?: boolean;
-  singleSelect?: boolean;
-  exclude?: boolean;
-}
+import type { OptionsListControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
 /**
  * ----------------------------------------------------------------

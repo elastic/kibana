@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupSchema } from './src/controls_group_schema';
+import type { DataControlState } from '@kbn/controls-schemas';
 
-export type {
-  ControlState,
-  ControlsGroupState,
-  DataControlState,
-  OptionsListControlState,
-  OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-} from './src/types';
+export type StoredDataControlState = Omit<DataControlState, 'dataViewId'> & {
+  dataViewRefName: string;
+};

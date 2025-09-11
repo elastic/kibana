@@ -18,24 +18,24 @@ import type {
   SearchQuery,
 } from '@kbn/content-management-plugin/common';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
-import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
-import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardItem,
-  DashboardCreateOut,
   DashboardCreateOptions,
+  DashboardCreateOut,
   DashboardGetOut,
+  DashboardItem,
+  DashboardSearchOptions,
   DashboardSearchOut,
   DashboardUpdateOptions,
   DashboardUpdateOut,
-  DashboardSearchOptions,
 } from './latest';
+import { savedObjectToItem, transformDashboardIn } from './latest';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -183,6 +183,7 @@ export class DashboardStorage {
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = (await tagsClient?.getAll()) ?? [];
     // Save data in DB
+
     const {
       saved_object: savedObject,
       alias_purpose: aliasPurpose,

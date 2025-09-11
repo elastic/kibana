@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupSchema } from './src/controls_group_schema';
+import { schema } from '@kbn/config-schema';
+import { dataControlSchema } from './control_schema';
 
-export type {
-  ControlState,
-  ControlsGroupState,
-  DataControlState,
-  OptionsListControlState,
-  OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-} from './src/types';
+const rangeValueSchema = schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 });
+
+export const rangeSliderControlSchema = dataControlSchema.extends({
+  value: schema.maybe(rangeValueSchema),
+  step: schema.maybe(schema.number()),
+});

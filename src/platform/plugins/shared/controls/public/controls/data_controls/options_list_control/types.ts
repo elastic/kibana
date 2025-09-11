@@ -9,21 +9,21 @@
 
 import type { Subject } from 'rxjs';
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
-import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
-import type { DefaultDataControlState } from '../../../../common';
 import type {
   OptionsListControlState,
-  OptionsListDisplaySettings,
   OptionsListSelection,
+  OptionsListDisplaySettings,
   OptionsListSortingType,
-  OptionsListSuggestions,
-} from '../../../../common/options_list';
+  DataControlState,
+} from '@kbn/controls-schemas';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
 import type { EditorState } from './editor_state_manager';
 import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
+import type { OptionsListSuggestions } from '../../../../common/options_list';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
   DataControlApi & {
@@ -44,7 +44,7 @@ interface PublishesOptions {
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+export type OptionsListState = Pick<DataControlState, 'fieldName'> &
   SelectionsState &
   EditorState &
   TemporaryState & { sort: OptionsListSortingType | undefined };
@@ -56,7 +56,7 @@ type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
   PublishesOptionsListState &
-  PublishesTitle &
+  DataControlApi &
   OptionsListStateSetters & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;

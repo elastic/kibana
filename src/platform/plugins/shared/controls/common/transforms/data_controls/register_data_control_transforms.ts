@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupSchema } from './src/controls_group_schema';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { extractReferences, injectReferences } from './references';
 
-export type {
-  ControlState,
-  ControlsGroupState,
-  DataControlState,
-  OptionsListControlState,
-  OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-} from './src/types';
+export const registerDataControlTransforms = (
+  embeddable: EmbeddableSetup,
+  type: string,
+  refName: string
+) => {
+  embeddable.registerTransforms(type, {
+    transformIn: (state) => extractReferences(state, refName),
+    transformOut: (state, references, id) => injectReferences(id, state, refName, references),
+  });
+};

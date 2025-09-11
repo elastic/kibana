@@ -7,38 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing';
-
-import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { PublishesBlockingError, PublishesDataLoading } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { ControlWidth } from '@kbn/controls-schemas';
-import type { DefaultControlState } from '../../common';
-import type { ControlApiInitialization, DefaultControlApi } from './types';
 
-export type ControlApi = ControlApiInitialization<DefaultControlApi>;
+export type ControlApi = PublishesBlockingError & PublishesDataLoading;
 
-export const defaultControlComparators: StateComparators<DefaultControlState> = {
-  grow: 'referenceEquality',
-  width: 'referenceEquality',
-};
-
-export const defaultControlDefaultValues = {
-  grow: DEFAULT_CONTROL_GROW,
-  width: DEFAULT_CONTROL_WIDTH as ControlWidth,
-};
-
-export const initializeDefaultControlManager = (state: DefaultControlState) => {
+/** TODO: This feels redundant and doesn't actually do much anymore. We should remove it. */
+export const initializeDefaultControlManager = () => {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-  const stateManager = initializeStateManager<DefaultControlState>(
-    state,
-    defaultControlDefaultValues
-  );
+
   return {
-    ...stateManager,
     api: {
-      ...stateManager.api,
       dataLoading$,
       blockingError$,
       setBlockingError: (error: Error | undefined) => blockingError$.next(error),

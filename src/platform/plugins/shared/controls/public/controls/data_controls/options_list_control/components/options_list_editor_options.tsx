@@ -10,11 +10,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import type { OptionsListControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
-import type {
-  OptionsListControlState,
-  OptionsListSearchTechnique,
-} from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import type { CustomOptionsComponentProps } from '../../types';
