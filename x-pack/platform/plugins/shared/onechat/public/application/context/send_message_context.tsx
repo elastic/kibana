@@ -9,11 +9,13 @@ import {
   isConversationCreatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isReasoningEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
+  isToolProgressEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
-import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
+import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
@@ -33,6 +35,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
   const conversationActions = useConversationActions();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [toolProgress, setToolProgress] = useState<string | null>(null);
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
@@ -62,6 +65,18 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
           else if (isMessageCompleteEvent(event)) {
             conversationActions.setAssistantMessage({
               assistantMessage: event.data.message_content,
+            });
+          } else if (isToolProgressEvent(event)) {
+            setToolProgress(event.data.message);
+            conversationActions.setToolCallProgress({
+              progress: { message: event.data.message },
+              toolCallId: event.data.tool_call_id,
+            });
+          } else if (isReasoningEvent(event)) {
+            conversationActions.addReasoningStep({
+              step: createReasoningStep({
+                reasoning: event.data.reasoning,
+              }),
             });
           } else if (isToolCallEvent(event)) {
             conversationActions.addToolCall({
@@ -116,6 +131,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     onSettled: () => {
       conversationActions.invalidateConversation();
       messageControllerRef.current = null;
+      setToolProgress(null);
     },
     onSuccess: () => {
       setPendingMessage(null);
@@ -140,6 +156,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     isResponseLoading,
     error,
     pendingMessage,
+    toolProgress,
     retry: () => {
       if (
         // Retrying should not be allowed if a response is still being fetched
@@ -168,6 +185,7 @@ interface SendMessageState {
   isResponseLoading: boolean;
   error: unknown;
   pendingMessage: string | null;
+  toolProgress: string | null;
   retry: () => void;
   canCancel: boolean;
   cancel: () => void;
@@ -176,8 +194,16 @@ interface SendMessageState {
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
-  const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
-    useSendMessageMutation();
+  const {
+    sendMessage,
+    isResponseLoading,
+    error,
+    pendingMessage,
+    toolProgress,
+    retry,
+    canCancel,
+    cancel,
+  } = useSendMessageMutation();
 
   return (
     <SendMessageContext.Provider
@@ -186,6 +212,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         isResponseLoading,
         error,
         pendingMessage,
+        toolProgress,
         retry,
         canCancel,
         cancel,
