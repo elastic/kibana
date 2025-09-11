@@ -920,7 +920,7 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Unable to create \"read_only\" \"accessControlType\" saved object. User profile ID not found.: Bad Request`
+            `Unable to create \"read_only\" \"accessControlType\" saved object. User profile ID not found.`
           )
         );
         expect(client.create).not.toHaveBeenCalled();

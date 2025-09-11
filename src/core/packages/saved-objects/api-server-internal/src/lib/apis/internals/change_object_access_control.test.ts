@@ -161,7 +161,9 @@ describe('changeObjectAccessControl', () => {
             actionType: 'changeOwnership',
             currentUserProfileUid: mockUserProfileId,
           })
-        ).rejects.toThrow('User profile ID is invalid: invalid_user_profile_id: Bad Request');
+        ).rejects.toThrow(
+          'User profile ID is invalid: expected "u_<principal>_<version>": Bad Request'
+        );
       });
 
       it('returns error if no read-only objects are specified', async () => {
