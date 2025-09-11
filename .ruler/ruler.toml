@@ -16,7 +16,7 @@ merge_strategy = "merge"
 # --- MCP Server Definitions ---
 [mcp_servers.kibana]
 command = "bash"
-args = ["-lc", "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && node --no-experimental-require-module ./scripts/mcp_dev.js"]
+args = ["-lc", "source \"$NVM_DIR/nvm.sh\" && cd /home/brad/kibana && nvm use --silent && node --no-experimental-require-module ./scripts/mcp_dev.js"]
 
 # --- Global .gitignore Configuration ---
 [gitignore]
