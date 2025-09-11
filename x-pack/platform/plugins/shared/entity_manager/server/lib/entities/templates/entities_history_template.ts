@@ -13,10 +13,7 @@ import {
   entitiesHistoryIndexPattern,
   entitiesAliasPattern,
 } from '@kbn/entities-schema';
-import {
-  generateHistoryILMPolicyId,
-  generateHistoryIndexTemplateId,
-} from '../helpers/generate_component_id';
+import { generateHistoryIndexTemplateId } from '../helpers/generate_component_id';
 import {
   ECS_MAPPINGS_COMPONENT_TEMPLATE,
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
@@ -89,9 +86,6 @@ export const generateEntitiesHistoryIndexTemplateConfig = (
     },
     settings: {
       index: {
-        lifecycle: {
-          name: generateHistoryILMPolicyId(definition),
-        },
         codec: 'best_compression',
         mapping: {
           total_fields: {

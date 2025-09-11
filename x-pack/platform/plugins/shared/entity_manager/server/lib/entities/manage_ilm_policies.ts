@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import type { EntityDefinition } from '@kbn/entities-schema';
-
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENTITY_HISTORY_ILM_POLICY,
+  ENTITY_RESET_ILM_POLICY,
+} from '../../../common/constants_entities';
 import { generateEntitiesResetILMPolicy } from './ilm_policies/reset_ilm_policy';
 import { generateEntitiesHistoryILMPolicy } from './ilm_policies/history_ilm_policy';
 import { retryTransientEsErrors } from './helpers/retry';
 
-export async function createAndInstallILMPolicies(
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
+export async function createAndInstallILMPolicies(esClient: ElasticsearchClient): Promise<void> {
+  const resetPolicy: IlmPutLifecycleRequest = generateEntitiesResetILMPolicy();
+  await esClient.ilm.putLifecycle(resetPolicy);
+  const historyPolicy: IlmPutLifecycleRequest = generateEntitiesHistoryILMPolicy();
+  await esClient.ilm.putLifecycle(historyPolicy);
+}
+
+export async function getILMPoliciesStatus(
+  esClient: ElasticsearchClient
 ): Promise<Array<{ type: 'ilm_policy'; id: string }>> {
   const policies: Array<{ type: 'ilm_policy'; id: string }> = [];
 
-  const resetPolicy: IlmPutLifecycleRequest = generateEntitiesResetILMPolicy(definition);
-  await esClient.ilm.putLifecycle(resetPolicy);
-  policies.push({ type: 'ilm_policy', id: resetPolicy.name });
+  await esClient.ilm.getLifecycle({ name: ENTITY_RESET_ILM_POLICY });
+  policies.push({ type: 'ilm_policy', id: ENTITY_RESET_ILM_POLICY });
 
-  const historyPolicy: IlmPutLifecycleRequest = generateEntitiesHistoryILMPolicy(definition);
-  await esClient.ilm.putLifecycle(historyPolicy);
-  policies.push({ type: 'ilm_policy', id: historyPolicy.name });
+  await esClient.ilm.getLifecycle({ name: ENTITY_HISTORY_ILM_POLICY });
+  policies.push({ type: 'ilm_policy', id: ENTITY_HISTORY_ILM_POLICY });
 
   return policies;
 }
@@ -42,24 +47,7 @@ export async function deleteILMPolicy(esClient: ElasticsearchClient, name: strin
   }
 }
 
-export async function deleteILMPolicies(
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
-) {
-  try {
-    await Promise.all(
-      (definition.installedComponents ?? [])
-        .filter(({ type }) => type === 'ilm_policy')
-        .map(({ id }) =>
-          retryTransientEsErrors(
-            () => esClient.ilm.deleteLifecycle({ name: id }, { ignore: [404] }),
-            { logger }
-          )
-        )
-    );
-  } catch (error: any) {
-    logger.error(`Error deleting entity manager index ilm policy: ${error.message}`);
-    throw error;
-  }
+export async function deleteILMPolicies(esClient: ElasticsearchClient, logger: Logger) {
+  await deleteILMPolicy(esClient, ENTITY_RESET_ILM_POLICY, logger);
+  await deleteILMPolicy(esClient, ENTITY_HISTORY_ILM_POLICY, logger);
 }

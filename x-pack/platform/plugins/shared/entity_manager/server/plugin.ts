@@ -29,6 +29,7 @@ import type {
 } from './types';
 import { disableManagedEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
+import { createAndInstallILMPolicies } from './lib/entities/manage_ilm_policies';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -122,6 +123,10 @@ export class EntityManagerServerPlugin
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
     }).catch((err) => this.logger.error(err));
+
+    createAndInstallILMPolicies(core.elasticsearch.client.asInternalUser).catch((err) =>
+      this.logger.error(err)
+    );
 
     // Disable v1 built-in definitions.
     // the api key invalidation requires a check against the cluster license

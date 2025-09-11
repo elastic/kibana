@@ -13,15 +13,13 @@ import {
   entitiesIndexPattern,
   entitiesAliasPattern,
 } from '@kbn/entities-schema';
-import {
-  generateResetIndexTemplateId,
-  generateResetILMPolicyId,
-} from '../helpers/generate_component_id';
+import { generateResetIndexTemplateId } from '../helpers/generate_component_id';
 import {
   ECS_MAPPINGS_COMPONENT_TEMPLATE,
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
+  ENTITY_RESET_ILM_POLICY,
 } from '../../../../common/constants_entities';
 
 export const generateEntitiesResetIndexTemplateConfig = (
@@ -56,7 +54,7 @@ export const generateEntitiesResetIndexTemplateConfig = (
     settings: {
       index: {
         lifecycle: {
-          name: generateResetILMPolicyId(definition),
+          name: ENTITY_RESET_ILM_POLICY,
         },
       },
     },

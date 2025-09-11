@@ -8,9 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import {
-  generateHistoryILMPolicyId,
-  generateResetILMPolicyId,
-} from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
+  ENTITY_HISTORY_ILM_POLICY,
+  ENTITY_RESET_ILM_POLICY,
+} from '@kbn/entityManager-plugin/common/constants_entities';
 import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
@@ -25,10 +25,7 @@ export async function getEntityILMPolicyStatuses({
   definition,
   esClient,
 }: Options): Promise<EngineComponentStatus[]> {
-  const namesToCheck: string[] = [
-    generateResetILMPolicyId(definition),
-    generateHistoryILMPolicyId(definition),
-  ];
+  const namesToCheck: string[] = [ENTITY_RESET_ILM_POLICY, ENTITY_HISTORY_ILM_POLICY];
   const result: EngineComponentStatus[] = await Promise.all(
     namesToCheck.map(async (name) => {
       let exists: boolean = false;

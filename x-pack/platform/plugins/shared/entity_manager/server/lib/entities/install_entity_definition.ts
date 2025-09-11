@@ -14,8 +14,6 @@ import {
   generateLatestIndexTemplateId,
   generateHistoryIndexTemplateId,
   generateResetIndexTemplateId,
-  generateResetILMPolicyId,
-  generateHistoryILMPolicyId,
 } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
@@ -29,7 +27,7 @@ import {
   updateEntityDefinition,
 } from './save_entity_definition';
 import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templates';
-import { createAndInstallILMPolicies, deleteILMPolicy } from './manage_ilm_policies';
+import { getILMPoliciesStatus } from './manage_ilm_policies';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
@@ -92,10 +90,6 @@ export async function installEntityDefinition({
       logger,
       name: generateResetIndexTemplateId(definition),
     });
-
-    await deleteILMPolicy(esClient, generateResetILMPolicyId(definition), logger);
-    await deleteILMPolicy(esClient, generateHistoryILMPolicyId(definition), logger);
-
     await deleteEntityDefinition(soClient, definition).catch((err) => {
       if (err instanceof EntityDefinitionNotFound) {
         return;
@@ -176,8 +170,8 @@ async function install({
   logger.debug(`Installing definition [${definition.id}] v${definition.version}`);
   logger.debug(() => JSON.stringify(definition, null, 2));
 
-  logger.debug(`Installing ilm policies for definition [${definition.id}]`);
-  const ilmPolicies = await createAndInstallILMPolicies(esClient, definition, logger);
+  logger.debug(`Checking ilm policies for definition [${definition.id}]`);
+  const ilmPolicies = await getILMPoliciesStatus(esClient);
 
   logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);

@@ -24,13 +24,15 @@ import {
   generateResetIndexTemplateId,
   generateLatestIngestPipelineId,
   generateLatestTransformId,
-  generateHistoryILMPolicyId,
-  generateResetILMPolicyId,
 } from './helpers/generate_component_id';
 import { generateLatestTransform } from './transform/generate_latest_transform';
 import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
 import { EntityDefinitionIdInvalid } from './errors/entity_definition_id_invalid';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
+import {
+  ENTITY_HISTORY_ILM_POLICY,
+  ENTITY_RESET_ILM_POLICY,
+} from '../../../common/constants_entities';
 
 const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
@@ -39,8 +41,8 @@ const getExpectedInstalledComponents = (definition: EntityDefinition) => {
     { type: 'template', id: generateResetIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
-    { type: 'ilm_policy', id: generateResetILMPolicyId(definition) },
-    { type: 'ilm_policy', id: generateHistoryILMPolicyId(definition) },
+    { type: 'ilm_policy', id: ENTITY_RESET_ILM_POLICY },
+    { type: 'ilm_policy', id: ENTITY_HISTORY_ILM_POLICY },
   ];
 };
 

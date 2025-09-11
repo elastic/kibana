@@ -10,6 +10,7 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   ENTITY_HISTORY,
   ENTITY_LATEST,
+  ENTITY_RESET,
 } from '@kbn/entities-schema';
 
 // Base constants
@@ -28,11 +29,18 @@ export const ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1 =
 export const ENTITY_HISTORY_PREFIX_V1 =
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_HISTORY}` as const;
 
+export const ENTITY_HISTORY_ILM_POLICY =
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_ilm_policy` as const;
+
 // Latest constants
 export const ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_base` as const;
 export const ENTITY_LATEST_PREFIX_V1 =
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}` as const;
+
+// Reset constants
+export const ENTITY_RESET_ILM_POLICY =
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_ilm_policy` as const;
 
 // Transform constants
 export const ENTITY_DEFAULT_LATEST_FREQUENCY = '1m';

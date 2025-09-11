@@ -32,10 +32,6 @@ export function generateHistoryIndexTemplateId(definition: EntityDefinition) {
   return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_${definition.id}_index_template` as const;
 }
 
-export function generateHistoryILMPolicyId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_${definition.id}_ilm_policy` as const;
-}
-
 // Latest
 function generateLatestId(definition: EntityDefinition) {
   return `${ENTITY_LATEST_PREFIX_V1}-${definition.id}` as const;
@@ -58,8 +54,4 @@ export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
 // Reset
 export function generateResetIndexTemplateId(definition: EntityDefinition) {
   return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_${definition.id}_index_template` as const;
-}
-
-export function generateResetILMPolicyId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_${definition.id}_ilm_policy` as const;
 }

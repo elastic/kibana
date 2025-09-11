@@ -22,7 +22,6 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import type { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
-import { deleteILMPolicies } from './entities/manage_ilm_policies';
 
 export class EntityClient {
   constructor(
@@ -135,11 +134,6 @@ export class EntityClient {
 
     if (deleteData) {
       await deleteIndices(
-        this.options.clusterClient.asCurrentUser,
-        definition,
-        this.options.logger
-      );
-      await deleteILMPolicies(
         this.options.clusterClient.asCurrentUser,
         definition,
         this.options.logger

@@ -6,7 +6,10 @@
  */
 
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1 } from '../../../common/constants_entities';
+import {
+  ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
+  ENTITY_HISTORY_ILM_POLICY,
+} from '../../../common/constants_entities';
 
 export const entitiesHistoryBaseComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
   name: ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
@@ -18,6 +21,13 @@ export const entitiesHistoryBaseComponentTemplateConfig: ClusterPutComponentTemp
     managed: true,
   },
   template: {
+    settings: {
+      index: {
+        lifecycle: {
+          name: ENTITY_HISTORY_ILM_POLICY,
+        },
+      },
+    },
     mappings: {
       properties: {
         entity: {

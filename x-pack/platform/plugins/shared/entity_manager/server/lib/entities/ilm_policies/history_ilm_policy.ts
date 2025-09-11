@@ -6,14 +6,9 @@
  */
 
 import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryILMPolicyId } from '../helpers/generate_component_id';
+import { ENTITY_HISTORY_ILM_POLICY } from '../../../../common/constants_entities';
 
-export const generateEntitiesHistoryILMPolicy = (
-  definition: EntityDefinition
-): IlmPutLifecycleRequest => ({
-  // TODO(kuba): Not sure about the exact definition/behavior of this policy for snapshots.
-  // To be considered in code review phase.
+export const generateEntitiesHistoryILMPolicy = (): IlmPutLifecycleRequest => ({
   policy: {
     phases: {
       hot: {
@@ -25,5 +20,5 @@ export const generateEntitiesHistoryILMPolicy = (
       },
     },
   },
-  name: generateHistoryILMPolicyId(definition),
+  name: ENTITY_HISTORY_ILM_POLICY,
 });

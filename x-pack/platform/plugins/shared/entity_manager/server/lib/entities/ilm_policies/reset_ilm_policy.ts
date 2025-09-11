@@ -6,12 +6,9 @@
  */
 
 import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '@kbn/entities-schema';
-import { generateResetILMPolicyId } from '../helpers/generate_component_id';
+import { ENTITY_RESET_ILM_POLICY } from '../../../../common/constants_entities';
 
-export const generateEntitiesResetILMPolicy = (
-  definition: EntityDefinition
-): IlmPutLifecycleRequest => ({
+export const generateEntitiesResetILMPolicy = (): IlmPutLifecycleRequest => ({
   policy: {
     phases: {
       hot: {
@@ -25,5 +22,5 @@ export const generateEntitiesResetILMPolicy = (
       },
     },
   },
-  name: generateResetILMPolicyId(definition),
+  name: ENTITY_RESET_ILM_POLICY,
 });
