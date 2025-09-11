@@ -70,7 +70,7 @@ export const layoutVar = (name: CSSVarName, fallback?: string): string => {
  * ```
  */
 export const layoutVarName = (name: CSSVarName): string => {
-  const isAppVar = name.startsWith('application.');
+  const isAppVar = name.startsWith('application.') && name.split('.').length === 3;
 
   if (isAppVar) {
     // Convert "application.topBar.height" to "top-bar-height"

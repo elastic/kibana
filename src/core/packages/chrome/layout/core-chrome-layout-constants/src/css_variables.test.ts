@@ -15,6 +15,7 @@ describe('CSS Variables', () => {
       expect(layoutVarName('banner.height')).toBe('--kbn-layout--banner-height');
       expect(layoutVarName('header.width')).toBe('--kbn-layout--header-width');
       expect(layoutVarName('navigation.top')).toBe('--kbn-layout--navigation-top');
+      expect(layoutVarName('application.bottom')).toBe('--kbn-layout--application-bottom');
     });
 
     it('should generate application variable names with --kbn-application-- prefix', () => {
