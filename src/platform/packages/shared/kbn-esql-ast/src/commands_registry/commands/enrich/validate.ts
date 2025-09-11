@@ -6,11 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getMessageFromId } from '../../../definitions/utils/errors';
-import type { ESQLSource, ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
-import { ENRICH_MODES } from './util';
-import type { ESQLPolicy, ICommandContext, ICommandCallbacks } from '../../types';
+import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
+import { errors, getMessageFromId } from '../../../definitions/utils/errors';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
+import type {
+  ESQLAst,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLMessage,
+  ESQLSource,
+} from '../../../types';
+import type { ESQLPolicy, ICommandCallbacks, ICommandContext } from '../../types';
+import { ENRICH_MODES } from './util';
 
 export const validate = (
   command: ESQLCommand,
@@ -53,7 +60,34 @@ export const validate = (
     }
   }
 
-  messages.push(...validateCommandArguments(command, ast, context, callbacks));
+  const policy = index && policies.get(index.valueUnquoted);
+  const withOption = command.args.find(
+    (arg) => isOptionNode(arg) && arg.name === 'with'
+  ) as ESQLCommandOption;
+
+  if (withOption && policy) {
+    withOption.args.forEach((arg) => {
+      if (isAssignment(arg) && Array.isArray(arg.args[1]) && isColumn(arg.args[1][0])) {
+        const column = arg.args[1][0];
+        if (!policy.enrichFields.includes(column.parts.join('.'))) {
+          messages.push(errors.unknownColumn(column));
+        }
+      }
+    });
+  }
+
+  messages.push(
+    ...validateCommandArguments(
+      {
+        ...command,
+        // exclude WITH from generic validation since it shouldn't be compared against the generic column list
+        args: command.args.filter((arg) => arg !== withOption),
+      },
+      ast,
+      context,
+      callbacks
+    )
+  );
 
   return messages;
 };
