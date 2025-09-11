@@ -8,9 +8,9 @@
  */
 
 import type * as synth from '../synth';
-import type { ESQLOrderExpression, ESQLSource } from '../types';
+import type { ESQLAstCommand, ESQLCommand, ESQLOrderExpression, ESQLSource } from '../types';
 import type { ComposerQuery } from './composer_query';
-import type { ParameterHole } from './parameter_hole';
+import type { ParameterHole, DoubleParameterHole } from './parameter_hole';
 
 /**
  * Holes are expressions that can be used in the `esql` tagged template function.
@@ -27,6 +27,12 @@ export type ComposerQueryTagHole =
   | synth.SynthTemplateHole
 
   /**
+   * An ESQL command node can be used as a hole, for example to
+   * conditionally add a command to the query.
+   */
+  | ESQLAstCommand
+
+  /**
    * A parameter hole is where user provides a runtime value and we automatically
    * create a parameter for that hole in the AST and store the parameter value
    * in the `params` bag.
@@ -36,7 +42,14 @@ export type ComposerQueryTagHole =
   /**
    * Same as {@link ParameterHole}, but a shorthand syntax.
    */
-  | ParameterShorthandHole;
+  | ParameterShorthandHole
+
+  /**
+   * A nested ComposerQuery instance can be used as a hole to embed
+   * one query into another. For example, to build a `FORK` command
+   * out of multiple sub-queries.
+   */
+  | ComposerQuery;
 
 /**
  * A hole shorthand where the user can specify a parametrized hole with an
@@ -81,8 +94,9 @@ type SynthMethods = typeof import('../synth');
  * Methods available of the `esql` tagged template function.
  * These methods are used to construct AST nodes.
  */
-export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par'> {
+export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpar'> {
   par: (value: unknown, name?: string) => ParameterHole;
+  dpar: (value: unknown, name?: string) => DoubleParameterHole;
 
   /**
    * Creates a new {@link ComposerQuery} instance with a `FROM` command with
@@ -103,6 +117,25 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par'> {
     source: ComposerSourceShorthand,
     ...moreSources: ComposerSourceShorthand[]
   ) => ComposerQuery;
+
+  /**
+   * An AST no-op command that can be used in the query, for example in
+   * conditional expressions.
+   *
+   * Example:
+   *
+   * ```typescript
+   * const shouldAddNoop = true;
+   * const query = esql`FROM index
+   *   | ${shouldAddNoop ? esql.noop : esql.cmd`WHERE foo > 42`}
+   *   | LIMIT 10`;
+   * ```
+   *
+   * No-op command is removed from the final query during synthesis.
+   *
+   * @returns An ESQLCommand node representing a no-op command.
+   */
+  nop: ESQLCommand;
 }
 
 export type ComposerSourceShorthand = string | ESQLSource;

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -28,9 +29,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should set a description for a stream', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: 'This is a test stream',
           ingest: {
@@ -53,9 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should update a stream description', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: 'Updated test stream description',
           ingest: {

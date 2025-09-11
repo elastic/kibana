@@ -55,6 +55,7 @@ import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
+import { deletePackageKnowledgeBase } from './knowledge_base_index';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -154,7 +155,9 @@ export async function deleteKibanaAssets({
   spaceId?: string;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository([KibanaSavedObjectType.alert])
+    appContextService
+      .getSavedObjects()
+      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
@@ -390,6 +393,8 @@ async function deleteAssets(
           packageSpecConditions: packageInfo?.conditions,
         })
       ),
+      // Delete knowledge base content for this package
+      deletePackageKnowledgeBase(esClient, name),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
