@@ -35,6 +35,7 @@ export interface ConversationSettingsEditorProps {
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
+  isAssistantSharingEnabled?: boolean;
   isDisabled?: boolean;
   selectedConversation: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -51,6 +52,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     allSystemPrompts,
     conversationsSettingsBulkActions,
     http,
+    isAssistantSharingEnabled = false,
     isDisabled = false,
     selectedConversation,
     setConversationsSettingsBulkActions,
@@ -309,18 +311,20 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           </EuiFormRow>
         )}
 
-        <EuiFormRow
-          data-test-subj="shared-field"
-          display="rowCompressed"
-          fullWidth
-          label={i18n.SHARING_OPTIONS}
-        >
-          <ShareSelect
-            selectedConversation={selectedConversation}
-            onSharedSelectionChange={handleOnSharedSelectionChange}
-            onUsersUpdate={handleUsersUpdate}
-          />
-        </EuiFormRow>
+        {isAssistantSharingEnabled && (
+          <EuiFormRow
+            data-test-subj="shared-field"
+            display="rowCompressed"
+            fullWidth
+            label={i18n.SHARING_OPTIONS}
+          >
+            <ShareSelect
+              selectedConversation={selectedConversation}
+              onSharedSelectionChange={handleOnSharedSelectionChange}
+              onUsersUpdate={handleUsersUpdate}
+            />
+          </EuiFormRow>
+        )}
       </>
     );
   }

@@ -20,6 +20,7 @@ import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
 import { useNavigateToDiscover } from '../hooks/use_navigate_to_discover';
+import { useNavigateToDashboard } from '../hooks/use_navigate_to_dashboard';
 import { AnalyticsEvents } from '../analytics/constants';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 
@@ -35,7 +36,7 @@ export const SampleDataActionButton = ({
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, isLoading: isStatusLoading } = useSampleDataStatus();
+  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
 
   const onInstallButtonClick = useCallback(() => {
@@ -63,6 +64,7 @@ export const SampleDataActionButton = ({
   }, [share, uiSettings, indexName]);
 
   const navigateToDiscover = useNavigateToDiscover(indexName || '');
+  const navigateToDashboard = useNavigateToDashboard(dashboardId);
 
   const navigateToIndexDetails = useCallback(async () => {
     const indexDetailsLocator = share.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID');
@@ -106,10 +108,24 @@ export const SampleDataActionButton = ({
                   defaultMessage="Discover"
                 />
               </EuiContextMenuItem>,
+              ...(dashboardId
+                ? [
+                    <EuiContextMenuItem
+                      key="dashboard"
+                      onClick={navigateToDashboard}
+                      icon="dashboardApp"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchHomepage.createIndex.ingestSampleData.linkToDashboard"
+                        defaultMessage="Dashboard"
+                      />
+                    </EuiContextMenuItem>,
+                  ]
+                : []),
               <EuiContextMenuItem key="playground" onClick={navigateToPlayground} icon="comment">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToPlayground"
-                  defaultMessage="RAG Playground"
+                  defaultMessage="Playground"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem key="index" onClick={navigateToIndexDetails} icon="index">

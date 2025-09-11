@@ -123,7 +123,7 @@ pageLoadAssetSize:
   productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
-  reindexService: 2781
+  reindexService: 3601
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
@@ -134,7 +134,7 @@ pageLoadAssetSize:
   savedObjectsManagement: 22426
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
-  savedSearch: 12662
+  savedSearch: 11000
   screenshotMode: 2351
   screenshotting: 8417
   searchAssistant: 6150
@@ -161,7 +161,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67227
+  stackConnectors: 67939
   streams: 8494
   streamsApp: 12431
   streamsAppWrapper: 5787

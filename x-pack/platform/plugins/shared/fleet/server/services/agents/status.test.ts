@@ -245,27 +245,14 @@ describe('getIncomingDataByAgentsId', () => {
     const agentsIds = ['agentId1', 'agentId2'];
     const dataStreamPattern = [...Array(100)].map((_, i) => `test-${i}-*`).join(',');
 
-    let call = 0;
-    esClient.search.mockImplementation(() => {
-      call++;
-      if (call === 3) {
-        return {
-          hits: {},
-          aggregations: {
-            agent_ids: {
-              buckets: [{ key: 'agentId1', doc_count: 1 }],
-            },
-          },
-        } as any;
-      } else {
-        return {
-          hits: {},
-          aggregations: {
-            agent_hits: {},
-          },
-        };
-      }
-    });
+    esClient.search.mockReturnValueOnce({
+      hits: {},
+      aggregations: {
+        agent_ids: {
+          buckets: [{ key: 'agentId1', doc_count: 1 }],
+        },
+      },
+    } as any);
 
     const result = await getIncomingDataByAgentsId({
       esClient,
@@ -273,7 +260,7 @@ describe('getIncomingDataByAgentsId', () => {
       dataStreamPattern,
     });
 
-    expect(esClient.security.hasPrivileges).toBeCalledTimes(4);
+    expect(esClient.security.hasPrivileges).toBeCalledTimes(1);
 
     expect(result).toEqual({
       items: [

@@ -71,7 +71,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/233920
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     let synthEsClient: InfraSynthtraceEsClient;
 

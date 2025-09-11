@@ -54,3 +54,4 @@ export const FAILURE_STORE_SELECTOR = '::failures';
 export const DATA_SELECTOR = '::data';
 
 export const FAILURE_STORE_PRIVILEGE = 'read_failure_store';
+export const MANAGE_FAILURE_STORE_PRIVILEGE = 'manage_failure_store';

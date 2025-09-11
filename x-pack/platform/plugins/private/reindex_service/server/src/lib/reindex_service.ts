@@ -7,19 +7,19 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-
-import type { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import {
-  esIndicesStateCheck,
-  getReindexWarnings,
-  type Version,
-} from '@kbn/upgrade-assistant-pkg-server';
-import type { ReindexSavedObject, IndexWarning } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-
-import { generateNewIndexName, sourceNameForIndex } from './index_settings';
+import type {
+  IndicesAlias,
+  IndicesIndexSettings,
+  IndicesUpdateAliasesRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, ReindexStep } from '../../../common';
+import type { IndexSettings, IndexWarning, ReindexArgs } from '../../../common';
+import type { ReindexSavedObject } from './types';
+import type { CreateReindexOpArgs } from './reindex_actions';
 
 import type { ReindexActions } from './reindex_actions';
 
@@ -30,7 +30,7 @@ export interface ReindexService {
    * Checks whether or not the user has proper privileges required to reindex this index.
    * @param indexName
    */
-  hasRequiredPrivileges(indexName: string): Promise<boolean>;
+  hasRequiredPrivileges(indexNames: string[]): Promise<boolean>;
 
   /**
    * Checks an index's settings and mappings to flag potential issues during reindex.
@@ -44,10 +44,17 @@ export interface ReindexService {
    * @param indexName
    * @param opts Additional options when creating a new reindex operation
    */
-  createReindexOperation(
-    indexName: string,
-    opts?: { enqueue?: boolean }
-  ): Promise<ReindexSavedObject>;
+  createReindexOperation({
+    indexName,
+    newIndexName,
+    opts,
+    settings,
+  }: {
+    indexName: string;
+    newIndexName: string;
+    opts?: { enqueue?: boolean };
+    settings?: IndexSettings;
+  }): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -127,7 +134,7 @@ export const reindexServiceFactory = (
   esClient: ElasticsearchClient,
   actions: ReindexActions,
   log: Logger,
-  licensing: LicensingPluginSetup,
+  licensing: LicensingPluginStart,
   kibanaVersion: Version
 ): ReindexService => {
   // ------ Utility functions
@@ -193,11 +200,19 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const createNewIndex = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, settings: settingsStr } = reindexOp.attributes;
 
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
+    }
+
+    let newSettings: IndexSettings;
+
+    try {
+      newSettings = settingsStr ? JSON.parse(settingsStr) : {};
+    } catch (err) {
+      throw new Error(`Could not parse index settings: ${err}`);
     }
 
     const { settings = {} } = flatSettings;
@@ -209,17 +224,21 @@ export const reindexServiceFactory = (
       'index.refresh_interval': settings['index.refresh_interval'],
     };
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const settings_override = {
+      ...newSettings,
+      // Reindexing optimizations
+      'index.number_of_replicas': 0,
+      'index.refresh_interval': -1,
+    };
+
     let createIndex;
     try {
       createIndex = await esClient.transport.request<{ acknowledged: boolean }>({
         method: 'POST',
         path: `_create_from/${indexName}/${newIndexName}`,
         body: {
-          settings_override: {
-            // Reindexing optimizations
-            'index.number_of_replicas': 0,
-            'index.refresh_interval': -1,
-          },
+          settings_override,
         },
       });
       /**
@@ -462,16 +481,23 @@ export const reindexServiceFactory = (
 
     const isHidden = await isIndexHidden(indexName);
 
-    const aliasResponse = await esClient.indices.updateAliases({
-      actions: [
-        { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
-        { remove_index: { index: indexName } },
-        ...extraAliases,
-      ],
-    });
+    const updateAliasActions: IndicesUpdateAliasesRequest['actions'] = reindexOp.attributes
+      .reindexOptions?.deleteOldIndex
+      ? [
+          { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
+          { remove_index: { index: indexName } },
+          ...extraAliases,
+        ]
+      : extraAliases;
 
-    if (!aliasResponse.acknowledged) {
-      throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    if (updateAliasActions.length) {
+      const aliasResponse = await esClient.indices.updateAliases({
+        actions: updateAliasActions,
+      });
+
+      if (!aliasResponse.acknowledged) {
+        throw error.cannotCreateIndex(`Index aliases could not be created.`);
+      }
     }
 
     if (reindexOptions?.openAndClose === true) {
@@ -491,7 +517,7 @@ export const reindexServiceFactory = (
   // ------ The service itself
 
   return {
-    async hasRequiredPrivileges(indexName: string) {
+    async hasRequiredPrivileges(names: string[]) {
       /**
        * To avoid a circular dependency on Security we use a work around
        * here to detect whether Security is available and enabled
@@ -505,15 +531,6 @@ export const reindexServiceFactory = (
       // If security is disabled or unavailable, return true.
       if (!securityFeature || !(securityFeature.isAvailable && securityFeature.isEnabled)) {
         return true;
-      }
-
-      const names = [indexName, generateNewIndexName(indexName, kibanaVersion)];
-      const sourceName = sourceNameForIndex(indexName, kibanaVersion);
-
-      // if we have re-indexed this in the past, there will be an
-      // underlying alias we will also need to update.
-      if (sourceName !== indexName) {
-        names.push(sourceName);
       }
 
       const resp = await esClient.security.hasPrivileges({
@@ -556,7 +573,17 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
+    async createReindexOperation({
+      indexName,
+      newIndexName,
+      opts,
+      settings,
+    }: {
+      indexName: string;
+      newIndexName: string;
+      opts?: ReindexArgs['reindexOptions'];
+      settings?: IndexSettings;
+    }) {
       const indexExists = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
@@ -567,7 +594,8 @@ export const reindexServiceFactory = (
         const existingOp = existingReindexOps.saved_objects[0];
         if (
           existingOp.attributes.status === ReindexStatus.failed ||
-          existingOp.attributes.status === ReindexStatus.cancelled
+          existingOp.attributes.status === ReindexStatus.cancelled ||
+          existingOp.attributes.status === ReindexStatus.completed
         ) {
           // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
@@ -578,10 +606,20 @@ export const reindexServiceFactory = (
         }
       }
 
-      return actions.createReindexOp(
+      const reindexOptions: CreateReindexOpArgs['reindexOptions'] = {};
+      if (opts?.enqueue) {
+        reindexOptions.queueSettings = { queuedAt: Date.now() };
+      }
+      if (opts?.deleteOldIndex) {
+        reindexOptions.deleteOldIndex = true;
+      }
+
+      return actions.createReindexOp({
         indexName,
-        opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined
-      );
+        newIndexName,
+        reindexOptions,
+        settings,
+      });
     },
 
     async findReindexOperation(indexName: string) {
@@ -684,7 +722,7 @@ export const reindexServiceFactory = (
       });
     },
 
-    async resumeReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
+    async resumeReindexOperation(indexName, opts) {
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
