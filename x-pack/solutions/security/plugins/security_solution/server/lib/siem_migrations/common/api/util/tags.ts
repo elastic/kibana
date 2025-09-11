@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationVendor } from '../../../../../../common/siem_migrations/types';
 
-export const getVendorTag = (originalRule: OriginalRule): string => {
-  const { vendor } = originalRule;
+export const getVendorTag = (vendor: SiemMigrationVendor): string => {
   const capitalizedVendor = `${vendor.charAt(0).toUpperCase()}${vendor.slice(1)}`;
   return `Migrated from ${capitalizedVendor}`;
 };
