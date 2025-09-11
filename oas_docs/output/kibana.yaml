@@ -14907,7 +14907,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         required: true
       responses:
         '200':
@@ -84349,11 +84349,22 @@ components:
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_MonitoredUserDoc:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
+        - type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            event:
+              type: object
+              properties:
+                ingested:
+                  format: date-time
+                  type: string
+    Security_Entity_Analytics_API_MonitoredUserUpdateDoc:
       type: object
       properties:
-        '@timestamp':
-          format: date-time
-          type: string
         entity_analytics_monitoring:
           type: object
           properties:
@@ -84368,12 +84379,6 @@ components:
                   value:
                     type: string
               type: array
-        event:
-          type: object
-          properties:
-            ingested:
-              format: date-time
-              type: string
         id:
           type: string
         labels:
