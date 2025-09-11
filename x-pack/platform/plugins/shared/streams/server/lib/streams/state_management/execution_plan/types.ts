@@ -137,8 +137,8 @@ export interface UpdateIngestSettingsAction {
   request: {
     name: string;
     settings: {
-      'index.number_of_replicas': number | null;
-      'index.number_of_shards': number | null;
+      'index.number_of_replicas'?: number | null;
+      'index.number_of_shards'?: number | null;
       'index.refresh_interval': string | -1 | null;
     };
   };

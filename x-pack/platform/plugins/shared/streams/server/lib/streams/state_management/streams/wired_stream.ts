@@ -55,6 +55,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
+import { formatSettings } from './helpers';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -575,11 +576,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'update_ingest_settings',
         request: {
           name: this._definition.name,
-          settings: {
-            'index.number_of_replicas': settings['index.number_of_replicas']?.value ?? null,
-            'index.number_of_shards': settings['index.number_of_shards']?.value ?? null,
-            'index.refresh_interval': settings['index.refresh_interval']?.value ?? null,
-          },
+          settings: formatSettings(settings, this.dependencies.isServerless),
         },
       },
       {
@@ -688,11 +685,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'update_ingest_settings',
         request: {
           name: this._definition.name,
-          settings: {
-            'index.number_of_replicas': settings['index.number_of_replicas']?.value ?? null,
-            'index.number_of_shards': settings['index.number_of_shards']?.value ?? null,
-            'index.refresh_interval': settings['index.refresh_interval']?.value ?? null,
-          },
+          settings: formatSettings(settings, this.dependencies.isServerless),
         },
       });
     }

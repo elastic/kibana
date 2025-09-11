@@ -30,6 +30,7 @@ import { StreamActiveRecord } from '../stream_active_record/stream_active_record
 import { validateClassicFields } from '../../helpers/validate_fields';
 import { validateBracketsInFieldNames } from '../../helpers/validate_stream';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
+import { formatSettings } from './helpers';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -228,14 +229,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       type: 'update_ingest_settings',
       request: {
         name: this._definition.name,
-        settings: {
-          'index.number_of_replicas':
-            this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
-          'index.number_of_shards':
-            this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
-          'index.refresh_interval':
-            this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
-        },
+        settings: formatSettings(this._definition.ingest.settings, this.dependencies.isServerless),
       },
     });
 
@@ -315,14 +309,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         type: 'update_ingest_settings',
         request: {
           name: this._definition.name,
-          settings: {
-            'index.number_of_replicas':
-              this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
-            'index.number_of_shards':
-              this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
-            'index.refresh_interval':
-              this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
-          },
+          settings: formatSettings(
+            this._definition.ingest.settings,
+            this.dependencies.isServerless
+          ),
         },
       });
     }
