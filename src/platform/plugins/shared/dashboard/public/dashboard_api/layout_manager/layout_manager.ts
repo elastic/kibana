@@ -11,7 +11,6 @@ import deepEqual from 'fast-deep-equal';
 import { filter, map as lodashMap, max } from 'lodash';
 import {
   BehaviorSubject,
-  Subject,
   combineLatest,
   combineLatestWith,
   debounceTime,

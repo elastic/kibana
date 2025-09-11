@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlState } from '@kbn/controls-schemas';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DashboardPanel, DashboardSection } from '../../../server';
@@ -26,7 +26,7 @@ export interface DashboardLayout {
     [uuid: string]: DashboardLayoutPanel;
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'gridData' | 'title'> };
-  controls: { [id: string]: ControlState };
+  controls: ControlsGroupState['controls'];
 }
 
 export interface DashboardChildState {
