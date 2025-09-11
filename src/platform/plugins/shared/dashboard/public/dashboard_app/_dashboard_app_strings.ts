@@ -71,7 +71,7 @@ export const unsavedChangesBadgeStrings = {
 
 export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-    defaultMessage: 'Create visualization',
+    defaultMessage: 'Visualization',
   });
 
 export const getQuickCreateButtonGroupLegend = () =>

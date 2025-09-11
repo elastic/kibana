@@ -77,7 +77,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         },
         {
           name: i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-            defaultMessage: 'Add panel',
+            defaultMessage: 'New panel',
           }),
           icon: 'plusInCircle',
           'data-test-subj': 'dashboardOpenAddPanelFlyoutButton',
@@ -120,7 +120,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         },
         {
           name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
-            defaultMessage: 'Add collapsible section',
+            defaultMessage: 'Collapsible section',
           }),
           icon: 'section',
           'data-test-subj': 'dashboardAddCollapsibleSectionButton',
@@ -131,7 +131,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
         },
         {
           name: i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
-            defaultMessage: 'Add control',
+            defaultMessage: 'Control',
           }),
           icon: 'controlsHorizontal',
           'data-test-subj': 'dashboard-controls-menu-button',
@@ -141,7 +141,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           name: i18n.translate(
             'dashboard.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel',
             {
-              defaultMessage: 'Add from library',
+              defaultMessage: 'From library',
             }
           ),
           'data-test-subj': 'dashboardAddFromLibraryButton',
