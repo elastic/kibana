@@ -129,7 +129,8 @@
             ".fleet-agents*",
             ".fleet-actions*",
             "risk-score.risk-score-*",
-            ".entities.v1.latest.security_*"
+            ".entities.v1.latest.security_*",
+            ".entities.v1.history.*.security_*"
           ],
           "privileges": ["read"]
         }
