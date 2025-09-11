@@ -718,13 +718,13 @@ Object {
       "type": "keyword",
     },
     "entity.attributes.Privileged": Object {
-      "type": "keyword",
+      "type": "boolean",
     },
     "entity.id": Object {
       "type": "keyword",
     },
     "entity.lifecycle.First_seen": Object {
-      "type": "keyword",
+      "type": "date",
     },
     "entity.name": Object {
       "type": "keyword",
@@ -1121,10 +1121,10 @@ Object {
       "type": "keyword",
     },
     "entity.attributes.Privileged": Object {
-      "type": "keyword",
+      "type": "boolean",
     },
     "entity.lifecycle.First_seen": Object {
-      "type": "keyword",
+      "type": "date",
     },
     "entity.name": Object {
       "type": "keyword",
@@ -1438,10 +1438,10 @@ Object {
       "type": "keyword",
     },
     "entity.attributes.Privileged": Object {
-      "type": "keyword",
+      "type": "boolean",
     },
     "entity.lifecycle.First_seen": Object {
-      "type": "keyword",
+      "type": "date",
     },
     "entity.name": Object {
       "type": "keyword",
@@ -1717,10 +1717,10 @@ Object {
       "type": "keyword",
     },
     "entity.attributes.Privileged": Object {
-      "type": "keyword",
+      "type": "boolean",
     },
     "entity.lifecycle.First_seen": Object {
-      "type": "keyword",
+      "type": "date",
     },
     "entity.name": Object {
       "type": "keyword",

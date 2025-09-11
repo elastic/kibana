@@ -50,10 +50,12 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({
       source: `${prefix}.attributes.Privileged`,
       destination: 'entity.attributes.Privileged',
+      mapping: { type: 'boolean' },
     }),
     newestValue({
       source: `${prefix}.lifecycle.First_seen`,
       destination: 'entity.lifecycle.First_seen',
+      mapping: { type: 'date' },
     }),
   ];
 };
