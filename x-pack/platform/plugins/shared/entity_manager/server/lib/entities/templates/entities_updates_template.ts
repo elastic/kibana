@@ -53,5 +53,5 @@ export const generateEntitiesUpdatesIndexTemplateConfig = (
 });
 
 function getCustomLatestTemplateComponents(definition: EntityDefinition) {
-  return [`${definition.id}-update@platform`, `${definition.id}-update@custom`];
+  return [`${definition.id}-updates@platform`, `${definition.id}-updates@custom`];
 }

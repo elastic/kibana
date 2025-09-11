@@ -19,10 +19,10 @@ Object {
           "type": "keyword",
         },
         "host.entity.attributes.Privileged": Object {
-          "type": "keyword",
+          "type": "boolean",
         },
         "host.entity.lifecycle.First_seen": Object {
-          "type": "keyword",
+          "type": "date",
         },
         "host.entity.name": Object {
           "type": "keyword",
