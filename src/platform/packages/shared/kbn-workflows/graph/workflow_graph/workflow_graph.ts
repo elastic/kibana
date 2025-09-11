@@ -32,6 +32,22 @@ export class WorkflowGraph {
     return this.graph!.node(nodeId) as unknown as GraphNode;
   }
 
+  public getNodeStack(nodeId: string): string[] {
+    const predecessors = this.getAllPredecessors(nodeId).toReversed();
+
+    const stack: string[] = [];
+    for (const node of predecessors) {
+      if (node.type.startsWith('enter-')) {
+        stack.push(node.id);
+      }
+
+      if (node.type.startsWith('exit-')) {
+        stack.pop();
+      }
+    }
+    return stack;
+  }
+
   public getAllNodes(): GraphNode[] {
     return this.graph!.nodes().map((nodeId) => this.graph!.node(nodeId) as unknown as GraphNode);
   }
