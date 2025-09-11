@@ -7,6 +7,7 @@
 
 import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import Boom from '@hapi/boom';
 
 describe('getWebhookSecretHeadersKeyRoute', () => {
   const router = httpServiceMock.createRouter();
@@ -116,10 +117,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     const routeHandler = router.get.mock.calls[0][1];
 
     const mockActionsClientAuthFail = {
-      get: jest.fn().mockImplementation(() => {
-        const error = new Error('Not authorized');
-        throw error;
-      }),
+      get: jest.fn().mockRejectedValue(new Boom.Boom('Not authorized', { statusCode: 403 })),
     };
 
     getStartServices.mockResolvedValue([
@@ -148,6 +146,11 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
       params: { id: '3' },
     });
 
-    await expect(routeHandler({}, mockRequest, mockResponse)).rejects.toThrow('Not authorized');
+    await routeHandler({}, mockRequest, mockResponse);
+
+    expect(mockResponse.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'Not authorized' },
+    });
   });
 });
