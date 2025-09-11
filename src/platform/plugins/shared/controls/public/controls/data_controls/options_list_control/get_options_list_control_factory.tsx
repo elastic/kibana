@@ -28,7 +28,7 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
-import { isValidSearch } from '../../../../common/options_list';
+import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
 import { coreServices } from '../../../services/kibana_services';
 import {
   defaultDataControlComparators,
@@ -68,6 +68,10 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
   return {
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      if (isOptionsListESQLControlState(initialState)) {
+        throw new Error('ES|QL control state handling not yet implemented'); // TODO: Is this really the best way to do this????
+      }
+
       const state = initialState.rawState;
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
@@ -266,6 +270,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
+          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+            throw new Error('ES|QL control state handling not yet implemented');
+          }
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);

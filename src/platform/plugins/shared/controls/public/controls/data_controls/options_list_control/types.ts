@@ -12,7 +12,6 @@ import type { Subject } from 'rxjs';
 import type {
   OptionsListControlState,
   OptionsListSelection,
-  OptionsListDisplaySettings,
   OptionsListSortingType,
   DataControlState,
 } from '@kbn/controls-schemas';
@@ -32,32 +31,33 @@ export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState
     hasSelections$: PublishingSubject<boolean | undefined>;
   };
 
-export interface OptionsListComponentState
-  extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
-  searchString: string;
-  searchStringValid: boolean;
-  requestSize: number;
-}
-
 interface PublishesOptions {
   availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-export type OptionsListState = Pick<DataControlState, 'fieldName'> &
+
+/**
+ * A type consisting of only the properties that the options list control puts into state managers
+ * and then passes to the UI component. Excludes any managed state properties that don't end up being used
+ * by the component
+ */
+export type OptionsListComponentState = Pick<DataControlState, 'fieldName'> &
   SelectionsState &
   EditorState &
-  TemporaryState & { sort: OptionsListSortingType | undefined };
+  TemporaryState & {
+    sort: OptionsListSortingType | undefined;
+  };
 
-type PublishesOptionsListState = SubjectsOf<OptionsListState>;
-type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
-  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+type PublishesOptionsListComponentState = SubjectsOf<OptionsListComponentState>;
+type OptionsListComponentStateSetters = Partial<SettersOf<OptionsListComponentState>> &
+  SettersOf<Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
-  PublishesOptionsListState &
+  PublishesOptionsListComponentState &
   DataControlApi &
-  OptionsListStateSetters & {
+  OptionsListComponentStateSetters & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: Subject<void>;

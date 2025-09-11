@@ -65,10 +65,11 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
 
 ### Available fixtures
 
-| Fixture           | Description                                                       |
-| ----------------- | ----------------------------------------------------------------- |
-| `inferenceClient` | Bound to the connector declared by the active Playwright project. |
-| `phoenixClient`   | Client for the Phoenix API (to run experiments)                   |
+| Fixture                     | Description                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                           |
+| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                             |
+| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets |
 
 ## Running the suite
 
@@ -102,6 +103,73 @@ Now run the tests exactly like a normal Scout/Playwright suite in another termin
 
 ```bash
 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+## Elasticsearch Export
+
+The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+
+### Datastream Structure
+
+The evaluation data is stored with the following structure:
+
+- **Index Pattern**: `.kibana-evaluations*`
+- **Datastream**: `.kibana-evaluations`
+- **Document Structure**:
+
+  ```json
+  {
+    "@timestamp": "2025-08-28T14:21:35.886Z",
+    "run_id": "026c5060fbfc7dcb",
+    "model": {
+      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "family": "anthropic",
+      "provider": "bedrock"
+    },
+    "dataset": {
+      "id": "dataset_id",
+      "name": "my-dataset",
+      "examples_count": 10
+    },
+    "evaluator": {
+      "name": "Factuality",
+      "stats": {
+        "mean": 0.85,
+        "median": 1.0,
+        "std_dev": 0.37,
+        "min": 0.0,
+        "max": 1.0,
+        "count": 10,
+        "percentage": 85.0
+      },
+      "scores": [1.0, 0.8, 1.0, 0.6, 1.0]
+    },
+    "experiments": [{ "id": "experiment_id_1" }],
+    "environment": {
+      "hostname": "your-hostname"
+    },
+    "tags": ["tag1", "tag2"]
+  }
+  ```
+
+### Querying Evaluation Data
+
+After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
+
+```kql
+environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"run-id"
+```
+
+### Using the Evaluation Analysis Service
+
+The `evaluationAnalysisService` fixture provides methods to analyze and compare evaluation results:
+
+```ts
+evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
+  // The service automatically retrieves scores from Elasticsearch
+  // and provides statistical analysis capabilities
+  // Analysis happens automatically after experiments complete
+});
 ```
 
 ### LLM-as-a-judge

@@ -333,7 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should restore the search bar state in ES|QL mode', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
-        const defaultQuery = 'FROM logstash-* | LIMIT 10';
+        const defaultQuery = 'FROM logstash-*';
 
         const expectState = async (query: string, isDirty: boolean) => {
           await retry.try(async () => {
@@ -363,7 +363,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery0, true);
-        expect(await discover.getHitCount()).to.be('10');
+        expect(await discover.getHitCount()).to.be('1,000');
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery0, false);
@@ -372,12 +372,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         await expectState(defaultQuery, false);
-        expect(await discover.getHitCount()).to.be('10');
+        expect(await discover.getHitCount()).to.be('1,000');
 
         await unifiedTabs.selectTab(2);
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery2, true);
-        expect(await discover.getHitCount()).to.be('10');
+        expect(await discover.getHitCount()).to.be('1,000');
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery2, false);

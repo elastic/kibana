@@ -1079,7 +1079,21 @@ export class CstToAstConverter {
   }
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
-    return this.toSource(ctx._index);
+    if (ctx._index) {
+      return this.toSource(ctx._index);
+    } else {
+      return Builder.expression.source.node(
+        {
+          sourceType: 'index',
+          name: '',
+        },
+        {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: true,
+          text: ctx?.getText(),
+        }
+      );
+    }
   }
 
   // ------------------------------------------------------------- CHANGE_POINT
@@ -1338,8 +1352,32 @@ export class CstToAstConverter {
     }
 
     const withOption = this.fromCommandNamedParameters(namedParamsCtx);
-    if (withOption && !withOption.incomplete) {
+
+    if (!withOption) {
+      return;
+    }
+
+    // check the existence of inference_id
+    const namedParameters = withOption.args[0] as ast.ESQLMap | undefined;
+    command.inferenceId = undefined;
+
+    if (namedParameters) {
       command.args.push(withOption);
+
+      command.inferenceId = Builder.expression.literal.string(
+        '',
+        { name: 'inferenceId' },
+        { incomplete: true }
+      );
+
+      const inferenceIdParam = namedParameters?.entries.find(
+        (param) => param.key.valueUnquoted === 'inference_id'
+      )?.value as ast.ESQLStringLiteral;
+
+      if (inferenceIdParam) {
+        command.inferenceId = inferenceIdParam;
+        command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
+      }
     }
   }
 
@@ -2073,7 +2111,10 @@ export class CstToAstConverter {
         throw new Error(`Unexpected node type: ${(node as ast.ESQLProperNode).type} in toColumn`);
       }
     } else if (ctx instanceof cst.QualifiedNameContext) {
-      const list = ctx.identifierOrParameter_list();
+      // TODO: new grammar also introduced here bracketed syntax.
+      // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R156-R158
+      const fieldNameCtx = ctx._name ?? ctx.fieldName();
+      const list = fieldNameCtx ? fieldNameCtx.identifierOrParameter_list() : [];
 
       for (const item of list) {
         if (item instanceof cst.IdentifierOrParameterContext) {
@@ -2116,7 +2157,10 @@ export class CstToAstConverter {
     ctx: cst.QualifiedNamePatternContext
   ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
     const args: ast.ESQLColumn['args'] = [];
-    const patterns = ctx.identifierPattern_list();
+    // TODO: new grammar also introduced here bracketed syntax.
+    // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R165-R167
+    const fieldNamePatternCtx = ctx._name ?? ctx.fieldNamePattern();
+    const patterns = fieldNamePatternCtx ? fieldNamePatternCtx.identifierPattern_list() : [];
 
     // Special case: a single parameter is returned as a param literal
     if (patterns.length === 1) {
@@ -2367,8 +2411,13 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
+
       if (entry) {
         map.entries.push(entry);
+
+        if (entry.incomplete) {
+          map.incomplete = true;
+        }
       } else {
         map.incomplete = true;
       }
@@ -2382,17 +2431,40 @@ export class CstToAstConverter {
     const valueCtx = ctx._value;
 
     if (keyCtx && valueCtx) {
+      let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+      if (!key) {
+        return undefined;
+      }
 
-      const entry = Builder.expression.entry(key, value, {
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      });
+      const constantCtx = valueCtx.constant();
 
-      return entry;
+      if (constantCtx) {
+        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+      }
+
+      const mapExpressionCtx = valueCtx.mapExpression();
+
+      if (mapExpressionCtx) {
+        value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (!value) {
+        value = this.fromParserRuleToUnknown(valueCtx);
+        value.incomplete = true;
+      }
+
+      if (value) {
+        const entry = Builder.expression.entry(key, value, {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+        });
+
+        return entry;
+      }
     }
+    return undefined;
   }
 
   // ----------------------------------------------------- constant expressions

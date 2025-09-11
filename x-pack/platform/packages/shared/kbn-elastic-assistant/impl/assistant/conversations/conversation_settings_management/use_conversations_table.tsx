@@ -66,6 +66,7 @@ interface GetColumnsParams {
 
 export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
+
   const getColumns = useCallback(
     ({
       conversationOptions,
@@ -81,116 +82,112 @@ export const useConversationsTable = () => {
       onDeleteActionClicked,
       onEditActionClicked,
       totalItemCount,
-    }: GetColumnsParams): Array<EuiBasicTableColumn<ConversationTableItem>> => {
-      return [
-        {
-          field: '',
-          name: (
-            <PageSelectionCheckbox
-              conversationOptions={conversationOptions}
-              deletedConversationsIds={deletedConversationsIds}
-              excludedIds={excludedIds}
-              isExcludedMode={isExcludedMode}
-              handlePageChecked={handlePageChecked}
-              handlePageUnchecked={handlePageUnchecked}
-              totalItemCount={totalItemCount}
-            />
-          ),
-          render: (conversation: ConversationTableItem) => (
-            <InputCheckbox
-              conversation={conversation}
-              deletedConversationsIds={deletedConversationsIds}
-              excludedIds={excludedIds}
-              isExcludedMode={isExcludedMode}
-              handleRowChecked={handleRowChecked}
-              handleRowUnChecked={handleRowUnChecked}
-              totalItemCount={totalItemCount}
-            />
-          ),
-          width: '40px',
-          sortable: false,
-        },
-        {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
-          render: (conversation: ConversationTableItem) => (
-            <EuiLink onClick={() => onEditActionClicked(conversation)}>
-              {conversation.title}
-            </EuiLink>
-          ),
-          sortable: ({ title }: ConversationTableItem) => title,
-        },
-        {
-          field: 'systemPromptTitle',
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT,
-          align: 'left',
-          render: (systemPromptTitle: ConversationTableItem['systemPromptTitle']) =>
-            systemPromptTitle ? <EuiBadge color="hollow">{systemPromptTitle}</EuiBadge> : null,
-          sortable: false,
-        },
-        {
-          field: 'connectorTypeTitle',
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_CONNECTOR,
-          align: 'left',
-          render: (connectorTypeTitle: ConversationTableItem['connectorTypeTitle']) =>
-            connectorTypeTitle ? <EuiBadge color="hollow">{connectorTypeTitle}</EuiBadge> : null,
-          sortable: false,
-        },
-        {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_SHARING,
-          render: (conversation: ConversationTableItem) => {
-            const conversationSharedState = getConversationSharedState(conversation);
-            const sharingMap = {
-              [ConversationSharedState.SHARED]: { tooltip: VISIBLE_SHARED, badge: SHARED },
-              [ConversationSharedState.RESTRICTED]: {
-                tooltip: VISIBLE_RESTRICTED,
-                badge: RESTRICTED,
-              },
-              [ConversationSharedState.PRIVATE]: { tooltip: VISIBLE_PRIVATE, badge: PRIVATE },
-            };
+    }: GetColumnsParams): Array<EuiBasicTableColumn<ConversationTableItem>> => [
+      {
+        field: '',
+        name: (
+          <PageSelectionCheckbox
+            conversationOptions={conversationOptions}
+            deletedConversationsIds={deletedConversationsIds}
+            excludedIds={excludedIds}
+            isExcludedMode={isExcludedMode}
+            handlePageChecked={handlePageChecked}
+            handlePageUnchecked={handlePageUnchecked}
+            totalItemCount={totalItemCount}
+          />
+        ),
+        render: (conversation: ConversationTableItem) => (
+          <InputCheckbox
+            conversation={conversation}
+            deletedConversationsIds={deletedConversationsIds}
+            excludedIds={excludedIds}
+            isExcludedMode={isExcludedMode}
+            handleRowChecked={handleRowChecked}
+            handleRowUnChecked={handleRowUnChecked}
+            totalItemCount={totalItemCount}
+          />
+        ),
+        width: '40px',
+        sortable: false,
+      },
+      {
+        name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
+        render: (conversation: ConversationTableItem) => (
+          <EuiLink onClick={() => onEditActionClicked(conversation)}>{conversation.title}</EuiLink>
+        ),
+        sortable: ({ title }: ConversationTableItem) => title,
+      },
+      {
+        field: 'systemPromptTitle',
+        name: i18n.CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT,
+        align: 'left',
+        render: (systemPromptTitle: ConversationTableItem['systemPromptTitle']) =>
+          systemPromptTitle ? <EuiBadge color="hollow">{systemPromptTitle}</EuiBadge> : null,
+        sortable: false,
+      },
+      {
+        field: 'connectorTypeTitle',
+        name: i18n.CONVERSATIONS_TABLE_COLUMN_CONNECTOR,
+        align: 'left',
+        render: (connectorTypeTitle: ConversationTableItem['connectorTypeTitle']) =>
+          connectorTypeTitle ? <EuiBadge color="hollow">{connectorTypeTitle}</EuiBadge> : null,
+        sortable: false,
+      },
+      {
+        name: i18n.CONVERSATIONS_TABLE_COLUMN_SHARING,
+        render: (conversation: ConversationTableItem) => {
+          const conversationSharedState = getConversationSharedState(conversation);
+          const sharingMap = {
+            [ConversationSharedState.SHARED]: { tooltip: VISIBLE_SHARED, badge: SHARED },
+            [ConversationSharedState.RESTRICTED]: {
+              tooltip: VISIBLE_RESTRICTED,
+              badge: RESTRICTED,
+            },
+            [ConversationSharedState.PRIVATE]: { tooltip: VISIBLE_PRIVATE, badge: PRIVATE },
+          };
 
-            const { tooltip: tooltipContent, badge: badgeLabel } =
-              sharingMap[conversationSharedState] || sharingMap[ConversationSharedState.PRIVATE];
-            return (
-              <EuiToolTip content={tooltipContent}>
-                <ShareBadge
-                  conversationSharedState={conversationSharedState}
-                  isConversationOwner
-                  label={badgeLabel}
-                />
-              </EuiToolTip>
-            );
-          },
-          width: '100px',
+          const { tooltip: tooltipContent, badge: badgeLabel } =
+            sharingMap[conversationSharedState] || sharingMap[ConversationSharedState.PRIVATE];
+          return (
+            <EuiToolTip content={tooltipContent}>
+              <ShareBadge
+                conversationSharedState={conversationSharedState}
+                isConversationOwner
+                label={badgeLabel}
+              />
+            </EuiToolTip>
+          );
         },
-        {
-          field: 'updatedAt',
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_UPDATED_AT,
-          align: 'center',
-          render: (updatedAt: ConversationTableItem['updatedAt']) =>
-            updatedAt ? (
-              <EuiBadge color="hollow">
-                <FormattedDate
-                  value={new Date(updatedAt)}
-                  year="numeric"
-                  month="2-digit"
-                  day="numeric"
-                />
-              </EuiBadge>
-            ) : null,
-          sortable: true,
-        },
-        {
-          width: '120px',
-          align: 'center',
-          ...getActions({
-            isDeleteEnabled,
-            isEditEnabled,
-            onDelete: onDeleteActionClicked,
-            onEdit: onEditActionClicked,
-          }),
-        },
-      ];
-    },
+        width: '100px',
+      },
+      {
+        field: 'updatedAt',
+        name: i18n.CONVERSATIONS_TABLE_COLUMN_UPDATED_AT,
+        align: 'center',
+        render: (updatedAt: ConversationTableItem['updatedAt']) =>
+          updatedAt ? (
+            <EuiBadge color="hollow">
+              <FormattedDate
+                value={new Date(updatedAt)}
+                year="numeric"
+                month="2-digit"
+                day="numeric"
+              />
+            </EuiBadge>
+          ) : null,
+        sortable: true,
+      },
+      {
+        width: '120px',
+        align: 'center',
+        ...getActions({
+          isDeleteEnabled,
+          isEditEnabled,
+          onDelete: onDeleteActionClicked,
+          onEdit: onEditActionClicked,
+        }),
+      },
+    ],
     [getActions]
   );
   const getConversationsList = useCallback(

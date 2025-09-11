@@ -33,6 +33,14 @@ export {
   type ControlGroupRendererProps,
 } from './control_group/control_group_renderer';
 
+export type {
+  ControlGroupRuntimeState,
+  ControlPanelState,
+  ControlPanelsState,
+  DefaultDataControlState,
+} from '../common';
+export type { OptionsListDSLControlState } from '../common/options_list';
+
 export { serializeRuntimeState } from './control_group/utils/serialize_runtime_state';
 
 export function plugin() {

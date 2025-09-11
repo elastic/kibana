@@ -10,6 +10,9 @@
 export { isValidSearch } from './is_valid_search';
 export { getSelectionAsFieldType } from './options_list_selections';
 export type {
+  OptionsListESQLControlState,
+  OptionsListDSLControlState,
+  OptionsListDisplaySettings,
   OptionsListFailureResponse,
   OptionsListRequest,
   OptionsListSuccessResponse,

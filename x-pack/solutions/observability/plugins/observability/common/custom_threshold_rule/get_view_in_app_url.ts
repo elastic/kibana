@@ -26,18 +26,14 @@ export interface GetViewInAppUrlArgs {
   spaceId?: string;
 }
 
-export const getViewInAppUrl = ({
+export const getViewInAppLocatorParams = ({
   dataViewId,
   endedAt,
   groups,
-  logsLocator,
   metrics = [],
   searchConfiguration,
   startedAt = new Date().toISOString(),
-  spaceId,
 }: GetViewInAppUrlArgs) => {
-  if (!logsLocator) return '';
-
   const searchConfigurationQuery = searchConfiguration?.query.query;
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
@@ -67,14 +63,35 @@ export const getViewInAppUrl = ({
     dataViewSpec = searchConfiguration.index as DataViewSpec;
   }
 
-  return logsLocator.getRedirectUrl(
-    {
-      dataViewId,
-      dataViewSpec,
-      timeRange,
-      query,
-      filters: [...searchConfigurationFilters, ...groupFilters],
-    },
-    { spaceId }
-  );
+  return {
+    dataViewId,
+    dataViewSpec,
+    timeRange,
+    query,
+    filters: [...searchConfigurationFilters, ...groupFilters],
+  };
+};
+
+export const getViewInAppUrl = ({
+  dataViewId,
+  endedAt,
+  groups,
+  logsLocator,
+  metrics = [],
+  searchConfiguration,
+  startedAt = new Date().toISOString(),
+  spaceId,
+}: GetViewInAppUrlArgs) => {
+  if (!logsLocator) return '';
+
+  const params = getViewInAppLocatorParams({
+    dataViewId,
+    endedAt,
+    groups,
+    metrics,
+    searchConfiguration,
+    startedAt,
+  });
+
+  return logsLocator.getRedirectUrl(params, { spaceId });
 };
