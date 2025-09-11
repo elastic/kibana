@@ -125,17 +125,31 @@ export interface ConversationRound {
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
+  /** when the round was started */
+  started_at: string;
+  /** time it took for the round to resolve, in ms */
+  took: number;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
 }
 
+/**
+ * Main structure representing a conversation with an agent.
+ */
 export interface Conversation {
+  /** unique id for this round */
   id: string;
+  /** id of the agent this conversation is bound to */
   agent_id: string;
+  /** info of the owner of the discussion */
   user: UserIdAndName;
+  /** title of the conversation */
   title: string;
+  /** creation date */
   created_at: string;
+  /** update date */
   updated_at: string;
+  /** list of round for this conversation */
   rounds: ConversationRound[];
 }
 
