@@ -96,7 +96,7 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
           : {};
       const telemetryValue = {
         ...telemetryParams,
-        durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
+        durationMs: (parseInt(run.end_time + '') ?? 0) - (parseInt(run.start_time + '') ?? 0),
         toolsInvoked,
         ...(telemetryParams.actionTypeId === '.gen-ai'
           ? { isOssModel: run.inputs.isOssModel }

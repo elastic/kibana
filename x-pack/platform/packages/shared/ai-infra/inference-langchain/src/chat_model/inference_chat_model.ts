@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { z, ZodSchema } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
