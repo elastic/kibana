@@ -22,26 +22,6 @@ export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
 const cache = new Map<string, ESQLColumnData[]>();
 
-// Function to check if a key exists in the cache, ignoring case
-function checkCacheInsensitive(keyToCheck: string) {
-  for (const key of cache.keys()) {
-    if (key.toLowerCase() === keyToCheck.toLowerCase()) {
-      return true; // Or return the value associated with the key if needed: return cache.get(key);
-    }
-  }
-  return false;
-}
-
-// Function to get a value from the cache, ignoring case
-function getValueInsensitive(keyToCheck: string) {
-  for (const key of cache.keys()) {
-    if (key.toLowerCase() === keyToCheck.toLowerCase()) {
-      return cache.get(key);
-    }
-  }
-  return undefined;
-}
-
 /**
  * Given a query, this function will compute the available fields and cache them
  * for the next time the same query is used.
@@ -53,18 +33,9 @@ async function cacheColumnsForQuery(
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string
 ) {
-  let cacheKey: string;
-  try {
-    cacheKey = BasicPrettyPrinter.print(query);
-  } catch {
-    // for some syntactically incorrect queries
-    // the printer will throw. They're incorrect
-    // anyways, so just move on — ANTLR errors will
-    // be reported.
-    return;
-  }
+  const cacheKey = originalQueryText.slice(query.location.min, query.location.max + 1);
 
-  const existsInCache = checkCacheInsensitive(cacheKey);
+  const existsInCache = cache.has(cacheKey);
   if (existsInCache) {
     // this is already in the cache
     return;
@@ -74,7 +45,7 @@ async function cacheColumnsForQuery(
     ...query,
     commands: query.commands.slice(0, -1),
   });
-  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(queryBeforeCurrentCommand) ?? [];
+  const fieldsAvailableAfterPreviousCommand = cache.get(queryBeforeCurrentCommand) ?? [];
 
   const availableFields = await getCurrentQueryAvailableColumns(
     query.commands,
@@ -102,15 +73,17 @@ export function getColumnsByTypeHelper(
   resourceRetriever?: ESQLCallbacks
 ) {
   const root = getQueryForFields(originalQueryText, query);
-  const queryForFields = BasicPrettyPrinter.print(root);
+
+  // IMPORTANT: cache key can't be case-insensitive because column names are case-sensitive
+  const cacheKey = originalQueryText.slice(root.location.min, root.location.max + 1);
 
   const cacheColumns = async () => {
-    if (!queryForFields) {
+    if (!cacheKey) {
       return;
     }
 
     const getFields = async (queryToES: string) => {
-      const cached = getValueInsensitive(queryToES);
+      const cached = cache.get(queryToES);
       if (cached) {
         return cached as ESQLFieldWithMetadata[];
       }
@@ -121,7 +94,11 @@ export function getColumnsByTypeHelper(
 
     const subqueries = [];
     for (let i = 0; i < root.commands.length; i++) {
-      subqueries.push(Builder.expression.query(root.commands.slice(0, i + 1)));
+      subqueries.push(
+        Builder.expression.query(root.commands.slice(0, i + 1), {
+          location: { min: 0, max: root.commands[i].location.max },
+        })
+      );
     }
 
     const getPolicies = async () => {
@@ -142,7 +119,7 @@ export function getColumnsByTypeHelper(
     ): Promise<ESQLColumnData[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await cacheColumns();
-      const cachedFields = getValueInsensitive(queryForFields);
+      const cachedFields = cache.get(cacheKey);
       return (
         cachedFields?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
@@ -157,7 +134,7 @@ export function getColumnsByTypeHelper(
     },
     getColumnMap: async (): Promise<Map<string, ESQLColumnData>> => {
       await cacheColumns();
-      const cachedFields = getValueInsensitive(queryForFields);
+      const cachedFields = cache.get(cacheKey);
       const cacheCopy = new Map<string, ESQLColumnData>();
       cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
       return cacheCopy;
@@ -220,7 +197,8 @@ export function getQueryForFields(
      */
     const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
     const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
-    return { ...root, commands: newCommands };
+    const newLocation = { min: 0, max: newCommands[newCommands.length - 1]?.location.max ?? 0 };
+    return { ...root, commands: newCommands, location: newLocation };
   }
 
   if (lastCommand && lastCommand.name === 'eval') {
@@ -240,7 +218,8 @@ export function getQueryForFields(
        */
       const expanded = expandEvals(commands);
       const newCommands = expanded.slice(0, endsWithComma ? undefined : -1);
-      return { ...root, commands: newCommands };
+      const newLocation = { min: 0, max: newCommands[newCommands.length - 1]?.location.max ?? 0 };
+      return { ...root, commands: newCommands, location: newLocation };
     }
   }
 
@@ -251,6 +230,13 @@ function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
   if (root.commands.length === 1) {
     return { ...root, commands: [root.commands[0]] };
   } else {
-    return { ...root, commands: root.commands.slice(0, -1) };
+    const newCommands = root.commands.slice(0, -1);
+    const newLocation = { min: 0, max: newCommands[newCommands.length - 1]?.location.max ?? 0 };
+
+    return {
+      ...root,
+      commands: newCommands,
+      location: newLocation,
+    };
   }
 }

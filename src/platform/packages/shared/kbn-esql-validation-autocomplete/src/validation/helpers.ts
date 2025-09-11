@@ -60,7 +60,11 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
     subsequences.push(expandedCommands.slice(0, i + 1));
   }
 
-  return subsequences.map((subsequence) => Builder.expression.query(subsequence));
+  return subsequences.map((subsequence) =>
+    Builder.expression.query(subsequence, {
+      location: { min: 0, max: subsequence[subsequence.length - 1].location.max },
+    })
+  );
 }
 
 /**
