@@ -44,6 +44,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./connector_types/gemini'));
     loadTestFile(require.resolve('./connector_types/xsoar'));
+    loadTestFile(require.resolve('./connector_types/get_webhook_secret_headers_keys'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
