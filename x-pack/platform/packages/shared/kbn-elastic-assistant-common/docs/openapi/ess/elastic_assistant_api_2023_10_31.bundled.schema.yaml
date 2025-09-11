@@ -1827,7 +1827,7 @@ components:
         - id
         - type
     BaseInterruptResumeValue:
-      description: The basis of a interrupt resume value
+      description: The basis of an interrupt resume value
       type: object
       properties:
         type:
@@ -1837,7 +1837,7 @@ components:
       required:
         - type
     BaseInterruptValue:
-      description: The basis of a agent interrupt
+      description: The basis of an agent interrupt
       type: object
       properties:
         expired:
@@ -2854,10 +2854,10 @@ components:
         interruptValue:
           $ref: '#/components/schemas/InterruptValue'
           description: >-
-            When the agent is interrupted (e.g. user input is required), this
-            field is populated with the details of the interrupt. Messages
-            containing interruptValues in the metadata are excluded from the LLM
-            context.
+            When the agent is interrupted (for example, when user input is
+            required), this field is populated with the details of the
+            interrupt. Messages containing interruptValues in the metadata are
+            excluded from the LLM context.
     MessageRole:
       description: Message role.
       enum:
