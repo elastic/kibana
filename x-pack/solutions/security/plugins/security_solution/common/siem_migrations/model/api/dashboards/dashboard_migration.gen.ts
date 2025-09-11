@@ -282,6 +282,31 @@ export const StopDashboardsMigrationResponse = z.object({
   stopped: z.boolean(),
 });
 
+export type UpdateDashboardMigrationRequestParams = z.infer<
+  typeof UpdateDashboardMigrationRequestParams
+>;
+export const UpdateDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateDashboardMigrationRequestParamsInput = z.input<
+  typeof UpdateDashboardMigrationRequestParams
+>;
+
+export type UpdateDashboardMigrationRequestBody = z.infer<
+  typeof UpdateDashboardMigrationRequestBody
+>;
+export const UpdateDashboardMigrationRequestBody = z
+  .object({
+    /**
+     * The dashboard migration name
+     */
+    name: NonEmptyString.optional(),
+  })
+  .strict();
+export type UpdateDashboardMigrationRequestBodyInput = z.input<
+  typeof UpdateDashboardMigrationRequestBody
+>;
+
 export type UpsertDashboardMigrationResourcesRequestParams = z.infer<
   typeof UpsertDashboardMigrationResourcesRequestParams
 >;

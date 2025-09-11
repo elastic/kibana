@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./dashboards/create'));
     loadTestFile(require.resolve('./resources/missing'));

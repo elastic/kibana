@@ -419,6 +419,8 @@ import type {
   StartDashboardsMigrationResponse,
   StopDashboardsMigrationRequestParamsInput,
   StopDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
   UpsertDashboardMigrationResourcesRequestParamsInput,
   UpsertDashboardMigrationResourcesRequestBodyInput,
   UpsertDashboardMigrationResourcesResponse,
@@ -2873,6 +2875,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates mutable fields of an existing dashboard migration
+   */
+  async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient
@@ -3392,6 +3410,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;
