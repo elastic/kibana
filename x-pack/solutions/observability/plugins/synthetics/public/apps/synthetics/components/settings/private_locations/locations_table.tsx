@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ResetLocation } from './reset_location';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -42,11 +43,13 @@ interface ListItem extends PrivateLocation {
 export const PrivateLocationsTable = ({
   deleteLoading,
   onDelete,
+  onReset,
   onEdit,
   privateLocations,
 }: {
   deleteLoading?: boolean;
   onDelete: (id: string) => void;
+  onReset: (id: string) => void;
   onEdit: (privateLocation: PrivateLocation) => void;
   privateLocations: PrivateLocation[];
 }) => {
@@ -117,6 +120,18 @@ export const PrivateLocationsTable = ({
     {
       name: ACTIONS_LABEL,
       actions: [
+        {
+          name: RESET_LABEL,
+          description: RESET_LABEL,
+          render: (item: ListItem) => (
+            <ResetLocation
+              id={item.id}
+              label={item.label}
+              onReset={onReset}
+              locationMonitors={locationMonitors}
+            />
+          ),
+        },
         {
           name: EDIT_LOCATION,
           description: EDIT_LOCATION,
@@ -255,6 +270,13 @@ const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLoca
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
   defaultMessage: 'Create location',
 });
+
+const RESET_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.privateLocations.resetLabel',
+  {
+    defaultMessage: 'Reset location',
+  }
+);
 
 export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
   defaultMessage: 'Learn more.',

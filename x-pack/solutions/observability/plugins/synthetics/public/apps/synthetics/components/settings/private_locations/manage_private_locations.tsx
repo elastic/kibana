@@ -55,6 +55,7 @@ export const ManagePrivateLocations = () => {
     loading,
     privateLocations,
     onDeleteLocationAPI,
+    onResetLocationAPI,
     deleteLoading,
   } = usePrivateLocationsAPI();
 
@@ -102,6 +103,7 @@ export const ManagePrivateLocations = () => {
             onDelete={onDeleteLocationAPI}
             onEdit={onEditLocation}
             deleteLoading={deleteLoading}
+            onReset={onResetLocationAPI}
           />
         </ManageEmptyState>
       )}

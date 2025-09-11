@@ -8,34 +8,33 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import { selectPrivateLocationsState } from '../../../state/private_locations/selectors';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
-export const DeleteLocation = ({
-  loading,
+export const ResetLocation = ({
   id,
   label,
   locationMonitors,
-  onDelete,
+  onReset,
 }: {
   id: string;
   label: string;
-  loading?: boolean;
-  onDelete: (id: string) => void;
+  onReset: (id: string) => void;
   locationMonitors: Array<{ id: string; count: number }>;
 }) => {
   const monCount = locationMonitors?.find((l) => l.id === id)?.count ?? 0;
-  const canDelete = monCount === 0;
+  const canReset = monCount > 0;
+  const { loading, resetLoading } = useSelector(selectPrivateLocationsState);
 
   const { canSave } = useSyntheticsSettingsContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const deleteDisabledReason = i18n.translate(
-    'xpack.synthetics.monitorManagement.cannotDelete.description',
+  const resetDisabledReason = i18n.translate(
+    'xpack.synthetics.monitorManagement.cannotReset.description',
     {
-      defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}.
-                Remove all monitors from this location first.`,
-      values: { monCount },
+      defaultMessage: 'Location has no monitors to reset.',
     }
   );
 
@@ -44,15 +43,15 @@ export const DeleteLocation = ({
   const deleteModal = (
     <EuiConfirmModal
       aria-labelledby={confirmModalTitleId}
-      title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
-        defaultMessage: 'Delete "{location}"',
+      title={i18n.translate('xpack.synthetics.monitorManagement.resetLocationName', {
+        defaultMessage: 'Reset "{location}"',
         values: { location: label },
       })}
       titleProps={{ id: confirmModalTitleId }}
       onCancel={() => setIsModalOpen(false)}
-      onConfirm={() => onDelete(id)}
+      onConfirm={() => onReset(id)}
       cancelButtonText={CANCEL_LABEL}
-      confirmButtonText={DELETE_LABEL}
+      confirmButtonText={RESET_LABEL}
       buttonColor="danger"
       defaultFocusedButton="confirm"
       isLoading={loading}
@@ -64,33 +63,34 @@ export const DeleteLocation = ({
   return (
     <>
       {isModalOpen && deleteModal}
-      <EuiToolTip content={canDelete ? DELETE_LABEL : deleteDisabledReason}>
+      <EuiToolTip content={canReset ? RESET_LABEL : resetDisabledReason}>
         <EuiButtonEmpty
           data-test-subj={`deleteLocation-${id}`}
-          isLoading={loading}
-          iconType="trash"
-          color="danger"
-          aria-label={DELETE_LABEL}
+          isLoading={resetLoading}
+          iconType="refresh"
+          color="success"
+          aria-label={RESET_LABEL}
           onClick={() => {
             setIsModalOpen(true);
           }}
-          isDisabled={!canDelete || !canSave}
+          isDisabled={!canReset || !canSave}
         >
-          {DELETE_LABEL}
+          {RESET_LABEL}
         </EuiButtonEmpty>
       </EuiToolTip>
     </>
   );
 };
 
-const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.deleteLocation', {
-  defaultMessage: 'Delete location',
+const RESET_LABEL = i18n.translate('xpack.synthetics.monitorManagement.resetLocation', {
+  defaultMessage: 'Reset location',
 });
 
 const CANCEL_LABEL = i18n.translate('xpack.synthetics.monitorManagement.cancelLabel', {
   defaultMessage: 'Cancel',
 });
 
-const ARE_YOU_SURE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.areYouSure', {
-  defaultMessage: 'Are you sure you want to delete this location?',
+const ARE_YOU_SURE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.resetConfirmation', {
+  defaultMessage:
+    'Are you sure you want to reset this location? Monitors resources will be recreated. This will not deleted any existing data, only fleet resources will be reset.',
 });

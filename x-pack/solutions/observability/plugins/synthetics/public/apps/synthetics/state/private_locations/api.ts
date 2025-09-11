@@ -57,3 +57,11 @@ export const deleteSyntheticsPrivateLocation = async (
     version: INITIAL_REST_VERSION,
   });
 };
+
+export const resetSyntheticsPrivateLocation = async (
+  locationId: string
+): Promise<SyntheticsPrivateLocations> => {
+  return await apiService.delete(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + `/${locationId}/reset`, {
+    version: INITIAL_REST_VERSION,
+  });
+};
