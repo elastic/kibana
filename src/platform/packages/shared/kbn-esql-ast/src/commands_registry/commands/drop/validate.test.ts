@@ -21,24 +21,22 @@ describe('DROP Validation', () => {
 
   test('validates the most basic query', () => {
     // make sure that @timestamp field is not present
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('MIN(doubleField * 10)', [
-      {
-        name: 'MIN(doubleField * 10)',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('COUNT(*)', [
-      {
-        name: 'COUNT(*)',
-        type: 'integer',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('MIN(doubleField * 10)', {
+      name: 'MIN(doubleField * 10)',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('COUNT(*)', {
+      name: 'COUNT(*)',
+      type: 'integer',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
     const context = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     dropExpectErrors('from index | drop textField, doubleField, dateField', []);
     dropExpectErrors('from index | drop `any#Char$Field`', []);

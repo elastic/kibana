@@ -11558,6 +11558,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
           description: Successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Internal Server Error
       summary: Initialize the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
@@ -11760,7 +11766,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         required: true
       responses:
         '200':
@@ -71314,11 +71320,22 @@ components:
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_MonitoredUserDoc:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
+        - type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            event:
+              type: object
+              properties:
+                ingested:
+                  format: date-time
+                  type: string
+    Security_Entity_Analytics_API_MonitoredUserUpdateDoc:
       type: object
       properties:
-        '@timestamp':
-          format: date-time
-          type: string
         entity_analytics_monitoring:
           type: object
           properties:
@@ -71333,12 +71350,6 @@ components:
                   value:
                     type: string
               type: array
-        event:
-          type: object
-          properties:
-            ingested:
-              format: date-time
-              type: string
         id:
           type: string
         labels:
@@ -71370,12 +71381,18 @@ components:
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+          properties:
+            message:
+              description: Error message typically only present if the engine is in error state
+              type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
-        - type
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
+      description: The status of the Privilege Monitoring Engine
       enum:
         - started
         - error
