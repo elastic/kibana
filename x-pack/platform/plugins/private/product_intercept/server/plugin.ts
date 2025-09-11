@@ -13,10 +13,16 @@ import {
   type Logger,
 } from '@kbn/core/server';
 import type { InterceptSetup, InterceptStart } from '@kbn/intercepts-plugin/server';
-import { TRIGGER_DEF_ID } from '../common/constants';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import {
+  TRIGGER_DEF_ID,
+  UPGRADE_TRIGGER_DEF_PREFIX_ID,
+  TRIAL_TRIGGER_DEF_ID,
+} from '../common/constants';
 import { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
+  cloud: CloudSetup;
   intercepts: InterceptSetup;
 }
 
@@ -32,22 +38,49 @@ export class ProductInterceptServerPlugin
 {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
+  private readonly buildVersion: string;
+  private trialEndDate?: Date;
 
   constructor(initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<ServerConfigSchema>();
+    this.buildVersion = initContext.env.packageInfo.version;
   }
 
-  setup(core: CoreSetup, {}: ProductInterceptServerPluginSetup) {
+  setup(core: CoreSetup, { cloud }: ProductInterceptServerPluginSetup) {
+    this.trialEndDate = cloud?.trialEndDate;
+
     return {};
   }
 
   start(core: CoreStart, { intercepts }: ProductInterceptServerPluginStart) {
     if (this.config.enabled) {
       void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
-        this.logger.debug('Registering kibana product trigger definition');
+        this.logger.debug('Registering global product intercept trigger definition');
         return { triggerAfter: this.config.interval };
       });
+
+      void intercepts.registerTriggerDefinition?.(
+        `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
+        () => {
+          this.logger.debug('Registering global product upgrade intercept trigger definition');
+          return { triggerAfter: this.config.upgradeInterceptInterval, isRecurrent: false };
+        }
+      );
+
+      // Register trial intercept only if the trial end date is set and not passed
+      if (this.trialEndDate && Date.now() <= this.trialEndDate.getTime()) {
+        void intercepts.registerTriggerDefinition?.(
+          `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
+          () => {
+            this.logger.debug('Registering global product trial intercept trigger definition');
+            return {
+              triggerAfter: this.config.trialInterceptInterval,
+              isRecurrent: false,
+            };
+          }
+        );
+      }
     }
 
     return {};

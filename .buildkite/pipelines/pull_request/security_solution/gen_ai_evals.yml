@@ -12,9 +12,9 @@ steps:
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
         env:
-          FTR_CONFIG: "x-pack/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts"
+          FTR_CONFIG: 'x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts'
           FTR_CONFIG_GROUP_KEY: 'ftr-security-solution-gen-ai-evaluations'
-          FTR_SECURITY_GEN_AI: "1"
+          FTR_SECURITY_GEN_AI: '1'
         label: Security Solution Gen AI Evaluations
         key: security-solution-gen-ai-evaluations
         timeout_in_minutes: 50

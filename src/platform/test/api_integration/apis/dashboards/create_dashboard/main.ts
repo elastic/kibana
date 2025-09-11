@@ -319,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // TODO Maybe move this test to x-pack/test/api_integration/dashboards
+    // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
     it('can create a dashboard in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
 
