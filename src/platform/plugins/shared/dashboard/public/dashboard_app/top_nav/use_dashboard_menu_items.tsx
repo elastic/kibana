@@ -241,10 +241,10 @@ export const useDashboardMenuItems = ({
     viewMode,
     showShare,
     dashboardApi,
+    setIsLabsShown,
     isLabsShown,
     quickSaveDashboard,
     resetChanges,
-    setIsLabsShown,
     isResetting,
   ]);
 
@@ -336,8 +336,8 @@ export const useDashboardMenuItems = ({
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
-      editModeItems.push(menuItems.add);
-      editModeItems.push(menuItems.quickSave);
+
+      editModeItems.push(menuItems.add, menuItems.quickSave);
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.add, menuItems.interactiveSave);
     }

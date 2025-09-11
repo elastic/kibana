@@ -133,7 +133,7 @@ export function InternalDashboardTopNav({
       getDashboardRecentlyAccessedService().add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
     return () => subscription.unsubscribe();
-  }, [lastSavedId, title, viewMode]);
+  }, [lastSavedId, viewMode, title]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
@@ -188,12 +188,12 @@ export function InternalDashboardTopNav({
       );
     }
   }, [
-    customLeadingBreadCrumbs,
-    dashboardApi,
-    dashboardTitle,
     redirectTo,
-    styles.updateIcon,
+    dashboardTitle,
+    dashboardApi,
     viewMode,
+    customLeadingBreadCrumbs,
+    styles.updateIcon,
   ]);
 
   /**
