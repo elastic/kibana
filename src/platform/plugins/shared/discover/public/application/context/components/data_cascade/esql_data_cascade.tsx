@@ -8,15 +8,18 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiBadge,
-  EuiButtonEmpty,
+  EuiPopover,
   EuiPanel,
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextTruncate,
+  EuiContextMenu,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
@@ -34,6 +37,7 @@ import {
   UnifiedDataTable,
   DataLoadingState,
 } from '@kbn/unified-data-table';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useScopedServices } from '../../../../components/scoped_services_provider/scoped_services_provider';
@@ -68,6 +72,86 @@ interface ESQLDataCascadeLeafCellProps {
   cellData: DataTableRecord[];
   queryMeta: ESQLStatsQueryMeta;
   dataView: DataView;
+}
+
+type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
+
+const contextRowActions: NonNullable<EuiContextMenuPanelDescriptor['items']> = [
+  {
+    name: i18n.translate('discover.esql_data_cascade.row.action.copy_to_clipboard', {
+      defaultMessage: 'Copy to clipboard',
+    }),
+    icon: 'copy',
+    onClick(this: ESQLDataGroupNode) {},
+  },
+  {
+    name: i18n.translate('discover.esql_data_cascade.row.action.filter_in', {
+      defaultMessage: 'Filter in',
+    }),
+    icon: 'plusInCircle',
+    onClick(this: ESQLDataGroupNode) {},
+  },
+  {
+    name: i18n.translate('discover.esql_data_cascade.row.action.filter_out', {
+      defaultMessage: 'Filter out',
+    }),
+    icon: 'minusInCircle',
+    onClick(this: ESQLDataGroupNode) {},
+  },
+  {
+    name: i18n.translate('discover.esql_data_cascade.row.action.view_docs', {
+      defaultMessage: 'View docs in new tab',
+    }),
+    icon: 'popout',
+    onClick(this: ESQLDataGroupNode) {},
+  },
+];
+
+function ContextMenu({
+  row,
+  contextActions,
+  openPopoverRowId,
+  setOpenPopoverRowId,
+}: {
+  row: ESQLDataGroupNode;
+  contextActions: NonNullable<EuiContextMenuPanelDescriptor['items']>;
+  openPopoverRowId: string | null;
+  setOpenPopoverRowId: (id: string | null) => void;
+}) {
+  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () => [
+      {
+        id: row.id,
+        items: [
+          ...contextActions.map((action, index) => ({
+            ...action,
+            onClick: action.onClick?.bind(row),
+          })),
+        ],
+      },
+    ],
+    [row, contextActions]
+  );
+
+  return (
+    <EuiPopover
+      id={'contextMenuPopoverId'}
+      button={
+        <EuiButtonIcon
+          size="s"
+          color="text"
+          iconType="boxesVertical"
+          onClick={() => setOpenPopoverRowId(row.id)}
+        />
+      }
+      isOpen={openPopoverRowId === row.id}
+      closePopover={() => setOpenPopoverRowId(null)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId={panels[0].id} panels={panels} />
+    </EuiPopover>
+  );
 }
 
 const ESQLDataCascadeLeafCell = React.memo(
@@ -156,13 +240,13 @@ export const ESQLDataCascade = ({
   const { data, expressions } = useDiscoverServices();
   const { scopedProfilesManager } = useScopedServices();
 
+  const [openPopoverRowId, setOpenPopoverRowId] = useState<string | null>(null);
+
   const queryMeta = useMemo(() => {
     return getESQLStatsQueryMeta((query as AggregateQuery).esql);
   }, [query]);
 
   const styles = useMemo(() => esqlCascadeStyles({ euiTheme }), [euiTheme]);
-
-  type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
 
   const fetchCascadeData = useCallback(
     async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query'>) => {
@@ -324,20 +408,17 @@ export const ESQLDataCascade = ({
               );
             })
           }
-          rowHeaderActions={({ row }) => [
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              iconSide="right"
-              iconType="arrowDown"
-              flush="right"
-            >
-              <FormattedMessage
-                id="discover.esql_data_cascade.row.action.take_action"
-                defaultMessage="Take action"
-              />
-            </EuiButtonEmpty>,
-          ]}
+          rowHeaderActions={({ row }) => {
+            return [
+              <ContextMenu
+                key={`${row.id}-context-menu`}
+                row={row.original as ESQLDataGroupNode}
+                contextActions={contextRowActions}
+                openPopoverRowId={openPopoverRowId}
+                setOpenPopoverRowId={setOpenPopoverRowId}
+              />,
+            ];
+          }}
           onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
         >
           <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
