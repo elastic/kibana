@@ -1126,7 +1126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - formats custom id appropriately', async () => {
-      const project = `test project ${uuidv4()}`;
+      const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
