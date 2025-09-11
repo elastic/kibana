@@ -6,6 +6,7 @@
  */
 
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
@@ -23,6 +24,7 @@ export interface OnechatSetupDependencies {
 export interface OnechatStartDependencies {
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  cloud: CloudStart;
 }
 
 export interface OnechatPluginSetup {}
