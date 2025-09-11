@@ -41,9 +41,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
-    // isFieldCompatible: (field) => {
-    //   return field.aggregatable && field.type === 'number';
-    // },
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
