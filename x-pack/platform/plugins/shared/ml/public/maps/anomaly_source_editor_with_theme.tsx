@@ -16,7 +16,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
-import { getActualStyle } from './util';
+import { getActualStyle } from './utils/get_actual_style';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import type { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalySource } from './anomaly_source';
