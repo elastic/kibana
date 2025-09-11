@@ -85,7 +85,7 @@ export const ComparePercentageBadge = ({
         z-index: 9999;
         position: relative;
         // positioning hack for Lens Metric
-        top: ${positionForLens ? '-35px' : 'initial'};
+        top: ${positionForLens ? '-40px' : 'initial'};
         left: ${positionForLens ? '20px' : 'initial'};
       `}
     >
