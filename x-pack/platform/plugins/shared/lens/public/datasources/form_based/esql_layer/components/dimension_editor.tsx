@@ -12,7 +12,10 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
-import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
+import {
+  transformEsqlMultiTermBreakdown,
+  getMultiTermsFormatterParams,
+} from '@kbn/esql-multiterm-transformer';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
 import { FormatSelector } from '../../dimension_panel/format_selector';
@@ -80,6 +83,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             columns: initialColumns,
             rows: [],
             query: query.esql,
+            formatter: props.core.fieldFormats.getInstance(
+              'multi_terms',
+              getMultiTermsFormatterParams(initialColumns)
+            ),
           });
 
           setAllColumns(columns);

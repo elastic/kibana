@@ -76,17 +76,17 @@ describe('transformEsqlMultiTermBreakdown', () => {
     };
     const result = transformEsqlMultiTermBreakdown({ ...datatable, query: statsQuery });
     expect(result.transformed).toBe(true);
-    expect(result.newColumnName).toBe('host.name > region');
+    expect(result.newColumnName).toBe('host.name › region');
     expect(result.originalStringColumns).toEqual([
       { id: 'host', name: 'host.name', meta: { type: 'string' } },
       { id: 'region', name: 'region', meta: { type: 'string' } },
     ]);
     expect(result.columns).toHaveLength(3);
-    expect(result.columns[2].name).toBe('host.name > region');
+    expect(result.columns[2].name).toBe('host.name › region');
     expect(result.rows).toEqual([
-      { date: 1, metric: 100, 'host.name > region': 'host-a > us-east-1' },
-      { date: 2, metric: 200, 'host.name > region': 'host-b > us-west-2' },
-      { date: 3, metric: 300, 'host.name > region': 'host-c > (empty)' },
+      { date: 1, metric: 100, 'host.name › region': 'host-a › us-east-1' },
+      { date: 2, metric: 200, 'host.name › region': 'host-b › us-west-2' },
+      { date: 3, metric: 300, 'host.name › region': 'host-c › __missing__' },
     ]);
   });
 
@@ -104,11 +104,11 @@ describe('transformEsqlMultiTermBreakdown', () => {
     };
     const result = transformEsqlMultiTermBreakdown({ ...datatable, query: statsQuery });
     expect(result.transformed).toBe(true);
-    expect(result.newColumnName).toBe('host.name > region > cloud.provider');
+    expect(result.newColumnName).toBe('host.name › region › cloud.provider');
     expect(result.columns).toHaveLength(3);
-    expect(result.columns[2].name).toBe('host.name > region > cloud.provider');
+    expect(result.columns[2].name).toBe('host.name › region › cloud.provider');
     expect(result.rows).toEqual([
-      { date: 1, metric: 100, 'host.name > region > cloud.provider': 'host-a > us-east-1 > aws' },
+      { date: 1, metric: 100, 'host.name › region › cloud.provider': 'host-a › us-east-1 › aws' },
     ]);
   });
 });

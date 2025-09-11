@@ -9,11 +9,18 @@
 
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { Parser, Walker } from '@kbn/esql-ast';
+import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
+
+interface MultiTermFormatter {
+  convert: (value: any, contentType?: FieldFormatsContentType) => string;
+}
 
 interface EsqlMultiTermTransformInput {
   columns: DatatableColumn[];
   rows: DatatableRow[];
   query?: string;
+  formatter?: MultiTermFormatter;
 }
 
 interface EsqlMultiTermTransformOutput {
@@ -22,6 +29,22 @@ interface EsqlMultiTermTransformOutput {
   transformed: boolean;
   newColumnName: string | null;
   originalStringColumns: DatatableColumn[];
+}
+
+export function getMultiTermsFormatterParams(columns: DatatableColumn[]) {
+  return {
+    paramsPerField: columns
+      .filter((c) => c.meta.type === 'string')
+      .map((c) => ({
+        id: 'terms',
+        params: {
+          id: 'string',
+          missingBucketLabel: i18n.translate('esqlMultiTermTransformer.missingLabel', {
+            defaultMessage: '(empty)',
+          }),
+        },
+      })),
+  };
 }
 
 /**
@@ -36,6 +59,7 @@ export function transformEsqlMultiTermBreakdown({
   columns,
   rows,
   query,
+  formatter,
 }: EsqlMultiTermTransformInput): EsqlMultiTermTransformOutput {
   const noTransform = {
     columns,
@@ -75,14 +99,19 @@ export function transformEsqlMultiTermBreakdown({
   // Check if the datatable matches the specific shape for transformation.
   if (dateColumns.length === 1 && numberColumns.length === 1 && stringColumns.length >= 2) {
     // Create the new combined column name (e.g., "host.name > region").
-    const newColumnName = stringColumns.map((c) => c.name).join(', ');
+    const newColumnName = formatter
+      ? formatter.convert({ keys: stringColumns.map((c) => c.name) })
+      : stringColumns.map((c) => c.name).join(' › ');
     const stringColumnIds = stringColumns.map((c) => c.id);
 
     // Transform each row to have the new combined column.
     const newRows = rows.map((row) => {
       const newRow = { ...row };
       // Concatenate the values of the original string columns.
-      newRow[newColumnName] = stringColumnIds.map((id) => row[id] ?? '(empty)').join(', ');
+      const values = stringColumnIds.map((id) => row[id] ?? '__missing__');
+      newRow[newColumnName] = formatter
+        ? formatter.convert({ keys: values }, 'text')
+        : values.join(' › ');
       // Remove the original string columns from the row.
       stringColumnIds.forEach((id) => {
         delete newRow[id];

@@ -18,7 +18,10 @@ import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
+import {
+  transformEsqlMultiTermBreakdown,
+  getMultiTermsFormatterParams,
+} from '@kbn/esql-multiterm-transformer';
 import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
@@ -230,6 +233,10 @@ export function getTextBasedDatasource({
         columns: context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
         rows: [],
         query: context.query.esql,
+        formatter: data.fieldFormats.getInstance(
+          'multi_terms',
+          getMultiTermsFormatterParams(context.textBasedColumns ?? [])
+        ),
       });
 
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
