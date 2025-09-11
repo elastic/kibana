@@ -332,18 +332,19 @@ export class PluginsService
     const disabledPlugins = [];
     const disabledDependants = [];
     const disabledDependantsCauses = new Set<string>();
-    const pluginEnablementCache = new Map<PluginName, PluginEnablementResult>();
+    const pluginDependenciesAvailibilityCache = new Map<PluginName, AllDependenciesAvailableResult>();
 
+    
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
-      const pluginEnablement = shouldEnablePlugin({
+      const allDependenciesAvailableResult = allDependenciesAvailable({
         pluginName,
         pluginEnableStatuses,
-        cache: pluginEnablementCache,
+        cache: pluginDependenciesAvailibilityCache,
       });
 
-      if (pluginEnablement.enabled) {
+      if (allDependenciesAvailableResult.success) {
         if (plugin.manifest.type === PluginType.preboot) {
           this.prebootPluginsSystem.addPlugin(plugin);
         } else {
@@ -351,7 +352,7 @@ export class PluginsService
         }
       } else if (isEnabled) {
         disabledDependants.push(pluginName);
-        pluginEnablement.missingOrIncompatibleDependencies.forEach((dependency) =>
+        allDependenciesAvailableResult.missingOrIncompatibleDependencies.forEach((dependency) =>
           disabledDependantsCauses.add(dependency)
         );
       } else {
@@ -415,11 +416,11 @@ export class PluginsService
   }
 }
 
-type PluginEnablementResult =
-  | { enabled: true }
-  | { enabled: false; missingOrIncompatibleDependencies: string[] };
+type AllDependenciesAvailableResult =
+  | { success: true }
+  | { success: false; missingOrIncompatibleDependencies: string[] };
 
-function shouldEnablePlugin({
+function allDependenciesAvailable({
   pluginName,
   pluginEnableStatuses,
   cache,
@@ -427,9 +428,9 @@ function shouldEnablePlugin({
 }: {
   pluginName: PluginName;
   pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>;
-  cache: Map<PluginName, PluginEnablementResult>;
+  cache: Map<PluginName, AllDependenciesAvailableResult>;
   parents?: PluginName[];
-}): PluginEnablementResult {
+}): AllDependenciesAvailableResult {
   const cachedValue = cache.get(pluginName);
   if (cachedValue) {
     return cachedValue;
@@ -437,10 +438,10 @@ function shouldEnablePlugin({
 
   const pluginInfo = pluginEnableStatuses.get(pluginName);
 
-  let result: PluginEnablementResult;
+  let result: AllDependenciesAvailableResult;
   if (pluginInfo === undefined || !pluginInfo.isEnabled) {
     result = {
-      enabled: false,
+      success: false,
       missingOrIncompatibleDependencies: [],
     };
   } else {
@@ -450,21 +451,21 @@ function shouldEnablePlugin({
         (dependencyName) =>
           pluginEnableStatuses.get(dependencyName)?.plugin.manifest.type !==
             pluginInfo.plugin.manifest.type ||
-          !shouldEnablePlugin({
+          !allDependenciesAvailable({
             pluginName: dependencyName,
             pluginEnableStatuses,
             parents: [...parents, pluginName],
             cache,
-          }).enabled
+          }).success
       );
 
     if (missingOrIncompatibleDependencies.length === 0) {
       result = {
-        enabled: true,
+        success: true,
       };
     } else {
       result = {
-        enabled: false,
+        success: false,
         missingOrIncompatibleDependencies,
       };
     }
