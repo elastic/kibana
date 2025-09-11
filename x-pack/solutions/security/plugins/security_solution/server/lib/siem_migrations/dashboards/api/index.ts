@@ -15,7 +15,11 @@ import { registerSiemDashboardMigrationsStartRoute } from './start';
 import { registerSiemDashboardMigrationsStopRoute } from './stop';
 import { registerSiemDashboardMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemDashboardMigrationsResourceGetMissingRoute } from './resources/missing';
+import { registerSiemDashboardMigrationsResourceGetRoute } from './resources/get';
+import { registerSiemDashboardMigrationsResourceUpsertRoute } from './resources/upsert';
+import { registerSiemDashboardMigrationsInstallRoute } from './install';
 import { registerSiemDashboardMigrationsGetDashboardsRoute } from './dashboards/get';
+import { registerSiemDashboardMigrationsDeleteRoute } from './delete';
 
 export const registerSiemDashboardMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -25,6 +29,7 @@ export const registerSiemDashboardMigrationsRoutes = (
   // ===== Dashboard Migrations ======
   registerSiemDashboardMigrationsCreateRoute(router, logger);
   registerSiemDashboardMigrationsGetRoute(router, logger);
+  registerSiemDashboardMigrationsDeleteRoute(router, logger);
 
   // ===== Dashboards ======
   registerSiemDashboardMigrationsCreateDashboardsRoute(router, logger);
@@ -32,6 +37,11 @@ export const registerSiemDashboardMigrationsRoutes = (
 
   // ===== Resources ======
   registerSiemDashboardMigrationsResourceGetMissingRoute(router, logger);
+  registerSiemDashboardMigrationsResourceGetRoute(router, logger);
+  registerSiemDashboardMigrationsResourceUpsertRoute(router, logger);
+
+  // ===== Install ======
+  registerSiemDashboardMigrationsInstallRoute(router, logger);
 
   // ===== Stats ========
   registerSiemDashboardMigrationsStatsRoute(router, logger);
