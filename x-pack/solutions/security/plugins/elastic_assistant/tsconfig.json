@@ -97,7 +97,8 @@
     "@kbn/core-security-server",
     "@kbn/onechat-plugin",
     "@kbn/index-adapter",
-    "@kbn/langgraph-checkpoint-saver"
+    "@kbn/langgraph-checkpoint-saver",
+    "@kbn/shared-ux-router"
   ],
   "exclude": [
     "target/**/*",
