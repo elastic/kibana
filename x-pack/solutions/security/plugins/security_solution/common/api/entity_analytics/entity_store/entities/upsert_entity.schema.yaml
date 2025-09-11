@@ -8,7 +8,7 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: UpsertEntity
-      summary: Updates or creates an entity in Entity Store
+      summary: Upsert an entity in Entity Store
       description: >
         Update or create an entity in Entity Store.
         

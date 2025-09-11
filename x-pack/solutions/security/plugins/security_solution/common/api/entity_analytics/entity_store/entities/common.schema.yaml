@@ -224,7 +224,11 @@ components:
           required:
             - criticality
     
-    # The entities here mapped are mapped as stored in elasticsearch, not as input via logs.
+    # These entities represent the API of Entity Store
+    # where entity is a root field, as it's in the final
+    # index for entities. Note that this is different form the 
+    # mapping from logs where `entity` will be nested under
+    # `host`, `user` and `service`
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'

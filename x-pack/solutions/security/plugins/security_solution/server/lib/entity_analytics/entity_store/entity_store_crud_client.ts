@@ -37,8 +37,9 @@ interface EntityStoreClientOpts {
   dataClient: EntityStoreDataClient;
 }
 
+const ID_FIELD = 'entity.id';
+
 const nonForcedAttributesPathRegex = [
-  /entity\.id/,
   /entity\.attributes\..*/,
   /entity\.lifecycle\..*/,
   /entity\.behavior\..*/,
@@ -127,6 +128,10 @@ function assertOnlyNonForcedAttributesInReq(flatProps: Record<string, unknown>) 
 }
 
 function isPropAllowed(prop: string) {
+  if (prop === ID_FIELD) {
+    return true;
+  }
+
   for (const regex of nonForcedAttributesPathRegex) {
     if (regex.test(prop)) {
       return true;
