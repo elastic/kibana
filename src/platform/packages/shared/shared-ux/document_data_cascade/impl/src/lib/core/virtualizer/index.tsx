@@ -7,30 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
-import { useRef, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useRef, useState, useMemo, type CSSProperties } from 'react';
 import { type Row } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 
+type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
+
 export interface CascadeVirtualizerProps<G extends GroupNode>
-  extends Pick<Parameters<typeof useVirtualizer>[0], 'getScrollElement' | 'overscan'> {
+  extends Pick<UseVirtualizerOptions, 'getScrollElement' | 'overscan'> {
   rows: Row<G>[];
   /**
    * cause the active group root row to stick right under the header
    */
   enableStickyGroupHeader: boolean;
+  estimatedRowHeight?: number;
 }
 
 interface CascadeVirtualizerReturnValue
-  extends Pick<ReturnType<typeof useVirtualizer>, 'scrollOffset' | 'measureElement'> {
+  extends Pick<
+    ReturnType<typeof useVirtualizer>,
+    'scrollOffset' | 'measureElement' | 'getTotalSize' | 'getVirtualItems'
+  > {
   activeStickyIndex: number | null;
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<number, number>;
   scrollToVirtualizedIndex: (index: number) => void;
   scrollToLastVirtualizedRow: () => void;
-  items: VirtualItem[];
-  totalSize: number;
 }
 
 export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
@@ -52,7 +55,7 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
 }: VirtualizerRangeExtractorArgs<G>) => {
   const activeStickyIndexRef = useRef<number | null>(null);
 
-  return useCallback<NonNullable<Parameters<typeof useVirtualizer>[0]['rangeExtractor']>>(
+  return useCallback<NonNullable<UseVirtualizerOptions['rangeExtractor']>>(
     (range) => {
       const rangeStartRow = rows[range.startIndex];
 
@@ -91,6 +94,7 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
 export const useCascadeVirtualizer = <G extends GroupNode>({
   overscan,
   enableStickyGroupHeader,
+  estimatedRowHeight = 0,
   rows,
   getScrollElement,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
@@ -107,47 +111,47 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
    */
   const virtualizedRowComputedTranslateValueRef = useRef(new Map<number, number>());
 
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => 0,
-    getScrollElement,
-    overscan,
-    rangeExtractor,
-    onChange: (rowVirtualizerInstance) => {
-      // @ts-expect-error -- the itemsSizeCache property does exist,
-      // but it not included in the type definition because it is marked as a private property,
-      // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
-      virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
-    },
-  });
+  const virtualizerOptions = useMemo<UseVirtualizerOptions>(
+    () => ({
+      count: rows.length,
+      estimateSize: () => estimatedRowHeight,
+      getScrollElement,
+      overscan,
+      rangeExtractor,
+      onChange: (rowVirtualizerInstance) => {
+        // @ts-expect-error -- the itemsSizeCache property does exist,
+        // but it not included in the type definition because it is marked as a private property,
+        // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
+        virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
+      },
+    }),
+    [estimatedRowHeight, getScrollElement, overscan, rangeExtractor, rows.length]
+  );
 
-  return {
-    get items() {
-      return virtualizer.getVirtualItems();
-    },
-    get totalSize() {
-      return virtualizer.getTotalSize();
-    },
-    get virtualizedRowsSizeCache() {
-      return virtualizedRowsSizeCacheRef.current;
-    },
-    get activeStickyIndex() {
-      return activeStickyIndex;
-    },
-    get virtualizedRowComputedTranslateValue() {
-      return virtualizedRowComputedTranslateValueRef.current;
-    },
-    get scrollToVirtualizedIndex() {
-      return virtualizer.scrollToIndex;
-    },
-    get scrollToLastVirtualizedRow() {
-      return () => this.scrollToVirtualizedIndex(rows.length - 1);
-    },
-    get scrollOffset() {
-      return virtualizer.scrollOffset;
-    },
-    measureElement: virtualizer.measureElement,
-  };
+  const virtualizerImpl = useVirtualizer(virtualizerOptions);
+
+  return useMemo(
+    () => ({
+      activeStickyIndex,
+      getVirtualItems: virtualizerImpl.getVirtualItems.bind(virtualizerImpl),
+      getTotalSize: virtualizerImpl.getTotalSize.bind(virtualizerImpl),
+      get scrollOffset() {
+        return virtualizerImpl.scrollOffset;
+      },
+      get scrollToLastVirtualizedRow() {
+        return () => virtualizerImpl.scrollToIndex(rows.length - 1);
+      },
+      scrollToVirtualizedIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
+      measureElement: virtualizerImpl.measureElement.bind(virtualizerImpl),
+      get virtualizedRowsSizeCache() {
+        return virtualizedRowsSizeCacheRef.current;
+      },
+      get virtualizedRowComputedTranslateValue() {
+        return virtualizedRowComputedTranslateValueRef.current;
+      },
+    }),
+    [activeStickyIndex, virtualizerImpl, rows.length]
+  );
 };
 
 /**
@@ -155,7 +159,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
  */
 export const getGridHeaderPositioningStyle = (
   virtualizedRowComputedTranslateValueMap: Map<number, number>
-): React.CSSProperties => ({
+): CSSProperties => ({
   top: -(virtualizedRowComputedTranslateValueMap.get(0) ?? 0),
   transform: `translate3d(0, ${virtualizedRowComputedTranslateValueMap.get(0) ?? 0}px, 0)`,
 });
@@ -166,8 +170,54 @@ export const getGridHeaderPositioningStyle = (
 export const getGridRowPositioningStyle = (
   renderIndex: number,
   virtualizedRowComputedTranslateValueMap: Map<number, number>
-): React.CSSProperties => {
+): CSSProperties => {
   return {
     transform: `translateY(${virtualizedRowComputedTranslateValueMap.get(renderIndex) ?? 0}px)`,
   };
 };
+
+interface VirtualizedCascadeListProps<G extends GroupNode>
+  extends Pick<
+    CascadeVirtualizerReturnValue,
+    'virtualizedRowComputedTranslateValue' | 'getVirtualItems' | 'activeStickyIndex'
+  > {
+  rows: Row<G>[];
+  children: (props: {
+    isActiveSticky: boolean;
+    virtualItem: VirtualItem;
+    virtualRowStyle: React.CSSProperties;
+    row: Row<G>;
+  }) => React.ReactNode;
+}
+
+export function VirtualizedCascadeRowList<G extends GroupNode>({
+  activeStickyIndex,
+  getVirtualItems,
+  virtualizedRowComputedTranslateValue,
+  rows,
+  children,
+}: VirtualizedCascadeListProps<G>) {
+  return getVirtualItems().map(function buildCascadeRows(virtualItem, renderIndex) {
+    const row = rows[virtualItem.index];
+
+    const isActiveSticky = activeStickyIndex === virtualItem.index;
+
+    // side effect to record the computed translate value for each item of virtualized row
+    // allows us to position the header correctly in relation to the scrolled virtualized rows
+    virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
+
+    return (
+      <Fragment key={row.id}>
+        {children({
+          row,
+          isActiveSticky,
+          virtualItem,
+          virtualRowStyle: getGridRowPositioningStyle(
+            renderIndex,
+            virtualizedRowComputedTranslateValue
+          ),
+        })}
+      </Fragment>
+    );
+  });
+}
