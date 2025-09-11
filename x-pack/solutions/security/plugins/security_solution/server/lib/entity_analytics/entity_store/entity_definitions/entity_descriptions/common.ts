@@ -52,8 +52,8 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.attributes.Privileged',
     }),
     newestValue({
-      source: `${prefix}.lifecycle.FirstSeen`,
-      destination: 'entity.lifecycle.FirstSeen',
+      source: `${prefix}.lifecycle.First_seen`,
+      destination: 'entity.lifecycle.First_seen',
     }),
   ];
 };

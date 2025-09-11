@@ -90,10 +90,10 @@ export default function (providerContext: FtrProviderContext) {
             entity: {
               id: userName,
               attributes: {
-                Privileged: true,
+                privileged: true,
               },
               lifecycle: {
-                FirstSeen: date,
+                first_seen: date,
               },
             },
           },
@@ -110,7 +110,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.type).toEqual('user');
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.FirstSeen).toEqual(date);
+            expect(hit._source?.entity?.lifecycle?.First_Seen).toEqual(date);
           });
 
           return true;
