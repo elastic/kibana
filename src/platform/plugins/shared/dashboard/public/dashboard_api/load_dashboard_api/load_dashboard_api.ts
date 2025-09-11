@@ -8,7 +8,7 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { CONTENT_ID } from '@kbn/visualizations-plugin/common/content_management';
+import { CONTENT_ID } from '../../../common/content_management';
 import { getAccessControlClient } from '../../services/access_control_service';
 import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
