@@ -115,6 +115,19 @@ describe('InstallationService', () => {
         }),
       });
     });
+    it('calls the endpoint with the forceUpdate and Inference Ids if provided', async () => {
+      await service.updateAll({
+        forceUpdate: false,
+        inferenceIds: [defaultInferenceEndpoints.ELSER],
+      });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(UPDATE_ALL_API_PATH, {
+        body: JSON.stringify({
+          forceUpdate: false,
+          inferenceIds: [defaultInferenceEndpoints.ELSER],
+        }),
+      });
+    });
 
     it('returns the value from the server', async () => {
       const expected = {

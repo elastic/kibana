@@ -80,7 +80,7 @@ export class InstallationService {
     const forceUpdate = params?.forceUpdate ?? false;
     const inferenceIds = params?.inferenceIds ?? [];
     const response = await this.http.post<PerformUpdateResponse>(UPDATE_ALL_API_PATH, {
-      body: JSON.stringify({ forceUpdate, inferenceIds }),
+      body: JSON.stringify({ forceUpdate, ...(inferenceIds.length > 0 ? { inferenceIds } : {}) }),
     });
 
     return response;
