@@ -129,7 +129,7 @@ export const EmbeddedMapComponent = ({
 
   const experimentalDataViewLayerList = useMemo(
     () =>
-      experimentalDataView.id
+      experimentalDataView.id && experimentalDataView.getIndexPattern()
         ? getLayerList({ euiTheme }, [
             {
               id: experimentalDataView.id,
