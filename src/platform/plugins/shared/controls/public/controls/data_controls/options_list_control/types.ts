@@ -12,8 +12,6 @@ import type { Subject } from 'rxjs';
 import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
 import type { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
 import type {
-  OptionsListControlState,
-  OptionsListDisplaySettings,
   OptionsListSelection,
   OptionsListSortingType,
   OptionsListSuggestions,
@@ -28,32 +26,33 @@ export type OptionsListControlApi = DataControlApi & {
   setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
 };
 
-export interface OptionsListComponentState
-  extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
-  searchString: string;
-  searchStringValid: boolean;
-  requestSize: number;
-}
-
 interface PublishesOptions {
   availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+
+/**
+ * A type consisting of only the properties that the options list control puts into state managers
+ * and then passes to the UI component. Excludes any managed state properties that don't end up being used
+ * by the component
+ */
+export type OptionsListComponentState = Pick<DefaultDataControlState, 'fieldName'> &
   SelectionsState &
   EditorState &
-  TemporaryState & { sort: OptionsListSortingType | undefined };
+  TemporaryState & {
+    sort: OptionsListSortingType | undefined;
+  };
 
-type PublishesOptionsListState = SubjectsOf<OptionsListState>;
-type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
-  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+type PublishesOptionsListComponentState = SubjectsOf<OptionsListComponentState>;
+type OptionsListComponentStateSetters = Partial<SettersOf<OptionsListComponentState>> &
+  SettersOf<Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
-  PublishesOptionsListState &
+  PublishesOptionsListComponentState &
   Pick<PublishesTitle, 'title$'> &
-  OptionsListStateSetters & {
+  OptionsListComponentStateSetters & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: Subject<void>;

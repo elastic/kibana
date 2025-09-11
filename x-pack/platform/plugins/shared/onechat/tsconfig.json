@@ -68,5 +68,6 @@
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
     "@kbn/scout",
+    "@kbn/share-plugin",
   ]
 }

@@ -35,7 +35,6 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
-  | 'abortController'
 >;
 export const useLensProps = ({
   title,
@@ -101,7 +100,13 @@ export const useLensProps = ({
 
     const builder = new LensConfigBuilder(services.dataViews);
 
-    attributes$.current.next((await builder.build(lensParams)) as LensAttributes);
+    attributes$.current.next(
+      (await builder.build(lensParams, {
+        query: {
+          esql: query,
+        },
+      })) as LensAttributes
+    );
   }, [lensParams, services.dataViews]);
 
   const buildLensProps = useCallback(() => {
@@ -153,7 +158,6 @@ const getLensProps = ({
   searchSessionId?: string;
   attributes: LensAttributes;
   timeRange: TimeRange;
-  abortController?: AbortController;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',

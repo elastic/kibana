@@ -358,7 +358,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
                 />
               );
             } else {
-              return undefined;
+              return <>&nbsp;</>;
             }
           }
         : undefined,

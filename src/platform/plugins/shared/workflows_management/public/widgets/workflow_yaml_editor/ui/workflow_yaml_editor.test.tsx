@@ -10,6 +10,7 @@
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 
@@ -58,7 +59,11 @@ describe('WorkflowYAMLEditor', () => {
   };
 
   const renderWithI18n = (component: React.ReactElement) => {
-    return render(<I18nProviderMock>{component}</I18nProviderMock>);
+    return render(
+      <MemoryRouter>
+        <I18nProviderMock>{component}</I18nProviderMock>
+      </MemoryRouter>
+    );
   };
 
   beforeEach(() => {

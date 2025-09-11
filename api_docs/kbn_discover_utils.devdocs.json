@@ -4513,6 +4513,34 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.transaction.id",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.span.id",
+            "type": "string",
+            "tags": [],
+            "label": "'span.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.LogDocumentOverview.log.file.path",
             "type": "string",
             "tags": [],

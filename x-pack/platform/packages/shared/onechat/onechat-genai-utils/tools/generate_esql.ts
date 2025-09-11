@@ -72,6 +72,18 @@ ${context ?? 'No additional context provided.'}
 
 ${formatResourceWithSampledValues({ resource: resolvedResource, indentLevel: 0 })}
 
+<directives>
+## ES|QL Safety Rules
+
+1. **LIMIT is Mandatory:** All multi-row queries **must** end with a \`LIMIT\`. The only exception is for single-row aggregations (e.g., \`STATS\` without a \`GROUP BY\`).
+
+2. **Applying Limits:**
+    * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the \`LIMIT\`.
+    * **Default:** If no number is given, default to \`LIMIT 100\` for both raw events and \`GROUP BY\` results. Notify the user when you apply this default (e.g., "I've added a \`LIMIT 100\` for safety.").
+
+3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety \`LIMIT 250\` and state that this limit was added to protect the system.
+</directives>
+
 Based on all the information above, generate the ES|QL query.
 `,
   });

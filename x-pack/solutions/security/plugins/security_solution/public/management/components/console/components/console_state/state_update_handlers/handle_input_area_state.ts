@@ -33,7 +33,9 @@ const setArgSelectorValueToParsedArgs = (
       if (parsedInput.hasArg(argName)) {
         const argumentValues = enteredCommand.argState[argName] ?? [];
 
-        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
+        parsedInput.args[argName] = argumentValues.map((itemState) => {
+          return itemState?.value || '';
+        });
       }
     }
   }

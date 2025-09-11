@@ -17,7 +17,13 @@ import { RoundLayout } from './round_layout';
 import { RoundResponse } from './round_response';
 import { conversationRoundsId } from './conversation_rounds.styles';
 
-export const ConversationRounds: React.FC<{}> = () => {
+interface ConversationRoundsProps {
+  scrollContainerHeight: number;
+}
+
+export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
+  scrollContainerHeight,
+}) => {
   const { isResponseLoading, retry, error } = useSendMessage();
 
   const conversationRounds = useConversationRounds();
@@ -32,7 +38,8 @@ export const ConversationRounds: React.FC<{}> = () => {
           defaultMessage: 'Conversation messages',
         })}
       >
-        {conversationRounds.map(({ input, response, steps }, index) => {
+        {conversationRounds.map((round, index) => {
+          const { input, response, steps } = round;
           const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
@@ -40,14 +47,22 @@ export const ConversationRounds: React.FC<{}> = () => {
           return (
             <RoundLayout
               key={index}
+              scrollContainerHeight={scrollContainerHeight}
               // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
               input={<EuiText size="s">{input.message}</EuiText>}
+              isResponseLoading={isResponseLoading}
+              isCurrentRound={isCurrentRound}
               outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (
                   <RoundError error={error} onRetry={retry} />
                 ) : (
-                  <RoundResponse response={response} steps={steps} isLoading={isLoading} />
+                  <RoundResponse
+                    rawRound={round}
+                    response={response}
+                    steps={steps}
+                    isLoading={isLoading}
+                  />
                 )
               }
             />

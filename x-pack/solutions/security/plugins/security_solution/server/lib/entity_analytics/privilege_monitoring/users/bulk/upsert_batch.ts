@@ -35,7 +35,7 @@ export const bulkUpsertBatch =
             {
               '@timestamp': timestamp,
               user: { name: u.username, is_privileged: true },
-              labels: { sources: ['csv'] },
+              labels: { sources: ['csv'], source_ids: [] },
               ...labelField,
             },
             /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -47,6 +47,8 @@ export const bulkUpsertBatch =
           {
             script: {
               source: /* java */ `
+                boolean userModified = false;
+
                 if (ctx._source.labels == null) {
                   ctx._source.labels = new HashMap();
                 }
@@ -55,6 +57,7 @@ export const bulkUpsertBatch =
                 }
                 if (!ctx._source.labels.sources.contains(params.source)) {
                   ctx._source.labels.sources.add(params.source);
+                  userModified = true;
                 }
 
                 if (params.ea_label != null) {
@@ -66,17 +69,25 @@ export const bulkUpsertBatch =
                   }
                   if (!ctx._source.entity_analytics_monitoring.labels.contains(params.ea_label)) {
                     ctx._source.entity_analytics_monitoring.labels.add(params.ea_label);
+                    userModified = true;
                   }
                 }
 
                 if (ctx._source.user.is_privileged == false) {
                   ctx._source.user.is_privileged = true;
+                  userModified = true;
+                }
+
+                if (userModified) {
+                  ctx._source['@timestamp'] = params.timestamp;
+                  ctx._source.event.ingested = params.timestamp;
                 }
               `,
               lang: 'painless',
               params: {
                 source: 'csv',
                 ea_label: u.label,
+                timestamp,
               },
             },
           },

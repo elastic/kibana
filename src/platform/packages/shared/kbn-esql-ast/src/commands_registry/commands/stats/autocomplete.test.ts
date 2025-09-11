@@ -69,6 +69,14 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 // types accepted by the AVG function
 export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
 
+export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
+  'BY ',
+  ' = ',
+  ...allAggFunctions,
+  ...allGroupingFunctions,
+  ...allEvalFunctionsForStats,
+];
+
 export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ' = ',
   ...allAggFunctions,
@@ -119,14 +127,12 @@ describe('STATS Autocomplete', () => {
 
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
-        const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
-
-        await statsExpectSuggestions('from a | stats ', expected);
-        await statsExpectSuggestions('FROM a | STATS ', expected);
-        await statsExpectSuggestions('from a | stats a=max(b), ', expected);
+        await statsExpectSuggestions('from a | stats ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION);
+        await statsExpectSuggestions('FROM a | STATS ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION);
+        await statsExpectSuggestions('from a | stats a=max(b), ', EXPECTED_FOR_EMPTY_EXPRESSION);
         await statsExpectSuggestions(
           'from a | stats a=max(b) WHERE doubleField > longField, ',
-          expected
+          EXPECTED_FOR_EMPTY_EXPRESSION
         );
       });
 
@@ -420,19 +426,14 @@ describe('STATS Autocomplete', () => {
       });
 
       test('increments suggested variable name counter', async () => {
-        await statsExpectSuggestions('from a | eval col0=round(b), col1=round(c) | stats ', [
-          ' = ',
-          // TODO verify that this change is ok
-          ...allAggFunctions,
-          ...allEvalFunctionsForStats,
-          ...allGroupingFunctions,
-        ]);
-        await statsExpectSuggestions('from a | stats col0=min(b),col1=c,', [
-          ' = ',
-          ...allAggFunctions,
-          ...allEvalFunctionsForStats,
-          ...allGroupingFunctions,
-        ]);
+        await statsExpectSuggestions(
+          'from a | eval col0=round(b), col1=round(c) | stats ',
+          EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
+        );
+        await statsExpectSuggestions(
+          'from a | stats col0=min(b),col1=c,',
+          EXPECTED_FOR_EMPTY_EXPRESSION
+        );
       });
 
       test('expressions with aggregates', async () => {

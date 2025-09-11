@@ -65,7 +65,7 @@ export const toolsToLangchain = async ({
 };
 
 export const sanitizeToolId = (toolId: string): string => {
-  return toolId.replace('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
+  return toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
 };
 
 /**
@@ -101,6 +101,10 @@ export const toolToLangchain = ({
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
 }): StructuredTool => {
+  const description = tool.llmDescription
+    ? tool.llmDescription({ description: tool.description, config: tool.configuration })
+    : tool.description;
+
   return toTool(
     async (input, config): Promise<[string, RunToolReturn]> => {
       let onEvent: ToolEventHandlerFn | undefined;
@@ -137,12 +141,11 @@ export const toolToLangchain = ({
     {
       name: toolId ?? tool.id,
       schema: tool.schema,
-      description: tool.description,
+      description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
       metadata: {
         toolId: tool.id,
-        toolType: tool.type,
       },
     }
   );

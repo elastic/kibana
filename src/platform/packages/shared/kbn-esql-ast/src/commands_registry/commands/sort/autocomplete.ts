@@ -78,12 +78,7 @@ export async function autocomplete(
 
       const columnExists = (name: string) => _columnExists(name, context);
 
-      if (
-        isExpressionComplete(
-          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-          innerText
-        )
-      ) {
+      if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
         suggestions.push(
           ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
         );

@@ -38,22 +38,6 @@ import type {
 } from './types';
 
 export function fromBucketLensApiToLensState(
-  options: LensApiFiltersOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): FiltersIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiTermsOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): TermsIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiRangeOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): RangeIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiDateHistogramOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): DateHistogramIndexPatternColumn;
-export function fromBucketLensApiToLensState(
   options: LensApiBucketOperations,
   columns: { column: AnyMetricLensStateColumn; id: string }[]
 ): AnyBucketLensStateColumn {
@@ -74,25 +58,9 @@ export function fromBucketLensApiToLensState(
 }
 
 export function fromBucketLensStateToAPI(
-  column: FiltersIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiFiltersOperation;
-export function fromBucketLensStateToAPI(
-  column: DateHistogramIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiDateHistogramOperation;
-export function fromBucketLensStateToAPI(
-  column: RangeIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiRangeOperation;
-export function fromBucketLensStateToAPI(
-  column: TermsIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiTermsOperation;
-export function fromBucketLensStateToAPI(
   column: AnyBucketLensStateColumn,
   columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiBucketOperations | undefined {
+): LensApiBucketOperations {
   if (isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', column)) {
     return fromFiltersLensStateToAPI(column);
   }

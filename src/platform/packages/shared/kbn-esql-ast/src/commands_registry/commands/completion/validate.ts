@@ -22,13 +22,9 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const { prompt, location, targetField, inferenceId } = command as ESQLAstCompletionCommand;
+  const { prompt, location, inferenceId } = command as ESQLAstCompletionCommand;
 
-  const promptExpressionType = getExpressionType(
-    prompt,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const promptExpressionType = getExpressionType(prompt, context?.columns);
 
   if (!supportedPromptTypes.includes(promptExpressionType)) {
     messages.push(
@@ -42,17 +38,6 @@ export const validate = (
   if (inferenceId?.incomplete) {
     messages.push(errors.byId('inferenceIdRequired', command.location, { command: 'COMPLETION' }));
   }
-
-  const targetName = targetField?.name || 'completion';
-
-  // Sets the target field so the column is recognized after the command is applied
-  context?.userDefinedColumns.set(targetName, [
-    {
-      name: targetName,
-      location: targetField?.location || command.location,
-      type: 'keyword',
-    },
-  ]);
 
   messages.push(...validateCommandArguments(command, ast, context, callbacks));
 

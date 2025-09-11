@@ -26,21 +26,19 @@ describe('INLINESTATS Validation', () => {
   });
 
   describe('INLINESTATS <aggregates> [ BY <grouping> ]', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField * 3.281', [
-      {
-        name: 'doubleField * 3.281',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg_doubleField', [
-      {
-        name: 'avg_doubleField',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField * 3.281', {
+      name: 'doubleField * 3.281',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg_doubleField', {
+      name: 'avg_doubleField',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
 
     describe('... <aggregates> ...', () => {
       test('no errors on correct usage', () => {

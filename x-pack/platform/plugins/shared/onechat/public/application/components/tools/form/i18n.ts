@@ -155,9 +155,6 @@ export const i18nMessages = {
           defaultMessage: 'Configuring a tool',
         }
       ),
-      esqlOnlyCallout: i18n.translate('xpack.onechat.tools.newTool.configuration.esqlOnlyCallout', {
-        defaultMessage: 'Currently ES|QL only',
-      }),
     },
     form: {
       type: {
@@ -168,6 +165,20 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.type.esqlOption',
           {
             defaultMessage: 'ES|QL',
+          }
+        ),
+        indexSearchOption: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.type.indexSearchOption',
+          {
+            defaultMessage: 'Index search',
+          }
+        ),
+      },
+      indexSearch: {
+        patternLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.patternLabel',
+          {
+            defaultMessage: 'Target pattern',
           }
         ),
       },

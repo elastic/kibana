@@ -8,7 +8,6 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { v4 as generateUuid } from 'uuid';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -100,6 +99,10 @@ export class WorkflowExecutionState {
 
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
     if (!step.id) {
+      throw new Error('WorkflowExecutionState: Step execution must have an ID to be upserted');
+    }
+
+    if (!this.stepExecutions.has(step.id!)) {
       this.createStep(step);
     } else {
       this.updateStep(step);
@@ -185,21 +188,20 @@ export class WorkflowExecutionState {
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
-    const stepExecutionId = generateUuid();
     const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
     if (!stepExecutions.length) {
       this.stepIdExecutionIdIndex.set(step.stepId as string, []);
     }
-    this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(stepExecutionId as string);
+    this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(step.id as string);
     const newStep: EsWorkflowStepExecution = {
       ...step,
-      id: stepExecutionId,
+      id: step.id,
       executionIndex: stepExecutions.length,
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(stepExecutionId as string, newStep);
+    this.stepExecutions.set(step.id as string, newStep);
     this.stepChanges.push({
       objectId: newStep.id,
       changeType: 'create',
