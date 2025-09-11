@@ -7,7 +7,6 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless security API', function () {
     this.tags(['esGate']);

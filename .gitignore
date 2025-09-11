@@ -37,13 +37,13 @@ __tmp__
 /src/platform/test/*/screenshots/session
 /src/platform/test/*/screenshots/visual_regression_gallery.html
 
-# Ignore the same artifacts in x-pack
-/x-pack/test/*/failure_debug
-/x-pack/test/*/screenshots/diff
-/x-pack/test/*/screenshots/failure
-/x-pack/test/*/screenshots/session
-/x-pack/test/*/screenshots/visual_regression_gallery.html
-/x-pack/test/functional/apps/*/*/reporting/reports/failure
+# Ignore the same artifacts in x-pack/platform and and x-pack/solutions/*/test
+/x-pack/**/test/*/failure_debug
+/x-pack/**/test/*/screenshots/diff
+/x-pack/**/test/*/screenshots/failure
+/x-pack/**/test/*/screenshots/session
+/x-pack/**/test/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/functional/apps/*/*/reporting/reports/failure
 
 # Ignore the same artifacts in x-pack/test_serverless
 /x-pack/test_serverless/*/failure_debug
@@ -148,6 +148,7 @@ src/platform/packages/**/package-map.json
 **/.journeys/
 **/.rca/
 x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/test
 
 # ignore FTR temp directory
 .ftr
