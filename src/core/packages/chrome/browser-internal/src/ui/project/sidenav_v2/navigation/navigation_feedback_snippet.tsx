@@ -16,7 +16,6 @@ interface NavigationFeedbackSnippetProps {
   solutionId: SolutionId;
 }
 
-const feedbackPanelLocalStorageKey = 'core.ui.chrome.sideNavigation.feedbackInteraction';
 const feedbackSnippetId = 'sideNavigationFeedback';
 
 const feedbackUrls: { [id in SolutionId]: string } = {
@@ -47,7 +46,6 @@ export const NavigationFeedbackSnippet = ({ solutionId }: NavigationFeedbackSnip
     <FeedbackSnippet
       feedbackButtonMessage={feedbackButtonMessage}
       feedbackSnippetId={feedbackSnippetId}
-      feedbackPanelLocalStorageKey={feedbackPanelLocalStorageKey}
       promptViewMessage={promptViewMessage}
       surveyUrl={feedbackSurveyUrl}
     />
