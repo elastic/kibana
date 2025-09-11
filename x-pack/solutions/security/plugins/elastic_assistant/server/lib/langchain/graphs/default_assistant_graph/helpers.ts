@@ -133,6 +133,9 @@ export const streamGraph = async ({
     version: 'v2',
     streamMode: ['values', 'debug'],
     recursionLimit: inputs?.isOssModel ? 50 : 25,
+    configurable: {
+      thread_id: inputs.threadId,
+    },
   });
 
   const pushStreamUpdate = async () => {
@@ -224,6 +227,9 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
       recursionLimit: inputs?.isOssModel ? 50 : 25,
+      configurable: {
+        thread_id: inputs.threadId,
+      },
     });
     const lastMessage = result.messages[result.messages.length - 1];
     const output = lastMessage.text;
