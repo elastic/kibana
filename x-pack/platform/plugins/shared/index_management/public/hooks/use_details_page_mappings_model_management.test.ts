@@ -13,33 +13,34 @@ jest.mock('../application/app_context', () => ({
   useAppContext: () => ({
     plugins: {
       ml: {
-        mlApi: {
-          trainedModels: {
-            getModelsDownloadStatus: jest.fn().mockResolvedValue({
-              '.elser_model_2_linux-x86_64': {},
-            }),
-            getTrainedModelStats: jest.fn().mockResolvedValue({
-              trained_model_stats: [
-                {
-                  model_id: '.elser_model_2-x86_64',
-                  deployment_stats: {
-                    deployment_id: 'elser_model_2',
+        getMlApi: () =>
+          Promise.resolve({
+            trainedModels: {
+              getModelsDownloadStatus: jest.fn().mockResolvedValue({
+                '.elser_model_2_linux-x86_64': {},
+              }),
+              getTrainedModelStats: jest.fn().mockResolvedValue({
+                trained_model_stats: [
+                  {
                     model_id: '.elser_model_2-x86_64',
-                    state: 'not started',
+                    deployment_stats: {
+                      deployment_id: 'elser_model_2',
+                      model_id: '.elser_model_2-x86_64',
+                      state: 'not started',
+                    },
                   },
-                },
-                {
-                  model_id: '.multilingual-e5-small',
-                  deployment_stats: {
-                    deployment_id: 'e5',
+                  {
                     model_id: '.multilingual-e5-small',
-                    state: 'started',
+                    deployment_stats: {
+                      deployment_id: 'e5',
+                      model_id: '.multilingual-e5-small',
+                      state: 'started',
+                    },
                   },
-                },
-              ],
-            }),
-          },
-        },
+                ],
+              }),
+            },
+          }),
       },
     },
   }),
