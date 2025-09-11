@@ -9,7 +9,7 @@
 
 import { WorkflowGraph } from '../../../graph';
 
-import type { ForEachStep, ConnectorStep, WorkflowYaml } from '../../../spec/schema';
+import type { ForEachStep, ConnectorStep, WorkflowYaml, IfStep } from '../../../spec/schema';
 import type { EnterForeachNode } from '../../../types/execution';
 
 import { findInputsInGraph } from './find_inputs_in_graph';
@@ -98,6 +98,38 @@ describe('findInputsInGraph', () => {
           inner_foreach: ['foreach.item'],
         });
       });
+    });
+  });
+
+  describe('if step', () => {
+    const workflow = {
+      steps: [
+        {
+          name: 'ifstep',
+          type: 'if',
+          condition: 'event.rule.name:alert or steps.analysis.output:malicious',
+          steps: [
+            {
+              name: 'iterable-step',
+              type: 'console',
+              with: {
+                message: 'Hello World!',
+              },
+            } as ConnectorStep,
+          ],
+        } as IfStep,
+      ],
+    } as WorkflowYaml;
+
+    it('should be able to extract KQL variables', () => {
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const stepGraph = graph.getStepGraph('ifstep');
+      const inputs = findInputsInGraph(stepGraph);
+      expect(inputs).toEqual(
+        expect.objectContaining({
+          ifstep: ['event.rule.name', 'steps.analysis.output'],
+        })
+      );
     });
   });
 });

@@ -9,22 +9,29 @@
 
 import type { WorkflowGraph } from '../../../graph';
 import { extractNunjucksVariables } from '../extract_nunjucks_variables/extract_nunjucks_variables';
+import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
 
-import type { AtomicGraphNode, EnterForeachNode, ExitForeachNode } from '../../../types/execution';
+import type { AtomicGraphNode, EnterForeachNode, EnterIfNode } from '../../../types/execution';
 
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};
   const nodes = workflowGraph.topologicalOrder.map((nodeId) => workflowGraph.getNode(nodeId));
-  const stack: string[] = [];
 
   for (const node of nodes) {
     let stepInputsKey;
     let stepInputs: string[] = [];
-    const isInForeach = stack.some(
-      (nodeId) => workflowGraph.getNode(nodeId).type === 'enter-foreach'
-    );
+    const isInForeach = workflowGraph
+      .getNodeStack(node.id)
+      .some((nodeId) => workflowGraph.getNode(nodeId).type === 'enter-foreach');
+
+    if ((node as EnterIfNode).type === 'enter-if') {
+      const ifNode = node as EnterIfNode;
+      const ifInput = ifNode.configuration.condition;
+      const kqlVariables = extractPropertyPathsFromKql(ifInput);
+      kqlVariables.forEach((variable) => stepInputs.push(variable));
+      stepInputsKey = ifNode.stepId;
+    }
     if ((node as EnterForeachNode).type === 'enter-foreach') {
-      stack.push(node.id);
       const enterForeachNode = node as EnterForeachNode;
       const foreachInput = (node as EnterForeachNode).configuration.foreach;
       let shouldInclude = true;
@@ -39,9 +46,6 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
         stepInputs.push((node as EnterForeachNode).configuration.foreach);
         stepInputsKey = enterForeachNode.stepId;
       }
-    }
-    if ((node as ExitForeachNode).type === 'exit-foreach') {
-      stack.pop();
     }
     if ((node as AtomicGraphNode).type === 'atomic') {
       const atomicNode = node as AtomicGraphNode;
