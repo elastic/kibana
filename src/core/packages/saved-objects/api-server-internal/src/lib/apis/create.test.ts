@@ -920,10 +920,34 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Cannot create a saved object of type \"accessControlType\" with \"read_only\" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+            `Cannot create a saved object of type \"accessControlType\" with an access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
           )
         );
         expect(client.create).not.toHaveBeenCalled();
+      });
+
+      // Regression test
+      it('allows creation when the type supports access control and no user is present if access mode is not provided', async () => {
+        securityExtension.getCurrentUser.mockReturnValueOnce(null);
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+        });
+
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+        });
       });
     });
   });

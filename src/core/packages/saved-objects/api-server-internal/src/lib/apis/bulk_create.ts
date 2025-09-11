@@ -116,30 +116,33 @@ export const performBulkCreate = async <T>(
 
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
-    const accessMode = object.accessControl?.accessMode ?? options.accessControl?.accessMode; // options.accessControl?.accessMode;
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
+    const paramsIncludeAccessControl =
+      !!object.accessControl?.accessMode || !!options.accessControl?.accessMode;
 
-    // This condition is fine, the option will just be ignored
-    // if (!typeSupportsAccessControl && accessMode) {
-    //   throw SavedObjectsErrorHelpers.createBadRequestError(
-    //     `The "accessMode" field is not supported for saved objects of type "${type}".`
-    //   );
-    // }
-
-    // Should this just be a more generic check? If the options include an accessMode, or any of the objects include an accessMode,
-    // and there is no current user, then throw an error?
-    if (!createdBy && typeSupportsAccessControl && accessMode === 'read_only') {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
-      );
+    if (!createdBy && typeSupportsAccessControl && paramsIncludeAccessControl) {
+      return left({
+        id,
+        type,
+        error: {
+          ...errorContent(
+            SavedObjectsErrorHelpers.createBadRequestError(
+              `Cannot create a saved object of type "${type}" with an access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+            )
+          ),
+        },
+      });
     }
+
+    const accessMode =
+      object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default'; // options.accessControl?.accessMode;
 
     // This will effectively create the accessControl property for supporting types and remove the property for non-supporting types
     const accessControlToWrite =
       typeSupportsAccessControl && createdBy
         ? {
             owner: createdBy,
-            accessMode: accessMode,
+            accessMode,
           }
         : undefined;
     return right({

@@ -1195,12 +1195,23 @@ describe('#bulkCreate', () => {
             attributes: { title: 'Test Two' },
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
             accessControl: {
-              accessMode: 'read_only',
+              accessMode: 'default', // default === RBAC-only
             } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
-          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
-            accessControl: { accessMode: 'default' }, // default === RBAC-only
-          });
+          const obj3AccessControl = {
+            type: READ_ONLY_TYPE,
+            id: 'has-read-only-metadata',
+            attributes: { title: 'Test Three' },
+            references: [{ name: 'ref_0', type: 'test', id: '3' }],
+          };
+          await bulkCreateSuccess(
+            client,
+            repository,
+            [obj1NoAccessControl, obj2AccessControl, obj3AccessControl],
+            {
+              accessControl: { accessMode: 'read_only' },
+            }
+          );
 
           expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -1221,10 +1232,98 @@ describe('#bulkCreate', () => {
                   initialNamespace: undefined,
                   accessControl: {
                     owner: CURRENT_USER_PROFILE_ID,
-                    accessMode: 'read_only',
+                    accessMode: 'default', // explicitly confirm the mode is overriden
+                  },
+                },
+                {
+                  type: READ_ONLY_TYPE,
+                  id: 'has-read-only-metadata',
+                  name: 'Test Three',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  accessControl: {
+                    owner: CURRENT_USER_PROFILE_ID,
+                    accessMode: 'read_only', // explicitly confirm the mode is NOT overriden
                   },
                 },
               ]),
+            })
+          );
+        });
+
+        it('does not create objects with access control when there in no active user profile', async () => {
+          securityExtension.getCurrentUser.mockReturnValueOnce(null);
+
+          const obj1NoAccessControl = {
+            type: 'config',
+            id: '6.0.0-alpha1',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+          };
+          const obj2AccessControl = {
+            type: READ_ONLY_TYPE,
+            id: 'has-read-only-metadata',
+            attributes: { title: 'Test Two' },
+            references: [{ name: 'ref_0', type: 'test', id: '2' }],
+          };
+          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
+            accessControl: { accessMode: 'read_only' },
+          });
+
+          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: expect.arrayContaining([
+                {
+                  type: 'config',
+                  id: '6.0.0-alpha1',
+                  name: 'Test One',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  // explicitly confirm there is no accessControl for non-supporting type
+                },
+              ]),
+            })
+          );
+        });
+
+        // regression test
+        it('creates objects supporting access control when there in no active user profile if no access mode is provided', async () => {
+          securityExtension.getCurrentUser.mockReturnValueOnce(null);
+
+          const obj1NoAccessControl = {
+            type: 'config',
+            id: '6.0.0-alpha1',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+          };
+          const obj2AccessControl = {
+            type: READ_ONLY_TYPE,
+            id: 'could-have-read-only-metadata',
+            attributes: { title: 'Test Two' },
+            references: [{ name: 'ref_0', type: 'test', id: '2' }],
+          };
+          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl]); // no accessControl options
+
+          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: [
+                {
+                  type: 'config',
+                  id: '6.0.0-alpha1',
+                  name: 'Test One',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  // explicitly confirm there is no accessControl for non-supporting type
+                },
+                {
+                  type: READ_ONLY_TYPE,
+                  id: 'could-have-read-only-metadata',
+                  name: 'Test Two',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  // explicitly confirm there is no accessControl for supporting type
+                },
+              ],
             })
           );
         });
