@@ -8,19 +8,19 @@
 import { renderHook } from '@testing-library/react';
 import { useValueMetrics } from './use_value_metrics';
 
-import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
-import { useAlertCountQuery } from '../../hooks/use_alert_count_query';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
+import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+import { useAlertCountQuery } from './use_alert_count_query';
 
 const mockedUseKibana = {
   ...mockUseKibana(),
 };
 
-jest.mock('../../hooks/use_alert_count_query');
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../common/lib/kibana', () => {
+jest.mock('./use_alert_count_query');
+jest.mock('../../attack_discovery/pages/use_find_attack_discoveries');
+jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../common/lib/kibana', () => {
   return {
     useKibana: () => mockedUseKibana,
   };
@@ -61,10 +61,8 @@ describe('useValueMetrics', () => {
     });
     (useAlertCountQuery as jest.Mock).mockImplementation(({ filters }) => {
       if (filters && filters[0]?.query?.bool?.must_not?.length) {
-        // filtered
         return { alertCount: mockFilteredAlertsCount };
       }
-      // unfiltered
       return { alertCount: mockAlertCount, isLoading: mockIsLoading };
     });
   });
