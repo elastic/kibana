@@ -15,8 +15,8 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelectorLazy } from './anomaly_job_selector_lazy';
 import { LayerSelector } from './layer_selector';
-import type { MlAnomalyLayersType } from './util';
-import { ML_ANOMALY_LAYERS } from './util';
+import type { MlAnomalyLayersType } from './utils/constants';
+import { ML_ANOMALY_LAYERS } from './utils/constants';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;

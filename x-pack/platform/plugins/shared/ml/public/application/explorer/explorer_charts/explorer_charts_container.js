@@ -35,7 +35,7 @@ import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
-import { getInitialAnomaliesLayers } from '../../../maps/util';
+import { getInitialAnomaliesLayers } from '../../../maps/utils/get_initial_anomalies_layers';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import {
   getChartType,
