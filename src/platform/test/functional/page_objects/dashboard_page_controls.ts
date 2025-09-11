@@ -100,11 +100,7 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async openControlsMenu() {
-    const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
-    if (!isOpen) {
-      await this.dashboardAddPanel.clickTopNavAddMenu();
-      await this.testSubjects.click('dashboard-controls-menu-button');
-    }
+    await this.testSubjects.click('dashboard-controls-menu-button');
   }
 
   public async openCreateControlFlyout() {
