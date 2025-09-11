@@ -14,7 +14,7 @@ import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common/chat/conver
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -171,6 +171,9 @@ const getFlyoutResultItems = ({
               iconSide="left"
               onClick={() => onOpenFlyout(flyoutResultItems)}
               aria-haspopup="dialog"
+              aria-label={i18n.translate('xpack.onechat.conversation.roundResultsButtonAriaLabel', {
+                defaultMessage: 'View tool call results',
+              })}
             >
               {i18n.translate('xpack.onechat.conversation.roundResultsButton', {
                 defaultMessage: 'Tool call results',
@@ -201,35 +204,36 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
     closeFlyout,
   } = useToolResultsFlyout();
 
+  const renderedSteps = useMemo(() => {
+    return steps.flatMap((step, index): ReactNode => {
+      if (isToolCallStep(step)) {
+        return [
+          <ToolCallDisplay key={`step-${index}-tool-call`} step={step} />,
+          ...getProgressionItems({ step, stepIndex: index }),
+          ...getMainThinkingResultItems({ step, stepIndex: index }),
+          ...getFlyoutResultItems({
+            step,
+            stepIndex: index,
+            onOpenFlyout: openFlyout,
+          }),
+        ];
+      }
+
+      // What is the difference between a reasoning step and a tool call progression message. When does the agent produce one over the other?
+      // Is there any difference for how we should display reasoning and progression?
+      if (isReasoningStep(step)) {
+        return [
+          <ThinkingItemLayout key={`step-reasoning-${index}`}>{step.reasoning}</ThinkingItemLayout>,
+        ];
+      }
+
+      return [];
+    });
+  }, [steps, openFlyout]);
+
   return (
     <ol css={stepsListStyles} aria-label={labels.roundThinkingSteps}>
-      {steps.flatMap((step, index): ReactNode => {
-        if (isToolCallStep(step)) {
-          return [
-            <ToolCallDisplay key={`step-${index}-tool-call`} step={step} />,
-            ...getProgressionItems({ step, stepIndex: index }),
-            ...getMainThinkingResultItems({ step, stepIndex: index }),
-            ...getFlyoutResultItems({
-              step,
-              stepIndex: index,
-              onOpenFlyout: openFlyout,
-            }),
-          ];
-        }
-
-        // What is the difference between a reasoning step and a tool call progression message. When does the agent produce one over the other?
-        // Is there any difference for how we should display reasoning and progression?
-        if (isReasoningStep(step)) {
-          return [
-            <ThinkingItemLayout key={`step-reasoning-${index}`}>
-              {step.reasoning}
-            </ThinkingItemLayout>,
-          ];
-        }
-
-        return [];
-      })}
-
+      {renderedSteps}
       <RoundResultsFlyout isOpen={isToolResultsFlyoutOpen} onClose={closeFlyout}>
         {(toolResults ?? []).map((result: ToolResult, index) => (
           <ThinkingItemLayout key={`flyout-result-${index}`}>
