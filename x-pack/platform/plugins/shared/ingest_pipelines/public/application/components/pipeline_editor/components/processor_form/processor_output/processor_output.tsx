@@ -84,7 +84,7 @@ const i18nTexts = {
 
 const styles = {
   callOut: css`
-    &.euiCallOut--customIcon .euiCallOutHeader {
+    & .euiCallOutHeader {
       align-items: center;
     }
   `,
