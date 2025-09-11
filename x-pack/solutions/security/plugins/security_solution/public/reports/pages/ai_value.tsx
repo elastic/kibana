@@ -8,6 +8,7 @@ import React, { useState, useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
+import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
 import { EXPORT_REPORT } from '../components/ai_value/translations';
@@ -76,7 +77,13 @@ const AIValueComponent = () => {
   }
 
   return (
-    <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
+    <SecuritySolutionPageWrapper
+      data-test-subj="aiValuePage"
+      className={css`
+        max-width: 1440px;
+        margin: 0 auto;
+      `}
+    >
       <HeaderPage
         title={i18n.AI_VALUE_DASHBOARD}
         rightSideItems={[
