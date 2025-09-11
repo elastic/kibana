@@ -28,6 +28,7 @@ interface Props {
 export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
   const {
     core: { notifications },
+    services: { telemetryClient },
   } = useKibana();
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
@@ -71,6 +72,8 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                 }
                 iconType="sparkles"
                 onClick={() => {
+                  const startTime = Date.now();
+
                   setIsGenerating(true);
                   setGeneratedQueries([]);
                   setSelectedQueries([]);
@@ -110,6 +113,9 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                           'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
                           { defaultMessage: `Generated significant events queries successfully` }
                         ),
+                      });
+                      telemetryClient.trackSignificantEventsSuggestionsGenerate({
+                        duration_ms: Date.now() - startTime,
                       });
                       setIsGenerating(false);
                     },

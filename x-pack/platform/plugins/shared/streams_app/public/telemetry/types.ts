@@ -35,9 +35,42 @@ interface StreamsAIGrokSuggestionAcceptedProps {
   detected_fields: number;
 }
 
+interface StreamsProcessingSavedProps {
+  processors_count: number;
+}
+
+interface StreamsRetentionChangedProps {
+  type: 'dsl' | 'ilm' | 'inherit';
+  value?: string;
+}
+
+interface StreamsChildStreamCreatedProps {
+  name: string;
+}
+
+interface StreamsSchemaFieldUpdatedProps {
+  field_name: string;
+  field_status: 'mapped' | 'unmapped';
+  field_type?: string;
+}
+
+interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
+  duration_ms: number;
+}
+
+interface StreamsSignificantEventsCreatedProps {
+  count: number;
+}
+
 export {
   type StreamsAssetCountProps,
   type StreamsAssetClickEventProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
+  type StreamsRetentionChangedProps,
+  type StreamsProcessingSavedProps,
+  type StreamsChildStreamCreatedProps,
+  type StreamsSchemaFieldUpdatedProps,
+  type StreamsSignificantEventsSuggestionsGeneratedEventProps,
+  type StreamsSignificantEventsCreatedProps,
 };

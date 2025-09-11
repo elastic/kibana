@@ -31,6 +31,7 @@ interface Props {
 export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     core: { notifications },
+    services: { telemetryClient },
   } = useKibana();
   const {
     timeState: { start, end },
@@ -97,6 +98,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     { defaultMessage: `Saved significant event query successfully` }
                   ),
                 });
+                telemetryClient.trackSignificantEventsCreated({ count: 1 });
                 setIsEditFlyoutOpen(false);
                 significantEventsFetchState.refresh();
               },
@@ -120,6 +122,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     { defaultMessage: `Saved significant events queries successfully` }
                   ),
                 });
+                telemetryClient.trackSignificantEventsCreated({ count: data.queries.length });
                 setIsEditFlyoutOpen(false);
                 significantEventsFetchState.refresh();
               },

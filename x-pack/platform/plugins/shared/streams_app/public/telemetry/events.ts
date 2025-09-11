@@ -10,12 +10,24 @@ import {
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ASSET_CLICK_EVENT_TYPE,
   STREAMS_ASSET_COUNT_EVENT_TYPE,
+  STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
+  STREAMS_PROCESSING_SAVED_EVENT_TYPE,
+  STREAMS_RETENTION_CHANGED_EVENT_TYPE,
+  STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAssetClickEventSchema,
   streamsAssetCountSchema,
+  streamsChildStreamCreatedSchema,
+  streamsProcessingSavedSchema,
+  streamsRetentionChangedSchema,
+  streamsSchemaFieldUpdatedSchema,
+  streamsSignificantEventsCreatedSchema,
+  streamsSignificantEventsSuggestionsGeneratedSchema,
 } from './schemas';
 
 const streamsAssetCountEventType = {
@@ -38,9 +50,45 @@ const streamsAIGrokSuggestionAcceptedEventType = {
   schema: streamsAIGrokSuggestionAcceptedSchema,
 };
 
+const streamsProcessingSavedEventType = {
+  eventType: STREAMS_PROCESSING_SAVED_EVENT_TYPE,
+  schema: streamsProcessingSavedSchema,
+};
+
+const streamsRetentionChangedEventType = {
+  eventType: STREAMS_RETENTION_CHANGED_EVENT_TYPE,
+  schema: streamsRetentionChangedSchema,
+};
+
+const streamsChildStreamCreatedEventType = {
+  eventType: STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
+  schema: streamsChildStreamCreatedSchema,
+};
+
+const streamsSchemaFieldUpdatedEventType = {
+  eventType: STREAMS_SCHEMA_FIELD_UPDATED_EVENT_TYPE,
+  schema: streamsSchemaFieldUpdatedSchema,
+};
+
+const streamsSignificantEventsSuggestionsGeneratedEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
+  schema: streamsSignificantEventsSuggestionsGeneratedSchema,
+};
+
+const streamsSignificantEventsCreatedEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
+  schema: streamsSignificantEventsCreatedSchema,
+};
+
 export {
   streamsAssetCountEventType,
   streamsAssetClickEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
+  streamsProcessingSavedEventType,
+  streamsRetentionChangedEventType,
+  streamsChildStreamCreatedEventType,
+  streamsSchemaFieldUpdatedEventType,
+  streamsSignificantEventsSuggestionsGeneratedEventType,
+  streamsSignificantEventsCreatedEventType,
 };
