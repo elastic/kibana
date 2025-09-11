@@ -18,10 +18,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
 import React, { useState } from 'react';
+import { useSendMessage } from '../../../../context/send_message_context';
 import type { Timer } from '../../../../hooks/use_timer';
+import { RoundFlyout } from '../round_flyout';
 import { RoundTimer } from './round_timer';
 import { RoundSteps } from './steps/round_steps';
-import { RoundFlyout } from '../round_flyout';
 
 interface RoundThinkingProps {
   rawRound: ConversationRound;
@@ -34,7 +35,7 @@ const fullWidthStyles = css`
   width: 100%;
 `;
 
-const thinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
+const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
 });
 const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinking.completed', {
@@ -52,6 +53,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
+  const { toolProgress } = useSendMessage();
   const [showFlyout, setShowFlyout] = useState(false);
 
   if (steps.length === 0) {
@@ -70,6 +72,12 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
     }
   `;
 
+  let thinkingButtonLabel = thinkingCompletedLabel;
+  if (isLoading) {
+    // While this round is loading, show the progression message as the button label if available
+    // Otherwise fallback to default thinking label
+    thinkingButtonLabel = toolProgress ?? defaultThinkingLabel;
+  }
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
   };
@@ -82,7 +90,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
       buttonProps={{
         css: fullWidthStyles,
       }}
-      buttonContent={isLoading ? thinkingLabel : thinkingCompletedLabel}
+      buttonContent={thinkingButtonLabel}
       extraAction={
         timer.showTimer ? (
           <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />

@@ -11,6 +11,7 @@ import {
   isMessageCompleteEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
+  isToolProgressEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
 import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
@@ -33,6 +34,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
   const conversationActions = useConversationActions();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [toolProgress, setToolProgress] = useState<string | null>(null);
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
@@ -63,6 +65,8 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
             conversationActions.setAssistantMessage({
               assistantMessage: event.data.message_content,
             });
+          } else if (isToolProgressEvent(event)) {
+            setToolProgress(event.data.message);
           } else if (isToolCallEvent(event)) {
             conversationActions.addToolCall({
               step: createToolCallStep({
@@ -116,6 +120,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     onSettled: () => {
       conversationActions.invalidateConversation();
       messageControllerRef.current = null;
+      setToolProgress(null);
     },
     onSuccess: () => {
       setPendingMessage(null);
@@ -140,6 +145,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     isResponseLoading,
     error,
     pendingMessage,
+    toolProgress,
     retry: () => {
       if (
         // Retrying should not be allowed if a response is still being fetched
@@ -168,6 +174,7 @@ interface SendMessageState {
   isResponseLoading: boolean;
   error: unknown;
   pendingMessage: string | null;
+  toolProgress: string | null;
   retry: () => void;
   canCancel: boolean;
   cancel: () => void;
@@ -176,8 +183,16 @@ interface SendMessageState {
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
-  const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
-    useSendMessageMutation();
+  const {
+    sendMessage,
+    isResponseLoading,
+    error,
+    pendingMessage,
+    toolProgress,
+    retry,
+    canCancel,
+    cancel,
+  } = useSendMessageMutation();
 
   return (
     <SendMessageContext.Provider
@@ -186,6 +201,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         isResponseLoading,
         error,
         pendingMessage,
+        toolProgress,
         retry,
         canCancel,
         cancel,
