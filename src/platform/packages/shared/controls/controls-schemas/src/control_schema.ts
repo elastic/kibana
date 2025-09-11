@@ -12,7 +12,6 @@ import { DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
-    type: schema.string(),
     title: schema.maybe(
       schema.string({ meta: { description: 'A human-readable title for the control' } })
     ),
