@@ -140,6 +140,10 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import type {
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -184,6 +188,10 @@ import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-
 import type { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import type { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type {
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   UpdateEntitySourceRequestParamsInput,
   UpdateEntitySourceRequestBodyInput,
@@ -1577,6 +1585,28 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Installs migration dashboards
+     */
+    installMigrationDashboards(
+      props: InstallMigrationDashboardsProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/install',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Installs migration rules
      */
     installMigrationRules(props: InstallMigrationRulesProps, kibanaSpace: string = 'default') {
@@ -2123,6 +2153,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Updates mutable fields of an existing dashboard migration
+     */
+    updateDashboardMigration(
+      props: UpdateDashboardMigrationProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .patch(
+          getRouteUrlForSpace(
+            replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     updateEntitySource(props: UpdateEntitySourceProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
@@ -2533,6 +2582,10 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
+}
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
   body: InstallMigrationRulesRequestBodyInput;
@@ -2627,6 +2680,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;

@@ -197,6 +197,37 @@ export type GetDashboardMigrationStatsRequestParamsInput = z.input<
 export type GetDashboardMigrationStatsResponse = z.infer<typeof GetDashboardMigrationStatsResponse>;
 export const GetDashboardMigrationStatsResponse = DashboardMigrationTaskStats;
 
+export type InstallMigrationDashboardsRequestParams = z.infer<
+  typeof InstallMigrationDashboardsRequestParams
+>;
+export const InstallMigrationDashboardsRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type InstallMigrationDashboardsRequestParamsInput = z.input<
+  typeof InstallMigrationDashboardsRequestParams
+>;
+
+export type InstallMigrationDashboardsRequestBody = z.infer<
+  typeof InstallMigrationDashboardsRequestBody
+>;
+export const InstallMigrationDashboardsRequestBody = z.object({
+  /**
+   * The list of dashboard migration ids to install
+   */
+  ids: z.array(NonEmptyString).optional(),
+});
+export type InstallMigrationDashboardsRequestBodyInput = z.input<
+  typeof InstallMigrationDashboardsRequestBody
+>;
+
+export type InstallMigrationDashboardsResponse = z.infer<typeof InstallMigrationDashboardsResponse>;
+export const InstallMigrationDashboardsResponse = z.object({
+  /**
+   * The number of dashboards that were installed.
+   */
+  installed: z.number(),
+});
+
 export type StartDashboardsMigrationRequestParams = z.infer<
   typeof StartDashboardsMigrationRequestParams
 >;
@@ -250,6 +281,31 @@ export const StopDashboardsMigrationResponse = z.object({
    */
   stopped: z.boolean(),
 });
+
+export type UpdateDashboardMigrationRequestParams = z.infer<
+  typeof UpdateDashboardMigrationRequestParams
+>;
+export const UpdateDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateDashboardMigrationRequestParamsInput = z.input<
+  typeof UpdateDashboardMigrationRequestParams
+>;
+
+export type UpdateDashboardMigrationRequestBody = z.infer<
+  typeof UpdateDashboardMigrationRequestBody
+>;
+export const UpdateDashboardMigrationRequestBody = z
+  .object({
+    /**
+     * The dashboard migration name
+     */
+    name: NonEmptyString.optional(),
+  })
+  .strict();
+export type UpdateDashboardMigrationRequestBodyInput = z.input<
+  typeof UpdateDashboardMigrationRequestBody
+>;
 
 export type UpsertDashboardMigrationResourcesRequestParams = z.infer<
   typeof UpsertDashboardMigrationResourcesRequestParams
