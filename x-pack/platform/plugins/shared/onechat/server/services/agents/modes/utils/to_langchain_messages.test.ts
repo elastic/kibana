@@ -20,6 +20,8 @@ import type {
 } from './prepare_conversation';
 
 describe('conversationLangchainMessages', () => {
+  const now = new Date().toISOString();
+
   const makeRoundInput = (
     message: string,
     attachments: ProcessedAttachment[] = []
@@ -77,6 +79,8 @@ describe('conversationLangchainMessages', () => {
         input: makeRoundInput('hi'),
         steps: [],
         response: makeAssistantResponse('hello!'),
+        started_at: now,
+        took: 42,
       },
     ];
     const nextInput = makeRoundInput('how are you?');
@@ -111,6 +115,8 @@ describe('conversationLangchainMessages', () => {
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),
+        started_at: now,
+        took: 42,
       },
     ];
     const nextInput = makeRoundInput('next');
@@ -159,6 +165,8 @@ describe('conversationLangchainMessages', () => {
         input: makeRoundInput('hi'),
         steps: [],
         response: makeAssistantResponse('hello!'),
+        started_at: now,
+        took: 42,
       },
       {
         id: 'round-2',
@@ -171,6 +179,8 @@ describe('conversationLangchainMessages', () => {
           ),
         ],
         response: makeAssistantResponse('done with bar'),
+        started_at: now,
+        took: 42,
       },
     ];
     const nextInput = makeRoundInput('bye');
@@ -227,6 +237,8 @@ describe('conversationLangchainMessages', () => {
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),
+        started_at: now,
+        took: 42,
       },
     ];
     const nextInput = makeRoundInput('next');
@@ -311,6 +323,8 @@ describe('conversationLangchainMessages', () => {
           input: makeRoundInput('message with attachment', [attachment]),
           steps: [],
           response: makeAssistantResponse('got it'),
+          started_at: now,
+          took: 42,
         },
       ];
       const nextInput = makeRoundInput('next message');

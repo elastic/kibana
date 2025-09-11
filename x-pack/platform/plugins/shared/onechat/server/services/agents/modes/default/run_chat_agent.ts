@@ -25,7 +25,9 @@ import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
-export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
+export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
+  startTime?: Date;
+};
 
 export type RunChatAgentFn = (
   params: RunChatAgentParams,
@@ -44,6 +46,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
+    startTime = new Date(),
   },
   { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
@@ -94,7 +97,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
   });
 
-  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}`);
 
   const eventStream = agentGraph.streamEvents(
     { initialMessages, cycleLimit },
@@ -105,7 +108,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
-        runId,
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
@@ -128,7 +130,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput }),
+    addRoundCompleteEvent({ userInput: processedInput, startTime }),
     shareReplay()
   );
 
