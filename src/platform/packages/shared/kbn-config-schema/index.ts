@@ -191,11 +191,11 @@ function arrayOf<V, D extends DefaultValue<V>, DA extends DefaultValue<V[]> = ne
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, V>(
+function mapOf<K, V, D extends DefaultValue<Map<K, V>>>(
   keyType: Type<K>,
   valueType: Type<V>,
-  options?: MapOfOptions<K, V>
-): Type<Map<K, V>> {
+  options?: MapOfOptions<K, V, D>
+): Type<Map<K, V>, D> {
   return new MapOfType(keyType, valueType, options);
 }
 
