@@ -28,7 +28,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
         },
         {
-          displaySuccessMessage: true, // shows a toast and scrolls to panel
+          displaySuccessMessage: true,
         }
       )
       .catch(() => {

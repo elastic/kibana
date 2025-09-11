@@ -29,7 +29,7 @@ export const createSearchPanelAction = {
         panelType: SEARCH_EMBEDDABLE_TYPE,
       },
       {
-        displaySuccessMessage: true, // shows a toast and scrolls to panel
+        displaySuccessMessage: true,
       }
     );
   },

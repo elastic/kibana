@@ -47,7 +47,7 @@ export function createBurnRatePanelAction(
             serializedState: { rawState: initialState },
           },
           {
-            displaySuccessMessage: true, // shows a toast and scrolls to panel
+            displaySuccessMessage: true,
           }
         );
       } catch (e) {

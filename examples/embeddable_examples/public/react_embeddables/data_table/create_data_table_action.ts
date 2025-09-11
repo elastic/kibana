@@ -33,7 +33,7 @@ export const createDataTableAction = {
         panelType: DATA_TABLE_ID,
       },
       {
-        displaySuccessMessage: true, // shows a toast and scrolls to panel
+        displaySuccessMessage: true,
       }
     );
   },

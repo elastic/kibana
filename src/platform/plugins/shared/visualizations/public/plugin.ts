@@ -483,7 +483,7 @@ export class VisualizationsPlugin
             },
           },
           {
-            displaySuccessMessage: true, // shows a toast and scrolls to panel
+            displaySuccessMessage: true,
           }
         );
       },

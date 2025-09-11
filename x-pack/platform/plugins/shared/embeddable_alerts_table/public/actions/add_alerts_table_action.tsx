@@ -59,7 +59,7 @@ export const getAddAlertsTableAction = (
                     serializedState: { rawState: { tableConfig } },
                   },
                   {
-                    displaySuccessMessage: true, // shows a toast and scrolls to panel
+                    displaySuccessMessage: true,
                   }
                 );
               }}

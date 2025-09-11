@@ -41,7 +41,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
           },
         },
         {
-          displaySuccessMessage: true, // shows a toast and scrolls to panel
+          displaySuccessMessage: true,
         }
       );
     },
