@@ -8,111 +8,47 @@
  */
 
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { findInputsInGraph } from '@kbn/workflows/common/utils';
+import {
+  findInputsInGraph,
+  extractSchemaPropertyPaths,
+  parseJsPropertyAccess,
+} from '@kbn/workflows/common/utils';
 
 import type { StepContext } from '@kbn/workflows';
+import { StepContextSchema } from '@kbn/workflows';
 
-function parseJsPropertyAccess(path: string): string[] {
-  const parts: string[] = [];
-  let current = '';
-  let inBracket = false;
-
-  for (let i = 0; i < path.length; i++) {
-    const char = path[i];
-
-    if (char === '.' && !inBracket) {
-      if (current) {
-        parts.push(current);
-        current = '';
-      }
-    } else if (char === '[') {
-      inBracket = true;
-      if (current) {
-        parts.push(current);
-        current = '';
-      }
-    } else if (char === ']') {
-      inBracket = false;
-      if (current) {
-        parts.push(current);
-        current = '';
-      }
-    } else {
-      current += char;
-    }
-  }
-
-  if (current) {
-    parts.push(current);
-  }
-
-  return parts;
-}
+const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
 
 export function buildStepContextMock(workflowGraph: WorkflowGraph): Partial<StepContext> {
-  const stepContextMock = {} as Partial<StepContext>;
+  const stepContextMock = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
-  const allInputsParsed = Object.values(inputsInGraph)
-    .flat()
-    .map((input) => parseJsPropertyAccess(input));
-  const stepVariables = allInputsParsed.filter((input) => input[0] === 'steps');
+  const allInputs = Object.values(inputsInGraph).flat();
+  const allInputsFiltered = allInputs.filter((input) =>
+    StepContextSchemaPropertyPaths.some((schemaPropertyPath) =>
+      input.startsWith(schemaPropertyPath.path)
+    )
+  );
+  const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
 
-  stepVariables.forEach((parsed) => {
-    const stepName = parsed.slice(1, 2).join();
-    const stepStateKey = parsed.slice(2, 3).join();
+  inputsParsed.forEach((pathParts) => {
+    let current = stepContextMock;
 
-    if (!['output', 'error'].includes(stepStateKey)) {
-      return;
-    }
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      const isLastPart = i === pathParts.length - 1;
 
-    if (!stepContextMock.steps) {
-      stepContextMock.steps = {};
-    }
-
-    if (!stepContextMock.steps[stepName]) {
-      stepContextMock.steps[stepName] = {} as Partial<StepContext['steps']>;
-    }
-
-    switch (stepStateKey) {
-      case 'output': {
-        stepContextMock.steps[stepName][stepStateKey] = {};
-        break;
-      }
-      case 'error': {
-        stepContextMock.steps[stepName][stepStateKey] = null;
-        break;
+      if (isLastPart) {
+        // Set a default value for the final property
+        current[part] = current[part] || null;
+      } else {
+        // Create nested object if it doesn't exist
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
       }
     }
   });
-
-  if (allInputsParsed.some((input) => input[0] === 'event')) {
-    stepContextMock.event = {};
-  }
-
-  const foreachInputs = allInputsParsed.filter((input) => input[0] === 'foreach');
-
-  if (foreachInputs.length) {
-    if (foreachInputs.some((x) => x.length === 1 && x[0] === 'foreach')) {
-      stepContextMock.foreach = {
-        item: {},
-        items: [],
-        index: 0,
-        total: 0,
-      };
-    } else {
-      if (!stepContextMock.foreach) {
-        stepContextMock.foreach = {} as StepContext['foreach'];
-      }
-
-      const itemReference = foreachInputs.find(
-        (input) => input[0] === 'foreach' && input[1] === 'item'
-      );
-
-      if (itemReference) {
-        stepContextMock.foreach!.item = {};
-      }
-    }
-  }
 
   return stepContextMock;
 }
