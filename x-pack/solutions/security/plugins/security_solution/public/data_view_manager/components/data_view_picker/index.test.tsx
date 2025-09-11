@@ -10,7 +10,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
