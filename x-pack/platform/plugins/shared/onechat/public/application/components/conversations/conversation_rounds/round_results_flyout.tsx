@@ -30,10 +30,10 @@ export const RoundResultsFlyout: React.FC<RoundResultsFlyoutProps> = ({
   if (!isOpen) return null;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="rawResponseFlyoutTitle" size="m">
+    <EuiFlyout onClose={onClose} aria-labelledby="roundResultsFlyoutTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="rawResponseFlyoutTitle">{roundResultsFlyoutTitle}</h2>
+          <h2 id="roundResultsFlyoutTitle">{roundResultsFlyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>

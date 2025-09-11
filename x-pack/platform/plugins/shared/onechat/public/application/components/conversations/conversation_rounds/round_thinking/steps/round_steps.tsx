@@ -14,7 +14,7 @@ import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common/chat/conver
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -32,6 +32,7 @@ import { TabularDataResultStep } from './tabular_data_result_step';
 import { OtherResultStep } from './other_result_step';
 import { QueryResultStep } from './query_result_step';
 import { RoundResultsFlyout } from '../../round_results_flyout';
+import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
 
 interface ToolResultDisplayProps {
   toolResult: ToolResult;
@@ -148,21 +149,15 @@ const getMainThinkingResultItems = ({
 const getFlyoutResultItems = ({
   step,
   stepIndex,
-  showResultsFlyout,
-  setShowResultsFlyout,
+  onOpenFlyout,
 }: {
   step: ToolCallStep;
   stepIndex: number;
-  showResultsFlyout: boolean;
-  setShowResultsFlyout: (show: boolean) => void;
+  onOpenFlyout: (results: ToolResult[]) => void;
 }) => {
   const flyoutResultItems = step.results.filter((result: ToolResult) =>
     flyoutResultTypes.includes(result.type)
   );
-
-  const toggleFlyout = () => {
-    setShowResultsFlyout(!showResultsFlyout);
-  };
 
   if (flyoutResultItems.length > 0) {
     return [
@@ -174,7 +169,8 @@ const getFlyoutResultItems = ({
               iconType={'eye'}
               color="primary"
               iconSide="left"
-              onClick={toggleFlyout}
+              onClick={() => onOpenFlyout(flyoutResultItems)}
+              aria-haspopup="dialog"
             >
               {i18n.translate('xpack.onechat.conversation.roundResultsButton', {
                 defaultMessage: 'Tool call results',
@@ -183,14 +179,6 @@ const getFlyoutResultItems = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </ThinkingItemLayout>,
-
-      <RoundResultsFlyout isOpen={showResultsFlyout} onClose={toggleFlyout}>
-        {flyoutResultItems.map((result: ToolResult, index) => (
-          <ThinkingItemLayout key={`step-${stepIndex}-${step.tool_id}-result-${index}`}>
-            <ToolResultDisplay toolResult={result} />
-          </ThinkingItemLayout>
-        ))}
-      </RoundResultsFlyout>,
     ];
   }
   return [];
@@ -198,7 +186,7 @@ const getFlyoutResultItems = ({
 
 const stepsListStyles = css`
   list-style: none;
-  padding: none;
+  padding: 0;
 `;
 
 export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
@@ -206,8 +194,12 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
   // In the case of tool call steps we'll have
   // an item for the tool call, items for the progression, and items for the tool call results
 
-  // Flyout for tool call results
-  const [showResultsFlyout, setShowResultsFlyout] = useState(false);
+  const {
+    toolResults,
+    isOpen: isToolResultsFlyoutOpen,
+    openFlyout,
+    closeFlyout,
+  } = useToolResultsFlyout();
 
   return (
     <ol css={stepsListStyles} aria-label={labels.roundThinkingSteps}>
@@ -220,8 +212,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
             ...getFlyoutResultItems({
               step,
               stepIndex: index,
-              showResultsFlyout,
-              setShowResultsFlyout,
+              onOpenFlyout: openFlyout,
             }),
           ];
         }
@@ -238,6 +229,14 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
 
         return [];
       })}
+
+      <RoundResultsFlyout isOpen={isToolResultsFlyoutOpen} onClose={closeFlyout}>
+        {(toolResults ?? []).map((result: ToolResult, index) => (
+          <ThinkingItemLayout key={`flyout-result-${index}`}>
+            <ToolResultDisplay toolResult={result} />
+          </ThinkingItemLayout>
+        ))}
+      </RoundResultsFlyout>
     </ol>
   );
 };
