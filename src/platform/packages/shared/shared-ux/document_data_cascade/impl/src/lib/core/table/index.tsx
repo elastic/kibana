@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useRef, useMemo } from 'react';
+import React, { type FC, useMemo, useEffect } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -20,7 +20,6 @@ import {
   type Row,
   type Cell,
 } from '@tanstack/react-table';
-export type { Row, Table, CellContext } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
 import {
   useDataCascadeActions,
@@ -28,7 +27,9 @@ import {
   type GroupNode,
 } from '../../../store_provider';
 
-interface TableProps<G, L>
+export type { Row, Table, CellContext };
+
+export interface TableProps<G, L>
   extends Omit<
     TableOptions<G>,
     | 'columns'
@@ -41,24 +42,29 @@ interface TableProps<G, L>
     | 'onExpandedChange'
     | 'getRowCanExpand'
   > {
+  initialData: G[];
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
   rowCell: FC<CellContext<G, L>>;
 }
 
-export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
+export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
   allowMultipleRowToggle,
   enableRowSelection,
   header: Header,
   rowCell: RowCell,
+  initialData,
   ...rest
 }: TableProps<G, L>) => {
-  const tableRef = useRef<Table<G>>();
   const columnHelper = createColumnHelper<G>();
   const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
 
-  tableRef.current = useReactTable<G>({
+  useEffect(() => {
+    actions.setInitialState(initialData);
+  }, [initialData, actions]);
+
+  const table = useReactTable<G>({
     ...rest,
     data: state.groupNodes,
     state: state.table,
@@ -92,7 +98,7 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
 
       // Compute the new expanded rows, comparing the proposed expanded rows with the previous expanded rows
       const newExpandedRows = proposedExpandedRows.reduce((acc, id) => {
-        const row = tableRef.current!.getRow?.(id);
+        const row = table.getRow(id);
 
         if (
           // when the row is root, and its id is not in previousExpandedRows we want to keep it
@@ -103,7 +109,7 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
         } else if (row?.parentId && previousExpandedRows.includes(row?.parentId)) {
           // when row is a child, and its parent id is in previous expanded row,
           // we need to check if it has a sibling then apply a fitting treatment
-          const siblings = tableRef.current!.getRow?.(row?.parentId)?.getLeafRows() ?? [];
+          const siblings = table.getRow(row?.parentId)?.getLeafRows() ?? [];
           const expandedRowSibling = siblings.find(
             (sibling) => proposedExpandedRows.includes(sibling.id) && sibling.id !== id
           );
@@ -128,13 +134,13 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
   return useMemo(
     () => ({
       get headerColumns() {
-        return tableRef.current!.getHeaderGroups()[0].headers;
+        return table.getHeaderGroups()[0].headers;
       },
       get rows() {
-        return tableRef.current!.getRowModel().rows;
+        return table.getRowModel().rows;
       },
     }),
-    []
+    [table]
   );
 };
 
@@ -199,18 +205,14 @@ export function useAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
  */
 export function TableHeader<G extends GroupNode, L extends LeafNode>({
   headerColumns,
-}: Pick<ReturnType<typeof useTableHelper<G, L>>, 'headerColumns'>) {
-  return (
-    <React.Fragment>
-      {headerColumns.map((header) => {
-        return (
-          <React.Fragment key={header.id}>
-            {flexRender(header.column.columnDef.header, header.getContext())}
-          </React.Fragment>
-        );
-      })}
-    </React.Fragment>
-  );
+}: Pick<ReturnType<typeof useCascadeTable<G, L>>, 'headerColumns'>) {
+  return headerColumns.map((header) => {
+    return (
+      <React.Fragment key={header.id}>
+        {flexRender(header.column.columnDef.header, header.getContext())}
+      </React.Fragment>
+    );
+  });
 }
 
 export function TableCellRender<G extends GroupNode, L extends LeafNode>({
