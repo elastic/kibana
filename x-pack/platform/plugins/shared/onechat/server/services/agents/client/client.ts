@@ -74,7 +74,7 @@ class AgentClientImpl implements AgentClient {
   private readonly request: KibanaRequest;
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
-  private readonly user: UserIdAndName;
+  private readonly user?: UserIdAndName;
 
   constructor({
     storage,
@@ -84,7 +84,7 @@ class AgentClientImpl implements AgentClient {
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
-    user: UserIdAndName;
+    user?: UserIdAndName;
     request: KibanaRequest;
   }) {
     this.storage = storage;
@@ -282,7 +282,7 @@ const hasAccess = ({
   user,
 }: {
   profile: Pick<Document, '_source'>;
-  user: UserIdAndName;
+  user?: UserIdAndName;
 }) => {
   // no access control for now
   return true;

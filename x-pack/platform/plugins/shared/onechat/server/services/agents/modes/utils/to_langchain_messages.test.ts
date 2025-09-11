@@ -199,13 +199,14 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('merges toolParameters with tool call params', () => {
-    const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-      { type: ToolResultType.other, data: 'result!' },
+    const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+      { type: ToolResultType.other, data: { result: 'result!' } },
     ]);
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('find foo'),
-        steps: [makeToolCallStep(toolCall)],
+        steps: [makeToolCallStep(toolCall1)],
         response: makeAssistantResponse('done!'),
       },
     ];
@@ -218,8 +219,8 @@ describe('conversationLangchainMessages', () => {
 
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
-    const toolCall = (toolCallAIMessage as AIMessage).tool_calls![0];
-    expect(toolCall.args).toEqual({
+    const toolCallFromMessage = (toolCallAIMessage as AIMessage).tool_calls![0];
+    expect(toolCallFromMessage.args).toEqual({
       query: 'foo',
       apiKey: 'secret123',
       timeout: 5000,
@@ -227,25 +228,30 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles empty toolParameters', () => {
-    const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-      { type: ToolResultType.other, data: 'result!' },
+    const toolCall2 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+      { type: ToolResultType.other, data: { result: 'result!' } },
     ]);
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('find foo'),
-        steps: [makeToolCallStep(toolCall)],
+        steps: [makeToolCallStep(toolCall2)],
         response: makeAssistantResponse('done!'),
       },
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationToLangchainMessages({ previousRounds, nextInput, toolParameters: {} });
+    const result = conversationToLangchainMessages({
+      previousRounds,
+      nextInput,
+      toolParameters: {},
+    });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
     const [_human, toolCallAIMessage] = result;
 
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
-    const toolCall = (toolCallAIMessage as AIMessage).tool_calls![0];
-    expect(toolCall.args).toEqual({ query: 'foo' });
+    const toolCallFromMessage2 = (toolCallAIMessage as AIMessage).tool_calls![0];
+    expect(toolCallFromMessage2.args).toEqual({ query: 'foo' });
   });
 });
