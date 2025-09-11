@@ -16,9 +16,9 @@ import {
 } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
-import { installTranslated } from './util/installation';
+import { installTranslated } from '../../common/api/util/installation';
 
 export const registerSiemDashboardMigrationsInstallRoute = (
   router: SecuritySolutionPluginRouter,
@@ -41,7 +41,7 @@ export const registerSiemDashboardMigrationsInstallRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,
