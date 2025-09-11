@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
   useIsWithinMaxBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -86,6 +87,7 @@ const FieldEditorFlyoutContentComponent = ({
   const isEditingExistingField = !!fieldToEdit;
   const { dataView, subfields$ } = useFieldEditorContext();
 
+  const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinMaxBreakpoint('s');
 
   const { controller } = useFieldPreviewContext();
@@ -257,7 +259,7 @@ const FieldEditorFlyoutContentComponent = ({
                   color="primary"
                   iconType="info"
                   size="s"
-                  style={{ marginTop: '10px' }}
+                  css={{ marginTop: euiTheme.base }}
                 />
               )}
             </FlyoutPanels.Header>

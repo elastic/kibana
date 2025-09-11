@@ -153,6 +153,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
               discoverSessionTitle: newTitle,
             },
           }),
+          managed: false,
         };
 
         const dataView = await services.dataViews.create(newDataViewSpec);
