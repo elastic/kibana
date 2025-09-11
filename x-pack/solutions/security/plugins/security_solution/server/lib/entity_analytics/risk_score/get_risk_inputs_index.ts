@@ -25,7 +25,6 @@ export const getRiskInputsIndex = async ({
 }): Promise<RiskInputsIndexResponse> => {
   try {
     const dataView = await soClient.get<DataViewAttributes>('index-pattern', dataViewId);
-
     const index = dataView.attributes.title;
     const runtimeMappings =
       dataView.attributes.runtimeFieldMap != null
