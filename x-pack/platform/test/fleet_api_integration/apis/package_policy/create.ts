@@ -659,7 +659,11 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(body.item.inputs).to.eql(inputs);
+      expect(
+        (body.item.inputs as Array<{ id?: string; [key: string]: any }>).map(
+          ({ id, ...input }) => input
+        )
+      ).to.eql(inputs);
     });
 
     it('should return 400 if an invalid format query param is passed', async function () {

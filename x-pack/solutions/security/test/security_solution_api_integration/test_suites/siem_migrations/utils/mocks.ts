@@ -6,10 +6,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import {
-  MigrationTranslationResult,
-  SiemMigrationStatus,
-} from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
 import type {
   ElasticRule,
@@ -100,58 +96,6 @@ export const getMigrationRuleDocuments = (
     docs.push(getMigrationRuleDocument(overrideParams));
   }
   return docs;
-};
-
-export const statsOverrideCallbackFactory = ({
-  migrationId,
-  failed = 0,
-  pending = 0,
-  processing = 0,
-  completed = 0,
-  fullyTranslated = 0,
-  partiallyTranslated = 0,
-}: {
-  migrationId: string;
-  failed?: number;
-  pending?: number;
-  processing?: number;
-  completed?: number;
-  fullyTranslated?: number;
-  partiallyTranslated?: number;
-}) => {
-  const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
-    let translationResult;
-    let status = SiemMigrationStatus.PENDING;
-
-    const pendingEndIndex = failed + pending;
-    const processingEndIndex = failed + pending + processing;
-    const completedEndIndex = failed + pending + processing + completed;
-    if (index < failed) {
-      status = SiemMigrationStatus.FAILED;
-    } else if (index < pendingEndIndex) {
-      status = SiemMigrationStatus.PENDING;
-    } else if (index < processingEndIndex) {
-      status = SiemMigrationStatus.PROCESSING;
-    } else if (index < completedEndIndex) {
-      status = SiemMigrationStatus.COMPLETED;
-      const fullyTranslatedEndIndex = completedEndIndex - completed + fullyTranslated;
-      const partiallyTranslatedEndIndex =
-        completedEndIndex - completed + fullyTranslated + partiallyTranslated;
-      if (index < fullyTranslatedEndIndex) {
-        translationResult = MigrationTranslationResult.FULL;
-      } else if (index < partiallyTranslatedEndIndex) {
-        translationResult = MigrationTranslationResult.PARTIAL;
-      } else {
-        translationResult = MigrationTranslationResult.UNTRANSLATABLE;
-      }
-    }
-    return {
-      migration_id: migrationId,
-      translation_result: translationResult,
-      status,
-    };
-  };
-  return overrideCallback;
 };
 
 const getDefaultMigrationDoc: () => Omit<StoredSiemMigration, 'id'> = () => ({
@@ -249,14 +193,32 @@ export const defaultSplunkLookupResource = {
   updated_at: '2025-05-21T15:23:15.505Z',
 };
 
+export const executeTaskInBatches = async <T>({
+  items,
+  batchSize,
+  executor,
+}: {
+  items: T[];
+  batchSize: number;
+  executor: (batch: T[], batchNumber: number) => Promise<void>;
+}) => {
+  const batches = Math.ceil(items.length / batchSize);
+  for (let i = 0; i < batches; i++) {
+    const batch = items.slice(i * batchSize, (i + 1) * batchSize);
+    await executor(batch, i);
+  }
+};
+
 export const createMacrosForMigrationId = async ({
   es,
   migrationId,
   count,
+  index = SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN,
 }: {
   es: Client;
   migrationId: string;
   count: number;
+  index?: string;
 }) => {
   const macros = [];
   for (let i = 0; i < count; i++) {
@@ -267,14 +229,20 @@ export const createMacrosForMigrationId = async ({
     });
   }
 
-  const createMacroOperations = macros.flatMap((macro) => [
-    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
-    macro,
-  ]);
+  await executeTaskInBatches({
+    items: macros,
+    batchSize: 1000,
+    executor: async (batch) => {
+      const createMacroOperations = batch.flatMap((macro) => [
+        { create: { _index: index } },
+        macro,
+      ]);
 
-  await es.bulk({
-    refresh: 'wait_for',
-    operations: [...createMacroOperations],
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: [...createMacroOperations],
+      });
+    },
   });
 };
 
@@ -282,10 +250,12 @@ export const createLookupsForMigrationId = async ({
   es,
   migrationId,
   count,
+  index = SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN,
 }: {
   es: Client;
   migrationId: string;
   count: number;
+  index?: string;
 }) => {
   const lookups = [];
   for (let i = 0; i < count; i++) {
@@ -296,13 +266,18 @@ export const createLookupsForMigrationId = async ({
     });
   }
 
-  const createLookupOperations = lookups.flatMap((lookup) => [
-    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
-    lookup,
-  ]);
-
-  await es.bulk({
-    refresh: 'wait_for',
-    operations: [...createLookupOperations],
+  await executeTaskInBatches({
+    items: lookups,
+    batchSize: 1000,
+    executor: async (batch) => {
+      const createLookupOperations = batch.flatMap((lookup) => [
+        { create: { _index: index } },
+        lookup,
+      ]);
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: [...createLookupOperations],
+      });
+    },
   });
 };

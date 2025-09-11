@@ -35,7 +35,11 @@ export const UpdateWorkflowInsightRequestSchema = {
     message: schema.maybe(schema.string()),
     category: schema.maybe(schema.oneOf([schema.literal('endpoint')])),
     type: schema.maybe(
-      schema.oneOf([schema.literal('incompatible_antivirus'), schema.literal('noisy_process_tree')])
+      schema.oneOf([
+        schema.literal('incompatible_antivirus'),
+        schema.literal('policy_response_failure'),
+        schema.literal('noisy_process_tree'),
+      ])
     ),
     source: schema.maybe(
       schema.object({
@@ -79,6 +83,8 @@ export const UpdateWorkflowInsightRequestSchema = {
             })
           )
         ),
+        descriptive: schema.maybe(schema.string()),
+        link: schema.maybe(schema.string()),
       })
     ),
     metadata: schema.maybe(
@@ -100,6 +106,7 @@ export const GetWorkflowInsightsRequestSchema = {
       schema.arrayOf(
         schema.oneOf([
           schema.literal('incompatible_antivirus'),
+          schema.literal('policy_response_failure'),
           schema.literal('noisy_process_tree'),
         ])
       )

@@ -18,8 +18,7 @@ export const validateCommandArguments = (
   command: ESQLCommand,
   ast: ESQLAst,
   context: ICommandContext = {
-    userDefinedColumns: new Map(), // Ensure context is always defined
-    fields: new Map(),
+    columns: new Map(), // Ensure context is always defined
   },
   callbacks: ICommandCallbacks = {}
 ) => {

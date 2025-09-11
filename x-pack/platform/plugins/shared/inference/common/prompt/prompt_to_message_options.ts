@@ -50,7 +50,7 @@ export function promptToMessageOptions(
     throw new Error(`No model match found for ${format(model)}`);
   }
 
-  const { toolChoice, tools, temperature, template } = bestMatch;
+  const { tools, temperature, template } = bestMatch;
 
   const validatedInput = prompt.input.parse(input);
 
@@ -79,7 +79,6 @@ export function promptToMessageOptions(
         messages,
         system,
         tools,
-        toolChoice,
         temperature,
       },
       (val) => val === undefined
