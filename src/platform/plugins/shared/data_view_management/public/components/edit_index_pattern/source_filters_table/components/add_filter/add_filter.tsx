@@ -27,15 +27,27 @@ const sourcePlaceholder = i18n.translate(
 );
 
 export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
-  const [filter, setFilter] = useState<string>('');
-  const [isInvalid, setIsInvalid] = useState<boolean>(false);
+  const [filter, setFilter] = useState('');
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  const isAddButtonDisabled = filter.length === 0 || isInvalid;
 
   const onAddButtonClick = useCallback(() => {
     onAddFilter(filter);
     setFilter('');
   }, [filter, onAddFilter]);
 
-  const validateFilter = useCallback((value: string) => {
+  const onInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.trim();
+      setFilter(value);
+    },
+    [setFilter]
+  );
+
+  const onInputBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+
     if (value.length === 0) {
       setIsInvalid(true);
       return;
@@ -59,15 +71,15 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
           value={filter}
           data-test-subj="fieldFilterInput"
           isInvalid={isInvalid}
-          onBlur={(e) => validateFilter(e.target.value.trim())}
-          onChange={(e) => setFilter(e.target.value.trim())}
+          onBlur={onInputBlur}
+          onChange={onInputChange}
           placeholder={sourcePlaceholder}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton
           data-test-subj="addFieldFilterButton"
-          isDisabled={filter.length === 0 || isInvalid}
+          isDisabled={isAddButtonDisabled}
           onClick={onAddButtonClick}
         >
           <FormattedMessage
