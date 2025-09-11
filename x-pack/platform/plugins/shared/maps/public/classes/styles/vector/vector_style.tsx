@@ -551,7 +551,7 @@ export class VectorStyle implements IVectorStyle {
   }
 
   isTimeAware() {
-    return this._descriptor.isTimeAware;
+    return this._descriptor.isTimeAware ?? true;
   }
 
   getPropertiesDescriptor(): NormalizedVectorStyleDescriptor['properties'] {

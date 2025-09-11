@@ -15,6 +15,7 @@ import type {
   LensApiReferableMetricOperations,
 } from '../../schema/metric_ops';
 import type {
+  AnyBucketLensStateColumn,
   AnyLensStateColumn,
   AnyMetricLensStateColumn,
   ReferableMetricLensStateColumn,
@@ -130,4 +131,10 @@ export function isColumnOfReferableType(
   return referrableTypes.some((type) =>
     isLensStateColumnOfType<ReferableMetricLensStateColumn>(type, column)
   );
+}
+
+export function isLensStateBucketColumnType(
+  column: AnyLensStateColumn
+): column is AnyBucketLensStateColumn {
+  return column.isBucketed;
 }
