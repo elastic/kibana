@@ -31,6 +31,13 @@ interface EsqlMultiTermTransformOutput {
   originalStringColumns: DatatableColumn[];
 }
 
+/**
+ * Generates the parameters required for the `multi_terms` field formatter.
+ * This is used to format the combined string columns created by `transformEsqlMultiTermBreakdown`.
+ *
+ * @param {DatatableColumn[]} columns - The columns of the datatable.
+ * @returns {object} The parameters for the `multi_terms` field formatter.
+ */
 export function getMultiTermsFormatterParams(columns: DatatableColumn[]) {
   return {
     paramsPerField: columns
@@ -49,8 +56,9 @@ export function getMultiTermsFormatterParams(columns: DatatableColumn[]) {
 
 /**
  * Checks a datatable for a specific shape (1 date, 1 number, and 2 or more string columns)
- * and transforms it if the shape is matched. The transformation combines the string
- * columns into a single column, creating a unified breakdown dimension for visualizations.
+ * and transforms it if the shape is matched and the ESQL query uses both `TS` and `STATS` commands.
+ * The transformation combines the string columns into a single column, creating a unified
+ * breakdown dimension for visualizations.
  *
  * @param {EsqlMultiTermTransformInput} input - The datatable containing columns and rows.
  * @returns {EsqlMultiTermTransformOutput} The transformed datatable, or the original if the shape is not matched.
@@ -81,7 +89,8 @@ export function transformEsqlMultiTermBreakdown({
       root,
       (node) => node.type === 'command' && node.name === 'stats'
     );
-    if (!statsCommand) {
+    const tsCommand = Walker.find(root, (node) => node.type === 'command' && node.name === 'ts');
+    if (!statsCommand || !tsCommand) {
       return noTransform;
     }
   }

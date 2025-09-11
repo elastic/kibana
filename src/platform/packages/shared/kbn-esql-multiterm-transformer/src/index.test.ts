@@ -11,7 +11,7 @@ import { transformEsqlMultiTermBreakdown } from '.';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('transformEsqlMultiTermBreakdown', () => {
-  const statsQuery = 'FROM my_index | STATS a BY b, c, d';
+  const statsQuery = 'TS my_index | STATS a BY b, c, d';
 
   it('should not transform the datatable if it has less than 3 columns', () => {
     const datatable: Datatable = {
@@ -55,7 +55,25 @@ describe('transformEsqlMultiTermBreakdown', () => {
       ],
       rows: [{ date: 1, metric: 100, host: 'host-a', region: 'us-east-1' }],
     };
-    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: 'FROM my_index' });
+    const result = transformEsqlMultiTermBreakdown({ ...datatable, query: 'TS my_index' });
+    expect(result.transformed).toBe(false);
+  });
+
+  it('should not transform the datatable if the query does not have a TS command', () => {
+    const datatable: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'date', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'metric', name: 'AVG(bytes)', meta: { type: 'number' } },
+        { id: 'host', name: 'host.name', meta: { type: 'string' } },
+        { id: 'region', name: 'region', meta: { type: 'string' } },
+      ],
+      rows: [{ date: 1, metric: 100, host: 'host-a', region: 'us-east-1' }],
+    };
+    const result = transformEsqlMultiTermBreakdown({
+      ...datatable,
+      query: 'FROM my_index | STATS a BY b, c, d',
+    });
     expect(result.transformed).toBe(false);
   });
 

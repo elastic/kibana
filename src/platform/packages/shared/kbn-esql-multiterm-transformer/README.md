@@ -4,11 +4,11 @@ This package provides a utility function to transform the results of specific ES
 
 ## The Problem
 
-When an ESQL query uses a `STATS ... BY` clause with multiple keyword fields in addition to a date bucket (e.g., `STATS AVG(bytes) BY BUCKET(@timestamp, ...), host.name, region`), the resulting data table has separate columns for each keyword field. While accurate, this format is not ideal for charting, as most charts expect a single field to use for breaking down a metric. This often leads to confusing or incorrect visualizations.
+When an ESQL query uses a `TS` source command and a `STATS ... BY` clause with multiple keyword fields in addition to a date bucket (e.g., `TS my_index | STATS AVG(bytes) BY BUCKET(@timestamp, ...), host.name, region`), the resulting data table has separate columns for each keyword field. While accurate, this format is not ideal for charting, as most charts expect a single field to use for breaking down a metric. This often leads to confusing or incorrect visualizations.
 
 ## The Solution
 
-This utility identifies this specific data shape (one date column, one numeric column, and two or more string/keyword columns) and transforms it:
+This utility identifies this specific data shape (one date column, one numeric column, and two or more string/keyword columns) resulting from a query using both `TS` and `STATS` commands and transforms it:
 
 - It combines the multiple string columns into a single new column.
 - The new column's name is a concatenation of the original column names (e.g., `host.name > region`).
@@ -35,6 +35,7 @@ const originalDatatable: Datatable = {
     { date: 1672531200000, metric: 100, host: 'host-a', region: 'us-east-1' },
     { date: 1672531200000, metric: 200, host: 'host-b', region: 'us-west-2' },
   ],
+  query: 'TS my_index | STATS AVG(bytes) BY BUCKET(@timestamp, 1d), host.name, region',
 };
 
 const transformedDatatable = transformEsqlMultiTermBreakdown(originalDatatable);
