@@ -30,7 +30,7 @@ export const ErrorStacktraceLink = ({
   });
 
   const { linkProps } = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: datasetDetails.rawName,
     query,
     sendTelemetry,
     timeRangeConfig: timeRange,
