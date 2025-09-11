@@ -84,7 +84,7 @@ export const AccessModeContainer = ({
       const canManage = await accessControlClient.canManageAccessControl({
         accessControl,
         createdBy,
-        uid: user?.uid,
+        userId: user?.uid,
         contentTypeId: entityName,
       });
       setCanManageAccessControl(canManage);

@@ -49,6 +49,7 @@ import { type TracksOverlays } from '@kbn/presentation-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { DashboardUser } from '../../common/types';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import type {
@@ -159,6 +160,7 @@ export type DashboardApi = CanExpandPanels &
     accessControl$: PublishingSubject<SavedObjectAccessControl>;
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
+    user: DashboardUser;
   };
 
 export interface DashboardInternalApi {

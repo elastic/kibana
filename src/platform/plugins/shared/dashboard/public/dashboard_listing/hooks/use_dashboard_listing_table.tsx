@@ -231,7 +231,7 @@ export const useDashboardListingTable = ({
         accessControlClient.checkGlobalPrivilege(CONTENT_ID),
       ]);
 
-      const uid = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
+      const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
       const isGloballyAuthorized =
         globalPrivilegeResponse.status === 'fulfilled'
           ? globalPrivilegeResponse.value.isGloballyAuthorized
@@ -253,7 +253,7 @@ export const useDashboardListingTable = ({
           accessControlClient.checkUserAccessControl({
             accessControl: hit?.accessControl,
             createdBy: hit.createdBy,
-            uid,
+            userId,
           });
 
         return toTableListViewSavedObject(hit, canManageAccessControl);

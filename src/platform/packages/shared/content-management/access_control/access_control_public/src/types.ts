@@ -26,7 +26,7 @@ export interface ChangeAccessModeResponse {
 export interface CheckUserAccessControlParameters {
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
-  uid?: string;
+  userId?: string;
 }
 
 export interface CanManageContentControlParameters extends CheckUserAccessControlParameters {

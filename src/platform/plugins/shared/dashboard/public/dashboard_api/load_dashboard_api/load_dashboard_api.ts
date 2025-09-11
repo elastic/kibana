@@ -8,6 +8,8 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { CONTENT_ID } from '@kbn/visualizations-plugin/common/content_management';
+import { getAccessControlClient } from '../../services/access_control_service';
 import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
@@ -73,6 +75,10 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  const accessControlClient = getAccessControlClient();
+  const currentUser = await coreServices?.userProfile.getCurrent();
+  const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(CONTENT_ID);
+
   // --------------------------------------------------------------------------------------
   // get dashboard Api
   // --------------------------------------------------------------------------------------
@@ -85,6 +91,10 @@ export async function loadDashboardApi({
     },
     savedObjectResult,
     savedObjectId,
+    user: {
+      uid: currentUser.uid,
+      hasGlobalAccessControlPrivilege: isGloballyAuthorized,
+    },
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {

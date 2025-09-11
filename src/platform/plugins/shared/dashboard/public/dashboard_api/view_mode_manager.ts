@@ -9,36 +9,33 @@
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import { BehaviorSubject, from } from 'rxjs';
-import { coreServices } from '../services/kibana_services';
-import { CONTENT_ID } from '../../common/content_management';
+import { BehaviorSubject } from 'rxjs';
 import { getAccessControlClient } from '../services/access_control_service';
+import type { DashboardUser } from '../../common/types';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager(
+  user: DashboardUser,
   incomingEmbeddable?: EmbeddablePackageState,
   savedObjectResult?: LoadDashboardReturn
 ) {
   const dashboardBackupService = getDashboardBackupService();
   const accessControlClient = getAccessControlClient();
-
-  const viewMode$ = new BehaviorSubject<ViewMode>('view');
-
-  async function resolveInitialViewMode(): Promise<ViewMode> {
-    const user = await coreServices?.userProfile.getCurrent();
-    const canManageDashboard = await accessControlClient.canManageAccessControl({
+  const canUserEditDashboard =
+    user.hasGlobalAccessControlPrivilege ||
+    accessControlClient.checkUserAccessControl({
       accessControl: savedObjectResult?.accessControl,
       createdBy: savedObjectResult?.createdBy,
-      uid: user?.uid,
-      contentTypeId: CONTENT_ID,
+      userId: user.uid,
     });
 
+  function getInitialViewMode() {
     if (
       savedObjectResult?.managed ||
       !getDashboardCapabilities().showWriteControls ||
-      !canManageDashboard
+      !canUserEditDashboard
     ) {
       return 'view';
     }
@@ -47,14 +44,13 @@ export function initializeViewModeManager(
       incomingEmbeddable ||
       savedObjectResult?.newDashboardCreated ||
       dashboardBackupService.dashboardHasUnsavedEdits(savedObjectResult?.dashboardId)
-    ) {
+    )
       return 'edit';
-    }
 
     return dashboardBackupService.getViewMode();
   }
 
-  from(resolveInitialViewMode()).subscribe((mode) => viewMode$.next(mode));
+  const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
 
   function setViewMode(viewMode: ViewMode) {
     // block the Dashboard from entering edit mode if this Dashboard is managed.

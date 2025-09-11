@@ -64,14 +64,14 @@ export class AccessControlClient implements AccessControlClientPublic {
   async canManageAccessControl({
     accessControl,
     createdBy,
-    uid,
+    userId,
     contentTypeId,
   }: CanManageContentControlParameters): Promise<boolean> {
     const { isGloballyAuthorized } = await this.checkGlobalPrivilege(contentTypeId);
     const canManage = this.checkUserAccessControl({
       accessControl,
       createdBy,
-      uid,
+      userId,
     });
     return isGloballyAuthorized || canManage;
   }
@@ -79,9 +79,9 @@ export class AccessControlClient implements AccessControlClientPublic {
   checkUserAccessControl({
     accessControl,
     createdBy,
-    uid,
+    userId,
   }: CheckUserAccessControlParameters): boolean {
-    if (!uid) {
+    if (!userId) {
       return false;
     }
 
@@ -90,10 +90,10 @@ export class AccessControlClient implements AccessControlClientPublic {
       if (!createdBy) {
         return true;
       }
-      return uid === createdBy;
+      return userId === createdBy;
     }
 
-    return uid === accessControl.owner;
+    return userId === accessControl.owner;
   }
 
   isInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean {
