@@ -15,11 +15,11 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
-import { MetricInsightsFlyout } from '../flyout/metrics_insights_flyout';
 
 export type LensWrapperProps = {
   metric: MetricField;
   lensProps: LensProps;
+  onViewDetails: (metric: MetricField, esqlQuery: string) => void;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
@@ -31,14 +31,18 @@ export function LensWrapper({
   onBrushEnd,
   onFilter,
   abortController,
+  onViewDetails,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
-  const [isFlyoutOpen, { toggle: toggleFlyoutOpen }] = useBoolean(false);
 
   const { EmbeddableComponent, SaveModalComponent } = services.lens;
 
   const esqlQuery = (lensProps?.attributes?.state?.query as AggregateQuery).esql ?? '';
+
+  const handleViewDetails = React.useCallback(() => {
+    onViewDetails(metric, esqlQuery);
+  }, [onViewDetails, metric, esqlQuery]);
 
   const chartCss = css`
     position: relative;
@@ -70,7 +74,7 @@ export function LensWrapper({
 
   const extraActions = useLensExtraActions({
     copyToDashboard: { onClick: toggleSaveModalVisible },
-    viewDetails: { onClick: toggleFlyoutOpen },
+    viewDetails: { onClick: handleViewDetails },
   });
 
   return (
@@ -95,12 +99,6 @@ export function LensWrapper({
           isSaveable={false}
         />
       )}
-      <MetricInsightsFlyout
-        metric={metric}
-        esqlQuery={esqlQuery}
-        isOpen={isFlyoutOpen}
-        onClose={toggleFlyoutOpen}
-      />
     </>
   );
 }
