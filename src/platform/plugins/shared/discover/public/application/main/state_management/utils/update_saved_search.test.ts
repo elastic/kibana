@@ -54,7 +54,7 @@ describe('updateSavedSearch', () => {
     jest.clearAllMocks();
   });
 
-  it('should set visContect from initialInternalState', async () => {
+  it('should set visContext from initialInternalState', async () => {
     const savedSearch = {
       ...savedSearchMock,
       searchSource: savedSearchMock.searchSource.createCopy(),
