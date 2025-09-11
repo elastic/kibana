@@ -99,6 +99,22 @@ components:
           type: string
           description: The user who last updated the migration
 
+    UpdateMigrationDashboard:
+      type: object
+      description: The dashboard migration data object for dashboard update operation
+      required:
+        - id
+      properties:
+        id:
+          description: The dashboard migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        elastic_dashboard:
+          description: The migrated elastic dashboard attributes to update.
+          $ref: '#/components/schemas/ElasticDashboardPartial'
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
+
     OriginalDashboard:
       type: object
       required:
@@ -153,6 +169,11 @@ components:
         data:
           type: string
           description: The data of the dashboard, format could depend on the vendor
+
+    ElasticDashboardPartial:
+      description: The partial version of the migrated elastic dashboard.
+      $ref: '#/components/schemas/ElasticDashboard'
+      x-modify: partial
 
     DashboardMigrationTaskStats:
       description: The dashboard migration task stats object.
