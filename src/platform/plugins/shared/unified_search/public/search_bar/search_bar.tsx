@@ -37,6 +37,7 @@ import type {
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
@@ -585,6 +586,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
   public render() {
     const { theme, query } = this.props;
+    const { isBackgroundSearchEnabled, session } = this.services.data.search;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme, isESQLQuery);
@@ -704,6 +706,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
+        {isBackgroundSearchEnabled && <BackgroundSearchRestoredCallout state$={session.state$} />}
         <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
