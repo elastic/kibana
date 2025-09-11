@@ -52,10 +52,7 @@ export class ControlsPlugin
     });
 
     startPlugins.dashboard.registerDashboardPanelSettings(RANGE_SLIDER_CONTROL, () => {
-      return {
-        ...CONTROL_PANEL_PLACEMENT,
-        placementSettings: { ...CONTROL_PANEL_PLACEMENT.placementSettings, width: 6 },
-      };
+      return CONTROL_PANEL_PLACEMENT;
     });
 
     startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
