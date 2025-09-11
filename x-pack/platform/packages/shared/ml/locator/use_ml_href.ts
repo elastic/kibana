@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import type { DependencyList } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import type { MlPluginSetup } from '@kbn/ml-plugin-contracts';
@@ -22,17 +23,31 @@ export const useMlHref = (
   dependencies?: DependencyList
 ) => {
   const [url, setUrl] = useState<string>('');
+  const isMounted = useMountedState();
 
   useEffect(() => {
     async function getUrl() {
-      if (ml?.getLocator) {
-        setUrl((await ml.getLocator()).useUrl(params, undefined, dependencies));
+      if (!ml?.getLocator) {
+        setUrl('');
+        return;
+      }
+
+      try {
+        const locator = await ml.getLocator();
+        const result = await locator.getUrl(params);
+        if (!isMounted()) return;
+        setUrl(result);
+      } catch (error) {
+        if (!isMounted()) return;
+        // eslint-disable-next-line no-console
+        console.error('useMlHref', error);
+        setUrl('');
       }
     }
 
     getUrl();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ml, isMounted, ...Object.values(params), ...(dependencies || [])]);
 
   return url;
 };
