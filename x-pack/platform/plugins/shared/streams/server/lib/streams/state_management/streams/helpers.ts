@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
+import type { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 
 export function formatSettings(settings: IngestStreamSettings, isServerless: boolean) {
   if (isServerless) {
