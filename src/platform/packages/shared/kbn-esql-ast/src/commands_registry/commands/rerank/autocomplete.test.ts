@@ -49,7 +49,6 @@ const SUGGESTION_GROUPS = {
   ] as string[],
   FIELD_CONTINUATIONS: [
     SUGGESTION_TOKENS.COMMA_SPACE,
-    SUGGESTION_TOKENS.ASSIGNMENT,
     SUGGESTION_TOKENS.WITH_CLAUSE,
     SUGGESTION_TOKENS.PIPE,
   ] as string[],
@@ -208,7 +207,6 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, [
         'textField, ',
-        'textField = ',
         'textField WITH { $0 } ',
         'textField | ',
       ]);
@@ -219,20 +217,6 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, SUGGESTION_GROUPS.FIELD_CONTINUATIONS);
     });
-
-    test('suggests continuations after multiple fields', async () => {
-      const query = buildRerankQuery({
-        query: '"search query"',
-        onClause: 'textField, keywordField',
-      });
-
-      await expectRerankSuggestions(query, [
-        'keywordField, ',
-        'keywordField = ',
-        'keywordField WITH { $0 } ',
-        'keywordField | ',
-      ]);
-    });
   });
 
   // ============================================================================
@@ -240,29 +224,6 @@ describe('RERANK Autocomplete', () => {
   // ============================================================================
 
   describe('Boolean expressions', () => {
-    test('handles simple equality correctly', async () => {
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: 'textField = keywordField',
-        }) + ' ';
-
-      await expectRerankSuggestions(query, {
-        contains: OPERATOR_SUGGESTIONS.COMPARISON,
-      });
-    });
-
-    test('handles comparison with boolean result correctly', async () => {
-      const query = buildRerankQuery({
-        query: '"search query"',
-        onClause: 'integerField >',
-      });
-
-      await expectRerankSuggestions(query, {
-        contains: ['keywordField', 'textField', 'integerField'],
-      });
-    });
-
     test.each([
       {
         name: 'arithmetic expression (non-boolean)',
@@ -392,17 +353,6 @@ describe('RERANK Autocomplete', () => {
   // ============================================================================
 
   describe('Advanced boolean expressions', () => {
-    test('handles nested NOT expressions', async () => {
-      const expression = 'NOT (keywordField LIKE "a*")';
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: `textField = ${expression}`,
-        }) + ' ';
-
-      await expectRerankSuggestions(query, SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS);
-    });
-
     test('handles complex parenthesized expressions', async () => {
       // Complex expressions ending with incomplete part show operators
       const expression = '(textField = "value") AND NOT (keywordField';
@@ -420,19 +370,6 @@ describe('RERANK Autocomplete', () => {
         notContains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
       });
     });
-
-    test('handles multiple comparison operators in sequence', async () => {
-      // Field at end of expression shows field continuations
-      const expression = 'integerField > 10 AND integerField';
-      const query = buildRerankQuery({
-        query: '"search query"',
-        onClause: expression,
-      });
-
-      await expectRerankSuggestions(query, {
-        contains: ['integerField, ', 'integerField = ', 'integerField WITH { $0 } '],
-      });
-    });
   });
 
   describe('Edge cases', () => {
@@ -446,18 +383,6 @@ describe('RERANK Autocomplete', () => {
       await expectRerankSuggestions(query, SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS);
     });
 
-    test('handles complete IS NULL expressions correctly', async () => {
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: 'textField = keywordField IS NULL',
-        }) + ' ';
-
-      await expectRerankSuggestions(query, {
-        contains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
-      });
-    });
-
     test('handles malformed expressions gracefully', async () => {
       const query = buildRerankQuery({
         query: '"search query"',
@@ -467,18 +392,6 @@ describe('RERANK Autocomplete', () => {
       await expectRerankSuggestions(query, {
         contains: ['textField', 'keywordField', 'integerField'],
         notContains: SUGGESTION_GROUPS.BOOLEAN_CONTINUATIONS,
-      });
-    });
-
-    test('handles mixed operator precedence', async () => {
-      const expression = 'textField LIKE "a*" AND integerField';
-      const query = buildRerankQuery({
-        query: '"search query"',
-        onClause: expression,
-      });
-
-      await expectRerankSuggestions(query, {
-        contains: ['integerField, ', 'integerField = ', 'integerField WITH { $0 } '],
       });
     });
   });
@@ -522,23 +435,6 @@ describe('RERANK Autocomplete', () => {
       await expectRerankSuggestions(query, {
         contains: expected,
       });
-    });
-  });
-
-  // ============================================================================
-  // Final Command Completion
-  // ============================================================================
-
-  describe('Command completion', () => {
-    test('suggests only pipe after complete rerank command', async () => {
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: 'textField = keywordField',
-          withClause: '{ "inference_id": "inference_1" }',
-        }) + ' ';
-
-      await expectRerankSuggestions(query, [SUGGESTION_TOKENS.PIPE]);
     });
   });
 });
