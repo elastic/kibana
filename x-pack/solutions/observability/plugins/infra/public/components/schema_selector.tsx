@@ -196,8 +196,8 @@ export const SchemaSelector = ({
         : options.length === 0
         ? [
             {
-              inputDisplay: i18n.translate('xpack.infra.schemaSelector.noHostsReturned', {
-                defaultMessage: 'No hosts returned',
+              inputDisplay: i18n.translate('xpack.infra.schemaSelector.noSchemaAvailable', {
+                defaultMessage: 'No schema available',
               }),
               value: 'unknown',
             },
