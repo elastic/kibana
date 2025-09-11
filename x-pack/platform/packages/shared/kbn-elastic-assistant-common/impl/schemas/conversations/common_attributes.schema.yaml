@@ -47,7 +47,7 @@ components:
 
     BaseInterruptResumeValue:
       type: object
-      description: The basis of a interrupt resume value
+      description: The basis of an interrupt resume value
       required:
         - 'type'
       properties:
