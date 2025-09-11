@@ -53,9 +53,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            settings: {},
+            processing: { steps: [] },
             classic: {},
           },
         });
@@ -122,6 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [
                 {
