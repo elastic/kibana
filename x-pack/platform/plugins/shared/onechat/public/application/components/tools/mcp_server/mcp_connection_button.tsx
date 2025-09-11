@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiText,
@@ -23,9 +23,7 @@ export const McpConnectionButton = () => {
 
   const { kibanaUrl } = useKibanaUrl();
 
-  const mcpServerUrl = useMemo(() => {
-    return `${kibanaUrl}${MCP_SERVER_PATH}`;
-  }, [kibanaUrl]);
+  const mcpServerUrl = `${kibanaUrl}${MCP_SERVER_PATH}`;
 
   return (
     <EuiPopover
