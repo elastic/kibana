@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
@@ -933,12 +934,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
 
           // delete unexpected types from payload as a temporary workaround
           // https://github.com/elastic/elasticsearch/issues/134467
-          const jobConfig = { ...job } as Job;
-          delete jobConfig.job_type;
-          delete jobConfig.job_version;
-          delete jobConfig.create_time;
-          delete jobConfig.finished_time;
-          delete jobConfig.model_snapshot_id;
+          const jobConfig = omit(job, [
+            'job_type',
+            'job_version',
+            'create_time',
+            'finished_time',
+            'model_snapshot_id',
+          ]);
 
           const payload =
             datafeedId !== undefined
