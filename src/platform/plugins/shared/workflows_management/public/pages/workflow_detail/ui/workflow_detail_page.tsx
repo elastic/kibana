@@ -19,6 +19,7 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -129,6 +130,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const [testStepId, setTestStepId] = useState<string | null>(null);
   const [stepContextMock, setStepContextMock] = useState<Partial<StepContext> | null>(null);
+  const [testSingleStepExecutionId, setTestSingleStepExecutionId] = useState<string | null>(null);
 
   const handleRunClick = () => {
     let needInput: boolean | undefined = false;
@@ -246,7 +248,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       workflowYaml,
       stepContextMock: mock,
     });
-    setSelectedExecution(response.workflowExecutionId);
+    setTestSingleStepExecutionId(response.workflowExecutionId);
     setTestStepId(null);
     setStepContextMock(null);
   };
@@ -331,6 +333,15 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 onClose={() => setSelectedExecution(null)}
               />
             )}
+          </EuiFlexItem>
+        )}
+        {workflow && testSingleStepExecutionId && activeTab !== 'executions' && (
+          <EuiFlexItem css={styles.sidebar}>
+            <SingleStepExecution
+              stepExecutionId={testSingleStepExecutionId}
+              workflowYaml={yamlValue}
+              onClose={() => setTestSingleStepExecutionId(null)}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
