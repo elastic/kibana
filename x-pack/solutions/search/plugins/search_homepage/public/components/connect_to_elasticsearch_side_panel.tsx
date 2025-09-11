@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../hooks/use_kibana';
 import { SampleDataActionButton } from './sample_data_action_button';
-import { useIsSampleDataAvailable } from '../hooks/use_sample_data_is_available';
+import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
 
 export const ConnectToElasticsearchSidePanel = () => {
   const { application } = useKibana().services;

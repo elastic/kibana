@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-types';
 
 import useObservable from 'react-use/lib/useObservable';
-import { useIsSampleDataAvailable } from './use_sample_data_is_available';
+import { useIsSampleDataAvailable } from './use_is_sample_data_available';
 import { useKibana } from './use_kibana';
 import { useUserPrivilegesQuery } from './api/use_user_permissions';
 
@@ -53,27 +53,31 @@ describe('useIsSampleDataAvailable', () => {
     mockUseObservable.mockReturnValue(makeLicense(true));
   });
 
-  it('returns isAvailable true when plugin exists, license is sufficient, and user has privileges', () => {
+  it('returns isUsageAvailable true when plugin exists, license is sufficient, and user has privileges', () => {
     const { result } = renderHook(() => useIsSampleDataAvailable());
 
     expect(result.current).toEqual({
-      isAvailable: true,
+      hasPrivileges: true,
       hasRequiredLicense: true,
+      isPluginAvailable: true,
+      isUsageAvailable: true,
     });
   });
 
-  it('returns hasRequiredLicense false and isAvailable false when license is insufficient', () => {
+  it('returns hasRequiredLicense false and isUsageAvailable false when license is insufficient', () => {
     mockUseObservable.mockReturnValue(makeLicense(false));
 
     const { result } = renderHook(() => useIsSampleDataAvailable());
 
     expect(result.current).toEqual({
-      isAvailable: false,
+      hasPrivileges: true,
       hasRequiredLicense: false,
+      isPluginAvailable: true,
+      isUsageAvailable: false,
     });
   });
 
-  it('returns isAvailable false when user lacks manage index privilege', () => {
+  it('returns isUsageAvailable false when user lacks manage index privilege', () => {
     mockUseUserPrivilegesQuery.mockReturnValue({
       data: { privileges: { canManageIndex: false } },
     } as any);
@@ -81,12 +85,14 @@ describe('useIsSampleDataAvailable', () => {
     const { result } = renderHook(() => useIsSampleDataAvailable());
 
     expect(result.current).toEqual({
-      isAvailable: false,
+      hasPrivileges: false,
       hasRequiredLicense: true,
+      isPluginAvailable: true,
+      isUsageAvailable: false,
     });
   });
 
-  it('returns isAvailable false when sampleDataIngest plugin is not available', () => {
+  it('returns isPluginAvailable false when sampleDataIngest plugin is not available', () => {
     mockUseKibana.mockReturnValue({
       services: {
         licensing: { license$: {} as any },
@@ -97,8 +103,10 @@ describe('useIsSampleDataAvailable', () => {
     const { result } = renderHook(() => useIsSampleDataAvailable());
 
     expect(result.current).toEqual({
-      isAvailable: false,
+      hasPrivileges: true,
       hasRequiredLicense: true,
+      isPluginAvailable: false,
+      isUsageAvailable: false,
     });
   });
 
@@ -121,8 +129,10 @@ describe('useIsSampleDataAvailable', () => {
     const { result } = renderHook(() => useIsSampleDataAvailable());
 
     expect(result.current).toEqual({
-      isAvailable: true,
+      hasPrivileges: true,
       hasRequiredLicense: true,
+      isPluginAvailable: true,
+      isUsageAvailable: true,
     });
   });
 
@@ -134,8 +144,10 @@ describe('useIsSampleDataAvailable', () => {
     const { result } = renderHook(() => useIsSampleDataAvailable());
 
     expect(result.current).toEqual({
-      isAvailable: false,
+      hasPrivileges: false,
       hasRequiredLicense: true,
+      isPluginAvailable: true,
+      isUsageAvailable: false,
     });
   });
 });

@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
-import { useIsSampleDataAvailable } from '../hooks/use_sample_data_is_available';
+import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
 import { useKibana } from '../hooks/use_kibana';
 
-jest.mock('../hooks/use_sample_data_is_available');
+jest.mock('../hooks/use_is_sample_data_available');
 jest.mock('../hooks/use_kibana');
 jest.mock('./sample_data_action_button', () => ({
   SampleDataActionButton: () => <div data-test-subj="sampleDataActionButton" />,
