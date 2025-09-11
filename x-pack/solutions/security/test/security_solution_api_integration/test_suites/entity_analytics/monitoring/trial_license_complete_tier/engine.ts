@@ -28,44 +28,6 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonUtils = PrivMonUtils(getService);
   const privMonUtilsCustomSpace = PrivMonUtils(getService, customSpace);
 
-  const createUserIndex = async (indexName: string) =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-                fields: {
-                  text: { type: 'text' },
-                },
-              },
-              role: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    });
-
-  const waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
-    let lastSeenLength = -1;
-
-    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
-      const res = await api.listPrivMonUsers({ query: {} });
-      const currentLength = res.body.length;
-
-      if (currentLength !== lastSeenLength) {
-        log.info(`PrivMon users sync check: found ${currentLength} users`);
-        lastSeenLength = currentLength;
-      }
-
-      return currentLength >= expectedLength;
-    });
-  };
-
   async function getPrivMonSoStatus(space: string = 'default') {
     return kibanaServer.savedObjects.find({
       type: 'privilege-monitoring-status',
@@ -356,8 +318,8 @@ export default ({ getService }: FtrProviderContext) => {
         await api.deleteMonitoringEngine({ query: { data: true } });
       });
       it('should return a 409 if the task is already running', async () => {
-        await privmonUtils.setPrivmonTaskStatus(TaskStatus.Running);
-        await privmonUtils.scheduleMonitoringEngineNow({ expectStatusCode: 409 });
+        await privMonUtils.setPrivmonTaskStatus(TaskStatus.Running);
+        await privMonUtils.scheduleMonitoringEngineNow({ expectStatusCode: 409 });
       });
     });
 
@@ -368,7 +330,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await indexSyncUtils.createIndex();
         await enablePrivmonSetting(kibanaServer);
-        await privmonUtils.initPrivMonEngine();
+        await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
@@ -395,7 +357,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.addUsersToIndex([...uniqueUsernames, ...repeatedUsers]);
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const users = await privmonUtils.scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
+        const users = await privMonUtils.scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
 
         // Check if the users are indexed
         const userNames = users.map((u: any) => u.user.name);
@@ -409,19 +371,19 @@ export default ({ getService }: FtrProviderContext) => {
 
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const usersBefore = await privmonUtils.scheduleEngineAndWaitForUserCount(2);
+        const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
 
-        const user1Before = privmonUtils.findUser(usersBefore, 'user1');
+        const user1Before = privMonUtils.findUser(usersBefore, 'user1');
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
         await indexSyncUtils.deleteUserFromIndex('user1');
         // add a new user so we know when the task completes
         await indexSyncUtils.addUsersToIndex(['user3']);
 
-        const usersAfter = await privmonUtils.scheduleEngineAndWaitForUserCount(3);
-        const user1After = privmonUtils.findUser(usersAfter, 'user1');
+        const usersAfter = await privMonUtils.scheduleEngineAndWaitForUserCount(3);
+        const user1After = privMonUtils.findUser(usersAfter, 'user1');
         log.info(`User 1 after: ${JSON.stringify(user1After)}`);
-        privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
-        privmonUtils.assertIsPrivileged(user1After, false);
+        privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
+        privMonUtils.assertIsPrivileged(user1After, false);
       });
 
       it('should update a user when it was already added by the API', async () => {
@@ -431,20 +393,20 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const { body: usersBeforeSync } = await api.listPrivMonUsers({ query: {} });
-        const user1Before = privmonUtils.findUser(usersBeforeSync, user1.name);
+        const user1Before = privMonUtils.findUser(usersBeforeSync, user1.name);
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
 
         await indexSyncUtils.addUsersToIndex([user1.name]);
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const usersAfterSync = await privmonUtils.scheduleEngineAndWaitForUserCount(1);
-        const user1After = privmonUtils.findUser(usersAfterSync, user1.name);
+        const usersAfterSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1After = privMonUtils.findUser(usersAfterSync, user1.name);
         log.info(`User 1 after: ${JSON.stringify(user1After)}`);
 
-        privmonUtils.assertIsPrivileged(user1After, true);
+        privMonUtils.assertIsPrivileged(user1After, true);
         expect(user1After?.user?.name).toEqual(user1.name);
         expect(user1After?.labels?.sources).toEqual(['api', 'index']);
-        privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
+        privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
       });
 
       it('should not update timestamps when re-syncing the same user', async () => {
@@ -452,12 +414,12 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.addUsersToIndex([user1.name]);
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const usersAfterFirstSync = await privmonUtils.scheduleEngineAndWaitForUserCount(1);
-        const user1AfterFirstSync = privmonUtils.findUser(usersAfterFirstSync, user1.name);
+        const usersAfterFirstSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1AfterFirstSync = privMonUtils.findUser(usersAfterFirstSync, user1.name);
         log.info(`User 1 after first sync: ${JSON.stringify(user1AfterFirstSync)}`);
 
-        const usersAfterSecondSync = await privmonUtils.scheduleEngineAndWaitForUserCount(1);
-        const user1AfterSecondSync = privmonUtils.findUser(usersAfterSecondSync, user1.name);
+        const usersAfterSecondSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+        const user1AfterSecondSync = privMonUtils.findUser(usersAfterSecondSync, user1.name);
         log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 
         expect(user1AfterSecondSync?.['@timestamp']).toEqual(user1AfterFirstSync?.['@timestamp']);
@@ -468,7 +430,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('default entity sources', () => {
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
         await enablePrivmonSetting(kibanaServer);
-        await privmonUtils.initPrivMonEngine();
+        await privMonUtils.initPrivMonEngine();
 
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
