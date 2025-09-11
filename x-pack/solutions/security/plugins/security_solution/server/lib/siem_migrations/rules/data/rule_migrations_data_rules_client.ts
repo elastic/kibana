@@ -14,22 +14,21 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
-import {
-  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
-  SiemMigrationStatus,
-} from '../../../../../common/siem_migrations/constants';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
   type RuleMigrationAllIntegrationsStats,
   type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { getSortingOptions } from './sort';
-import { dsl } from './dsl_queries';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
 import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
 import { SiemMigrationsDataItemClient } from '../../common/data/siem_migrations_data_item_client';
+import { MAX_ES_SEARCH_SIZE } from '../../common/data/constants';
 import type { SiemMigrationGetItemsOptions, SiemMigrationSort } from '../../common/data/types';
+import { getSortingOptions } from './sort';
+import { dsl } from './dsl_queries';
+
 export type CreateRuleMigrationRulesInput = CreateMigrationItemInput<RuleMigrationRule>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
@@ -159,7 +158,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',
