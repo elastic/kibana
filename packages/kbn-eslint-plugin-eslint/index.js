@@ -22,5 +22,6 @@ module.exports = {
     no_unsafe_hash: require('./rules/no_unsafe_hash'),
     no_deprecated_authz_config: require('./rules/no_deprecated_authz_config'),
     require_kibana_feature_privileges_naming: require('./rules/require_kibana_feature_privileges_naming'),
+    scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
   },
 };

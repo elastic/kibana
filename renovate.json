@@ -790,7 +790,7 @@
         "unified"
       ],
       "reviewers": [
-        "team:response-ops",
+        "team:kibana-cases",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3148,6 +3148,7 @@
         "ts-easing",
         "typescript-fsa",
         "typescript-fsa-reducers",
+        "type-fest",
         "unidiff"
       ],
       "reviewers": [
@@ -4313,17 +4314,30 @@
         "email-addresses",
         "json-stringify-safe",
         "murmurhash",
-        "mdast-util-to-hast",
-        "pretty-ms",
-        "p-settle",
-        "p-reflect",
-        "remark-stringify",
         "stats-lite",
-        "textarea-caret",
-        "type-fest"
+        "textarea-caret"
       ],
       "reviewers": [
         "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Kibana Cases misc dependencies",
+      "matchDepNames": [
+        "pretty-ms",
+        "remark-stringify"
+      ],
+      "reviewers": [
+        "team:kibana-cases"
       ],
       "matchBaseBranches": [
         "main"

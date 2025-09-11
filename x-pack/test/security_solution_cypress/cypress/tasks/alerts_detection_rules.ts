@@ -408,6 +408,14 @@ export const expectToContainRule = (
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
 };
 
+export const expectModifiedRuleBadgeToBeDisplayed = () => {
+  cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('exist');
+};
+
+export const expectModifiedRuleBadgeToNotBeDisplayed = () => {
+  cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('not.exist');
+};
+
 export const expectModifiedBadgeToBeDisplayed = () => {
   cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('exist');
 };

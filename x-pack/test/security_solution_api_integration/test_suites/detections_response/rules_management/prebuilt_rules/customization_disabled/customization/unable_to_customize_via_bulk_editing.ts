@@ -6,13 +6,13 @@
  */
 
 import expect from 'expect';
+import type { BulkActionEditPayload } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
-  BulkActionEditPayload,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { installMockPrebuiltRules } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return prebuiltRule;
   };
 
-  describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
+  describe('@ess @serverless @skipInServerless Customization under insufficient license', () => {
     const bulkEditingCases = [
       {
         type: BulkActionEditTypeEnum.add_tags,
