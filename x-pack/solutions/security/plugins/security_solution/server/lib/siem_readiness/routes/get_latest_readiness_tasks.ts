@@ -23,14 +23,11 @@ export interface TaskSource {
 interface EsHit<T = unknown> {
   _index: string;
   _id: string;
-  _score: number;
   _source: T;
 }
 
 interface TopHitsAggregation<T = unknown> {
   hits: {
-    total: { value: number; relation: string };
-    max_score: number;
     hits: EsHit<T>[];
   };
 }
@@ -42,8 +39,6 @@ interface TermsBucket<T = unknown> {
 }
 
 interface TermsAggregation<T = unknown> {
-  doc_count_error_upper_bound: number;
-  sum_other_doc_count: number;
   buckets: TermsBucket<T>[];
 }
 

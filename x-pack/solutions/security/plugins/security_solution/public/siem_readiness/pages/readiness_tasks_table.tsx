@@ -122,7 +122,7 @@ export const ReadinessTasksTable: React.FC = () => {
               }}
               extraAction={
                 <div style={{ paddingRight: euiTheme.size.base }}>
-                  <EuiBadge color={pillar.badgeColor}>{pillar.inputDisplay}</EuiBadge>
+                  <EuiBadge color={pillar?.badgeColor}>{pillar?.inputDisplay}</EuiBadge>
                   <EuiBadge color={taskData?.status === 'completed' ? 'success' : 'warning'}>
                     {taskData?.status || 'incomplete'}
                   </EuiBadge>
@@ -134,7 +134,7 @@ export const ReadinessTasksTable: React.FC = () => {
               </EuiText>
               {taskContent.actionButtonLabel && taskContent.action && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                  <EuiButton size="s" fill onClick={() => taskContent.action()}>
+                  <EuiButton size="s" fill onClick={() => taskContent.action?.()}>
                     {taskContent.actionButtonLabel}
                   </EuiButton>
                 </div>
