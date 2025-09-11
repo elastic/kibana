@@ -78,13 +78,7 @@ export const checkCancelPermission = (
   agentType: ResponseActionAgentType,
   command: ResponseActionsApiCommandNames
 ): boolean => {
-  if (!isCancelFeatureAvailable(authz, featureFlags, agentType)) {
-    return false;
-  }
-
-  if (!canUserCancelCommand(authz, command)) {
-    return false;
-  }
-
-  return true;
+  return (
+    isCancelFeatureAvailable(authz, featureFlags, agentType) && canUserCancelCommand(authz, command)
+  );
 };

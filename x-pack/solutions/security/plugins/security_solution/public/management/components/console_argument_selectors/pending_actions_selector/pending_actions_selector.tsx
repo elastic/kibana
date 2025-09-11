@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
 import { PENDING_ACTIONS_CONFIG, SHARED_TRUNCATION_STYLE } from '../shared/constants';
@@ -49,7 +49,7 @@ export const PendingActionsSelector = memo<
   CommandArgumentValueSelectorProps<
     string,
     PendingActionsSelectorState,
-    { agentType?: ResponseActionAgentType; endpointId?: string }
+    EndpointCommandDefinitionMeta
   >
 >(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
   const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg-${argIndex}`);
