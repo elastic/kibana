@@ -6,7 +6,7 @@
  */
 
 import { expect, type Page, type Locator } from '@playwright/test';
-import { DiscoverValidation } from './discover_validation';
+import { DiscoverValidationPage } from './discover_validation.page';
 
 export class KubernetesEAFlowPage {
   page: Page;
@@ -68,8 +68,8 @@ export class KubernetesEAFlowPage {
     await this.exploreLogsButton.click();
   }
 
-  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidation> {
+  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
     await this.exploreLogsButton.click();
-    return new DiscoverValidation(this.page);
+    return new DiscoverValidationPage(this.page);
   }
 }

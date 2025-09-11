@@ -61,6 +61,13 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
   if (!isLogsEssentialsMode) {
     await hostDetailsPage.assertCpuPercentageNotEmpty();
   } else {
-    await autoDetectFlowPage.assertLogsDataReceivedIndicator();
+    await autoDetectFlowPage.assertReceivedDataIndicator();
+    
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
   }
 });

@@ -66,8 +66,8 @@ test('Kubernetes EA', async ({
 
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
 
-    const { DiscoverValidation } = await import('./pom/pages/discover_validation');
-    const discoverValidation = new DiscoverValidation(page);
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
   }

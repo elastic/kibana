@@ -54,8 +54,8 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
 
-    const { DiscoverValidation } = await import('./pom/pages/discover_validation');
-    const discoverValidation = new DiscoverValidation(page);
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
     await discoverValidation.waitForDiscoverToLoad();
     await discoverValidation.assertHasAnyLogData();
   }

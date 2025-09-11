@@ -78,14 +78,15 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    */
   fs.writeFileSync(outputPath, codeSnippet);
 
+  /**
+   * There is no explicit data ingest indication
+   * in the flow, so we need to rely on a timeout.
+   * 5 minutes should be enough for the stack to be
+   * created and to start pushing data.
+   */
+  await page.waitForTimeout(5 * 60000);
+
   if (!isLogsEssentialsMode) {
-    /**
-     * There is no explicit data ingest indication
-     * in the flow, so we need to rely on a timeout.
-     * 5 minutes should be enough for the stack to be
-     * created and to start pushing data.
-     */
-    await page.waitForTimeout(5 * 60000);
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
     );
@@ -103,8 +104,6 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    await page.waitForTimeout(3 * 60000);
-
     const discoverValidation =
       await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
     await discoverValidation.waitForDiscoverToLoad();

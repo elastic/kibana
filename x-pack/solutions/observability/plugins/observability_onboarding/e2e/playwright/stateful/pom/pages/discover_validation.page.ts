@@ -7,14 +7,14 @@
 
 import { expect, type Page } from '@playwright/test';
 
-export class DiscoverValidation {
+export class DiscoverValidationPage {
   constructor(private page: Page) {}
 
   async waitForDiscoverToLoad() {
     await this.page.waitForLoadState('networkidle');
 
     // Wait for the histogram component to be fully rendered
-    await this.page.waitForSelector('[data-test-subj="unifiedHistogramRendered"]', {
+    await this.page.getByTestId('unifiedHistogramRendered').waitFor({
       timeout: 60000,
       state: 'visible',
     });
@@ -25,12 +25,8 @@ export class DiscoverValidation {
    * Checks for either histogram chart or query hits indicator.
    */
   async assertHasAnyLogData() {
-    const histogramExists = await this.page
-      .locator('[data-test-subj="unifiedHistogramChart"]')
-      .isVisible();
-    const queryHitsExists = await this.page
-      .locator('[data-test-subj="discoverQueryHits"]')
-      .isVisible();
+    const histogramExists = await this.page.getByTestId('unifiedHistogramChart').isVisible();
+    const queryHitsExists = await this.page.getByTestId('discoverQueryHits').isVisible();
 
     expect(
       histogramExists || queryHitsExists,
