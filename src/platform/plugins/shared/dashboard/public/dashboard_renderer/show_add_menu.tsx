@@ -12,9 +12,9 @@ import { v4 as uuidv4 } from 'uuid';
 import ReactDOM from 'react-dom';
 
 import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import { DefaultControlApi } from '@kbn/controls-plugin/public';
+import type { DefaultControlApi } from '@kbn/controls-plugin/public';
 import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -22,7 +22,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { executeAddLensPanelAction } from '../dashboard_actions/execute_add_lens_panel_action';
-import { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi } from '../dashboard_api/types';
 import {
   getAddControlButtonTitle,
   getControlButtonTitle,
