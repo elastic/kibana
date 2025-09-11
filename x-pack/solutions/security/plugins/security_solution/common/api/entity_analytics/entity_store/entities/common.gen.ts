@@ -34,13 +34,13 @@ export const EntityField = z.object({
   EngineMetadata: EngineMetadata.optional(),
   attributes: z
     .object({
-      Privileged: z.boolean().optional(),
+      privileged: z.boolean().optional(),
     })
     .optional(),
   behavior: z.object({}).optional(),
   lifecycle: z
     .object({
-      FirstSeen: z.string().datetime().optional(),
+      first_seen: z.string().datetime().optional(),
     })
     .optional(),
 });

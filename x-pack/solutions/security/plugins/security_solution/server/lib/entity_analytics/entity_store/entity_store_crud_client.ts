@@ -10,12 +10,25 @@ import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/cor
 import { getFlattenedObject } from '@kbn/std';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type {
+  Entity,
+  EntityField,
+} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
 import { getEntityUpdatesIndexName } from './elasticsearch_assets/updates_entity_index';
+
+interface CustomEntityFieldsAttributesHolder {
+  attributes?: Record<string, unknown>;
+  lifecycle?: Record<string, unknown>;
+  behavior?: Record<string, unknown>;
+}
+
+type CustomECSEntityField = EntityField & CustomEntityFieldsAttributesHolder;
+
+type CustomECSDocument = Entity & { entity: CustomECSEntityField };
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -46,7 +59,9 @@ export class EntityStoreCrudClient {
 
   public async upsertEntity(type: APIEntityType, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
-    const flatProps = getFlattenedObject(doc);
+
+    const normalizedDocToECS = normalizeToECS(doc);
+    const flatProps = getFlattenedObject(normalizedDocToECS);
 
     if (!force) {
       assertOnlyNonForcedAttributesInReq(flatProps);
@@ -55,6 +70,7 @@ export class EntityStoreCrudClient {
     this.logger.info(`Updating entity '${doc.entity.id}' (type ${type})`);
 
     const painlessUpdate = buildUpdateEntityPainlessScript(flatProps);
+
     if (!painlessUpdate) {
       throw new BadCRUDRequestError(`The request doesn't contain any update`);
     }
@@ -79,15 +95,7 @@ export class EntityStoreCrudClient {
     await this.esClient.create({
       id: uuidv4(),
       index: getEntityUpdatesIndexName(type, this.namespace),
-      document: {
-        '@timestamp': new Date().toISOString(),
-        [type]: {
-          name: doc.entity.id,
-          entity: {
-            ...doc.entity,
-          },
-        },
-      },
+      document: buildDocumentToUpdate(type, normalizedDocToECS),
     });
   }
 
@@ -126,4 +134,72 @@ function isPropAllowed(prop: string) {
   }
 
   return false;
+}
+
+function normalizeToECS(doc: Entity): CustomECSDocument {
+  const normalizedDoc = { ...doc }; // create copy
+
+  const { attributes, lifecycle, behavior } = doc.entity;
+  const objsToCheck = { attributes, lifecycle, behavior };
+  for (const key of Object.keys(objsToCheck)) {
+    const typedKey = key as keyof typeof objsToCheck;
+    const value = objsToCheck[typedKey];
+    if (value) {
+      normalizedDoc.entity[typedKey] = convertFieldsToCustomECS(value);
+    }
+  }
+
+  return normalizedDoc;
+}
+
+function convertFieldsToCustomECS(
+  obj?: Record<string, unknown>
+): Record<string, unknown> | undefined {
+  if (!obj) {
+    return undefined;
+  }
+
+  const customECSFormatObj: Record<string, unknown> = {};
+  const keys = Object.keys(obj);
+  for (const key of keys) {
+    customECSFormatObj[convertToECSCustomFormat(key)] = obj[key];
+  }
+
+  return customECSFormatObj;
+}
+
+function convertToECSCustomFormat(key: string): string {
+  // assuming we are getting a key in snake case;
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function buildDocumentToUpdate(type: APIEntityType, data: Partial<CustomECSDocument>) {
+  if (type === 'generic') {
+    return {
+      '@timestamp': new Date().toISOString(),
+      ...data,
+    };
+  }
+
+  // Get host, user, service field
+  const typeData = (data[type as keyof typeof data] || {}) as Record<string, unknown>;
+
+  // Force name to be picked by the store
+  typeData.name = data.entity?.id;
+  // Nest entity under type data
+  typeData.entity = data.entity;
+
+  const doc: Record<string, unknown> = {
+    '@timestamp': new Date().toISOString(),
+    ...data,
+  };
+
+  // Remove entity from root
+  delete doc.entity;
+
+  // override the host, user service
+  // field with the built value
+  doc[type as keyof typeof doc] = typeData;
+
+  return doc;
 }

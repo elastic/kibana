@@ -57,7 +57,7 @@ describe('EntityStoreCrudClient', () => {
           type: 'update',
           sub_type: 'updated-sub',
           attributes: {
-            Privileged: true,
+            privileged: true,
           },
         },
       };
@@ -78,10 +78,10 @@ describe('EntityStoreCrudClient', () => {
         entity: {
           id: 'host-1',
           attributes: {
-            Privileged: true,
+            privileged: true,
           },
           lifecycle: {
-            FirstSeen: new Date().toISOString(),
+            first_seen: new Date().toISOString(),
           },
         },
       };
@@ -107,10 +107,10 @@ describe('EntityStoreCrudClient', () => {
         entity: {
           id: 'host-1',
           attributes: {
-            Privileged: true,
+            privileged: true,
           },
           lifecycle: {
-            FirstSeen: '1995-12-17T03:24:00',
+            first_seen: '1995-12-17T03:24:00',
           },
         },
       };
@@ -132,7 +132,7 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;` +
             `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['FirstSeen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
         },
       });
 
@@ -144,7 +144,83 @@ describe('EntityStoreCrudClient', () => {
           host: {
             name: 'host-1',
             entity: {
-              ...doc.entity,
+              id: 'host-1',
+              attributes: {
+                Privileged: true,
+              },
+              lifecycle: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                First_seen: '1995-12-17T03:24:00',
+              },
+            },
+          },
+        },
+      });
+
+      expect(v4Spy).toBeCalledTimes(1);
+    });
+
+    it('when valid update entity for generic type', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      // overly complex mock implementation to work around type issues
+      // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
+      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+
+      const doc: Entity = {
+        entity: {
+          id: 'database-1',
+          name: 'mysql-db',
+          attributes: {
+            privileged: false,
+          },
+          lifecycle: {
+            first_seen: '1995-12-17T03:24:00',
+          },
+        },
+      };
+
+      await client.upsertEntity('generic', doc, true);
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('generic');
+      expect(esClientMock.updateByQuery).toBeCalledWith({
+        index: '.entities.v1.latest.security_generic_default',
+        query: {
+          term: {
+            'entity.id': 'database-1',
+          },
+        },
+        script: {
+          lang: 'painless',
+          source:
+            `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
+            `ctx._source['entity']['name'] = 'mysql-db';` +
+            `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
+            `ctx._source['entity']['attributes']['Privileged'] = false;` +
+            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
+            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
+        },
+      });
+
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v1.updates.security_generic_default',
+        id: '123',
+        document: {
+          '@timestamp': mockedDate.toISOString(),
+          entity: {
+            id: 'database-1',
+            name: 'mysql-db',
+            attributes: {
+              Privileged: false,
+            },
+            lifecycle: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              First_seen: '1995-12-17T03:24:00',
             },
           },
         },
@@ -173,10 +249,10 @@ describe('EntityStoreCrudClient', () => {
         entity: {
           id: 'host-1',
           attributes: {
-            Privileged: true,
+            privileged: true,
           },
           lifecycle: {
-            FirstSeen: '1995-12-17T03:24:00',
+            first_seen: '1995-12-17T03:24:00',
           },
         },
       };
@@ -201,7 +277,7 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;` +
             `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['FirstSeen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
         },
       });
 
@@ -211,9 +287,17 @@ describe('EntityStoreCrudClient', () => {
         document: {
           '@timestamp': mockedDate.toISOString(),
           host: {
+            id: ['123'],
             name: 'host-1',
             entity: {
-              ...doc.entity,
+              id: 'host-1',
+              attributes: {
+                Privileged: true,
+              },
+              lifecycle: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                First_seen: '1995-12-17T03:24:00',
+              },
             },
           },
         },

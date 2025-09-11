@@ -21,7 +21,7 @@ Object {
         "host.entity.attributes.Privileged": Object {
           "type": "keyword",
         },
-        "host.entity.lifecycle.FirstSeen": Object {
+        "host.entity.lifecycle.First_seen": Object {
           "type": "keyword",
         },
         "host.entity.name": Object {
