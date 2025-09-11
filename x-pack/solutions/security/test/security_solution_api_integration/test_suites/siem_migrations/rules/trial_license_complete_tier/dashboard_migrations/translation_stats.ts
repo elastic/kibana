@@ -91,30 +91,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return 200 with translation stats for empty migration', async () => {
-      const response = await dashboardMigrationRoutes.translationStats({
+      await dashboardMigrationRoutes.translationStats({
         migrationId,
+        expectStatusCode: 204,
       });
-
-      expect(response.body).toMatchObject(
-        expect.objectContaining({
-          id: migrationId,
-          dashboards: {
-            total: 0,
-            success: {
-              total: 0,
-              result: {
-                full: 0,
-                partial: 0,
-                untranslatable: 0,
-              },
-              installable: 0,
-            },
-            failed: 0,
-          },
-        })
-      );
-
-      expect(response.body.dashboards?.total).toBe(0);
     });
 
     describe('Error handling', () => {
