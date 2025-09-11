@@ -13,7 +13,7 @@ const validTaskIds = READINESS_TASKS.map((config) => config.id);
 const validStatuses: SiemReadinessTask['status'][] = ['completed', 'incomplete'];
 
 export const validateTask = (task: SiemReadinessTask): void => {
-  const taskConfig: ReadinessTaskConfig = READINESS_TASKS.find(
+  const taskConfig: ReadinessTaskConfig | undefined = READINESS_TASKS.find(
     (config) => config.id === task.task_id
   );
 
