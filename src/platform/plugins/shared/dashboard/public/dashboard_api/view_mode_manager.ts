@@ -9,7 +9,10 @@
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
+import { coreServices } from '../services/kibana_services';
+import { CONTENT_ID } from '../../common/content_management';
+import { getAccessControlClient } from '../services/access_control_service';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -19,8 +22,24 @@ export function initializeViewModeManager(
   savedObjectResult?: LoadDashboardReturn
 ) {
   const dashboardBackupService = getDashboardBackupService();
-  function getInitialViewMode() {
-    if (savedObjectResult?.managed || !getDashboardCapabilities().showWriteControls) {
+  const accessControlClient = getAccessControlClient();
+
+  const viewMode$ = new BehaviorSubject<ViewMode>('view');
+
+  async function resolveInitialViewMode(): Promise<ViewMode> {
+    const user = await coreServices?.userProfile.getCurrent();
+    const canManageDashboard = await accessControlClient.canManageAccessControl({
+      accessControl: savedObjectResult?.accessControl,
+      createdBy: savedObjectResult?.createdBy,
+      uid: user?.uid,
+      contentTypeId: CONTENT_ID,
+    });
+
+    if (
+      savedObjectResult?.managed ||
+      !getDashboardCapabilities().showWriteControls ||
+      !canManageDashboard
+    ) {
       return 'view';
     }
 
@@ -28,13 +47,14 @@ export function initializeViewModeManager(
       incomingEmbeddable ||
       savedObjectResult?.newDashboardCreated ||
       dashboardBackupService.dashboardHasUnsavedEdits(savedObjectResult?.dashboardId)
-    )
+    ) {
       return 'edit';
+    }
 
     return dashboardBackupService.getViewMode();
   }
 
-  const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
+  from(resolveInitialViewMode()).subscribe((mode) => viewMode$.next(mode));
 
   function setViewMode(viewMode: ViewMode) {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
