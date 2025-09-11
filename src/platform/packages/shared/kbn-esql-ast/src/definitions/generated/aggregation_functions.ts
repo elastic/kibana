@@ -1898,6 +1898,7 @@ const presentDefinition: FunctionDefinition = {
   examples: [
     'FROM employees\n| STATS is_present = PRESENT(languages)',
     'FROM employees\n| STATS is_present = PRESENT(salary) BY languages',
+    'FROM employees\n| WHERE emp_no == 10020\n| STATS is_present = TO_INTEGER(PRESENT(languages))',
   ],
 };
 

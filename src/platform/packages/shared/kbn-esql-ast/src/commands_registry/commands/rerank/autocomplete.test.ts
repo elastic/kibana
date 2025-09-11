@@ -11,7 +11,14 @@ import {
   lookupIndexFields,
   getMockCallbacks,
 } from '../../../__tests__/context_fixtures';
-import { autocomplete } from './autocomplete';
+import { autocomplete, buildNextActions } from './autocomplete';
+import {
+  onCompleteItem,
+  pipeCompleteItem,
+  commaCompleteItem,
+  withCompleteItem,
+  assignCompletionItem,
+} from '../../complete_items';
 import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 
@@ -19,15 +26,19 @@ import type { ICommandCallbacks } from '../../types';
 // Test Constants and Suggestions
 // ============================================================================
 
+const nextActions = buildNextActions({ includeBinaryOperators: true });
+
 const SUGGESTION_TOKENS = {
   QUERY_LITERAL: '"${0:Your search query.}"',
-  ON_KEYWORD: 'ON ',
-  PIPE: '| ',
-  COMMA_SPACE: ', ',
-  ASSIGNMENT: ' = ',
-  WITH_CLAUSE: 'WITH { $0 }',
-  AND_OPERATOR: ' AND ',
-  OR_OPERATOR: ' OR ',
+  ON_KEYWORD: onCompleteItem.text,
+  PIPE: pipeCompleteItem.text,
+  COMMA_SPACE: commaCompleteItem.text.endsWith(' ')
+    ? commaCompleteItem.text
+    : `${commaCompleteItem.text} `,
+  ASSIGNMENT: assignCompletionItem.text,
+  WITH_CLAUSE: withCompleteItem.text,
+  AND_OPERATOR: nextActions[3].label + ' ',
+  OR_OPERATOR: nextActions[4].label + ' ',
   INFERENCE_ID_KEY: '"inference_id": "$0"',
   INFERENCE_ENDPOINT: 'inference_1',
 } as const;
@@ -80,7 +91,7 @@ const buildRerankQuery = (components: QueryComponents): string => {
     query += ` ${components.targetField}`;
   }
 
-  if (components.targetAssignment) {
+  if (components.targetAssignment !== undefined) {
     query += ` = ${components.targetAssignment}`;
   }
 
@@ -202,6 +213,14 @@ describe('RERANK Autocomplete', () => {
   // ============================================================================
 
   describe('Field selection and continuations', () => {
+    test('suggests fields after ON and space', async () => {
+      const query = buildRerankQuery({ query: '"search query"' }) + ' on ';
+
+      await expectRerankSuggestions(query, {
+        contains: ['textField', 'keywordField', 'integerField'],
+      });
+    });
+
     test('suggests field continuations after selecting a field', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'textField' });
 
@@ -216,6 +235,14 @@ describe('RERANK Autocomplete', () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'textField' }) + ' ';
 
       await expectRerankSuggestions(query, SUGGESTION_GROUPS.FIELD_CONTINUATIONS);
+    });
+
+    test('suggests assignment operator after user-defined column with space', async () => {
+      const query = buildRerankQuery({ query: '"search query"', onClause: 'col0' }) + ' ';
+
+      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+
+      await expectRerankSuggestions(query, [SUGGESTION_TOKENS.ASSIGNMENT], mockCallbacks);
     });
   });
 
@@ -396,6 +423,18 @@ describe('RERANK Autocomplete', () => {
     });
   });
 
+  test('shows exit operators after field in list following boolean expressions', async () => {
+    const query =
+      buildRerankQuery({
+        query: '"search query"',
+        onClause: 'col0 = TRUE, textField',
+      }) + ' '; // multiple spaces
+
+    await expectRerankSuggestions(query, {
+      contains: SUGGESTION_GROUPS.FIELD_CONTINUATIONS,
+      notContains: ['keywordField', 'integerField'],
+    });
+  });
   // ============================================================================
   // Parrtial Input
   // ============================================================================
