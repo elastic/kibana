@@ -16,6 +16,7 @@ _search_ai_lake_analyst:
         - "read"
         - "view_index_metadata"
         - "write"
+        - "maintenance"
     - names:
         - ".siem-signals-*"
         - ".preview.alerts-security*"
