@@ -212,20 +212,20 @@ function argMatchesParamType(
   givenIsLiteral: boolean,
   acceptUnknown: boolean
 ): boolean {
-  if (givenType === expectedType) return true;
-
-  if (expectedType === 'any') return true;
-
-  if (givenType === 'param') return true;
+  if (
+    givenType === expectedType ||
+    expectedType === 'any' ||
+    givenType === 'param' ||
+    // all ES|QL functions accept null, but this is not reflected
+    // in our function definitions so we let it through here
+    givenType === 'null' ||
+    // all functions accept keywords for text parameters
+    bothStringTypes(givenType, expectedType)
+  ) {
+    return true;
+  }
 
   if (givenType === 'unknown') return acceptUnknown;
-
-  // all ES|QL functions accept null, but this is not reflected
-  // in our function definitions so we let it through here
-  if (givenType === 'null') return true;
-
-  // all functions accept keywords for text parameters
-  if (bothStringTypes(givenType, expectedType)) return true;
 
   if (
     givenIsLiteral &&
