@@ -84,45 +84,6 @@ import {
  * Specialized function signatures for transforming metric API operations to Lens state columns
  */
 export function fromMetricAPItoLensState(
-  options: LensApiCountMetricOperation
-): [CountIndexPatternColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiUniqueCountMetricOperation
-): [CardinalityIndexPatternColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiMetricOperation
-): [
-  | StandardDeviationIndexPatternColumn
-  | MinIndexPatternColumn
-  | MaxIndexPatternColumn
-  | AvgIndexPatternColumn
-  | MedianIndexPatternColumn
-];
-export function fromMetricAPItoLensState(
-  options: LensApiSumMetricOperation
-): [SumIndexPatternColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiStaticValueOperation
-): [StaticValueIndexPatternColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiFormulaOperation
-): [FormulaIndexPatternColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiLastValueOperation
-): [LastValueIndexPatternColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiMovingAverageOperation
-): [MovingAverageIndexPatternColumn, ReferableMetricLensStateColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiCounterRateOperation
-): [CounterRateIndexPatternColumn, ReferableMetricLensStateColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiCumulativeSumOperation
-): [CumulativeSumIndexPatternColumn, ReferableMetricLensStateColumn];
-export function fromMetricAPItoLensState(
-  options: LensApiDifferencesOperation
-): [DerivativeIndexPatternColumn, ReferableMetricLensStateColumn];
-export function fromMetricAPItoLensState(
   options: LensApiAllMetricOperations
 ): AnyMetricLensStateColumn[] {
   if (isAPIColumnOfType<LensApiCountMetricOperation>('count', options)) {
@@ -160,7 +121,6 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiMovingAverageOperation>('moving_average', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      // @ts-expect-error
       const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
       return [
         fromMovingAverageAPItoLensState(options, {
@@ -201,7 +161,6 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiDifferencesOperation>('differences', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      // @ts-expect-error
       const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
       return [
         fromDifferencesAPItoLensState(options, {

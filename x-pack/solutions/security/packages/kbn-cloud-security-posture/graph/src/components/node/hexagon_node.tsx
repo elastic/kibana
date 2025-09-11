@@ -23,7 +23,7 @@ import { HexagonHoverShape, HexagonShape } from './shapes/hexagon_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
-import { GRAPH_ENTITY_NODE_ID } from '../test_ids';
+import { GRAPH_ENTITY_NODE_HOVER_SHAPE_ID, GRAPH_ENTITY_NODE_ID } from '../test_ids';
 
 const NODE_SHAPE_WIDTH = 87;
 const NODE_SHAPE_HEIGHT = 96;
@@ -49,6 +49,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
       <NodeShapeContainer>
         {interactive && (
           <NodeShapeOnHoverSvg
+            data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
             width={NODE_SHAPE_WIDTH}
             height={NODE_SHAPE_HEIGHT}
             viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
