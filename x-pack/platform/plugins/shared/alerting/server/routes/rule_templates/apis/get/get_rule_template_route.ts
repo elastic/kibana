@@ -58,9 +58,6 @@ export const getInternalRuleTemplateRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const params: GetRuleTemplateRequestParamsV1 = req.params;
 
-        // TODO
-        // TODO (http-versioning): Remove this cast, this enables us to move forward
-        // without fixing all of other solution types
         const ruleTemplate = await rulesClient.getTemplate({
           id: params.id,
         });
