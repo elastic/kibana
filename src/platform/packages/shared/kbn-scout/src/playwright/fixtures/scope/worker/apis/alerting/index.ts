@@ -240,13 +240,12 @@ export const getAlertingApiHelper = (
           log,
           `alertingApi.rules.delete [${ruleId}]`,
           async () => {
-            const response = await kbnClient.request({
+            await kbnClient.request({
               method: 'DELETE',
               path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}`,
               retries: 0,
               ignoreErrors: [204, 404],
             });
-            log.debug('Delete response:', response);
           }
         );
       },
