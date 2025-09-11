@@ -53,16 +53,54 @@ export const isAgentlessIntegration = (
   integrationToEnable?: string
 ) => {
   if (integrationToEnable) {
-    return Boolean(
-      packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
-        ?.deployment_modes?.agentless?.enabled === true
+    const integration = packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable);
+    
+    if (!integration) {
+      return false;
+    }
+
+    // If deployment_modes is explicitly declared, use it
+    if (integration.deployment_modes) {
+      return integration.deployment_modes.agentless?.enabled === true;
+    }
+
+    // Backward compatibility: check if any inputs in this integration support agentless
+    const inputs = extractRegistryInputsForDeploymentMode(packageInfo);
+    const integrationInputs = inputs.filter(input => input.policy_template === integrationToEnable);
+    
+    if (integrationInputs.length > 0) {
+      return integrationInputs.some(input => 
+        input.deployment_modes && 
+        Array.isArray(input.deployment_modes) && 
+        input.deployment_modes.includes('agentless')
+      );
+    }
+
+    // If no inputs found for this integration, fall back to checking all inputs
+    return inputs.some(input => 
+      input.deployment_modes && 
+      Array.isArray(input.deployment_modes) && 
+      input.deployment_modes.includes('agentless')
     );
   }
 
-  return Boolean(
+  // Check if any policy template explicitly supports agentless
+  const hasExplicitAgentlessSupport = Boolean(
     packageInfo?.policy_templates?.some(
       (policyTemplate) => policyTemplate?.deployment_modes?.agentless?.enabled === true
     )
+  );
+
+  if (hasExplicitAgentlessSupport) {
+    return true;
+  }
+
+  // Backward compatibility: check if any inputs support agentless
+  const inputs = extractRegistryInputsForDeploymentMode(packageInfo);
+  return inputs.some(input => 
+    input.deployment_modes && 
+    Array.isArray(input.deployment_modes) && 
+    input.deployment_modes.includes('agentless')
   );
 };
 
@@ -113,11 +151,12 @@ export function isInputAllowedForDeploymentMode(
     return true;
   }
 
-  // Check first if policy_template for input supports the deployment type
+  // Check if policy_template for input explicitly disallows the deployment type
+  // Only block if the policy template explicitly declares the deployment mode as disabled
   if (
     packageInfo &&
     input.policy_template &&
-    !integrationSupportsDeploymentMode(deploymentMode, packageInfo, input.policy_template)
+    isExplicitlyDisabledForDeploymentMode(deploymentMode, packageInfo, input.policy_template)
   ) {
     return false;
   }
@@ -160,6 +199,29 @@ const integrationSupportsDeploymentMode = (
   }
 
   return true;
+};
+
+const isExplicitlyDisabledForDeploymentMode = (
+  deploymentMode: string,
+  packageInfo: PackageInfo,
+  integrationName: string
+) => {
+  const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
+
+  if (!integration?.deployment_modes) {
+    // If no deployment_modes are specified, don't block at policy template level
+    return false;
+  }
+
+  if (deploymentMode === 'agentless') {
+    return integration.deployment_modes?.agentless?.enabled === false;
+  }
+
+  if (deploymentMode === 'default') {
+    return integration.deployment_modes?.default?.enabled === false;
+  }
+
+  return false;
 };
 
 /*
