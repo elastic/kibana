@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(deleteResult).toEqual({ id: createdSchedule.id });
 
         // Check that schedule has been deleted
-        checkIfScheduleDoesNotExist({
+        await checkIfScheduleDoesNotExist({
           getService,
           id: createdSchedule.id,
           kibanaSpace: kibanaSpace1,
@@ -85,7 +85,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
 
-        checkIfScheduleExists({ getService, id: createdSchedule.id, kibanaSpace: kibanaSpace1 });
+        await checkIfScheduleExists({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
       });
 
       it('should not be able to delete a schedule in a space without kibana privileges for that space', async () => {
@@ -106,7 +110,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
 
-        checkIfScheduleExists({ getService, id: createdSchedule.id, kibanaSpace: kibanaSpace1 });
+        await checkIfScheduleExists({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
       });
     });
   });

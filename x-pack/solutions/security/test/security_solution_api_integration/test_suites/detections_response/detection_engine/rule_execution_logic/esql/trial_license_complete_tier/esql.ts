@@ -691,7 +691,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -935,7 +935,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1014,7 +1014,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1076,7 +1076,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
