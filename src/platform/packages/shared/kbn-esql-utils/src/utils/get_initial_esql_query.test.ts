@@ -122,8 +122,8 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@custom_timestamp');
-    expect(getInitialESQLQuery(dataView, { language: 'kuery', query: 'error' })).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""") | LIMIT 10'
+    expect(getInitialESQLQuery(dataView, true, { language: 'kuery', query: 'error' })).toBe(
+      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""")'
     );
   });
 
@@ -147,7 +147,7 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
-    expect(getInitialESQLQuery(dataView, { language: 'lucene', query: 'error' })).toBe(
+    expect(getInitialESQLQuery(dataView, false, { language: 'lucene', query: 'error' })).toBe(
       'FROM logs* | WHERE QSTR("""error""") | LIMIT 10'
     );
   });
@@ -172,8 +172,8 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
-    expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' })).toBe(
-      'FROM logs* | LIMIT 10'
+    expect(getInitialESQLQuery(dataView, true, { language: 'unknown', query: 'error' })).toBe(
+      'FROM logs*'
     );
   });
 });
