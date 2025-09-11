@@ -85,15 +85,14 @@ function isTextBasedLayer(
 /**
  * Builds dataset state from the layer configuration
  *
- * @param layer
- * @returns
+ * @param layer Lens State Layer
+ * @returns Lens API Dataset configuration
  */
 export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer) => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
-      index: layer.index,
-      query: layer.query,
+      query: layer.query?.esql ?? '',
     };
   }
   return {
@@ -193,15 +192,12 @@ function buildDatasourceStatesLayer(
   ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(config, i);
 
-    const newLayer = {
+    return {
       index: index.index,
       query: { esql: ds.query },
       timeField: '@timestamp',
       columns,
-      allColumns: columns,
     };
-
-    return newLayer;
   }
 
   if (dataset.type === 'esql') {
@@ -223,7 +219,7 @@ function buildDatasourceStatesLayer(
  * @returns lens datasource states
  *
  */
-export const buildDatasourceStates = async (
+export const buildDatasourceStates = (
   config: LensApiState,
   dataviews: Record<string, { index: string; timeFieldName: string }>,
   buildFormulaLayers: (
@@ -330,10 +326,36 @@ export const generateLayer = (
   };
 };
 
-export type DeepMutable<T> = {
-  -readonly [P in keyof T]: T[P] extends object
-    ? T[P] extends (...args: any[]) => any
-      ? T[P] // don't mutate functions
-      : DeepMutable<T[P]>
-    : T[P];
+export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBasedLayer) => {
+  if (!('columnOrder' in options)) {
+    return {
+      sampling: 1,
+      ignore_global_filters: true,
+    };
+  }
+
+  return {
+    sampling: options.sampling,
+    ignore_global_filters: options.ignoreGlobalFilters,
+  };
 };
+
+export type DeepMutable<T> = T extends (...args: never[]) => unknown
+  ? T // don't mutate functions
+  : T extends ReadonlyArray<infer U>
+  ? DeepMutable<U>[] // handle readonly arrays
+  : T extends object
+  ? {
+      -readonly [P in keyof T]: DeepMutable<T[P]>;
+    }
+  : T;
+
+export type DeepPartial<T> = T extends (...args: never[]) => unknown
+  ? T // don't mutate functions
+  : T extends ReadonlyArray<infer U>
+  ? DeepPartial<U>[] // handle readonly arrays
+  : T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;

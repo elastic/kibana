@@ -318,6 +318,25 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams, schedule: scheduleToUse });
   };
 
+  const scheduleCsvWithNotification = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    notification: { email: { to: string[] } } = { email: { to: ['test@test.com'] } },
+    startedAt?: string
+  ) => {
+    const jobParams = rison.encode(job);
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule: scheduleToUse, notification });
+  };
+
   /**
    * Methods for various Reporting API operations.
    */
@@ -476,6 +495,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     );
   };
 
+  const runTelemetryTask = async () => {
+    return await supertest
+      .post(`/api/reporting_fixture_telemetry/run_soon`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ taskId: 'Reporting-reporting_telemetry' })
+      .expect(200);
+  };
+
   return {
     logTaskManagerHealth,
     initEcommerce,
@@ -504,6 +531,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     schedulePdf,
     schedulePng,
     scheduleCsv,
+    scheduleCsvWithNotification,
     listReports,
     postJob,
     postJobJSON,
@@ -519,5 +547,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     deleteTasks,
     listScheduledReports,
     disableScheduledReports,
+    runTelemetryTask,
   };
 }
