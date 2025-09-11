@@ -13,6 +13,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
+import { flow } from 'lodash';
 import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
 import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
@@ -29,6 +30,11 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 function getTaskId(namespace: string, entityType: EntityType): string {
   return `${TYPE}:${entityType}:${namespace}:${VERSION}`;
 }
+
+const removeNewlines = (content: string) => content.replace(/\n/g, '');
+const condenseMultipleSpaces = (content: string) => content.replace(/\s+/g, ' ');
+const removeComments = (content: string) => content.replace(/\/\/.*/g, '');
+const minifyPainless = flow(removeComments, removeNewlines, condenseMultipleSpaces);
 
 export function registerEntityStoreSnapshotTask({
   logger,
@@ -138,7 +144,7 @@ export async function removeEntityStoreSnapshotTask({
 // removeAllFieldsAndResetTimestamp is a painless function that takes a document,
 // strips it of all its fields (except for identity fields, like host.name or entity.id),
 // and sets the timestamps to @now. The result is used as a script in reindex operation.
-const removeAllFieldsAndResetTimestamp: string = `
+const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
     // Create a new map to hold the filtered fields
     Map newDoc = new HashMap();
 
@@ -161,7 +167,7 @@ const removeAllFieldsAndResetTimestamp: string = `
 
     // Replace the existing document with the new filtered document
     ctx._source = newDoc;
-    `;
+    `);
 
 export async function runTask({
   logger,
