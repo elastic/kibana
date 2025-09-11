@@ -36,17 +36,9 @@ const ORPHAN_CONTENT = i18n.translate(
   }
 );
 
-export function BarDetails({
-  item,
-  left,
-  onErrorClick,
-}: {
-  item: TraceWaterfallItem;
-  left: number;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
-}) {
+export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
   const viewRelatedErrorsLabel = i18n.translate(
@@ -125,7 +117,11 @@ export function BarDetails({
                   if (onErrorClick) {
                     e.preventDefault();
                     e.stopPropagation();
-                    onErrorClick({ traceId: item.traceId, docId: item.id });
+                    onErrorClick({
+                      traceId: item.traceId,
+                      docId: item.id,
+                      errorCount: item.errorCount,
+                    });
                   }
                 }}
               />

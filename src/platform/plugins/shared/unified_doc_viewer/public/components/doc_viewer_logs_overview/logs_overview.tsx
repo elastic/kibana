@@ -43,6 +43,7 @@ export type LogsOverviewProps = DocViewRenderProps & {
   renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   indexes: TraceIndexes;
+  showTraceWaterfall?: boolean;
 };
 
 export interface LogsOverviewApi {
@@ -63,6 +64,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
       indexes,
+      showTraceWaterfall,
     },
     ref
   ) => {
@@ -131,7 +133,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               dataView={dataView}
             />
           )}
-          {parsedDoc[TRACE_ID_FIELD] ? (
+          {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
             <DataSourcesProvider indexes={indexes}>
               <TraceWaterfall
                 traceId={parsedDoc[TRACE_ID_FIELD]}

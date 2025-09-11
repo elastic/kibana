@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,14 +17,13 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { where } from '@kbn/esql-composer';
-import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { SpanFlyout } from './span_flyout';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import React, { useCallback, useRef, useState } from 'react';
 import { ExitFullScreenButton } from './exit_full_screen_button';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { LogsFlyout } from './logs_flyout';
+import { SpanFlyout } from './span_flyout';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -46,22 +43,10 @@ export const FullScreenWaterfall = ({
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
   const [spanId, setSpanId] = useState<string | null>(null);
+  const [isLogsFlyoutVisible, setIsLogsFlyoutVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { indexes } = useDataSourcesContext();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
-    indexPattern: [indexes.apm.errors, indexes.logs],
-  });
-
-  const generateRelatedErrorsDiscoverUrl = useCallback(
-    (docId: string) => {
-      return generateDiscoverLink(
-        where(`QSTR("${TRACE_ID_FIELD}:${traceId} AND ${SPAN_ID_FIELD}:${docId}")`)
-      );
-    },
-    [generateDiscoverLink, traceId]
-  );
 
   const getParentApi = useCallback(
     () => ({
@@ -72,7 +57,10 @@ export const FullScreenWaterfall = ({
           rangeTo,
           serviceName,
           scrollElement: overlayMaskRef.current,
-          getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
+          onErrorClick: (params: { traceId: string; docId: string; errorCount: number }) => {
+            setIsLogsFlyoutVisible(true);
+            setSpanId(params.docId);
+          },
           onNodeClick: (nodeSpanId: string) => {
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
@@ -81,7 +69,7 @@ export const FullScreenWaterfall = ({
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, serviceName, generateRelatedErrorsDiscoverUrl]
+    [traceId, rangeFrom, rangeTo, serviceName]
   );
 
   return (
@@ -147,6 +135,14 @@ export const FullScreenWaterfall = ({
           />
         </EuiFocusTrap>
       )}
+      {isLogsFlyoutVisible && spanId ? (
+        <LogsFlyout
+          onCloseFlyout={() => setIsLogsFlyoutVisible(false)}
+          traceId={traceId}
+          docId={spanId}
+          dataView={dataView}
+        />
+      ) : null}
     </>
   );
 };

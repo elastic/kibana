@@ -62,6 +62,11 @@ describe('BarDetails', () => {
   });
 
   describe('in case of errors', () => {
+    beforeAll(() => {
+      (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+        onErrorClick: () => {},
+      });
+    });
     it('renders errors icon in case of errors', () => {
       const mockItemWithError = {
         name: 'Test Span',
@@ -79,9 +84,7 @@ describe('BarDetails', () => {
           duration: 1234,
           errorCount: 1,
         } as unknown as TraceWaterfallItem;
-        const { getByTestId } = render(
-          <BarDetails item={mockItemWithError} left={10} onErrorClick={() => {}} />
-        );
+        const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
         expect(getByTestId('apmBarDetailsErrorButton')).toBeInTheDocument();
       });
     });
