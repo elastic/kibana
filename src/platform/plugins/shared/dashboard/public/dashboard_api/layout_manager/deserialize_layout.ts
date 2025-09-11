@@ -19,7 +19,6 @@ export function deserializeLayout(
   references: Reference[],
   getReferences: (id: string) => Reference[]
 ) {
-  if (typeof initialControls === 'function') debugger;
   // console.log({ panels, initialControls });
   const layout: DashboardLayout = {
     panels: {},
@@ -33,12 +32,10 @@ export function deserializeLayout(
   };
   const childState: DashboardChildState = {
     ...Object.values((initialControls ?? { controls: {} }).controls).reduce((prev, control) => {
-      // console.log('REFS', references, getReferencesForControls(references, control.id));
       return {
         ...prev,
         [control.id ?? v4()]: {
-          rawState: control.controlConfig,
-          references: control.id ? getReferencesForControls(references, control.id) : [],
+          rawState: control,
         },
       };
     }, {}),

@@ -29,6 +29,7 @@ import type { ControlState } from '@kbn/controls-schemas';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 
 import { ControlPanel } from './components/control_panel';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 export const ControlsRenderer = ({
   parentApi,
@@ -39,6 +40,7 @@ export const ControlsRenderer = ({
     [controlId: string]: ControlState;
   };
 }) => {
+  console.log({ parentApi });
   const controlsInOrder = Object.values(getInitialState()).sort((controlA, controlB) => {
     return controlA.order - controlB.order;
   });
@@ -65,7 +67,6 @@ export const ControlsRenderer = ({
 
   return (
     <EuiPanel
-      css={styles.panel}
       borderRadius="m"
       paddingSize="none"
       color={draggingId ? 'success' : 'transparent'}
@@ -98,8 +99,15 @@ export const ControlsRenderer = ({
                 gutterSize="s"
                 wrap={true}
               >
-                {controlsInOrder.map(({ id, type }) => (
-                  <ControlPanel type={type} uuid={id!} parentApi={parentApi} />
+                {controlsInOrder.map(({ id, type, grow, width }) => (
+                  <ControlPanel
+                    key={id}
+                    type={type}
+                    uuid={id!}
+                    grow={grow ?? DEFAULT_CONTROL_GROW}
+                    width={width ?? DEFAULT_CONTROL_WIDTH}
+                    parentApi={parentApi}
+                  />
                 ))}
               </EuiFlexGroup>
             </SortableContext>
@@ -131,12 +139,4 @@ export const ControlsRenderer = ({
   //     hidePanelChrome
   //   />
   // ));
-};
-
-const styles = {
-  panel: css({
-    display: 'flex',
-    alignItems: 'center',
-  }),
-  autoApply: css({ alignSelf: 'end' }),
 };
