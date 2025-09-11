@@ -79,6 +79,7 @@ Object {
 exports[`Agent policies fleet_agent_policies POST /api/fleet/agent_policies/_bulk_get should populate package_policies if called with ?full=true 1`] = `
 Object {
   "agents": 0,
+  "fips_agents": 0,
   "inactivity_timeout": 1209600,
   "is_managed": false,
   "is_protected": false,
@@ -91,6 +92,7 @@ Object {
       "name": "system-1",
       "namespace": "",
       "package": Object {
+        "fips_compatible": true,
         "name": "system",
         "requires_root": true,
         "title": "System",
@@ -107,6 +109,5 @@ Object {
   "status": "active",
   "unprivileged_agents": 0,
   "updated_by": "elastic",
-  "fips_agents": 0,
 }
 `;
