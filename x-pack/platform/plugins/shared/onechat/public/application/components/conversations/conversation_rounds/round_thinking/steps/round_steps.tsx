@@ -167,17 +167,21 @@ const getFlyoutResultItems = ({
   if (flyoutResultItems.length > 0) {
     return [
       <ThinkingItemLayout key={`step-${stepIndex}-${step.tool_id}-result-flyout`}>
-        <EuiButtonEmpty
-          size="s"
-          iconType={'document'}
-          color="primary"
-          iconSide="left"
-          onClick={toggleFlyout}
-        >
-          {i18n.translate('xpack.onechat.conversation.roundResultsButton', {
-            defaultMessage: 'Tool call results',
-          })}
-        </EuiButtonEmpty>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType={'eye'}
+              color="primary"
+              iconSide="left"
+              onClick={toggleFlyout}
+            >
+              {i18n.translate('xpack.onechat.conversation.roundResultsButton', {
+                defaultMessage: 'Tool call results',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </ThinkingItemLayout>,
 
       <RoundResultsFlyout isOpen={showResultsFlyout} onClose={toggleFlyout}>
