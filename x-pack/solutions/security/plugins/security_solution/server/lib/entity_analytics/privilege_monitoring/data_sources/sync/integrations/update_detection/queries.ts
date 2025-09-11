@@ -39,14 +39,12 @@ export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
 export const buildPrivilegedSearchBody = (
   script: estypes.Script,
   timeGte: string = 'now-10y',
-  afterKey?: AfterKey, // needs to be record of field to field value?
+  afterKey?: AfterKey,
   pageSize: number = 20
 ): Omit<estypes.SearchRequest, 'index'> => ({
   size: 0,
   query: {
-    bool: {
-      must: [{ script: { script } }],
-    },
+    range: { '@timestamp': { gte: timeGte } },
   },
   aggs: {
     privileged_user_status_since_last_run: {
@@ -60,8 +58,8 @@ export const buildPrivilegedSearchBody = (
           top_hits: {
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
-            script_fields: { is_privileged: { script } },
-            _source: { includes: ['user', 'roles', '@timestamp'] }, // lets see what this gives us out
+            script_fields: { 'user.is_privileged': { script } },
+            _source: { includes: ['user', 'roles', '@timestamp'] },
           },
         },
       },
@@ -77,56 +75,72 @@ export const buildPrivilegedSearchBody = (
 export const UPDATE_SCRIPT_SOURCE = `
 if (params.new_privileged_status == false) {
   if (ctx._source.user.is_privileged == true) {
-    if (ctx._source.labels.sources == null) { ctx._source.labels.sources = []; }
-    ctx._source.labels.sources.removeIf(s -> s == params.sourceLabel);
-    if (ctx._source.labels.sources.size() == 0) { ctx._source.user.is_privileged = false; }
-  }
-} else {
-  if (ctx._source.labels.sources == null) { ctx._source.labels.sources = []; }
-  if (ctx._source.user.is_privileged == true) {
-    if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
-      ctx._source.labels.sources.add(params.sourceLabel);
+    if (ctx._source.labels.sources == null) {
+      ctx._source.labels.sources = [];
     }
-  } else {
+    ctx._source.labels.sources.removeIf(s -> java.util.Objects.equals(s, params.sourceLabel));
+    if (ctx._source.labels.sources.size() == 0) {
+      ctx._source.user.is_privileged = false;
+    }
+  }
+} else if (params.new_privileged_status == true) {
+  if (ctx._source.labels.sources == null) {
+    ctx._source.labels.sources = [];
+  }
+
+  if (ctx._source.user.is_privileged != true) {
     ctx._source.user.is_privileged = true;
-    if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
-      ctx._source.labels.sources.add(params.sourceLabel);
+  }
+
+  if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
+    ctx._source.labels.sources.add(params.sourceLabel);
+  }
+}`;
+
+export const buildBulkUpsertBody = async (
+  // merge with the index sync code, they are very similar
+  users: PrivMonOktaIntegrationsUser[],
+  sourceLabel: string,
+  dataClient: PrivilegeMonitoringDataClient
+) => {
+  const body: object[] = [];
+  dataClient.log('info', `Building bulk operations for integrations sync:  ${users.length} users`);
+  // check if existing and do create or update accordingly
+  for (const user of users) {
+    if (user.existingUserId) {
+      // update existing user
+      dataClient.log(
+        'debug',
+        `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
+      );
+      body.push(
+        { update: { _index: dataClient.index, _id: user.username } },
+        {
+          script: {
+            source: UPDATE_SCRIPT_SOURCE,
+            params: {
+              new_privileged_status: user.isPrivileged,
+              sourceLabel,
+            },
+          },
+        }
+      );
+    } else if (user.isPrivileged) {
+      dataClient.log('info', `Creating new user with integrations sync: ${user.username}`);
+      body.push(
+        { index: { _index: dataClient.index } },
+        {
+          user: { id: user.id, name: user.username, is_privileged: user.isPrivileged },
+          roles: user.roles ?? [],
+          labels: {
+            sources: [sourceLabel],
+          },
+          last_seen: user.lastSeen,
+        }
+      );
     }
   }
-}
-`;
-
-// WIP below should be moved to correct place
-
-export const buildBulkBody = async (
-  users: PrivMonOktaIntegrationsUser[],
-  index: string,
-  sourceLabel: string
-) => {
-  const body = [];
-  for (const u of users) {
-    body.push({ update: { _index: index, _id: u.username } });
-    body.push({
-      script: {
-        lang: 'painless',
-        source: UPDATE_SCRIPT_SOURCE,
-        params: {
-          new_privileged_status: u.isPrivileged,
-          sourceLabel,
-        },
-      },
-      // upsert defines doc shape if it does not exist yet
-      upsert: {
-        user: { id: u.id, name: u.username },
-        roles: u.roles ?? [],
-        is_privileged: u.isPrivileged,
-        labels: {
-          sources: u.isPrivileged ? [sourceLabel] : [],
-        },
-        last_seen: u.lastSeen,
-      },
-    });
-  }
+  dataClient.log('debug', `Built ${body.length / 2} bulk operations for integrations users`);
   return body;
 };
 
@@ -145,10 +159,10 @@ export const applyPrivilegedUpdates = async ({
   try {
     for (let i = 0; i < users.length; i += chunkSize) {
       const chunk = users.slice(i, i + chunkSize);
-      const operations = await buildBulkBody(
+      const operations = await buildBulkUpsertBody(
         chunk,
-        dataClient.index,
-        'entity_analytics_integration'
+        'entity_analytics_integration',
+        dataClient
       );
       await esClient.bulk({
         refresh: 'wait_for',

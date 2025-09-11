@@ -12,7 +12,7 @@ import { applyPrivilegedUpdates } from './queries';
 export const createPrivilegeStatusUpdateService = (dataClient: PrivilegeMonitoringDataClient) => {
   const updatePrivilegedStatus = async (users: PrivMonOktaIntegrationsUser[]) => {
     dataClient.log('info', `Updating internal index for users: ${JSON.stringify(users, null, 2)}`);
-    applyPrivilegedUpdates({ users, dataClient });
+    await applyPrivilegedUpdates({ users, dataClient });
   };
 
   return {

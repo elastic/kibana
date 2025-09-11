@@ -162,14 +162,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
         `Found ${batchUniqueUsernames.length} unique usernames in ${batchUsernames.length} hits.`
       );
 
-      const existingUserRes = await searchService.getMonitoredUsers(batchUsernames);
-
-      const existingUserMap = new Map<string, string | undefined>();
-      for (const hit of existingUserRes.hits.hits) {
-        const username = hit._source?.user?.name;
-        dataClient.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
-        if (username) existingUserMap.set(username, hit._id);
-      }
+      const existingUserMap = await searchService.getExistingUsersMap(batchUsernames);
 
       const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
 import type { PrivMonOktaIntegrationsUser } from '../../../../types';
+import { createSearchService } from '../../../../users/search';
 
 export type AfterKey = Record<string, string> | undefined;
 
@@ -20,7 +22,12 @@ export interface PrivTopHitSource {
     name?: string;
     email?: string;
     roles?: string[];
+    is_privileged?: boolean;
   };
+}
+
+interface PrivTopHitFields {
+  'user.is_privileged'?: boolean[];
 }
 
 // Top hits entry: only read from _source and sort
@@ -29,7 +36,7 @@ export interface PrivTopHit {
   _id?: string;
   _score?: number | null; // remove
   _source?: PrivTopHitSource;
-  sort?: number[]; // remove
+  fields?: PrivTopHitFields; // from script field
 }
 
 // One composite bucket
@@ -49,6 +56,7 @@ export interface PrivMatchersAggregation {
 }
 
 export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataClient) => {
+  const searchService = createSearchService(dataClient);
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonOktaIntegrationsUser[]> => {
@@ -79,7 +87,8 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
         // process current page
         if (buckets.length && aggregations) {
-          users.push(processAggregations(aggregations));
+          const processedAggregations = await processAggregations(aggregations);
+          users.push(...processedAggregations);
         }
 
         // update cursor & loop condition
@@ -95,26 +104,31 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     }
   };
 
-  const processAggregations = (
+  const processAggregations = async (
     aggregation: PrivMatchersAggregation
-  ): PrivMonOktaIntegrationsUser => {
-    const buckets: PrivBucket | undefined =
-      aggregation.privileged_user_status_since_last_run?.buckets[0];
+  ): Promise<PrivMonOktaIntegrationsUser[]> => {
+    const buckets: PrivBucket[] | undefined =
+      aggregation.privileged_user_status_since_last_run?.buckets;
     if (!buckets) {
-      return undefined as unknown as PrivMonOktaIntegrationsUser;
+      return [];
     }
-    const topHit: PrivTopHit = buckets.latest_doc_for_user.hits.hits[0];
-    return {
+
+    const batchUsernames = buckets.map((bucket) => bucket.key.username);
+    const existingUserMap = await searchService.getExistingUsersMap(uniq(batchUsernames));
+
+    const topHit: PrivTopHit = buckets[0].latest_doc_for_user.hits.hits[0];
+    const isPriv = topHit.fields?.['user.is_privileged']?.[0];
+    return buckets.map((bucket) => ({
       //  username: topHit._source?.user?.name || 'unknown',
       id: topHit._source?.user?.id || 'unknown',
-      username: buckets.key.username,
+      username: bucket.key.username,
       email: topHit._source?.user?.email,
       roles: topHit._source?.user?.roles || [],
       sourceId: 'from_matcher', // update placeholder
-      existingUserId: undefined, // to be filled in later
+      existingUserId: existingUserMap.get(bucket.key.username),
       lastSeen: topHit._source?.['@timestamp'] || new Date().toISOString(),
-      isPrivileged: true, // since matched by matcher
-    };
+      isPrivileged: isPriv || false,
+    }));
   };
   return { findPrivilegedUsersFromMatchers };
 };
