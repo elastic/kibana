@@ -12,9 +12,9 @@ export { getSelectionAsFieldType } from './options_list_selections';
 export type {
   OptionsListESQLControlState,
   OptionsListDSLControlState,
-  OptionsListDisplaySettings,
   OptionsListFailureResponse,
   OptionsListRequest,
   OptionsListSuccessResponse,
   OptionsListSuggestions,
 } from './types';
+export { isOptionsListESQLControlState } from './types';

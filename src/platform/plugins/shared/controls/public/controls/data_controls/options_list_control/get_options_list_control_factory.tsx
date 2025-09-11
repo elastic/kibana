@@ -69,7 +69,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       if (isOptionsListESQLControlState(initialState)) {
-        throw new Error('ES|QL control state handling not yet implemented'); // TODO: Is this really the best way to do this????
+        // TODO: @Zac can you fix this type error?
+        throw new Error('ES|QL control state handling not yet implemented');
       }
 
       const state = initialState.rawState;
