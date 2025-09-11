@@ -158,6 +158,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
             break;
         }
       }
+      setSubmittingButtonId(undefined);
       if (shouldRedirect) {
         navigateToOnechatUrl(appPaths.tools.list);
       }
@@ -195,12 +196,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const isViewMode = mode === ToolFormMode.View;
   const hasErrors = Object.keys(errors).length > 0;
-
-  useEffect(() => {
-    if (!isSubmitting) {
-      setSubmittingButtonId(undefined);
-    }
-  }, [isSubmitting]);
 
   const renderSaveButton = useCallback(
     ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {

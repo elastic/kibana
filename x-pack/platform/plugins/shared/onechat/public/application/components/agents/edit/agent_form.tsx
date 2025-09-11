@@ -145,6 +145,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     ) => {
       setSubmittingButtonId(buttonId);
       await submit(data);
+      setSubmittingButtonId(undefined);
       if (shouldRedirect) {
         navigateToOnechatUrl(appPaths.agents.list);
       }
@@ -175,12 +176,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const activeToolsCount = useMemo(() => {
     return filterToolsBySelection(tools, agentTools).length;
   }, [tools, agentTools]);
-
-  useEffect(() => {
-    if (!isSubmitting) {
-      setSubmittingButtonId(undefined);
-    }
-  }, [isSubmitting]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
