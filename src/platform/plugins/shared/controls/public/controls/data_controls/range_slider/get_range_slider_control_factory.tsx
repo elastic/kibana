@@ -147,6 +147,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
         controlFetch$,
+        appliedFilters$: dataControlManager.api.appliedFilters$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
         setIsLoading: (isLoading: boolean) => {

@@ -17,33 +17,42 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { isEqual } from 'lodash';
 import { dataService } from '../../../services/kibana_services';
 
 export function minMax$({
   controlFetch$,
+  appliedFilters$,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
   controlFetch$: Observable<FetchContext>;
+  appliedFilters$: PublishingSubject<Filter[] | undefined>;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, dataViews$, fieldName$]).pipe(
+  return combineLatest([controlFetch$, dataViews$, fieldName$, appliedFilters$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, dataViews, fieldName]) => {
+    switchMap(async ([controlFetchContext, dataViews, fieldName, appliedFilters]) => {
       const dataView = dataViews?.[0];
       const dataViewField = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
       if (!dataView || !dataViewField) {
         return { max: undefined, min: undefined };
       }
+
+      // Don't pass the filters that this range control applies into the min/max query
+      const filters =
+        controlFetchContext.filters?.filter(
+          (filter) => !appliedFilters?.some((appliedFilter) => isEqual(filter, appliedFilter))
+        ) ?? [];
 
       try {
         setIsLoading(true);
@@ -54,6 +63,7 @@ export function minMax$({
           dataView,
           field: dataViewField,
           ...controlFetchContext,
+          filters,
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };
