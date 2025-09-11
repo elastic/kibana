@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,7 +53,8 @@ export const CustomScriptSelector = memo<
     CustomScriptSelectorState,
     EndpointCommandDefinitionMeta
   >
->(({ value, valueText, onChange, store, command, requestFocus, argIndex }) => {
+>(({ value, valueText, argName, argIndex, onChange, store: _store, command, requestFocus }) => {
+  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}`);
   const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
@@ -62,11 +64,18 @@ export const CustomScriptSelector = memo<
     return {};
   }, [agentType, platform]);
 
+  // Because the console supports multiple instances of the same argument, we need to ensure that
+  // if the command was defined to now allow multiples, that we only render the first one.
+  const shouldRender = useMemo<boolean>(() => {
+    const argDefinition = command.commandDefinition.args?.[argName];
+    return argDefinition?.allowMultiples || argIndex === 0;
+  }, [argIndex, argName, command.commandDefinition.args]);
+
   const {
-    data: scripts = [],
-    isLoading,
-    error,
-  } = useGetCustomScripts(agentType, scriptsApiQueryParams);
+    data = [],
+    isLoading: isLoadingScripts,
+    error: scriptsError,
+  } = useGetCustomScripts(agentType, scriptsApiQueryParams, { enabled: shouldRender });
 
   const options = useMemo(() => {
     return transformCustomScriptsToOptions(scripts, value);
@@ -91,33 +100,46 @@ export const CustomScriptSelector = memo<
     [agentType, value, store?.selectedOption, onChange]
   );
 
-  // Handle SentinelOne pre-selection from history
   useEffect(() => {
-    // For SentinelOne: If a `value` is set, but we have no `selectedOption`, then component
-    // might be getting initialized from either console input history or from a user's past action.
-    // Ensure that we set `selectedOption` once we get the list of scripts
-    if (agentType === 'sentinel_one' && value && !store?.selectedOption && scripts.length > 0) {
-      const preSelectedScript = scripts.find((script) => script.name === value);
+    // If the argument selector should not be rendered, then at least set the `value` to a string
+    // so that the normal com,and argument validations can be invoked if the user still ENTERs the command
+    if (!shouldRender && value !== '') {
+      onChange({
+        value: '',
+        valueText: '',
+        store: state,
+      });
+    } else if (
+      // For SentinelOne: If a `value` is set, but we have no `selectedOption`, then the component
+      // might be getting initialized from either console input history or from a user's past action.
+      // Ensure that we set `selectedOption` once we get the list of scripts
+      shouldRender &&
+      agentType === 'sentinel_one' &&
+      value &&
+      !state?.selectedOption &&
+      data.length > 0
+    ) {
+      const preSelectedScript = data.find((script) => script.name === value);
 
       // If script not found, then reset value/valueText
       if (!preSelectedScript) {
         onChange({
           value: '',
           valueText: '',
-          store: store || { isPopoverOpen: !value },
+          store: state,
         });
       } else {
         onChange({
           value,
           valueText,
           store: {
-            ...(store || { isPopoverOpen: !value }),
+            ...state,
             selectedOption: preSelectedScript,
           },
         });
       }
     }
-  }, [agentType, scripts, onChange, store, value, valueText]);
+  }, [agentType, data, onChange, shouldRender, state, value, valueText]);
 
   const {
     services: { notifications },
@@ -191,7 +213,7 @@ export const CustomScriptSelector = memo<
 
   const testIdPrefix = testId();
 
-  return (
+  return shouldRender ? (
     <EuiPopover
       isOpen={state.isPopoverOpen}
       offset={10}
@@ -233,8 +255,8 @@ export const CustomScriptSelector = memo<
           errorMessage={
             error ? (
               <FormattedMessage
-                id="xpack.securitySolution.baseArgumentSelector.errorLoading"
-                defaultMessage="Error loading data"
+                id="xpack.securitySolution.endpoint.customScriptSelector.errorLoading"
+                defaultMessage="Error loading scripts"
               />
             ) : undefined
           }
@@ -248,6 +270,14 @@ export const CustomScriptSelector = memo<
         </EuiSelectable>
       )}
     </EuiPopover>
+  ) : (
+    <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
+      <EuiIcon type="warning" size="s" color="subdued" />{' '}
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.customScriptSelector.noMultipleArgs"
+        defaultMessage="Argument is only supported once per command"
+      />
+    </EuiText>
   );
 });
 

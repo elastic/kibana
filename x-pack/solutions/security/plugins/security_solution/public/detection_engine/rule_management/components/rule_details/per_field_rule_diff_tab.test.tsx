@@ -11,7 +11,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../common/api/detection_engine';
-import type { PartialRuleDiff } from '../../../../../common/api/detection_engine';
+import type { PartialThreeWayRuleDiff } from '../../../../../common/api/detection_engine';
 import { TestProviders } from '../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
@@ -25,7 +25,7 @@ const ruleFieldsDiffBaseFieldsMock = {
   merge_outcome: ThreeWayMergeOutcome.Target,
 };
 
-const ruleFieldsDiffMock: PartialRuleDiff = {
+const ruleFieldsDiffMock: PartialThreeWayRuleDiff = {
   fields: {
     version: {
       ...ruleFieldsDiffBaseFieldsMock,
@@ -40,7 +40,7 @@ const ruleFieldsDiffMock: PartialRuleDiff = {
   num_fields_with_non_solvable_conflicts: 0,
 };
 
-const renderPerFieldRuleDiffTab = (ruleDiff: PartialRuleDiff) => {
+const renderPerFieldRuleDiffTab = (ruleDiff: PartialThreeWayRuleDiff) => {
   return render(
     <TestProviders>
       <PerFieldRuleDiffTab
@@ -56,7 +56,7 @@ const renderPerFieldRuleDiffTab = (ruleDiff: PartialRuleDiff) => {
 
 describe('PerFieldRuleDiffTab', () => {
   test('Field groupings should be rendered together in the same accordion panel', () => {
-    const mockData: PartialRuleDiff = {
+    const mockData: PartialThreeWayRuleDiff = {
       ...ruleFieldsDiffMock,
       fields: {
         kql_query: {
@@ -99,7 +99,7 @@ describe('PerFieldRuleDiffTab', () => {
 
   describe('Undefined values are displayed with empty diffs', () => {
     test('Displays only an updated field value when changed from an empty value', () => {
-      const mockData: PartialRuleDiff = {
+      const mockData: PartialThreeWayRuleDiff = {
         ...ruleFieldsDiffMock,
         fields: {
           name: {
@@ -119,7 +119,7 @@ describe('PerFieldRuleDiffTab', () => {
     });
 
     test('Displays only an outdated field value when incoming update is an empty value', () => {
-      const mockData: PartialRuleDiff = {
+      const mockData: PartialThreeWayRuleDiff = {
         ...ruleFieldsDiffMock,
         fields: {
           name: {
@@ -140,7 +140,7 @@ describe('PerFieldRuleDiffTab', () => {
   });
 
   test('Field diff components have the same grouping and order as in rule details overview', () => {
-    const mockData: PartialRuleDiff = {
+    const mockData: PartialThreeWayRuleDiff = {
       ...ruleFieldsDiffMock,
       fields: {
         setup: {
