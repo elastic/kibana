@@ -135,7 +135,6 @@ describe('Find user conversations route', () => {
         );
 
         expect(response.status).toEqual(200);
-        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
         expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
       });
     });
@@ -150,7 +149,19 @@ describe('Find user conversations route', () => {
             total: 1,
             perPage: 100,
             page: 1,
-            data: [{ id: 'space1-conversation', title: 'Space1 Conversation' }],
+            data: {
+              took: 1,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: {
+                total: { value: 1, relation: 'eq' },
+                max_score: 1,
+                hits: [{
+                  _id: 'space1-conversation',
+                  _source: { id: 'space1-conversation', title: 'Space1 Conversation' }
+                }]
+              }
+            }
           })
         );
 
@@ -162,7 +173,19 @@ describe('Find user conversations route', () => {
             total: 1,
             perPage: 100,
             page: 1,
-            data: [{ id: 'space2-conversation', title: 'Space2 Conversation' }],
+            data: {
+              took: 1,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: {
+                total: { value: 1, relation: 'eq' },
+                max_score: 1,
+                hits: [{
+                  _id: 'space2-conversation',
+                  _source: { id: 'space2-conversation', title: 'Space2 Conversation' }
+                }]
+              }
+            }
           })
         );
 

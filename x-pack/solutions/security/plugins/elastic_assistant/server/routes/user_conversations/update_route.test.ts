@@ -20,6 +20,7 @@ import expect from 'expect';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -312,6 +313,129 @@ describe('Update conversation route', () => {
         },
         message:
           'Failed attempt to share conversation [id=conversation-1] to users ([id=user1, name=User One], [id=user2, name=User Two])',
+      });
+    });
+  });
+
+  describe('Update conversation route with Spaces', () => {
+
+    describe('non-default space behavior', () => {
+      it('should work correctly in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        const conversation = getConversationMock(getQueryConversationParams());
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.updateConversation.mockResolvedValue(
+          conversation
+        );
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          conversation
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        updateConversationRoute(spaceServer.router);
+
+        const request = requestMock.create({
+          method: 'put',
+          path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID.replace('{id}', 'conversation-1'),
+          params: { id: 'conversation-1' },
+          body: getUpdateConversationSchemaMock(),
+        });
+
+        const response = await spaceServer.inject(
+          request,
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+
+      it('should handle 404 for non-existent conversation in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.alternativeSpace)(spaceContext);
+
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          null
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        updateConversationRoute(spaceServer.router);
+
+        const request = requestMock.create({
+          method: 'put',
+          path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID.replace('{id}', 'nonexistent-id'),
+          params: { id: 'nonexistent-id' },
+          body: getUpdateConversationSchemaMock(),
+        });
+
+        const response = await spaceServer.inject(
+          request,
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(404);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(
+          spaceTestScenarios.alternativeSpace
+        );
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should not access conversations from other spaces', async () => {
+        // Setup space1 context with conversation
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        const space1Conversation = {
+          ...getConversationMock(getQueryConversationParams()),
+          id: 'space1-conversation',
+        };
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          space1Conversation
+        );
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.updateConversation.mockResolvedValue(
+          space1Conversation
+        );
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        // Setup space2 context - should not find space1's conversation
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+        space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          null
+        );
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        updateConversationRoute(space1Server.router);
+        updateConversationRoute(space2Server.router);
+
+        const updateRequest = {
+          method: 'put' as const,
+          path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID.replace('{id}', 'space1-conversation'),
+          params: { id: 'space1-conversation' },
+          body: getUpdateConversationSchemaMock(),
+        };
+
+        // Update conversation from space1 (should succeed)
+        const space1Response = await space1Server.inject(
+          requestMock.create(updateRequest),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        // Try to update same conversation from space2 (should fail with 404)
+        const space2Response = await space2Server.inject(
+          requestMock.create(updateRequest),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(404);
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
       });
     });
   });

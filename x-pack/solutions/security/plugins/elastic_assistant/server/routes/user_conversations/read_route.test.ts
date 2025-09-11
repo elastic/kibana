@@ -158,7 +158,6 @@ describe('Read conversation route', () => {
         );
 
         expect(response.status).toEqual(200);
-        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
         expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
       });
 

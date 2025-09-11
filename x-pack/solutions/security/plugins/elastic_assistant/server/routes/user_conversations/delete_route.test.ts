@@ -15,6 +15,7 @@ import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Delete conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -90,6 +91,108 @@ describe('Delete conversation route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('Delete conversation route with Spaces', () => {
+    describe('non-default space behavior', () => {
+      it('should work correctly in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          getConversationMock(getQueryConversationParams())
+        );
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation.mockResolvedValue(
+          1
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        deleteConversationRoute(spaceServer.router);
+
+        const response = await spaceServer.inject(
+          getDeleteConversationRequest(),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+
+      it('should handle 404 for non-existent conversation in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.alternativeSpace)(spaceContext);
+
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          null
+        );
+        spaceClients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation.mockResolvedValue(
+          0
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        deleteConversationRoute(spaceServer.router);
+
+        const response = await spaceServer.inject(
+          getDeleteConversationRequest('nonexistent-id'),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(404);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(
+          spaceTestScenarios.alternativeSpace
+        );
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should not delete conversations from other spaces', async () => {
+        // Setup space1 context with conversation that can be deleted
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          getConversationMock(getQueryConversationParams())
+        );
+        space1Clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation.mockResolvedValue(
+          1
+        );
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        // Setup space2 context - should not find space1's conversation
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+        space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+          null
+        );
+        space2Clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation.mockResolvedValue(
+          0
+        );
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        deleteConversationRoute(space1Server.router);
+        deleteConversationRoute(space2Server.router);
+
+        // Delete conversation from space1 (should succeed)
+        const space1Response = await space1Server.inject(
+          getDeleteConversationRequest('space1-conversation'),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        // Try to delete same conversation from space2 (should fail with 404)
+        const space2Response = await space2Server.inject(
+          getDeleteConversationRequest('space1-conversation'),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(404);
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
+      });
     });
   });
 });

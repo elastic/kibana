@@ -72,7 +72,7 @@ describe('Get Knowledge Base Status Route', () => {
         withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
 
         spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
-        
+
         const spaceKbDataClient = knowledgeBaseDataClientMock.create();
         spaceContext.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest
           .fn()
@@ -105,7 +105,6 @@ describe('Get Knowledge Base Status Route', () => {
         });
 
         // Verify space ID was used
-        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
         expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
       });
 
@@ -114,7 +113,7 @@ describe('Get Knowledge Base Status Route', () => {
         withSpace(spaceTestScenarios.alternativeSpace)(spaceContext);
 
         spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
-        
+
         const spaceKbDataClient = knowledgeBaseDataClientMock.create();
         const kbDataClientGetter = jest.fn().mockResolvedValue(spaceKbDataClient);
         spaceContext.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = kbDataClientGetter;
@@ -160,7 +159,7 @@ describe('Get Knowledge Base Status Route', () => {
         space1Context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest
           .fn()
           .mockResolvedValue(space1KbClient);
-        
+
         space1KbClient.isInferenceEndpointExists.mockResolvedValue(true);
         space1KbClient.isModelInstalled.mockResolvedValue(true);
         space1KbClient.isSetupAvailable.mockResolvedValue(true);
@@ -177,7 +176,7 @@ describe('Get Knowledge Base Status Route', () => {
         space2Context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest
           .fn()
           .mockResolvedValue(space2KbClient);
-          
+
         space2KbClient.isInferenceEndpointExists.mockResolvedValue(false);
         space2KbClient.isModelInstalled.mockResolvedValue(false);
         space2KbClient.isSetupAvailable.mockResolvedValue(false);

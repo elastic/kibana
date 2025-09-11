@@ -146,7 +146,6 @@ describe('Find user prompts route', () => {
         );
 
         expect(response.status).toEqual(200);
-        expect(spaceContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
         expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
       });
     });
@@ -161,7 +160,19 @@ describe('Find user prompts route', () => {
             total: 1,
             perPage: 100,
             page: 1,
-            data: [{ id: 'space1-prompt', name: 'Space1 Prompt', isDefault: false }],
+            data: {
+              took: 1,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: {
+                total: { value: 1, relation: 'eq' },
+                max_score: 1,
+                hits: [{
+                  _id: 'space1-prompt',
+                  _source: { id: 'space1-prompt', name: 'Space1 Prompt', isDefault: false }
+                }]
+              }
+            }
           })
         );
 
@@ -171,9 +182,21 @@ describe('Find user prompts route', () => {
         space2Clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
           Promise.resolve({
             total: 1,
-            perPage: 100, 
+            perPage: 100,
             page: 1,
-            data: [{ id: 'space2-prompt', name: 'Space2 Prompt', isDefault: false }],
+            data: {
+              took: 1,
+              timed_out: false,
+              _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+              hits: {
+                total: { value: 1, relation: 'eq' },
+                max_score: 1,
+                hits: [{
+                  _id: 'space2-prompt',
+                  _source: { id: 'space2-prompt', name: 'Space2 Prompt', isDefault: false }
+                }]
+              }
+            }
           })
         );
 

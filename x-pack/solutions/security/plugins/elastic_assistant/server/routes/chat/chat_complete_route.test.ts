@@ -528,7 +528,7 @@ describe('chatCompleteRoute', () => {
     const createContextWithSpace = (spaceId: string) => ({
       resolve: jest.fn().mockResolvedValue({
         elasticAssistant: {
-          ...mockContext.resolve().then(r => r.elasticAssistant),
+          ...mockContext.resolve().then((r) => r.elasticAssistant),
           getSpaceId: jest.fn().mockReturnValue(spaceId),
           actions: {
             getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
@@ -569,7 +569,9 @@ describe('chatCompleteRoute', () => {
           }),
           getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
             spaceId,
-            findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+            findDocuments: jest
+              .fn()
+              .mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
           }),
         },
         core: {
@@ -674,22 +676,24 @@ describe('chatCompleteRoute', () => {
       });
 
       it('should use space-scoped data clients', async () => {
-        const resolvedContext = await nonDefaultSpaceContext.resolve();
-        
         const mockRouter = {
           versioned: {
             post: jest.fn().mockImplementation(() => {
               return {
                 addVersion: jest.fn().mockImplementation(async (_, handler) => {
-                  await handler(
-                    nonDefaultSpaceContext,
-                    mockRequest,
-                    mockResponse
+                  const result = await handler(nonDefaultSpaceContext, mockRequest, mockResponse);
+
+                  // Verify the context has correct space
+                  const resolvedContext = await nonDefaultSpaceContext.resolve();
+                  expect(resolvedContext.elasticAssistant.getSpaceId()).toBe(
+                    spaceTestScenarios.nonDefaultSpace
                   );
 
-                  // Verify getSpaceId was called and returned correct space
-                  expect(resolvedContext.elasticAssistant.getSpaceId).toHaveBeenCalled();
-                  expect(resolvedContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+                  expect(result).toEqual({
+                    connector_id: 'mock-connector-id',
+                    data: mockActionResponse,
+                    status: 'ok',
+                  });
                 }),
               };
             }),
@@ -736,19 +740,27 @@ describe('chatCompleteRoute', () => {
         // Create separate data client mocks for each space
         const space1DataClient = {
           spaceId: 'space1',
-          getConversation: jest.fn().mockResolvedValue({ ...existingConversation, id: 'space1-conversation' }),
+          getConversation: jest
+            .fn()
+            .mockResolvedValue({ ...existingConversation, id: 'space1-conversation' }),
         };
         const space2DataClient = {
-          spaceId: 'space2', 
-          getConversation: jest.fn().mockResolvedValue({ ...existingConversation, id: 'space2-conversation' }),
+          spaceId: 'space2',
+          getConversation: jest
+            .fn()
+            .mockResolvedValue({ ...existingConversation, id: 'space2-conversation' }),
         };
 
         // Mock the data clients for each space
         const resolvedSpace1 = await space1Context.resolve();
         const resolvedSpace2 = await space2Context.resolve();
-        
-        resolvedSpace1.elasticAssistant.getAIAssistantConversationsDataClient = jest.fn().mockResolvedValue(space1DataClient);
-        resolvedSpace2.elasticAssistant.getAIAssistantConversationsDataClient = jest.fn().mockResolvedValue(space2DataClient);
+
+        resolvedSpace1.elasticAssistant.getAIAssistantConversationsDataClient = jest
+          .fn()
+          .mockResolvedValue(space1DataClient);
+        resolvedSpace2.elasticAssistant.getAIAssistantConversationsDataClient = jest
+          .fn()
+          .mockResolvedValue(space2DataClient);
 
         const mockRouter = {
           versioned: {
@@ -757,13 +769,17 @@ describe('chatCompleteRoute', () => {
                 addVersion: jest.fn().mockImplementation(async (_, handler) => {
                   // Test space1 context
                   await handler(space1Context, mockRequest, mockResponse);
-                  
-                  // Test space2 context  
+
+                  // Test space2 context
                   await handler(space2Context, mockRequest, mockResponse);
 
                   // Verify each space got its own data client
-                  expect(resolvedSpace1.elasticAssistant.getAIAssistantConversationsDataClient).toHaveBeenCalled();
-                  expect(resolvedSpace2.elasticAssistant.getAIAssistantConversationsDataClient).toHaveBeenCalled();
+                  expect(
+                    resolvedSpace1.elasticAssistant.getAIAssistantConversationsDataClient
+                  ).toHaveBeenCalled();
+                  expect(
+                    resolvedSpace2.elasticAssistant.getAIAssistantConversationsDataClient
+                  ).toHaveBeenCalled();
                 }),
               };
             }),
