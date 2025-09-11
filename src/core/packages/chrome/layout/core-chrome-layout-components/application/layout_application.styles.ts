@@ -37,7 +37,7 @@ const topBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   top: 0;
   z-index: ${layoutLevels.applicationTopBar};
-  height: ${layoutVar('application-top-bar-height')};
+  height: ${layoutVar('application.topBar.height')};
   flex-shrink: 0;
 `;
 
@@ -45,7 +45,7 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   bottom: 0;
   z-index: ${layoutLevels.applicationBottomBar};
-  height: ${layoutVar('application-bottom-bar-height')};
+  height: ${layoutVar('application.bottomBar.height')};
   flex-shrink: 0;
 `;
 

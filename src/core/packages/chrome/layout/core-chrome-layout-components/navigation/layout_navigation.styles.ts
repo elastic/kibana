@@ -17,7 +17,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: navigation;
   align-self: start;
   height: 100%;
-  width: ${layoutVar('navigation-width')};
+  width: ${layoutVar('navigation.width')};
   z-index: ${layoutLevels.navigation}
   display: flex;
 `;

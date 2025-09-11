@@ -19,7 +19,7 @@ const root = css`
   flex-direction: column;
   align-items: center;
   height: 100%;
-  width: ${layoutVar('sidebar-width')};
+  width: ${layoutVar('sidebar.width')};
   z-index: ${layoutLevels.sidebar};
 `;
 

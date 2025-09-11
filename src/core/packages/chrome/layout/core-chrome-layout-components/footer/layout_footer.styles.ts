@@ -13,8 +13,8 @@ import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 const root = css`
   position: sticky;
   grid-area: footer;
-  width: ${layoutVar('footer-width')};
-  height: ${layoutVar('footer-height')};
+  width: ${layoutVar('footer.width')};
+  height: ${layoutVar('footer.height')};
   z-index: ${layoutLevels.footer};
 `;
 

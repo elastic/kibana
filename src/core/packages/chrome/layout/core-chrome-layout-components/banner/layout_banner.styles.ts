@@ -14,8 +14,8 @@ import type { EmotionFn } from '../types';
 const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: banner;
   position: sticky;
-  width: ${layoutVar('banner-width')};
-  height: ${layoutVar('banner-height')};
+  width: ${layoutVar('banner.width')};
+  height: ${layoutVar('banner.height')};
   z-index: ${layoutLevels.banner};
 `;
 

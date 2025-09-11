@@ -14,8 +14,8 @@ import type { EmotionFn } from '../types';
 const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   grid-area: header;
-  height: ${layoutVar('header-height')};
-  max-width: ${layoutVar('header-width')};
+  height: ${layoutVar('header.height')};
+  max-width: ${layoutVar('header.width')};
   z-index: ${layoutLevels.header};
 `;
 

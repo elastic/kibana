@@ -14,14 +14,11 @@ export type LayoutComponent =
   | 'navigation'
   | 'sidebar'
   | 'application';
-export type ApplicationComponent =
-  | 'application-top-bar'
-  | 'application-bottom-bar'
-  | 'application-content';
+export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
 export type LayoutProperty = 'top' | 'bottom' | 'left' | 'right' | 'height' | 'width';
 
-export type LayoutVarName = `${LayoutComponent}-${LayoutProperty}`;
-export type ApplicationVarName = `${ApplicationComponent}-${LayoutProperty}`;
+export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
+export type ApplicationVarName = `application.${ApplicationComponent}.${LayoutProperty}`;
 export type CSSVarName = LayoutVarName | ApplicationVarName;
 
 /**
@@ -29,19 +26,19 @@ export type CSSVarName = LayoutVarName | ApplicationVarName;
  * Automatically detects the correct prefix (--kbn-layout-- or --kbn-application--)
  * based on the variable name pattern.
  *
- * @param name - The CSS variable name (without prefix)
+ * @param name - The CSS variable name in dot notation
  * @param fallback - Optional fallback value
  * @returns The complete CSS var() expression
  *
  * @example
  * ```typescript
  * // Layout variables (uses --kbn-layout-- prefix)
- * layoutVar('banner-top', '0px')      // var(--kbn-layout--banner-top, 0px)
- * layoutVar('header-height')          // var(--kbn-layout--header-height)
+ * layoutVar('banner.top', '0px')      // var(--kbn-layout--banner-top, 0px)
+ * layoutVar('header.height')          // var(--kbn-layout--header-height)
  *
  * // Application variables (uses --kbn-application-- prefix)
- * layoutVar('application-top-bar-height')         // var(--kbn-application--top-bar-height)
- * layoutVar('application-content-top', '0px')     // var(--kbn-application--content-top, 0px)
+ * layoutVar('application.topBar.height')         // var(--kbn-application--top-bar-height)
+ * layoutVar('application.content.top', '0px')    // var(--kbn-application--content-top, 0px)
  * ```
  */
 export const layoutVar = (name: CSSVarName, fallback?: string): string => {
@@ -53,28 +50,38 @@ export const layoutVar = (name: CSSVarName, fallback?: string): string => {
  * Helper function to get the CSS variable name with type safety.
  * Returns the complete CSS variable name (with prefix) for use in template strings.
  *
- * @param name - The CSS variable name (without prefix)
+ * @param name - The CSS variable name in dot notation
  * @returns The complete CSS variable name with appropriate prefix
  *
  * @example
  * ```typescript
  * // Get variable names for definitions
- * const topBarVar = layoutVarName('application-top-bar-height');
+ * const topBarVar = layoutVarName('application.topBar.height');
  * // Returns: "--kbn-application--top-bar-height"
  *
  * // Use in template strings
  * const styles = css`
- *   ${layoutVarName('banner-height')}: 50px;
- *   ${layoutVarName('application-top-bar-height')}: 40px;
+ *   ${layoutVarName('banner.height')}: 50px;
+ *   ${layoutVarName('application.topBar.height')}: 40px;
  * `;
  *
  * // Use with DOM API
- * element.style.setProperty(layoutVarName('banner-height'), '50px');
+ * element.style.setProperty(layoutVarName('banner.height'), '50px');
  * ```
  */
 export const layoutVarName = (name: CSSVarName): string => {
-  const isAppVar = name.startsWith('application-');
-  const cleanName = isAppVar ? name.replace('application-', '') : name;
-  const prefix = isAppVar ? '--kbn-application--' : '--kbn-layout--';
-  return `${prefix}${cleanName}`;
+  const isAppVar = name.startsWith('application.');
+
+  if (isAppVar) {
+    // Convert "application.topBar.height" to "top-bar-height"
+    const parts = name.split('.');
+    const component = parts[1]; // "topBar"
+    const property = parts[2]; // "height"
+    const kebabComponent = component.replace(/([A-Z])/g, '-$1').toLowerCase();
+    return `--kbn-application--${kebabComponent}-${property}`;
+  } else {
+    // Convert "header.height" to "header-height"
+    const kebabName = name.replace('.', '-');
+    return `--kbn-layout--${kebabName}`;
+  }
 };
