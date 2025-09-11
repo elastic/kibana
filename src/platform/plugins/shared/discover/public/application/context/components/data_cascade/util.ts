@@ -45,25 +45,38 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
-  Array.from(mutate.commands.stats.list(esqlQuery.ast)).forEach((statsCommand) => {
-    const { grouping, aggregates } = mutate.commands.stats.summarizeCommand(
-      esqlQuery,
-      statsCommand
-    );
+  const statsCommands = Array.from(mutate.commands.stats.list(esqlQuery.ast));
 
-    groupByFields.push(
-      ...Object.values(grouping).map((group) => ({
-        field: removeBackticks(group.field),
-        type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
-      }))
-    );
+  let statsCommand: StatsCommand | null = null;
 
-    Object.values(aggregates).forEach((aggregate) => {
-      appliedFunctions.push({
-        identifier: removeBackticks(aggregate.field),
-        operator:
-          (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
-      });
+  // we always want to operate on the last stats command that has valid grouping options,
+  // but allow for the possibility of multiple stats commands in the query
+  for (let i = statsCommands.length - 1; i >= 0; i--) {
+    const { grouping } = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommands[i]);
+
+    if (grouping && Object.keys(grouping).length) {
+      statsCommand = statsCommands[i] as StatsCommand;
+      break;
+    }
+  }
+
+  if (!statsCommand) {
+    return { groupByFields, appliedFunctions };
+  }
+
+  const { grouping, aggregates } = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommand);
+
+  groupByFields.push(
+    ...Object.values(grouping).map((group) => ({
+      field: removeBackticks(group.field),
+      type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
+    }))
+  );
+
+  Object.values(aggregates).forEach((aggregate) => {
+    appliedFunctions.push({
+      identifier: removeBackticks(aggregate.field),
+      operator: (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
     });
   });
 
