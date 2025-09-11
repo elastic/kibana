@@ -144,6 +144,7 @@ export const CaseRt = rt.intersection([
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
+    totalEvents: rt.number,
     version: rt.string,
   }),
   rt.exact(
@@ -157,6 +158,7 @@ export const CasesRt = rt.array(CaseRt);
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
+  events: rt.number,
   userComments: rt.number,
 });
 

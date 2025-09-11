@@ -15,6 +15,7 @@ import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   ConnectorMappings,
+  EventAttachmentPayload,
   UserActionAttributes,
   UserCommentAttachmentPayload,
 } from '../common/types/domain';
@@ -702,6 +703,13 @@ export const alertComment: AlertAttachmentPayload = {
     name: 'rule-name-1',
   },
   type: AttachmentType.alert as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const eventComment: EventAttachmentPayload = {
+  eventId: 'event-id-1',
+  index: 'mock-index',
+  type: AttachmentType.event as const,
   owner: SECURITY_SOLUTION_OWNER,
 };
 

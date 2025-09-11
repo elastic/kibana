@@ -101,6 +101,7 @@ export const getCaseResponse = (): Case => ({
   id: 'test-case',
   totalComment: 0,
   totalAlerts: 0,
+  totalEvents: 0,
   version: 'test-version',
   category: null,
   observables: [],

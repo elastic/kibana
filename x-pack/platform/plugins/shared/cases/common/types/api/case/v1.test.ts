@@ -89,6 +89,7 @@ const basicCase: Case = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updated_at: '2020-02-20T15:02:57.995Z',
   updated_by: {
     full_name: 'Leslie Knope',
