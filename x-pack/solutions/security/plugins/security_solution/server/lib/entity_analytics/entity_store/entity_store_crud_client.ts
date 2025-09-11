@@ -8,7 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
-import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
@@ -43,7 +44,7 @@ export class EntityStoreCrudClient {
     this.dataClient = dataClient;
   }
 
-  public async upsertEntity(type: EntityType, doc: Entity, force = false) {
+  public async upsertEntity(type: APIEntityType, doc: Entity, force = false) {
     await this.assertEngineIsRunning(type);
     const flatProps = getFlattenedObject(doc);
 
@@ -90,22 +91,12 @@ export class EntityStoreCrudClient {
     });
   }
 
-  private async assertEngineIsRunning(type: EntityType) {
-    const { engines, status } = await this.dataClient.status({ include_components: true });
+  private async assertEngineIsRunning(type: APIEntityType) {
+    const engineRunning = await this.dataClient.isEngineRunning(EntityType[type]);
 
-    if (status !== 'running') {
+    if (!engineRunning) {
       throw new EngineNotRunningError(type);
     }
-
-    for (let i = 0; i < engines.length; i++) {
-      if (engines[i].type === type) {
-        if (engines[i].status === 'started') {
-          return;
-        }
-      }
-    }
-
-    throw new EngineNotRunningError(type);
   }
 }
 

@@ -284,6 +284,11 @@ export class EntityStoreDataClient {
       : Promise.resolve([] as EngineComponentStatus[]);
   }
 
+  public async isEngineRunning(type: EntityType) {
+    const engine = await this.engineClient.maybeGet(type);
+    return engine?.status === ENGINE_STATUS.STARTED;
+  }
+
   public async enable(
     requestBodyOverrides: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
