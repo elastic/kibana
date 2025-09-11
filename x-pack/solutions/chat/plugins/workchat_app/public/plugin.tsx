@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -24,9 +25,12 @@ export class WorkChatAppPlugin
       WorkChatAppPluginStartDependencies
     >
 {
+  logger: Logger;
   private services?: WorkChatServices;
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
