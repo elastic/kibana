@@ -488,7 +488,9 @@ function DiscoverDocumentsComponent({
             renderCustomToolbar={renderCustomToolbarWithElements}
             services={services}
             totalHits={totalHits}
-            onFetchMoreRecords={onFetchMoreRecords}
+            onFetchMoreRecords={
+              documentState.interceptedWarnings?.length ? undefined : onFetchMoreRecords
+            }
             externalCustomRenderers={cellRenderers}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
