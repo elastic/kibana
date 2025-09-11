@@ -11,7 +11,7 @@ import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/co
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
-import { PrivMonUtils } from './utils';
+import { PrivMonUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {

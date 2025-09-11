@@ -540,7 +540,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MonitoredUserDoc'
+              $ref: '#/components/schemas/MonitoredUserUpdateDoc'
         required: true
       responses:
         '200':
@@ -1791,11 +1791,22 @@ components:
     Metadata:
       $ref: '#/components/schemas/TransformStatsMetadata'
     MonitoredUserDoc:
+      allOf:
+        - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
+        - type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            event:
+              type: object
+              properties:
+                ingested:
+                  format: date-time
+                  type: string
+    MonitoredUserUpdateDoc:
       type: object
       properties:
-        '@timestamp':
-          format: date-time
-          type: string
         entity_analytics_monitoring:
           type: object
           properties:
@@ -1810,12 +1821,6 @@ components:
                   value:
                     type: string
               type: array
-        event:
-          type: object
-          properties:
-            ingested:
-              format: date-time
-              type: string
         id:
           type: string
         labels:
