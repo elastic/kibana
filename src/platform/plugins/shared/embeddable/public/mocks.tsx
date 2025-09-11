@@ -50,6 +50,8 @@ const createSetupContract = (): Setup => {
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerTransforms: jest.fn(),
     registerEnhancement: jest.fn(),
+    transformEnhancementsIn: jest.fn(),
+    transformEnhancementsOut: jest.fn(),
   };
   return setupContract;
 };

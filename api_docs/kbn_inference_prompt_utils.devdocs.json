@@ -44,14 +44,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>>, keyof ",
+          "ToolDefinitions",
+          " | undefined>[]>>, keyof ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -59,15 +53,7 @@
             "section": "def-common.BoundOptions",
             "text": "BoundOptions"
           },
-          "> & PromptReasoningAgentOptions & { prompt: TPrompt; } & { toolCallbacks: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolCallbacksOf",
-            "text": "ToolCallbacksOf"
-          },
-          "<",
+          "> & PromptReasoningAgentOptions & { prompt: TPrompt; } & { toolCallbacks: ToolCallbacksOfTools<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -75,7 +61,7 @@
             "section": "def-common.ToolOptionsOfPrompt",
             "text": "ToolOptionsOfPrompt"
           },
-          "<TPrompt>>; }) => Promise<",
+          "<TPrompt>[\"tools\"]>; }) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -122,14 +108,8 @@
                 "text": "PromptVersion"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>[]>>, keyof ",
+              "ToolDefinitions",
+              " | undefined>[]>>, keyof ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -137,15 +117,7 @@
                 "section": "def-common.BoundOptions",
                 "text": "BoundOptions"
               },
-              "> & PromptReasoningAgentOptions & { prompt: TPrompt; } & { toolCallbacks: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolCallbacksOf",
-                "text": "ToolCallbacksOf"
-              },
-              "<",
+              "> & PromptReasoningAgentOptions & { prompt: TPrompt; } & { toolCallbacks: ToolCallbacksOfTools<",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -153,7 +125,7 @@
                 "section": "def-common.ToolOptionsOfPrompt",
                 "text": "ToolOptionsOfPrompt"
               },
-              "<TPrompt>>; }"
+              "<TPrompt>[\"tools\"]>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
             "deprecated": false,
@@ -197,14 +169,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>>, keyof ",
+          "ToolDefinitions",
+          " | undefined>[]>>, keyof ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -220,7 +186,25 @@
             "section": "def-common.ToolCallback",
             "text": "ToolCallback"
           },
-          ">; }) => Promise<",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCall",
+            "text": "ToolCall"
+          },
+          "<string, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallArguments",
+            "text": "ToolCallArguments"
+          },
+          ">, ",
+          "ToolCallbackResult",
+          ">>; }) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -253,14 +237,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>>>>"
+          "ToolDefinitions",
+          " | undefined>[]>>>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
         "deprecated": false,
@@ -299,14 +277,8 @@
                 "text": "PromptVersion"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>[]>>, keyof ",
+              "ToolDefinitions",
+              " | undefined>[]>>, keyof ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -322,7 +294,25 @@
                 "section": "def-common.ToolCallback",
                 "text": "ToolCallback"
               },
-              ">; }"
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolCall",
+                "text": "ToolCall"
+              },
+              "<string, ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolCallArguments",
+                "text": "ToolCallArguments"
+              },
+              ">, ",
+              "ToolCallbackResult",
+              ">>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
             "deprecated": false,
