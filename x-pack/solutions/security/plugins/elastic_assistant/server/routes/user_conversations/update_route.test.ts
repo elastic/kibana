@@ -318,7 +318,6 @@ describe('Update conversation route', () => {
   });
 
   describe('Update conversation route with Spaces', () => {
-
     describe('non-default space behavior', () => {
       it('should work correctly in non-default space', async () => {
         const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();

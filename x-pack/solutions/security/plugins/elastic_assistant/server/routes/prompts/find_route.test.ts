@@ -167,12 +167,14 @@ describe('Find user prompts route', () => {
               hits: {
                 total: { value: 1, relation: 'eq' },
                 max_score: 1,
-                hits: [{
-                  _id: 'space1-prompt',
-                  _source: { id: 'space1-prompt', name: 'Space1 Prompt', isDefault: false }
-                }]
-              }
-            }
+                hits: [
+                  {
+                    _id: 'space1-prompt',
+                    _source: { id: 'space1-prompt', name: 'Space1 Prompt', isDefault: false },
+                  },
+                ],
+              },
+            },
           })
         );
 
@@ -191,12 +193,14 @@ describe('Find user prompts route', () => {
               hits: {
                 total: { value: 1, relation: 'eq' },
                 max_score: 1,
-                hits: [{
-                  _id: 'space2-prompt',
-                  _source: { id: 'space2-prompt', name: 'Space2 Prompt', isDefault: false }
-                }]
-              }
-            }
+                hits: [
+                  {
+                    _id: 'space2-prompt',
+                    _source: { id: 'space2-prompt', name: 'Space2 Prompt', isDefault: false },
+                  },
+                ],
+              },
+            },
           })
         );
 

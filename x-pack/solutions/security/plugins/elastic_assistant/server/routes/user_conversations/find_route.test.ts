@@ -156,12 +156,14 @@ describe('Find user conversations route', () => {
               hits: {
                 total: { value: 1, relation: 'eq' },
                 max_score: 1,
-                hits: [{
-                  _id: 'space1-conversation',
-                  _source: { id: 'space1-conversation', title: 'Space1 Conversation' }
-                }]
-              }
-            }
+                hits: [
+                  {
+                    _id: 'space1-conversation',
+                    _source: { id: 'space1-conversation', title: 'Space1 Conversation' },
+                  },
+                ],
+              },
+            },
           })
         );
 
@@ -180,12 +182,14 @@ describe('Find user conversations route', () => {
               hits: {
                 total: { value: 1, relation: 'eq' },
                 max_score: 1,
-                hits: [{
-                  _id: 'space2-conversation',
-                  _source: { id: 'space2-conversation', title: 'Space2 Conversation' }
-                }]
-              }
-            }
+                hits: [
+                  {
+                    _id: 'space2-conversation',
+                    _source: { id: 'space2-conversation', title: 'Space2 Conversation' },
+                  },
+                ],
+              },
+            },
           })
         );
 

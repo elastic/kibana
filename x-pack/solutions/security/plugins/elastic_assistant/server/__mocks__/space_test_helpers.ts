@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import type { ElasticAssistantApiRequestHandlerContext } from '../types';
-
 /**
  * Helper to override the getSpaceId mock for a specific space in tests
  */
@@ -36,12 +33,12 @@ export const expectSpaceScopedIndex = (mockClient: any, spaceId: string) => {
  * Helper to verify that data client was initialized with the correct spaceId
  */
 export const expectDataClientWithSpaceId = (
-  dataClientGetter: jest.Mock, 
+  dataClientGetter: jest.Mock,
   expectedSpaceId: string
 ) => {
   expect(dataClientGetter).toHaveBeenCalledWith(
     expect.objectContaining({
-      spaceId: expectedSpaceId
+      spaceId: expectedSpaceId,
     })
   );
 };
@@ -89,7 +86,10 @@ export const createSpaceTestSuite = (
           // Override will be done in individual test files
         });
 
-        it('should work correctly in non-default space', testImplementations.testNonDefaultSpaceFunctionality);
+        it(
+          'should work correctly in non-default space',
+          testImplementations.testNonDefaultSpaceFunctionality
+        );
 
         if (testImplementations.testSpaceScopedIndices) {
           it('should use space-scoped indices', testImplementations.testSpaceScopedIndices);
@@ -101,6 +101,6 @@ export const createSpaceTestSuite = (
           it('should not access data from other spaces', testImplementations.testSpaceIsolation);
         });
       }
-    }
+    },
   };
 };
