@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Children, isValidElement, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { Children, isValidElement, useRef, useMemo, useCallback } from 'react';
 import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
-import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
-import { TableHeader, useTableHelper, type Table, type CellContext } from '../../lib/core/table';
+import { type GroupNode, type LeafNode } from '../../store_provider';
+import { TableHeader, useCascadeTable, type Table, type CellContext } from '../../lib/core/table';
 import {
   useCascadeVirtualizer,
   getGridHeaderPositioningStyle,
-  getGridRowPositioningStyle,
+  VirtualizedCascadeRowList,
 } from '../../lib/core/virtualizer';
 import {
   useRegisterCascadeAccessibilityHelpers,
@@ -69,7 +69,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   }
 
   const { euiTheme } = useEuiTheme();
-  const actions = useDataCascadeActions<G, L>();
 
   // The scrollable element for your list
   const scrollElementRef = useRef(null);
@@ -78,11 +77,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
 
-  useEffect(() => {
-    actions.setInitialState(data);
-  }, [data, actions]);
-
-  const cascadeHeader = useCallback(
+  const cascadeHeaderElement = useCallback(
     ({ table }: { table: Table<G> }) => {
       const { rows: tableRows } = table.getGroupedRowModel();
 
@@ -120,16 +115,17 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     [rowElement.props.children.props, size]
   );
 
-  const { headerColumns, rows } = useTableHelper<G, L>({
+  const { headerColumns, rows } = useCascadeTable<G, L>({
+    initialData: data,
     enableRowSelection,
     allowMultipleRowToggle,
-    header: cascadeHeader,
+    header: cascadeHeaderElement,
     rowCell: cascadeRowCell,
   });
 
   const {
-    items: virtualItems,
-    totalSize,
+    getVirtualItems,
+    getTotalSize,
     activeStickyIndex,
     scrollOffset: virtualizerScrollOffset,
     measureElement,
@@ -140,6 +136,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     overscan,
     getScrollElement: () => scrollElementRef.current,
     enableStickyGroupHeader,
+    estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
   });
 
   useRegisterCascadeAccessibilityHelpers<G>({
@@ -152,7 +149,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
-      <EuiAutoSizer>
+      <EuiAutoSizer doNotBailOutOnEmptyChildren>
         {(containerSize) => (
           <div ref={scrollElementRef} css={overflowYAuto} style={{ ...containerSize }}>
             <EuiFlexGroup
@@ -162,6 +159,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               style={{ width: containerSize.width }}
             >
               <EuiFlexItem
+                grow={false}
                 css={styles.cascadeTreeGridHeader}
                 style={getGridHeaderPositioningStyle(virtualizedRowComputedTranslateValue)}
                 data-scrolled={
@@ -184,42 +182,36 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
-                <div css={styles.cascadeTreeGridWrapper} style={{ height: totalSize }}>
+                <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div
                     {...treeGridContainerARIAAttributes}
                     aria-labelledby="treegrid-label"
                     css={relativePosition}
                   >
-                    {virtualItems.map(function buildCascadeRows(virtualItem, renderIndex) {
-                      const row = rows[virtualItem.index];
-
-                      // CONSIDERATION: maybe use the sticky index as a marker for accessibility announcements
-                      const isActiveSticky =
-                        enableStickyGroupHeader && activeStickyIndex === virtualItem.index;
-
-                      virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
-
-                      return (
-                        <React.Fragment key={row.id}>
-                          <CascadeRowPrimitive<G, L>
-                            {...{
-                              size,
-                              isActiveSticky,
-                              enableRowSelection,
-                              rowInstance: row,
-                              virtualRow: virtualItem,
-                              virtualRowStyle: getGridRowPositioningStyle(
-                                renderIndex,
-                                virtualizedRowComputedTranslateValue
-                              ),
-                              innerRef: measureElement,
-                              activeStickyRenderSlotRef,
-                              ...rowElement.props,
-                            }}
-                          />
-                        </React.Fragment>
-                      );
-                    })}
+                    <VirtualizedCascadeRowList<G>
+                      {...{
+                        activeStickyIndex,
+                        getVirtualItems,
+                        virtualizedRowComputedTranslateValue,
+                        rows,
+                      }}
+                    >
+                      {({ row, isActiveSticky, virtualItem, virtualRowStyle }) => (
+                        <CascadeRowPrimitive<G, L>
+                          {...{
+                            size,
+                            isActiveSticky,
+                            enableRowSelection,
+                            rowInstance: row,
+                            virtualRow: virtualItem,
+                            virtualRowStyle,
+                            innerRef: measureElement,
+                            activeStickyRenderSlotRef,
+                            ...rowElement.props,
+                          }}
+                        />
+                      )}
+                    </VirtualizedCascadeRowList>
                   </div>
                 </div>
               </EuiFlexItem>
