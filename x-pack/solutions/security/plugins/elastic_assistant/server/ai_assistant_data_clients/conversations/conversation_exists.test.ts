@@ -26,7 +26,7 @@ describe('conversationExists', () => {
         total: { value: 1 },
         hits: [],
       },
-    } as any);
+    });
 
     const result = await conversationExists({
       esClient,
@@ -61,7 +61,7 @@ describe('conversationExists', () => {
         total: { value: 0 },
         hits: [],
       },
-    } as any);
+    });
 
     const result = await conversationExists({
       esClient,
