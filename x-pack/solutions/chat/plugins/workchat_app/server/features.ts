@@ -14,7 +14,6 @@ import {
   WORKCHAT_APP_ID,
   capabilityGroups,
 } from '../common/features';
-import { integrationTypeName, agentTypeName, conversationTypeName } from './saved_objects';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -32,7 +31,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         api: [...capabilityGroups.api.all],
         catalogue: [WORKCHAT_FEATURE_ID],
         savedObject: {
-          all: [integrationTypeName, agentTypeName, conversationTypeName],
+          all: [],
           read: [],
         },
         ui: [...capabilityGroups.ui.all],
@@ -43,8 +42,8 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         api: [...capabilityGroups.api.read],
         catalogue: [WORKCHAT_FEATURE_ID],
         savedObject: {
-          all: [conversationTypeName],
-          read: [integrationTypeName, agentTypeName],
+          all: [],
+          read: [],
         },
         ui: [...capabilityGroups.ui.read],
         // composedOf: [{ feature: WORKCHAT_FRAMEWORK_FEATURE_ID, privileges: ['read'] }],
