@@ -79,6 +79,7 @@ export {
   selectRecentlyClosedTabs,
   selectTab,
   selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
 } from './selectors';
 
 export {
