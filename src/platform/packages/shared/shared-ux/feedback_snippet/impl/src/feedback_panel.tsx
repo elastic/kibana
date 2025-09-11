@@ -23,10 +23,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FeedbackView } from '.';
+import type { FeedbackView } from './feedback_snippet';
 
 interface FeedbackPanelProps {
+  feedbackSnippetId: string;
   feedbackView: FeedbackView;
+  promptViewMessage: React.ReactNode;
   handleDismissPanel: () => void;
   handleOpenSurveyAndDismissPanel: () => void;
   handleNegativeFeedback: () => void;
@@ -36,47 +38,25 @@ interface FeedbackPanelProps {
 const ConfettiComponentLazy = React.lazy(() => import('./confetti'));
 
 const thumbUpIconLabel = i18n.translate(
-  'core.ui.chrome.sideNavigation.sideNavigation.feedbackPanel.thumbUpIconLabel',
+  'sharedUXPackages.feedbackSnippet.feedbackPanel.thumbUpIconLabel',
   {
     defaultMessage: 'Thumb up',
   }
 );
 
 const thumbDownIconLabel = i18n.translate(
-  'core.ui.chrome.sideNavigation.sideNavigation.feedbackPanel.thumbDownIconLabel',
+  'sharedUXPackages.feedbackSnippet.feedbackPanel.thumbDownIconLabel',
   {
     defaultMessage: 'Thumb down',
   }
 );
 
 const faceHappyIconLabel = i18n.translate(
-  'core.ui.chrome.sideNavigation.sideNavigation.feedbackPanel.faceHappyIconLabel',
+  'sharedUXPackages.feedbackSnippet.feedbackPanel.faceHappyIconLabel',
   {
     defaultMessage: 'Happy face',
   }
 );
-
-const panelMessages = {
-  prompt: (
-    <FormattedMessage
-      id="core.ui.chrome.sideNavigation.feedbackPanel.promptTitle"
-      defaultMessage="How's the navigation working for you?"
-    />
-  ),
-  positive: (
-    <FormattedMessage
-      id="core.ui.chrome.sideNavigation.feedbackPanel.positiveTitle"
-      defaultMessage="Thanks for the feedback!{br}Glad you enjoy it!"
-      values={{ br: <br /> }}
-    />
-  ),
-  negative: (
-    <FormattedMessage
-      id="core.ui.chrome.sideNavigation.feedbackPanel.negativeTitle"
-      defaultMessage="Sorry to hear! Please, tell us a little more:"
-    />
-  ),
-};
 
 /**
  * A panel to gather user feedback.
@@ -86,7 +66,9 @@ const panelMessages = {
  * - Negative: Ask the user for more information
  */
 export const FeedbackPanel = ({
+  feedbackSnippetId,
   feedbackView,
+  promptViewMessage,
   handleDismissPanel,
   handleOpenSurveyAndDismissPanel,
   handleNegativeFeedback,
@@ -94,16 +76,33 @@ export const FeedbackPanel = ({
 }: FeedbackPanelProps) => {
   const { euiTheme } = useEuiTheme();
 
+  const panelMessages = {
+    prompt: promptViewMessage,
+    positive: (
+      <FormattedMessage
+        id="sharedUXPackages.feedbackSnippet.feedbackPanel.positiveTitle"
+        defaultMessage="Thanks for the feedback!{br}Glad you enjoy it!"
+        values={{ br: <br /> }}
+      />
+    ),
+    negative: (
+      <FormattedMessage
+        id="sharedUXPackages.feedbackSnippet.feedbackPanel.negativeTitle"
+        defaultMessage="Sorry to hear! Please, tell us a little more:"
+      />
+    ),
+  };
+
   const closePanelIcon = (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
-        data-test-subj="sideNavFeedbackPanelDismiss"
+        data-test-subj="feedbackSnippetPanelDismiss"
         iconType="cross"
         color="text"
         onClick={handleDismissPanel}
-        id="sideNavigationFeedbackPanelDismiss"
+        id={`${feedbackSnippetId}PanelDismiss`}
         aria-label={i18n.translate(
-          'core.ui.chrome.sideNavigation.sideNavigation.feedbackPanel.closeIconLabel',
+          'sharedUXPackages.feedbackSnippet.feedbackPanel.closeIconLabel',
           {
             defaultMessage: 'Close feedback panel',
           }
@@ -117,7 +116,7 @@ export const FeedbackPanel = ({
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={handleNegativeFeedback}
-          id="sideNavigationFeedbackPanelThumbDown"
+          id={`${feedbackSnippetId}PanelThumbDown`}
           color="danger"
           size="s"
         >
@@ -127,7 +126,7 @@ export const FeedbackPanel = ({
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={handlePositiveFeedback}
-          id="sideNavigationFeedbackPanelThumbUp"
+          id={`${feedbackSnippetId}PanelThumbUp`}
           color="success"
           size="s"
         >
@@ -150,16 +149,16 @@ export const FeedbackPanel = ({
       fullWidth
       iconType="popout"
       iconSide="right"
-      id="sideNavigationFeedbackPanelSurveyLink"
+      id={`${feedbackSnippetId}PanelSurveyLink`}
       aria-label={i18n.translate(
-        'core.ui.chrome.sideNavigation.sideNavigation.feedbackPanelSurveyButtonLabel',
+        'sharedUXPackages.feedbackSnippet.feedbackPanelSurveyButtonLabel',
         {
           defaultMessage: 'Take quick survey',
         }
       )}
     >
       <FormattedMessage
-        id="core.ui.chrome.sideNavigation.sideNavigation.feedbackPanelSurveyButtonText"
+        id="sharedUXPackages.feedbackSnippet.feedbackPanelSurveyButtonText"
         defaultMessage="Take quick survey"
       />
     </EuiButton>
@@ -173,7 +172,7 @@ export const FeedbackPanel = ({
 
   return (
     <EuiPanel
-      data-test-subj="sideNavFeedbackPanel"
+      data-test-subj="feedbackSnippetPanel"
       grow={false}
       hasShadow
       css={css`
