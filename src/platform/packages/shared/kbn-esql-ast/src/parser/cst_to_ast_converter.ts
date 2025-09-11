@@ -1784,38 +1784,12 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
       return this.collectBooleanExpression(ctx.booleanExpression());
     } else if (ctx instanceof cst.FunctionContext) {
-      const functionExpressionCtx = ctx.functionExpression();
-      const fn = this.createFunctionCall(ctx);
-      const asteriskArg = functionExpressionCtx.ASTERISK()
-        ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
-        : undefined;
-      if (asteriskArg) {
-        fn.args.push(asteriskArg);
-      }
-
-      // TODO: Remove array manipulations here.
-      const functionArgs = functionExpressionCtx
-        .booleanExpression_list()
-        .flatMap(this.collectBooleanExpression.bind(this))
-        .filter(nonNullable);
-
-      if (functionArgs.length) {
-        fn.args.push(...(functionArgs as any));
-      }
-
-      const mapExpressionCtx = functionExpressionCtx.mapExpression();
-
-      if (mapExpressionCtx) {
-        const trailingMap = this.fromMapExpression(mapExpressionCtx);
-
-        fn.args.push(trailingMap);
-      }
-
-      return fn;
+      return this.fromFunction(ctx);
     } else if (ctx instanceof cst.InlineCastContext) {
       return this.collectInlineCast(ctx);
+    } else {
+      return this.fromParserRuleToUnknown(ctx);
     }
-    return this.fromParserRuleToUnknown(ctx);
   }
 
   private fromCommandNamedParameters(
@@ -2325,6 +2299,55 @@ export class CstToAstConverter {
 
   // --------------------------------------------------- expression: "function"
 
+  private fromFunction(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
+    const functionExpressionCtx = ctx.functionExpression();
+    const functionNameCtx = functionExpressionCtx.functionName();
+    const mapExpressionCtx = functionExpressionCtx.mapExpression();
+    const fn: ast.ESQLFunctionCallExpression = {
+      type: 'function',
+      subtype: 'variadic-call',
+      name: functionNameCtx.getText().toLowerCase(),
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      args: [],
+      incomplete: Boolean(ctx.exception),
+    };
+    const identifierOrParameter = functionNameCtx.identifierOrParameter();
+    const asteriskArg = functionExpressionCtx.ASTERISK()
+      ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
+      : undefined;
+
+    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
+      const operator = this.fromIdentifierOrParam(identifierOrParameter);
+
+      if (operator) {
+        fn.operator = operator;
+      }
+    }
+
+    if (asteriskArg) {
+      fn.args.push(asteriskArg);
+    }
+
+    // TODO: Remove array manipulations here.
+    const functionArgs = functionExpressionCtx
+      .booleanExpression_list()
+      .flatMap(this.collectBooleanExpression.bind(this))
+      .filter(nonNullable);
+
+    if (functionArgs.length) {
+      fn.args.push(...(functionArgs as any));
+    }
+
+    if (mapExpressionCtx) {
+      const trailingMap = this.fromMapExpression(mapExpressionCtx);
+
+      fn.args.push(trailingMap);
+    }
+
+    return fn;
+  }
+
   // TODO: Rename to `toFunction` or similar.
   private createFunction<Subtype extends ast.FunctionSubtype>(
     name: string,
@@ -2345,33 +2368,6 @@ export class CstToAstConverter {
 
     if (subtype) {
       node.subtype = subtype;
-    }
-
-    return node;
-  }
-
-  // TODO: Rename to `toFunctionCall` or similar.
-  private createFunctionCall(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
-    const functionExpressionCtx = ctx.functionExpression();
-    const functionName = functionExpressionCtx.functionName();
-    const node: ast.ESQLFunctionCallExpression = {
-      type: 'function',
-      subtype: 'variadic-call',
-      name: functionName.getText().toLowerCase(),
-      text: ctx.getText(),
-      location: getPosition(ctx.start, ctx.stop),
-      args: [],
-      incomplete: Boolean(ctx.exception),
-    };
-
-    const identifierOrParameter = functionName.identifierOrParameter();
-
-    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.fromIdentifierOrParam(identifierOrParameter);
-
-      if (operator) {
-        node.operator = operator;
-      }
     }
 
     return node;
