@@ -1321,6 +1321,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.ScheduleType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ScheduleType",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
