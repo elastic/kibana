@@ -9,12 +9,13 @@ import {
   isConversationCreatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isReasoningEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
   isToolProgressEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
-import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
+import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
@@ -67,6 +68,16 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
             });
           } else if (isToolProgressEvent(event)) {
             setToolProgress(event.data.message);
+            conversationActions.setToolCallProgress({
+              progress: { message: event.data.message },
+              toolCallId: event.data.tool_call_id,
+            });
+          } else if (isReasoningEvent(event)) {
+            conversationActions.addReasoningStep({
+              step: createReasoningStep({
+                reasoning: event.data.reasoning,
+              }),
+            });
           } else if (isToolCallEvent(event)) {
             conversationActions.addToolCall({
               step: createToolCallStep({
