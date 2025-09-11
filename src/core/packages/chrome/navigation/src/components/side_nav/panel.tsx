@@ -12,13 +12,11 @@ import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 
-import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useRovingIndex } from '../../utils/use_roving_index';
-import { FeedbackSnippet } from '../feedback_snippet';
 
 export interface SideNavPanelProps {
   children: ReactNode;
-  solutionId: SolutionId;
+  sidePanelFooter?: ReactNode;
 }
 
 /**
@@ -28,7 +26,7 @@ export interface SideNavPanelProps {
  *
  * TODO: pass ref to EuiPanel
  */
-export const SideNavPanel = ({ children, solutionId }: SideNavPanelProps): JSX.Element => {
+export const SideNavPanel = ({ children, sidePanelFooter }: SideNavPanelProps): JSX.Element => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -63,7 +61,7 @@ export const SideNavPanel = ({ children, solutionId }: SideNavPanelProps): JSX.E
         >
           {children}
         </div>
-        <FeedbackSnippet solutionId={solutionId} />
+        {sidePanelFooter}
       </EuiPanel>
     </div>
   );

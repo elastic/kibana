@@ -20,5 +20,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-feedback-snippet"
   ]
 }

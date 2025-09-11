@@ -356,11 +356,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       feedbackCallout: {
         async getFeedbackTestSubjectId() {
-          return (await isV2()) ? 'sideNavFeedbackPanel' : 'sideNavfeedbackCallout';
+          return (await isV2()) ? 'feedbackSnippetPanel' : 'sideNavfeedbackCallout';
         },
         async getFeedbackDismissTestSubjectId() {
           return (await isV2())
-            ? 'sideNavFeedbackPanel > sideNavFeedbackPanelDismiss'
+            ? 'feedbackSnippetPanel > feedbackSnippetPanelDismiss'
             : 'sideNavfeedbackCallout > euiDismissCalloutButton';
         },
         async expectExists() {
@@ -370,7 +370,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         },
         async expectMissing() {
           return (await isV2())
-            ? await testSubjects.existOrFail('sideNavFeedbackButton', {
+            ? await testSubjects.existOrFail('feedbackSnippetButton', {
                 timeout: TIMEOUT_CHECK,
               })
             : await testSubjects.missingOrFail(await this.getFeedbackTestSubjectId(), {

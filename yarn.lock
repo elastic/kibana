@@ -7840,6 +7840,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-feedback-snippet@link:src/platform/packages/shared/shared-ux/feedback_snippet/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-context@link:src/platform/packages/shared/shared-ux/file/context":
   version "0.0.0"
   uid ""

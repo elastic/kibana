@@ -12,7 +12,6 @@ import React from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { SolutionId } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
@@ -32,9 +31,9 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
-   * The solution id, used for building feedback survey links.
+   * Content to display inside the side panel footer.
    */
-  solutionId: SolutionId;
+  sidePanelFooter?: React.ReactNode;
   /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
@@ -63,7 +62,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
-  solutionId,
+  sidePanelFooter,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -347,7 +346,7 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
-        <SideNav.Panel solutionId={solutionId}>
+        <SideNav.Panel sidePanelFooter={sidePanelFooter}>
           <SecondaryMenu
             badgeType={sidePanelContent.badgeType}
             isPanel

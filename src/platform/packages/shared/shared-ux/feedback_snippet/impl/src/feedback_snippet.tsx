@@ -9,20 +9,32 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import type { SolutionId } from '@kbn/core-chrome-browser';
 import { FeedbackButton } from './feedback_button';
 import { FeedbackPanel } from './feedback_panel';
-import { FEEDBACK_PANEL_LS_KEY, FEEDBACK_PANEL_POSITIVE_LIFETIME } from '../../constants';
 
-const feedbackUrls: { [id in SolutionId]: string } = {
-  es: 'https://ela.st/search-nav-feedback',
-  chat: 'https://ela.st/search-nav-feedback',
-  oblt: 'https://ela.st/o11y-nav-feedback',
-  security: 'https://ela.st/security-nav-feedback',
-};
+const FEEDBACK_PANEL_POSITIVE_LIFETIME = 3000;
 
 interface FeedbackSnippetProps {
-  solutionId: SolutionId;
+  /**
+   * Message to display in the FeedbackButton.
+   */
+  feedbackButtonMessage: React.ReactNode;
+  /**
+   * HTML id for click tracking purposes.
+   */
+  feedbackSnippetId: string;
+  /**
+   * Key for local storage.
+   */
+  feedbackPanelLocalStorageKey: string;
+  /**
+   * Message to display during the feedback prompt view.
+   */
+  promptViewMessage: React.ReactNode;
+  /**
+   * Survey URL where the FeedbackButton will redirect to.
+   */
+  surveyUrl: string;
 }
 
 export type FeedbackView = 'prompt' | 'positive' | 'negative';
@@ -31,20 +43,25 @@ export type FeedbackView = 'prompt' | 'positive' | 'negative';
  * A snippet to gather user feedback.
  * Initially a panel, once interacted with, it becomes a persistent button.
  */
-export const FeedbackSnippet = ({ solutionId }: FeedbackSnippetProps) => {
+export const FeedbackSnippet = ({
+  feedbackButtonMessage,
+  feedbackSnippetId,
+  feedbackPanelLocalStorageKey,
+  promptViewMessage,
+  surveyUrl,
+}: FeedbackSnippetProps) => {
   const [feedbackView, setFeedbackView] = useState<FeedbackView>('prompt');
   const [showPanel, setShowPanel] = useState(() => {
-    return localStorage.getItem(FEEDBACK_PANEL_LS_KEY) === null;
+    return localStorage.getItem(feedbackPanelLocalStorageKey) === null;
   });
-  const surveyUrl = feedbackUrls[solutionId];
 
   const handleOpenSurvey = () => {
     window.open(surveyUrl, '_blank');
   };
 
   const storeFeedbackInteraction = useCallback(() => {
-    localStorage.setItem(FEEDBACK_PANEL_LS_KEY, Date.now().toString());
-  }, []);
+    localStorage.setItem(feedbackPanelLocalStorageKey, Date.now().toString());
+  }, [feedbackPanelLocalStorageKey]);
 
   const handleDismissPanel = useCallback(() => {
     setShowPanel(false);
@@ -81,13 +98,19 @@ export const FeedbackSnippet = ({ solutionId }: FeedbackSnippetProps) => {
 
   return showPanel ? (
     <FeedbackPanel
+      feedbackSnippetId={feedbackSnippetId}
       feedbackView={feedbackView}
       handleDismissPanel={handleDismissPanel}
       handleOpenSurveyAndDismissPanel={handleOpenSurveyAndDismissPanel}
       handlePositiveFeedback={handlePositiveFeedback}
       handleNegativeFeedback={handleNegativeFeedback}
+      promptViewMessage={promptViewMessage}
     />
   ) : (
-    <FeedbackButton handleOpenSurvey={handleOpenSurvey} />
+    <FeedbackButton
+      feedbackButtonMessage={feedbackButtonMessage}
+      feedbackSnippetId={feedbackSnippetId}
+      handleOpenSurvey={handleOpenSurvey}
+    />
   );
 };
