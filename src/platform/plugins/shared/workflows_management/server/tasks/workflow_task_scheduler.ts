@@ -94,7 +94,7 @@ export class WorkflowTaskScheduler {
           bool: {
             must: [
               { term: { 'task.taskType': 'workflow:scheduled' } },
-              { term: { _id: `task:workflow:${workflowId}:scheduled` } },
+              { ids: { values: [`task:workflow:${workflowId}:scheduled`] } },
             ],
           },
         },

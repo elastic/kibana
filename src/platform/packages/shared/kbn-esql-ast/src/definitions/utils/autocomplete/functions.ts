@@ -24,7 +24,7 @@ import {
   listCompleteItem,
 } from '../../../commands_registry/complete_items';
 import type {
-  ESQLFieldWithMetadata,
+  ESQLColumnData,
   GetColumnsByTypeFn,
   ICommandCallbacks,
   ICommandContext,
@@ -51,7 +51,6 @@ import {
 import { getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getSuggestionsToRightOfOperatorExpression } from '../operators';
 import { buildValueDefinitions } from '../values';
-import { collectUserDefinedColumns, excludeUserDefinedColumnsFromCurrentCommand } from './columns';
 import {
   extractTypeFromASTArg,
   getFieldsOrFunctionsSuggestions,
@@ -167,19 +166,11 @@ export async function getFunctionArgsSuggestions(
     signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
   };
 
-  const fieldsMap: Map<string, ESQLFieldWithMetadata> = context?.fields || new Map();
-  const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
+  const columnMap: Map<string, ESQLColumnData> = context?.columns || new Map();
 
   const references = {
-    fields: fieldsMap,
-    userDefinedColumns: anyUserDefinedColumns,
+    columns: columnMap,
   };
-  const userDefinedColumnsExcludingCurrentCommandOnes = excludeUserDefinedColumnsFromCurrentCommand(
-    commands,
-    command,
-    fieldsMap,
-    innerText
-  );
 
   const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
     getValidSignaturesAndTypesToSuggestNext(
@@ -232,8 +223,7 @@ export async function getFunctionArgsSuggestions(
     arg &&
     isColumn(arg) &&
     !getColumnExists(arg, {
-      fields: fieldsMap,
-      userDefinedColumns: userDefinedColumnsExcludingCurrentCommandOnes,
+      columns: columnMap,
     });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
@@ -437,7 +427,7 @@ async function getListArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
   getFieldsByType: GetColumnsByTypeFn,
-  fieldsMap: Map<string, ESQLFieldWithMetadata>,
+  columnMap: Map<string, ESQLColumnData>,
   offset: number,
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
   activeProduct?: PricingProduct
@@ -460,18 +450,10 @@ async function getListArgsSuggestions(
       }
     }
 
-    const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
-    // extract the current node from the userDefinedColumns inferred
-    anyUserDefinedColumns.forEach((values, key) => {
-      if (values.some((v) => v.location === node.location)) {
-        anyUserDefinedColumns.delete(key);
-      }
-    });
     const [firstArg] = node.args;
     if (isColumn(firstArg)) {
       const argType = extractTypeFromASTArg(firstArg, {
-        fields: fieldsMap,
-        userDefinedColumns: anyUserDefinedColumns,
+        columns: columnMap,
       });
       if (argType) {
         // do not propose existing columns again
@@ -485,8 +467,7 @@ async function getListArgsSuggestions(
             getFieldsByType,
             {
               functions: true,
-              fields: true,
-              userDefinedColumns: anyUserDefinedColumns,
+              columns: true,
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
             hasMinimumLicenseRequired,
@@ -536,8 +517,7 @@ export const getInsideFunctionsSuggestions = async (
         queryText: innerText,
         location: getLocationFromCommandOrOptionName(command.name),
         rootOperator: node,
-        getExpressionType: (expression) =>
-          getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+        getExpressionType: (expression) => getExpressionType(expression, context?.columns),
         getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
         activeProduct: context?.activeProduct,
@@ -550,7 +530,7 @@ export const getInsideFunctionsSuggestions = async (
         innerText,
         ast,
         callbacks?.getByType ?? (() => Promise.resolve([])),
-        context?.fields ?? new Map(),
+        context?.columns ?? new Map(),
         cursorPosition ?? 0,
         callbacks?.hasMinimumLicenseRequired,
         context?.activeProduct
