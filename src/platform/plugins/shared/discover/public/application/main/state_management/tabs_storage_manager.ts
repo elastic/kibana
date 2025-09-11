@@ -78,8 +78,8 @@ export interface TabsStorageManager {
   loadLocally: (props: {
     userId: string;
     spaceId: string;
-    persistedDiscoverSession: DiscoverSession | undefined;
-    shouldClearAllTabs: boolean | undefined;
+    persistedDiscoverSession?: DiscoverSession;
+    shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
   }) => TabsInternalStatePayload;
   getNRecentlyClosedTabs: (
