@@ -56,13 +56,16 @@ export const getDefaultConnector = (
   );
 
   if (defaultConnector) {
+    // If the user has set a default connector setting, and that connector exists, use it
     return defaultConnector;
   }
 
   if (validConnectors?.length) {
+    // In case the default connector is not set or is invalid, return the first valid connector
     return validConnectors[0];
   }
 
+  // If no valid connectors are available, return undefined
   return undefined;
 };
 
