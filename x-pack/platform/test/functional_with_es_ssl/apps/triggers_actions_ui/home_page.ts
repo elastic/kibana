@@ -115,7 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdRule.name);
 
           // Verify url
-          retry.try(async () =>
+          await retry.try(async () =>
             expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdRule.id}`)
           );
         });
