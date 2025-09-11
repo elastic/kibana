@@ -12,8 +12,10 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
@@ -21,7 +23,15 @@ import { useNavigateToDiscover } from '../hooks/use_navigate_to_discover';
 import { AnalyticsEvents } from '../analytics/constants';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 
-export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSampleDataClick }) => {
+interface SampleDataActionButtonProps {
+  clickEvent?: string;
+  hasRequiredLicense?: boolean;
+}
+
+export const SampleDataActionButton = ({
+  clickEvent = AnalyticsEvents.installSampleDataClick,
+  hasRequiredLicense = false,
+}: SampleDataActionButtonProps) => {
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
@@ -115,7 +125,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
     );
   }
 
-  return (
+  const button = (
     <EuiButtonEmpty
       color="primary"
       iconSide="left"
@@ -123,6 +133,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
       size="s"
       data-test-subj="installSampleBtn"
       isLoading={isLoading}
+      disabled={!hasRequiredLicense}
       onClick={onInstallButtonClick}
     >
       <FormattedMessage
@@ -130,5 +141,21 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
         defaultMessage="Install a sample dataset"
       />
     </EuiButtonEmpty>
+  );
+
+  return hasRequiredLicense ? (
+    button
+  ) : (
+    <EuiToolTip
+      position="bottom"
+      title={i18n.translate('xpack.searchHomepage.sampleData.licenseTooltip.title', {
+        defaultMessage: 'Enterprise',
+      })}
+      content={i18n.translate('xpack.searchHomepage.sampleData.licenseTooltip.description', {
+        defaultMessage: 'This dataset makes use of AI features that require an Enterprise license.',
+      })}
+    >
+      {button}
+    </EuiToolTip>
   );
 };

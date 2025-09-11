@@ -32,7 +32,9 @@ export const useIsSampleDataAvailable = () => {
   );
 
   return {
-    isAvailable: isPluginAvailable && hasPrivileges && hasLicense,
+    isUsageAvailable: isPluginAvailable && hasPrivileges && hasLicense,
+    isPluginAvailable,
+    hasPrivileges,
     hasRequiredLicense: hasLicense,
   };
 };

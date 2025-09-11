@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -20,7 +20,11 @@ export const ConnectToElasticsearchSidePanel = () => {
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
-  const { isAvailable: isSampleDataAvailable, hasRequiredLicense } = useIsSampleDataAvailable();
+  const {
+    hasRequiredLicense,
+    isPluginAvailable: isSampleDataIngestPluginAvailable,
+    hasPrivileges: hasSampleDataRequiredPrivileges,
+  } = useIsSampleDataAvailable();
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -52,13 +56,32 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
         />
 
-        {isSampleDataAvailable && (
+        {isSampleDataIngestPluginAvailable && hasSampleDataRequiredPrivileges && (
           <EuiCard
             display="plain"
             hasBorder
             textAlign="left"
             titleSize="xs"
             data-test-subj="sampleDataSection"
+            betaBadgeProps={
+              hasRequiredLicense
+                ? undefined
+                : {
+                    label: i18n.translate(
+                      'xpack.searchHomepage.connectToElasticsearch.licenseBadge.title',
+                      {
+                        defaultMessage: 'Enterprise',
+                      }
+                    ),
+                    tooltipContent: i18n.translate(
+                      'xpack.searchHomepage.connectToElasticsearch.licenseBadge.description',
+                      {
+                        defaultMessage:
+                          'This dataset makes use of AI features that require an Enterprise license.',
+                      }
+                    ),
+                  }
+            }
             title={
               <FormattedMessage
                 id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
@@ -71,17 +94,7 @@ export const ConnectToElasticsearchSidePanel = () => {
                 defaultMessage="Add data sets with sample visualizations, dashboards, and more."
               />
             }
-            footer={<SampleDataActionButton />}
-          />
-        )}
-        {!isSampleDataAvailable && !hasRequiredLicense && (
-          <EuiCallOut
-            data-test-subj="sampleDataLicenseUpgrade"
-            size="s"
-            color={'warning'}
-            title={i18n.translate('xpack.searchHomepage.connectToElasticsearch.licenseRequired', {
-              defaultMessage: 'You need upgrade license to standard',
-            })}
+            footer={<SampleDataActionButton hasRequiredLicense={hasRequiredLicense} />}
           />
         )}
 

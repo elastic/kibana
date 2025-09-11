@@ -9,7 +9,6 @@ import React, { useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -55,7 +54,11 @@ export const CreateIndexForm = ({
 }: CreateIndexFormProps) => {
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
-  const { isAvailable: isSampleDataAvailable, hasRequiredLicense } = useIsSampleDataAvailable();
+  const {
+    hasRequiredLicense,
+    isPluginAvailable: isSampleDataPluginAvailable,
+    hasPrivileges: hasSampleDataRequiredPrivileges,
+  } = useIsSampleDataAvailable();
   const onIngestSampleData = useCallback(() => {
     usageTracker.click(AnalyticsEvents.createIndexIngestSampleDataClick);
     ingestSampleData();
@@ -181,23 +184,11 @@ export const CreateIndexForm = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isSampleDataAvailable && (
+            {isSampleDataPluginAvailable && hasSampleDataRequiredPrivileges && (
               <SampleDataPanel
                 isLoading={isIngestingSampleData}
                 onIngestSampleData={onIngestSampleData}
-              />
-            )}
-            {!isSampleDataAvailable && !hasRequiredLicense && (
-              <EuiCallOut
-                data-test-subj="sampleDataLicenseUpgrade"
-                size="s"
-                color={'warning'}
-                title={i18n.translate(
-                  'xpack.searchIndices.shared.createIndex.sampleData.licenseRequired',
-                  {
-                    defaultMessage: 'You need upgrade license to standard',
-                  }
-                )}
+                hasRequiredLicense={hasRequiredLicense}
               />
             )}
           </EuiFlexItem>
