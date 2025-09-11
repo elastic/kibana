@@ -191,6 +191,31 @@ export const DashboardMigrationDashboard = z
   .merge(DashboardMigrationDashboardData);
 
 /**
+ * The partial version of the migrated elastic dashboard.
+ */
+export type ElasticDashboardPartial = z.infer<typeof ElasticDashboardPartial>;
+export const ElasticDashboardPartial = ElasticDashboard.partial();
+
+/**
+ * The dashboard migration data object for dashboard update operation
+ */
+export type UpdateMigrationDashboard = z.infer<typeof UpdateMigrationDashboard>;
+export const UpdateMigrationDashboard = z.object({
+  /**
+   * The dashboard migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The migrated elastic dashboard attributes to update.
+   */
+  elastic_dashboard: ElasticDashboardPartial.optional(),
+  /**
+   * The comments for the migration including a summary from the LLM in markdown.
+   */
+  comments: MigrationComments.optional(),
+});
+
+/**
  * The dashboard migration task stats object.
  */
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;

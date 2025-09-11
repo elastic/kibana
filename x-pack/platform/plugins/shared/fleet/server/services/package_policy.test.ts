@@ -6035,6 +6035,19 @@ describe('Package policy service', () => {
 
         return Promise.resolve({ saved_objects: [] });
       });
+
+      soClient.get.mockResolvedValue({
+        id: 'package-policy-1',
+        attributes: {
+          name: 'policy1',
+          enabled: true,
+          policy_ids: ['agent-policy-1'],
+          output_id: 'output-id-123',
+          inputs: [],
+          package: { name: 'test-package', version: '1.0.0' },
+        },
+      } as any);
+
       appContextService.start(
         createAppContextStartContractMock(undefined, false, {
           internal: soClient,
@@ -6056,6 +6069,7 @@ describe('Package policy service', () => {
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],
+          package: { name: 'test-package', version: '1.0.0' },
         },
         {
           force: undefined,
