@@ -57,7 +57,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       onKeyDown={onKeyDown}
       onBlur={onBlur}
       placeholder={i18n.translate('metricsExperience.searchInputPlaceholder', {
-        defaultMessage: 'Search metrics…',
+        defaultMessage: 'Search metrics',
       })}
       fullWidth={false}
       compressed

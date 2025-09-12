@@ -35,7 +35,7 @@ export const usePaginatedFields = ({
     const totalPages = Math.ceil(allFields.length / pageSize);
 
     const currentPageFields = allFields
-      .filter((field) => field.name.includes(searchTerm))
+      .filter((field) => field.name.toLowerCase().includes(searchTerm.toLowerCase()))
       .slice(currentPage * pageSize, currentPage * pageSize + pageSize);
 
     return {

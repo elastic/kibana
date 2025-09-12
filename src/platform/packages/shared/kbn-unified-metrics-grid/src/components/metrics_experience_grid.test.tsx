@@ -142,7 +142,7 @@ describe('MetricsExperienceGrid', () => {
     await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
   });
 
-  it('renders the no data state covering the entire container when Fields API returns no data', () => {
+  it('renders the no data state with the header when Fields API returns no data', () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'success',
@@ -152,8 +152,8 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
-    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).not.toBeInTheDocument();
+    expect(queryByTestId('toggleActions')).toBeInTheDocument();
+    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
   });
 
