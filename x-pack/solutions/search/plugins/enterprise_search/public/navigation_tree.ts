@@ -104,7 +104,8 @@ export const getNavigationTreeDefinition = ({
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
                     );
                   },
                   link: SEARCH_HOMEPAGE,
@@ -120,7 +121,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'onechat:agents' },
                   ],
                   iconV2: 'comment',
-                  id: 'chat',
+                  id: 'agent_builder',
                   renderAs: 'panelOpener',
                   sideNavVersion: 'v2',
                   title: AGENTS_TITLE,
