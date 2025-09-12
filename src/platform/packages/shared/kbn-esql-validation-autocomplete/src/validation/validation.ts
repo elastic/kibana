@@ -16,7 +16,7 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import { getColumnsByTypeHelper } from '../shared/resources_helpers';
+import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
@@ -116,12 +116,13 @@ async function validateAst(
   ]);
 
   const sourceQuery = queryString.split('|')[0];
-  const sourceFields = await getColumnsByTypeHelper(
+  const sourceFields = await new QueryColumns(
     EsqlQuery.fromSrc(sourceQuery).ast,
     sourceQuery,
     callbacks
-  ).getColumnMap();
+  ).asMap();
 
+  // TODO move into the loop?
   messages.push(
     ...validateUnsupportedTypeFields(
       sourceFields as Map<string, ESQLFieldWithMetadata>,
@@ -140,12 +141,11 @@ async function validateAst(
    */
   const subqueries = getSubqueriesToValidate(rootCommands);
   for (const subquery of subqueries) {
-    const { getColumnMap } = getColumnsByTypeHelper(subquery, queryString, callbacks);
-    const availableColumns = await getColumnMap();
+    const columns = await new QueryColumns(subquery, queryString, callbacks).asMap();
 
     const references: ReferenceMaps = {
       sources,
-      columns: availableColumns,
+      columns,
       policies: availablePolicies,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
