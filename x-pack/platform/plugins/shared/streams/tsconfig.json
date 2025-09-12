@@ -61,6 +61,8 @@
     "@kbn/licensing-types",
     "@kbn/safer-lodash-set",
     "@kbn/sse-utils",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/otel-semantic-conventions"
   ]
 }
