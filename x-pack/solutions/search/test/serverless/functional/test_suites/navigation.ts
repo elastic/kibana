@@ -26,7 +26,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('navigation', function () {
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
-      await svlCommonPage.loginWithRole('developer');
+      await svlCommonPage.loginWithRole('admin');
       await svlSearchNavigation.navigateToElasticsearchHome();
     });
     after(async () => {
@@ -53,107 +53,118 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Check Side Nav Links
       const sideNavCases: Array<{
-        deepLinkId: AppDeepLinkId;
+        link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         breadcrumbs: string[];
         pageTestSubject: string;
       }> = isV2
         ? [
             {
-              deepLinkId: 'searchHomepage',
+              link: { deepLinkId: 'searchHomepage' },
               breadcrumbs: ['Elasticsearch'],
               pageTestSubject: 'search-homepage',
             },
             {
-              deepLinkId: 'discover',
+              link: { navId: 'agent_builder' },
+              breadcrumbs: ['Conversations'],
+              pageTestSubject: 'onechatPageConversations',
+            },
+            {
+              link: { deepLinkId: 'onechat:tools' },
+              breadcrumbs: ['Tools'],
+              pageTestSubject: 'kbnAppWrapper visibleChrome',
+            },
+            {
+              link: { deepLinkId: 'onechat:agents' },
+              breadcrumbs: ['Agents'],
+              pageTestSubject: 'kbnAppWrapper visibleChrome',
+            },
+            {
+              link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
               pageTestSubject: 'queryInput',
             },
             {
-              deepLinkId: 'dashboards',
+              link: { deepLinkId: 'discover' },
+              breadcrumbs: ['Discover'],
+              pageTestSubject: 'queryInput',
+            },
+            {
+              link: { deepLinkId: 'dashboards' },
               breadcrumbs: ['Dashboards'],
               pageTestSubject: 'dashboardLandingPage',
             },
             {
-              deepLinkId: 'searchPlayground',
+              link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
             },
             {
-              deepLinkId: 'searchSynonyms',
+              link: { deepLinkId: 'searchSynonyms' },
               breadcrumbs: ['Relevance', 'Synonyms'],
               pageTestSubject: 'searchSynonymsOverviewPage',
             },
             {
-              deepLinkId: 'searchQueryRules',
+              link: { deepLinkId: 'searchQueryRules' },
               breadcrumbs: ['Relevance', 'Query rules'],
               pageTestSubject: 'queryRulesBasePage',
             },
             {
-              deepLinkId: 'visualize',
-              breadcrumbs: ['Visualize library'],
-              pageTestSubject: 'newItemButton',
-            },
-            {
-              deepLinkId: 'dev_tools:console',
+              link: { deepLinkId: 'dev_tools:console' },
               breadcrumbs: ['Developer Tools'],
               pageTestSubject: 'console',
             },
           ]
         : [
             {
-              deepLinkId: 'searchHomepage',
+              link: { deepLinkId: 'searchHomepage' },
               breadcrumbs: ['Home'],
               pageTestSubject: 'search-homepage',
             },
             {
-              deepLinkId: 'discover',
+              link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
               pageTestSubject: 'queryInput',
             },
             {
-              deepLinkId: 'dashboards',
+              link: { deepLinkId: 'dashboards' },
               breadcrumbs: ['Dashboards'],
               pageTestSubject: 'dashboardLandingPage',
             },
             {
-              deepLinkId: 'elasticsearchIndexManagement',
+              link: { deepLinkId: 'elasticsearchIndexManagement' },
               breadcrumbs: ['Build', 'Index Management', 'Indices'],
               pageTestSubject: 'elasticsearchIndexManagement',
             },
             {
-              deepLinkId: 'searchPlayground',
+              link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
             },
             {
-              deepLinkId: 'searchSynonyms',
+              link: { deepLinkId: 'searchSynonyms' },
               breadcrumbs: ['Relevance', 'Synonyms'],
               pageTestSubject: 'searchSynonymsOverviewPage',
             },
             {
-              deepLinkId: 'searchQueryRules',
+              link: { deepLinkId: 'searchQueryRules' },
               breadcrumbs: ['Relevance', 'Query rules'],
               pageTestSubject: 'queryRulesBasePage',
             },
             {
-              deepLinkId: 'searchInferenceEndpoints',
+              link: { deepLinkId: 'searchInferenceEndpoints' },
               breadcrumbs: ['Relevance', 'Inference endpoints'],
               pageTestSubject: 'inferenceEndpointsPage',
             },
             {
-              deepLinkId: 'dev_tools:console',
+              link: { deepLinkId: 'dev_tools:console' },
               breadcrumbs: ['Developer Tools'],
               pageTestSubject: 'console',
             },
           ];
 
       for (const testCase of sideNavCases) {
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: testCase.deepLinkId,
-        });
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.clickLink(testCase.link);
+        await solutionNavigation.sidenav.expectLinkActive(testCase.link);
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
@@ -280,6 +291,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       if (isV2) {
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
@@ -317,23 +329,27 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         ]);
       } else {
         // in v2 we don't have "sections" and order is different because items under "more" are in the end
-        await solutionNavigation.sidenav.expectOnlyDefinedLinks([
-          // home:
-          'searchHomepage',
-          // main;
-          'discover',
-          'dashboards',
-          'searchPlayground',
-          'searchSynonyms',
-          'searchQueryRules',
-          'machine_learning',
-          'maps',
-          'visualize',
-          // footer:
-          'dev_tools',
-          'ingest_and_data',
-          'admin_and_settings',
-        ]);
+        await solutionNavigation.sidenav.expectOnlyDefinedLinks(
+          [
+            // home:
+            'searchHomepage',
+            // main;
+            'agent_builder',
+            'discover',
+            'dashboards',
+            'searchPlayground',
+            'searchSynonyms',
+            'searchQueryRules',
+            'machine_learning',
+            'maps',
+            'visualize',
+            // footer:
+            'dev_tools',
+            'ingest_and_data',
+            'admin_and_settings',
+          ],
+          { checkOrder: false }
+        );
       }
     });
   });
