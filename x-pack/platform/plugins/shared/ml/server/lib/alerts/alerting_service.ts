@@ -6,35 +6,28 @@
  */
 
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
 import { capitalize, get, memoize, pick } from 'lodash';
+
+import { i18n } from '@kbn/i18n';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
   type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
-import {
-  getEntityFieldName,
-  getEntityFieldValue,
-  type MlAnomalyRecordDoc,
-  type MlAnomalyResultType,
-  ML_ANOMALY_RESULT_TYPE,
+import type {
+  MlAnomaliesTableRecordExtended,
+  MlAnomalyRecordDoc,
+  MlAnomalyResultType,
 } from '@kbn/ml-anomaly-utils';
+import { getEntityFieldName, getEntityFieldValue } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getAnomalyDescription } from '../../../common/util/anomaly_description';
-import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
-import type { MlClient } from '../ml_client';
-import type {
-  MlAnomalyDetectionAlertParams,
-  MlAnomalyDetectionAlertPreviewRequest,
-} from '../../routes/schemas/alerting_schema';
 import type {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
@@ -44,16 +37,24 @@ import type {
   TopHitsResultsKeys,
   TopInfluencerAADDoc,
   TopRecordAADDoc,
-} from '../../../common/types/alerts';
+} from '@kbn/ml-common-types/alerts';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import type { MlClient } from '@kbn/ml-client';
+import type {
+  MlAnomalyDetectionAlertParams,
+  MlAnomalyDetectionAlertPreviewRequest,
+} from '@kbn/ml-server-api-schemas/alerting_schema';
+import type { DatafeedsService } from '@kbn/ml-server-services/datafeeds';
+import { getTypicalAndActualValues } from '@kbn/ml-server-services/results_service/results_service';
+
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type {
   AnomalyDetectionAlertContext,
   AnomalyDetectionAlertPayload,
 } from './register_anomaly_detection_alert_type';
-import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
+import { resolveMaxTimeInterval } from '../../../common/util/time_interval_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
-import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 import { assertUserError } from './utils';
 

@@ -7,10 +7,9 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import { HttpService } from '../../application/services/http_service';
-import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices } from '../types';
 
 /**
@@ -21,7 +20,9 @@ export const getMlServices = async (
   pluginsStart: MlStartDependencies
 ): Promise<SingleMetricViewerServices> => {
   const [
+    { HttpService },
     { AnomalyDetectorService },
+    { AnomalyExplorerChartsService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { timeSeriesExplorerServiceFactory },
@@ -32,18 +33,20 @@ export const getMlServices = async (
     { toastNotificationServiceProvider },
     { mlJobServiceFactory },
   ] = await Promise.all([
+    await import('@kbn/ml-services/http_service'),
     await import('../../application/services/anomaly_detector_service'),
-    await import('../../application/services/field_format_service_factory'),
-    await import('../../application/util/index_service'),
+    await import('../../application/services/anomaly_explorer_charts_service'),
+    await import('@kbn/ml-services/field_format_service_factory'),
+    await import('@kbn/ml-services/index_service'),
     await import('../../application/util/time_series_explorer_service'),
-    await import('../../application/services/ml_api_service'),
-    await import('../../application/services/results_service'),
-    await import('../../application/capabilities/check_capabilities'),
+    await import('@kbn/ml-services/ml_api_service'),
+    await import('@kbn/ml-services/results_service'),
+    await import('@kbn/ml-services/capabilities/check_capabilities'),
     await import(
       '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
     ),
     await import('../../application/services/toast_notification_service'),
-    await import('../../application/services/job_service'),
+    await import('@kbn/ml-services/job_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);

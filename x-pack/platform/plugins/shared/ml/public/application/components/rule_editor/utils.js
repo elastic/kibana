@@ -13,9 +13,8 @@ import {
   ML_DETECTOR_RULE_APPLIES_TO,
   ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_OPERATOR,
-} from '@kbn/ml-anomaly-utils';
-
-import { processCreatedBy } from '../../../../common/util/job_utils';
+} from '@kbn/ml-anomaly-utils/detector_rule';
+import { processCreatedBy } from '@kbn/ml-common-utils/job_utils/process_created_by';
 
 export function getNewConditionDefaults() {
   return {

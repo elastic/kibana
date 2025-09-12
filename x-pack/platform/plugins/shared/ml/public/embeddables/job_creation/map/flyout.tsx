@@ -20,7 +20,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { getTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_title';
 import type { MapApi } from '@kbn/maps-plugin/public';
 import { Layer } from './map_vis_layer_selection_flyout/layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_map';

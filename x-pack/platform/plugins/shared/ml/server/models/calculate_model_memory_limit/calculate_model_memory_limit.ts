@@ -6,11 +6,14 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
-import type { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
+import type { AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { MlClient } from '@kbn/ml-client';
+
 import { fieldsServiceProvider } from '../fields_service';
-import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
   /**

@@ -6684,6 +6684,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-client@link:x-pack/platform/packages/shared/ml/ml_client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-api-schemas@link:x-pack/platform/packages/shared/ml/common_api_schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-constants@link:x-pack/platform/packages/shared/ml/common_constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-types@link:x-pack/platform/packages/shared/ml/common_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-utils@link:x-pack/platform/packages/shared/ml/common_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-creation-wizard-utils@link:x-pack/platform/packages/private/ml/creation_wizard_utils":
   version "0.0.0"
   uid ""
@@ -6708,11 +6728,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-embeddables@link:x-pack/platform/packages/shared/ml/embeddables":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-error-utils@link:x-pack/platform/packages/shared/ml/error_utils":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-field-stats-flyout@link:x-pack/platform/packages/private/ml/field_stats_flyout":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-hooks@link:x-pack/platform/packages/shared/ml/hooks":
   version "0.0.0"
   uid ""
 
@@ -6728,11 +6756,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-kibana-context@link:x-pack/platform/packages/shared/ml/kibana_context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-license@link:x-pack/platform/packages/shared/ml/license":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-local-storage@link:x-pack/platform/packages/private/ml/local_storage":
   version "0.0.0"
   uid ""
 
+"@kbn/ml-locator@link:x-pack/platform/packages/shared/ml/locator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-nested-property@link:x-pack/platform/packages/private/ml/nested_property":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-node-checks@link:x-pack/platform/packages/shared/ml/node_checks":
   version "0.0.0"
   uid ""
 
@@ -6741,6 +6785,10 @@
   uid ""
 
 "@kbn/ml-parse-interval@link:x-pack/platform/packages/private/ml/parse_interval":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-plugin-contracts@link:x-pack/platform/packages/shared/ml/plugin_contracts":
   version "0.0.0"
   uid ""
 
@@ -6768,6 +6816,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-saved-objects@link:x-pack/platform/packages/shared/ml/saved_objects":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-server-api-schemas@link:x-pack/platform/packages/shared/ml/server_api_schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-server-services@link:x-pack/platform/packages/shared/ml/server_services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-services@link:x-pack/platform/packages/shared/ml/services":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-string-hash@link:x-pack/platform/packages/private/ml/string_hash":
   version "0.0.0"
   uid ""
@@ -6780,7 +6844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-ui-actions@link:x-pack/platform/packages/private/ml/ui_actions":
+"@kbn/ml-ui-actions@link:x-pack/platform/packages/shared/ml/ui_actions":
   version "0.0.0"
   uid ""
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
+import { ANNOTATION_TYPE } from '@kbn/ml-common-types/annotations';
 import {
   SINGLE_METRIC_JOB_CONFIG,
   MULTI_METRIC_JOB_CONFIG,

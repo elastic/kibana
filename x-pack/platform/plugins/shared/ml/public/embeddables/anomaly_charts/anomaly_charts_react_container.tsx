@@ -7,32 +7,35 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import moment from 'moment-timezone';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
+
+import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { type MlEntityField, type MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import type { MlEntityField, MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
-import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
+
 import type {
   AnomalyChartsEmbeddableOverridableState,
   AnomalyChartsEmbeddableServices,
   AnomalyChartsApi,
   AnomalyChartsAttachmentApi,
-} from '..';
+} from '../types';
 
 import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
-import { useMlJobService } from '../../application/services/job_service';
 import { useThresholdToSeverity } from '../../application/explorer/hooks/use_threshold_to_severity';
 import { resolveSeverityFormat } from '../../application/components/controls/select_severity/severity_format_resolver';
 import { useDefaultSeverity } from '../../application/components/controls/select_severity/select_severity';

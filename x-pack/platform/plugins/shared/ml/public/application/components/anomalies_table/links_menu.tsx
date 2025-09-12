@@ -29,14 +29,13 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import {
-  isCategorizationAnomaly,
-  isRuleSupported,
-  type MlCustomUrlAnomalyRecordDoc,
-  type MlKibanaUrlConfig,
-  type MlAnomaliesTableRecord,
-  MLCATEGORY,
+import type {
+  MlCustomUrlAnomalyRecordDoc,
+  MlKibanaUrlConfig,
+  MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
+import { isCategorizationAnomaly, isRuleSupported } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -44,23 +43,26 @@ import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
-
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { PLUGIN_ID } from '../../../../common/constants/app';
-import { findMessageField } from '../../util/index_utils';
-import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils/get_filters_for_dsl_query';
+import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils/escape_kuery_for_field_value_pair';
+import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
-import { useMlJobService } from '../../services/job_service';
-import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
+import { findMessageField } from '../../util/index_utils';
+import { getInitialAnomaliesLayers } from '../../../maps/utils/get_initial_anomalies_layers';
+import { getInitialSourceIndexFieldLayers } from '../../../maps/utils/get_initial_source_index_field_layers';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
 import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlApi, useMlKibana } from '../../contexts/kibana';
-import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import type { FocusTrapProps } from '../../util/create_focus_trap_props';

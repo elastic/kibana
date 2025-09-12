@@ -10,7 +10,7 @@ import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
-import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import type { DropDownLabel } from '@kbn/ml-field-stats-flyout';

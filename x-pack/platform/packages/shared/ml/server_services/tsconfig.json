@@ -1,0 +1,31 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-common-types",
+    "@kbn/ml-client",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-is-defined",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-runtime-field-utils",
+    "@kbn/ml-parse-interval",
+    "@kbn/ml-common-utils",
+    "@kbn/ml-server-api-schemas",
+  ]
+}

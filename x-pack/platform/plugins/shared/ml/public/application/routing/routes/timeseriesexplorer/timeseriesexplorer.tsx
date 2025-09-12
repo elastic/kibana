@@ -7,15 +7,19 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import type { NavigateToPath } from '../../../contexts/kibana';
-import { useMlApi, useUiSettings } from '../../../contexts/kibana';
+import { useUiSettings } from '../../../contexts/kibana';
 import { getDateFormatTz } from '../../../explorer/explorer_utils';
-import { useMlJobService } from '../../../services/job_service';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';

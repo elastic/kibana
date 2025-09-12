@@ -8,20 +8,22 @@
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
-import type { QueryErrorMessage } from '@kbn/ml-error-utils';
+import type { QueryErrorMessage } from '@kbn/ml-common-types/errors';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import type { Dictionary } from '@kbn/ml-common-types/common';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
-import { PLUGIN_ID } from '../../../../../../../common/constants/app';
-import type { Dictionary } from '../../../../../../../common/types/common';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
-import { useMlKibana } from '../../../../../contexts/kibana';
 
 export interface ExplorationQueryBarProps {
   dataView: DataView;
@@ -175,7 +177,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   return (
     <EuiInputPopover
-      style={{ maxWidth: '100%' }}
+      css={{ maxWidth: '100%' }}
       closePopover={() => setQueryErrorMessage(undefined)}
       input={
         <EuiFlexGroup alignItems="center">

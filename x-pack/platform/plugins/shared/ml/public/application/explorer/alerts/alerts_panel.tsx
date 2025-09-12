@@ -32,21 +32,20 @@ import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
 import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { ML_RULE_TYPE_IDS } from '../../../../common';
-import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
-import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
-import { AlertsTableFlyoutBody } from '../../../alerting/anomaly_detection_alerts_table/flyout_body';
-import { CollapsiblePanel } from '../../components/collapsible_panel';
-import { useMlKibana } from '../../contexts/kibana';
-import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
-import { AlertsSummary } from './alerts_summary';
-import { AnomalyDetectionAlertsOverviewChart } from './chart';
-import { statusNameMap } from './const';
+import { ML_RULE_TYPE_IDS, ML_VALID_CONSUMERS } from '@kbn/ml-common-constants/alerts';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
-} from '../../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
+import { AlertsTableFlyoutBody } from '../../../alerting/anomaly_detection_alerts_table/flyout_body';
+import { CollapsiblePanel } from '../../components/collapsible_panel';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
+import { AlertsSummary } from './alerts_summary';
+import { AnomalyDetectionAlertsOverviewChart } from './chart';
+import { statusNameMap } from './const';
 import { AlertsTableCellValue } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
 
 const columns: EuiDataGridColumn[] = [
