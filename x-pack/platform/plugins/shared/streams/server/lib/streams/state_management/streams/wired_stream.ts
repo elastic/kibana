@@ -690,7 +690,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       });
 
       const oldSettings = getInheritedSettings(
-        getAncestorsAndSelf(this._definition.name).map((id) => startingState.get(id)!.definition)
+        getAncestorsAndSelf(this._definition.name).map(
+          (id) => startingState.get(id)!.definition
+        ) as Streams.WiredStream.Definition[]
       );
       if (settingsUpdateRequiresRollover(oldSettings, settings)) {
         actions.push({
