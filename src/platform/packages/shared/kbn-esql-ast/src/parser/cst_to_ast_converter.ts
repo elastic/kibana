@@ -128,12 +128,6 @@ export class CstToAstConverter {
     return location[prop];
   }
 
-  private getUnquotedText(ctx: antlr.ParserRuleContext) {
-    return [68 /* esql_parser.UNQUOTED_IDENTIFIER */, 77 /* esql_parser.UNQUOTED_SOURCE */]
-      .map((keyCode) => ctx.getToken(keyCode, 0))
-      .filter(nonNullable)[0];
-  }
-
   /**
    * Follow a similar logic to the ES one:
    * * remove backticks at the beginning and at the end
@@ -144,7 +138,7 @@ export class CstToAstConverter {
   }
 
   private sanitizeIdentifierString(ctx: antlr.ParserRuleContext) {
-    const result = this.getUnquotedText(ctx)?.getText() || this.safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+    const result = this.safeBackticksRemoval(ctx.getText());
     // TODO - understand why <missing null> is now returned as the match text for the FROM command
     return result === '<missing null>' ? '' : result;
   }
