@@ -139,14 +139,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     async (
       data: AgentFormData,
       {
-        shouldRedirect = true,
+        navigateToListView = true,
         buttonId = BUTTON_IDS.SAVE,
-      }: { shouldRedirect?: boolean; buttonId?: string } = {}
+      }: { navigateToListView?: boolean; buttonId?: string } = {}
     ) => {
       setSubmittingButtonId(buttonId);
-      await submit(data);
-      setSubmittingButtonId(undefined);
-      if (shouldRedirect) {
+      try {
+        await submit(data);
+      } finally {
+        setSubmittingButtonId(undefined);
+      }
+      if (navigateToListView) {
         navigateToOnechatUrl(appPaths.agents.list);
       }
     },
@@ -157,7 +160,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     async (data: AgentFormData) => {
       await handleSave(data, {
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
-        shouldRedirect: false,
+        navigateToListView: false,
       });
       navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
     },

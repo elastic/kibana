@@ -129,37 +129,40 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     async (
       data: ToolFormData,
       {
-        shouldRedirect = true,
+        navigateToListView = true,
         buttonId = BUTTON_IDS.SAVE,
-      }: { shouldRedirect?: boolean; buttonId?: string } = {}
+      }: { navigateToListView?: boolean; buttonId?: string } = {}
     ) => {
       if (mode === ToolFormMode.View) return;
       setSubmittingButtonId(buttonId);
-      if (mode === ToolFormMode.Edit) {
-        switch (data.type) {
-          case ToolType.esql:
-            await saveTool(transformEsqlFormDataForUpdate(data));
-            break;
-          case ToolType.index_search:
-            await saveTool(transformIndexSearchFormDataForUpdate(data));
-            break;
-          default:
-            break;
+      try {
+        if (mode === ToolFormMode.Edit) {
+          switch (data.type) {
+            case ToolType.esql:
+              await saveTool(transformEsqlFormDataForUpdate(data));
+              break;
+            case ToolType.index_search:
+              await saveTool(transformIndexSearchFormDataForUpdate(data));
+              break;
+            default:
+              break;
+          }
+        } else {
+          switch (data.type) {
+            case ToolType.esql:
+              await saveTool(transformEsqlFormDataForCreate(data));
+              break;
+            case ToolType.index_search:
+              await saveTool(transformIndexSearchFormDataForCreate(data));
+              break;
+            default:
+              break;
+          }
         }
-      } else {
-        switch (data.type) {
-          case ToolType.esql:
-            await saveTool(transformEsqlFormDataForCreate(data));
-            break;
-          case ToolType.index_search:
-            await saveTool(transformIndexSearchFormDataForCreate(data));
-            break;
-          default:
-            break;
-        }
+      } finally {
+        setSubmittingButtonId(undefined);
       }
-      setSubmittingButtonId(undefined);
-      if (shouldRedirect) {
+      if (navigateToListView) {
         navigateToOnechatUrl(appPaths.tools.list);
       }
     },
@@ -172,7 +175,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const handleSaveAndTest = useCallback(
     async (data: ToolFormData) => {
-      await handleSave(data, { shouldRedirect: false, buttonId: BUTTON_IDS.SAVE_AND_TEST });
+      await handleSave(data, { navigateToListView: false, buttonId: BUTTON_IDS.SAVE_AND_TEST });
       handleTestTool();
     },
     [handleSave, handleTestTool]
