@@ -17,7 +17,7 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
-  appendSetToWhereClause,
+  appendSetWhereClauseToESQLQuery,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   getESQLQueryColumns,

@@ -17,7 +17,7 @@ import {
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery, appendSetToWhereClause } from '@kbn/esql-utils';
+import { appendSetWhereClauseToESQLQuery, appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { isMultiTermColumn } from '@kbn/esql-multiterm-transformer';
 import {
   buildSimpleExistFilter,
@@ -249,7 +249,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
             const fields = originalStringColumns.map((c) => c.name);
             const values = originalStringColumns.map((c) => originalValues[c.id]);
             const types = originalStringColumns.map((c) => c.meta?.type);
-            const queryWithWhere = appendSetToWhereClause(
+            const queryWithWhere = appendSetWhereClauseToESQLQuery(
               queryString,
               fields,
               values,

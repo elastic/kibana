@@ -35,7 +35,7 @@ export {
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
 } from './utils/append_to_query';
-export { appendSetToWhereClause } from './utils/append_set_to_query';
+export { appendSetWhereClauseToESQLQuery } from './utils/append_set_to_query';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,

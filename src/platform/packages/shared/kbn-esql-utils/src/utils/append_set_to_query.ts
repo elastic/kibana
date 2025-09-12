@@ -23,7 +23,7 @@ import { appendToESQLQuery } from './append_to_query';
  * @param fieldTypes An optional array of field types, used to determine if casting is needed.
  * @returns The updated ES|QL query string.
  */
-export function appendSetToWhereClause(
+export function appendSetWhereClauseToESQLQuery(
   baseESQLQuery: string,
   fields: string[],
   values: unknown[],
