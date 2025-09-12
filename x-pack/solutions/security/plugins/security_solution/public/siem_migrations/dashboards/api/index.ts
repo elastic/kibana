@@ -6,6 +6,7 @@
  */
 
 import { replaceParams } from '@kbn/openapi-common/shared';
+import type { SiemMigrationFilters } from '../../../../common/siem_migrations/types';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import {
@@ -21,7 +22,6 @@ import {
 } from '../../../../common/siem_migrations/dashboards/constants';
 import type {
   CreateDashboardMigrationRequestBody,
-  GetAllDashboardMigrationsStatsResponse,
   StartDashboardsMigrationRequestBody,
   StopDashboardsMigrationResponse,
   CreateDashboardMigrationDashboardsRequestBody,
@@ -29,12 +29,14 @@ import type {
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationResourcesResponse,
   GetDashboardMigrationResponse,
-  GetDashboardMigrationStatsResponse,
   UpsertDashboardMigrationResourcesRequestBody,
   UpsertDashboardMigrationResourcesResponse,
   StartDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestBody,
+  GetDashboardMigrationDashboardsResponse,
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
+import type { DashboardMigrationStats } from '../types';
 
 interface GetDashboardMigrationParams {
   migrationId: string;
@@ -75,10 +77,74 @@ export const getDashboardMigration = async ({
 export const getDashboardMigrationStats = async ({
   migrationId,
   signal,
-}: WithSignal<GetDashboardMigrationParams>): Promise<GetDashboardMigrationStatsResponse> => {
-  return KibanaServices.get().http.get<GetDashboardMigrationStatsResponse>(
+}: WithSignal<GetDashboardMigrationParams>): Promise<DashboardMigrationStats> => {
+  // Typed with `DashboardMigrationStats` instead of `GetDashboardMigrationStatsResponse` to use native enums instead of the zod enum
+  return KibanaServices.get().http.get<DashboardMigrationStats>(
     replaceParams(SIEM_DASHBOARD_MIGRATION_STATS_PATH, { migration_id: migrationId }),
     { version: VERSION, signal }
+  );
+};
+
+export const updateDashboardMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: WithSignal<GetDashboardMigrationParams> & Body<UpdateDashboardMigrationRequestBody>) => {
+  return KibanaServices.get().http.patch<void>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, { migration_id: migrationId }),
+    {
+      version: VERSION,
+      signal,
+      body: JSON.stringify(body),
+    }
+  );
+};
+
+export interface GetMigrationDashboardsParams {
+  /** `id` of the migration to get dashboards documents for */
+  migrationId: string;
+  /** Optional page number to retrieve */
+  page?: number;
+  /** Optional number of documents per page to retrieve */
+  perPage?: number;
+  /** Optional field of the dashboard migration object to sort results by */
+  sortField?: string;
+  /** Optional direction to sort results by */
+  sortDirection?: 'asc' | 'desc';
+  /** Optional parameter to filter documents */
+  filters?: SiemMigrationFilters;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves all the migration dashboard documents of a specific migration. */
+export const getMigrationDashboards = async ({
+  migrationId,
+  page,
+  perPage,
+  sortField,
+  sortDirection,
+  filters,
+  signal,
+}: GetMigrationDashboardsParams): Promise<GetDashboardMigrationDashboardsResponse> => {
+  return KibanaServices.get().http.get<GetDashboardMigrationDashboardsResponse>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH, { migration_id: migrationId }),
+    {
+      version: '1',
+      query: {
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_direction: sortDirection,
+        search_term: filters?.searchTerm,
+        ids: filters?.ids,
+        is_installed: filters?.installed,
+        is_fully_translated: filters?.fullyTranslated,
+        is_partially_translated: filters?.partiallyTranslated,
+        is_untranslatable: filters?.untranslatable,
+        is_failed: filters?.failed,
+      },
+      signal,
+    }
   );
 };
 
@@ -198,8 +264,9 @@ export type GetDashboardMigrationAllStatsParams = WithSignal<{}>;
 
 export const getDashboardMigrationAllStats = async ({
   signal,
-}: GetDashboardMigrationAllStatsParams): Promise<GetAllDashboardMigrationsStatsResponse> => {
-  return KibanaServices.get().http.get<GetAllDashboardMigrationsStatsResponse>(
+}: GetDashboardMigrationAllStatsParams): Promise<DashboardMigrationStats[]> => {
+  // Typed with `DashboardMigrationStats` instead of `GetAllDashboardMigrationsStatsResponse` to use native enums instead of the zod enum
+  return KibanaServices.get().http.get<DashboardMigrationStats[]>(
     SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH,
     { version: VERSION, signal }
   );

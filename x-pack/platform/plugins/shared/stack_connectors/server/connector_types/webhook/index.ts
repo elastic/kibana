@@ -24,7 +24,10 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  combineHeadersWithBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from '@kbn/actions-plugin/server/lib';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { SSLCertType } from '../../../common/auth/constants';
@@ -153,6 +156,7 @@ export async function executor(
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
+
   const { basicAuth, sslOverrides } = buildConnectorAuth({
     hasAuth,
     authType,
@@ -163,10 +167,12 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    headers: mergedHeaders,
   });
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(

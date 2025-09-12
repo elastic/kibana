@@ -25,6 +25,7 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
   // Dashboards
   SIEM_MIGRATION_ADDED_DASHBOARDS = 'siem_migration_added_dashboards',
+  SIEM_MIGRATION_INSTALLED_DASHBOARDS = 'siem_migration_installed_dashboards',
 }
 
 export enum AUDIT_TYPE {
@@ -66,6 +67,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_DASHBOARDS]: AUDIT_TYPE.CREATION,
 };
 
 interface SiemMigrationAuditEvent {
@@ -263,6 +265,26 @@ export class SiemMigrationAuditLogger {
       });
     } else {
       const message = `User installed all installable translated rules through SIEM migration with [migration_id=${migrationId}]`;
+      events.push({ action, message, error });
+    }
+    return this.log(events);
+  }
+
+  public async logInstallDashboards(params: {
+    migrationId: string;
+    ids?: string[];
+    error?: Error;
+  }): Promise<void> {
+    const { ids, migrationId, error } = params;
+    const action = SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_DASHBOARDS;
+    const events: SiemMigrationAuditEvent[] = [];
+    if (ids) {
+      ids.forEach((id) => {
+        const message = `User installed a dashboard through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
+        events.push({ action, message, error });
+      });
+    } else {
+      const message = `User installed all installable dashboards through SIEM migration with [migration_id=${migrationId}]`;
       events.push({ action, message, error });
     }
     return this.log(events);
