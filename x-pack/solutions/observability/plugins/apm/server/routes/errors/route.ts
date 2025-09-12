@@ -12,7 +12,7 @@ import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import type { ErrorDistributionResponse } from './distribution/get_distribution';
 import { getErrorDistribution } from './distribution/get_distribution';
-import { environmentRt, kueryRt, rangeRt, serviceNameOrTraceIdRt } from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import type { ErrorGroupPeriodsResponse } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
@@ -26,19 +26,17 @@ import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/errors/groups/main_statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
   params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
     query: t.intersection([
       t.partial({
         sortField: t.string,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         searchQuery: t.string,
-        spanId: t.string,
-        transactionId: t.string,
-        serviceName: t.string,
-        traceId: t.string,
       }),
-      serviceNameOrTraceIdRt,
       environmentRt,
       kueryRt,
       rangeRt,
@@ -48,20 +46,8 @@ const errorsMainStatisticsRoute = createApmServerRoute({
   handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
-
-    const {
-      serviceName,
-      environment,
-      kuery,
-      sortField,
-      sortDirection,
-      start,
-      end,
-      searchQuery,
-      traceId,
-      spanId,
-      transactionId,
-    } = params.query;
+    const { serviceName } = params.path;
+    const { environment, kuery, sortField, sortDirection, start, end, searchQuery } = params.query;
 
     return await getErrorGroupMainStatistics({
       environment,
@@ -73,9 +59,6 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       start,
       end,
       searchQuery,
-      traceId,
-      spanId,
-      transactionId,
     });
   },
 });

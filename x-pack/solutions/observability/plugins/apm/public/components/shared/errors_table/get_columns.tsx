@@ -28,7 +28,7 @@ const ErrorLink = styled(ErrorOverviewLink)`
 `;
 
 type ErrorGroupMainStatistics = APIReturnType<
-  | 'GET /internal/apm/services/errors/groups/main_statistics'
+  | 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'
   | 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name'
 >;
 type ErrorGroupDetailedStatistics =

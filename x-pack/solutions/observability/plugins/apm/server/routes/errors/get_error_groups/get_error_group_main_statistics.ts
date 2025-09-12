@@ -23,8 +23,6 @@ import {
   TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-  TRANSACTION_ID,
-  SPAN_ID,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
@@ -45,12 +43,9 @@ export async function getErrorGroupMainStatistics({
   transactionName,
   transactionType,
   searchQuery,
-  traceId,
-  spanId,
-  transactionId,
 }: {
   kuery?: string;
-  serviceName?: string;
+  serviceName: string;
   apmEventClient: APMEventClient;
   environment?: string;
   sortField?: string;
@@ -60,9 +55,6 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
-  traceId?: string;
-  spanId?: string;
-  transactionId?: string;
   searchQuery?: string;
 }): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
@@ -119,9 +111,6 @@ export async function getErrorGroupMainStatistics({
           ...termQuery(SERVICE_NAME, serviceName),
           ...termQuery(TRANSACTION_NAME, transactionName),
           ...termQuery(TRANSACTION_TYPE, transactionType),
-          ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, spanId),
-          ...termQuery(TRANSACTION_ID, transactionId),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),

@@ -16,7 +16,8 @@ import type { TableOptions, VisibleItemsStartEnd } from '../../../shared/managed
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
-type MainStatistics = APIReturnType<'GET /internal/apm/services/errors/groups/main_statistics'>;
+type MainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type DetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
@@ -53,20 +54,23 @@ export function useErrorGroupListData({
     useFetcher(
       (callApmApi) => {
         if (start && end) {
-          return callApmApi('GET /internal/apm/services/errors/groups/main_statistics', {
-            params: {
-              query: {
-                serviceName,
-                environment,
-                kuery,
-                start,
-                end,
-                sortField: sorting.field,
-                sortDirection: sorting.direction,
-                searchQuery,
+          return callApmApi(
+            'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+            {
+              params: {
+                path: { serviceName },
+                query: {
+                  environment,
+                  kuery,
+                  start,
+                  end,
+                  sortField: sorting.field,
+                  sortDirection: sorting.direction,
+                  searchQuery,
+                },
               },
-            },
-          }).then((response) => {
+            }
+          ).then((response) => {
             return {
               ...response,
               requestId: uuidv4(),

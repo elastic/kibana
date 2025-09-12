@@ -15,7 +15,7 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/clie
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 type ErrorGroups =
-  APIReturnType<'GET /internal/apm/services/errors/groups/main_statistics'>['errorGroups'];
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'];
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -27,18 +27,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   const callApi = async (
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/errors/groups/main_statistics'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
     >
   ) => {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services/errors/groups/main_statistics',
+      endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
       params: {
+        path: { serviceName, ...overrides?.path },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
-          serviceName,
           ...overrides?.query,
         },
       },
