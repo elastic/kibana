@@ -9,19 +9,6 @@
 
 import type { Token } from 'antlr4';
 
-export const regexUnquotedIdentifierPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
-
-export const formatIdentifier = (text: string): string => {
-  if (regexUnquotedIdentifierPattern.test(text)) {
-    return text;
-  }
-
-  return `\`${text.replace(/`/g, '``')}\``;
-};
-
-export const formatIdentifierParts = (parts: string[]): string =>
-  parts.map(formatIdentifier).join('.');
-
 export const getPosition = (
   start: Pick<Token, 'start' | 'stop'> | null,
   stop?: Pick<Token, 'stop'> | undefined
