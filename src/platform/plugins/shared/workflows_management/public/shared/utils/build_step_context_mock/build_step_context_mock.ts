@@ -25,24 +25,20 @@ export interface StepContextMockData {
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
 
-function buildSchemaFromObjectRecursive(obj: any): z.ZodTypeAny {
+function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
   if (Array.isArray(obj)) {
-    return z.array(buildSchemaFromObjectRecursive(obj[0]));
+    return z.array(buildStepContextSchemaFromObject(obj[0]));
   } else if (typeof obj === 'object' && obj !== null) {
     const config: Record<string, any> = {};
 
     Object.keys(obj).forEach((key) => {
-      config[key] = buildSchemaFromObjectRecursive(obj[key]);
+      config[key] = buildStepContextSchemaFromObject(obj[key]);
     });
 
     return z.object(config).strict();
   }
 
   return z.any();
-}
-
-function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
-  return buildSchemaFromObjectRecursive(obj);
 }
 
 export function buildStepContextMock(workflowGraph: WorkflowGraph): StepContextMockData {
