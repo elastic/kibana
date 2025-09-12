@@ -15,7 +15,6 @@ import {
   canUserCancelCommand,
   isCancelFeatureAvailable,
   checkCancelPermission,
-  getCancelPermissionDetails,
 } from './cancel_authz_utils';
 import { isActionSupportedByAgentType } from '../response_actions/is_response_action_supported';
 import { getEndpointAuthzInitialState } from './authz';

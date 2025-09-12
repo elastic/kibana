@@ -365,7 +365,14 @@ export function registerResponseActionRoutes(
  * Custom cancel action handler that uses utility functions for dynamic permission checking
  * instead of static authorization middleware.
  */
-function cancelActionHandler(endpointContext: EndpointAppContext) {
+function cancelActionHandler(
+  endpointContext: EndpointAppContext
+): RequestHandler<
+  unknown,
+  unknown,
+  CancelActionRequestBody,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<unknown, unknown, CancelActionRequestBody>,
