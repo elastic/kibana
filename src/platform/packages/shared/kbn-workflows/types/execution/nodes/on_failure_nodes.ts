@@ -14,14 +14,14 @@ import { GraphNodeSchema } from './base';
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-continue'),
-  stepId: z.string(),
+
   exitNodeId: z.string(),
 });
 export type EnterContinueNode = z.infer<typeof EnterContinueNodeSchema>;
 
 export const ExitContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  stepId: z.string(),
+
   type: z.literal('exit-continue'),
 });
 export type ExitContinueNode = z.infer<typeof ExitContinueNodeSchema>;
@@ -29,7 +29,7 @@ export type ExitContinueNode = z.infer<typeof ExitContinueNodeSchema>;
 export const EnterRetryNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-retry'),
-  stepId: z.string(),
+
   exitNodeId: z.string(),
   configuration: WorkflowRetrySchema,
 });
@@ -38,7 +38,7 @@ export type EnterRetryNode = z.infer<typeof EnterRetryNodeSchema>;
 export const ExitRetryNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-retry'),
-  stepId: z.string(),
+
   startNodeId: z.string(),
 });
 export type ExitRetryNode = z.infer<typeof ExitRetryNodeSchema>;
@@ -46,7 +46,7 @@ export type ExitRetryNode = z.infer<typeof ExitRetryNodeSchema>;
 export const EnterTryBlockNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-try-block'),
-  stepId: z.string(),
+
   enterNormalPathNodeId: z.string(),
   exitNodeId: z.string(),
 });
@@ -55,7 +55,7 @@ export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;
 export const ExitTryBlockNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-try-block'),
-  stepId: z.string(),
+
   enterNodeId: z.string(),
 });
 export type ExitTryBlockNode = z.infer<typeof ExitTryBlockNodeSchema>;
@@ -63,7 +63,7 @@ export type ExitTryBlockNode = z.infer<typeof ExitTryBlockNodeSchema>;
 export const EnterNormalPathNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-normal-path'),
-  stepId: z.string(),
+
   enterZoneNodeId: z.string(),
   enterFailurePathNodeId: z.string(),
 });
@@ -72,7 +72,7 @@ export type EnterNormalPathNode = z.infer<typeof EnterNormalPathNodeSchema>;
 export const ExitNormalPathNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-normal-path'),
-  stepId: z.string(),
+
   exitOnFailureZoneNodeId: z.string(),
   enterNodeId: z.string(),
 });
@@ -81,7 +81,7 @@ export type ExitNormalPathNode = z.infer<typeof ExitNormalPathNodeSchema>;
 export const EnterFallbackPathNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-fallback-path'),
-  stepId: z.string(),
+
   enterZoneNodeId: z.string(),
 });
 export type EnterFallbackPathNode = z.infer<typeof EnterFallbackPathNodeSchema>;
@@ -89,7 +89,7 @@ export type EnterFallbackPathNode = z.infer<typeof EnterFallbackPathNodeSchema>;
 export const ExitFallbackPathNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-fallback-path'),
-  stepId: z.string(),
+
   exitOnFailureZoneNodeId: z.string(),
   enterNodeId: z.string(),
 });

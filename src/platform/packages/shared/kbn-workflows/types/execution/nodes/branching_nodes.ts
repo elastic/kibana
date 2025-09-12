@@ -15,7 +15,7 @@ export const EnterIfNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-if'),
   exitNodeId: z.string(),
-  stepId: z.string(),
+
   configuration: IfStepSchema.omit({
     steps: true,
     else: true,
@@ -25,7 +25,7 @@ export type EnterIfNode = z.infer<typeof EnterIfNodeSchema>;
 
 export const EnterConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  stepId: z.string(),
+
   type: z.union([z.literal('enter-then-branch'), z.literal('enter-else-branch')]),
   condition: z.union([z.string(), z.undefined()]),
 });
@@ -33,7 +33,7 @@ export type EnterConditionBranchNode = z.infer<typeof EnterConditionBranchNodeSc
 
 export const ExitConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  stepId: z.string(),
+
   type: z.union([z.literal('exit-then-branch'), z.literal('exit-else-branch')]),
   startNodeId: z.string(),
 });
@@ -42,7 +42,7 @@ export type ExitConditionBranchNode = z.infer<typeof ExitConditionBranchNodeSche
 export const ExitIfNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-if'),
-  stepId: z.string(),
+
   startNodeId: z.string(),
 });
 
