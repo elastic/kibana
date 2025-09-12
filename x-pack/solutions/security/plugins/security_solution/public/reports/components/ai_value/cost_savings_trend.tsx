@@ -75,7 +75,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
   return (
     <div
       css={css`
-        padding: ${size.base};
+        padding: ${size.base} ${size.xl};
         .euiPanel,
         .embPanel,
         .echMetric,
@@ -86,11 +86,16 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       `}
       data-test-subj="cost-savings-trend-panel"
     >
-      <EuiTitle size="s">
-        <h3>{i18n.COST_SAVINGS_TREND}</h3>
+      <EuiTitle size="m">
+        <h2>{i18n.COST_SAVINGS_TREND}</h2>
       </EuiTitle>
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup
+        gutterSize="xl"
+        css={css`
+          gap: 48px;
+        `}
+      >
         <EuiFlexItem>
           <VisualizationEmbeddable
             data-test-subj="embeddable-area-chart"
@@ -110,7 +115,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
-            max-width: ${isSmall ? 'auto' : '300px'};
+            max-width: ${isSmall ? 'auto' : '600px'};
           `}
         >
           <CostSavingsKeyInsight isLoading={isLoading} lensResponse={lensResponse} />
