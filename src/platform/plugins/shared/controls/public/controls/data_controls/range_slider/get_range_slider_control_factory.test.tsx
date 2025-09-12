@@ -12,15 +12,16 @@ import { BehaviorSubject, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { PublishesUnifiedSearch, SerializedPanelState } from '@kbn/presentation-publishing';
-import { Query, render, waitFor } from '@testing-library/react';
+import type { Query } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import { Filter, AggregateQuery } from '@kbn/es-query';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { TimeRange } from '@kbn/timerange';
+import type { Filter, AggregateQuery } from '@kbn/es-query';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { TimeRange } from '@kbn/timerange';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
