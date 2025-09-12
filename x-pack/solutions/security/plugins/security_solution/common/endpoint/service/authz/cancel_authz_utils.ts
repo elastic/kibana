@@ -21,6 +21,10 @@ import { isActionSupportedByAgentType } from '../response_actions/is_response_ac
  * Checks if cancel operations are available for the given agent type and environment.
  * This is a general capability check, not command-specific.
  *
+ * Uses `canAccessResponseConsole` as the base permission because cancel operations require
+ * meaningful response action capabilities (not just read access). This permission is calculated
+ * based on having Enterprise license AND at least one non-release/non-cancel response action permission.
+ *
  * @param authz - The user's endpoint authorization permissions
  * @param featureFlags - Experimental features configuration
  * @param agentType - The agent type (endpoint, sentinel_one, crowdstrike, microsoft_defender_endpoint)
@@ -32,7 +36,7 @@ export const isCancelFeatureAvailable = (
   agentType: ResponseActionAgentType
 ): boolean => {
   // Check base access to security solution
-  if (!authz.canReadSecuritySolution) {
+  if (!authz.canAccessResponseConsole) {
     return false;
   }
 

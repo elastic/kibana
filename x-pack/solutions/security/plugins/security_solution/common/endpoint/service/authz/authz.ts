@@ -174,13 +174,14 @@ export const calculateEndpointAuthz = (
     // ---------------------------------------------------------
     canReadAdminData,
     canWriteAdminData,
-    canCancelResponseActions: false, // Always false - requires dynamic validation via utility functions
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
   // of the response actions except `release` and `cancel`. Sole access to `release` is something
   // that is supported for a user in a license downgrade scenario, and in that case, we don't want
   // to allow access to Response Console.
+  //
+  // NOTE: Cancel actions use `canAccessResponseConsole` as their base permission check
   authz.canAccessResponseConsole =
     isEnterpriseLicense &&
     Object.values(
@@ -238,7 +239,6 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteWorkflowInsights: false,
     canReadAdminData: false,
     canWriteAdminData: false,
-    canCancelResponseActions: false,
   };
 };
 

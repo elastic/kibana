@@ -180,7 +180,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
-  cancel: 'canReadSecuritySolution', // Use read permission for cancel operations - users with read access can cancel actions
+  cancel: 'canAccessResponseConsole', // Cancel uses base console permission
 });
 
 // 4 hrs in seconds

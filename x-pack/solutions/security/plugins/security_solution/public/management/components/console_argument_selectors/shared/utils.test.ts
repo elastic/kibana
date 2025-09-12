@@ -90,7 +90,6 @@ describe('utils', () => {
       canReadWorkflowInsights: true,
       canReadAdminData: true,
       canWriteAdminData: true,
-      canCancelResponseActions: false,
     };
 
     describe('with valid permissions', () => {

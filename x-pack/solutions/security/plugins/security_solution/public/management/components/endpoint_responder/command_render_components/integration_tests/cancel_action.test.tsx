@@ -108,7 +108,7 @@ describe('When using cancel action from response actions console', () => {
 
     it('should not show cancel command in help when user lacks write permissions', async () => {
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
-        canReadSecuritySolution: false,
+        canAccessResponseConsole: false,
       });
 
       await enterConsoleCommand(renderResult, user, 'help');
@@ -176,7 +176,7 @@ describe('When using cancel action from response actions console', () => {
       apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
-        canReadSecuritySolution: true,
+        canAccessResponseConsole: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
@@ -204,7 +204,7 @@ describe('When using cancel action from response actions console', () => {
       // Render with user who cannot kill processes but has general write permissions
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
         canKillProcess: false,
-        canReadSecuritySolution: true,
+        canAccessResponseConsole: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
@@ -234,7 +234,7 @@ describe('When using cancel action from response actions console', () => {
       apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValue(mockPendingActions);
 
       await render('microsoft_defender_endpoint', [...ENDPOINT_CAPABILITIES], {
-        canReadSecuritySolution: true,
+        canAccessResponseConsole: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
@@ -257,7 +257,7 @@ describe('When using cancel action from response actions console', () => {
 
     it('should show error when trying to use cancel command with endpoint agent', async () => {
       await render('endpoint', [...ENDPOINT_CAPABILITIES], {
-        canReadSecuritySolution: true,
+        canAccessResponseConsole: true,
       });
 
       await enterConsoleCommand(renderResult, user, 'cancel');

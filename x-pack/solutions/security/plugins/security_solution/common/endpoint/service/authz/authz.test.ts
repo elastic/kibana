@@ -384,7 +384,6 @@ describe('Endpoint Authz service', () => {
         canWriteEndpointExceptions: false,
         canReadAdminData: false,
         canWriteAdminData: false,
-        canCancelResponseActions: false,
       });
     });
   });

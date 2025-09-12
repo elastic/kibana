@@ -15,6 +15,7 @@ import {
   canUserCancelCommand,
   isCancelFeatureAvailable,
   checkCancelPermission,
+  getCancelPermissionDetails,
 } from './cancel_authz_utils';
 import { isActionSupportedByAgentType } from '../response_actions/is_response_action_supported';
 import { getEndpointAuthzInitialState } from './authz';
@@ -37,6 +38,7 @@ describe('cancel authorization utilities', () => {
       canWriteFileOperations: true,
       canWriteExecuteOperations: true,
       canWriteScanOperations: true,
+      canAccessResponseConsole: true, // Response action permissions
     };
 
     mockExperimentalFeatures = {
@@ -55,10 +57,15 @@ describe('cancel authorization utilities', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false when user lacks base security solution access', () => {
-      mockAuthz.canReadSecuritySolution = false;
+    it('should return false when user lacks base response console access', () => {
+      // Remove all response action permissions to make canAccessResponseConsole false
+      const restrictedAuthz = {
+        ...getEndpointAuthzInitialState(),
+        canReadSecuritySolution: true, // Basic read access only
+        // No response action permissions means canAccessResponseConsole would be false
+      };
       const result = isCancelFeatureAvailable(
-        mockAuthz,
+        restrictedAuthz,
         mockExperimentalFeatures,
         'microsoft_defender_endpoint'
       );
@@ -200,7 +207,7 @@ describe('cancel authorization utilities', () => {
       const canCancel = result;
 
       // Verify individual checks
-      const hasBaseAccess = mockAuthz.canReadSecuritySolution;
+      const hasBaseAccess = mockAuthz.canAccessResponseConsole;
       const featureEnabled = mockExperimentalFeatures.microsoftDefenderEndpointCancelEnabled;
       const agentSupportsCancel = isActionSupportedByAgentType(agentType, 'cancel', 'manual');
       const hasCommandPermission = canUserCancelCommand(mockAuthz, command);
@@ -215,9 +222,14 @@ describe('cancel authorization utilities', () => {
     it('should deny cancel when any condition fails', () => {
       const scenarios = [
         {
-          name: 'no base access',
+          name: 'no response console access',
           setup: () => {
-            mockAuthz.canReadSecuritySolution = false;
+            // Remove all response action permissions to simulate no console access
+            mockAuthz = {
+              ...getEndpointAuthzInitialState(),
+              canReadSecuritySolution: true, // Basic read access only
+              canAccessResponseConsole: false,
+            };
           },
         },
         {
@@ -244,11 +256,11 @@ describe('cancel authorization utilities', () => {
       ];
 
       scenarios.forEach(({ name, setup }) => {
-        // Reset to clean state
+        // Reset to clean state with minimal permissions for console access
         mockAuthz = {
           ...getEndpointAuthzInitialState(),
-          canReadSecuritySolution: true,
-          canIsolateHost: true,
+          canIsolateHost: true, // Provides base response action capability
+          canAccessResponseConsole: true, // Would be calculated as true
         };
         mockExperimentalFeatures = {
           ...allowedExperimentalValues,
@@ -281,9 +293,11 @@ describe('cancel authorization utilities', () => {
     });
 
     it('should handle edge case with minimal permissions', () => {
+      // Test with just enough permissions to enable response console access
       const minimalAuthz: EndpointAuthz = {
         ...getEndpointAuthzInitialState(),
-        canReadSecuritySolution: true, // Only base permission
+        canIsolateHost: true, // Minimal response action permission
+        canAccessResponseConsole: true, // Would be calculated as true due to canIsolateHost + Enterprise license
       };
 
       const result = isCancelFeatureAvailable(
@@ -296,9 +310,11 @@ describe('cancel authorization utilities', () => {
     });
 
     it('should deny specific command cancel with minimal permissions', () => {
+      // Test user with response console access but lacking specific command permission
       const minimalAuthz: EndpointAuthz = {
         ...getEndpointAuthzInitialState(),
-        canReadSecuritySolution: true, // Only base permission
+        canKillProcess: true, // Has some response action permission (for console access)
+        canAccessResponseConsole: true, // Would be true due to canKillProcess + Enterprise license
         canIsolateHost: false, // No isolate permission
       };
 

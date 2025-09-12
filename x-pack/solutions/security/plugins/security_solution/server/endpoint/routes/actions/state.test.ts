@@ -105,7 +105,6 @@ describe('when calling the Action state route handler', () => {
           canWriteFileOperations: false,
           canWriteScanOperations: false,
           canReadActionsLogManagement: false,
-          canReadSecuritySolution: false,
         },
       });
 
