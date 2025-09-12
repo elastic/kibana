@@ -49,8 +49,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'RAG Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
@@ -92,13 +91,8 @@ export default function searchSolutionNavigation({
         },
         {
           deepLinkId: 'searchPlayground',
-          breadcrumbs: ['Build', 'RAG Playground'],
+          breadcrumbs: ['Build', 'Playground'],
           pageTestSubject: 'playgroundsListPage',
-        },
-        {
-          deepLinkId: 'enterpriseSearchContent:connectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'searchCreateConnectorPage',
         },
         {
           deepLinkId: 'enterpriseSearchApplications:searchApplications',
@@ -159,7 +153,6 @@ export default function searchSolutionNavigation({
             'dashboards',
             'elasticsearchIndexManagement',
             'searchPlayground',
-            'enterpriseSearchContent:connectors',
             'enterpriseSearchApplications:searchApplications',
 
             // more:
@@ -187,7 +180,6 @@ export default function searchSolutionNavigation({
           'build',
           'elasticsearchIndexManagement',
           'searchPlayground',
-          'enterpriseSearchContent:connectors',
           'enterpriseSearchApplications:searchApplications',
           'relevance',
           'searchSynonyms:synonyms',

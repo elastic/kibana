@@ -264,17 +264,13 @@ import type {
   CreatePrivilegesImportIndexResponse,
 } from './entity_analytics/monitoring/create_index.gen';
 import type {
-  SearchPrivilegesIndicesRequestQueryInput,
-  SearchPrivilegesIndicesResponse,
-} from './entity_analytics/monitoring/search_indices.gen';
-import type {
   DeleteMonitoringEngineRequestQueryInput,
   DeleteMonitoringEngineResponse,
-} from './entity_analytics/privilege_monitoring/engine/delete.gen';
-import type { DisableMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/disable.gen';
-import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
-import type { ScheduleMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/schedule_now.gen';
-import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+} from './entity_analytics/monitoring/engine/delete.gen';
+import type { DisableMonitoringEngineResponse } from './entity_analytics/monitoring/engine/disable.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/monitoring/engine/schedule_now.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/monitoring/health.gen';
 import type {
   CreateEntitySourceRequestBodyInput,
   CreateEntitySourceResponse,
@@ -286,28 +282,32 @@ import type {
   UpdateEntitySourceRequestParamsInput,
   UpdateEntitySourceRequestBodyInput,
   UpdateEntitySourceResponse,
-} from './entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
-import type { PrivMonPrivilegesResponse } from './entity_analytics/privilege_monitoring/privileges.gen';
+} from './entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/monitoring/privileges.gen';
+import type {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesResponse,
+} from './entity_analytics/monitoring/search_indices.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/create.gen';
+} from './entity_analytics/monitoring/users/create.gen';
 import type {
   DeletePrivMonUserRequestParamsInput,
   DeletePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/delete.gen';
+} from './entity_analytics/monitoring/users/delete.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
-} from './entity_analytics/privilege_monitoring/users/list.gen';
+} from './entity_analytics/monitoring/users/list.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
   UpdatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/update.gen';
-import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
+} from './entity_analytics/monitoring/users/update.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/monitoring/users/upload_csv.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -397,8 +397,15 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
+  DeleteDashboardMigrationRequestParamsInput,
+  GetAllDashboardMigrationsStatsResponse,
+  GetAllTranslationStatsDashboardMigrationRequestParamsInput,
+  GetAllTranslationStatsDashboardMigrationResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationDashboardsRequestQueryInput,
+  GetDashboardMigrationDashboardsRequestParamsInput,
+  GetDashboardMigrationDashboardsResponse,
   GetDashboardMigrationResourcesRequestQueryInput,
   GetDashboardMigrationResourcesRequestParamsInput,
   GetDashboardMigrationResourcesResponse,
@@ -406,6 +413,16 @@ import type {
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+  InstallMigrationDashboardsResponse,
+  StartDashboardsMigrationRequestParamsInput,
+  StartDashboardsMigrationRequestBodyInput,
+  StartDashboardsMigrationResponse,
+  StopDashboardsMigrationRequestParamsInput,
+  StopDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
   UpsertDashboardMigrationResourcesRequestParamsInput,
   UpsertDashboardMigrationResourcesRequestBodyInput,
   UpsertDashboardMigrationResourcesResponse,
@@ -901,6 +918,21 @@ For detailed information on Kibana actions and alerting, and additional API call
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Deletes a SIEM dashboards migration using the migration id provided
+   */
+  async deleteDashboardMigration(props: DeleteDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1438,6 +1470,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migrations stats for all migrations stored in the system
+   */
+  async getAllDashboardMigrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetAllDashboardMigrationsStats`);
+    return this.kbnClient
+      .request<GetAllDashboardMigrationsStatsResponse>({
+        path: '/internal/siem_migrations/dashboards/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the rule migrations stats for all migrations stored in the system
    */
   async getAllStatsRuleMigration() {
@@ -1445,6 +1492,28 @@ finalize it.
     return this.kbnClient
       .request<GetAllStatsRuleMigrationResponse>({
         path: '/internal/siem_migrations/rules/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+   */
+  async getAllTranslationStatsDashboardMigration(
+    props: GetAllTranslationStatsDashboardMigrationProps
+  ) {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetAllTranslationStatsDashboardMigration`
+    );
+    return this.kbnClient
+      .request<GetAllTranslationStatsDashboardMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/translation_stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1493,6 +1562,26 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboards added to an existing dashboard migration
+   */
+  async getDashboardMigrationDashboards(props: GetDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request<GetDashboardMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2060,6 +2149,25 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Installs migration dashboards
+   */
+  async installMigrationDashboards(props: InstallMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationDashboards`);
+    return this.kbnClient
+      .request<InstallMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/install',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Installs migration rules
    */
   async installMigrationRules(props: InstallMigrationRulesProps) {
@@ -2540,7 +2648,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Run a shell command on an endpoint.
+   * Run a script on a host. Currently supported only for some agent types.
    */
   async runScriptAction(props: RunScriptActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
@@ -2666,6 +2774,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Starts a SIEM dashboards migration using the migration id provided
+   */
+  async startDashboardsMigration(props: StartDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartDashboardsMigration`);
+    return this.kbnClient
+      .request<StartDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/start',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2691,6 +2818,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Stops a running SIEM dashboards migration using the migration id provided
+   */
+  async stopDashboardsMigration(props: StopDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopDashboardsMigration`);
+    return this.kbnClient
+      .request<StopDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stop',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2750,6 +2895,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates mutable fields of an existing dashboard migration
+   */
+  async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -2977,6 +3138,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
+export interface DeleteDashboardMigrationProps {
+  params: DeleteDashboardMigrationRequestParamsInput;
+}
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
@@ -3064,11 +3228,18 @@ export interface FindAssetCriticalityRecordsProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
+export interface GetAllTranslationStatsDashboardMigrationProps {
+  params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
+}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationDashboardsProps {
+  query: GetDashboardMigrationDashboardsRequestQueryInput;
+  params: GetDashboardMigrationDashboardsRequestParamsInput;
 }
 export interface GetDashboardMigrationResourcesProps {
   query: GetDashboardMigrationResourcesRequestQueryInput;
@@ -3162,6 +3333,10 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
+}
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
   body: InstallMigrationRulesRequestBodyInput;
@@ -3237,12 +3412,19 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface StartDashboardsMigrationProps {
+  params: StartDashboardsMigrationRequestParamsInput;
+  body: StartDashboardsMigrationRequestBodyInput;
+}
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
+}
+export interface StopDashboardsMigrationProps {
+  params: StopDashboardsMigrationRequestParamsInput;
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
@@ -3255,6 +3437,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;

@@ -182,7 +182,7 @@ describe('Registry requests', () => {
       });
 
       it('500', async () => {
-        fetchMock.mockImplementationOnce(() => ({
+        fetchMock.mockImplementation(() => ({
           ok: false,
           status: 500,
           statusText: 'Internal Server Error',
@@ -194,7 +194,7 @@ describe('Registry requests', () => {
           `'500 Internal Server Error' error response from package registry at https://example.com`
         );
         await expect(promise).rejects.toMatchObject({ status: 500 });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(6);
       });
     });
 

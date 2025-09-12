@@ -16,9 +16,9 @@ import {
   createMaintenanceWindow,
   getRuleEvents,
   expectNoActionsFired,
-  runSoon,
 } from './test_helpers';
 import { Spaces } from '../../../scenarios';
+import { runSoon } from '../../helpers';
 import { ES_TEST_DATA_STREAM_NAME, getRuleServices } from './builtin_alert_types/es_query/common';
 import { createDataStream, deleteDataStream, DOCUMENT_SOURCE } from '../create_test_data';
 

@@ -157,7 +157,7 @@ export const cleanupDatastreams = async (es: Client) => {
 };
 
 export const cleanupIngestPipelines = async (es: Client) => {
-  es.ingest.deletePipeline({ id: `${INGEST_PIPELINE_PREFIX}*` });
+  await es.ingest.deletePipeline({ id: `${INGEST_PIPELINE_PREFIX}*` });
 };
 
 export const cleanupPolicies = async (es: Client) => {

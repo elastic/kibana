@@ -279,8 +279,26 @@ describe('Starred and History queries components', () => {
       );
       expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-        'Showing 3 queries (1KB used)'
+        'Showing 3 queries'
       );
+    });
+
+    it('should not render the history queries help text for small sized', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            isSpaceReduced={true}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+      expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('ESQLEditor-history-starred-queries-helpText')
+      ).not.toBeInTheDocument();
     });
 
     it('should render the starred queries if the corresponding btn is clicked', () => {
@@ -446,7 +464,7 @@ describe('Starred and History queries components', () => {
 
       // Initially shows total count
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-        'Showing 3 queries (1KB used)'
+        'Showing 3 queries'
       );
 
       // Filter to show only 1 result
@@ -454,7 +472,7 @@ describe('Starred and History queries components', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
-          'Showing 1 queries (1KB used)'
+          'Showing 1 queries'
         );
       });
     });

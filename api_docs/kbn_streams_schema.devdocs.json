@@ -1240,6 +1240,34 @@
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Group.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Group.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.Group.members",
             "type": "Array",
             "tags": [],
@@ -2469,6 +2497,29 @@
           "readonly [\"append\", \"attachment\", \"bytes\", \"circle\", \"community_id\", \"convert\", \"csv\", \"date\", \"date_index_name\", \"dissect\", \"dot_expander\", \"drop\", \"enrich\", \"fail\", \"fingerprint\", \"foreach\", \"ip_location\", \"geo_grid\", \"geoip\", \"grok\", \"gsub\", \"html_strip\", \"inference\", \"join\", \"json\", \"kv\", \"lowercase\", \"network_direction\", \"pipeline\", \"redact\", \"registered_domain\", \"remove\", \"rename\", \"reroute\", \"script\", \"set\", \"set_security_user\", \"sort\", \"split\", \"terminate\", \"trim\", \"uppercase\", \"urldecode\", \"uri_parts\", \"user_agent\"]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/ingest_pipeline_processors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.emptyAssets",
+        "type": "Object",
+        "tags": [],
+        "label": "emptyAssets",
+        "description": [],
+        "signature": [
+          "{ readonly dashboards: string[]; readonly rules: string[]; readonly queries: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/empty_assets.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -30,6 +30,7 @@ import {
 } from './alert_details_rule_form_flyout';
 import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
+import { useDiscoverUrl } from '../hooks/use_discover_url';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -59,6 +60,8 @@ export function HeaderActions({
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
+  const { discoverUrl } = useDiscoverUrl({ alert, rule });
+
   const handleUntrackAlert = useCallback(async () => {
     if (alert) {
       await untrackAlerts({
@@ -82,6 +85,23 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        {discoverUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={discoverUrl}
+              iconType="discoverApp"
+              target="_blank"
+              data-test-subj="view-in-discover-button"
+            >
+              <EuiText size="s">
+                {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
+                  defaultMessage: 'View in Discover',
+                })}
+              </EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+
         {cases && (
           <EuiFlexItem grow={false}>
             <ObsCasesContext>

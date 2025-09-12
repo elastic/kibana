@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SearchRequest,
-  EsqlEsqlColumnInfo,
-  FieldValue,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 
 export enum ToolResultType {
   resource = 'resource',
@@ -34,8 +31,11 @@ export interface ResourceResult {
 }
 
 export interface TabularDataResult {
+  tool_result_id: string;
   type: ToolResultType.tabularData;
   data: {
+    source?: 'esql';
+    query: string;
     columns: EsqlEsqlColumnInfo[];
     values: FieldValue[][];
   };
@@ -48,7 +48,7 @@ export interface QueryResult {
 
 export interface OtherResult {
   type: ToolResultType.other;
-  data: unknown;
+  data: Record<string, unknown>;
 }
 
 export interface ErrorResult {
@@ -66,3 +66,10 @@ export type ToolResult =
   | QueryResult
   | OtherResult
   | ErrorResult;
+
+export const visualizationElement = {
+  tagName: 'visualization',
+  attributes: {
+    toolResultId: 'tool-result-id',
+  },
+};

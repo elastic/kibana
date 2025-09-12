@@ -786,6 +786,1357 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerQuery",
+        "type": "Class",
+        "tags": [],
+        "label": "ComposerQuery",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.composerQuerySymbol",
+            "type": "boolean",
+            "tags": [],
+            "label": "[composerQuerySymbol]",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ast",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstQueryExpression",
+                    "text": "ESQLAstQueryExpression"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Map<string, unknown>"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.pipe",
+            "type": "Function",
+            "tags": [],
+            "label": "pipe",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.QueryCommandTag",
+                "text": "QueryCommandTag"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.change_point",
+            "type": "Function",
+            "tags": [],
+            "label": "change_point",
+            "description": [
+              "\nAppends a `CHANGE_POINT` command to detect change points in time series data.\nEquivalent to calling `.pipe` with a `CHANGE_POINT` command.\n\nThe `CHANGE_POINT` command is used to identify points in time where the statistical\nproperties of a time series change significantly.\n\n```typescript\n// Basic usage - detect change points in a column\nquery.change_point('metric_value');\n// Result: CHANGE_POINT metric_value\n\n// Specify a key column to group by\nquery.change_point('metric_value', { on: 'timestamp' });\n// Result: CHANGE_POINT metric_value ON timestamp\n\n// Specify output column names for type and p-value\nquery.change_point('metric_value', { as: ['change_type', 'p_value'] });\n// Result: CHANGE_POINT metric_value AS change_type, p_value\n\n// Use all options together\nquery.change_point('metric_value', {\n  on: 'timestamp',\n  as: ['change_type', 'p_value']\n});\n// Result: CHANGE_POINT metric_value ON timestamp AS change_type, p_value\n```\n\nColumns can be specified as strings or arrays for nested columns:\n\n```typescript\nquery.change_point(['metrics', 'cpu'], {\n  on: ['timestamp', 'field'],\n  as: [['change', 'type'], ['p', 'value']]\n});\n// Result: CHANGE_POINT metrics.cpu ON timestamp.field AS change.type, p.value\n```\n"
+            ],
+            "signature": [
+              "(value: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", options?: { on?: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              " | undefined; as?: [type: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", pvalue: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              "] | undefined; }) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.change_point.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [
+                  "The column to analyze for change points. Can be a string\ncolumn name or an array of column parts for nested columns\n(e.g., ['metrics', 'cpu'] for 'metrics.cpu')."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.change_point.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/esql-ast",
+                    "id": "def-common.ComposerQuery.change_point.$2.on",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "on",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/esql-ast",
+                        "scope": "common",
+                        "docId": "kibKbnEsqlAstPluginApi",
+                        "section": "def-common.ComposerColumnShorthand",
+                        "text": "ComposerColumnShorthand"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/esql-ast",
+                    "id": "def-common.ComposerQuery.change_point.$2.as",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "as",
+                    "description": [],
+                    "signature": [
+                      "[type: ",
+                      {
+                        "pluginId": "@kbn/esql-ast",
+                        "scope": "common",
+                        "docId": "kibKbnEsqlAstPluginApi",
+                        "section": "def-common.ComposerColumnShorthand",
+                        "text": "ComposerColumnShorthand"
+                      },
+                      ", pvalue: ",
+                      {
+                        "pluginId": "@kbn/esql-ast",
+                        "scope": "common",
+                        "docId": "kibKbnEsqlAstPluginApi",
+                        "section": "def-common.ComposerColumnShorthand",
+                        "text": "ComposerColumnShorthand"
+                      },
+                      "] | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.dissect",
+            "type": "Function",
+            "tags": [],
+            "label": "dissect",
+            "description": [
+              "\nAppends a `DISSECT` command to extract structured data from unstructured text.\nEquivalent to calling `.pipe` with a `DISSECT` command.\n\nThe `DISSECT` command uses pattern matching to extract key-value pairs from text\nfields based on a delimiter-based pattern. It's particularly useful for parsing\nlog entries, CSV data, or other structured text formats.\n\nRead more: {@link https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands#esql-dissect}.\n\n```typescript\n// Basic usage - extract fields from a text column\nquery.dissect('message', '%{timestamp} - %{level} - %{msg}');\n// Result: DISSECT message \"%{timestamp} - %{level} - %{msg}\"\n\n// Extract from nested column\nquery.dissect(['log', 'entry'], '%{date} %{time} [%{level}] %{message}');\n// Result: DISSECT log.entry \"%{date} %{time} [%{level}] %{message}\"\n\n// Using APPEND_SEPARATOR option\nquery.dissect('data', '%{field1},%{field2},%{field3}', {\n  APPEND_SEPARATOR: ','\n});\n// Result: DISSECT data \"%{field1},%{field2},%{field3}\" APPEND_SEPARATOR = \",\"\n```\n\nExamples with different patterns:\n\n```typescript\n// CSV-like data\nquery.dissect('csv_data', '%{name},%{age},%{city}');\n\n// Log entries with timestamps\nquery.dissect('log_line', '[%{timestamp}] %{level}: %{message}');\n\n// Key-value pairs\nquery.dissect('kv_data', 'user=%{user} action=%{action} result=%{result}');\n\n// Skip unwanted parts\nquery.dissect('complex_log', '%{date} %{time} %{} [%{level}] %{message}');\n```\n"
+            ],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", pattern: string, options?: { APPEND_SEPARATOR?: string | undefined; }) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.dissect.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "The column containing the text to dissect. Can be a string\ncolumn name or an array of column parts for nested columns\n(e.g., ['log', 'message'] for 'log.message')."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.dissect.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pattern",
+                "description": [
+                  "The dissect pattern that defines how to extract fields\nfrom the input text."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.dissect.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/esql-ast",
+                    "id": "def-common.ComposerQuery.dissect.$3.APPEND_SEPARATOR",
+                    "type": "string",
+                    "tags": [],
+                    "label": "APPEND_SEPARATOR",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.grok",
+            "type": "Function",
+            "tags": [],
+            "label": "grok",
+            "description": [
+              "\nAppends a `GROK` command to extract structured data from unstructured text using patterns.\nEquivalent to calling `.pipe` with a `GROK` command.\n\nThe `GROK` command uses regular expression-based patterns to parse and extract fields\nfrom text data. It's particularly powerful for parsing log files, as it combines\nregular expressions with pre-built patterns for common data formats.\n\n```typescript\n// Basic usage - extract fields using a grok pattern\nquery.grok('message', '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:msg}');\n// Result: GROK message \"%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:msg}\"\n\n// Extract from nested column\nquery.grok(['log', 'entry'], '%{COMBINEDAPACHELOG}');\n// Result: GROK log.entry \"%{COMBINEDAPACHELOG}\"\n```\n"
+            ],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", pattern: string) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.grok.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "The column containing the text to parse with grok. Can be a\nstring column name or an array of column parts for nested columns\n(e.g., ['log', 'message'] for 'log.message')."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.grok.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pattern",
+                "description": [
+                  "The grok pattern that defines how to extract and name\nfields from the input text. Use `%{PATTERN:field_name}` syntax to\nextract and name fields."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.enrich",
+            "type": "Function",
+            "tags": [],
+            "label": "enrich",
+            "description": [
+              "\nAppends an `ENRICH` command to add data from an enrich policy to the query\nresults. Equivalent to calling `.pipe` with an `ENRICH` command.\n\nThe `ENRICH` command allows you to add fields from an enrich policy to your query results\nbased on matching field values. Enrich policies are pre-configured datasets that can be\nused to supplement your query data with additional context or metadata.\n\nSee docs: {@link https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands#esql-enrich}\n\n```typescript\n// Basic usage - enrich with a policy\nquery.enrich('user_policy');\n// Result: ENRICH user_policy\n\n// Specify a match field using ON clause\nquery.enrich('geo_policy', { on: 'ip_address' });\n// Result: ENRICH geo_policy ON ip_address\n\n// Select specific fields to add using WITH clause\nquery.enrich('user_policy', {\n  with: {\n    full_name: 'user_name',\n    department: ['org', 'dept']\n  }\n});\n// Result: ENRICH user_policy WITH full_name = user_name, department = org.dept\n\n// Use both ON and WITH options\nquery.enrich('geo_policy', {\n  on: 'client_ip',\n  with: {\n    country: 'geo_country',\n    city: 'geo_city'\n  }\n});\n// Result: ENRICH geo_policy ON client_ip WITH country = geo_country, city = geo_city\n```\n"
+            ],
+            "signature": [
+              "(policy: string, options?: { on?: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              " | undefined; with?: Record<string, ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              "> | undefined; }) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.enrich.$1",
+                "type": "string",
+                "tags": [],
+                "label": "policy",
+                "description": [
+                  "The name of the enrich policy to use for enrichment."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.enrich.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/esql-ast",
+                    "id": "def-common.ComposerQuery.enrich.$2.on",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "on",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/esql-ast",
+                        "scope": "common",
+                        "docId": "kibKbnEsqlAstPluginApi",
+                        "section": "def-common.ComposerColumnShorthand",
+                        "text": "ComposerColumnShorthand"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/esql-ast",
+                    "id": "def-common.ComposerQuery.enrich.$2.with",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "with",
+                    "description": [],
+                    "signature": [
+                      "Record<string, ",
+                      {
+                        "pluginId": "@kbn/esql-ast",
+                        "scope": "common",
+                        "docId": "kibKbnEsqlAstPluginApi",
+                        "section": "def-common.ComposerColumnShorthand",
+                        "text": "ComposerColumnShorthand"
+                      },
+                      "> | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.limit",
+            "type": "Function",
+            "tags": [],
+            "label": "limit",
+            "description": [
+              "\nAppends a new `LIMIT` command to the query. Equivalent to calling\n`.pipe` with a `LIMIT` command.\n"
+            ],
+            "signature": [
+              "(limit: number) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.limit.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [
+                  "The limit to apply to the query."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.sample",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "sample",
+            "description": [
+              "\nAppends a new `SAMPLE` command to the query. Equivalent to calling\n`.pipe` with a `SAMPLE` command.\n\nThe `SAMPLE` command randomly selects a subset of rows from the result set\nbased on the specified probability. This is useful for quickly analyzing\nlarge datasets without processing the entire set of results.\n\n```typescript\n// Sample approximately 10% of the rows\nquery.sample(0.1);\n// ... | SAMPLE 0.1 | ...\n\n// Sample approximately 50% of the rows\nquery.pipe `SAMPLE ${0.5}`;\n// ... | SAMPLE 0.5 | ...\n```\n"
+            ],
+            "signature": [
+              "(probability: number) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.sample.$1",
+                "type": "number",
+                "tags": [],
+                "label": "probability",
+                "description": [
+                  "A number between 0 and 1 representing the fraction of\nrows to sample. For example, 0.1 samples approximately 10% of rows,\nwhile 0.5 samples approximately 50%."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.keep",
+            "type": "Function",
+            "tags": [],
+            "label": "keep",
+            "description": [
+              "\nSpecifies the columns to keep in the result set. Appends a `KEEP` command.\nEquivalent to calling `.pipe` with a `KEEP` command.\n\n```typescript\nquery.pipe`KEEP {['order', 'id']}`; // KEEP order.id\n```\n\nColumns can be a list of column names. To specify nested columns, use the\nshorthand syntax `['user', 'name']` for `user.name`.\n\nFor example:\n\n```typescript\nquery.keep('my-column', ['order', 'id']); // KEEP `my-column`, order.id\n```\n\nColumn name parts are automatically escaped if they contain special\ncharacters.\n"
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", ...columns: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.keep.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "column",
+                "description": [
+                  "The first column to keep."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.keep.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "columns",
+                "description": [
+                  "Additional columns to keep."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.drop",
+            "type": "Function",
+            "tags": [],
+            "label": "drop",
+            "description": [
+              "\nSpecifies the columns to drop from the result set. Appends a `DROP` command.\nEquivalent to calling `.pipe` with a `DROP` command.\n\n```typescript\nquery.pipe`DROP {['order', 'id']}`; // DROP order.id\n```\n\nColumns can be a list of column names. To specify nested columns, use the\nshorthand syntax `['user', 'name']` for `user.name`.\n\nFor example:\n\n```typescript\nquery.drop('my-column', ['order', 'id']); // DROP `my-column`, order.id\n```\n\nColumn name parts are automatically escaped if they contain special\ncharacters.\n"
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", ...columns: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.drop.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "column",
+                "description": [
+                  "The first column to drop."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.drop.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "columns",
+                "description": [
+                  "Additional columns to drop."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.mv_expand",
+            "type": "Function",
+            "tags": [],
+            "label": "mv_expand",
+            "description": [
+              "\nAppends a `MV_EXPAND` command to expand multi-valued fields into multiple\nrows. Equivalent to calling `.pipe` with a `MV_EXPAND` command.\n\n```typescript\nquery.pipe `MV_EXPAND tags`; // ... | MV_EXPAND tags | ...\n```\n\nColumns can be specified as strings or arrays for nested columns:\n\n```typescript\nquery.mv_expand(['user', 'roles']); // ... | MV_EXPAND user.roles | ...\n```"
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.mv_expand.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "column",
+                "description": [
+                  "The column to expand."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.rename",
+            "type": "Function",
+            "tags": [],
+            "label": "rename",
+            "description": [
+              "\nSpecifies renaming of columns in the result set. Appends a `RENAME` command.\nEquivalent to calling `.pipe` with a `RENAME` command.\n\n```typescript\nquery.pipe `RENAME foo = bar, baz = qux`;\n```\n\nColumns can be specified as strings or arrays for nested columns:\n\n```typescript\nquery.rename(['user', 'name'], 'username');\n// ... | RENAME user.name = username | ...\n```\n\nYou can rename multiple columns at once:\n\n```typescript\nquery.rename(\n  ['user', 'name'], 'username',\n  'addr', ['user', 'address']\n);\n// ... | RENAME user.name = username, addr = user.address | ...\n```\n"
+            ],
+            "signature": [
+              "(expression: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerRenameShorthand",
+                "text": "ComposerRenameShorthand"
+              },
+              ", ...expressions: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerRenameShorthand",
+                "text": "ComposerRenameShorthand"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.rename.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "expression",
+                "description": [
+                  "The first rename expression as a tuple of [newName, oldName]."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerRenameShorthand",
+                    "text": "ComposerRenameShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.rename.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "expressions",
+                "description": [
+                  "Additional rename expressions."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerRenameShorthand",
+                    "text": "ComposerRenameShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.sort",
+            "type": "Function",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nSpecifies the columns to sort by. Appends a `SORT` command. Equivalent to\ncalling `.pipe` with a `SORT` command.\n\n```typescript\nquery.pipe `SORT order.id,\n  order.date DESC, user.name NULLS LAST`;\n```\n\nOrder conditions are specified as a 3-tuple [column, order, nulls].\n`column` can be specified as a string or as an array of column parts.\n\nFor example:\n\n```typescript\nquery.sort([['order', 'id'], 'ASC', 'NULLS FIRST']);\n  // SORT order.id ASC NULLS FIRST\n```\n\nIf you your column is not nested, you can simply pass a string:\n\n```typescript\nquery.sort(['column', '', 'NULLS FIRST']); // SORT column NULLS FIRST\nquery.sort('abc'); // SORT abc\n```\n"
+            ],
+            "signature": [
+              "(expression: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerSortShorthand",
+                "text": "ComposerSortShorthand"
+              },
+              ", ...expressions: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerSortShorthand",
+                "text": "ComposerSortShorthand"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.sort.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "expression",
+                "description": [
+                  "The primary sort expression."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerSortShorthand",
+                    "text": "ComposerSortShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.sort.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "expressions",
+                "description": [
+                  "Additional sort expressions."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerSortShorthand",
+                    "text": "ComposerSortShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.lookup_join",
+            "type": "Function",
+            "tags": [],
+            "label": "lookup_join",
+            "description": [
+              "\nAppends a `LOOKUP JOIN` command to perform a lookup join with another index.\nEquivalent to calling `.pipe` with a `LOOKUP JOIN` command.\n\nThe `LOOKUP JOIN` command allows you to enrich your query results by joining\ndata from another index based on matching field values. This is useful for\nadding context or related information from different datasets.\n\n```typescript\n// Basic usage - perform a lookup join with another index\nquery.lookup_join('other_index', 'user_id');\n// Result: ... | LOOKUP JOIN other_index ON user_id | ...\n\n// Join on multiple fields\nquery.lookup_join('other_index', 'user_id', 'session_id');\n// Result: ... | LOOKUP JOIN other_index ON user_id, session_id | ...\n\n// Join using a nested column\nquery.lookup_join('other_index', ['user', 'id']);\n// Result: ... | LOOKUP JOIN other_index ON user.id | ...\n```\n"
+            ],
+            "signature": [
+              "(lookupIndex: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerSourceShorthand",
+                "text": "ComposerSourceShorthand"
+              },
+              ", onFieldName: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              ", ...onFieldNames: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerColumnShorthand",
+                "text": "ComposerColumnShorthand"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.lookup_join.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "lookupIndex",
+                "description": [
+                  "The name of the index to join with."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerSourceShorthand",
+                    "text": "ComposerSourceShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.lookup_join.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "onFieldName",
+                "description": [
+                  "The first field to join on. Can be a string column name\nor an array of column parts for nested columns (e.g., ['user', 'id']\nfor 'user.id')."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.lookup_join.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "onFieldNames",
+                "description": [
+                  "Additional fields to join on."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerColumnShorthand",
+                    "text": "ComposerColumnShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.where",
+            "type": "Function",
+            "tags": [],
+            "label": "where",
+            "description": [
+              "\nAppends a `WHERE` command to filter rows based on a condition. Equivalent to\ncalling `.pipe` with a `WHERE` command.\n\n```typescript\nquery.where `foo > 42 AND bar < 24`;\n```\n\nYou can use parameters in the WHERE condition:\n\n```typescript\nconst threshold = 42;\nquery.where `foo > ${{threshold}}`;\n```\n\nYou can also parametrize the template by providing parameters upfront:\n\n```typescript\nquery.where({threshold: 42}) `foo > ?threshold`;\n```\n\nOr use string syntax with parameters:\n\n```typescript\nquery.where('foo > ?threshold', {threshold: 42});\n```\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.QueryCommandTag",
+                "text": "QueryCommandTag"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.getParams",
+            "type": "Function",
+            "tags": [],
+            "label": "getParams",
+            "description": [
+              "\nReturns a record of all parameters used in the query, where keys are\nparameter names and values are the corresponding parameter values."
+            ],
+            "signature": [
+              "() => Record<string, unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.setParam",
+            "type": "Function",
+            "tags": [],
+            "label": "setParam",
+            "description": [],
+            "signature": [
+              "(name: string, value: unknown) => this"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.setParam.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.setParam.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.print",
+            "type": "Function",
+            "tags": [],
+            "label": "print",
+            "description": [
+              "\nPrints the query to a string in a specified format.\n"
+            ],
+            "signature": [
+              "(format?: \"basic\" | \"wrapping\") => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQuery.print.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "format",
+                "description": [
+                  "The format of the printed query. Can be 'wrapping' for a\nmore readable format or 'basic' for a single line."
+                ],
+                "signature": [
+                  "\"basic\" | \"wrapping\""
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The printed query string."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.toRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "toRequest",
+            "description": [
+              "\nConverts the query to an ESQL request format as an object, which\nElasticsearch `POST /_query` API expects.\n"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.EsqlRequest",
+                "text": "EsqlRequest"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "An object representing the ESQL request, including the query string\nand parameters."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQuery.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [
+              "\nUsed for debugging and logging purposes, this method provides a\nstring representation of the ComposerQuery instance.\n\nSimply cast the `query` instance to a string to get a formatted output.\n\n```typescript\nconst query = esql`\n  FROM kibana_ecommerce_index\n    | WHERE foo > 42 AND bar < 24\n    | EVAL a = 123 | LIMIT 10`;\n\nconsole.log(query + '');\n// Output:\n// ComposerQuery\n// ├─ query\n// │  └─ FROM kibana_ecommerce_index\n// │       | WHERE foo > 42 AND bar < 24\n// │       | EVAL a = 123\n// │       | LIMIT 10\n// │\n// └─ params\n//    └─ {}\n```"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/composer_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLErrorListener",
         "type": "Class",
         "tags": [],
@@ -1181,6 +2532,67 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/query/query.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ParameterHole",
+        "type": "Class",
+        "tags": [],
+        "label": "ParameterHole",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/parameter_hole.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ParameterHole.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/parameter_hole.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ParameterHole.Unnamed.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/parameter_hole.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ParameterHole.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/parameter_hole.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5192,6 +6604,116 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.e",
+        "type": "Function",
+        "tags": [],
+        "label": "e",
+        "description": [
+          "\nAlias for {@link esql} for convenience."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTag",
+            "text": "ComposerQueryTag"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ParametrizedComposerQueryTag",
+            "text": "ParametrizedComposerQueryTag"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryGenerator",
+            "text": "ComposerQueryGenerator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQuery",
+            "text": "ComposerQuery"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTagMethods",
+            "text": "ComposerQueryTagMethods"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.esql",
+        "type": "Function",
+        "tags": [],
+        "label": "esql",
+        "description": [
+          "\nESQL query composer tag function.\n\nThis function allows you to create ESQL queries using template literals.\nIt supports both static and dynamic inputs, but it is designed to provide\nsafe and structured query construction with dynamic parameters.\n\nBasic example:\n\n```typescript\nconst inputFromUser = 42;\nconst query = esql`FROM index | WHERE foo > ${inputFromUser} | LIMIT 10`;\n```\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTag",
+            "text": "ComposerQueryTag"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ParametrizedComposerQueryTag",
+            "text": "ParametrizedComposerQueryTag"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryGenerator",
+            "text": "ComposerQueryGenerator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQuery",
+            "text": "ComposerQuery"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTagMethods",
+            "text": "ComposerQueryTagMethods"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.exp",
         "type": "Function",
         "tags": [],
@@ -5392,6 +6914,54 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.getNoValidCallSignatureError",
+        "type": "Function",
+        "tags": [],
+        "label": "getNoValidCallSignatureError",
+        "description": [],
+        "signature": [
+          "(fnName: string, givenTypes: string[]) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/utils/validation/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.getNoValidCallSignatureError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fnName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/utils/validation/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.getNoValidCallSignatureError.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "givenTypes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/utils/validation/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5722,6 +7292,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isFieldType",
+        "type": "Function",
+        "tags": [],
+        "label": "isFieldType",
+        "description": [],
+        "signature": [
+          "(str: string | undefined) => str is \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isFieldType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -6595,14 +8198,6 @@
         "references": [
           {
             "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts"
           },
           {
@@ -6692,6 +8287,14 @@
           {
             "plugin": "@kbn/esql-utils",
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts"
+          },
+          {
+            "plugin": "@kbn/esql-composer",
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
+          },
+          {
+            "plugin": "@kbn/esql-composer",
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
           },
           {
             "plugin": "inference",
@@ -6831,14 +8434,6 @@
           },
           {
             "plugin": "@kbn/esql-composer",
-            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
-          },
-          {
-            "plugin": "@kbn/esql-composer",
-            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
-          },
-          {
-            "plugin": "@kbn/esql-composer",
             "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.test.ts"
           },
           {
@@ -6859,11 +8454,11 @@
           },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/helper.test.ts"
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.test.ts"
           },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/helper.test.ts"
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.test.ts"
           }
         ],
         "children": [
@@ -7402,6 +8997,84 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.within",
+        "type": "Function",
+        "tags": [],
+        "label": "within",
+        "description": [],
+        "signature": [
+          "(inner: number | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLSingleAstItem",
+            "text": "ESQLSingleAstItem"
+          },
+          ", outer: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLSingleAstItem",
+            "text": "ESQLSingleAstItem"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/location.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.within.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inner",
+            "description": [],
+            "signature": [
+              "number | ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLSingleAstItem",
+                "text": "ESQLSingleAstItem"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/location.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.within.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outer",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLSingleAstItem",
+                "text": "ESQLSingleAstItem"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/location.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -7525,6 +9198,248 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerQueryTagMethods",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComposerQueryTagMethods",
+        "description": [
+          "\nMethods available of the `esql` tagged template function.\nThese methods are used to construct AST nodes."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTagMethods",
+            "text": "ComposerQueryTagMethods"
+          },
+          " extends Omit<typeof ",
+          "src/platform/packages/shared/kbn-esql-ast/src/synth/index",
+          ", \"par\" | \"dpar\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryTagMethods.par",
+            "type": "Function",
+            "tags": [],
+            "label": "par",
+            "description": [],
+            "signature": [
+              "(value: unknown, name?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ParameterHole",
+                "text": "ParameterHole"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQueryTagMethods.par.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQueryTagMethods.par.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryTagMethods.dpar",
+            "type": "Function",
+            "tags": [],
+            "label": "dpar",
+            "description": [],
+            "signature": [
+              "(value: unknown, name?: string | undefined) => ",
+              "DoubleParameterHole"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQueryTagMethods.dpar.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQueryTagMethods.dpar.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryTagMethods.from",
+            "type": "Function",
+            "tags": [],
+            "label": "from",
+            "description": [
+              "\nCreates a new {@link ComposerQuery} instance with a `FROM` command with\nthe specified list of sources.\n\nExample:\n\n```typescript\nconst query = esql.from('kibana_ecommerce_index', 'kibana_logs_index');\n// FROM kibana_ecommerce_index, kibana_logs_index\n```\n"
+            ],
+            "signature": [
+              "(source: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerSourceShorthand",
+                "text": "ComposerSourceShorthand"
+              },
+              ", ...moreSources: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerSourceShorthand",
+                "text": "ComposerSourceShorthand"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerQuery",
+                "text": "ComposerQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQueryTagMethods.from.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "source",
+                "description": [
+                  "The source to use in the `FROM` command, at least one source\nis required."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerSourceShorthand",
+                    "text": "ComposerSourceShorthand"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.ComposerQueryTagMethods.from.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "moreSources",
+                "description": [
+                  "Additional sources to include in the `FROM` command."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ComposerSourceShorthand",
+                    "text": "ComposerSourceShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryTagMethods.nop",
+            "type": "Object",
+            "tags": [],
+            "label": "nop",
+            "description": [
+              "\nAn AST no-op command that can be used in the query, for example in\nconditional expressions.\n\nExample:\n\n```typescript\nconst shouldAddNoop = true;\nconst query = esql`FROM index\n  | ${shouldAddNoop ? esql.noop : esql.cmd`WHERE foo > 42`}\n  | LIMIT 10`;\n```\n\nNo-op command is removed from the final query during synthesis.\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLCommand",
+                "text": "ESQLCommand"
+              },
+              "<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8664,6 +10579,110 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.EsqlRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsqlRequest",
+        "description": [
+          "\nThe Elasticsearch request body as it can be sent to the `POST /_query` endpoint."
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.EsqlRequest.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.EsqlRequest.params",
+            "type": "Array",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.EsqlRequestParams",
+                "text": "EsqlRequestParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.EsqlRequest.filter",
+            "type": "Unknown",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.EsqlRequest.columnar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "columnar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.EsqlRequest.locale",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.EsqlRequest.wait_for_completion_timeout",
+            "type": "string",
+            "tags": [],
+            "label": "wait_for_completion_timeout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLSource",
         "type": "Interface",
         "tags": [],
@@ -9063,7 +11082,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
+              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9131,28 +11150,12 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.FunctionParameter.acceptedValues",
+            "id": "def-common.FunctionParameter.suggestedValues",
             "type": "Array",
             "tags": [],
-            "label": "acceptedValues",
+            "label": "suggestedValues",
             "description": [
-              "\nif provided this means that the value must be one\nof the options in the array iff the value is a literal.\n\nString values are case insensitive.\n\nIf the value is not a literal, this field is ignored because\nwe can't check the return value of a function to see if it\nmatches one of the options prior to runtime."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.FunctionParameter.literalSuggestions",
-            "type": "Array",
-            "tags": [],
-            "label": "literalSuggestions",
-            "description": [
-              "\nMust only be included _in addition to_ acceptedValues.\n\nIf provided this is the list of suggested values that\nwill show up in the autocomplete. If omitted, the acceptedValues\nwill be used as suggestions.\n\nThis is useful for functions that accept\nvalues that we don't want to show as suggestions."
+              "\nA list of suggested values for this parameter."
             ],
             "signature": [
               "string[] | undefined"
@@ -9393,6 +11396,93 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.QueryCommandTag",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryCommandTag",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.QueryCommandTag",
+            "text": "QueryCommandTag"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.QueryCommandTagParametrized",
+            "text": "QueryCommandTagParametrized"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.QueryCommandTag.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.QueryCommandTagParametrized",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryCommandTagParametrized",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.QueryCommandTagParametrized.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.QueryCommandTagParametrized.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.Signature",
         "type": "Interface",
         "tags": [],
@@ -9445,7 +11535,7 @@
             "label": "returnType",
             "description": [],
             "signature": [
-              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9481,13 +11571,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.wrongArgumentType",
+            "id": "def-common.ValidationErrors.wrongNumberArgsExact",
             "type": "Object",
             "tags": [],
-            "label": "wrongArgumentType",
+            "label": "wrongNumberArgsExact",
             "description": [],
             "signature": [
-              "{ message: string; type: { name: string; argType: string; value: string | number | Date; givenType: string; }; }"
+              "{ message: string; type: { fn: string; expected: number; actual: number; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9495,13 +11585,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.wrongArgumentNumber",
+            "id": "def-common.ValidationErrors.wrongNumberArgsVariadic",
             "type": "Object",
             "tags": [],
-            "label": "wrongArgumentNumber",
+            "label": "wrongNumberArgsVariadic",
             "description": [],
             "signature": [
-              "{ message: string; type: { fn: string; numArgs: number; passedArgs: number; }; }"
+              "{ message: string; type: { fn: string; validArgCounts: number[]; actual: number; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9509,13 +11599,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.wrongArgumentNumberTooMany",
+            "id": "def-common.ValidationErrors.wrongNumberArgsAtLeast",
             "type": "Object",
             "tags": [],
-            "label": "wrongArgumentNumberTooMany",
+            "label": "wrongNumberArgsAtLeast",
             "description": [],
             "signature": [
-              "{ message: string; type: { fn: string; numArgs: number; passedArgs: number; extraArgs: number; }; }"
+              "{ message: string; type: { fn: string; minArgs: number; actual: number; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9523,13 +11613,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.wrongArgumentNumberTooFew",
+            "id": "def-common.ValidationErrors.noMatchingCallSignature",
             "type": "Object",
             "tags": [],
-            "label": "wrongArgumentNumberTooFew",
+            "label": "noMatchingCallSignature",
             "description": [],
             "signature": [
-              "{ message: string; type: { fn: string; numArgs: number; passedArgs: number; missingArgs: number; }; }"
+              "{ message: string; type: { functionName: string; argTypes: string; validSignatures: string[]; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9579,55 +11669,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.noNestedArgumentSupport",
+            "id": "def-common.ValidationErrors.functionNotAllowedHere",
             "type": "Object",
             "tags": [],
-            "label": "noNestedArgumentSupport",
+            "label": "functionNotAllowedHere",
             "description": [],
             "signature": [
-              "{ message: string; type: { name: string; argType: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.unsupportedFunctionForCommand",
-            "type": "Object",
-            "tags": [],
-            "label": "unsupportedFunctionForCommand",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { name: string; command: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.unsupportedFunctionForCommandOption",
-            "type": "Object",
-            "tags": [],
-            "label": "unsupportedFunctionForCommandOption",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { name: string; command: string; option: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.unsupportedLiteralOption",
-            "type": "Object",
-            "tags": [],
-            "label": "unsupportedLiteralOption",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { name: string; value: string; supportedOptions: string; }; }"
+              "{ message: string; type: { name: string; locationName: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9691,20 +11739,6 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.unsupportedTypeForCommand",
-            "type": "Object",
-            "tags": [],
-            "label": "unsupportedTypeForCommand",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { command: string; value: string; type: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ValidationErrors.unknownPolicy",
             "type": "Object",
             "tags": [],
@@ -9712,6 +11746,20 @@
             "description": [],
             "signature": [
               "{ message: string; type: { name: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.nestedAggFunction",
+            "type": "Object",
+            "tags": [],
+            "label": "nestedAggFunction",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { parentName: string; name: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9761,34 +11809,6 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.fnUnsupportedAfterCommand",
-            "type": "Object",
-            "tags": [],
-            "label": "fnUnsupportedAfterCommand",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { function: string; command: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.expectedConstant",
-            "type": "Object",
-            "tags": [],
-            "label": "expectedConstant",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { fn: string; given: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ValidationErrors.metadataBracketsDeprecation",
             "type": "Object",
             "tags": [],
@@ -9824,62 +11844,6 @@
             "description": [],
             "signature": [
               "{ message: string; type: { value: string | number; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.noAggFunction",
-            "type": "Object",
-            "tags": [],
-            "label": "noAggFunction",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { commandName: string; expression: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.expressionNotAggClosed",
-            "type": "Object",
-            "tags": [],
-            "label": "expressionNotAggClosed",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { commandName: string; expression: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.aggInAggFunction",
-            "type": "Object",
-            "tags": [],
-            "label": "aggInAggFunction",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { nestedAgg: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.onlyWhereCommandSupported",
-            "type": "Object",
-            "tags": [],
-            "label": "onlyWhereCommandSupported",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { fn: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9936,6 +11900,62 @@
             "description": [],
             "signature": [
               "{ message: string; type: { name: string; signatureDescription: string; requiredLicense: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.changePointWrongFieldType",
+            "type": "Object",
+            "tags": [],
+            "label": "changePointWrongFieldType",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { columnName: string; givenType: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.dropTimestampWarning",
+            "type": "Object",
+            "tags": [],
+            "label": "dropTimestampWarning",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.inferenceIdRequired",
+            "type": "Object",
+            "tags": [],
+            "label": "inferenceIdRequired",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.unsupportedQueryType",
+            "type": "Object",
+            "tags": [],
+            "label": "unsupportedQueryType",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -11460,6 +13480,375 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerColumnShorthand",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerColumnShorthand",
+        "description": [
+          "\nA shorthand for specifying a column in the query.\nIt can be a string a simple column or an array of strings for a nested column."
+        ],
+        "signature": [
+          "string | ",
+          "SynthColumnShorthand"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerQueryGenerator",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerQueryGenerator",
+        "description": [],
+        "signature": [
+          "(query: string, paramsValues?: Record<string, unknown> | undefined) => Return"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryGenerator.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryGenerator.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "paramsValues",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerQueryTag",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerQueryTag",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTagHole",
+            "text": "ComposerQueryTagHole"
+          },
+          "[]>(template: TemplateStringsArray, ...holes: { [K in keyof T]: T[K] extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ParameterShorthandHole",
+            "text": "ParameterShorthandHole"
+          },
+          " ? ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.SingleKey",
+            "text": "SingleKey"
+          },
+          "<T[K]> : T[K]; }) => ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQuery",
+            "text": "ComposerQuery"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryTag.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerQueryTag.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "holes",
+            "description": [],
+            "signature": [
+              "{ [K in keyof T]: T[K] extends ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ParameterShorthandHole",
+                "text": "ParameterShorthandHole"
+              },
+              " ? ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.SingleKey",
+                "text": "SingleKey"
+              },
+              "<T[K]> : T[K]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerQueryTagHole",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerQueryTagHole",
+        "description": [
+          "\nHoles are expressions that can be used in the `esql` tagged template function.\n\n```ts\nesql `FROM index | WHERE foo > ${ hole } | LIMIT 10`;\n                                 ^~~~~^\n```"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstCommand",
+            "text": "ESQLAstCommand"
+          },
+          " | ",
+          "SynthTemplateHole",
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQuery",
+            "text": "ComposerQuery"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ParameterShorthandHole",
+            "text": "ParameterShorthandHole"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ParameterHole",
+            "text": "ParameterHole"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerRenameShorthand",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerRenameShorthand",
+        "description": [
+          "\nA shorthand for specifying a rename expression in the `RENAME` command.\n\n```\n... | RENAME <oldName> AS <newName> | ...\n```"
+        ],
+        "signature": [
+          "[newName: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerColumnShorthand",
+            "text": "ComposerColumnShorthand"
+          },
+          ", oldName: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerColumnShorthand",
+            "text": "ComposerColumnShorthand"
+          },
+          "]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerSortShorthand",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerSortShorthand",
+        "description": [
+          "\nA shorthand for specifying a sort condition."
+        ],
+        "signature": [
+          "string | [column: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerColumnShorthand",
+            "text": "ComposerColumnShorthand"
+          },
+          ", order?: \"\" | \"ASC\" | \"DESC\" | undefined, nulls?: \"\" | \"NULLS FIRST\" | \"NULLS LAST\" | undefined]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerSourceShorthand",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerSourceShorthand",
+        "description": [],
+        "signature": [
+          "string | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLSource",
+            "text": "ESQLSource"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerTag",
+        "type": "Type",
+        "tags": [],
+        "label": "ComposerTag",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryTagHole",
+            "text": "ComposerQueryTagHole"
+          },
+          "[]>(template: TemplateStringsArray, ...holes: { [K in keyof T]: T[K] extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ParameterShorthandHole",
+            "text": "ParameterShorthandHole"
+          },
+          " ? ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.SingleKey",
+            "text": "SingleKey"
+          },
+          "<T[K]> : T[K]; }) => Return"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerTag.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerTag.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "holes",
+            "description": [],
+            "signature": [
+              "{ [K in keyof T]: T[K] extends ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ParameterShorthandHole",
+                "text": "ParameterShorthandHole"
+              },
+              " ? ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.SingleKey",
+                "text": "SingleKey"
+              },
+              "<T[K]> : T[K]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.EDITOR_MARKER",
         "type": "string",
         "tags": [],
@@ -11555,26 +13944,6 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/user_defined_columns.ts"
-          },
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/user_defined_columns.ts"
-          },
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-validation-autocomplete",
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/helpers.ts"
-          },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts"
@@ -11863,6 +14232,87 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.EsqlRequestParamEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlRequestParamEntry",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.EsqlRequestParamPositionalEntry",
+            "text": "EsqlRequestParamPositionalEntry"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.EsqlRequestParamNamedEntry",
+            "text": "EsqlRequestParamNamedEntry"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.EsqlRequestParamNamedEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlRequestParamNamedEntry",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.EsqlRequestParamPositionalEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlRequestParamPositionalEntry",
+        "description": [],
+        "signature": [
+          "string | number | boolean | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.EsqlRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlRequestParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.EsqlRequestParamEntry",
+            "text": "EsqlRequestParamEntry"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLSingleAstItem",
         "type": "Type",
         "tags": [],
@@ -12009,7 +14459,7 @@
           "\nThis is the type of a parameter in a function definition."
         ],
         "signature": [
-          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
+          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -12026,9 +14476,32 @@
           "\nThis is the return type of a function definition.\n\nTODO: remove `any`"
         ],
         "signature": [
-          "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+          "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.IsUnion",
+        "type": "Type",
+        "tags": [],
+        "label": "IsUnion",
+        "description": [],
+        "signature": [
+          "[T] extends [",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<T>] ? false : true"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12050,6 +14523,135 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ParameterShorthandHole",
+        "type": "Type",
+        "tags": [],
+        "label": "ParameterShorthandHole",
+        "description": [
+          "\nA hole shorthand where the user can specify a parametrized hole with an\nobject literal syntax where th"
+        ],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ParametrizedComposerQueryTag",
+        "type": "Type",
+        "tags": [],
+        "label": "ParametrizedComposerQueryTag",
+        "description": [],
+        "signature": [
+          "(paramsValues?: Record<string, unknown> | undefined) => ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerTag",
+            "text": "ComposerTag"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQuery",
+            "text": "ComposerQuery"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryGenerator",
+            "text": "ComposerQueryGenerator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQuery",
+            "text": "ComposerQuery"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ParametrizedComposerQueryTag.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "paramsValues",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ParametrizedComposerTag",
+        "type": "Type",
+        "tags": [],
+        "label": "ParametrizedComposerTag",
+        "description": [],
+        "signature": [
+          "(paramsValues?: Record<string, unknown> | undefined) => ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerTag",
+            "text": "ComposerTag"
+          },
+          "<Return> & ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerQueryGenerator",
+            "text": "ComposerQueryGenerator"
+          },
+          "<Return>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ParametrizedComposerTag.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "paramsValues",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ReasonTypes",
         "type": "Type",
         "tags": [],
@@ -12065,13 +14667,37 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.SingleKey",
+        "type": "Type",
+        "tags": [],
+        "label": "SingleKey",
+        "description": [
+          "\n{@link SingleKey} enforces on the type level that an object literal has just\none field."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.IsUnion",
+            "text": "IsUnion"
+          },
+          "<keyof T> extends true ? never : {} extends T ? never : T"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.SupportedDataType",
         "type": "Type",
         "tags": [],
         "label": "SupportedDataType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"unsupported\" | \"null\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"unsupported\" | \"null\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"geohash\" | \"geohex\" | \"geotile\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -12126,6 +14752,21 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.UnionToIntersection",
+        "type": "Type",
+        "tags": [],
+        "label": "UnionToIntersection",
+        "description": [],
+        "signature": [
+          "(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12540,7 +15181,7 @@
           "\nThis is the list of all data types that are supported in ES|QL.\n\nNot all of these can be used as field types. Some can only be literals,\nothers may be the value of a field, but cannot be used in the index mapping.\n\nThis is a partial list. The full list is here and we may need to expand this type as\nthe capabilities of the client-side engines grow.\nhttps://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java"
         ],
         "signature": [
-          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\"]"
+          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\", \"geohash\", \"geohex\", \"geotile\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,

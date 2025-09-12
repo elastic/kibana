@@ -204,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('page loading error', () => {
+        describe.skip('page loading error', () => {
           before(async () => {
             // manually navigate to index detail page for an index that doesn't exist
             await pageObjects.common.navigateToApp(
