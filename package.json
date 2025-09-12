@@ -263,7 +263,7 @@
     "@kbn/controls-constants": "link:src/platform/packages/shared/controls/controls-constants",
     "@kbn/controls-example-plugin": "link:examples/controls_example",
     "@kbn/controls-plugin": "link:src/platform/plugins/shared/controls",
-    "@kbn/controls-renderer": "link:src/platform/packages/shared/controls/controls-renderer",
+    "@kbn/controls-renderer": "link:src/platform/packages/private/kbn-controls-renderer",
     "@kbn/controls-schemas": "link:src/platform/packages/shared/controls/controls-schemas",
     "@kbn/core": "link:src/core",
     "@kbn/core-analytics-browser": "link:src/core/packages/analytics/browser",

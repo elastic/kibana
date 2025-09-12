@@ -23,15 +23,15 @@ import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { type DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 import {
-  type PublishesDisabledActionIds,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
+  type PublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';
-import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
