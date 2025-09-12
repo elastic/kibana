@@ -62,7 +62,9 @@ export async function autocomplete(
   const positionInExpression = getExpressionPosition(query, expressionRoot);
   if (positionInExpression === 'empty_expression' && !insideAssignment) {
     suggestions.push(
-      getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+      getNewUserDefinedColumnSuggestion(
+        (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
+      )
     );
   }
 

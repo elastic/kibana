@@ -132,7 +132,7 @@ export async function autocomplete(
       const suggestions: ISuggestionItem[] = [];
       suggestions.push(
         getNewUserDefinedColumnSuggestion(
-          callbacks?.getSuggestedUserDefinedColumnName?.(policyMetadata.enrichFields) || ''
+          (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
         )
       );
       suggestions.push(...(await getFieldSuggestionsForWithClause()));

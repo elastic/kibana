@@ -243,16 +243,18 @@ async function getSuggestionsWithinCommandExpression(
   const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
   const references = { columns: columnMap };
 
-  const getSuggestedUserDefinedColumnName = (extraColumnNames?: string[]) => {
-    if (!extraColumnNames?.length) {
-      return findNewUserDefinedColumn(columnMap);
-    }
+  const getSuggestedUserDefinedColumnName = async () => {
+    const correctedQuery = correctQuerySyntax(innerText);
+    const { root } = parse(correctedQuery, { withFormatting: true });
+    // get columns including the current command being edited
+    // this is needed to avoid suggesting a user defined column name that is already used
+    const columnsIncludingCurrentCommand = await new QueryColumns(
+      root,
+      correctedQuery,
+      callbacks
+    ).asMap();
 
-    const augmentedColumnsMap = new Map(columnMap);
-    extraColumnNames.forEach((name) => {
-      augmentedColumnsMap.set(name, { name, type: 'double', userDefined: false });
-    });
-    return findNewUserDefinedColumn(augmentedColumnsMap);
+    return findNewUserDefinedColumn(columnsIncludingCurrentCommand);
   };
 
   const additionalCommandContext = await getCommandContext(
