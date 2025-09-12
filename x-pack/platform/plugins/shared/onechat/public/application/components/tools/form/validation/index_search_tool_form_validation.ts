@@ -15,6 +15,7 @@ import type { Resolver } from 'react-hook-form';
 import type { IndexSearchToolFormData } from '../types/tool_form_types';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import { useOnechatServices } from '../../../../hooks/use_onechat_service';
+import type { ToolsService } from '../../../../../services';
 
 const indexSearchI18nMessages = {
   pattern: {
@@ -75,13 +76,12 @@ export const useIndexSearchToolFormValidationResolver = (): Resolver<IndexSearch
   );
 };
 
-const indexSearchFormValidationSchema = (toolsService: any) =>
+const indexSearchFormValidationSchema = (toolsService: ToolsService) =>
   z.object({
     toolId: sharedValidationSchemas.toolId,
     description: sharedValidationSchemas.description,
     labels: sharedValidationSchemas.labels,
 
-    // Index Search specific validation with async target checking
     pattern: z
       .string()
       .min(1, { message: indexSearchI18nMessages.pattern.requiredError })
@@ -89,15 +89,14 @@ const indexSearchFormValidationSchema = (toolsService: any) =>
       .refine(
         async (pattern) => {
           if (!pattern || !pattern.trim()) {
-            return true; // Let required validation handle empty values
+            return true;
           }
 
           try {
             const response = await toolsService.resolveSearchSources({ pattern });
             return response.total > 0;
           } catch {
-            // If API call fails, we'll show an API error instead of no matches
-            throw new Error(indexSearchI18nMessages.pattern.apiError);
+            return false;
           }
         },
         { message: indexSearchI18nMessages.pattern.noMatchesError }
