@@ -19,7 +19,6 @@ import {
   EuiI18n,
   useResizeObserver,
   EuiSwitch,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
