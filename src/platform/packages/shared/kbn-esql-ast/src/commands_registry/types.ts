@@ -97,9 +97,11 @@ export type GetColumnsByTypeFn = (
   }
 ) => Promise<ISuggestionItem[]>;
 
+// TODO consider not exporting this
 export interface ESQLFieldWithMetadata {
   name: string;
   type: FieldType;
+  userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
   metadata?: {
@@ -107,14 +109,18 @@ export interface ESQLFieldWithMetadata {
   };
 }
 
+// TODO consider not exporting this
 export interface ESQLUserDefinedColumn {
   name: string;
   // invalid expressions produce columns of type "unknown"
   // also, there are some cases where we can't yet infer the type of
   // a valid expression as with `CASE` which can return union types
   type: SupportedDataType | 'unknown';
-  location: ESQLLocation;
+  userDefined: true;
+  location: ESQLLocation; // TODO should this be optional?
 }
+
+export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
 export interface ESQLPolicy {
   name: string;
@@ -126,15 +132,14 @@ export interface ESQLPolicy {
 export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
-  getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
+  getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
 }
 
 export interface ICommandContext {
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-  fields: Map<string, ESQLFieldWithMetadata>;
+  columns: Map<string, ESQLColumnData>;
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];

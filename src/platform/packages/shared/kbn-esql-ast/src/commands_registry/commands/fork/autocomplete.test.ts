@@ -74,6 +74,14 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 // types accepted by the AVG function
 export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
 
+export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
+  'BY ',
+  ' = ',
+  ...allAggFunctions,
+  ...allGroupingFunctions,
+  ...allEvalFunctionsForStats,
+];
+
 export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ' = ',
   ...allAggFunctions,
@@ -300,7 +308,10 @@ describe('FORK Autocomplete', () => {
 
         describe('stats', () => {
           it('suggests for empty expression', async () => {
-            await forkExpectSuggestions('FROM a | FORK (STATS ', EXPECTED_FOR_EMPTY_EXPRESSION);
+            await forkExpectSuggestions(
+              'FROM a | FORK (STATS ',
+              EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
+            );
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(integerField), ',
               EXPECTED_FOR_EMPTY_EXPRESSION
