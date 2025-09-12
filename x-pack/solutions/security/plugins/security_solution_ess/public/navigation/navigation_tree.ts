@@ -35,6 +35,9 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         },
         defaultNavigationTree.dashboards(),
         {
+          link: 'workflows',
+        },
+        {
           breadcrumbStatus: 'hidden',
           children: [
             defaultNavigationTree.rules(),
