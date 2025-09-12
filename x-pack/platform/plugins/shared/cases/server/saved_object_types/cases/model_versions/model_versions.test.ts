@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { modelVersion1, modelVersion2, modelVersion3 } from '.';
+import { modelVersion1, modelVersion2, modelVersion3, modelVersion4 } from '.';
 
 describe('Model versions', () => {
   describe('version 1', () => {
@@ -89,6 +89,28 @@ describe('Model versions', () => {
           Object {
             "addedMappings": Object {
               "incremental_id": Object {
+                "type": "unsigned_long",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 4', () => {
+    it('returns version 4 changes correctly', () => {
+      expect(modelVersion4.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "incremental_id": Object {
+                "fields": Object {
+                  "keyword": Object {
+                    "type": "keyword",
+                  },
+                },
                 "type": "unsigned_long",
               },
             },
