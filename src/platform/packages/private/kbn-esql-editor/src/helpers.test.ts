@@ -8,14 +8,14 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { MonacoMessage } from './helpers';
 import {
-  parseErrors,
-  parseWarning,
+  filterDataErrors,
   getIndicesList,
   getRemoteIndicesList,
-  filterDataErrors,
+  parseErrors,
+  parseWarning,
 } from './helpers';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
 describe('helpers', function () {
   describe('parseErrors', function () {

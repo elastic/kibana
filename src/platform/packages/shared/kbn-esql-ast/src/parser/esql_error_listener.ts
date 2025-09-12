@@ -53,6 +53,7 @@ export class ESQLErrorListener extends ErrorListener<any> {
       endColumn,
       message: textMessage,
       severity: 'error',
+      code: 'syntaxError',
     });
   }
 

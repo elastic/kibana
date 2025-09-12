@@ -8,69 +8,69 @@
  */
 
 import {
+  EuiButton,
+  EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOutsideClickDetector,
-  useEuiTheme,
-  EuiDatePicker,
-  EuiToolTip,
-  EuiButton,
-  type EuiButtonColor,
-  useGeneratedHtmlId,
   EuiFormLabel,
+  EuiOutsideClickDetector,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type EuiButtonColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { isEqual, memoize } from 'lodash';
+import { css } from '@emotion/react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import useObservable from 'react-use/lib/useObservable';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { FieldType } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
+import { isEqual, memoize } from 'lodash';
+import moment from 'moment';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { FieldType } from '@kbn/esql-ast';
+import useObservable from 'react-use/lib/useObservable';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import { EditorFooter } from './editor_footer';
-import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
-import {
-  clearCacheWhenOld,
-  getESQLSources,
-  parseErrors,
-  parseWarning,
-  useDebounceWithOptions,
-  onKeyDownResizeHandler,
-  onMouseDownResizeHandler,
-  getEditorOverwrites,
-  type MonacoMessage,
-  filterDataErrors,
-} from './helpers';
-import { addQueriesToCache } from './history_local_storage';
-import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
-  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   EDITOR_MAX_HEIGHT,
+  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type {
-  ESQLEditorProps as ESQLEditorPropsInternal,
-  ESQLEditorDeps,
-  ControlsContext,
-} from './types';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import {
+  clearCacheWhenOld,
+  filterDataErrors,
+  getESQLSources,
+  getEditorOverwrites,
+  onKeyDownResizeHandler,
+  onMouseDownResizeHandler,
+  parseErrors,
+  parseWarning,
+  useDebounceWithOptions,
+} from './helpers';
+import { addQueriesToCache } from './history_local_storage';
+import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
+import type {
+  ControlsContext,
+  ESQLEditorDeps,
+  ESQLEditorProps as ESQLEditorPropsInternal,
+} from './types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
