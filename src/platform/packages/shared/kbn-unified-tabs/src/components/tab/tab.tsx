@@ -24,6 +24,7 @@ import {
   useGeneratedHtmlId,
   EuiProgress,
   EuiTextTruncate,
+  EuiIcon,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -36,6 +37,7 @@ import { TabPreview } from '../tab_preview';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  isUnsaved?: boolean;
   isDragging?: boolean;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
@@ -50,10 +52,19 @@ export interface TabProps {
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
 }
 
+const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
+  defaultMessage: 'Close tab',
+});
+
+const unsavedChangesIndicatorTitle = i18n.translate('unifiedTabs.unsavedChangesTabIndicatorTitle', {
+  defaultMessage: 'Unsaved changes',
+});
+
 export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    isUnsaved,
     isDragging,
     dragHandleProps,
     tabContentId,
@@ -73,10 +84,6 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
   const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
-
-  const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
-    defaultMessage: 'Close tab',
-  });
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
 
@@ -198,21 +205,30 @@ export const Tab: React.FC<TabProps> = (props) => {
               {previewData.status === TabStatus.RUNNING && (
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
-              <EuiText
-                id={tabLabelId}
-                color="inherit"
-                size="s"
-                css={getTabLabelCss(euiTheme)}
-                className="unifiedTabs__tabLabelText"
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                justifyContent="spaceBetween"
+                wrap={false}
+                responsive={false}
               >
-                <EuiTextTruncate
-                  text={item.label}
-                  // Truncation width must be equal to max tab width minus padding
-                  width={tabsSizeConfig.regularTabMaxWidth - euiTheme.base}
-                  truncation="middle"
-                  title=""
-                />
-              </EuiText>
+                <EuiText
+                  id={tabLabelId}
+                  color="inherit"
+                  size="s"
+                  css={getTabLabelCss(euiTheme)}
+                  className="unifiedTabs__tabLabelText"
+                >
+                  <EuiTextTruncate
+                    text={item.label}
+                    // Truncation width must be equal to max tab width minus padding
+                    width={tabsSizeConfig.regularTabMaxWidth - euiTheme.base}
+                    truncation="middle"
+                    title=""
+                  />
+                </EuiText>
+                {isUnsaved && <EuiIcon type="dot" title={unsavedChangesIndicatorTitle} />}
+              </EuiFlexGroup>
             </div>
           )}
         </div>
