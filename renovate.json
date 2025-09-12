@@ -4529,7 +4529,7 @@
         "express",
         "swagger-jsdoc",
         "swagger-ui-express",
-        "zod-to-json-schema"
+        "@finom/zod-to-json-schema"
       ],
       "reviewers": [
         "team:obs-entities"
