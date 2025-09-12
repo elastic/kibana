@@ -39,6 +39,7 @@ export class OnechatPlugin
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
+
   setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
     const isOnechatUiEnabled = core.uiSettings.get<boolean>(
       AGENT_BUILDER_ENABLED_SETTING_ID,

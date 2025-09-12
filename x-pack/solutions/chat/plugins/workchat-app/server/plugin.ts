@@ -20,6 +20,7 @@ import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
 import { AppLogger } from './utils';
+import { registerWorkChatDataTypes } from './data_types';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -67,6 +68,9 @@ export class WorkChatAppPlugin
     registerTypes({ savedObjects: core.savedObjects });
 
     registerFeatures({ features: setupDeps.features });
+
+    // Register custom data types with chat data registry
+    registerWorkChatDataTypes({ chatDataRegistry: setupDeps.chatDataRegistry });
 
     return {
       integrations: {
