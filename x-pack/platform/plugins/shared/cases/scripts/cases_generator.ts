@@ -155,12 +155,17 @@ const generateCases = async ({
       `Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`
     );
     const path = `${space ? `/s/${space}` : ''}/api/cases`;
+    const concurrency = 100;
     await pMap(
       cases,
-      (newCase) => {
+      (newCase, index) => {
+        if (index % concurrency === 0) {
+          const caseCount = cases.length;
+          console.log(`CREATING CASES ${index + 1} to ${Math.min(index + concurrency, caseCount)}`);
+        }
         return makeRequest({ url: kibana, path, newCase, username, password, apiKey, ssl });
       },
-      { concurrency: 100 }
+      { concurrency }
     );
   } catch (error) {
     toolingLogger.error(error);
