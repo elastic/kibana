@@ -80,7 +80,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
   const isCasesAttachmentEnabled = showLogRateAnalysisResults && significantItems.length > 0;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<LogRateAnalysisEmbeddableState> = {

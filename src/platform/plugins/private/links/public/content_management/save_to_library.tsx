@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   showSaveModal,
   OnSaveProps,
-  SavedObjectSaveModal,
+  SavedObjectSaveModalWithSaveResult,
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { CONTENT_ID } from '../../common';
@@ -83,7 +83,7 @@ export const runSaveToLibrary = async (
     };
 
     const saveModal = (
-      <SavedObjectSaveModal
+      <SavedObjectSaveModalWithSaveResult
         onSave={onSave}
         onClose={() => resolve(undefined)}
         title={newState.title ?? ''}

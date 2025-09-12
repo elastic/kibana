@@ -172,8 +172,8 @@ export function SaveModalContainer({
       savingToLibraryPermitted={savingToLibraryPermitted}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
-      onSave={(saveProps, options) => {
-        runLensSave(saveProps, options);
+      onSave={async (saveProps, options) => {
+        await runLensSave(saveProps, options);
       }}
       onClose={onClose}
       getAppNameFromId={getAppNameFromId}
