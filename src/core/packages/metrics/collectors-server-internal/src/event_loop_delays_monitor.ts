@@ -50,25 +50,20 @@ export class EventLoopDelaysMonitor implements IEventLoopDelaysMonitor {
   public collect(): IntervalHistogram {
     const lastUpdated = new Date();
     this.loopMonitor.disable();
-    const {
-      min: minNs,
-      max: maxNs,
-      mean: meanNs,
-      exceeds: exceedsNs,
-      stddev: stddevNs,
-    } = this.loopMonitor;
+    const { min: minNs, max: maxNs, mean: meanNs, exceeds, stddev: stddevNs } = this.loopMonitor;
 
     const collectedData: IntervalHistogram = {
       min: nsToMs(minNs),
       max: nsToMs(maxNs),
       mean: nsToMs(meanNs),
-      exceeds: nsToMs(exceedsNs),
+      exceeds,
       stddev: nsToMs(stddevNs),
       fromTimestamp: this.fromTimestamp.toISOString(),
       lastUpdatedAt: lastUpdated.toISOString(),
       percentiles: {
         50: nsToMs(this.loopMonitor.percentile(50)),
         75: nsToMs(this.loopMonitor.percentile(75)),
+        90: nsToMs(this.loopMonitor.percentile(90)),
         95: nsToMs(this.loopMonitor.percentile(95)),
         99: nsToMs(this.loopMonitor.percentile(99)),
       },
