@@ -1,6 +1,6 @@
 # Test plan: customizing prebuilt rules <!-- omit from toc -->
 
-**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
+**Status**: `implemented`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
 > [!TIP]
 > If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
@@ -15,8 +15,6 @@ This is a test plan for the workflows of customizing prebuilt rules via:
 - editing multiple rules in bulk on the Rule Management page via bulk actions, such as:
   - bulk adding or removing index patterns
   - bulk updating rule schedule
-
-as well as un-customizing prebuilt rules by reverting rule parameters back to their original values.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -42,6 +40,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can customize a prebuilt rule via public API**](#scenario-user-can-customize-a-prebuilt-rule-via-public-api)
   - [Detecting rule customizations](#detecting-rule-customizations)
     - [**Scenario: prebuilt rule's `is_customized` is set to true after it is customized**](#scenario-prebuilt-rules-is_customized-is-set-to-true-after-it-is-customized)
+    - [**Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged**](#scenario-prebuilt-rules-is_customized-stays-unchanged-after-it-is-saved-unchanged)
     - [**Scenario: prebuilt rule's `is_customized` value is not affected by specific fields**](#scenario-prebuilt-rules-is_customized-value-is-not-affected-by-specific-fields)
     - [**Scenario: User cannot change non-customizable rule fields on prebuilt rules**](#scenario-user-cannot-change-non-customizable-rule-fields-on-prebuilt-rules)
     - [**Scenario: User can revert a customized prebuilt rule to its original state**](#scenario-user-can-revert-a-customized-prebuilt-rule-to-its-original-state)
@@ -58,9 +57,13 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Modified badge should not appear on the rule management table when row is a custom rule**](#scenario-modified-badge-should-not-appear-on-the-rule-management-table-when-row-is-a-custom-rule)
     - [**Scenario: Modified badge should appear on the rule updates table when prebuilt rule is customized**](#scenario-modified-badge-should-appear-on-the-rule-updates-table-when-prebuilt-rule-is-customized)
     - [**Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-updates-table-when-prebuilt-rule-isnt-customized)
-    - [**Scenario: User should be able to filter by customized rules in the rule updates table**](#scenario-user-should-be-able-to-filter-by-customized-rules-in-the-rule-updates-table)
-    - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
+    - [**Scenario: Customized fields should be marked with a per-field "Modified" badge**](#scenario-customized-fields-should-be-marked-with-a-per-field-modified-badge)
+    - [**Scenario: Clicking on the rule's "Modified" badge should open a rule diff flyout**](#scenario-clicking-on-the-rules-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Clicking on a per-field "Modified" badge should open a rule diff flyout**](#scenario-clicking-on-a-per-field-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Hovering on rule's "Modified" badge should show a tooltip if rule base version is missing**](#scenario-hovering-on-rules-modified-badge-should-show-a-tooltip-if-rule-base-version-is-missing)
+    - [**Scenario: Per-field "Modified" badges should not be displayed if rule base version is missing**](#scenario-per-field-modified-badges-should-not-be-displayed-if-rule-base-version-is-missing)
   - [Licensing](#licensing)
+    - [**Scenario: User can customize a prebuilt rule by importing a customized version under an insufficient license**](#scenario-user-can-customize-a-prebuilt-rule-by-importing-a-customized-version-under-an-insufficient-license)
     - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
     - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
     - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
@@ -82,6 +85,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
 - **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
+- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
+- **modified badge**: a badge in the UI that appears on the top of the rule details page whenever the rule's `is_customized` value is set to true.
+- **per-field modified badge**: a smaller modified badge in the UI that appears on an individual field component on the rule details page.
 - **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 - **customizing bulk action**: a bulk action that updates values of customizable fields in multiple rules at once. See list below.
 
@@ -96,6 +102,18 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 | Delete custom highlighted fields |
 | Update rule schedules |
 | Apply timeline template |
+
+- **customization adjacent field**: field on a rule object that can be changed but is not taken into account when calculating `is_customized` field. See list below.
+
+**Examples:**
+| `<customization_adjacent_field>` |
+| actions |
+| exceptions_list |
+| enabled |
+| revision |
+| meta |
+
+- **per field JSON diff view**: a tab on the rule details flyout that contains field-separated JSON diffs between two rule versions. Only fields that are different are displayed in this view, fields with identical values are hidden.
 
 ## Requirements
 
@@ -229,13 +247,25 @@ Then the rule's `is_customized` value should be `true`
 And ruleSource should be "external"
 ```
 
+#### **Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged**
+
+**Automation**: one integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And the prebuilt rule doesn't have a matching base version
+When user opens the corresponding rule editing page
+And saves the form unchanged
+Then the rule's `is_customized` value should stay unchanged (non-customized rule stays non-customized)
+```
+
 **Examples:**
 
 `<field_name>` = all customizable rule fields
 
 #### **Scenario: prebuilt rule's `is_customized` value is not affected by specific fields**
 
-**Automation**: 5 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -255,7 +285,7 @@ Then the rule's `is_customized` value should remain `false`
 
 #### **Scenario: User cannot change non-customizable rule fields on prebuilt rules**
 
-**Automation**: 4 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -286,7 +316,7 @@ NOTE: These are not edge cases but rather normal cases. In many package upgrade 
 
 #### **Scenario: prebuilt rule's `is_customized` is set to true after it is customized when base version is missing**
 
-**Automation**: 1 Cypress test.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -302,7 +332,7 @@ And ruleSource should be "external"
 
 #### **Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged when base version is missing**
 
-**Automation**: 1 Cypress test.
+**Automation**: one integration test.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -318,7 +348,7 @@ Then the rule's `is_customized` value should stay unchanged (non-customized rule
 
 #### **Scenario: prebuilt rule's `is_customized` value is not affected by specific fields when base version is missing**
 
-**Automation**: 5 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -431,34 +461,99 @@ When a user navigates to the rule updates table
 And the "Modified" badge should NOT be present in the table row
 ```
 
-#### **Scenario: User should be able to filter by customized rules in the rule updates table**
+#### **Scenario: Customized fields should be marked with a per-field "Modified" badge**
 
-**Automation**: 1 cypress test.
+**Automation**: 1 cypress test and 1 unit test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
 And that rule is customized
-When a user navigates to the rule updates page
-And applies the filter to display only customized prebuilt rules
-Then the table should display only customized prebuilt rules
-And all shown table rows should have the "Modified" badge present
+And that rule has an existing base version
+When user navigates to that rule's details page
+Then the <field_name> field should be marked with a "Modified" rule badge
 ```
 
-#### **Scenario: User should be able to filter by non-customized rules on the rule updates table**
+**Examples:**
+
+`<field_name>` = all customizable rule fields
+
+#### **Scenario: Clicking on the rule's "Modified" badge should open a rule diff flyout**
 
 **Automation**: 1 cypress test.
 
 ```Gherkin
 Given a prebuilt rule installed
 And that rule is customized
-And that rule has an upgrade
-When a user navigates to the rule updates page
-And applies the filter to display only non-customized prebuilt rules
-Then the table should display only non-customized prebuilt rules
-And the all shown table rows should NOT have the "Modified" badge present
+And that rule has an existing base version
+When user clicks the field's "Modified" badge on rule's details page
+Then a rule diff flyout should open
+And this flyout should display a per field JSON diff view
+And should list all fields that are different between the current and base versions
+And should not contain a button to revert the rule
+```
+
+#### **Scenario: Clicking on a per-field "Modified" badge should open a rule diff flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When user navigates to that rule's details page
+And a per-field "Modified" badge is clicked
+Then a rule diff flyout should open
+And this flyout should display a per field JSON diff view
+And should list all fields that are different between the current and base version
+And should not contain a button to revert the rule
+```
+
+#### **Scenario: Hovering on rule's "Modified" badge should show a tooltip if rule base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule does not have an existing base version
+When user navigates to that rule's details page and hovers on the "Modified" badge
+Then a tooltip should be displayed
+And the "Modified" badge isn't clickable
+```
+
+#### **Scenario: Per-field "Modified" badges should not be displayed if rule base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule does not have an existing base version
+When user navigates to that rule's details page
+Then no per-field "Modified" badges should be displayed
 ```
 
 ### Licensing
+
+#### **Scenario: User can customize a prebuilt rule by importing a customized version under an insufficient license**
+
+If this rule is already installed, it should be updated. Its `is_customized` field should stay unchanged (`false` or `true`) if the rule from the import payload is equal to the installed rule.
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And the import payload contains a customized prebuilt rule
+And its rule_id matches the currently installed prebuilt rule
+And this installed prebuilt rule marked as non-customized
+And the installed rule is NOT equal to the import payload
+When the user imports the rule
+Then the installed prebuilt rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as customized
+And the updated rule's version  should match the import payload
+And the updated rule's parameters should match the import payload
+```
 
 #### **Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**
 
