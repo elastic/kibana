@@ -418,22 +418,18 @@ export class CstToAstConverter {
     return command;
   }
 
-  private toOption(name: string, ctx: antlr.ParserRuleContext): ast.ESQLCommandOption {
+  private toOption(
+    name: string,
+    ctx: antlr.ParserRuleContext,
+    args: ast.ESQLAstExpression[] = []
+  ): ast.ESQLCommandOption {
     return {
       type: 'option',
       name,
       text: ctx.getText(),
       location: getPosition(ctx.start, ctx.stop),
-      args: [],
-      incomplete: Boolean(
-        ctx.exception ||
-          ctx.children?.some((c) => {
-            // TODO: 1. Remove this expect error comment
-            // TODO: 2. .isErrorNode is function: .isErrorNode()
-            // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
-            return Boolean(c.isErrorNode);
-          })
-      ),
+      args,
+      incomplete: !!ctx.exception || args.some((arg) => arg.incomplete),
     };
   }
 
