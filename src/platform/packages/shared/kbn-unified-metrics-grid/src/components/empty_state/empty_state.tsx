@@ -25,7 +25,7 @@ interface EmptyStateProps {
   isLoading?: boolean;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ isLoading = false }) => (
+export const EmptyState = ({ isLoading = false }: EmptyStateProps) => (
   <div
     css={css`
       height: 100%;
