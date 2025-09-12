@@ -19,7 +19,7 @@ import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
-import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
+import { useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { PENDING_ACTIONS_CONFIG, SHARED_TRUNCATION_STYLE } from '../shared/constants';
 import { useGenericErrorToast, checkActionCancelPermission } from '../shared';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -59,11 +59,12 @@ export const PendingActionsSelector = memo<
 
   const userPrivileges = useUserPrivileges();
 
-  const { data, isLoading, error } = useGetPendingActions({
-    agentType,
-    endpointId,
+  const { data, isLoading, error } = useGetEndpointActionList({
+    agentTypes: agentType,
+    agentIds: endpointId,
     page: 1,
     pageSize: 200,
+    statuses: ['pending'],
   });
 
   const privilegeChecker = useCallback(

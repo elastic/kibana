@@ -12,7 +12,7 @@ import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable
 
 import type { PendingActionsSelectorState } from './pending_actions_selector';
 import { PendingActionsSelector } from './pending_actions_selector';
-import { useGetPendingActions } from '../../../hooks/response_actions/use_get_pending_actions';
+import { useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import {
   useGenericErrorToast,
   useBaseSelectorHandlers,
@@ -35,7 +35,7 @@ type PendingActionOption = EuiSelectableOption<Partial<{ description: string }>>
   data?: ActionDetails;
 };
 
-jest.mock('../../../hooks/response_actions/use_get_pending_actions');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list');
 jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
 jest.mock('../shared/hooks', () => ({
   useGenericErrorToast: jest.fn(),
@@ -56,8 +56,8 @@ jest.mock('../../../../common/experimental_features_service');
 jest.useFakeTimers();
 
 describe('PendingActionsSelector', () => {
-  const mockUseGetPendingActions = useGetPendingActions as jest.MockedFunction<
-    typeof useGetPendingActions
+  const mockUseGetEndpointActionList = useGetEndpointActionList as jest.MockedFunction<
+    typeof useGetEndpointActionList
   >;
   const mockUseGenericErrorToast = useGenericErrorToast as jest.MockedFunction<
     typeof useGenericErrorToast
@@ -147,12 +147,12 @@ describe('PendingActionsSelector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseGetPendingActions.mockReturnValue({
+    mockUseGetEndpointActionList.mockReturnValue({
       data: mockApiResponse,
       isLoading: false,
       isError: false,
       error: null,
-    } as unknown as ReturnType<typeof useGetPendingActions>);
+    } as unknown as ReturnType<typeof useGetEndpointActionList>);
 
     // Mock the error toast hook
     mockUseGenericErrorToast.mockImplementation(() => {});
@@ -249,12 +249,12 @@ describe('PendingActionsSelector', () => {
   };
 
   test('renders loading spinner when fetching data', () => {
-    mockUseGetPendingActions.mockReturnValueOnce({
+    mockUseGetEndpointActionList.mockReturnValueOnce({
       data: undefined,
       isLoading: true,
       isError: false,
       error: null,
-    } as unknown as ReturnType<typeof useGetPendingActions>);
+    } as unknown as ReturnType<typeof useGetEndpointActionList>);
 
     render(<PendingActionsSelector {...defaultProps} />);
 
@@ -338,12 +338,12 @@ describe('PendingActionsSelector', () => {
       total: 3,
     };
 
-    mockUseGetPendingActions.mockReturnValue({
+    mockUseGetEndpointActionList.mockReturnValue({
       data: multipleActionsResponse,
       isLoading: false,
       isError: false,
       error: null,
-    } as unknown as ReturnType<typeof useGetPendingActions>);
+    } as unknown as ReturnType<typeof useGetEndpointActionList>);
 
     // Mock the options to return multiple actions
     mockUsePendingActionsOptions.mockReturnValue([
@@ -403,7 +403,7 @@ describe('PendingActionsSelector', () => {
     ).toBeInTheDocument();
   });
 
-  test('calls useGetPendingActions with correct parameters from command meta', async () => {
+  test('calls useGetEndpointActionList with correct parameters from command meta', async () => {
     const commandWithEndpointId = {
       ...mockCommand,
       commandDefinition: {
@@ -420,11 +420,12 @@ describe('PendingActionsSelector', () => {
       <PendingActionsSelector {...defaultProps} command={commandWithEndpointId} />
     );
 
-    expect(mockUseGetPendingActions).toHaveBeenCalledWith({
-      agentType: 'microsoft_defender_endpoint',
-      endpointId: 'test-endpoint-id',
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith({
+      agentTypes: 'microsoft_defender_endpoint',
+      agentIds: 'test-endpoint-id',
       page: 1,
       pageSize: 200,
+      statuses: ['pending'],
     });
   });
 
@@ -486,12 +487,12 @@ describe('PendingActionsSelector', () => {
         data: [killProcessAction],
       };
 
-      mockUseGetPendingActions.mockReturnValue({
+      mockUseGetEndpointActionList.mockReturnValue({
         data: responseWithKillProcess,
         isLoading: false,
         isError: false,
         error: null,
-      } as unknown as ReturnType<typeof useGetPendingActions>);
+      } as unknown as ReturnType<typeof useGetEndpointActionList>);
 
       mockUseUserPrivileges.mockReturnValue({
         endpointPrivileges: {
