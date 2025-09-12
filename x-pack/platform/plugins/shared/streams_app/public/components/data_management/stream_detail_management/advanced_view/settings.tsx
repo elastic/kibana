@@ -170,7 +170,6 @@ export function Settings({
       {isServerless ? null : (
         <>
           <SettingRow
-            definition={definition}
             label={i18n.translate('xpack.streams.settings.indexConfiguration.shardsLabel', {
               defaultMessage: 'Shards',
             })}
@@ -202,7 +201,6 @@ export function Settings({
           <EuiHorizontalRule margin="m" />
 
           <SettingRow
-            definition={definition}
             label={i18n.translate('xpack.streams.settings.indexConfiguration.replicasLabel', {
               defaultMessage: 'Replicas',
             })}
@@ -232,7 +230,6 @@ export function Settings({
       )}
 
       <SettingRow
-        definition={definition}
         label={i18n.translate('xpack.streams.settings.indexConfiguration.refreshIntervalLabel', {
           defaultMessage: 'Refresh Interval',
         })}

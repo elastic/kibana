@@ -100,7 +100,7 @@ export function WiredStreamDetailManagement({
       label: (
         <EuiToolTip
           content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
-            defaultMessage: 'View details about this classic stream’s data quality',
+            defaultMessage: 'View details about this stream’s data quality',
           })}
         >
           <span>
@@ -118,20 +118,9 @@ export function WiredStreamDetailManagement({
             content: (
               <WiredAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
             ),
-            label: (
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
-                  defaultMessage:
-                    'View technical details about this classic stream’s underlying index setup',
-                })}
-              >
-                <span>
-                  {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-                    defaultMessage: 'Advanced',
-                  })}
-                </span>
-              </EuiToolTip>
-            ),
+            label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            }),
           },
         }
       : {}),
