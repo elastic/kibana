@@ -69,5 +69,6 @@
     "@kbn/lens-plugin",
     "@kbn/scout",
     "@kbn/share-plugin",
+    "@kbn/unsaved-changes-prompt",
   ]
 }
