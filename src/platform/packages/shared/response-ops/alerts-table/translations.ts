@@ -240,44 +240,75 @@ export const SELECT_ROW_ARIA_LABEL = (displayedRowIndex: number) =>
   });
 
 export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.addToCase',
+  'xpack.responseOpsAlertsTable.actions.addToCase',
   {
     defaultMessage: 'Add to existing case',
   }
 );
 
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.addToNewCase',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
+export const ADD_TO_NEW_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToNewCase', {
+  defaultMessage: 'Add to new case',
+});
 
 export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.noAlertsAddedToCaseTitle',
+  'xpack.responseOpsAlertsTable.actions.noAlertsAddedToCaseTitle',
   {
     defaultMessage: 'No alerts added to the case',
   }
 );
 
 export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.alertsAlreadyAttachedToCase',
+  'xpack.responseOpsAlertsTable.actions.alertsAlreadyAttachedToCase',
   {
     defaultMessage: 'All selected alerts are already attached to the case',
   }
 );
 
 export const MARK_AS_UNTRACKED = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.markAsUntracked',
+  'xpack.responseOpsAlertsTable.actions.markAsUntracked',
   {
     defaultMessage: 'Mark as untracked',
   }
 );
 
-export const MUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.mute', {
+export const MUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.mute', {
   defaultMessage: 'Mute',
 });
 
-export const UNMUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.unmute', {
+export const UNMUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.unmute', {
   defaultMessage: 'Unmute',
 });
+
+export const ALERT_FLYOUT_DEFAULT_TITLE = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertFlyout.ariaLabelDefault',
+  {
+    defaultMessage: 'Alert details',
+  }
+);
+
+export const ALERT_FLYOUT_OVERVIEW_TAB_TITLE = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertFlyout.overview',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
+export const ALERT_FLYOUT_TABLE_TAB_TITLE = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertFlyout.table',
+  {
+    defaultMessage: 'Table',
+  }
+);
+
+export const ALERT_FLYOUT_PAGINATION_ARIA_LABEL = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertFlyout.paginationLabel',
+  {
+    defaultMessage: 'Paginate alerts',
+  }
+);
+
+export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
+  i18n.translate('xpack.responseOpsAlertsTable.alertFlyout.ariaLabel', {
+    defaultMessage: 'Details for alert "{alertDescription}"',
+    values: { alertDescription },
+  });
