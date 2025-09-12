@@ -176,7 +176,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
-  const fields = getGenericEntity.data.fields;
+  const fields = getGenericEntity.data.fields || {};
 
   return (
     <>
