@@ -35,6 +35,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -323,8 +324,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return () => onAddColumnWithTracking(draggingFieldName);
   }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
+  const sidebarToggleStateAccessor = useProfileAccessor('getSidebarToggleState')(
+    () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: undefined })
+  );
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
-    () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
+    sidebarToggleStateAccessor
   );
 
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {

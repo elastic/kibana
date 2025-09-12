@@ -13,6 +13,7 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createChartSection } from './accessor/chart_section';
+import { createSidebarToggleState } from './accessor/sidebar_section';
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
 const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
@@ -23,6 +24,9 @@ export const createMetricsDataSourceProfileProvider = (
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   isExperimental: true,
   profile: {
+    getSidebarToggleState: createSidebarToggleState(
+      services.metricsContextService.getMetricsExperienceClient()
+    ),
     getChartSectionConfiguration: createChartSection(
       services.metricsContextService.getMetricsExperienceClient()
     ),
