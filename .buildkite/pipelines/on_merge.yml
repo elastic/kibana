@@ -187,6 +187,8 @@ steps:
       machineType: n2-standard-2
       diskSizeGb: 85
     timeout_in_minutes: 10
+    depends_on:
+      - build
     env:
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
