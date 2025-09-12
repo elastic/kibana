@@ -94,6 +94,13 @@ describe('get()', () => {
       },
       references: [],
     });
+
+    authorization.getAllAuthorizedRuleTypes.mockResolvedValue({
+      hasAllRequested: true,
+      authorizedRuleTypes: new Map([
+        ['123', { authorizedConsumers: { consumer1: { read: true, all: true } } }],
+      ]),
+    });
     const result = await rulesClient.getTemplate({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -141,33 +148,38 @@ describe('get()', () => {
       });
     });
 
-    it('ensures user is authorised to get this type of alert under alerting', async () => {
+    it('ensures user is authorised to get this type of rule template', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
+      authorization.getAllAuthorizedRuleTypes.mockResolvedValue({
+        hasAllRequested: true,
+        authorizedRuleTypes: new Map([
+          ['myType', { authorizedConsumers: { consumer1: { read: true, all: true } } }],
+        ]),
+      });
       await rulesClient.getTemplate({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'rule',
-        consumer: 'alerts',
-        operation: 'get',
-        ruleTypeId: 'myType',
+      expect(authorization.getAllAuthorizedRuleTypes).toHaveBeenCalledWith({
+        authorizationEntity: 'rule',
+        operations: ['get'],
       });
     });
 
     it('throws when user is not authorised to get this type of alert', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "myType" alert for "myApp"`)
-      );
+      authorization.getAllAuthorizedRuleTypes.mockResolvedValue({
+        hasAllRequested: true,
+        authorizedRuleTypes: new Map([
+          ['myType', { authorizedConsumers: { consumer1: { read: false, all: false } } }],
+        ]),
+      });
 
       await expect(rulesClient.getTemplate({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to get "myType" RuleTemplate]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'rule',
-        consumer: 'alerts',
-        operation: 'get',
-        ruleTypeId: 'myType',
+      expect(authorization.getAllAuthorizedRuleTypes).toHaveBeenCalledWith({
+        authorizationEntity: 'rule',
+        operations: ['get'],
       });
     });
   });

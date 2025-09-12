@@ -35,12 +35,22 @@ export async function getRuleTemplate(
   });
 
   try {
-    await context.authorization.ensureAuthorized({
-      ruleTypeId: result.attributes.ruleTypeId,
-      consumer: 'alerts',
-      operation: ReadOperations.Get,
-      entity: AlertingAuthorizationEntity.Rule,
+    const authzResult = await context.authorization.getAllAuthorizedRuleTypes({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      operations: [ReadOperations.Get],
     });
+    let isAuthorized = false;
+    const authorizedConsumers =
+      authzResult.authorizedRuleTypes.get(result.attributes.ruleTypeId)?.authorizedConsumers ?? {};
+    for (const authorizedConsumer of Object.values(authorizedConsumers)) {
+      if (authorizedConsumer.read) {
+        isAuthorized = true;
+        break;
+      }
+    }
+    if (!isAuthorized) {
+      throw Boom.forbidden(`Unauthorized to get "${result.attributes.ruleTypeId}" RuleTemplate`);
+    }
   } catch (error) {
     throw error;
   }
