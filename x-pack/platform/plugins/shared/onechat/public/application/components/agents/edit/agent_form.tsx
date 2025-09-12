@@ -75,7 +75,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
   const { services } = useKibana();
-  const { notifications, http, overlays, application, appParams } = services;
+  const {
+    notifications,
+    http,
+    overlays: { openConfirm },
+    application: { navigateToUrl },
+    appParams: { history },
+  } = services;
   const agentFormId = useGeneratedHtmlId({
     prefix: 'agentForm',
   });
@@ -132,10 +138,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
-    history: appParams.history,
+    history,
     http,
-    navigateToUrl: application.navigateToUrl,
-    openConfirm: overlays.openConfirm,
+    navigateToUrl,
+    openConfirm,
   });
 
   useEffect(() => {
