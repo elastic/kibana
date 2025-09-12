@@ -49,6 +49,7 @@ import type {
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
   ResponseActionScriptsApiResponse,
+  ResponseActionCancelOutputContent,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -85,7 +86,10 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   runscript: () => ActionDetailsApiResponse<ResponseActionRunScriptOutputContent>;
 
-  cancel: () => ActionDetailsApiResponse<Record<string, never>, ResponseActionCancelParameters>;
+  cancel: () => ActionDetailsApiResponse<
+    ResponseActionCancelOutputContent,
+    ResponseActionCancelParameters
+  >;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -323,12 +327,12 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     path: CANCEL_ROUTE,
     method: 'post',
     handler: (): ActionDetailsApiResponse<
-      Record<string, never>,
+      ResponseActionCancelOutputContent,
       ResponseActionCancelParameters
     > => {
       const generator = new EndpointActionGenerator('seed');
       const response = generator.generateActionDetails<
-        Record<string, never>,
+        ResponseActionCancelOutputContent,
         ResponseActionCancelParameters
       >({
         command: 'cancel',

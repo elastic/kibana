@@ -103,6 +103,12 @@ export interface ResponseActionRunScriptOutputContent {
   code: string;
 }
 
+export interface ResponseActionCancelOutputContent {
+  code: string;
+  actionId: string;
+  canceledAt: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -279,7 +285,8 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
-  | ResponseActionRunScriptOutputContent;
+  | ResponseActionRunScriptOutputContent
+  | ResponseActionCancelOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
