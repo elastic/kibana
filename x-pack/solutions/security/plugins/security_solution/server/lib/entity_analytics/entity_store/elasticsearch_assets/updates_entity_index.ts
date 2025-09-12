@@ -38,7 +38,7 @@ export const deleteEntityUpdatesIndex = async (
   esClient: ElasticsearchClient,
   namespace: string
 ) => {
-  esClient.indices.delete(
+  await esClient.indices.delete(
     {
       index: getEntityUpdatesIndexName(entityType, namespace),
     },
