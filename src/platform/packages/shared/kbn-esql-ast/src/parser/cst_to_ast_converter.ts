@@ -146,10 +146,7 @@ export class CstToAstConverter {
   }
 
   private sanitizeIdentifierString(ctx: antlr.ParserRuleContext) {
-    const result =
-      this.getUnquotedText(ctx)?.getText() ||
-      this.safeBackticksRemoval(this.getQuotedText(ctx)?.getText()) ||
-      this.safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+    const result = this.getUnquotedText(ctx)?.getText() || this.safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
     // TODO - understand why <missing null> is now returned as the match text for the FROM command
     return result === '<missing null>' ? '' : result;
   }
@@ -2137,7 +2134,7 @@ export class CstToAstConverter {
     }
 
     const text = this.sanitizeIdentifierString(ctx);
-    const hasQuotes = Boolean(this.getQuotedText(ctx) || this.isQuoted(ctx.getText()));
+    const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
     const column = Builder.expression.column(
       { args },
       {
@@ -2196,7 +2193,7 @@ export class CstToAstConverter {
     }
 
     const text = this.sanitizeIdentifierString(ctx);
-    const hasQuotes = Boolean(this.getQuotedText(ctx) || this.isQuoted(ctx.getText()));
+    const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
     const column = Builder.expression.column(
       { args },
       {
@@ -2228,17 +2225,6 @@ export class CstToAstConverter {
     node.name = text;
 
     return node;
-  }
-
-  /**
-   * @todo Parsing should not depend on ANTLR token constants. Those constants
-   *     change all the time, and this code will break (maybe is already broken).
-   *     Rethink this method.
-   */
-  private getQuotedText(ctx: antlr.ParserRuleContext) {
-    return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
-      .map((keyCode) => ctx.getToken(keyCode, 0))
-      .filter(nonNullable)[0];
   }
 
   private isQuoted(text: string | undefined) {
