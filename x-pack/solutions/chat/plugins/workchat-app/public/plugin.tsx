@@ -38,7 +38,7 @@ export class WorkChatAppPlugin
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>,
-    { onechat, chatDataRegistry }: WorkChatAppPluginSetupDependencies
+    { chatDataRegistry }: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     registerApp({
       core,
