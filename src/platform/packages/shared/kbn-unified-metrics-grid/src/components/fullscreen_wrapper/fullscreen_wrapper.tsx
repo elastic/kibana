@@ -14,14 +14,13 @@ import { getFullScreenStyles } from './get_fullscreen_styles';
 interface FullScreenProps {
   isFullscreen: boolean;
   dataTestSubj?: string;
-  children: React.ReactNode;
 }
 
-export const FullScreenWrapper: React.FC<FullScreenProps> = ({
+export const FullScreenWrapper = ({
   isFullscreen,
   dataTestSubj,
   children,
-}) => {
+}: React.PropsWithChildren<FullScreenProps>) => {
   const { euiTheme } = useEuiTheme();
 
   const styles = useMemo(() => getFullScreenStyles(euiTheme), [euiTheme]);

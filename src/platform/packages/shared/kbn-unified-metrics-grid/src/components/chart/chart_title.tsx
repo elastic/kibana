@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { getHighlightColors } from '@kbn/data-grid-in-table-search/src/get_highlight_colors';
 import React, { useMemo } from 'react';
 
-export const MetricTermWithHighlight = ({
+export const ChartTitle = ({
   searchTerm,
   text,
   truncation,
@@ -28,26 +28,47 @@ export const MetricTermWithHighlight = ({
   const { euiTheme } = useEuiTheme();
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
 
+  const chartTitleCss = css`
+    min-height: 24px;
+    max-height: 24px;
+    max-width: 90%;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 9000;
+    padding: ${euiTheme.size.s};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
   if (!searchTerm) {
-    return <EuiTextTruncate truncation={truncation} text={text} />;
+    return (
+      <h3 css={chartTitleCss}>
+        <EuiTextTruncate truncation={truncation} text={text} />
+      </h3>
+    );
   }
 
   return (
-    <EuiHighlight
-      css={css`
-        & mark {
-          color: ${colors.highlightColor};
-          background-color: ${colors.highlightBackgroundColor};
-        }
-        overflow: ellipsis;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      `}
-      strict={false}
-      highlightAll
-      search={searchTerm}
-    >
-      {text}
-    </EuiHighlight>
+    <h3 css={chartTitleCss}>
+      <EuiHighlight
+        css={css`
+          & mark {
+            color: ${colors.highlightColor};
+            background-color: ${colors.highlightBackgroundColor};
+          }
+          overflow: ellipsis;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        `}
+        strict={false}
+        highlightAll
+        search={searchTerm}
+      >
+        {text}
+      </EuiHighlight>
+    </h3>
   );
 };

@@ -78,7 +78,7 @@ export const Chart: React.FC<ChartProps> = ({
   ]);
 
   const lensProps = useLensProps({
-    title: '',
+    title: metric.name,
     query: esqlQuery,
     timeRange: getTimeRange(),
     color,
@@ -96,6 +96,9 @@ export const Chart: React.FC<ChartProps> = ({
         height: ${ChartSizes[size]}px;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
+        figcaption {
+          display: none;
+        }
       `}
     >
       {lensProps && (

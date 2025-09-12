@@ -9,20 +9,16 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { MetricTermWithHighlight } from './metric_term_with_highlight';
+import { ChartTitle } from './chart_title';
 
-describe('MetricTermWithHighlight', () => {
+describe('ChartTitle', () => {
   it('should render plain text when searchTerm is empty', () => {
-    const { getByText } = render(
-      <MetricTermWithHighlight searchTerm="" text="CPU Usage" truncation="end" />
-    );
+    const { getByText } = render(<ChartTitle searchTerm="" text="CPU Usage" truncation="end" />);
     expect(getByText('CPU Usage')).toBeInTheDocument();
   });
 
   it('should highlight matching searchTerm (case-insensitive)', () => {
-    const { container } = render(
-      <MetricTermWithHighlight searchTerm="cpu" text="CPU Usage" truncation="end" />
-    );
+    const { container } = render(<ChartTitle searchTerm="cpu" text="CPU Usage" truncation="end" />);
     // Should highlight "CPU"
     const mark = container.querySelector('mark');
     expect(mark).toBeInTheDocument();
@@ -31,11 +27,7 @@ describe('MetricTermWithHighlight', () => {
 
   it('should highlight only matching searchTerm', () => {
     const { container } = render(
-      <MetricTermWithHighlight
-        searchTerm="cpu.load"
-        text="system.cpu.load_average.15m"
-        truncation="end"
-      />
+      <ChartTitle searchTerm="cpu.load" text="system.cpu.load_average.15m" truncation="end" />
     );
     // Should highlight only "cpu.load"
     const mark = container.querySelector('mark');
@@ -46,7 +38,7 @@ describe('MetricTermWithHighlight', () => {
 
   it('should highlight all occurrences of the searchTerm', () => {
     const { container } = render(
-      <MetricTermWithHighlight searchTerm="m" text="Memory Usage" truncation="end" />
+      <ChartTitle searchTerm="m" text="Memory Usage" truncation="end" />
     );
     // There should be two <mark> elements for "m"
     const marks = container.querySelectorAll('mark');
@@ -57,16 +49,14 @@ describe('MetricTermWithHighlight', () => {
 
   it('should render text with no highlights if searchTerm does not match', () => {
     const { container, getByText } = render(
-      <MetricTermWithHighlight searchTerm="xyz" text="Memory" truncation="end" />
+      <ChartTitle searchTerm="xyz" text="Memory" truncation="end" />
     );
     expect(container.querySelector('mark')).not.toBeInTheDocument();
     expect(getByText('Memory')).toBeInTheDocument();
   });
 
   it('handles empty text gracefully', () => {
-    const { container } = render(
-      <MetricTermWithHighlight searchTerm="cpu" text="" truncation="end" />
-    );
+    const { container } = render(<ChartTitle searchTerm="cpu" text="" truncation="end" />);
     expect(container.textContent).toBe('');
     expect(container.querySelector('mark')).not.toBeInTheDocument();
   });

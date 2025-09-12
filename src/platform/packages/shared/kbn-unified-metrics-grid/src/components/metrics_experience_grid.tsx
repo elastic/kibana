@@ -109,7 +109,6 @@ export const MetricsExperienceGrid = ({
   });
 
   const {
-    allFields = [],
     currentPageFields = [],
     totalPages = 0,
     dimensions: appliedDimensions = [],
@@ -311,7 +310,7 @@ export const MetricsExperienceGrid = ({
                 <strong>
                   {i18n.translate('metricsExperience.grid.metricsCount.label', {
                     defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                    values: { count: allFields.length },
+                    values: { count: currentPageFields.length },
                   })}
                 </strong>
               </EuiText>
