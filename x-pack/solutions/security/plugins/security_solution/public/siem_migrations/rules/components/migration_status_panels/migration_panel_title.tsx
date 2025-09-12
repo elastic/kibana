@@ -22,7 +22,7 @@ import {
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { PanelText } from '../../../../common/components/panel_text';
-import { useUpdateMigration } from '../../logic/use_update_migration';
+import { useUpdateSiemMigration } from '../../../common/hooks/use_update_siem_migration';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
@@ -55,8 +55,8 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     migrationStats.id,
     'rule'
   );
-  const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateMigration(
-    migrationStats.id,
+  const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateSiemMigration(
+    'rule',
     { onError: onRenameError }
   );
 
@@ -67,10 +67,10 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
   const saveName = useCallback(
     (value: string) => {
       setName(value);
-      updateMigration({ name: value });
+      updateMigration({ migrationId: migrationStats.id, body: { name: value } });
       setIsEditing(false);
     },
-    [updateMigration]
+    [updateMigration, migrationStats.id]
   );
 
   const confirmDeleteMigration = useCallback(() => {
