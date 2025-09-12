@@ -13,8 +13,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
 import classnames from 'classnames';
-import type { NavigationProps } from './navigation';
-import { Navigation } from './navigation';
 
 interface Props {
   toggleSideNav: (isVisible: boolean) => void;
