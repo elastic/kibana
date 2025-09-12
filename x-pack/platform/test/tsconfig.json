@@ -168,6 +168,5 @@
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
     "@kbn/reindex-service-plugin",
-    "@kbn/test-suites-xpack-platform",
   ]
 }
