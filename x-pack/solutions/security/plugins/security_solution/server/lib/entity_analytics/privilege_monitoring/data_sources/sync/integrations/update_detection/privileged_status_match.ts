@@ -14,7 +14,6 @@ import { createSearchService } from '../../../../users/search';
 
 export type AfterKey = Record<string, string> | undefined;
 
-// Top hits _source structure
 export interface PrivTopHitSource {
   '@timestamp'?: string;
   user?: {
@@ -30,7 +29,6 @@ interface PrivTopHitFields {
   'user.is_privileged'?: boolean[];
 }
 
-// Top hits entry: only read from _source and sort
 export interface PrivTopHit {
   _index?: string;
   _id?: string;
@@ -39,7 +37,6 @@ export interface PrivTopHit {
   fields?: PrivTopHitFields; // from script field
 }
 
-// One composite bucket
 export interface PrivBucket {
   key: { username: string };
   doc_count: number;
@@ -91,7 +88,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
           users.push(...processedAggregations);
         }
 
-        // update cursor & loop condition
+        // next page
         afterKey = privUserAgg?.after_key;
         fetchMore = Boolean(afterKey);
       }

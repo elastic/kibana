@@ -25,6 +25,8 @@ interface UpsertResult {
   source: MonitoringEntitySource;
 }
 
+export type Processor = (source: MonitoringEntitySource) => Promise<void>;
+
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
@@ -133,7 +135,7 @@ export class MonitoringEntitySourceDescriptorClient {
   /**
    * entity_analytics_integration or index type
    */
-  public async findBySourceType(
+  public async findSourcesByType(
     type: MonitoringEntitySourceType
   ): Promise<MonitoringEntitySource[]> {
     const result = await this.find();

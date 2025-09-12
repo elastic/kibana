@@ -6,12 +6,10 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/monitoring';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
+import type { Processor } from '../../saved_objects';
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import type { MonitoringEntitySourceType } from '../../types';
-
-type Processor = (source: MonitoringEntitySource) => Promise<void>;
 
 export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
@@ -29,7 +27,7 @@ export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClie
       soClient,
       namespace: deps.namespace,
     });
-    const sources = await monitoringIndexSourceClient.findBySourceType(sourceType); // this will be index or integration
+    const sources = await monitoringIndexSourceClient.findSourcesByType(sourceType); // this will be index or integration
     if (sources.length === 0) {
       dataClient.log('debug', `No ${sourceType} monitoring sources found. Skipping sync.`);
       return;
