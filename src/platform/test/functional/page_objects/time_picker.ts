@@ -114,7 +114,7 @@ export class TimePickerPageObject extends FtrService {
 
   private async showStartEndTimes() {
     // click on the breadcrumbs to dismiss the tooltip (prevents flakiness)
-    await this.testSubjects.pressEnter('breadcrumbs');
+    await this.testSubjects.click('breadcrumbs');
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
     await this.retry.tryForTime(5000, async () => {
