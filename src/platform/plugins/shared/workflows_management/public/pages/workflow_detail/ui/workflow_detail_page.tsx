@@ -233,7 +233,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (params.actionType === 'run') {
       const stepContextMockData = buildStepContextMockForStep(workflowYaml, params.stepId);
 
-      if (!Object.keys(stepContextMockData).length) {
+      if (!Object.keys(stepContextMockData.stepContext).length) {
         submitStepRun(params.stepId, {});
         return;
       }

@@ -167,7 +167,7 @@ function zodErrorsToMarkers(zodError: z.ZodError, jsonText: string): monaco.edit
           startColumn: keyPosition.startColumn,
           endLineNumber: keyPosition.endLine,
           endColumn: keyPosition.endColumn,
-          source: 'zod-validation',
+          source: 'json-schema-validation',
         });
       }
     } else {
@@ -180,7 +180,7 @@ function zodErrorsToMarkers(zodError: z.ZodError, jsonText: string): monaco.edit
         startColumn: position.startColumn,
         endLineNumber: position.endLine,
         endColumn: position.endColumn,
-        source: 'zod-validation',
+        source: 'json-schema-validation',
       });
     }
   }
@@ -198,18 +198,18 @@ function findSpecificKey(
 ): { startLine: number; startColumn: number; endLine: number; endColumn: number } {
   const lines = jsonText.split('\n');
   const searchPattern = `"${keyName}"`;
-  
+
   // Find all occurrences of this key that are property keys
   const matches: Array<{ line: number; column: number; context: string }> = [];
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     let searchIndex = 0;
-    
+
     while (true) {
       const columnIndex = line.indexOf(searchPattern, searchIndex);
       if (columnIndex === -1) break;
-      
+
       // Check if this is a property key
       const afterMatch = line.substring(columnIndex + searchPattern.length).trim();
       if (afterMatch.startsWith(':')) {
@@ -219,15 +219,15 @@ function findSpecificKey(
           context: line.trim(),
         });
       }
-      
+
       searchIndex = columnIndex + 1;
     }
   }
-  
+
   if (matches.length > 0) {
     // Strategy: if there are multiple matches, try to pick the most appropriate one
     // For unrecognized keys, we often want the one that's NOT in a nested valid structure
-    
+
     if (matches.length === 1) {
       const match = matches[0];
       return {
@@ -237,11 +237,11 @@ function findSpecificKey(
         endColumn: match.column + searchPattern.length,
       };
     }
-    
+
     // For multiple matches, prefer later occurrences (often the problematic ones)
     // unless we have specific path context
     const preferredMatch = basePath.length > 0 ? matches[matches.length - 1] : matches[0];
-    
+
     return {
       startLine: preferredMatch.line,
       startColumn: preferredMatch.column,
@@ -249,7 +249,7 @@ function findSpecificKey(
       endColumn: preferredMatch.column + searchPattern.length,
     };
   }
-  
+
   // Fallback
   return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 5 };
 }

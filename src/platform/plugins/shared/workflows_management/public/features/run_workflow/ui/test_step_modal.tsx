@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiModal,
   EuiModalHeader,
@@ -21,6 +22,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import type { monaco } from '@kbn/monaco';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
 import { useJsonValidation } from './hooks/use_json_validation';
 
@@ -33,6 +35,7 @@ export function TestStepModal({
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {
+  const styles = useMemoCss(componentStyles);
   const [inputsJson, setInputsJson] = React.useState<string>(
     JSON.stringify(initialStepContextMock.stepContext, null, 2)
   );
@@ -78,29 +81,7 @@ export function TestStepModal({
         <EuiModalHeaderTitle id={modalTitleId}>Test Step</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="l"
-          css={css`
-            height: 100%;
-            overflow: auto;
-
-            /* Monaco editor error popup positioning offset */
-            .monaco-editor .monaco-hover,
-            .monaco-editor .suggest-widget,
-            .monaco-editor .parameter-hints-widget,
-            .monaco-editor .monaco-quick-input-widget {
-              transform: translateY(-290px) translateX(-250px) !important;
-              z-index: 9999 !important;
-            }
-
-            /* Specific styling for hover widgets in modals */
-            .monaco-editor .monaco-hover .hover-contents {
-              border-radius: 4px;
-              max-width: 400px;
-            }
-          `}
-        >
+        <EuiFlexGroup direction="row" gutterSize="l" css={styles.codeEditorWrapper}>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="l">
               <EuiFlexItem grow={false}>
@@ -164,3 +145,29 @@ export function TestStepModal({
     </EuiModal>
   );
 }
+
+const componentStyles = {
+  codeEditorWrapper: ({ euiTheme }: UseEuiTheme) => css`
+    height: 100%;
+    overflow: auto;
+
+    .monaco-editor .editor-widget {
+      background-color: ${euiTheme.colors.mediumShade} !important;
+    }
+
+    /* Monaco editor error popup positioning offset */
+    .monaco-editor .monaco-hover,
+    .monaco-editor .suggest-widget,
+    .monaco-editor .parameter-hints-widget,
+    .monaco-editor .monaco-quick-input-widget {
+      transform: translateY(-290px) translateX(-250px) !important;
+      z-index: 9999 !important;
+    }
+
+    /* Specific styling for hover widgets in modals */
+    .monaco-editor .monaco-hover .hover-contents {
+      border-radius: 4px;
+      max-width: 400px;
+    }
+  `,
+};
