@@ -105,46 +105,6 @@ export class ESQLExtensionsRegistry {
     return uniqBy(recommendedItems, uniqByProperty);
   }
 
-  private unsetRecommendedItems<T extends { name: string }>(
-    map: Map<string, T[]>,
-    items: T[],
-    activeSolutionId: SolutionId,
-    getIndexPattern: (item: T) => string | undefined,
-    itemTypeName: string // e.g., 'query' or 'field' for error messages
-  ): void {
-    if (!Array.isArray(items)) {
-      throw new Error(`Recommended ${itemTypeName}s must be an array`);
-    }
-
-    for (const item of items) {
-      if (typeof item.name !== 'string') {
-        continue; // Skip if the recommended item is malformed (missing name)
-      }
-
-      const indexPattern = getIndexPattern(item);
-      if (!indexPattern) {
-        // No index pattern found, possibly malformed or not valid for registration
-        continue;
-      }
-
-      const registryId = `${activeSolutionId}>${indexPattern}`;
-
-      if (map.has(registryId)) {
-        const existingItems = map.get(registryId)!;
-        const filteredItems = existingItems.filter(
-          (existingItem) => existingItem.name !== item.name
-        );
-        if (filteredItems.length === 0) {
-          // If no items left for this index pattern, remove the entry from the map
-          map.delete(registryId);
-        } else {
-          // Otherwise, update the map with the filtered items
-          map.set(registryId, filteredItems);
-        }
-      }
-    }
-  }
-
   setRecommendedQueries(
     recommendedQueries: RecommendedQuery[],
     activeSolutionId: SolutionId
@@ -183,19 +143,38 @@ export class ESQLExtensionsRegistry {
     recommendedQueries: RecommendedQuery[],
     activeSolutionId: SolutionId
   ): void {
-    this.unsetRecommendedItems(
-      this.recommendedQueries,
-      recommendedQueries,
-      activeSolutionId,
-      (recommendedQuery) => {
-        // Ensure it has a 'query' property
-        if (typeof recommendedQuery.query !== 'string') {
-          return undefined;
+    if (!Array.isArray(recommendedQueries)) {
+      throw new Error(`Recommended queries must be an array`);
+    }
+
+    for (const item of recommendedQueries) {
+      if (typeof item.name !== 'string' || typeof item.query !== 'string') {
+        continue; // Skip if the recommended item is malformed (missing name or query)
+      }
+
+      const indexPattern = getIndexPatternFromESQLQuery(item.query);
+      if (!indexPattern) {
+        // No index pattern found, possibly malformed or not valid for registration
+        continue;
+      }
+
+      const registryId = `${activeSolutionId}>${indexPattern}`;
+      const map = this.recommendedQueries;
+
+      if (map.has(registryId)) {
+        const existingItems = map.get(registryId)!;
+        const filteredItems = existingItems.filter(
+          (existingItem) => existingItem.name !== item.name
+        );
+        if (filteredItems.length === 0) {
+          // If no items left for this index pattern, remove the entry from the map
+          map.delete(registryId);
+        } else {
+          // Otherwise, update the map with the filtered items
+          map.set(registryId, filteredItems);
         }
-        return getIndexPatternFromESQLQuery(recommendedQuery.query);
-      },
-      'query'
-    );
+      }
+    }
   }
 
   setRecommendedFields(recommendedFields: RecommendedField[], activeSolutionId: SolutionId): void {
