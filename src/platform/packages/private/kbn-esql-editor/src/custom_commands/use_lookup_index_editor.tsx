@@ -83,6 +83,8 @@ export function getMonacoCommandString(
   )})`;
 }
 
+const DEBOUNCE_OPTIONS_PRIVILEGE_CHECK = { wait: 300, leading: true, trailing: false };
+
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
  */
@@ -92,25 +94,24 @@ export const useCanCreateLookupIndex = () => {
   } = useKibana<ESQLEditorDeps>();
   const { getPermissions } = useLookupIndexPrivileges();
 
-  const { run } = useDebounceFn(
-    async (indexName?: string) => {
-      if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
-        return false;
-      }
+  const { run } = useDebounceFn(async (indexName?: string) => {
+    if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
+      return false;
+    }
 
-      try {
-        const resultIndexName = indexName || '*';
-        const permissions = await getPermissions([resultIndexName]);
-        return permissions[resultIndexName]?.canCreateIndex ?? false;
-      } catch (e) {
-        return false;
-      }
-    },
-    { wait: 300, leading: true, trailing: false }
-  );
+    try {
+      const resultIndexName = indexName || '*';
+      const permissions = await getPermissions([resultIndexName]);
+      return permissions[resultIndexName]?.canCreateIndex ?? false;
+    } catch (e) {
+      return false;
+    }
+  }, DEBOUNCE_OPTIONS_PRIVILEGE_CHECK);
 
   return run as (indexName: string) => Promise<boolean>;
 };
+
+const DEBOUNCE_OPTIONS_FOR_DECORATOR = { wait: 500 };
 
 /**
  * Hook to register a custom command and tokens for lookup indices in the ESQL editor.
@@ -164,60 +165,57 @@ export const useLookupIndexCommand = (
     }
   `;
 
-  const { run: addLookupIndicesDecorator } = useDebounceFn(
-    async () => {
-      if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
-        return false;
-      }
+  const { run: addLookupIndicesDecorator } = useDebounceFn(async () => {
+    if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
+      return false;
+    }
 
-      const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
-      const lookupIndices: string[] = inQueryLookupIndices.current;
-      const permissions = await getPermissions(lookupIndices);
-      const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
+    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
+    const lookupIndices: string[] = inQueryLookupIndices.current;
+    const permissions = await getPermissions(lookupIndices);
+    const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-      for (let i = 0; i < lookupIndices.length; i++) {
-        const lookupIndex = lookupIndices[i];
+    for (let i = 0; i < lookupIndices.length; i++) {
+      const lookupIndex = lookupIndices[i];
 
-        const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
-        const matches =
-          editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+      const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
+      const matches =
+        editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
-        const commandString = getMonacoCommandString(
-          lookupIndex,
-          isExistingIndex,
-          permissions[lookupIndex]
-        );
+      const commandString = getMonacoCommandString(
+        lookupIndex,
+        isExistingIndex,
+        permissions[lookupIndex]
+      );
 
-        if (!commandString) continue;
+      if (!commandString) continue;
 
-        matches.forEach((match) => {
-          newDecorations.push({
-            range: match.range,
-            options: {
-              isWholeLine: false,
-              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              hoverMessage: {
-                value: commandString,
-                isTrusted: true,
-              },
-
-              inlineClassName:
-                lookupIndexBaseBadgeClassName +
-                ' ' +
-                (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+      matches.forEach((match) => {
+        newDecorations.push({
+          range: match.range,
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: {
+              value: commandString,
+              isTrusted: true,
             },
-          });
+
+            inlineClassName:
+              lookupIndexBaseBadgeClassName +
+              ' ' +
+              (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+          },
         });
-      }
-      if (editorModel.current) {
-        decorationIdsRef.current = editorModel.current.deltaDecorations(
-          decorationIdsRef.current,
-          newDecorations
-        );
-      }
-    },
-    { wait: 500 }
-  );
+      });
+    }
+    if (editorModel.current) {
+      decorationIdsRef.current = editorModel.current.deltaDecorations(
+        decorationIdsRef.current,
+        newDecorations
+      );
+    }
+  }, DEBOUNCE_OPTIONS_FOR_DECORATOR);
 
   const onFlyoutClose = useCallback(
     async (
