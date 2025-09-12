@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -19,10 +20,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { isEsqlTool, isIndexSearchTool } from '@kbn/onechat-common/tools';
 import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import type {
   CreateToolPayload,
@@ -39,10 +40,17 @@ import {
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
 } from '../../utils/transform_esql_form_data';
-import { OnechatTestFlyout } from './execute/test_tools';
+import {
+  transformIndexSearchFormDataForCreate,
+  transformIndexSearchFormDataForUpdate,
+  transformIndexSearchToolToFormData,
+} from '../../utils/transform_index_search_form_data';
+import { ToolTestFlyout } from './execute/test_tools';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
 import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
+import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
+import { useQueryState } from '../../hooks/use_query_state';
 
 interface ToolBaseProps {
   tool?: ToolDefinitionWithSchema;
@@ -72,12 +80,36 @@ export type ToolProps = ToolCreateProps | ToolEditProps | ToolViewProps;
 export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
-  const form = useToolForm(tool);
+  const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
+    OPEN_TEST_FLYOUT_QUERY_PARAM,
+    { defaultValue: false }
+  );
+  const [urlToolType] = useQueryState<ToolType | undefined>(TOOL_TYPE_QUERY_PARAM);
+
+  const initialToolType = useMemo(() => {
+    switch (urlToolType) {
+      case ToolType.esql:
+      case ToolType.index_search:
+        return urlToolType;
+      default:
+        return undefined;
+    }
+  }, [urlToolType]);
+
+  const form = useToolForm(tool, initialToolType);
   const { reset, formState, watch, handleSubmit } = form;
   const { errors } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
 
   const currentToolId = watch('toolId');
+
+  // Handle opening test tool flyout on navigation
+  useEffect(() => {
+    if (openTestFlyoutParam && currentToolId && !showTestFlyout) {
+      setShowTestFlyout(true);
+      setOpenTestFlyoutParam(false);
+    }
+  }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam]);
 
   const handleCancel = useCallback(() => {
     navigateToOnechatUrl(appPaths.tools.list);
@@ -91,6 +123,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           case ToolType.esql:
             await saveTool(transformEsqlFormDataForUpdate(data));
             break;
+          case ToolType.index_search:
+            await saveTool(transformIndexSearchFormDataForUpdate(data));
+            break;
           default:
             break;
         }
@@ -98,6 +133,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         switch (data.type) {
           case ToolType.esql:
             await saveTool(transformEsqlFormDataForCreate(data));
+            break;
+          case ToolType.index_search:
+            await saveTool(transformIndexSearchFormDataForCreate(data));
             break;
           default:
             break;
@@ -126,8 +164,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     if (tool) {
       if (isEsqlTool(tool)) {
         reset(transformEsqlToolToFormData(tool));
-      }
-      if (tool.type === ToolType.builtin) {
+      } else if (isIndexSearchTool(tool)) {
+        reset(transformIndexSearchToolToFormData(tool));
+      } else if (tool.type === ToolType.builtin) {
         reset(transformBuiltInToolToFormData(tool));
       }
     }
@@ -159,7 +198,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const saveAndTestButton = (
     <EuiButton
       size="s"
-      iconType="eye"
+      iconType="play"
       onClick={handleSubmit(handleSaveAndTest)}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
@@ -178,7 +217,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       size="s"
       onClick={handleTestTool}
       disabled={Object.keys(errors).length > 0}
-      iconType="eye"
+      iconType="play"
       css={css`
         width: 124px;
       `}
@@ -203,7 +242,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               {tool?.readonly && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" iconType="lock">
-                    {labels.tools.readOnlyBadge}
+                    {labels.tools.readOnly}
                   </EuiBadge>
                 </EuiFlexItem>
               )}
@@ -227,7 +266,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
               )}
               {showTestFlyout && currentToolId && (
-                <OnechatTestFlyout
+                <ToolTestFlyout
                   isOpen={showTestFlyout}
                   isLoading={isLoading}
                   toolId={currentToolId}
@@ -241,6 +280,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               )}
             </>
           )}
+          <EuiSpacer size="xl" />
         </KibanaPageTemplate.Section>
         <KibanaPageTemplate.BottomBar
           css={css`
