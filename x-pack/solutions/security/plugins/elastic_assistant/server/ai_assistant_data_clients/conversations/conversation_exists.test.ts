@@ -8,6 +8,8 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { conversationExists } from './conversation_exists';
+import { getBasicEmptySearchResponse } from '../../__mocks__/response';
+import { getConversationSearchEsMock } from '../../__mocks__/conversations_schema.mock';
 
 describe('conversationExists', () => {
   let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -21,12 +23,7 @@ describe('conversationExists', () => {
   });
 
   test('returns true when conversation exists', async () => {
-    esClient.search.mockResponse({
-      hits: {
-        total: { value: 1 },
-        hits: [],
-      },
-    });
+    esClient.search.mockResponse(getConversationSearchEsMock());
 
     const result = await conversationExists({
       esClient,
@@ -56,12 +53,7 @@ describe('conversationExists', () => {
   });
 
   test('returns false when conversation does not exist', async () => {
-    esClient.search.mockResponse({
-      hits: {
-        total: { value: 0 },
-        hits: [],
-      },
-    });
+    esClient.search.mockResponse(getBasicEmptySearchResponse());
 
     const result = await conversationExists({
       esClient,
