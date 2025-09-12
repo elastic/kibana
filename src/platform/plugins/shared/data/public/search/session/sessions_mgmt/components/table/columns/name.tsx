@@ -8,7 +8,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIconTip, EuiLink } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +22,34 @@ import { TableText } from '../..';
 function isSessionRestorable(status: SearchSessionStatus) {
   return status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE;
 }
+
+const NameColumnText = ({
+  status,
+  children,
+  href,
+  onClick,
+}: {
+  status: SearchSessionStatus;
+  children: React.ReactNode;
+  href: string;
+  onClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+}) => {
+  const hideLink = status === SearchSessionStatus.IN_PROGRESS;
+
+  if (hideLink)
+    return (
+      <EuiText data-test-subj="sessionManagementNameText" color="subdued">
+        {children}
+      </EuiText>
+    );
+
+  return (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink href={href} onClick={onClick} data-test-subj="sessionManagementNameLink">
+      {children}
+    </EuiLink>
+  );
+};
 
 export const nameColumn = ({
   core,
@@ -88,21 +116,20 @@ export const nameColumn = ({
           application: core.application,
         }}
       >
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiLink
+        <NameColumnText
+          status={status}
           href={href}
           onClick={(event) => {
             trackAction?.();
             onBackgroundSearchOpened?.({ session, event });
           }}
-          data-test-subj="sessionManagementNameCol"
         >
-          <TableText>
+          <TableText data-test-subj="sessionManagementNameCol">
             {name}
             {notRestorableWarning}
             {versionIncompatibleWarning}
           </TableText>
-        </EuiLink>
+        </NameColumnText>
       </RedirectAppLinks>
     );
   },

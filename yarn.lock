@@ -4184,6 +4184,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/background-search@link:src/platform/packages/shared/kbn-background-search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/banners-plugin@link:x-pack/platform/plugins/private/banners":
   version "0.0.0"
   uid ""

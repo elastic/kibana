@@ -130,6 +130,8 @@
       "@kbn/babel-register/*": ["src/platform/packages/shared/kbn-babel-register/*"],
       "@kbn/babel-transform": ["src/platform/packages/private/kbn-babel-transform"],
       "@kbn/babel-transform/*": ["src/platform/packages/private/kbn-babel-transform/*"],
+      "@kbn/background-search": ["src/platform/packages/shared/kbn-background-search"],
+      "@kbn/background-search/*": ["src/platform/packages/shared/kbn-background-search/*"],
       "@kbn/banners-plugin": ["x-pack/platform/plugins/private/banners"],
       "@kbn/banners-plugin/*": ["x-pack/platform/plugins/private/banners/*"],
       "@kbn/cache-cli": ["src/platform/packages/shared/kbn-cache-cli"],
