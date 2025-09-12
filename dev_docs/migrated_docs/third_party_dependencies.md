@@ -3,7 +3,7 @@ id: kibThirdPartyDependencies
 slug: /kibana-dev-docs/third-party-dependencies
 title: Managing third-party dependencies
 description: Expectations for working with third-party dependencies
-date: 2024-10-01
+date: 2025-08-21
 tags: ['contributor', 'dev', 'kibana', 'npm', 'dependencies', 'third-party', 'dependency']
 ---
 
@@ -21,16 +21,15 @@ When the use of an external dependency is necessary, ensure there is sufficient 
 Except in specific cases where widespread consensus was gained and clear ownership is established, third party dependencies should not be exposed directly as features of Kibana, whether it be through the UI, HTTP API, or programmatic interfaces.
 
 
-<DocCallOut>
-Treat third-party code as if it was your own. We share the responsibility for the efficacy, performance, and security of both the code we integrate and the code we develop.
-</DocCallOut>
+> [!IMPORTANT]
+> Treat third-party code as if it was your own. We share the responsibility for the efficacy, performance, and security of both the code we integrate and the code we develop.
 
 
 ## Adding new dependencies
 
 Looking for a dependency that isn't already available in Kibana? There are a few things to keep in mind before adding a new dependency.
 
-First, be sure you have read and are familiar with our <DocLink id="kibDevPrinciples" />. In particular, **Be wary of dependencies**
+First, be sure you have read and are familiar with our [development principles](dev_principles.mdx). In particular, **Be wary of dependencies**
 and **Prefer one way to do things** provide an overview of how we approach this question.
 
 In general, we have a bias toward **not** adding new dependencies unless there is a compelling reason to do so, as we want to
@@ -62,10 +61,8 @@ on Github:
 - **@elastic/kibana-operations**
 - **@elastic/kibana-security**
 
-<DocCallOut title="Internal only">
-  If you are unsure of which licenses are okay to use, refer to the
-  [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
-</DocCallOut>
+> [!NOTE]
+> **Internal only:** If you are unsure of which licenses are okay to use, refer to the [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
 
 ### Dependency evaluation
 
@@ -170,7 +167,7 @@ Here is an example configuration for a dependency in the `renovate.json` file:
       "release_note:skip",
       "backport:all-open",
       "effort:low",
-      "upgrade-risk:high"
+      "risk:high"
     ],
     // [5]
     "minimumReleaseAge": "7 days",
@@ -185,7 +182,7 @@ Here is an example configuration for a dependency in the `renovate.json` file:
 
 [3] `matchBaseBranches`: The branches that the rule will apply to. This should be set to `main` for most dependencies.
 
-[4] `labels`: Labels to apply to the PRs created by Renovate. The `Team:My-Team-Label` label should be replaced with your team's GitHub label from the Kibana repository. Include an `effort:low|medium|high` label to indicate the level of effort required to update the codebase, and an `upgrade-risk:low|medium|high` label to indicate the level of testing required to be confident in the changes. The `release_note:skip` and `backport:all-open` labels are used to control the release process and should not be changed without first consulting the AppEx Platform Security team.
+[4] `labels`: Labels to apply to the PRs created by Renovate. The `Team:My-Team-Label` label should be replaced with your team's GitHub label from the Kibana repository. Include an `effort:low|medium|high` label to indicate the level of effort required to update the codebase, and a `risk:low|medium|high` label to indicate the level of testing required to be confident in the changes. The `release_note:skip` and `backport:all-open` labels are used to control the release process and should not be changed without first consulting the AppEx Platform Security team.
 
 [5] `minimumReleaseAge`: The minimum age of a release before it can be upgraded. This is set to `7 days` to allow time for any issues to be identified and resolved before upgrading. You may adjust this value as needed.
 
