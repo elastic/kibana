@@ -21,8 +21,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { usePanelErrorCss } from './use_panel_error_css';
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -43,10 +43,10 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
-  const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = useMemo(() => {
@@ -75,6 +75,8 @@ export const PresentationPanelInternal = <
     viewModeSubject,
     (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
   );
+  console.log({ api: api?.type });
+  if (api?.type === 'optionsListControl') console.log({ blockingError });
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
@@ -120,6 +122,7 @@ export const PresentationPanelInternal = <
       setDragHandle={setDragHandle}
     >
       <EuiPanel
+        panelRef={panelRef}
         role="figure"
         paddingSize="none"
         className={classNames('embPanel', {
@@ -146,29 +149,21 @@ export const PresentationPanelInternal = <
           />
         )}
         {blockingError && api && (
-          <EuiFlexGroup
-            alignItems="center"
-            css={panelErrorCss}
-            className="eui-fullHeight"
-            data-test-subj="embeddableError"
-            justifyContent="center"
-          >
-            <PresentationPanelErrorInternal api={api} error={blockingError} />
-          </EuiFlexGroup>
+          <PresentationPanelErrorInternal api={api} error={blockingError} panelRef={panelRef} />
         )}
         {!initialLoadComplete && <PanelLoader />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
         >
-          <EuiErrorBoundary>
+          <KibanaErrorBoundary>
             <Component
               {...(componentProps as React.ComponentProps<typeof Component>)}
               ref={(newApi) => {
                 if (newApi && !api) setApi(newApi);
               }}
             />
-          </EuiErrorBoundary>
+          </KibanaErrorBoundary>
         </div>
       </EuiPanel>
     </PresentationPanelHoverActionsWrapper>
