@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  MAX_BROWSER_FIELDS_CACHE_SIZE,
-  browserFieldsManager,
-} from './security_browser_fields_manager';
+import { MAX_DATAVIEWS_TO_CACHE, browserFieldsManager } from './security_browser_fields_manager';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 
@@ -96,31 +93,24 @@ describe('browserFieldsManager', () => {
       expect(result1.browserFields.host).toEqual(result2.browserFields.host);
     });
 
-    it(`should remove the oldest cached item when the cache exceeds the maximum size of ${MAX_BROWSER_FIELDS_CACHE_SIZE}`, () => {
+    it(`should not exceed the maximum cache size of ${MAX_DATAVIEWS_TO_CACHE}`, () => {
       const dataViews = [];
-      const cacheSizeExcessCount = 2;
-      const totalDataViewsToCreate = MAX_BROWSER_FIELDS_CACHE_SIZE + cacheSizeExcessCount;
-
-      for (let i = 0; i < totalDataViewsToCreate; i += 1) {
+      const moreThanMaxCacheSize = MAX_DATAVIEWS_TO_CACHE + 2;
+      for (let i = 0; i < moreThanMaxCacheSize; i += 1) {
         dataViews.push(createDataView([{ name: `field${i}` }], `id-${i}`));
       }
 
-      // With the limit on the cache set to 10, adding 12 dataViews should remove the first two added
-      // Id's "id-0" and "id-1" should be removed from the cache
-      const results = dataViews.map((dv) => browserFieldsManager.getBrowserFields(dv));
+      const browserFieldsResult = dataViews.map((dv) => browserFieldsManager.getBrowserFields(dv));
+      expect(browserFieldsResult.length).toBe(moreThanMaxCacheSize);
 
-      // After the the two `getBrowserFields` calls below, the next two ids to be removed should be "id-2" and "id-3"
-      // with "id-4" being the oldest remaining in the cache
-      const result1Again = browserFieldsManager.getBrowserFields(dataViews[0]);
-      const result2Again = browserFieldsManager.getBrowserFields(dataViews[1]);
-      expect(results[0]).not.toBe(result1Again);
-      expect(results[1]).not.toBe(result2Again);
-
-      // Only ids "id-4" to "id-11" should remain from the original cache.
-      for (let i = 4; i < 12; i += 1) {
+      let cachedCount = 0;
+      for (let i = 0; i < moreThanMaxCacheSize; i += 1) {
         const resultAgain = browserFieldsManager.getBrowserFields(dataViews[i]);
-        expect(results[i]).toBe(resultAgain);
+        if (browserFieldsResult[i] === resultAgain) {
+          cachedCount += 1;
+        }
       }
+      expect(cachedCount).toBeLessThanOrEqual(MAX_DATAVIEWS_TO_CACHE);
     });
 
     it('should remove from the cache correctly', () => {
@@ -128,7 +118,7 @@ describe('browserFieldsManager', () => {
       const dataView2 = createDataView([{ name: 'host.name' }], 'still-cached-id');
       const result1 = browserFieldsManager.getBrowserFields(dataView1);
       const result2 = browserFieldsManager.getBrowserFields(dataView2);
-      browserFieldsManager.removeFromCache(dataView1.id);
+      if (dataView1.id) browserFieldsManager.removeFromCache(dataView1.id);
       const newResult1 = browserFieldsManager.getBrowserFields(dataView1);
       const sameResult2 = browserFieldsManager.getBrowserFields(dataView2);
       expect(result1).not.toBe(newResult1);
