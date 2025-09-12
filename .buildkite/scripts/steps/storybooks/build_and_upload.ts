@@ -109,8 +109,8 @@ const upload = () => {
     );
     exec(`
       ${activateScript} gs://ci-artifacts.kibana.dev
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --quiet '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=html --quiet 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
 
     if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {
