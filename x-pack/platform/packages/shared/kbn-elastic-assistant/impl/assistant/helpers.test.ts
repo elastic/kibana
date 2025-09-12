@@ -12,7 +12,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {
-    const connector1: AIConnector = {
+    const defaultConnector: AIConnector = {
       actionTypeId: '.gen-ai',
       isPreconfigured: false,
       isDeprecated: false,
@@ -29,7 +29,7 @@ describe('helpers', () => {
     };
 
     const connector2: AIConnector = {
-      ...connector1,
+      ...defaultConnector,
       id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
       name: 'OpenAI',
       config: {
@@ -49,9 +49,6 @@ describe('helpers', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       clientGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'c5f91dc0-2197-11ee-aded-897192c5d6f5';
-        }
         return undefined;
       });
     });
@@ -70,23 +67,35 @@ describe('helpers', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return the connector id if there is only one connector', () => {
-      const connectors: AIConnector[] = [connector1];
+    it('should return the connector if there is only one connector available', () => {
+      const connectors: AIConnector[] = [defaultConnector];
       const result = getDefaultConnector(connectors, settings);
 
       expect(result).toBe(connectors[0]);
     });
 
-    it('should return the default connector id if there are multiple connectors and default connector is defined', () => {
-      const connectors: AIConnector[] = [connector1, connector2];
+    it('should return the default connector if there are multiple connectors and default connector is defined', () => {
+      clientGet.mockImplementation((key: string) => {
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+          return defaultConnector.id;
+        }
+        return undefined;
+      });
+      const connectors: AIConnector[] = [defaultConnector, connector2];
       const result = getDefaultConnector(connectors, settings);
-      expect(result).toBe(connector1);
+      expect(result).toBe(defaultConnector);
     });
 
-    it('should return the default connector id if there are multiple connectors and default connector is defined but they are in a different order', () => {
-      const connectors: AIConnector[] = [connector2, connector1];
+    it('should return the default connector if there are multiple connectors and default connector is defined but they are in a different order', () => {
+      clientGet.mockImplementation((key: string) => {
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+          return defaultConnector.id;
+        }
+        return undefined;
+      });
+      const connectors: AIConnector[] = [connector2, defaultConnector];
       const result = getDefaultConnector(connectors, settings);
-      expect(result).toBe(connector1);
+      expect(result).toBe(defaultConnector);
     });
 
     it('should return the first connector if there are multiple connectors and no default connector is defined', () => {
@@ -94,7 +103,7 @@ describe('helpers', () => {
         return undefined;
       });
 
-      const connectors: AIConnector[] = [connector2, connector1];
+      const connectors: AIConnector[] = [connector2, defaultConnector];
       const result = getDefaultConnector(connectors, settings);
       expect(result).toBe(connectors[0]);
     });
@@ -107,7 +116,7 @@ describe('helpers', () => {
         return undefined;
       });
 
-      const connectors: AIConnector[] = [connector2, connector1];
+      const connectors: AIConnector[] = [connector2, defaultConnector];
       const result = getDefaultConnector(connectors, settings);
       expect(result).toBe(connectors[0]);
     });
