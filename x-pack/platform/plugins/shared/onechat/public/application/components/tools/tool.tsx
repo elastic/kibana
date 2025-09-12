@@ -102,6 +102,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const [showTestFlyout, setShowTestFlyout] = useState(false);
 
   const currentToolId = watch('toolId');
+  const currentToolType = watch('type');
 
   // Handle opening test tool flyout on navigation
   useEffect(() => {
