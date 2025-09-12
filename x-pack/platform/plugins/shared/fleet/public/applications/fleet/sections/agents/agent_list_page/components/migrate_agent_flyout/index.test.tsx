@@ -35,6 +35,7 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
+        agentCount={1}
         protectedAndFleetAgents={[]}
       />
     );
@@ -94,6 +95,7 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
+        agentCount={2}
         protectedAndFleetAgents={[]}
       />
     );
@@ -116,6 +118,7 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
+        agentCount={1}
         protectedAndFleetAgents={[
           {
             active: true,
