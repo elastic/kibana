@@ -17,6 +17,8 @@ export type {
   ExecutableTool,
   ExecutableToolHandlerParams,
   ExecutableToolHandlerFn,
+  LLmDescriptionHandlerParams,
+  LlmDescriptionHandler,
 } from './src/tools';
 export type { ModelProvider, ScopedModel } from './src/model_provider';
 export type {
@@ -34,8 +36,7 @@ export {
   type OnechatToolEvent,
   type ToolEventHandlerFn,
   type ToolEventEmitter,
-  type ToolEventEmitterFn,
-  type InternalToolEvent,
+  type ToolProgressEmitterFn,
 } from './src/events';
 export type {
   AgentHandlerParams,
@@ -48,6 +49,7 @@ export type {
   ScopedRunAgentFn,
   ScopedRunnerRunAgentParams,
   AgentEventEmitter,
+  AgentEventEmitterFn,
   RunAgentOnEventFn,
 } from './agents';
 export { chatSystemIndex, chatSystemIndexPrefix } from './src/indices';

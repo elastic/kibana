@@ -9,7 +9,7 @@
 
 import { buildMetricField } from './build_metric_field';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import type { Dimension } from '../../../common/dimensions/types';
+import type { Dimension } from '../../../common/types';
 
 describe('buildMetricField', () => {
   it('should build a metric field with string meta properties for a gauge', () => {

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MetricField } from './fields/types';
+export type { MetricField, MetricFieldsResponse, MetricFieldType } from './fields/types';
 export type { Dimension } from './dimensions/types';

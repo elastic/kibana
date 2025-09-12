@@ -1503,7 +1503,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", query: ",
+          ", removeLimit: boolean | undefined, query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1541,6 +1541,21 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getInitialESQLQuery.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "removeLimit",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getInitialESQLQuery.$3",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -1718,6 +1733,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getRemoteClustersFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getRemoteClustersFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => string[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getRemoteClustersFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

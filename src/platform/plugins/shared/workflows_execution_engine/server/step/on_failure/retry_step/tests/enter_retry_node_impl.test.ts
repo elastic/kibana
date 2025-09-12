@@ -52,9 +52,25 @@ describe('EnterRetryNodeImpl', () => {
         workflowRuntime.goToNextStep = jest.fn();
       });
 
-      it('should enter scope', async () => {
+      it('should enter whole retry step scope', async () => {
         await underTest.run();
-        expect(workflowRuntime.enterScope).toHaveBeenCalled();
+        expect(workflowRuntime.enterScope).toHaveBeenCalledWith();
+      });
+
+      it('should enter first attempt scope', async () => {
+        await underTest.run();
+        expect(workflowRuntime.enterScope).toHaveBeenCalledWith('1-attempt');
+      });
+
+      it('should enter scopes in correct order', async () => {
+        await underTest.run();
+        expect(workflowRuntime.enterScope).toHaveBeenNthCalledWith(1);
+        expect(workflowRuntime.enterScope).toHaveBeenNthCalledWith(2, '1-attempt');
+      });
+
+      it('should enter two scopes', async () => {
+        await underTest.run();
+        expect(workflowRuntime.enterScope).toHaveBeenCalledTimes(2);
       });
 
       it('should start step', async () => {
@@ -81,9 +97,10 @@ describe('EnterRetryNodeImpl', () => {
         workflowRuntime.goToNextStep = jest.fn();
       });
 
-      it('should enter scope', async () => {
+      it('should enter next attempt scope', async () => {
         await underTest.run();
-        expect(workflowRuntime.enterScope).toHaveBeenCalled();
+        expect(workflowRuntime.enterScope).toHaveBeenCalledWith('3-attempt');
+        expect(workflowRuntime.enterScope).toHaveBeenCalledTimes(1);
       });
 
       it('should increment attempt in step state', async () => {

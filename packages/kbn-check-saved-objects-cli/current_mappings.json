@@ -289,6 +289,26 @@
       }
     }
   },
+  "alerting_rule_template": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "ruleTypeId": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
@@ -601,6 +621,11 @@
         }
       },
       "incremental_id": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
         "type": "unsigned_long"
       },
       "observables": {
@@ -2584,6 +2609,7 @@
     }
   },
   "lens": {
+    "dynamic": false,
     "properties": {
       "description": {
         "type": "text"
@@ -4248,55 +4274,7 @@
       }
     }
   },
-  "workflow": {
-    "dynamic": false,
-    "properties": {
-      "createdBy": {
-        "type": "keyword"
-      },
-      "definition": {
-        "enabled": false,
-        "type": "object"
-      },
-      "deleted_at": {
-        "type": "date"
-      },
-      "description": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "lastUpdatedBy": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "tags": {
-        "type": "keyword"
-      },
-      "valid": {
-        "type": "boolean"
-      },
-      "yaml": {
-        "index": false,
-        "type": "text"
-      }
-    }
-  },
+
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}

@@ -51,7 +51,7 @@ export const Wrapper = memo(() => {
   const isLoading: boolean = useMemo(
     () =>
       newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'loading'
+        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
         : oldSourcererDataViewIsLoading,
     [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
   );
@@ -67,15 +67,20 @@ export const Wrapper = memo(() => {
     [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec?.runtimeFieldMap]
   );
 
-  // TODO check for status ready instead!
   const isDataViewInvalid: boolean = useMemo(
     () =>
       newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'error'
+        ? experimentalDataViewStatus === 'error' ||
+          (experimentalDataViewStatus === 'ready' && !experimentalDataView.hasMatchedIndices())
         : !oldSourcererDataViewSpec ||
           !oldSourcererDataViewSpec.id ||
           !oldSourcererDataViewSpec.title,
-    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    [
+      experimentalDataView,
+      experimentalDataViewStatus,
+      newDataViewPickerEnabled,
+      oldSourcererDataViewSpec,
+    ]
   );
 
   return (

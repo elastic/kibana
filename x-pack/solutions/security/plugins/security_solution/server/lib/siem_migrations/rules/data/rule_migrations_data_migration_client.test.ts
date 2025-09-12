@@ -12,7 +12,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
 import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
-import type { RuleMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -25,7 +25,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
   } as unknown as AuthenticatedUser;
-  const dependencies = {} as unknown as RuleMigrationsClientDependencies;
+  const dependencies = {} as unknown as SiemMigrationsClientDependencies;
 
   beforeEach(() => {
     ruleMigrationsDataMigrationClient = new RuleMigrationsDataMigrationClient(

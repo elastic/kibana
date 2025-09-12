@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, memo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,16 +17,15 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiIcon,
   EuiFieldText,
-  EuiFormRow,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { ArrayItem, ValidationFunc } from '../../../../../../shared_imports';
 import { UseField, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
-
-import './drag_and_drop_text_list.scss';
 
 interface Props {
   label: string;
@@ -57,6 +57,35 @@ const i18nTexts = {
   ),
 };
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    labelContainer: css`
+      margin-bottom: ${euiTheme.size.xs};
+    `,
+    panel: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      padding: ${euiTheme.size.m};
+    `,
+    item: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      padding-top: ${euiTheme.size.s};
+      padding-bottom: ${euiTheme.size.s};
+    `,
+    grabIcon: css`
+      height: ${euiTheme.size.xl};
+      width: ${euiTheme.size.xl};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `,
+    removeButton: css`
+      margin-left: ${euiTheme.size.s};
+    `,
+  };
+};
+
 function DragAndDropTextListComponent({
   label,
   helpText,
@@ -70,6 +99,8 @@ function DragAndDropTextListComponent({
   textDeserializer,
   textSerializer,
 }: Props): JSX.Element {
+  const styles = useStyles();
+
   const [droppableId] = useState(() => uuidv4());
   const [firstItemId] = useState(() => uuidv4());
 
@@ -81,6 +112,7 @@ function DragAndDropTextListComponent({
     },
     [onMove]
   );
+
   return (
     <EuiFormRow
       isInvalid={typeof error === 'string'}
@@ -91,7 +123,7 @@ function DragAndDropTextListComponent({
       <>
         {/* Label and help text. Also wire up the htmlFor so the label points to the first text field. */}
         <EuiFlexGroup
-          className="pipelineProcessorsEditor__form__dragAndDropList__labelContainer"
+          css={styles.labelContainer}
           justifyContent="flexStart"
           direction="column"
           gutterSize="none"
@@ -111,7 +143,7 @@ function DragAndDropTextListComponent({
         </EuiFlexGroup>
 
         {/* The processor panel */}
-        <div className="pipelineProcessorsEditor__form__dragAndDropList__panel">
+        <div css={styles.panel}>
           <EuiDragDropContext onDragEnd={onDragEnd}>
             <EuiDroppable droppableId={droppableId}>
               {value.map((item, idx) => {
@@ -125,16 +157,9 @@ function DragAndDropTextListComponent({
                   >
                     {(provided) => {
                       return (
-                        <EuiFlexGroup
-                          className="pipelineProcessorsEditor__form__dragAndDropList__item"
-                          justifyContent="center"
-                          gutterSize="none"
-                        >
+                        <EuiFlexGroup css={styles.item} justifyContent="center" gutterSize="none">
                           <EuiFlexItem grow={false}>
-                            <div
-                              {...provided.dragHandleProps}
-                              className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
-                            >
+                            <div {...provided.dragHandleProps} css={styles.grabIcon}>
                               <EuiIcon type="grab" />
                             </div>
                           </EuiFlexItem>
@@ -173,7 +198,7 @@ function DragAndDropTextListComponent({
                             {value.length > 1 ? (
                               <EuiButtonIcon
                                 aria-label={i18nTexts.removeItemButtonAriaLabel}
-                                className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
+                                css={styles.removeButton}
                                 iconType="minusInCircle"
                                 color="danger"
                                 onClick={() => onRemove(item.id)}
@@ -181,10 +206,7 @@ function DragAndDropTextListComponent({
                               />
                             ) : (
                               // Render a no-op placeholder button
-                              <EuiIcon
-                                className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
-                                type="empty"
-                              />
+                              <EuiIcon css={styles.removeButton} type="empty" />
                             )}
                           </EuiFlexItem>
                         </EuiFlexGroup>

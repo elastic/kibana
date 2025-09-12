@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   MonitoringEngineComponentResourceEnum,
   type CreateMonitoringEntitySource,
-  type InitMonitoringEngineResponse,
+  type MonitoringEngineDescriptor,
 } from '../../../../../common/api/entity_analytics';
 import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { PrivilegeMonitoringDataClient } from './data_client';
@@ -42,7 +42,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
 
   const init = async (
     soClient: SavedObjectsClientContract
-  ): Promise<InitMonitoringEngineResponse> => {
+  ): Promise<MonitoringEngineDescriptor> => {
     const descriptorClient = new PrivilegeMonitoringEngineDescriptorClient({
       soClient,
       namespace: deps.namespace,
@@ -111,7 +111,12 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
         },
       });
 
-      return { status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR };
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
+        error: {
+          message: e.message,
+        },
+      };
     }
 
     return descriptor;

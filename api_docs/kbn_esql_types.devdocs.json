@@ -1396,7 +1396,7 @@
         "tags": [],
         "label": "ResolveIndexResponse",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1410,7 +1410,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1424,7 +1424,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1438,7 +1438,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

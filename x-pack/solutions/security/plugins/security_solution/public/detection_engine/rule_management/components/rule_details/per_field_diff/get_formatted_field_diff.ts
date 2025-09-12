@@ -6,8 +6,8 @@
  */
 
 import type {
-  AllFieldsDiff,
-  RuleFieldsDiff,
+  AllThreeWayFieldsDiff,
+  ThreeWayRuleFieldsDiff,
   RuleFieldsDiffWithDataSource,
   RuleFieldsDiffWithKqlQuery,
   RuleFieldsDiffWithEqlQuery,
@@ -32,8 +32,8 @@ import {
 } from './get_field_diffs_for_grouped_fields';
 
 export const getFormattedFieldDiffGroups = (
-  fieldName: keyof AllFieldsDiff,
-  fields: Partial<RuleFieldsDiff>
+  fieldName: keyof AllThreeWayFieldsDiff,
+  fields: Partial<ThreeWayRuleFieldsDiff>
 ): FormattedFieldDiff => {
   /**
    * Field types that contain groupings of rule fields must be formatted differently to compare and render
@@ -73,13 +73,15 @@ export const getFormattedFieldDiffGroups = (
         fieldDiffs: getFieldDiffsForThreatQuery(threatQueryThreeWayDiff),
       };
     case 'rule_schedule':
-      const ruleScheduleThreeWayDiff = fields[fieldName] as AllFieldsDiff['rule_schedule'];
+      const ruleScheduleThreeWayDiff = fields[fieldName] as AllThreeWayFieldsDiff['rule_schedule'];
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForRuleSchedule(ruleScheduleThreeWayDiff),
       };
     case 'rule_name_override':
-      const ruleNameOverrideThreeWayDiff = fields[fieldName] as AllFieldsDiff['rule_name_override'];
+      const ruleNameOverrideThreeWayDiff = fields[
+        fieldName
+      ] as AllThreeWayFieldsDiff['rule_name_override'];
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForRuleNameOverride(ruleNameOverrideThreeWayDiff),
@@ -87,19 +89,23 @@ export const getFormattedFieldDiffGroups = (
     case 'timestamp_override':
       const timestampOverrideThreeWayDiff = fields[
         fieldName
-      ] as AllFieldsDiff['timestamp_override'];
+      ] as AllThreeWayFieldsDiff['timestamp_override'];
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForTimestampOverride(timestampOverrideThreeWayDiff),
       };
     case 'timeline_template':
-      const timelineTemplateThreeWayDiff = fields[fieldName] as AllFieldsDiff['timeline_template'];
+      const timelineTemplateThreeWayDiff = fields[
+        fieldName
+      ] as AllThreeWayFieldsDiff['timeline_template'];
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForTimelineTemplate(timelineTemplateThreeWayDiff),
       };
     case 'building_block':
-      const buildingBlockThreeWayDiff = fields[fieldName] as AllFieldsDiff['building_block'];
+      const buildingBlockThreeWayDiff = fields[
+        fieldName
+      ] as AllThreeWayFieldsDiff['building_block'];
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForBuildingBlock(buildingBlockThreeWayDiff),
@@ -107,13 +113,13 @@ export const getFormattedFieldDiffGroups = (
     case 'threshold':
       const thresholdThreeWayDiff = (fields as RuleFieldsDiffWithThreshold)[
         fieldName
-      ] as AllFieldsDiff['threshold'];
+      ] as AllThreeWayFieldsDiff['threshold'];
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForThreshold(thresholdThreeWayDiff),
       };
     default:
-      const fieldThreeWayDiff = (fields as AllFieldsDiff)[fieldName];
+      const fieldThreeWayDiff = (fields as AllThreeWayFieldsDiff)[fieldName];
       const currentVersionField = sortAndStringifyJson(fieldThreeWayDiff.current_version);
       const targetVersionField = sortAndStringifyJson(fieldThreeWayDiff.target_version);
       return {

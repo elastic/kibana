@@ -7,7 +7,7 @@
 import {
   getInlineSplQuery,
   type GetInlineSplQueryParams,
-} from '../../../../../../../common/task/agent/tools/inline_spl_query';
+} from '../../../../../../../common/task/agent/helpers/inline_spl_query';
 import type { GraphNode } from '../../types';
 
 export const getInlineQueryNode = (params: GetInlineSplQueryParams): GraphNode => {

@@ -22,7 +22,7 @@ export const registerSolutionNavigation = async (
 
   const navigationTree = shouldUseAINavigation
     ? createAiNavigationTree()
-    : createNavigationTree(services);
+    : await createNavigationTree(services);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 

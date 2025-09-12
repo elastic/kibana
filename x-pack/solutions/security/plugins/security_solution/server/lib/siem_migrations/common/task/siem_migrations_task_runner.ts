@@ -6,7 +6,7 @@
  */
 
 import assert from 'assert';
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
@@ -56,7 +56,16 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
-export class SiemMigrationTaskRunner<
+export type SiemTaskRunnerConstructor<
+  M extends MigrationDocument = MigrationDocument,
+  I extends ItemDocument = ItemDocument,
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+> = new (...params: any[]) => SiemMigrationTaskRunner<M, I, P, C, O>;
+
+export abstract class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type
   P extends object = {}, // The migration task input parameters schema
@@ -72,33 +81,28 @@ export class SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     protected readonly data: SiemMigrationsDataClient<M, I>,
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    this.actionsClientChat = new ActionsClientChat(this.dependencies.actionsClient, this.logger);
+    this.actionsClientChat = new ActionsClientChat(this.request, this.dependencies);
     this.abort = abortSignalToPromise(this.abortController.signal);
   }
 
   /** Receives the connectorId and creates the `this.task` and `this.telemetry` attributes */
-  public async setup(connectorId: string): Promise<void> {
-    throw new Error('setup method must be implemented in the subclass');
-  }
+  public abstract setup(connectorId: string): Promise<void>;
 
   /** Prepares the migration item for the task execution */
-  protected async prepareTaskInput(item: Stored<I>): Promise<P> {
-    throw new Error('prepareTaskInput method must be implemented in the subclass');
-  }
+  protected abstract prepareTaskInput(item: Stored<I>): Promise<P>;
 
   /** Processes the output of the migration task and returns the item to save */
-  protected processTaskOutput(item: Stored<I>, output: O): Stored<I> {
-    throw new Error('processTaskOutput method must be implemented in the subclass');
-  }
+  protected abstract processTaskOutput(item: Stored<I>, output: O): Stored<I>;
 
   /** Optional initialization logic */
-  async initialize() {}
+  public async initialize() {}
 
   public async run(invocationConfig: RunnableConfig<C>): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');

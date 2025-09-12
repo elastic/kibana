@@ -9,8 +9,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { config, configSchema } from './config';
-
 export type { MetricsExperienceRouteRepository } from './routes';
 
 const plugin = async (initContext: PluginInitializerContext) => {
@@ -18,4 +16,4 @@ const plugin = async (initContext: PluginInitializerContext) => {
   return new MetricsExperiencePlugin(initContext);
 };
 
-export { configSchema, config, plugin };
+export { plugin };

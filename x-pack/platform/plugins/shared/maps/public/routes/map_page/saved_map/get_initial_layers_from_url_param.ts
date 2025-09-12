@@ -16,11 +16,11 @@ function isObj(v: unknown): v is Record<string, unknown> {
 }
 
 function parseLayerDescriptors(mapInitLayers: string): LayerDescriptor[] {
-  const raw: any[] = rison.decodeArray(mapInitLayers);
+  const raw: unknown[] = rison.decodeArray(mapInitLayers);
 
   return raw.flatMap((desc, i) => {
     if (isObj(desc) && typeof desc.id === 'string') {
-      return desc as LayerDescriptor;
+      return desc as unknown as LayerDescriptor;
     }
 
     // we shouldn't end up here, but if we do it's likely only in testing or local dev so a console error is suitable

@@ -2364,13 +2364,27 @@ export class CstToAstConverter {
       incomplete: Boolean(ctx.exception),
     };
 
-    const identifierOrParameter = functionName.identifierOrParameter();
+    const identifierOrParameterCtx = functionName.identifierOrParameter();
 
-    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.fromIdentifierOrParam(identifierOrParameter);
+    if (identifierOrParameterCtx instanceof cst.IdentifierOrParameterContext) {
+      const operator = this.fromIdentifierOrParam(identifierOrParameterCtx);
 
       if (operator) {
         node.operator = operator;
+      }
+    } else {
+      const lastCtx = functionName.LAST();
+
+      if (lastCtx) {
+        node.operator = this.fromNodeToIdentifier(lastCtx);
+        node.operator.name = node.operator.name.toLowerCase();
+      } else {
+        const firstCtx = functionName.FIRST();
+
+        if (firstCtx) {
+          node.operator = this.fromNodeToIdentifier(firstCtx);
+          node.operator.name = node.operator.name.toLowerCase();
+        }
       }
     }
 
@@ -2411,8 +2425,13 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
+
       if (entry) {
         map.entries.push(entry);
+
+        if (entry.incomplete) {
+          map.incomplete = true;
+        }
       } else {
         map.incomplete = true;
       }
@@ -2426,17 +2445,40 @@ export class CstToAstConverter {
     const valueCtx = ctx._value;
 
     if (keyCtx && valueCtx) {
+      let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression;
+      if (!key) {
+        return undefined;
+      }
 
-      const entry = Builder.expression.entry(key, value, {
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      });
+      const constantCtx = valueCtx.constant();
 
-      return entry;
+      if (constantCtx) {
+        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+      }
+
+      const mapExpressionCtx = valueCtx.mapExpression();
+
+      if (mapExpressionCtx) {
+        value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (!value) {
+        value = this.fromParserRuleToUnknown(valueCtx);
+        value.incomplete = true;
+      }
+
+      if (value) {
+        const entry = Builder.expression.entry(key, value, {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+        });
+
+        return entry;
+      }
     }
+    return undefined;
   }
 
   // ----------------------------------------------------- constant expressions

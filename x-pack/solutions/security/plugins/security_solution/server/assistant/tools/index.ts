@@ -13,6 +13,7 @@ import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alert
 import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base/knowledge_base_retrieval_tool';
 import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write_tool';
 import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs_tool';
+import { ENTITY_RISK_SCORE_TOOL } from './entity_risk_score/entity_risk_score';
 
 // any new tool should also be added to telemetry schema in
 // x-pack/solutions/security/plugins/elastic_assistant/server/lib/telemetry/event_based_telemetry.ts
@@ -25,4 +26,5 @@ export const assistantTools = [
   OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
   PRODUCT_DOCUMENTATION_TOOL,
   SECURITY_LABS_KNOWLEDGE_BASE_TOOL,
+  ENTITY_RISK_SCORE_TOOL,
 ];

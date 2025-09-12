@@ -6,7 +6,7 @@
  */
 
 import { createToolEventEmitter, createAgentEventEmitter } from './events';
-import type { InternalToolEvent, RunContext } from '@kbn/onechat-server';
+import type { RunContext } from '@kbn/onechat-server';
 import { ChatEventType, type MessageChunkEvent } from '@kbn/onechat-common';
 
 describe('Event utilities', () => {
@@ -23,16 +23,11 @@ describe('Event utilities', () => {
         context,
       });
 
-      const testEvent: InternalToolEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-      };
-
-      emitter.emit(testEvent);
+      emitter.reportProgress('progress');
 
       expect(mockEventHandler).toHaveBeenCalledWith({
-        type: 'test-event',
-        data: { foo: 'bar' },
+        type: ChatEventType.toolProgress,
+        data: { message: 'progress' },
       });
     });
   });

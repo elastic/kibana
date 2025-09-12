@@ -9,7 +9,7 @@ import type { Readable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
 import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
@@ -24,8 +24,13 @@ export async function disableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_disable 2023-10-31').expect(200);
 }
 
-export async function indexDocument(esClient: Client, index: string, document: JsonObject) {
-  const response = await esClient.index({ index, document, refresh: 'wait_for' });
+export async function indexDocument(
+  esClient: Client,
+  index: string,
+  document: JsonObject,
+  refresh: Refresh = 'wait_for'
+) {
+  const response = await esClient.index({ index, document, refresh });
   return response;
 }
 

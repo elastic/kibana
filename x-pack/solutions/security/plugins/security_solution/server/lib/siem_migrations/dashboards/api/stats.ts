@@ -7,15 +7,13 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
 import type { GetDashboardMigrationStatsResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { GetDashboardMigrationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from '../../common/api/util/authz';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
-import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -35,7 +33,7 @@ export const registerSiemDashboardMigrationsStatsRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,
@@ -47,27 +45,12 @@ export const registerSiemDashboardMigrationsStatsRoute = (
               const dashboardMigrationClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-              const [stats, migration] = await Promise.all([
-                dashboardMigrationClient.data.items.getStats(migrationId),
-                dashboardMigrationClient.data.migrations.get(migrationId),
-              ]);
-
-              if (!migration) {
-                return res.notFound({
-                  body: MIGRATION_ID_NOT_FOUND(migrationId),
-                });
-              }
+              const stats = await dashboardMigrationClient.task.getStats(migrationId);
 
               if (stats.items?.total === 0) {
                 return res.noContent();
               }
-              return res.ok({
-                body: {
-                  ...stats,
-                  status: MigrationTaskStatusEnum.ready,
-                  name: migration.name,
-                },
-              });
+              return res.ok({ body: stats });
             } catch (err) {
               logger.error(err);
               return res.badRequest({ body: err.message });

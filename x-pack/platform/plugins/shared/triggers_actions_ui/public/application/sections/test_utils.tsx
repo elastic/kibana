@@ -15,7 +15,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -58,13 +57,13 @@ export const createAppMockRenderer = (options?: {
 
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
-      <KibanaRenderContextProvider {...core}>
+      {core.rendering.addContext(
         <KibanaContextProvider services={{ ...services, ...additionalServices }}>
           <QueryClientProvider client={queryClient} context={queryClientContext}>
             {children}
           </QueryClientProvider>
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>
+      )}
     </I18nProvider>
   ));
 

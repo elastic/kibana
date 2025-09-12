@@ -117,13 +117,6 @@ describe('generateLayer', () => {
                     "subobjects": false,
                     "type": "object",
                   },
-                  "dropped_attributes_count": Object {
-                    "type": "long",
-                  },
-                  "schema_url": Object {
-                    "ignore_above": 1024,
-                    "type": "keyword",
-                  },
                 },
                 "type": "object",
               },

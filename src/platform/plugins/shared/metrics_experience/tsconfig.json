@@ -6,7 +6,6 @@
   "include": ["../../../../typings/**/*", "public/**/*", "server/**/*", "common/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/server-route-repository",
     "@kbn/kibana-react-plugin",
@@ -19,6 +18,7 @@
     "@kbn/field-types",
     "@kbn/zod",
     "@kbn/es-types",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-feature-flags-server"
   ]
 }

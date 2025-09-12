@@ -6,6 +6,7 @@
  */
 
 import type { FilterSpecification, Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
+import type { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
@@ -28,7 +29,9 @@ export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
 
   static createDescriptor(options: Partial<HeatmapLayerDescriptor>) {
-    const heatmapLayerDescriptor = super.createDescriptor(options);
+    const heatmapLayerDescriptor = super.createDescriptor(
+      options
+    ) as Writable<HeatmapLayerDescriptor>;
     heatmapLayerDescriptor.type = LAYER_TYPE.HEATMAP;
     heatmapLayerDescriptor.style = HeatmapStyle.createDescriptor();
     return heatmapLayerDescriptor;

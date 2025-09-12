@@ -243,7 +243,6 @@ export const toNavigationItems = (
         secondarySections = [
           {
             id: `${navNode.id}-section`,
-            label: null,
             items: validChildren.map(createSecondaryMenuItem),
           },
         ];
@@ -267,7 +266,7 @@ export const toNavigationItems = (
 
             return {
               id: child.id,
-              label: child.title ?? null, // Use null for no label
+              label: child.title,
               items: secondaryItems,
             };
           })

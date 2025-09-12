@@ -25,19 +25,19 @@ export class StreamsApp {
   }
 
   async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'route');
+    await this.gotoStreamManagementTab(streamName, 'partitioning');
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+    await this.gotoStreamManagementTab(streamName, 'retention');
   }
 
   async gotoProcessingTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'enrich');
+    await this.gotoStreamManagementTab(streamName, 'processing');
   }
 
   async gotoSchemaEditorTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+    await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
   async gotoSignificantEventsTab(streamName: string) {

@@ -12,7 +12,7 @@ import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getLabelColors } from '../styles';
-import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
+import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
 import {
   LabelNode,
   TEST_SUBJ_EXPAND_BTN,
@@ -121,8 +121,8 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.getByTestId('ips-text')).toBeInTheDocument();
-    expect(screen.getByTestId('country-flags-badge')).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
   });
 
   describe('Shape colors', () => {
