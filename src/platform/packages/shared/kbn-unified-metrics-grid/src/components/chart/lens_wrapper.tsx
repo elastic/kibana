@@ -15,10 +15,13 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { ChartTitle } from './chart_title';
+import { useMetricsGridState } from '../../hooks/use_metrics_grid_state';
 
 export type LensWrapperProps = {
   metric: MetricField;
   lensProps: LensProps;
+  metricName: string;
   onViewDetails: (metric: MetricField, esqlQuery: string) => void;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
@@ -31,10 +34,12 @@ export function LensWrapper({
   onBrushEnd,
   onFilter,
   abortController,
+  metricName,
   onViewDetails,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
+  const { searchTerm } = useMetricsGridState();
 
   const { EmbeddableComponent, SaveModalComponent } = services.lens;
 
@@ -58,6 +63,7 @@ export function LensWrapper({
       width: 100%;
       margin: auto;
       box-shadow: none;
+      padding-top: ${euiTheme.size.l};
     }
 
     & .echLegend .echLegendList {
@@ -80,6 +86,7 @@ export function LensWrapper({
   return (
     <>
       <div css={chartCss}>
+        <ChartTitle searchTerm={searchTerm} text={metricName} truncation="end" />
         <EmbeddableComponent
           {...lensProps}
           extraActions={extraActions}

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useMetricsGridState } from '../../../hooks';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -20,12 +21,14 @@ interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
   indexPattern: string;
+  setDebouncedSearchTerm: (value: string) => void;
 }
 export const useToolbarActions = ({
   fields,
   requestParams,
   indexPattern,
   renderToggleActions,
+  setDebouncedSearchTerm,
 }: UseToolbarActionsProps) => {
   const {
     dimensions,
@@ -34,7 +37,31 @@ export const useToolbarActions = ({
     onValuesChange,
     onClearValues,
     onClearAllDimensions,
+    onClearSearchTerm,
+    isFullscreen,
+    onToggleFullscreen,
+    searchTerm,
   } = useMetricsGridState();
+
+  const [showSearchInput, setShowSearchInput] = useState(false);
+
+  useDebounce(
+    () => {
+      setDebouncedSearchTerm(searchTerm);
+    },
+    300,
+    [searchTerm]
+  );
+
+  const onShowSearch = useCallback(() => {
+    setShowSearchInput(true);
+  }, []);
+
+  const onClearSearch = useCallback(() => {
+    setShowSearchInput(false);
+    onClearSearchTerm();
+    setDebouncedSearchTerm('');
+  }, [onClearSearchTerm, setDebouncedSearchTerm]);
 
   const leftSideActions = useMemo(
     () => [
@@ -72,25 +99,32 @@ export const useToolbarActions = ({
   );
 
   const rightSideActions: IconButtonGroupProps['buttons'] = [
+    ...(!showSearchInput
+      ? [
+          {
+            iconType: 'search',
+            label: i18n.translate('metricsExperience.searchButton', {
+              defaultMessage: 'Search',
+            }),
+            onClick: onShowSearch,
+            'data-test-subj': 'metricsExperienceToolbarSearch',
+          },
+        ]
+      : []),
     {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
-    {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
-
-      onClick: () => {},
+      iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
+      label: isFullscreen
+        ? i18n.translate('metricsExperience.fullScreenExitButton', {
+            defaultMessage: 'Exit fullscreen',
+          })
+        : i18n.translate('metricsExperience.fullScreenButton', {
+            defaultMessage: 'Enter fullscreen',
+          }),
+      onClick: onToggleFullscreen,
       'data-test-subj': 'metricsExperienceToolbarFullScreen',
+      className: showSearchInput ? 'nextToSearchInput' : undefined,
     },
   ];
 
-  return { leftSideActions, rightSideActions };
+  return { leftSideActions, rightSideActions, onClearSearch, showSearchInput };
 };

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate, useFetch } from '@kbn/unified-histogram';
+import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -26,7 +26,7 @@ import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
-import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
+import { MetricsGridHeader } from './metrics_grid_header';
 import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
@@ -45,8 +45,8 @@ export const MetricsExperienceGrid = ({
   const { euiTheme } = euiThemeContext;
 
   const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
-
   const { getTimeRange, updateTimeRange } = requestParams;
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -64,19 +64,18 @@ export const MetricsExperienceGrid = ({
     timeRange: getTimeRange(),
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
-    requestParams,
-    indexPattern,
-    renderToggleActions,
-  });
-
   const {
-    allFields = [],
     currentPageFields = [],
     totalPages = 0,
     dimensions: appliedDimensions = [],
-  } = usePaginatedFields({ fields, dimensions, pageSize: 20, currentPage }) ?? {};
+    filteredFieldsBySearch = [],
+  } = usePaginatedFields({
+    fields,
+    dimensions,
+    pageSize: 20,
+    currentPage,
+    searchTerm: debouncedSearchTerm,
+  }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
     () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
@@ -100,17 +99,28 @@ export const MetricsExperienceGrid = ({
   }, [valueFilters]);
 
   if (fields.length === 0) {
-    return <EmptyState isLoading={isLoading} />;
+    return (
+      <MetricsGridHeader
+        indexPattern={indexPattern}
+        renderToggleActions={renderToggleActions}
+        chartToolbarCss={chartToolbarCss}
+        requestParams={requestParams}
+        setDebouncedSearchTerm={setDebouncedSearchTerm}
+        fields={fields}
+      >
+        <EmptyState isLoading={isLoading} />
+      </MetricsGridHeader>
+    );
   }
 
   return (
-    <ChartSectionTemplate
-      id="unifiedMetricsExperienceGridPanel"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        leftSide: leftSideActions,
-        rightSide: rightSideActions,
-      }}
+    <MetricsGridHeader
+      indexPattern={indexPattern}
+      renderToggleActions={renderToggleActions}
+      chartToolbarCss={chartToolbarCss}
+      requestParams={requestParams}
+      setDebouncedSearchTerm={setDebouncedSearchTerm}
+      fields={fields}
     >
       <EuiFlexGroup
         direction="column"
@@ -133,8 +143,8 @@ export const MetricsExperienceGrid = ({
             <EuiText size="s">
               <strong>
                 {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                  defaultMessage: '{count} metrics',
-                  values: { count: allFields.length },
+                  defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                  values: { count: filteredFieldsBySearch.length },
                 })}
               </strong>
             </EuiText>
@@ -163,6 +173,6 @@ export const MetricsExperienceGrid = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ChartSectionTemplate>
+    </MetricsGridHeader>
   );
 };

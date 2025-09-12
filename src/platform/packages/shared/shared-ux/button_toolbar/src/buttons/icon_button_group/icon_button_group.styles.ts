@@ -18,7 +18,7 @@ export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
         backgroundColor: euiTheme.colors.emptyShade,
         border,
         borderRight: 'none !important',
-        '&:first-of-type': {
+        '&:first-of-type:not(.nextToSearchInput)': {
           borderTopLeftRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomLeftRadius: `${euiTheme.border.radius.medium} !important`,
         },
@@ -35,6 +35,11 @@ export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
     buttonGroup: {
       '.euiButtonGroup__buttons': {
         borderRadius: `${euiTheme.border.radius.medium}`,
+        '.nextToSearchInput': {
+          borderLeft: 'none !important',
+          borderTopLeftRadius: `0px !important`,
+          borderBottomLeftRadius: `0px !important`,
+        },
       },
     },
   };
