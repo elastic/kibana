@@ -133,6 +133,9 @@ export const useESQLVariables = ({
         const currentTabControlState =
           input.initialChildControlState as ControlPanelsState<ESQLControlState>;
 
+        stateContainer.savedSearchState.updateControlState({
+          nextControlState: currentTabControlState,
+        });
         dispatch(
           setControlGroupState({
             controlGroupState: currentTabControlState,
@@ -143,9 +146,6 @@ export const useESQLVariables = ({
           // Update the ESQL variables in the internal state
           dispatch(internalStateActions.setEsqlVariables(newVariables));
           stateContainer.dataState.fetch();
-          stateContainer.savedSearchState.updateControlState({
-            nextControlState: currentTabControlState,
-          });
         }
       }
     });
