@@ -212,6 +212,7 @@
     "@kbn/audit-log-plugin": "link:x-pack/platform/test/security_api_integration/plugins/audit_log",
     "@kbn/automatic-import-plugin": "link:x-pack/platform/plugins/shared/automatic_import",
     "@kbn/avc-banner": "link:src/platform/packages/shared/kbn-avc-banner",
+    "@kbn/background-search": "link:src/platform/packages/shared/kbn-background-search",
     "@kbn/banners-plugin": "link:x-pack/platform/plugins/private/banners",
     "@kbn/calculate-auto": "link:src/platform/packages/shared/kbn-calculate-auto",
     "@kbn/calculate-width-from-char-count": "link:src/platform/packages/shared/kbn-calculate-width-from-char-count",
