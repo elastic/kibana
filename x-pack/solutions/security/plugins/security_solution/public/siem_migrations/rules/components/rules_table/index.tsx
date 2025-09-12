@@ -38,11 +38,11 @@ import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import {
   MigrationTranslationResult,
-  SiemMigrationRetryFilter,
   SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
+  SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
+import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 import type { RulesFilterOptions, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
@@ -213,7 +213,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         closeMissingIndexPatternFlyout();
       },
     });
-    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
+    const { mutate: startMigration, isLoading: isStarting } = useStartSiemMigration('rule', {
+      onSuccess: refetchData,
+    });
 
     const [isTableLoading, setTableLoading] = useState(false);
 
@@ -290,9 +292,13 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const reprocessFailedRulesWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, {
-          ...settings,
-          skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
+        startMigration({
+          migrationId,
+          retry: SiemMigrationRetryFilter.FAILED,
+          settings: {
+            ...settings,
+            skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
+          },
         });
       },
       [enablePrebuiltRulesMatching, migrationId, startMigration]
@@ -315,8 +321,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       );
     }, [enablePrebuiltRulesMatching]);
 
-    const isRulesLoading =
-      isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
+    const isRulesLoading = isPrebuiltRulesLoading || isDataLoading || isTableLoading || isStarting;
 
     const ruleActionsFactory = useCallback(
       (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => {
