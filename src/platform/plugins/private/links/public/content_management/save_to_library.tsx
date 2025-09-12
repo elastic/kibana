@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import {
   showSaveModal,
   OnSaveProps,
-  SavedObjectSaveModal,
   SaveResult,
+  SavedObjectSaveModalWithSaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
@@ -83,7 +83,7 @@ export const runSaveToLibrary = async (
     };
 
     const saveModal = (
-      <SavedObjectSaveModal
+      <SavedObjectSaveModalWithSaveResult
         onSave={onSave}
         onClose={() => resolve(undefined)}
         title={newState.title ?? ''}
