@@ -2318,6 +2318,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                       .toString()
                       .substring(0, 1000)}`
                 );
+
+                // Convert schema validation errors to Fleet errors
+                if (
+                  callbackError.constructor.name === 'ValidationError' ||
+                  callbackError.name === 'ValidationError'
+                ) {
+                  throw new PackagePolicyValidationError(callbackError.message);
+                }
+
                 throw callbackError;
               }
             }

@@ -31,9 +31,7 @@ interface RoundThinkingProps {
   timer: Timer;
 }
 
-const fullWidthStyles = css`
-  width: 100%;
-`;
+const buttonContentClassName = 'thinkingButtonContent';
 
 const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
@@ -52,8 +50,23 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
   rawRound,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const thinkingButtonStyles = css`
+    margin-right: ${euiTheme.size.xs};
+    & .${buttonContentClassName} {
+      /*
+      From what I can tell this is by far the easiest solution to limit the content to one line.
+      Other solutions require managing the width of the content, changing for if the timer
+      is displayed or not.
+      These CSS properties are supported by all modern browsers https://developer.mozilla.org/en-US/docs/Web/CSS/line-clamp
+    */
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  `;
   const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
-  const { toolProgress } = useSendMessage();
+  const { agentReasoning } = useSendMessage();
   const [showFlyout, setShowFlyout] = useState(false);
 
   if (steps.length === 0) {
@@ -74,9 +87,10 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
 
   let thinkingButtonLabel = thinkingCompletedLabel;
   if (isLoading) {
-    // While this round is loading, show the progression message as the button label if available
-    // Otherwise fallback to default thinking label
-    thinkingButtonLabel = toolProgress ?? defaultThinkingLabel;
+    // While this round is loading, show the agent reasoning as the button label if available
+    // Otherwise fallback to default thinking label.
+    // Agent reasoning can be reasoning directly from the agent or individual tool call progression
+    thinkingButtonLabel = agentReasoning ?? defaultThinkingLabel;
   }
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
@@ -88,9 +102,10 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
       arrowDisplay="left"
       css={accordionStyles}
       buttonProps={{
-        css: fullWidthStyles,
+        css: thinkingButtonStyles,
       }}
       buttonContent={thinkingButtonLabel}
+      buttonContentClassName={buttonContentClassName}
       extraAction={
         timer.showTimer ? (
           <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
