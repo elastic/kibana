@@ -8,22 +8,8 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import { NUMERIC_TYPES } from '../../../common/fields/constants';
-
-// copied from @kbn/discover-utils to avoid cyclic dependency
-const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
-  '_id',
-  '_index',
-  '_source',
-  '_size',
-  '_doc_count',
-  '_field_names',
-  '_ignored',
-  '_routing',
-  '_meta',
-  '_tier',
-];
+import type { MetricFieldType } from '../../../common/types';
+import { getTimeSeriesFieldCapsGenerator } from './iterate_field_caps_generator';
 
 export function extractMetricFields(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>
@@ -32,18 +18,16 @@ export function extractMetricFields(
     fieldName: string;
     type: string;
     typeInfo: FieldCapsFieldCapability;
-    fieldType: 'metric' | 'dimension';
+    fieldType: MetricFieldType;
   }> = [];
 
-  for (const [fieldName, fieldInfo] of Object.entries(fields)) {
-    // Filter out metadata fields
-    if (FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(fieldName)) continue;
-
-    for (const [type, typeInfo] of Object.entries(fieldInfo)) {
-      // Check for time series metrics (numeric fields with time_series_metric)
-      if (NUMERIC_TYPES.includes(type as ES_FIELD_TYPES) && typeInfo.time_series_metric) {
-        timeSeriesFields.push({ fieldName, type, typeInfo, fieldType: 'metric' });
-      }
+  for (const currentTimeSeriesFields of getTimeSeriesFieldCapsGenerator(fields, {
+    batchSize: 500,
+  })) {
+    if (currentTimeSeriesFields.length > 0) {
+      timeSeriesFields.push(
+        ...currentTimeSeriesFields.map((f) => ({ ...f, fieldType: 'metric' as MetricFieldType }))
+      );
     }
   }
 

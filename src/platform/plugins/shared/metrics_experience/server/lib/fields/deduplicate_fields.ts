@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricField } from '../../../common/fields/types';
+import type { MetricField } from '../../../common/types';
 
 const BASE_FIELD_NAME = 'metrics.';
 export function deduplicateFields(fields: MetricField[]): MetricField[] {
