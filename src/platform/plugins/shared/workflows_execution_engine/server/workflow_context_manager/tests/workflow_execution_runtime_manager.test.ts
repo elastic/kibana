@@ -9,7 +9,7 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, GraphNode } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -72,11 +72,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
     workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
       switch (nodeId) {
         case 'node1':
-          return { id: 'node1' };
+          return { id: 'node1', stepType: 'fakeStepType1' } as GraphNode;
         case 'node2':
-          return { id: 'node2' };
+          return { id: 'node2', stepType: 'fakeStepType2' } as GraphNode;
         case 'node3':
-          return { id: 'node3' };
+          return { id: 'node3', stepType: 'fakeStepType3' } as GraphNode;
       }
     });
 

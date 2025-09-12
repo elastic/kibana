@@ -207,7 +207,7 @@ export class WorkflowExecutionRuntimeManager {
         const stepExecution = {
           id: this.buildStepExecutionId(stepId),
           stepId: nodeId,
-          stepType: (node as any)?.configuration.type,
+          stepType: node.stepType,
           path: [...(workflowExecution.stack || [])],
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
           status: ExecutionStatus.RUNNING,

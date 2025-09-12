@@ -18,18 +18,23 @@ describe('ExitConditionBranchNodeImpl', () => {
   let workflowGraphMock: WorkflowGraph;
   let impl: ExitConditionBranchNodeImpl;
   let goToStep: jest.Mock<any, any, any>;
+  let exitScope: jest.Mock<any, any, any>;
   let getDirectSuccessors: jest.Mock<any, any, any>;
 
   beforeEach(() => {
     goToStep = jest.fn();
+    exitScope = jest.fn();
     getDirectSuccessors = jest.fn();
     step = {
       id: 'testStep',
       type: 'exit-then-branch',
+      stepId: 'testStep',
+      stepType: 'if',
       startNodeId: 'startBranchNode',
     };
     wfExecutionRuntimeManagerMock = {
       goToStep,
+      exitScope,
     } as any;
 
     workflowGraphMock = {
