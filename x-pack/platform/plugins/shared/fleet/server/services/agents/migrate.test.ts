@@ -9,8 +9,10 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Agent } from '../../types';
 
+import { FleetError } from '../../errors';
+
 import { bulkMigrateAgents, migrateSingleAgent } from './migrate';
-import { createAgentAction } from './actions';
+import { createAgentAction, createErrorActionResults } from './actions';
 import { getAgentPolicyForAgents, getAgents } from './crud';
 
 // Mock the imported functions
@@ -26,6 +28,9 @@ jest.mock('./crud', () => {
 });
 
 const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
+const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+  typeof createErrorActionResults
+>;
 
 const mockedAgent: Agent = {
   id: 'agent-123',
@@ -163,7 +168,7 @@ describe('Agent migration', () => {
         settings: { timeout: 300 },
       };
 
-      const result = await bulkMigrateAgents(esClientMock, soClientMock, {
+      await bulkMigrateAgents(esClientMock, soClientMock, {
         ...options,
         agentIds: [mockedAgent.id, mockedAgent.id],
       });
@@ -184,9 +189,6 @@ describe('Agent migration', () => {
           namespaces: ['default'],
         })
       );
-
-      // Verify result contains the action ID from createAgentAction
-      expect(result).toEqual({ actionId: 'test-action-id' });
     });
 
     it('should handle empty additional settings', async () => {
@@ -214,19 +216,27 @@ describe('Agent migration', () => {
       );
     });
 
-    it('should throw an error if the agent is protected', async () => {
+    it('should record error result if the agent is protected', async () => {
       (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
       };
       mockedPolicy.is_protected = true;
-      await expect(
-        bulkMigrateAgents(esClientMock, soClientMock, {
-          ...options,
-          agentIds: [mockedAgent.id, mockedAgent.id],
-        })
-      ).rejects.toThrowError('One or more agents are protected agents and cannot be migrated');
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [mockedAgent.id, mockedAgent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated because it is protected.'
+          ),
+        },
+        'agent does not support migration action'
+      );
     });
   });
 });

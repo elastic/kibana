@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { FleetUnauthorizedError } from '../../errors';
+import { FleetError } from '../../errors';
 
 import type { Agent } from '../../types';
 
@@ -57,11 +57,11 @@ export async function bulkMigrateAgentsBatch(
       agent.policy_id &&
       protectedAgentPolicies.map((policy) => policy.id).includes(agent.policy_id)
     ) {
-      errors[agent.id] = new FleetUnauthorizedError(
+      errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is protected.`
       );
     } else if (agent.components?.some((c) => c.type === 'fleet-server')) {
-      errors[agent.id] = new FleetUnauthorizedError(
+      errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is a fleet-server.`
       );
     } else {
