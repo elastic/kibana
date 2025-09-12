@@ -124,32 +124,25 @@ export const suggestionsApi = ({
 
   const chartType = preferredChartType?.toLowerCase();
 
-  // check if there is an XY chart suggested
-  // if user has requested for a line or area, we want to sligthly change the state
   // to return line / area instead of a bar chart
-  const XYSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
-  // a type can be area, line, area_stacked, area_percentage etc
-  const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
-  if (XYSuggestion && chartType && isAreaOrLine) {
-    return switchVisualizationType({
-      visualizationMap,
-      suggestion: XYSuggestion,
-      visualizationTypeId: chartType,
-    });
-  }
+  const xyResult = switchVisualizationType({
+    visualizationMap,
+    suggestions: newSuggestions,
+    targetTypeId: chartType,
+    familyType: 'lnsXY',
+    shouldSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+  });
+  if (xyResult) return xyResult;
 
-  // check if there is a pie chart suggested
-  // if user has requested for a donut, we want to sligthly change the state
   // to return a donut instead of a pie chart
-  const pieSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsPie');
-  const isDonut = preferredChartType === ChartType.Donut;
-  if (pieSuggestion && chartType && isDonut) {
-    return switchVisualizationType({
-      visualizationMap,
-      suggestion: pieSuggestion,
-      visualizationTypeId: chartType,
-    });
-  }
+  const pieResult = switchVisualizationType({
+    visualizationMap,
+    suggestions: newSuggestions,
+    targetTypeId: chartType,
+    familyType: 'lnsPie',
+    shouldSwitch: preferredChartType === ChartType.Donut,
+  });
+  if (pieResult) return pieResult;
 
   const chartTypeFromAttrs = preferredVisAttributes
     ? mapVisToChartType(preferredVisAttributes.visualizationType)
