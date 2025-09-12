@@ -37,6 +37,7 @@ const TrustedDeviceEntrySchema = schema.object({
     schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER),
     schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER_ID),
     schema.literal(TrustedDeviceConditionEntryField.PRODUCT_ID),
+    schema.literal(TrustedDeviceConditionEntryField.PRODUCT_NAME),
     schema.literal(TrustedDeviceConditionEntryField.USERNAME),
   ]),
   type: ConditionEntryTypeSchema,

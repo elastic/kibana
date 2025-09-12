@@ -28,6 +28,7 @@ export enum TrustedDeviceConditionEntryField {
   DEVICE_ID = 'device.serial_number',
   MANUFACTURER = 'device.vendor.name',
   PRODUCT_ID = 'device.product.id',
+  PRODUCT_NAME = 'device.product.name',
   DEVICE_TYPE = 'device.type',
   MANUFACTURER_ID = 'device.vendor.id',
 }
@@ -74,6 +75,7 @@ export const TRUSTED_DEVICE_OS_FIELD_AVAILABILITY = {
     TrustedDeviceConditionEntryField.MANUFACTURER,
     TrustedDeviceConditionEntryField.MANUFACTURER_ID,
     TrustedDeviceConditionEntryField.PRODUCT_ID,
+    TrustedDeviceConditionEntryField.PRODUCT_NAME,
   ] as const,
 
   /** Fields available only for Windows OS exclusively */

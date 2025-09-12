@@ -101,6 +101,12 @@ export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: s
       defaultMessage: 'Product ID',
     }
   ),
+  [TrustedDeviceConditionEntryField.PRODUCT_NAME]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.productName',
+    {
+      defaultMessage: 'Product Name',
+    }
+  ),
   [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
     'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.deviceType',
     {
@@ -144,6 +150,12 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryFie
     'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productId',
     {
       defaultMessage: 'The product identifier of the device',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.PRODUCT_NAME]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productName',
+    {
+      defaultMessage: 'The product name of the device',
     }
   ),
   [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
