@@ -2,6 +2,6 @@
   "type": "shared-browser",
   "id": "@kbn/screenshotting",
   "owner": "@elastic/obs-ux-management-team",
-  "group": "observability",
-  "visibility": "private"
+  "group": "platform",
+  "visibility": "shared"
 }

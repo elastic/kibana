@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/screenshotting'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/screenshotting'],
 };
