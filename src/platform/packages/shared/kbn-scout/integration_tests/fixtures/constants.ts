@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ALERT_RULE_PARAMS = {
+import type { CreateCaseParams } from '../../src/playwright/fixtures/scope/worker/apis/cases';
+
+export const createAlertRuleParams = {
   aggType: 'count',
   termSize: 5,
   thresholdComparator: '>',
@@ -17,4 +19,23 @@ export const ALERT_RULE_PARAMS = {
   threshold: [10],
   index: ['.kibana-event-log-*'],
   timeField: '@timestamp',
+};
+
+export const createCasePayload: CreateCaseParams = {
+  title: 'test',
+  tags: ['scout'],
+  category: null,
+  severity: 'low',
+  description: 'integration test',
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: '.none',
+    fields: null,
+  },
+  settings: {
+    syncAlerts: true,
+  },
+  owner: '',
+  customFields: [],
 };

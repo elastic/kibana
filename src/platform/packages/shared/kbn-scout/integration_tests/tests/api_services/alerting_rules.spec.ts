@@ -8,8 +8,8 @@
  */
 
 import { randomUUID } from 'crypto';
-import { apiTest, expect } from '../../../playwright';
-import { ALERT_RULE_PARAMS } from '../../fixtures/constants';
+import { apiTest, expect } from '../../../src/playwright';
+import { createAlertRuleParams } from '../../fixtures/constants';
 
 apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, () => {
   let ruleId: string;
@@ -25,7 +25,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       schedule: { interval: '1m' },
       enabled: false,
       actions: [],
-      params: ALERT_RULE_PARAMS,
+      params: createAlertRuleParams,
       tags: ['test'],
     });
     expect(createdResponse.status).toBe(200);

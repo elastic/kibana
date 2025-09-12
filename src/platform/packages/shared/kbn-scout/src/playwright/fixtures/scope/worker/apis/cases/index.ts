@@ -20,17 +20,19 @@ export interface CreateCaseParams {
     id: string;
     name: string;
     type: string;
-    fields: Record<string, any>;
+    fields: Record<string, any> | null;
   };
   settings?: {
     syncAlerts: boolean;
   };
   owner?: string;
-  category?: string;
+  category: string | null;
+  customFields: string[];
 }
 
 export interface UpdateCaseParams {
   id: string;
+  version: string;
   title?: string;
   description?: string;
   status?: 'open' | 'in-progress' | 'closed';
@@ -46,18 +48,15 @@ export interface UpdateCaseParams {
   settings?: {
     syncAlerts: boolean;
   };
-  version: string;
   category?: string;
 }
 
 export interface CasesApiService {
-  cases: {
-    create: (params: CreateCaseParams, spaceId?: string) => Promise<any>;
-    get: (caseId: string, spaceId?: string) => Promise<any>;
-    update: (updates: UpdateCaseParams[], spaceId?: string) => Promise<any>;
-    delete: (caseIds: string[], spaceId?: string) => Promise<void>;
-    find: (searchParams?: Record<string, any>, spaceId?: string) => Promise<any>;
-  };
+  create: (params: CreateCaseParams, spaceId?: string) => Promise<any>;
+  get: (caseId: string, spaceId?: string) => Promise<any>;
+  update: (updates: UpdateCaseParams[], spaceId?: string) => Promise<any>;
+  delete: (caseIds: string[], spaceId?: string) => Promise<void>;
+  find: (searchParams?: Record<string, any>, spaceId?: string) => Promise<any>;
   connectors: {
     get: (spaceId?: string) => Promise<any>;
   };
@@ -73,108 +72,120 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
   };
 
   return {
-    cases: {
-      create: async (params: CreateCaseParams, spaceId?: string) => {
-        return await measurePerformanceAsync(
-          log,
-          `casesApi.cases.create [${params.title}]`,
-          async () => {
-            return await kbnClient.request({
-              method: 'POST',
-              path: `${buildSpacePath(spaceId)}/api/cases`,
-              retries: 3,
-              body: {
-                title: params.title,
-                description: params.description,
-                tags: params.tags || [],
-                severity: params.severity || 'low',
-                assignees: params.assignees || [],
-                connector: params.connector || {
-                  id: 'none',
-                  name: 'none',
-                  type: '.none',
-                  fields: null,
-                },
-                settings: params.settings || {
-                  syncAlerts: true,
-                },
-                owner: params.owner || 'cases',
-                ...(params.category && { category: params.category }),
-              },
-            });
-          }
-        );
-      },
-
-      get: async (caseId: string, spaceId?: string) => {
-        return await measurePerformanceAsync(log, `casesApi.cases.get [${caseId}]`, async () => {
+    create: async (params: CreateCaseParams, spaceId?: string) => {
+      return await measurePerformanceAsync(
+        log,
+        `casesApi.cases.create [${params.title}]`,
+        async () => {
           return await kbnClient.request({
-            method: 'GET',
-            path: `${buildSpacePath(spaceId)}/api/cases/${caseId}`,
+            method: 'POST',
+            path: `${buildSpacePath(spaceId)}/api/cases`,
             retries: 3,
+            body: {
+              title: params.title,
+              description: params.description,
+              tags: params.tags || [],
+              severity: params.severity || 'low',
+              assignees: params.assignees || [],
+              connector: params.connector || {
+                id: 'none',
+                name: 'none',
+                type: '.none',
+                fields: null,
+              },
+              settings: params.settings || {
+                syncAlerts: true,
+              },
+              owner: params.owner || 'cases',
+              ...(params.category && { category: params.category }),
+            },
           });
-        });
-      },
+        }
+      );
+    },
 
-      update: async (updates: UpdateCaseParams[], spaceId?: string) => {
-        return await measurePerformanceAsync(
-          log,
-          `casesApi.cases.update [${updates.length} cases]`,
-          async () => {
-            const response = await kbnClient.request({
-              method: 'PATCH',
-              path: `${buildSpacePath(spaceId)}/api/cases`,
-              retries: 3,
-              body: {
-                cases: updates.map((update) => ({
+    get: async (caseId: string, spaceId?: string) => {
+      return await measurePerformanceAsync(log, `casesApi.cases.get [${caseId}]`, async () => {
+        return await kbnClient.request({
+          method: 'GET',
+          path: `${buildSpacePath(spaceId)}/api/cases/${caseId}`,
+          retries: 3,
+          ignoreErrors: [404],
+        });
+      });
+    },
+
+    update: async (updates: UpdateCaseParams[], spaceId?: string) => {
+      return await measurePerformanceAsync(
+        log,
+        `casesApi.cases.update [${updates.length} cases]`,
+        async () => {
+          return await kbnClient.request({
+            method: 'PATCH',
+            path: `${buildSpacePath(spaceId)}/api/cases`,
+            retries: 3,
+            body: {
+              cases: updates.map((update) => {
+                // Validate required fields
+                if (!update.id) {
+                  throw new Error('Case ID is required for update');
+                }
+                if (!update.version) {
+                  throw new Error('Case version is required for update');
+                }
+
+                const caseUpdate: any = {
                   id: update.id,
                   version: update.version,
-                  ...(update.title && { title: update.title }),
-                  ...(update.description && { description: update.description }),
-                  ...(update.status && { status: update.status }),
-                  ...(update.tags && { tags: update.tags }),
-                  ...(update.severity && { severity: update.severity }),
-                  ...(update.assignees && { assignees: update.assignees }),
-                  ...(update.connector && { connector: update.connector }),
-                  ...(update.settings && { settings: update.settings }),
-                  ...(update.category && { category: update.category }),
-                })),
-              },
-            });
-            return response.data;
-          }
-        );
-      },
+                };
 
-      delete: async (caseIds: string[], spaceId?: string) => {
-        return await measurePerformanceAsync(
-          log,
-          `casesApi.cases.delete [${caseIds.length} cases]`,
-          async () => {
-            await kbnClient.request({
-              method: 'DELETE',
-              path: `${buildSpacePath(spaceId)}/api/cases`,
-              retries: 3,
-              query: {
-                ids: JSON.stringify(caseIds),
-              },
-              ignoreErrors: [404],
-            });
-          }
-        );
-      },
+                // Only include fields that are explicitly provided
+                if (update.title !== undefined) caseUpdate.title = update.title;
+                if (update.description !== undefined) caseUpdate.description = update.description;
+                if (update.status !== undefined) caseUpdate.status = update.status;
+                if (update.tags !== undefined) caseUpdate.tags = update.tags;
+                if (update.severity !== undefined) caseUpdate.severity = update.severity;
+                if (update.assignees !== undefined) caseUpdate.assignees = update.assignees;
+                if (update.connector !== undefined) caseUpdate.connector = update.connector;
+                if (update.settings !== undefined) caseUpdate.settings = update.settings;
+                if (update.category !== undefined) caseUpdate.category = update.category;
 
-      find: async (searchParams?: Record<string, any>, spaceId?: string) => {
-        return await measurePerformanceAsync(log, 'casesApi.cases.find', async () => {
-          const response = await kbnClient.request({
-            method: 'GET',
-            path: `${buildSpacePath(spaceId)}/api/cases/_find`,
-            retries: 3,
-            query: searchParams,
+                return caseUpdate;
+              }),
+            },
           });
-          return response.data;
+        }
+      );
+    },
+
+    delete: async (caseIds: string[], spaceId?: string) => {
+      return await measurePerformanceAsync(
+        log,
+        `casesApi.cases.delete [${caseIds.length} cases]`,
+        async () => {
+          await kbnClient.request({
+            method: 'DELETE',
+            path: `${buildSpacePath(spaceId)}/api/cases`,
+            retries: 0,
+            query: {
+              ids: JSON.stringify(caseIds),
+            },
+            ignoreErrors: [204, 404],
+          });
+        }
+      );
+    },
+
+    find: async (searchParams?: Record<string, any>, spaceId?: string) => {
+      return await measurePerformanceAsync(log, 'casesApi.cases.find', async () => {
+        const response = await kbnClient.request({
+          method: 'GET',
+          path: `${buildSpacePath(spaceId)}/api/cases/_find`,
+          retries: 3,
+          query: searchParams,
         });
-      },
+        return response.data;
+      });
     },
 
     connectors: {
