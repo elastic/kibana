@@ -8,55 +8,16 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { i18n } from '@kbn/i18n';
-import {
-  EsqlToolFieldType,
-  toolIdRegexp,
-  toolIdMaxLength,
-  isReservedToolId,
-  isInProtectedNamespace,
-  hasProtectedNamespaceName,
-  ToolType,
-} from '@kbn/onechat-common/tools';
+import { EsqlToolFieldType, ToolType } from '@kbn/onechat-common/tools';
 import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
 import { get } from 'lodash';
 import { useCallback } from 'react';
 import type { Resolver } from 'react-hook-form';
 import type { EsqlToolFormData } from '../types/tool_form_types';
+import { sharedValidationSchemas } from './shared_tool_validation';
 
-const i18nMessages = {
-  toolId: {
-    requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.requiredError', {
-      defaultMessage: 'Tool ID is required.',
-    }),
-    formatError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.formatError', {
-      defaultMessage:
-        'Tool ID must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
-    }),
-    tooLongError: i18n.translate('xpack.onechat.tools.newTool.validation.name.tooLongError', {
-      defaultMessage: 'Tool ID must be at most {max} characters',
-      values: { max: toolIdMaxLength },
-    }),
-    reservedError: (toolId: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.toolId.reservedError', {
-        defaultMessage: 'Tool ID "{toolId}" is reserved. Please choose a different tool ID.',
-        values: { toolId },
-      }),
-    protectedNamespaceError: (name: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.name.protectedNamespaceError', {
-        defaultMessage:
-          'Name "{name}" is using a protected namespace. Please choose a different name.',
-        values: { name },
-      }),
-  },
-  description: {
-    requiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.description.requiredError',
-      {
-        defaultMessage: 'Description is required.',
-      }
-    ),
-  },
+const esqlI18nMessages = {
   // Specific errors will be provided by the ES|QL editor
   esql: {
     requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.esql.requiredError', {
@@ -130,44 +91,34 @@ export const useEsqlToolFormValidationResolver = (): Resolver<EsqlToolFormData> 
 
 export const esqlFormValidationSchema = z
   .object({
-    toolId: z
-      .string()
-      .min(1, { message: i18nMessages.toolId.requiredError })
-      .max(toolIdMaxLength, { message: i18nMessages.toolId.tooLongError })
-      .regex(toolIdRegexp, { message: i18nMessages.toolId.formatError })
-      .refine(
-        (name) => !isReservedToolId(name),
-        (name) => ({
-          message: i18nMessages.toolId.reservedError(name),
-        })
-      )
-      .refine(
-        (name) => !isInProtectedNamespace(name) && !hasProtectedNamespaceName(name),
-        (name) => ({
-          message: i18nMessages.toolId.protectedNamespaceError(name),
-        })
-      ),
-    description: z.string().min(1, { message: i18nMessages.description.requiredError }),
+    // Use shared validation schemas for common fields
+    toolId: sharedValidationSchemas.toolId,
+    description: sharedValidationSchemas.description,
+    labels: sharedValidationSchemas.labels,
+
+    // ESQL specific validation
     esql: z
       .string()
-      .min(1, { message: i18nMessages.esql.requiredError })
+      .min(1, { message: esqlI18nMessages.esql.requiredError })
       .refine(
         async (esql) => {
           const result = await validateQuery(esql, { ignoreOnMissingCallbacks: true });
           return result.errors.length === 0;
         },
-        { message: i18nMessages.esql.esqlError }
+        { message: esqlI18nMessages.esql.esqlError }
       ),
     params: z
       .array(
         z.object({
           name: z
             .string()
-            .min(1, { message: i18nMessages.params.nameRequiredError })
+            .min(1, { message: esqlI18nMessages.params.nameRequiredError })
             .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, {
-              message: i18nMessages.params.nameFormatError,
+              message: esqlI18nMessages.params.nameFormatError,
             }),
-          description: z.string().min(1, { message: i18nMessages.params.descriptionRequiredError }),
+          description: z
+            .string()
+            .min(1, { message: esqlI18nMessages.params.descriptionRequiredError }),
           type: z.nativeEnum(EsqlToolFieldType),
         })
       )
@@ -180,13 +131,12 @@ export const esqlFormValidationSchema = z
           if (otherParamNames.has(name)) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: i18nMessages.params.duplicateError(name),
+              message: esqlI18nMessages.params.duplicateError(name),
               path: [index, 'name'],
             });
           }
         });
       }),
-    labels: z.array(z.string()),
     type: z.literal(ToolType.esql),
   })
   .superRefine(({ esql, params }, ctx) => {
@@ -197,7 +147,7 @@ export const esqlFormValidationSchema = z
       if (!definedParams.has(param)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: i18nMessages.esql.esqlError,
+          message: esqlI18nMessages.esql.esqlError,
           path: ['esql'],
         });
         return;
