@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { bulkEditInternalRulesRoute } from './bulk_edit_rules_route';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -21,9 +21,6 @@ const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
-beforeEach(() => {
-  jest.resetAllMocks();
-});
 
 describe('bulkEditRulesRoute', () => {
   const mockedAlert: SanitizedRule<{}> = {
@@ -75,7 +72,14 @@ describe('bulkEditRulesRoute', () => {
       },
     ],
   };
+
   const bulkEditResult = { rules: mockedAlerts, errors: [], total: 1, skipped: [] };
+  const savedObjectsClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    savedObjectsClient.find = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+  });
 
   it('bulk edits rules with tags action', async () => {
     const licenseState = licenseStateMock.create();
@@ -90,7 +94,7 @@ describe('bulkEditRulesRoute', () => {
     rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, savedObjectsClient },
       {
         body: bulkEditRequest,
       },
@@ -139,7 +143,7 @@ describe('bulkEditRulesRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, savedObjectsClient },
       {
         body: bulkEditRequest,
       }
@@ -163,7 +167,7 @@ describe('bulkEditRulesRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, savedObjectsClient },
       {
         body: bulkEditRequest,
       }
@@ -182,10 +186,11 @@ describe('bulkEditRulesRoute', () => {
 
     rulesClient.bulkEdit.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
-      'ok',
-      'forbidden',
-    ]);
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient, savedObjectsClient },
+      { params: {}, body: { operations: [] } },
+      ['ok', 'forbidden']
+    );
 
     await handler(context, req, res);
 
@@ -242,7 +247,7 @@ describe('bulkEditRulesRoute', () => {
       rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditActionsResult);
 
       const [context, req, res] = mockHandlerArguments(
-        { rulesClient, actionsClient },
+        { rulesClient, actionsClient, savedObjectsClient },
         {
           body: bulkEditActionsRequest,
         },
@@ -296,7 +301,7 @@ describe('bulkEditRulesRoute', () => {
       rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditActionsResult);
 
       const [context, req, res] = mockHandlerArguments(
-        { rulesClient, actionsClient },
+        { rulesClient, actionsClient, savedObjectsClient },
         {
           body: bulkEditActionsRequest,
         },
@@ -342,7 +347,7 @@ describe('bulkEditRulesRoute', () => {
       rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditActionsResult);
 
       const [context, req, res] = mockHandlerArguments(
-        { rulesClient, actionsClient },
+        { rulesClient, actionsClient, savedObjectsClient },
         {
           body: {
             ...bulkEditActionsRequest,
@@ -361,6 +366,310 @@ describe('bulkEditRulesRoute', () => {
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Group is not defined in action 2"`
       );
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    it('throws 400 if the ids and filter are set', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, savedObjectsClient },
+        {
+          body: { ...bulkEditRequest, ids: ['1'], filter: 'a filter' },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"`
+      );
+    });
+
+    it('throws 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      savedObjectsClient.find = jest.fn().mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        aggregations: { ruleTypeIds: { buckets: [{ key: 'test.internal-rule-type' }] } },
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          savedObjectsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: bulkEditRequest,
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
+
+    it('does not throw 400 if the rule type is internally managed and the operation is apiKey', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      savedObjectsClient.find = jest.fn().mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        aggregations: { ruleTypeIds: { buckets: [{ key: 'test.internal-rule-type' }] } },
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          savedObjectsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: { ...bulkEditRequest, operations: [{ field: 'apiKey', operation: 'set' }] },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).resolves.not.toThrow();
+    });
+
+    it('throws 400 if the rule type is internally managed and multiple non supported operations', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      savedObjectsClient.find = jest.fn().mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        aggregations: { ruleTypeIds: { buckets: [{ key: 'test.internal-rule-type' }] } },
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          savedObjectsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: {
+            ...bulkEditRequest,
+            operations: [...bulkEditRequest.operations, { field: 'apiKey', operation: 'set' }],
+          },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
+
+    it('converts the ids as KQL filter correctly', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      savedObjectsClient.find = jest.fn().mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        aggregations: { ruleTypeIds: { buckets: [{ key: 'test.internal-rule-type' }] } },
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          savedObjectsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: { ...bulkEditRequest, ids: ['1'] },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+
+      expect(savedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "ruleTypeIds": Object {
+              "terms": Object {
+                "field": "alert.attributes.alertTypeId",
+                "size": 1,
+              },
+            },
+          },
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "alert.id",
+              },
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "alert:1",
+              },
+            ],
+            "function": "is",
+            "type": "function",
+          },
+          "page": 1,
+          "perPage": 0,
+          "type": "alert",
+        }
+      `);
+    });
+
+    it('converts the filter as KQL filter correctly', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      savedObjectsClient.find = jest.fn().mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        aggregations: { ruleTypeIds: { buckets: [{ key: 'test.internal-rule-type' }] } },
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          savedObjectsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: { ...bulkEditRequest, filter: `tags: one OR tags: two` },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+
+      expect(savedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "ruleTypeIds": Object {
+              "terms": Object {
+                "field": "alert.attributes.alertTypeId",
+                "size": 1,
+              },
+            },
+          },
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "tags",
+                  },
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "one",
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "tags",
+                  },
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "two",
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "or",
+            "type": "function",
+          },
+          "page": 1,
+          "perPage": 0,
+          "type": "alert",
+        }
+      `);
     });
   });
 });
