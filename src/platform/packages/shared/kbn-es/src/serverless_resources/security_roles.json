@@ -113,8 +113,7 @@
             "packetbeat-*",
             "winlogbeat-*",
             "logstash-*",
-            ".asset-criticality.asset-criticality-*",
-            ".entity_analytics.monitoring*"
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -132,7 +131,8 @@
             ".fleet-agents*",
             ".fleet-actions*",
             "risk-score.risk-score-*",
-            ".entities.v1.latest.security_*"
+            ".entities.v1.latest.security_*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
         }
@@ -194,8 +194,7 @@
             "winlogbeat-*",
             ".lists*",
             ".items*",
-            ".asset-criticality.asset-criticality-*",
-            ".entity_analytics.monitoring*"
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -211,7 +210,7 @@
           "privileges": ["read", "write", "maintenance", "view_index_metadata"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", ".entity_analytics.monitoring*"],
           "privileges": ["read"]
         }
       ],
@@ -252,8 +251,7 @@
             "winlogbeat-*",
             ".lists*",
             ".items*",
-            ".asset-criticality.asset-criticality-*",
-            ".entity_analytics.monitoring*"
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -269,7 +267,7 @@
           "privileges": ["read", "write", "manage"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", ".entity_analytics.monitoring*"],
           "privileges": ["read"]
         }
       ],
@@ -316,13 +314,12 @@
             "logs-*",
             "packetbeat-*",
             "winlogbeat-*",
-            ".asset-criticality.asset-criticality-*",
-            ".entity_analytics.monitoring*"
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["manage", "write", "read"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", ".entity_analytics.monitoring*"],
           "privileges": ["read"]
         }
       ],
@@ -369,8 +366,7 @@
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
             ".fleet-actions*",
-            ".asset-criticality.asset-criticality-*",
-            ".entity_analytics.monitoring*"
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["all"]
         },
@@ -384,6 +380,10 @@
             ".siem-signals-*"
           ],
           "privileges": ["all"]
+        },
+        {
+          "names": [".entity_analytics.monitoring*"],
+          "privileges": ["read"]
         }
       ],
       "run_as": []
