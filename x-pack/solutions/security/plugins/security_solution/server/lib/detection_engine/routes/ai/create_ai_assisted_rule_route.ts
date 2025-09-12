@@ -44,12 +44,49 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
         request,
         response
       ): Promise<IKibanaResponse<AIAssistedCreateRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
         console.log('Creating AI-assisted rule');
-        const { user_query: userQuery } = request.body;
+        const { user_query: userQuery, connector_id: connectorId } = request.body;
 
-        return response.ok({
-          body: { rule: { ...getRulesSchemaMock(), index: ['ai_index'], references: [] } },
-        });
+        const ctx = await context.resolve(['securitySolution']);
+        const inferenceService = ctx.securitySolution.getInferenceService();
+
+        const abortController = new AbortController();
+
+        request.events.completed$.subscribe(() => abortController.abort());
+
+        try {
+          const model = await inferenceService.getChatModel({
+            request,
+            connectorId,
+            chatModelOptions: {
+              // not passing specific `model`, we'll always use the connector default model
+              // temperature may need to be parametrized in the future
+              temperature: 0.05,
+              // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+              maxRetries: 1,
+              // Disable streaming explicitly
+              disableStreaming: true,
+              // Set a hard limit of 50 concurrent requests
+              maxConcurrency: 50,
+              signal: abortController.signal,
+            },
+          });
+
+          const rest = await model.invoke(userQuery);
+
+          return response.ok({
+            body: {
+              rule: { ...getRulesSchemaMock(), index: ['ai_index', rest.content], references: [] },
+            },
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
         // const siemResponse = buildSiemResponse(response);
         // const [_, { security }] = await getStartServices();
         // const securitySolution = await context.securitySolution;

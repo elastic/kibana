@@ -24,6 +24,10 @@ export const AIAssistedCreateRuleRequestBody = z.object({
    * The user query to assist in rule creation.
    */
   user_query: z.string(),
+  /**
+   * The ID of the connector to use for rule creation.
+   */
+  connector_id: z.string(),
 });
 export type AIAssistedCreateRuleRequestBodyInput = z.input<typeof AIAssistedCreateRuleRequestBody>;
 

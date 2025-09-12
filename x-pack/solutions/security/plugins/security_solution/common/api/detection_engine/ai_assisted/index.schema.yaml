@@ -19,10 +19,14 @@ paths:
               type: object
               required:
                 - user_query
+                - connector_id
               properties:
                 user_query:
                   type: string
                   description: The user query to assist in rule creation.
+                connector_id:
+                  type: string
+                  description: The ID of the connector to use for rule creation.
       responses:
         200:
           description: Indicates a successful call.

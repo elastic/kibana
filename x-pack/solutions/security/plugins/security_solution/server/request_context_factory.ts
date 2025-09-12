@@ -171,6 +171,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getInferenceService: () => startPlugins.inference,
+
       getDataViewsService: () => dataViewsService,
 
       getEntityStoreApiKeyManager,

@@ -17,6 +17,7 @@ import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -82,6 +83,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
+  getInferenceService: () => InferenceServerStart;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
