@@ -589,23 +589,28 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     return;
   }
 
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
+    title: plugin,
+    key: plugin,
+    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
+    group: rawScoutConfigs[plugin].group,
+  }));
+
   // upload the step definitions to Buildkite
-  const scoutConfig = 'x-pack/platform/plugins/shared/maps/test/scout/ui/playwright.config.ts';
   bk.uploadSteps(
     [
       {
         group: 'Scout Configs',
-        depends_on: ['build'], // BuildkiteStep
-        steps: [
-          {
-            label: `running ${scoutConfig}`,
+        depends_on: ['build'],
+        steps: scoutGroups.map(
+          ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
+            label: `Scout: [ ${group} / ${title} ] plugin`,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
             env: {
-              // SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG: scoutConfig,
-              SCOUT_CONFIG_GROUP_TYPE: 'platform',
+              SCOUT_CONFIG_GROUP_KEY: key,
+              SCOUT_CONFIG_GROUP_TYPE: group,
               ...envFromlabels,
             },
             retry: {
@@ -614,8 +619,8 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
                 { exit_status: '*', limit: 0 },
               ],
             },
-          },
-        ],
+          })
+        ),
       },
     ].flat()
   );
