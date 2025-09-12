@@ -108,6 +108,62 @@ components:
           type: boolean
           description: Indicates if the last execution was stopped by the user.
 
+    MigrationTranslationStats:
+      type: object
+      description: The items migration translation stats object.
+      required:
+        - id
+        - items
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        items:
+          type: object
+          description: The items migration translation stats.
+          required:
+            - total
+            - success
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of items in the migration.
+            success:
+              type: object
+              description: The number of items that have been successfully translated.
+              required:
+                - total
+                - result
+                - installable
+              properties:
+                total:
+                  type: integer
+                  description: The total number of items that have been successfully translated.
+                result:
+                  type: object
+                  description: The translation results
+                  required:
+                    - full
+                    - partial
+                    - untranslatable
+                  properties:
+                    full:
+                      type: integer
+                      description: The number of items that have been fully translated.
+                    partial:
+                      type: integer
+                      description: The number of items that have been partially translated.
+                    untranslatable:
+                      type: integer
+                      description: The number of items that could not be translated.
+                installable:
+                  type: integer
+                  description: The number of items that have been successfully translated and can be installed.
+            failed:
+              type: integer
+              description: The number of items that have failed translation.
+
     MigrationTranslationResult:
       type: string
       description: The migration translation result.
