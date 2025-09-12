@@ -12,26 +12,22 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
 import {
-  EuiDelayRender,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiProgress,
   EuiText,
   euiScrollBarStyles,
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { IconChartBarStacked } from '@kbn/chart-icons';
 import { Subject } from 'rxjs';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
 import { MetricsGridHeader } from './metrics_grid_header';
+import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -101,56 +97,17 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  if (currentPageFields?.length === 0) {
+  if (fields.length === 0) {
     return (
       <MetricsGridHeader
         indexPattern={indexPattern}
         renderToggleActions={renderToggleActions}
         chartToolbarCss={chartToolbarCss}
-        getTimeRange={getTimeRange}
+        requestParams={requestParams}
         setDebouncedSearchTerm={setDebouncedSearchTerm}
         fields={fields}
       >
-        <div
-          css={css`
-            height: 100%;
-          `}
-        >
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            justifyContent="spaceAround"
-            css={css`
-              height: 100%;
-            `}
-            gutterSize="s"
-          >
-            {isLoading ? (
-              <EuiFlexItem>
-                <EuiDelayRender delay={500} data-test-subj="metricsExperienceProgressBar">
-                  <EuiProgress size="xs" color="accent" position="absolute" />
-                </EuiDelayRender>
-              </EuiFlexItem>
-            ) : (
-              <>
-                <EuiFlexItem
-                  css={css`
-                    justify-content: end;
-                  `}
-                >
-                  <EuiIcon type={IconChartBarStacked as IconType} size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="xs" data-test-subj="metricsExperienceNoData">
-                    {i18n.translate('metricsExperience.grid.noData', {
-                      defaultMessage: 'No results found',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-              </>
-            )}
-          </EuiFlexGroup>
-        </div>
+        <EmptyState isLoading={isLoading} />
       </MetricsGridHeader>
     );
   }
@@ -160,7 +117,7 @@ export const MetricsExperienceGrid = ({
       indexPattern={indexPattern}
       renderToggleActions={renderToggleActions}
       chartToolbarCss={chartToolbarCss}
-      getTimeRange={getTimeRange}
+      requestParams={requestParams}
       setDebouncedSearchTerm={setDebouncedSearchTerm}
       fields={fields}
     >
