@@ -17,7 +17,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { optionsListControlSchema } from './options_list_schema';
+import { optionsListDSLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 
 const controlWidthSchema = schema.oneOf(
@@ -50,7 +50,7 @@ export const controlsGroupSchema = schema.object({
       schema
         .allOf([
           schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-          optionsListControlSchema,
+          optionsListDSLControlSchema,
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`

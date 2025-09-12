@@ -48,17 +48,22 @@ const optionsListControlBaseParameters = {
 export const optionsListDSLControlSchema = dataControlSchema.extends(
   optionsListControlBaseParameters
 );
-export const optionsListESQLControlSchema = schema.object({
-  ...optionsListControlBaseParameters,
-  selectedOptions: schema.arrayOf(schema.string()),
-  variableName: schema.string(),
-  variableType: schema.oneOf([
-    schema.literal('fields'),
-    schema.literal('values'),
-    schema.literal('functions'),
-    schema.literal('time_literal'),
-  ]),
-  esqlQuery: schema.string(),
-  controlType: schema.oneOf([schema.literal('STATIC_VALUES'), schema.literal('VALUES_FROM_QUERY')]),
-  availableOptions: schema.maybe(schema.arrayOf(schema.string())),
-});
+
+export const optionsListESQLControlSchema = schema
+  .object({
+    selectedOptions: schema.arrayOf(schema.string()),
+    variableName: schema.string(),
+    variableType: schema.oneOf([
+      schema.literal('fields'),
+      schema.literal('values'),
+      schema.literal('functions'),
+      schema.literal('time_literal'),
+    ]),
+    esqlQuery: schema.string(),
+    controlType: schema.oneOf([
+      schema.literal('STATIC_VALUES'),
+      schema.literal('VALUES_FROM_QUERY'),
+    ]),
+    availableOptions: schema.maybe(schema.arrayOf(schema.string())),
+  })
+  .extends(optionsListControlBaseParameters);
