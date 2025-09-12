@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { dataControlSchema } from './control_schema';
 
-const rangeValueSchema = schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 });
+export const rangeValueSchema = schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 });
 
 export const rangeSliderControlSchema = dataControlSchema.extends({
   value: schema.maybe(rangeValueSchema),

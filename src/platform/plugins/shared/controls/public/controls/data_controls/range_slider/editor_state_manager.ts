@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import type { RangesliderControlState } from './types';
 
-export type EditorState = Pick<RangesliderControlState, 'step'>;
+export type EditorState = Pick<RangeSliderControlState, 'step'>;
 
 export const editorComparators: StateComparators<EditorState> = {
   step: 'referenceEquality',

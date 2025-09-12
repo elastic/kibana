@@ -14,7 +14,6 @@ import type { Filter, RangeFilterParams } from '@kbn/es-query';
 import { buildRangeFilter } from '@kbn/es-query';
 import {
   fetch$,
-  initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -22,6 +21,7 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,
@@ -32,12 +32,12 @@ import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
-import type { RangesliderControlApi, RangesliderControlState } from './types';
+import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 
 export const getRangesliderControlFactory = (): EmbeddableFactory<
-  RangesliderControlState,
-  RangesliderControlApi
+  RangeSliderControlState,
+  RangeSliderControlApi
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
@@ -47,11 +47,10 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
-      const titlesManager = initializeTitleManager(state);
       const editorStateManager = initializeEditorStateManager(state);
 
       const dataControlManager = await initializeDataControlManager<
-        Pick<RangesliderControlState, 'step'>
+        Pick<RangeSliderControlState, 'step'>
       >({
         controlId: uuid,
         controlType: RANGE_SLIDER_CONTROL,
@@ -59,7 +58,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         state,
         parentApi,
         editorStateManager,
-        titlesManager,
       });
 
       const selections = initializeRangeControlSelections(
@@ -74,11 +72,10 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             ...editorStateManager.getLatestState(),
             value: selections.value$.getValue(),
           },
-          references: dataControlManager.internalApi.extractReferences('rangeSliderDataView'),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<RangesliderControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
         uuid,
         parentApi,
         serializeState,
@@ -179,6 +176,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           const dataView = dataViews?.[0];
           const dataViewField =
             dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+          console.log('RANGE VALUE', value);
           const gte = parseFloat(value?.[0] ?? '');
           const lte = parseFloat(value?.[1] ?? '');
 

@@ -8,17 +8,12 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishingSubject, SerializedTitles } from '@kbn/presentation-publishing';
-import type { DefaultDataControlState } from '../../../../common';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 export type RangeValue = [string, string];
 
-export interface RangesliderControlState extends DefaultDataControlState, SerializedTitles {
-  value?: RangeValue;
-  step?: number;
-}
-
-export type RangesliderControlApi = DefaultEmbeddableApi<RangesliderControlState> & {
+export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> & {
   clearSelections: () => void;
   hasSelections$: PublishingSubject<boolean | undefined>;
 };
