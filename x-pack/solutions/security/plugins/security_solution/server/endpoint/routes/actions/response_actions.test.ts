@@ -1135,15 +1135,14 @@ describe('Response actions', () => {
             endpoint_ids: ['test-endpoint-id'],
             parameters: { action_id: 'test-action-id' },
           } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true, canIsolateHost: true },
+          authz: { canIsolateHost: true },
           version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
         expect(fetchActionByIdSpy).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          'test-action-id',
-          expect.anything()
+          'test-action-id'
         );
         expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
           endpoint_ids: ['test-endpoint-id'],
@@ -1246,7 +1245,7 @@ describe('Response actions', () => {
             endpoint_ids: ['test-endpoint-id'],
             parameters: { action_id: 'test-action-id' },
           } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true },
+          authz: {},
           version: '2023-10-31',
         });
         expect(mockResponse.customError).toHaveBeenCalledWith({

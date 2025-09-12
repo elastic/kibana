@@ -371,12 +371,16 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
     request: KibanaRequest<unknown, unknown, CancelActionRequestBody>,
     response: KibanaResponseFactory
   ) => {
-    const logger = endpointContext.logFactory.get('cancelAction');
+    const cancelActionLogger = endpointContext.logFactory.get('cancelActionHandler');
     const { parameters } = request.body;
     const actionId = parameters?.action_id;
 
     if (!actionId) {
-      return errorHandler(logger, response, new Error('action_id is required in parameters'));
+      return errorHandler(
+        cancelActionLogger,
+        response,
+        new Error('action_id is required in parameters')
+      );
     }
 
     try {
@@ -387,13 +391,12 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
       const originalAction = await fetchActionRequestById(
         endpointContext.service,
         spaceId,
-        actionId,
-        { bypassSpaceValidation: false }
+        actionId
       );
 
       if (!originalAction) {
         return errorHandler(
-          logger,
+          cancelActionLogger,
           response,
           new CustomHttpRequestError(`Action with id '${actionId}' not found.`, 404)
         );
@@ -407,7 +410,7 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
           : [originalAction.agent.id];
         if (!originalActionAgentIds.includes(requestEndpointId)) {
           return errorHandler(
-            logger,
+            cancelActionLogger,
             response,
             new CustomHttpRequestError(
               `Endpoint '${requestEndpointId}' is not associated with action '${actionId}'`,
@@ -422,9 +425,9 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
       const agentType = originalAction.EndpointActions?.input_type;
 
       if (!command) {
-        logger.warn(`Action ${actionId} missing command information`);
+        cancelActionLogger.warn(`Action ${actionId} missing command information`);
         return errorHandler(
-          logger,
+          cancelActionLogger,
           response,
           new CustomHttpRequestError(
             `Unable to determine command type for action '${actionId}'`,
@@ -434,9 +437,9 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
       }
 
       if (!agentType) {
-        logger.warn(`Action ${actionId} missing agent type information`);
+        cancelActionLogger.warn(`Action ${actionId} missing agent type information`);
         return errorHandler(
-          logger,
+          cancelActionLogger,
           response,
           new CustomHttpRequestError(`Unable to determine agent type for action '${actionId}'`, 500)
         );
@@ -452,13 +455,13 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
       );
 
       if (!canCancel) {
-        return errorHandler(logger, response, new EndpointAuthorizationError());
+        return errorHandler(cancelActionLogger, response, new EndpointAuthorizationError());
       }
 
       // Proceed with existing cancellation logic using the standard response action handler
       return responseActionRequestHandler(endpointContext, 'cancel')(context, request, response);
     } catch (error) {
-      return errorHandler(logger, response, error);
+      return errorHandler(cancelActionLogger, response, error);
     }
   };
 }
