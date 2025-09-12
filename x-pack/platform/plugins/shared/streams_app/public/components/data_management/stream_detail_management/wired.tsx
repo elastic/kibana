@@ -99,7 +99,7 @@ export function WiredStreamDetailManagement({
       content: <StreamDetailDataQuality definition={definition} />,
       label: (
         <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+          content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
             defaultMessage: 'View details about this stream’s data quality',
           })}
         >
