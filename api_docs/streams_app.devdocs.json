@@ -319,7 +319,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " & ({ [key: string]: never; } | { name: string; } | { name: string; managementTab: \"enrich\"; pageState: ",
+          " & ({ [key: string]: never; } | { name: string; } | { name: string; managementTab: \"processing\"; pageState: ",
           "EnrichmentUrlState",
           "; } | { name: string; managementTab: string; pageState: never; })"
         ],

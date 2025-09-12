@@ -15,18 +15,30 @@ export enum DiscoverFlyouts {
 
 const AllDiscoverFlyouts = Object.values(DiscoverFlyouts);
 
-const getFlyoutCloseButton = (flyout: DiscoverFlyouts): HTMLElement | null => {
+const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLElement | null> => {
   switch (flyout) {
     case DiscoverFlyouts.lensEdit:
-      return document.getElementById('lnsCancelEditOnFlyFlyout');
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="lnsEditOnFlyFlyout"] [data-test-subj="lns-indexPattern-dimensionContainerBack"]'
+          ),
+        () => document.getElementById('lnsCancelEditOnFlyFlyout'),
+      ];
     case DiscoverFlyouts.docViewer:
-      return document.querySelector(
-        '[data-test-subj="docViewerFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
-      );
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="docViewerFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
     case DiscoverFlyouts.esqlDocs:
-      return document.querySelector(
-        '[data-test-subj="esqlInlineDocumentationFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
-      );
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="esqlInlineDocumentationFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
   }
 };
 
@@ -38,10 +50,11 @@ export const dismissFlyouts = (
     if (flyout === excludedFlyout) {
       return;
     }
-    const closeButton = getFlyoutCloseButton(flyout);
-    if (closeButton) {
-      closeButton.click?.();
-    }
+    const closeButtonGetters = getFlyoutCloseButtonGetters(flyout);
+    closeButtonGetters.forEach((getCloseButton) => {
+      const closeButton = getCloseButton();
+      closeButton?.click();
+    });
   });
 };
 
