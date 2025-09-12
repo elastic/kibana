@@ -28,6 +28,16 @@ FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
 configs=""
 group=$SCOUT_CONFIG_GROUP_TYPE
 
+# Check if SCOUT_CONFIG is provided and handle single config execution
+if [ "${SCOUT_CONFIG:-}" != "" ]; then
+  if [ "$SCOUT_CONFIG_GROUP_TYPE" == "" ]; then
+    echo "Missing SCOUT_CONFIG_GROUP_TYPE env var for single config run"
+    exit 1
+  fi
+  configs="$SCOUT_CONFIG"
+  group="$SCOUT_CONFIG_GROUP_TYPE"
+fi
+
 # The first retry should only run the configs that failed in the previous attempt
 # Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
 if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
