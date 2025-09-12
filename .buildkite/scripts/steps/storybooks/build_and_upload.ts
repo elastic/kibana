@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { storybookAliases } from '../../../../src/dev/storybook/aliases';
@@ -25,6 +25,31 @@ const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}`;
 
 const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
 
+const buildStorybook = (storybook: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const child = spawn('yarn', ['storybook', '--site', storybook], {
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        STORYBOOK_BASE_URL,
+        NODE_OPTIONS: '--max-old-space-size=6144',
+      },
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Storybook build failed for ${storybook} with exit code ${code}`));
+      }
+    });
+
+    child.on('error', (error) => {
+      reject(error);
+    });
+  });
+};
+
 const ghStatus = (state: string, description: string) =>
   exec(
     `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
@@ -35,16 +60,10 @@ const ghStatus = (state: string, description: string) =>
     `--silent`
   );
 
-const build = () => {
+const build = async () => {
   console.log('--- Building Storybooks');
 
-  for (const storybook of Object.keys(storybookAliases)) {
-    exec(
-      `STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`,
-      `NODE_OPTIONS=--max-old-space-size=6144`,
-      `yarn storybook --site ${storybook}`
-    );
-  }
+  await Promise.all(Object.keys(storybookAliases).map(buildStorybook));
 };
 
 const upload = () => {
@@ -98,12 +117,14 @@ const upload = () => {
   }
 };
 
-try {
-  ghStatus('pending', 'Building Storybooks');
-  build();
-  upload();
-  ghStatus('success', 'Storybooks built');
-} catch (error) {
-  ghStatus('error', 'Building Storybooks failed');
-  throw error;
-}
+(async () => {
+  try {
+    ghStatus('pending', 'Building Storybooks');
+    await build();
+    upload();
+    ghStatus('success', 'Storybooks built');
+  } catch (error) {
+    ghStatus('error', 'Building Storybooks failed');
+    throw error;
+  }
+})();
