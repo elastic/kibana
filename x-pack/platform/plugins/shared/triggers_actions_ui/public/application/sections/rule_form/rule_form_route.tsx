@@ -39,9 +39,14 @@ export const RuleFormRoute = () => {
 
   const history = useHistory();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
-  const { id, ruleTypeId } = useParams<{
+  const {
+    id,
+    ruleTypeId,
+    templateId: templateIdParams,
+  } = useParams<{
     id?: string;
     ruleTypeId?: string;
+    templateId?: string;
   }>();
   const { returnApp, returnPath } = location.state || {};
 
@@ -65,7 +70,7 @@ export const RuleFormRoute = () => {
   }, []);
 
   const [searchParams] = useSearchParams();
-  const templateId = searchParams.get('fromTemplate') ?? undefined;
+  const templateId = templateIdParams ?? searchParams.get('fromTemplate') ?? undefined;
 
   const {
     data: ruleTemplate,
