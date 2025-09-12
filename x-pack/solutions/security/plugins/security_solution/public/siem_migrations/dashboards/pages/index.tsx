@@ -23,6 +23,7 @@ import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { PageTitle } from '../../common/components/page_title';
+import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -78,6 +79,11 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
+
+      if (migrationStats.status === SiemMigrationTaskStatus.RUNNING) {
+        return <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />;
+      }
+
       return (
         <>
           {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (

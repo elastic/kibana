@@ -82,3 +82,9 @@ export const MIGRATION_STOPPING_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.panels.translate.stoppingButton',
   { defaultMessage: 'Stopping' }
 );
+
+// Error panel translations
+export const MIGRATION_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.panels.error',
+  { defaultMessage: 'The last execution of this migration failed with the following message:' }
+);
