@@ -8,8 +8,9 @@
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
+import { LRUCache as LRU } from 'lru-cache';
 
-type DataViewId = DataView['id'];
+type DataViewId = NonNullable<DataView['id']>;
 interface BrowserFieldsResult {
   browserFields: BrowserFields;
 }
@@ -17,17 +18,26 @@ interface BrowserFieldsResult {
 // NOTE:for referential comparison optimization
 const emptyBrowserFields = {};
 
-// We don't want the cache to grow indefinitely
-// as individual dataviews can be an arbitrary size
-export const MAX_BROWSER_FIELDS_CACHE_SIZE = 10;
+export const MAX_DATAVIEWS_TO_CACHE = 5; // only store a max of 5 data views
+export const MAX_NUMBER_OF_FIELDS_TO_CACHE = 1_000_000; // 1 million fields
+export const BROWSER_FIELDS_CACHE_TTL = 60 * 60 * 1000; // one hour
+
 /**
  * SecurityBrowserFieldsManager is a singleton class that manages the browser fields
  * for the Security Solution. It caches the browser fields to improve performance
- * when accessing the fields multiple times across multiple scopes.
+ * as the same dataView can be accessed multiple times across multiple scopes.
+ *
+ * We use an LRU cache to limit memory usage and ensure that the most recently
+ * accessed dataViews are kept in memory. The cache is limited by both the number
+ * of dataViews and the total number of fields across all cached dataViews.
  */
 class SecurityBrowserFieldsManager {
   private static instance: SecurityBrowserFieldsManager;
-  private dataViewIdToBrowserFieldsCache = new Map<DataViewId, BrowserFieldsResult>();
+  private browserFieldsCache = new LRU<DataViewId, BrowserFieldsResult>({
+    max: MAX_DATAVIEWS_TO_CACHE,
+    maxSize: MAX_NUMBER_OF_FIELDS_TO_CACHE,
+    ttl: BROWSER_FIELDS_CACHE_TTL,
+  });
 
   constructor() {
     if (SecurityBrowserFieldsManager.instance) {
@@ -41,14 +51,10 @@ class SecurityBrowserFieldsManager {
    * We use a for loop for performance reasons, as this function could be called
    * multiple times and we want to minimize the overhead of array methods.
    * @param fields - The fields from the dataView to be processed.
-   * @returns An object containing the browserFields.
+   * @returns An object containing the formatted browserFields.
    */
   private buildBrowserFields(fields: DataView['fields']): BrowserFieldsResult {
-    if (fields == null) return { browserFields: emptyBrowserFields };
-
-    if (!fields.length) {
-      return { browserFields: emptyBrowserFields };
-    }
+    if (fields == null || !fields.length) return { browserFields: emptyBrowserFields };
 
     const browserFields: BrowserFields = {};
     for (let i = 0; i < fields.length; i++) {
@@ -65,24 +71,8 @@ class SecurityBrowserFieldsManager {
         }
       }
     }
-    return { browserFields };
-  }
 
-  /**
-   *
-   * @param dataViewId - The unique identifier of the dataView. This field is only set for saved dataViews.
-   * Adhoc dataViews do not have an id and will not be cached.
-   * @returns The cached browser fields for the specified dataView id, or undefined if not found.
-   */
-  private getCachedBrowserFields(dataViewId: DataViewId): BrowserFieldsResult | undefined {
-    if (dataViewId != null) {
-      // Check if the browser fields for this id are already cached
-      const cachedBrowserFields = this.dataViewIdToBrowserFieldsCache.get(dataViewId);
-      if (cachedBrowserFields) {
-        return cachedBrowserFields;
-      }
-      return undefined;
-    }
+    return { browserFields };
   }
 
   /**
@@ -98,34 +88,22 @@ class SecurityBrowserFieldsManager {
     }
 
     const dataViewId = dataView.id;
-
-    // Caching depends on the scope and title
-    if (dataViewId != null) {
-      const cachedResult = this.getCachedBrowserFields(dataViewId);
-      if (cachedResult) {
-        // If the browser fields for this dataView are cached, return them
-        return cachedResult;
-      }
-      // If the browser fields for this dataView are not cached, build them
-      const result = this.buildBrowserFields(fields);
-      // Maintain a maximum cache size to prevent unbounded memory usage
-      // An individual dataview can be an arbitrary size, so this limit is more precautionary than anything
-      if (this.dataViewIdToBrowserFieldsCache.size >= MAX_BROWSER_FIELDS_CACHE_SIZE) {
-        const firstKey = this.dataViewIdToBrowserFieldsCache.keys().next().value;
-        this.dataViewIdToBrowserFieldsCache.delete(firstKey);
-      }
-      // Cache the newly built browser fields for future use
-      this.dataViewIdToBrowserFieldsCache.set(dataViewId, result);
-      return result;
+    // Only cache if the dataView has an id
+    if (dataViewId == null) {
+      return this.buildBrowserFields(fields);
     }
 
-    // If the id is not defined (i.e. for adhoc dataViews), return the browser fields without caching
-    return this.buildBrowserFields(fields);
+    const cachedResult = this.browserFieldsCache.get(dataViewId);
+    if (cachedResult) return cachedResult;
+
+    const result = this.buildBrowserFields(fields);
+    this.browserFieldsCache.set(dataViewId, result, { size: fields.length });
+    return result;
   }
 
   public removeFromCache(dataViewId: DataViewId): void {
-    if (dataViewId != null && this.dataViewIdToBrowserFieldsCache.has(dataViewId)) {
-      this.dataViewIdToBrowserFieldsCache.delete(dataViewId);
+    if (dataViewId != null && this.browserFieldsCache.has(dataViewId)) {
+      this.browserFieldsCache.delete(dataViewId);
     }
   }
 
@@ -134,7 +112,7 @@ class SecurityBrowserFieldsManager {
    * This method is useful for resetting the state of the manager, especially during tests
    */
   public clearCache(): void {
-    this.dataViewIdToBrowserFieldsCache.clear();
+    this.browserFieldsCache.clear();
   }
 }
 
