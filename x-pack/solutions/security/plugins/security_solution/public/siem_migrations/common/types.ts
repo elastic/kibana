@@ -17,7 +17,11 @@ export interface GetMigrationStatsParams {
   signal?: AbortSignal;
 }
 
-export enum StatusFilter {
+export interface MigrationSettingsBase {
+  connectorId: string;
+}
+
+export enum StatusFilterBase {
   INSTALLED = 'installed',
   TRANSLATED = 'translated',
   PARTIALLY_TRANSLATED = 'partially_translated',
@@ -26,9 +30,5 @@ export enum StatusFilter {
 }
 
 export interface FilterOptionsBase {
-  status?: StatusFilter;
-}
-
-export interface MigrationSettingsBase {
-  connectorId: string;
+  status?: StatusFilterBase;
 }

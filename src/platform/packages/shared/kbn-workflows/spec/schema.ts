@@ -19,11 +19,60 @@ export const TemplatingOptionsSchema = z.object({
   engine: z.enum(['mustache', 'nunjucks']),
 });
 
+export const WorkflowRetrySchema = z.object({
+  'max-attempts': z.number().min(1),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+});
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
+
+// Base step schema, with recursive steps property
+export const BaseStepSchema = z.object({
+  name: z.string().min(1),
+  type: z.string(),
+});
+export type BaseStep = z.infer<typeof BaseStepSchema>;
+
+export const WorkflowOnFailureSchema = z.object({
+  retry: WorkflowRetrySchema.optional(),
+  fallback: z.array(BaseStepSchema).min(1).optional(),
+  continue: z.boolean().optional(),
+});
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowOnFailureSchema.extend({
+    fallback: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
+
 export const WorkflowSettingsSchema = z.object({
-  retry: RetryPolicySchema.optional(),
+  'on-failure': WorkflowOnFailureSchema.optional(),
   templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
+export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
+
+export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowSettingsSchema.extend({
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({
@@ -58,15 +107,6 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 /* --- Steps --- */
-export const WorkflowRetrySchema = z.object({
-  'max-attempts': z.number().min(1),
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
-});
-export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
-
 const StepWithTimeoutSchema = z.object({
   timeout: z.number().optional(),
 });
@@ -83,20 +123,6 @@ const StepWithIfConditionSchema = z.object({
   if: z.string().optional(),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
-
-// Base step schema, with recursive steps property
-export const BaseStepSchema = z.object({
-  name: z.string().min(1),
-  type: z.string(),
-});
-export type BaseStep = z.infer<typeof BaseStepSchema>;
-
-export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema.optional(),
-  fallback: z.array(BaseStepSchema).min(1).optional(),
-  continue: z.boolean().optional(),
-});
-export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 export const StepWithOnFailureSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
@@ -139,19 +165,6 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithTimeoutSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
-
-export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
-  const schema = WorkflowOnFailureSchema.extend({
-    fallback: z.array(stepSchema).optional(),
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial();
-  }
-
-  return schema;
-}
 
 export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = HttpStepSchema.extend({
