@@ -31,8 +31,8 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-
 import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
+
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
@@ -193,7 +193,7 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
           >
             <div ref={panelRef} css={css({ height: '100%' })}>
               {blockingError && (
-                // becaise we are hiding the panel chrome, we must handle blockingerrors manually
+                // because we are hiding the panel chrome, we must handle blockingerrors manually
                 <PresentationPanelError api={api} error={blockingError} panelRef={panelRef} />
               )}
               <span css={shouldHideComponent && styles.containerHidden}>
@@ -203,7 +203,7 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
                   type={type}
                   getParentApi={() => parentApi}
                   onApiAvailable={(panelApi) => {
-                    console.log({ panelApi });
+                    // console.log({ panelApi });
                     setApi(panelApi);
                     parentApi.registerChildApi(panelApi);
                   }}
