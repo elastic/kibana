@@ -8,13 +8,12 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder, EDITOR_MARKER } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
   ESQLPolicy,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { expandEvals } from './expand_evals';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 import type { ESQLCallbacks } from './types';
 
@@ -40,16 +39,15 @@ export class QueryColumns {
     return undefined;
   }
 
-  private readonly root: ESQLAstQueryExpression;
-  private readonly queryForFields: string;
+  // once computed, the columns for the query will be cached here
+  private readonly fullQueryCacheKey: string;
 
   constructor(
-    query: ESQLAstQueryExpression,
+    private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks
   ) {
-    this.root = getQueryForFields(originalQueryText, query);
-    this.queryForFields = BasicPrettyPrinter.print(this.root);
+    this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query);
   }
 
   /**
@@ -61,7 +59,7 @@ export class QueryColumns {
   ): Promise<ESQLColumnData[]> {
     const types = Array.isArray(expectedType) ? expectedType : [expectedType];
     await this.buildCache();
-    const cachedFields = QueryColumns.fromCache(this.queryForFields);
+    const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
     return (
       cachedFields?.filter(({ name, type }) => {
         const ts = Array.isArray(type) ? type : [type];
@@ -79,7 +77,7 @@ export class QueryColumns {
    */
   async asMap(): Promise<Map<string, ESQLColumnData>> {
     await this.buildCache();
-    const cachedFields = QueryColumns.fromCache(this.queryForFields);
+    const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
     const cacheCopy = new Map<string, ESQLColumnData>();
     cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
     return cacheCopy;
@@ -89,7 +87,7 @@ export class QueryColumns {
    * Ensures the cache is populated for all subqueries of this query context.
    */
   private async buildCache() {
-    if (!this.queryForFields) return;
+    if (!this.fullQueryCacheKey) return;
 
     const getFields = async (queryToES: string) => {
       const cached = QueryColumns.fromCache(queryToES);
@@ -100,8 +98,8 @@ export class QueryColumns {
     };
 
     const subqueries = [];
-    for (let i = 0; i < this.root.commands.length; i++) {
-      subqueries.push(Builder.expression.query(this.root.commands.slice(0, i + 1)));
+    for (let i = 0; i < this.query.commands.length; i++) {
+      subqueries.push(Builder.expression.query(this.query.commands.slice(0, i + 1)));
     }
 
     const getPolicies = async () => {
@@ -110,7 +108,7 @@ export class QueryColumns {
     };
 
     for (const subquery of subqueries) {
-      await this.cacheColumnsForSubquery(subquery, getFields, getPolicies);
+      await this.cacheColumnsForQuery(subquery, getFields, getPolicies);
     }
   }
 
@@ -120,7 +118,7 @@ export class QueryColumns {
    * @param fetchFields
    * @param getPolicies
    */
-  async cacheColumnsForSubquery(
+  async cacheColumnsForQuery(
     query: ESQLAstQueryExpression,
     fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
     getPolicies: () => Promise<Map<string, ESQLPolicy>>
@@ -181,72 +179,4 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     return (await resourceRetriever?.getSources?.()) || [];
   };
-}
-
-/**
- * This function is used to build the query that will be used to compute the
- * fields available at the final position. It is robust to final partial commands
- * e.g. "FROM logs* | EVAL foo = 1 | EVAL "
- *
- * Generally, this is the user's query up to the end of the previous command, but there
- * are special cases for multi-expression EVAL and FORK branches.
- *
- * IMPORTANT: the AST nodes in the new query still reference locations in the original query text
- *
- * @param queryString The original query string
- * @param commands
- * @returns
- */
-export function getQueryForFields(
-  queryString: string,
-  root: ESQLAstQueryExpression
-): ESQLAstQueryExpression {
-  const commands = root.commands;
-  const lastCommand = commands[commands.length - 1];
-  if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
-    /**
-     * This flattens the current fork branch into a simpler but equivalent
-     * query that is compatible with the existing field computation/caching strategy.
-     *
-     * The intuition here is that if the cursor is within a fork branch, the
-     * previous context is equivalent to a query without the FORK command:
-     *
-     * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
-     * Simplified:     FROM lolz | EVAL foo = 1 | EVAL baz = 3
-     */
-    const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
-    const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
-    return { ...root, commands: newCommands };
-  }
-
-  if (lastCommand && lastCommand.name === 'eval') {
-    const endsWithComma = queryString.replace(EDITOR_MARKER, '').trim().endsWith(',');
-    if (lastCommand.args.length > 1 || endsWithComma) {
-      /**
-       * If we get here, we know that we have a multi-expression EVAL statement.
-       *
-       * e.g. EVAL foo = 1, bar = foo + 1, baz = bar + 1
-       *
-       * In order for this to work with the caching system which expects field availability to be
-       * delineated by pipes, we need to split the current EVAL command into an equivalent
-       * set of single-expression EVAL commands.
-       *
-       * Original query: FROM lolz | EVAL foo = 1, bar = foo + 1, baz = bar + 1, /
-       * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1
-       */
-      const expanded = expandEvals(commands);
-      const newCommands = expanded.slice(0, endsWithComma ? undefined : -1);
-      return { ...root, commands: newCommands };
-    }
-  }
-
-  return buildQueryUntilPreviousCommand(root);
-}
-
-function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
-  if (root.commands.length === 1) {
-    return { ...root, commands: [root.commands[0]] };
-  } else {
-    return { ...root, commands: root.commands.slice(0, -1) };
-  }
 }
