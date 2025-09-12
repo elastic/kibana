@@ -18,8 +18,8 @@ import {
   EuiSwitch,
   type EuiSwitchEvent,
   EuiToolTip,
-  EuiIcon,
   copyToClipboard,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -274,16 +274,15 @@ export const EmbedContent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
+            type="question"
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
                 defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
-          >
-            <EuiIcon type="question" />
-          </EuiToolTip>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -325,11 +324,12 @@ export const EmbedContent = ({
           <EuiToolTip
             content={
               isTextCopied
-                ? i18n.translate('share.embed.copied', { defaultMessage: 'Link copied' })
+                ? i18n.translate('share.embed.copied', { defaultMessage: 'Code copied' })
                 : null
             }
           >
             <EuiButton
+              iconType="copy"
               fill
               data-test-subj="copyEmbedUrlButton"
               onClick={copyUrlHelper}
