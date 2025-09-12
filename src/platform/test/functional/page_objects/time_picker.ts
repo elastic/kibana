@@ -119,9 +119,8 @@ export class TimePickerPageObject extends FtrService {
       const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
         timeout: 50,
       });
-      // Press Enter on the breadcrumbs to dismiss any visible tooltip.
-      // This prevents flakiness caused by tooltips overlapping other buttons (e.g., the date picker button).
-      await this.testSubjects.pressEnter('breadcrumbs');
+      // click on the breadcrumbs to dismiss the tooltip (prevents flakiness)
+      await this.testSubjects.click('breadcrumbs');
       if (isShowDatesButton) {
         await this.testSubjects.click('superDatePickerShowDatesButton', 50);
       }
