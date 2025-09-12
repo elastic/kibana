@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepFactory } from './step/step_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
@@ -41,7 +42,8 @@ export async function workflowExecutionLoop(
   workflowRuntime: WorkflowExecutionRuntimeManager,
   workflowExecutionState: WorkflowExecutionState,
   workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory
+  nodesFactory: StepFactory,
+  workflowGraph: WorkflowGraph
 ) {
   while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     if (
@@ -52,7 +54,7 @@ export async function workflowExecutionLoop(
       break;
     }
 
-    await runStep(workflowRuntime, nodesFactory, workflowLogger);
+    await runStep(workflowRuntime, nodesFactory, workflowLogger, workflowGraph);
     await workflowLogger.flushEvents();
   }
 }
@@ -60,7 +62,8 @@ export async function workflowExecutionLoop(
 async function runStep(
   workflowRuntime: WorkflowExecutionRuntimeManager,
   nodesFactory: StepFactory,
-  workflowLogger: WorkflowEventLogger
+  workflowLogger: WorkflowEventLogger,
+  workflowGraph: WorkflowGraph
 ): Promise<void> {
   const currentNode = workflowRuntime.getCurrentStep();
   const step = nodesFactory.create(currentNode as any);
@@ -69,8 +72,9 @@ async function runStep(
     await step.run();
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
+    await workflowRuntime.failStep(currentNode.id, error);
   } finally {
-    await catchError(workflowRuntime, workflowLogger, nodesFactory);
+    await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
     await workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 }
@@ -122,7 +126,8 @@ async function markWorkflowCancelled(
 async function catchError(
   workflowRuntime: WorkflowExecutionRuntimeManager,
   workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory
+  nodesFactory: StepFactory,
+  workflowGraph: WorkflowGraph
 ) {
   try {
     while (
@@ -131,7 +136,7 @@ async function catchError(
     ) {
       const stack = workflowRuntime.getWorkflowExecution().stack;
       const nodeId = stack[stack.length - 1];
-      const node = workflowRuntime.getNode(nodeId);
+      const node = workflowGraph.getNode(nodeId);
       const stepImplementation = nodesFactory.create(node as any);
 
       if ((stepImplementation as unknown as StepErrorCatcher).catchError) {

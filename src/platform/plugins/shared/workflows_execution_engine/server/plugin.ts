@@ -16,13 +16,13 @@ import type {
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { v4 as generateUuid } from 'uuid';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -85,24 +85,30 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
-                await createContainer(
-                  workflowRunId,
-                  spaceId,
-                  actions,
-                  taskManager,
-                  esClient,
-                  logger,
-                  config,
-                  workflowExecutionRepository
-                );
-
+              const {
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory,
+                workflowExecutionGraph,
+              } = await createContainer(
+                workflowRunId,
+                spaceId,
+                actions,
+                taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
               await workflowRuntime.start();
+
               await workflowExecutionLoop(
                 workflowRuntime,
                 workflowExecutionState,
                 workflowLogger,
-                nodesFactory
+                nodesFactory,
+                workflowExecutionGraph
               );
             },
             async cancel() {
@@ -131,24 +137,30 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
-                await createContainer(
-                  workflowRunId,
-                  spaceId,
-                  actions,
-                  taskManager,
-                  esClient,
-                  logger,
-                  config,
-                  workflowExecutionRepository
-                );
+              const {
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory,
+                workflowExecutionGraph,
+              } = await createContainer(
+                workflowRunId,
+                spaceId,
+                actions,
+                taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
               await workflowRuntime.resume();
 
               await workflowExecutionLoop(
                 workflowRuntime,
                 workflowExecutionState,
                 workflowLogger,
-                nodesFactory
+                nodesFactory,
+                workflowExecutionGraph
               );
             },
             async cancel() {},
@@ -279,7 +291,15 @@ async function createContainer(
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
-  const workflowExecutionGraph = convertToWorkflowGraph(workflowExecution.workflowDefinition);
+  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+    workflowExecution.workflowDefinition
+  );
+
+  // If the execution is for a specific step, narrow the graph to that step
+  if (workflowExecution.stepId) {
+    workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
+  }
+
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
   const stepExecutionRepository = new StepExecutionRepository(esClient);
   const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
@@ -330,10 +350,12 @@ async function createContainer(
     workflowRuntime,
     workflowLogger,
     workflowTaskManager,
-    urlValidator
+    urlValidator,
+    workflowExecutionGraph
   );
 
   return {
+    workflowExecutionGraph,
     workflowRuntime,
     workflowExecutionState,
     contextManager,

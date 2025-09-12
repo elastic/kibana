@@ -12,6 +12,7 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('EnterIfNodeImpl', () => {
   let step: EnterIfNode;
@@ -19,7 +20,7 @@ describe('EnterIfNodeImpl', () => {
   let impl: EnterIfNodeImpl;
   let startStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
-  let getNodeSuccessors: jest.Mock<any, any, any>;
+  let getDirectSuccessors: jest.Mock<any, any, any>;
   let enterScope: jest.Mock<any, any, any>;
   let workflowContextLoggerMock: IWorkflowEventLogger;
   let workflowContextManagerMock: WorkflowContextManager;
@@ -28,7 +29,7 @@ describe('EnterIfNodeImpl', () => {
     startStep = jest.fn();
     goToStep = jest.fn();
     enterScope = jest.fn();
-    getNodeSuccessors = jest.fn();
+    getDirectSuccessors = jest.fn();
     workflowContextLoggerMock = {
       logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
@@ -46,17 +47,20 @@ describe('EnterIfNodeImpl', () => {
     wfExecutionRuntimeManagerMock = {
       startStep,
       goToStep,
-      getNodeSuccessors,
       enterScope,
+    } as any;
+    const workflowGraph: WorkflowGraph = {
+      getDirectSuccessors,
     } as any;
     impl = new EnterIfNodeImpl(
       step,
       wfExecutionRuntimeManagerMock,
+      workflowGraph,
       workflowContextManagerMock,
       workflowContextLoggerMock
     );
 
-    getNodeSuccessors.mockReturnValue([
+    getDirectSuccessors.mockReturnValue([
       {
         id: 'thenNode',
         type: 'enter-then-branch',
@@ -91,7 +95,7 @@ describe('EnterIfNodeImpl', () => {
 
   describe('then branch', () => {
     beforeEach(() => {
-      getNodeSuccessors.mockReturnValueOnce([
+      getDirectSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
           type: 'enter-then-branch',
@@ -119,7 +123,7 @@ describe('EnterIfNodeImpl', () => {
 
   describe('else branch', () => {
     beforeEach(() => {
-      getNodeSuccessors.mockReturnValueOnce([
+      getDirectSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
           type: 'enter-then-branch',
@@ -147,7 +151,7 @@ describe('EnterIfNodeImpl', () => {
 
   describe('no else branch defined', () => {
     beforeEach(() => {
-      getNodeSuccessors.mockReturnValueOnce([
+      getDirectSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
           type: 'enter-then-branch',
@@ -170,15 +174,15 @@ describe('EnterIfNodeImpl', () => {
     });
   });
 
-  it('should throw an error if successors are not enter-then-branch or enter-else-branch', async () => {
-    getNodeSuccessors.mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
+  it('should throw an error if successors are not enter-condition-branch', async () => {
+    getDirectSuccessors.mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
       `EnterIfNode with id ${step.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
     );
   });
 
   it('should throw an error if condition evaluation fails', async () => {
-    getNodeSuccessors.mockReturnValueOnce([
+    getDirectSuccessors.mockReturnValueOnce([
       {
         id: 'thenNode',
         type: 'enter-then-branch',

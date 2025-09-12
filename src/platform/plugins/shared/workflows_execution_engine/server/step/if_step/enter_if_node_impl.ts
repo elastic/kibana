@@ -8,6 +8,7 @@
  */
 
 import type { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { KQLSyntaxError } from '@kbn/es-query';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -19,6 +20,7 @@ export class EnterIfNodeImpl implements StepImplementation {
   constructor(
     private step: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private workflowGraph: WorkflowGraph,
     private workflowContextManager: WorkflowContextManager,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
@@ -26,7 +28,7 @@ export class EnterIfNodeImpl implements StepImplementation {
   public async run(): Promise<void> {
     await this.wfExecutionRuntimeManager.startStep(this.step.id);
     this.wfExecutionRuntimeManager.enterScope();
-    const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
+    const successors: any[] = this.workflowGraph.getDirectSuccessors(this.step.id);
 
     if (
       successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))

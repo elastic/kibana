@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorStep, EsWorkflowExecution, ForEachStep, WorkflowYaml } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
-import type { ConnectorStep, EsWorkflowExecution, ForEachStep, WorkflowYaml } from '@kbn/workflows';
-import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
 describe('WorkflowContextManager', () => {
   function createTestContainer(workflow: WorkflowYaml) {
-    const workflowExecutionGraph = convertToWorkflowGraph(workflow);
+    const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
     const workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
     workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
       id: 'testStep',
@@ -291,7 +291,7 @@ describe('WorkflowContextManager', () => {
     it('should have foreach equal to the inner foreach step state for step innerLogStep', () => {
       testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        stack: ['outerForeachStep', 'innerForeachStep'],
+        stack: ['enterForeach_outerForeachStep', 'enterForeach_innerForeachStep'],
       } as EsWorkflowExecution);
       testContainer.workflowExecutionRuntime.getCurrentStep = jest
         .fn()
@@ -299,7 +299,7 @@ describe('WorkflowContextManager', () => {
       testContainer.workflowExecutionRuntime.getStepState = jest
         .fn()
         .mockImplementation((nodeId) => {
-          if (nodeId === 'outerForeachStep') {
+          if (nodeId === 'enterForeach_outerForeachStep') {
             return {
               items: ['item1', 'item2', 'item3'],
               index: 0,
@@ -307,7 +307,7 @@ describe('WorkflowContextManager', () => {
               total: 3,
             };
           }
-          if (nodeId === 'innerForeachStep') {
+          if (nodeId === 'enterForeach_innerForeachStep') {
             return {
               items: ['1', '2', '3', '4'],
               index: 1,

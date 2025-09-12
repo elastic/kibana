@@ -13,32 +13,26 @@ import { HttpStepSchema, WaitStepSchema } from '../../../spec/schema';
 export const GraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
+  stepId: z.string(),
+  stepType: z.string(),
 });
 export type GraphNode = z.infer<typeof GraphNodeSchema>;
 
-export const ExecutionGraphNodeSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  configuration: z.any(),
-});
-
-export type ExecutionGraphNode = z.infer<typeof ExecutionGraphNodeSchema>;
-
-export const AtomicGraphNodeSchema = z.object({
+export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('atomic'),
   configuration: z.any(),
 });
 export type AtomicGraphNode = z.infer<typeof AtomicGraphNodeSchema>;
 
-export const WaitGraphNodeSchema = z.object({
+export const WaitGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('wait'),
   configuration: WaitStepSchema,
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
 
-export const HttpGraphNodeSchema = z.object({
+export const HttpGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('http'),
   configuration: HttpStepSchema,

@@ -8,17 +8,19 @@
  */
 
 import type { ExitConditionBranchNode } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class ExitConditionBranchNodeImpl implements StepImplementation {
   constructor(
     private step: ExitConditionBranchNode,
+    private workflowGraph: WorkflowGraph,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    const successors = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
+    const successors = this.workflowGraph.getDirectSuccessors(this.step.id);
 
     if (successors.length !== 1) {
       throw new Error(

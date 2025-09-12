@@ -71,7 +71,7 @@ export function buildStepExecutionsTree(
         if (stepExecutionsMap.has(currentFullKey)) {
           const stepExecution = stepExecutionsMap.get(currentFullKey)!;
           result = {
-            stepId: currentPart,
+            stepId: stepExecution.stepId,
             stepType: stepExecution.stepType!,
             executionIndex: stepExecution.executionIndex!,
             stepExecutionId: stepExecution.id!,

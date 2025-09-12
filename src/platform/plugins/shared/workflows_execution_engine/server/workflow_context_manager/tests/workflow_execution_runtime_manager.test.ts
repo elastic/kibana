@@ -9,16 +9,16 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
-import { graphlib } from '@dagrejs/dagre';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, GraphNode } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
   let workflowExecution: EsWorkflowExecution;
-  let workflowExecutionGraph: graphlib.Graph;
+  let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
   const originalDateCtor = global.Date;
@@ -64,44 +64,27 @@ describe('WorkflowExecutionRuntimeManager', () => {
       flush: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
-    workflowExecutionGraph = new graphlib.Graph({ directed: true });
-    workflowExecutionGraph.setNode('node1', {
-      id: 'node1',
-      configuration: { type: 'fakeStepType1' },
+    workflowExecutionGraph = {
+      topologicalOrder: ['node1', 'node2', 'node3'],
+    } as unknown as WorkflowGraph;
+
+    // workflowExecutionGraph.topologicalOrder = ['node1', 'node2', 'node3'];
+    workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+      switch (nodeId) {
+        case 'node1':
+          return { id: 'node1', stepType: 'fakeStepType1' } as GraphNode;
+        case 'node2':
+          return { id: 'node2', stepType: 'fakeStepType2' } as GraphNode;
+        case 'node3':
+          return { id: 'node3', stepType: 'fakeStepType3' } as GraphNode;
+      }
     });
-    workflowExecutionGraph.setNode('node2', {
-      id: 'node2',
-      configuration: { type: 'fakeStepType2' },
-    });
-    workflowExecutionGraph.setNode('node3', {
-      id: 'node3',
-      configuration: { type: 'fakeStepType3' },
-    });
-    workflowExecutionGraph.setEdge('node1', 'node2');
-    workflowExecutionGraph.setEdge('node2', 'node3');
 
     underTest = new WorkflowExecutionRuntimeManager({
       workflowExecution,
       workflowExecutionGraph,
       workflowLogger,
       workflowExecutionState,
-    });
-  });
-
-  describe('getNodeSuccessors', () => {
-    it('should return the successors of a given node', () => {
-      const successors = underTest.getNodeSuccessors('node1');
-      expect(successors).toEqual([expect.objectContaining({ id: 'node2' })]);
-    });
-
-    it('should return an empty array if the node has no successors', () => {
-      const successors = underTest.getNodeSuccessors('node3');
-      expect(successors).toEqual([]);
-    });
-
-    it('should return an empty array if the node does not exist', () => {
-      const successors = underTest.getNodeSuccessors('nonexistent');
-      expect(successors).toEqual([]);
     });
   });
 

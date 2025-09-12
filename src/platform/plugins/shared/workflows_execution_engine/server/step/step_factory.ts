@@ -8,6 +8,7 @@
  */
 
 import type { BaseStep } from '@kbn/workflows'; // Adjust path as needed
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { StepImplementation } from './step_base';
 // Import schema and inferred types
@@ -44,7 +45,8 @@ export class StepFactory {
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowTaskManager: WorkflowTaskManager,
-    private urlValidator: UrlValidator
+    private urlValidator: UrlValidator,
+    private workflowGraph: WorkflowGraph
   ) {}
 
   public create<TStep extends BaseStep>(
@@ -100,6 +102,7 @@ export class StepFactory {
         return new EnterIfNodeImpl(
           step as any,
           this.workflowRuntime,
+          this.workflowGraph,
           this.contextManager,
           stepLogger
         );
@@ -108,7 +111,11 @@ export class StepFactory {
         return new EnterConditionBranchNodeImpl(step as any, this.workflowRuntime);
       case 'exit-then-branch':
       case 'exit-else-branch':
-        return new ExitConditionBranchNodeImpl(step as any, this.workflowRuntime);
+        return new ExitConditionBranchNodeImpl(
+          step as any,
+          this.workflowGraph,
+          this.workflowRuntime
+        );
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, this.workflowRuntime);
       case 'wait':

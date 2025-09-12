@@ -11,3 +11,4 @@ export {
   convertToWorkflowGraph,
   convertToSerializableGraph,
 } from './build_execution_graph/build_execution_graph';
+export { WorkflowGraph } from './workflow_graph/workflow_graph';
