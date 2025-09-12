@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
 import { UploadRulesPanel } from './upload_rules_panel';
-import { MigrationProgressPanel } from '../../../../../../siem_migrations/rules/components/migration_status_panels/migration_progress_panel';
+import { MigrationProgressPanel } from '../../../../../../siem_migrations/common/components/migration_panels/migration_progress_panel';
 import { MigrationResultPanel } from '../../../../../../siem_migrations/rules/components/migration_status_panels/migration_result_panel';
 import { MigrationReadyPanel } from '../../../../../../siem_migrations/rules/components/migration_status_panels/migration_ready_panel';
 import { MissingAIConnectorCallout } from './missing_ai_connector_callout';
@@ -81,7 +81,7 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} />
+              <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
               <MigrationResultPanel

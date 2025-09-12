@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+// Common translations for all migration panels
 export const OPEN_MIGRATION_OPTIONS_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.panels.openMigrationOptionsButton',
   { defaultMessage: 'Open migration options' }
@@ -48,4 +49,36 @@ export const DELETE_MIGRATION_DESCRIPTION = i18n.translate(
     defaultMessage:
       'This action cannot be undone. All translations related to this migration will be removed permanently.',
   }
+);
+
+// Progress panel translations
+export const MIGRATION_PROGRESS_DESCRIPTION = (totalItems: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.panels.progress.description', {
+    defaultMessage: `Processing migration of {totalItems} items.`,
+    values: { totalItems },
+  });
+
+export const MIGRATION_IN_PROGRESS_BADGE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.panels.progress.badge',
+  { defaultMessage: `Translation in progress` }
+);
+
+export const MIGRATION_PREPARING = i18n.translate(
+  'xpack.securitySolution.siemMigrations.panels.progress.preparing',
+  { defaultMessage: `Preparing environment for the AI powered translation.` }
+);
+
+export const MIGRATION_TRANSLATING = i18n.translate(
+  'xpack.securitySolution.siemMigrations.panels.progress.translating',
+  { defaultMessage: `Translating items` }
+);
+
+export const MIGRATION_STOP_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.panels.translate.stopButton',
+  { defaultMessage: 'Stop' }
+);
+
+export const MIGRATION_STOPPING_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.panels.translate.stoppingButton',
+  { defaultMessage: 'Stopping' }
 );
