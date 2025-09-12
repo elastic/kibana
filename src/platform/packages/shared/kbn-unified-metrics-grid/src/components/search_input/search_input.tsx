@@ -12,18 +12,20 @@ import { EuiFieldSearch, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-interface MetricsGridSearchControlProps {
+interface SearchInputProps {
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
   onClear: () => void;
   'data-test-subj'?: string;
+  showSearchInput: boolean;
 }
 
-export const MetricsGridSearchControl: React.FC<MetricsGridSearchControlProps> = ({
+export const SearchInput: React.FC<SearchInputProps> = ({
+  showSearchInput,
   searchTerm,
   onSearchTermChange,
   onClear,
-  'data-test-subj': dataTestSubj = 'metricsGridSearchControl',
+  'data-test-subj': dataTestSubj = 'SearchInput',
 }) => {
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +49,7 @@ export const MetricsGridSearchControl: React.FC<MetricsGridSearchControlProps> =
     }
   }, [onClear, searchTerm]);
 
-  return (
+  return showSearchInput ? (
     <EuiFieldSearch
       autoFocus
       value={searchTerm}
@@ -69,5 +71,5 @@ export const MetricsGridSearchControl: React.FC<MetricsGridSearchControlProps> =
         min-width: 200px;
       `}
     />
-  );
+  ) : undefined;
 };

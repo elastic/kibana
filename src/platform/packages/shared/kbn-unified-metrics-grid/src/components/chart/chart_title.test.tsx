@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { ChartTitle } from './chart_title';
 
