@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
-import { createProxyActionConnector } from '../../utils/llm_proxy/create_proxy_action_connector';
+import {
+  createLlmProxyActionConnector,
+  deleteActionConnector,
+} from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/http_client';
 import { toolCallMock } from '../../utils/llm_proxy/mocks';
 import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
@@ -20,19 +23,18 @@ export default function ({ getService }: OneChatFtrProviderContext) {
   const log = getService('log');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe.only('POST /api/chat/converse', function () {
+  describe('POST /api/chat/converse', function () {
     let llmProxy: LlmProxy;
     let connectorId: string;
 
     beforeEach(async () => {
       llmProxy = await createLlmProxy(log);
-      connectorId = await createProxyActionConnector(getService, {
-        port: llmProxy.getPort(),
-      });
+      connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       llmProxy.close();
+      await deleteActionConnector(getService, { actionId: connectorId });
     });
 
     describe('simple conversation', () => {

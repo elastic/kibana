@@ -8,66 +8,77 @@
 import expect from '@kbn/expect';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
 import { last } from 'lodash';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
-import { createProxyActionConnector } from '../../utils/llm_proxy/create_proxy_action_connector';
+import {
+  createLlmProxyActionConnector,
+  deleteActionConnector,
+} from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/http_client';
-import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { toolCallMock } from '../../utils/llm_proxy/mocks';
+import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: OneChatFtrProviderContext) {
   const supertest = getService('supertest');
 
   const log = getService('log');
+  const synthtrace = getService('synthtrace');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
   describe('POST /api/chat/converse', function () {
-    let proxy: LlmProxy;
+    let llmProxy: LlmProxy;
     let connectorId: string;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     beforeEach(async () => {
-      proxy = await createLlmProxy(log);
-      connectorId = await createProxyActionConnector(getService, {
-        port: proxy.getPort(),
-      });
+      llmProxy = await createLlmProxy(log);
+      connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      await generateApmData(apmSynthtraceEsClient);
     });
 
-    afterEach(() => {
-      proxy.close();
+    afterEach(async () => {
+      llmProxy.close();
+      await deleteActionConnector(getService, { actionId: connectorId });
+      await apmSynthtraceEsClient.clean();
     });
 
-    describe('tool: esql', () => {
+    describe.only('tool: esql', () => {
       const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
       const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
-      const USER_PROMPT = 'Please find a single trace with `transaction.name=GET /products`';
+      const USER_PROMPT = 'Please find a single trace with `service.name:java-backend`';
 
       let body: ChatResponse;
 
       beforeEach(async () => {
         // mock title
-        proxy.interceptors.toolChoice({
+        llmProxy.interceptors.toolChoice({
           name: 'generate_conversation_title',
           response: toolCallMock('generate_conversation_title', { title: MOCKED_LLM_TITLE }),
         });
 
         // intercept the user message and respond with tool call to "platform_coresearch"
-        proxy.interceptors.userMessage({
+        llmProxy.interceptors.userMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages)?.content as string;
             return lastMessage.includes(USER_PROMPT);
           },
           response: toolCallMock('platform_coresearch', {
-            query: 'transaction.name:GET /products',
+            query: 'service.name:java-backend',
           }),
         });
 
         //
-        proxy.interceptors.toolChoice({
+        llmProxy.interceptors.toolChoice({
           name: 'select_resources',
           response: toolCallMock('select_resources', {
+            reasoning:
+              "The query is looking for transactions, specifically with the name 'java-backend'. The most relevant data stream for transaction-related queries is 'metrics-apm.transaction.1m-default', which likely contains transaction metrics and related data.",
             targets: [
               {
                 reason:
-                  'The query is looking for transaction data, and this data stream is likely to contain relevant transaction information, including transaction duration and metrics.',
+                  'This data stream likely contains transaction metrics and related data, which is relevant for the query looking for transactions with a specific name.',
                 type: 'data_stream',
                 name: 'metrics-apm.transaction.1m-default',
               },
@@ -75,15 +86,20 @@ export default function ({ getService }: FtrProviderContext) {
           }),
         });
 
-        proxy.interceptors.userMessage({
+        llmProxy.interceptors.userMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages)?.content as string;
             return lastMessage.startsWith('Execute the following user query:');
           },
           response: toolCallMock('natural_language_search', {
-            query: 'transaction.name:GET /products',
+            query: 'service.name:java-backend',
             index: 'metrics-apm.transaction.1m-default',
           }),
+        });
+
+        void llmProxy.interceptors.toolChoice({
+          name: 'structuredOutput',
+          response: toolCallMock('platform_coresearch', { commands: ['FROM', 'WHERE'] }),
         });
 
         body = await oneChatApiClient.converse({
@@ -91,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
           connector_id: connectorId,
         });
 
-        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       it('returns the response from the LLM', async () => {
@@ -104,4 +120,24 @@ export default function ({ getService }: FtrProviderContext) {
       // });
     });
   });
+}
+
+async function generateApmData(apmSynthtraceEsClient: ApmSynthtraceEsClient) {
+  const myService = apm
+    .service({ name: 'java-backend', environment: 'production', agentName: 'java' })
+    .instance('my-instance');
+
+  const events = timerange('now-15m', 'now')
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => {
+      return [
+        myService
+          .transaction({ transactionName: 'GET /user/123' })
+          .timestamp(timestamp)
+          .duration(1000),
+      ];
+    });
+
+  return apmSynthtraceEsClient.index(events);
 }

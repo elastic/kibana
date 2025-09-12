@@ -24,7 +24,7 @@ type RequestHandler = (
   request: Request,
   response: Response,
   requestBody: ChatCompletionStreamParams
-) => void;
+) => LLMMessage;
 
 interface RequestInterceptor {
   name: string;
@@ -71,24 +71,30 @@ export class LlmProxy {
           requestBody,
           matchingInterceptorName: matchingInterceptor?.name,
         });
-        if (matchingInterceptor) {
-          this.log.info(`Handling interceptor "${matchingInterceptor.name}"`);
-          matchingInterceptor.handle(request, response, requestBody);
 
-          this.log.debug(`Removing interceptor "${matchingInterceptor.name}"`);
+        const compressedConversation = requestBody.messages.map((m) => {
+          return { ...m, content: m.role === 'system' ? m.content?.slice(0, 200) : m.content };
+        });
+
+        // @ts-expect-error
+        const toolChoice = requestBody.tool_choice?.function.name;
+        const availableToolNames = requestBody.tools?.map(({ function: fn }) => fn.name);
+
+        this.log.info(`Outgoing conversation "${JSON.stringify(compressedConversation, null, 2)}"`);
+        this.log.info(`Tools: ${JSON.stringify(availableToolNames, null, 2)}`);
+        if (toolChoice) {
+          this.log.info(`Tool choice: ${toolChoice}`);
+        }
+
+        if (matchingInterceptor) {
+          const mockedLlmResponse = matchingInterceptor.handle(request, response, requestBody);
+          this.log.info(`Mocked LLM response: ${JSON.stringify(mockedLlmResponse, null, 2)}`);
           pull(this.requestInterceptors, matchingInterceptor);
           return;
         }
 
         const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
-
-        this.log.warning(
-          `${errorMessage}. Messages: ${JSON.stringify(
-            requestBody.messages,
-            null,
-            2
-          )} Tool choice: ${JSON.stringify(requestBody.tool_choice, null, 2)}`
-        );
+        this.log.warning(errorMessage);
 
         this.log.warning(
           `Available interceptors: ${JSON.stringify(
@@ -223,6 +229,8 @@ export class LlmProxy {
             };
 
             outerResolve(simulator);
+
+            return isFunction(responseMock) ? responseMock(simulator.requestBody) : responseMock;
           },
         });
       }),

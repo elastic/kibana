@@ -7,7 +7,7 @@
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
-export async function createProxyActionConnector(
+export async function createLlmProxyActionConnector(
   getService: FtrProviderContext['getService'],
   { port }: { port: number }
 ) {
@@ -42,4 +42,19 @@ export async function createProxyActionConnector(
     logger.error(`Failed to create action connector due to: ${e}`);
     throw e;
   }
+}
+
+export async function deleteActionConnector(
+  getService: FtrProviderContext['getService'],
+  { actionId }: { actionId: string }
+) {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const samlAuth = getService('samlAuth');
+
+  const internalReqHeader = samlAuth.getInternalRequestHeader();
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+  return supertestWithoutAuth
+    .delete(`/api/actions/connector/${actionId}`)
+    .set(roleAuthc.apiKeyHeader)
+    .set(internalReqHeader);
 }
