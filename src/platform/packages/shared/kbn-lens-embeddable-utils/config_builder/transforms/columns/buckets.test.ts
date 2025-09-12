@@ -21,7 +21,11 @@ import type {
 } from '../../schema/bucket_ops';
 import { fromBucketLensApiToLensState, fromBucketLensStateToAPI } from './buckets';
 import type { AnyLensStateColumn, AnyMetricLensStateColumn } from './types';
-import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE, isAPIColumnOfType } from './utils';
+import {
+  LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+  isAPIColumnOfType,
+  isLensStateColumnOfType,
+} from './utils';
 
 describe('Buckets Transforms', () => {
   describe('fromBucketLensApiToLensState', () => {
@@ -53,6 +57,9 @@ describe('Buckets Transforms', () => {
         filters: [{ filter: { language: 'kuery', query: 'status:active' }, label: 'Active' }],
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
+      if (!isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', result)) {
+        fail();
+      }
       expect(result.operationType).toBe('filters');
       expect(result.params.filters[0].label).toBe('Active');
     });
@@ -66,6 +73,9 @@ describe('Buckets Transforms', () => {
         use_original_time_range: false,
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
+      if (!isLensStateColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', result)) {
+        fail();
+      }
       expect(result.operationType).toBe('date_histogram');
       expect(result.sourceField).toBe('@timestamp');
       expect(result.params.interval).toBe('1d');
@@ -78,6 +88,9 @@ describe('Buckets Transforms', () => {
         ranges: [{ gt: 0, lte: 100, label: 'Low' }],
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
+      if (!isLensStateColumnOfType<RangeIndexPatternColumn>('range', result)) {
+        fail();
+      }
       expect(result.operationType).toBe('range');
       expect(result.sourceField).toBe('price');
       expect(result.params.ranges[0].label).toBe('Low');
@@ -90,6 +103,9 @@ describe('Buckets Transforms', () => {
         size: 5,
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
+      if (!isLensStateColumnOfType<TermsIndexPatternColumn>('terms', result)) {
+        fail();
+      }
       expect(result.operationType).toBe('terms');
       expect(result.sourceField).toBe('status');
       expect(result.params.size).toBe(5);

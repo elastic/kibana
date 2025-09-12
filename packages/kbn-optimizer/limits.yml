@@ -22,7 +22,7 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 12234
-  core: 573024
+  core: 573263
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -89,7 +89,7 @@ pageLoadAssetSize:
   kibanaOverview: 6339
   kibanaReact: 24701
   kibanaUsageCollection: 1736
-  kibanaUtils: 54751
+  kibanaUtils: 54846
   lens: 66734
   licenseManagement: 13558
   licensing: 10078
@@ -109,7 +109,7 @@ pageLoadAssetSize:
   navigation: 10112
   newsfeed: 12371
   noDataPage: 1749
-  observability: 160191
+  observability: 176467
   observabilityAIAssistant: 46941
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
@@ -117,7 +117,7 @@ pageLoadAssetSize:
   observabilityOnboarding: 12872
   observabilityShared: 76367
   onechat: 14281
-  osquery: 47588
+  osquery: 47425
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67227
+  stackConnectors: 67939
   streams: 8372
   streamsApp: 12431
   streamsAppWrapper: 5787
