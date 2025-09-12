@@ -1045,7 +1045,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
    * Resolves the external action ID from an internal response action ID for Microsoft Defender Endpoint.
    * This queries the original action request document to get the Microsoft-specific machineActionId.
    */
-  protected async resolveExternalActionId(actionId: string): Promise<string> {
+  private async resolveExternalActionId(actionId: string): Promise<string> {
     try {
       this.log.debug(
         `resolveExternalActionId: attempting to resolve external action ID for action [${actionId}]`

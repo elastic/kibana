@@ -891,14 +891,4 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   > {
     return super.fetchAllPendingActions<TParameters, TOutputContent, TMeta>();
   }
-
-  protected async resolveExternalActionId(actionId: string): Promise<string> {
-    // Mock validation - just return the same ID for test purposes
-    return actionId;
-  }
-
-  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
-    // Mock validation - just return the same ID for test purposes
-    return actionDetails.id;
-  }
 }
