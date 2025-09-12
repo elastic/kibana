@@ -6,14 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { ObjectRemover } from '../../../../../common/lib';
+import { Superuser, GlobalRead, StackAlertsOnly } from '../../../../scenarios';
+import type { User } from '../../../../../common/types';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { User } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/types';
-import {
-  Superuser,
-  GlobalRead,
-  StackAlertsOnly,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/security_and_spaces/scenarios';
-import { ObjectRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 
 export default function getWebhookSecretHeaderKeys({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
