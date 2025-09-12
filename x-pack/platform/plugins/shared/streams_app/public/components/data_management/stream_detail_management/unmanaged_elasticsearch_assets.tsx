@@ -107,11 +107,14 @@ export function UnmanagedElasticsearchAssets({
           <Row
             left={
               <RowMetadata
-                label={i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-                  defaultMessage: 'Index template',
-                })}
+                label={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.indexTemplateTitle',
+                  {
+                    defaultMessage: 'Index template',
+                  }
+                )}
                 description={i18n.translate(
-                  'xpack.streams.streamDetailView.unmanagedStreamOverview',
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.indexTemplateDescription',
                   {
                     defaultMessage:
                       'Use composable index and component templates to automatically apply settings, mappings, and aliases to indices',
@@ -132,9 +135,12 @@ export function UnmanagedElasticsearchAssets({
           <Row
             left={
               <RowMetadata
-                label={i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-                  defaultMessage: 'Pipeline',
-                })}
+                label={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.pipelineTitle',
+                  {
+                    defaultMessage: 'Pipeline',
+                  }
+                )}
                 description={''}
               />
             }
@@ -151,11 +157,14 @@ export function UnmanagedElasticsearchAssets({
           <Row
             left={
               <RowMetadata
-                label={i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-                  defaultMessage: 'Data stream',
-                })}
+                label={i18n.translate(
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.dataStreamTitle',
+                  {
+                    defaultMessage: 'Data stream',
+                  }
+                )}
                 description={i18n.translate(
-                  'xpack.streams.streamDetailView.unmanagedStreamOverview',
+                  'xpack.streams.streamDetailView.unmanagedStreamOverview.dataStreamDescription',
                   {
                     defaultMessage:
                       'Data streams store time-series data across multiple indices and can be created from index templates',
