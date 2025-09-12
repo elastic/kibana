@@ -27,6 +27,7 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/metrics-experience-plugin",
     "@kbn/data-plugin",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/apm-types"
   ]
 }
