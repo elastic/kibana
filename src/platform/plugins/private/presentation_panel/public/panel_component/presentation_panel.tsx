@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { PanelLoader } from '@kbn/panel-loader';
-import { isPromise } from '@kbn/std';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import React, { useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+
+import { EuiErrorBoundary, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PanelLoader } from '@kbn/panel-loader';
+import { isPromise } from '@kbn/std';
+
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 
@@ -106,12 +107,12 @@ export const PresentationPanel = <
   return shouldHavePanel && Panel ? (
     <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
   ) : (
-    <KibanaErrorBoundary>
+    <EuiErrorBoundary>
       <UnwrappedComponent
         {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
           typeof UnwrappedComponent
         >)}
       />
-    </KibanaErrorBoundary>
+    </EuiErrorBoundary>
   );
 };

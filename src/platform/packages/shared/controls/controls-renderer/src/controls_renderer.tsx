@@ -40,7 +40,6 @@ export const ControlsRenderer = ({
     [controlId: string]: ControlState;
   };
 }) => {
-  console.log({ parentApi });
   const controlsInOrder = Object.values(getInitialState()).sort((controlA, controlB) => {
     return controlA.order - controlB.order;
   });

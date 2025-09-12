@@ -56,7 +56,6 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
   // }, []);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
-  console.log({ panelRef: panelRef.current });
   const [api, setApi] = useState<ApiType | null>(null);
   const {
     attributes,
@@ -115,7 +114,7 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
   const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
   const styles = useMemoCss(controlPanelStyles);
-  console.log({ isEditable });
+
   return (
     <EuiFlexItem
       component="li"
