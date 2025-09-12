@@ -23,6 +23,12 @@ import type { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } f
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
 import type { IndexPattern, IndexPatternRef } from '../../types';
+import {
+  getFormulaColumnsFromLayer,
+  hasStateFormulaColumn,
+} from './operations/definitions/helpers';
+import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
+import type { DateRange } from '../../../common/types';
 
 export function onRefreshIndexPattern() {
   if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
@@ -131,6 +137,33 @@ function getUsedIndexPatterns({
   };
 }
 
+function expandFormulaColumns(
+  state: { layers: Record<string, FormBasedLayer> },
+  {
+    indexPatterns,
+    dateRange,
+  }: { indexPatterns: Record<string, IndexPattern>; dateRange?: DateRange }
+): {
+  layers: Record<string, FormBasedLayer>;
+} {
+  if (!hasStateFormulaColumn(state)) {
+    return state;
+  }
+  const layers = state.layers;
+  for (const layerId of Object.keys(state.layers)) {
+    const layer = state.layers[layerId];
+    const formulaColumns = getFormulaColumnsFromLayer(layer);
+    for (const [columnId, column] of formulaColumns) {
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(columnId, column, layer, {
+        indexPattern: indexPatterns[layer.indexPatternId],
+        dateRange,
+      });
+      state.layers[layerId] = newLayer;
+    }
+  }
+  return { layers };
+}
+
 export function loadInitialState({
   persistedState,
   references,
@@ -139,6 +172,7 @@ export function loadInitialState({
   initialContext,
   indexPatternRefs = [],
   indexPatterns = {},
+  dateRange,
 }: {
   persistedState?: FormBasedPersistedState;
   references?: Reference[];
@@ -147,8 +181,10 @@ export function loadInitialState({
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   indexPatternRefs?: IndexPatternRef[];
   indexPatterns?: Record<string, IndexPattern>;
+  dateRange?: DateRange;
 }): FormBasedPrivateState {
-  const state = createStateFromPersisted({ persistedState, references });
+  const injectedState = createStateFromPersisted({ persistedState, references });
+  const state = expandFormulaColumns(injectedState ?? { layers: {} }, { indexPatterns, dateRange });
   const { usedPatterns, allIndexPatternIds: indexPatternIds } = getUsedIndexPatterns({
     state,
     defaultIndexPatternId,
@@ -174,7 +210,6 @@ export function loadInitialState({
   }
 
   return {
-    layers: {},
     ...state,
     currentIndexPatternId,
   };
