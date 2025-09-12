@@ -5,21 +5,8 @@
  * 2.0.
  */
 
-import type { DataTypeComponent } from './services';
-
-export interface ChatDataRegistryPluginSetup {
-  /**
-   * Registry for data type component descriptors
-   */
-  dataTypeRegistry: {
-    /**
-     * Register a custom data type component descriptor
-     */
-    register: (descriptor: DataTypeComponent) => void;
-    list: () => Array<string>;
-    clear: () => void;
-  };
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ChatDataRegistryPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ChatDataRegistryPluginStart {}

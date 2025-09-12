@@ -7,22 +7,12 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
-import { DataTypeRegistry } from './services';
 
 export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
 {
-  private readonly dataTypeRegistry = new DataTypeRegistry();
-
   public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
-    // Return methods that should be available to other plugins
-    return {
-      dataTypeRegistry: {
-        register: (descriptor) => this.dataTypeRegistry.register(descriptor),
-        list: () => this.dataTypeRegistry.list(),
-        clear: () => this.dataTypeRegistry.clear(),
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart): ChatDataRegistryPluginStart {
