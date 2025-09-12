@@ -12,7 +12,7 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
-import { render } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
@@ -169,7 +169,7 @@ describe('QueryBarTopRowTopRow', () => {
           )
         );
 
-        expect(getByTestId(submitId)).toBeVisible();
+        expect(within(getByTestId(submitId)).getByText('Refresh')).toBeVisible();
       });
     });
 
@@ -185,12 +185,13 @@ describe('QueryBarTopRowTopRow', () => {
               timeHistory: mockTimeHistory,
               isLoading: true,
               onCancel: jest.fn(),
+              submitButtonStyle: 'withText',
             },
             { servicesOverride: { data } }
           )
         );
 
-        expect(getByTestId(cancelId)).toBeVisible();
+        expect(within(getByTestId(cancelId)).getByText('Cancel')).toBeVisible();
       });
     });
   });

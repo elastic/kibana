@@ -592,17 +592,17 @@ export const QueryBarTopRow = React.memo(
       if (isBackgroundSearchEnabled) {
         return (
           <SplitButton
+            aria-label={buttonLabelCancel}
+            color="text"
+            data-test-subj="queryCancelSplitButton"
+            iconType="cross"
+            isSecondaryButtonDisabled={!canSendToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
-            aria-label={buttonLabelCancel}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-            iconType="cross"
-            data-test-subj="queryCancelSplitButton"
-            color="text"
+            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
             secondaryButtonIcon="clock"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            isSecondaryButtonDisabled={!canSendToBackground}
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
           >
             {buttonLabelCancel}
           </SplitButton>
@@ -653,19 +653,19 @@ export const QueryBarTopRow = React.memo(
 
       const updateButton = isBackgroundSearchEnabled ? (
         <SplitButton
+          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+          color={props.isDirty ? 'success' : 'primary'}
           data-test-subj="querySubmitSplitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
+          isSecondaryButtonDisabled={!canSendToBackground}
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-          color={props.isDirty ? 'success' : 'primary'}
-          secondaryButtonIcon="clock"
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
+          secondaryButtonIcon="clock"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-          isSecondaryButtonDisabled={!canSendToBackground}
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
         >
           {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
         </SplitButton>
