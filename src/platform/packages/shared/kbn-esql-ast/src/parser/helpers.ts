@@ -7,22 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Token } from 'antlr4';
-
-export const getPosition = (
-  start: Pick<Token, 'start' | 'stop'> | null,
-  stop?: Pick<Token, 'stop'> | undefined
-) => {
-  if (!start || start.start < 0) {
-    return { min: 0, max: 0 };
-  }
-  const endFirstToken = start.stop > -1 ? Math.max(start.stop + 1, start.start) : undefined;
-  return {
-    min: start.start,
-    max: stop?.stop ?? endFirstToken ?? Infinity,
-  };
-};
-
 export const nonNullable = <T>(v: T): v is NonNullable<T> => {
   return v != null;
 };

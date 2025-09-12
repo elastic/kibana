@@ -9,6 +9,8 @@
 
 import type { Token } from 'antlr4';
 import { DEFAULT_CHANNEL } from './constants';
+import type { ESQLLocation } from '../types';
+
 /**
  * Finds all tokens in the given range using binary search. Allows to further
  * filter the tokens using a predicate.
@@ -129,4 +131,20 @@ export const findPunctuationToken = (
     ({ channel, text }) =>
       channel === DEFAULT_CHANNEL && text.length === 1 && punctuationChars.has(text)
   );
+};
+
+export const getPosition = (
+  start: Pick<Token, 'start' | 'stop'> | null,
+  stop?: Pick<Token, 'stop'> | undefined
+): ESQLLocation => {
+  if (!start || start.start < 0) {
+    return { min: 0, max: 0 };
+  }
+
+  const endFirstToken = start.stop > -1 ? Math.max(start.stop + 1, start.start) : undefined;
+
+  return {
+    min: start.start,
+    max: stop?.stop ?? endFirstToken ?? Infinity,
+  };
 };
