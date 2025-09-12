@@ -71,7 +71,7 @@ export const unsavedChangesBadgeStrings = {
 
 export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-    defaultMessage: 'Create visualization',
+    defaultMessage: 'Visualization',
   });
 
 export const getQuickCreateButtonGroupLegend = () =>
@@ -246,6 +246,14 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  add: {
+    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n.translate('dashboard.topNave.addConfigDescription', {
+      defaultMessage: 'Add content to your dashboard',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>
@@ -265,7 +273,7 @@ export const getAddESQLControlButtonTitle = () =>
 
 export const getEditControlGroupButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
-    defaultMessage: 'Settings',
+    defaultMessage: 'Controls settings',
   });
 
 export const getOnlyOneTimeSliderControlMsg = () =>

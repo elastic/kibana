@@ -48,9 +48,11 @@ export class DashboardPageControls extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
   private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   /* -----------------------------------------------------------
      General controls functions
@@ -100,6 +102,7 @@ export class DashboardPageControls extends FtrService {
   public async openControlsMenu() {
     const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
     if (!isOpen) {
+      await this.dashboardAddPanel.clickTopNavAddMenu();
       await this.testSubjects.click('dashboard-controls-menu-button');
     }
   }
@@ -127,7 +130,7 @@ export class DashboardPageControls extends FtrService {
 
   public async openControlGroupSettingsFlyout() {
     this.log.debug('Open controls group settings flyout');
-    await this.openControlsMenu();
+    await this.dashboard.openSettingsFlyout();
     await this.testSubjects.click('controls-settings-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-group-settings-flyout');
