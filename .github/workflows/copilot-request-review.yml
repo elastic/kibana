@@ -22,9 +22,8 @@ jobs:
           )
 
           PR_LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
-
-          # Check if any team label matches
           SHOULD_REQUEST_REVIEW=false
+
           for team in "${TEAMS[@]}"; do
             if echo "$PR_LABELS" | grep -q "\"$team\""; then
               echo "Found matching team label: $team"
