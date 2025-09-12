@@ -290,7 +290,9 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
 
   return (
     <>
-      <ol aria-label={labels.roundThinkingSteps}>{renderedSteps}</ol>
+      <ol css={stepsListStyles} aria-label={labels.roundThinkingSteps}>
+        {renderedSteps}
+      </ol>
       <ToolResponseFlyout
         isOpen={isToolResultsFlyoutOpen}
         onClose={closeFlyout}
