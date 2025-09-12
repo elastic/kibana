@@ -190,7 +190,11 @@ export function Settings({
             setting={settings['index.number_of_shards']}
             isInvalid={settings['index.number_of_shards']?.invalid}
             onChange={(value) =>
-              updateSetting('index.number_of_shards', value, !!value && isInvalidInteger(value))
+              updateSetting(
+                'index.number_of_shards',
+                value,
+                !!value && (isInvalidInteger(value) || Number(value) === 0)
+              )
             }
             onReset={() => onReset('index.number_of_shards')}
           />
@@ -323,7 +327,6 @@ const prepareSettings = (input: Record<string, Setting>): IngestStreamSettings =
 };
 
 function SettingRow({
-  definition,
   label,
   inputLabel,
   description,
@@ -333,7 +336,6 @@ function SettingRow({
   onChange,
   onReset,
 }: {
-  definition: Streams.ingest.all.GetResponse;
   label: string;
   inputLabel: string;
   description: string;
@@ -398,5 +400,5 @@ function SettingRow({
 
 const isInvalidInteger = (value: string) => {
   const num = Number(value);
-  return isNaN(num) || num < 1 || num % 1 > 0;
+  return isNaN(num) || num < 0 || num % 1 > 0;
 };
