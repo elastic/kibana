@@ -17,7 +17,7 @@ import { getDashboardBackupService } from '../services/dashboard_backup_service'
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager(
-  user: DashboardUser,
+  user?: DashboardUser,
   incomingEmbeddable?: EmbeddablePackageState,
   savedObjectResult?: LoadDashboardReturn
 ) {
@@ -29,11 +29,11 @@ export function initializeViewModeManager(
   );
 
   const canUserManageAccessControl =
-    user.hasGlobalAccessControlPrivilege ||
+    user?.hasGlobalAccessControlPrivilege ||
     accessControlClient.checkUserAccessControl({
       accessControl: savedObjectResult?.accessControl,
       createdBy: savedObjectResult?.createdBy,
-      userId: user.uid,
+      userId: user?.uid,
     });
 
   const canUserEditDashboard = isDashboardInEditAccessMode || canUserManageAccessControl;

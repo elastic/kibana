@@ -59,7 +59,7 @@ export const useDashboardMenuItems = ({
       createdBy: dashboardApi.createdBy,
       userId: dashboardApi.user?.uid,
     });
-    return dashboardApi.user.hasGlobalAccessControlPrivilege || userAccessControl;
+    return dashboardApi?.user?.hasGlobalAccessControlPrivilege || userAccessControl;
   }, [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]);
 
   const isEditButtonDisabled = useMemo(() => {

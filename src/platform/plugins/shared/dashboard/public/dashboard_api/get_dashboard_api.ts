@@ -51,7 +51,7 @@ export function getDashboardApi({
   initialState: DashboardState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
-  user: DashboardUser;
+  user?: DashboardUser;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;

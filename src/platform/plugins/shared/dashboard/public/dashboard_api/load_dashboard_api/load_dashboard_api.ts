@@ -75,9 +75,23 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
-  const accessControlClient = getAccessControlClient();
-  const currentUser = await coreServices?.userProfile.getCurrent();
-  const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(CONTENT_ID);
+  const getUserAccessControlData = async () => {
+    try {
+      const accessControlClient = getAccessControlClient();
+      const currentUser = await coreServices?.userProfile.getCurrent();
+      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(CONTENT_ID);
+
+      if (!currentUser) {
+        return;
+      }
+
+      return { uid: currentUser.uid, hasGlobalAccessControlPrivilege: isGloballyAuthorized };
+    } catch (error) {
+      return;
+    }
+  };
+
+  const user = await getUserAccessControlData();
 
   // --------------------------------------------------------------------------------------
   // get dashboard Api
@@ -91,10 +105,7 @@ export async function loadDashboardApi({
     },
     savedObjectResult,
     savedObjectId,
-    user: {
-      uid: currentUser.uid,
-      hasGlobalAccessControlPrivilege: isGloballyAuthorized,
-    },
+    user,
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {

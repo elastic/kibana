@@ -54,23 +54,7 @@ describe('loadDashboardApi', () => {
       getState: () => ({
         query: lastSavedQuery,
       }),
-      storeViewMode: jest.fn(),
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/access_control_service').getAccessControlClient = jest
-      .fn()
-      .mockReturnValue({
-        checkGlobalPrivilege: jest.fn().mockResolvedValue({ isGloballyAuthorized: true }),
-      });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const kibanaServices = require('../../services/kibana_services');
-    kibanaServices.coreServices = {
-      userProfile: {
-        getCurrent: jest.fn().mockResolvedValue({ uid: 'test-user-uid' }),
-      },
-    };
   });
 
   afterEach(() => {

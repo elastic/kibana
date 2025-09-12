@@ -160,7 +160,7 @@ export type DashboardApi = CanExpandPanels &
     accessControl$: PublishingSubject<SavedObjectAccessControl>;
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
-    user: DashboardUser;
+    user?: DashboardUser;
   };
 
 export interface DashboardInternalApi {
