@@ -602,8 +602,15 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             );
           }
 
-          // Resolve the external action ID from the internal response action ID
-          const externalActionId = await this.resolveExternalActionId(actionId);
+          // Get the external action ID from the internal response action ID
+          const externalActionId = await this.getExternalActionId(actionId);
+
+          if (!externalActionId) {
+            throw new ResponseActionsClientError(
+              `Unable to resolve Microsoft Defender machine action ID for action [${actionId}]`,
+              400
+            );
+          }
 
           const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
@@ -1039,33 +1046,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return agentResponse;
-  }
-
-  /**
-   * Resolves the external action ID from an internal response action ID for Microsoft Defender Endpoint.
-   * This queries the original action request document to get the Microsoft-specific machineActionId.
-   */
-  private async resolveExternalActionId(actionId: string): Promise<string> {
-    try {
-      this.log.debug(
-        `resolveExternalActionId: attempting to resolve external action ID for action [${actionId}]`
-      );
-
-      // Get the Microsoft Defender machine action ID from the original action request
-      const externalActionId = await this.getExternalActionId(actionId);
-
-      if (!externalActionId) {
-        throw new ResponseActionsClientError(
-          `Unable to resolve Microsoft Defender machine action ID for action [${actionId}]`,
-          400
-        );
-      }
-
-      return externalActionId;
-    } catch (error) {
-      this.log.error(`Failed to resolve external action ID for action [${actionId}]`, error);
-      throw error;
-    }
   }
 
   /**
