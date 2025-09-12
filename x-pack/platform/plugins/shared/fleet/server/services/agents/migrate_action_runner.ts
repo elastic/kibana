@@ -15,7 +15,7 @@ import type { Agent } from '../../types';
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 
-import { createAgentAction } from './actions';
+import { createAgentAction, createErrorActionResults } from './actions';
 import { getAgentPolicyForAgents } from './crud';
 
 export class MigrateActionRunner extends ActionRunner {
@@ -45,35 +45,39 @@ export async function bulkMigrateAgentsBatch(
     settings?: Record<string, any>;
   }
 ) {
+  const errors: Record<Agent['id'], Error> = {};
+  const now = new Date().toISOString();
+
   const agentPolicies = await getAgentPolicyForAgents(soClient, agents);
+  const protectedAgentPolicies = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
 
-  // If any agent is protected or has fleet-server as a component, throw an error
-  const protectedAgents = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
-  const fleetServerAgents = agents.filter((agent) =>
-    agent.components?.some((c) => c.type === 'fleet-server')
-  );
-
-  if (protectedAgents.length > 0 || fleetServerAgents.length > 0) {
-    throw new FleetUnauthorizedError(
-      `One or more agents are ${
-        protectedAgents.length > 0 && fleetServerAgents.length > 0
-          ? 'protected and fleet-server'
-          : protectedAgents.length > 0
-          ? 'protected'
-          : 'fleet-server'
-      } agents and cannot be migrated`
-    );
-  }
+  const agentsToAction: Agent[] = [];
+  agents.forEach((agent: Agent) => {
+    if (
+      agent.policy_id &&
+      protectedAgentPolicies.map((policy) => policy.id).includes(agent.policy_id)
+    ) {
+      errors[agent.id] = new FleetUnauthorizedError(
+        `Agent ${agent.id} cannot be migrated because it is protected.`
+      );
+    } else if (agent.components?.some((c) => c.type === 'fleet-server')) {
+      errors[agent.id] = new FleetUnauthorizedError(
+        `Agent ${agent.id} cannot be migrated because it is a fleet-server.`
+      );
+    } else {
+      agentsToAction.push(agent);
+    }
+  });
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? agents.length;
-  const agentIds = agents.map((agent) => agent.id);
+  const agentIds = agentsToAction.map((agent) => agent.id);
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
-  const response = await createAgentAction(esClient, {
+  await createAgentAction(esClient, {
     id: actionId,
     agents: agentIds,
-    created_at: new Date().toISOString(),
+    created_at: now,
     type: 'MIGRATE',
     total,
     data: {
@@ -82,7 +86,14 @@ export async function bulkMigrateAgentsBatch(
       settings: options.settings,
     },
     namespaces,
-    // expiration?
   });
-  return { actionId: response.id };
+
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'agent does not support migration action'
+  );
+
+  return { actionId };
 }

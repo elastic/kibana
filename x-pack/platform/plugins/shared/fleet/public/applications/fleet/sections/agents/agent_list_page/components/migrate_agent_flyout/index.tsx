@@ -80,7 +80,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
   const flyoutTitleId = useGeneratedHtmlId();
 
-  // TODO protectedAndFleetAgents only has agents from current page
   const filteredAgents = useMemo(
     () =>
       Array.isArray(agents)
@@ -192,7 +191,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             />
           </EuiText>
 
-          {protectedAndFleetAgents.length > 0 && (
+          {Array.isArray(agents) && protectedAndFleetAgents.length > 0 && (
             <>
               <EuiSpacer />
               <EuiPanel color="warning" data-test-subj="migrateAgentFlyoutAlertPanel">

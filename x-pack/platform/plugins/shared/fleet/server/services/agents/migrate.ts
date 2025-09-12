@@ -60,7 +60,9 @@ export async function bulkMigrateAgents(
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
     return await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
-      ...options,
+      enrollment_token: options.enrollment_token,
+      uri: options.uri,
+      settings: options.settings,
       spaceId: currentSpaceId,
     });
   }
@@ -76,7 +78,9 @@ export async function bulkMigrateAgents(
   });
   if (res.total <= batchSize) {
     return await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
-      ...options,
+      enrollment_token: options.enrollment_token,
+      uri: options.uri,
+      settings: options.settings,
       spaceId: currentSpaceId,
     });
   } else {
