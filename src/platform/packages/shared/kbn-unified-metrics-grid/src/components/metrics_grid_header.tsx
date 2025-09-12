@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { i18n } from '@kbn/i18n';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { DimensionsSelector } from './toolbar/dimensions_selector';
-import { ValuesSelector } from './toolbar/values_selector';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useMetricsGridState } from '../hooks';
 import { FullScreenWrapper } from './fullscreen_wrapper/fullscreen_wrapper';
-import { SearchInput } from './search_input/search_input';
+import { SearchInput } from './toolbar/search_input/search_input';
+import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 
-export interface MetricsGridHeaderProps {
+export interface MetricsGridHeaderProps
+  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   indexPattern: string;
-  renderToggleActions: () => React.ReactNode;
   chartToolbarCss?: SerializedStyles;
-  getTimeRange: () => { from: string; to: string };
   setDebouncedSearchTerm: (value: string) => void;
   fields: MetricField[];
   children?: React.ReactNode;
@@ -34,107 +30,19 @@ export const MetricsGridHeader = ({
   indexPattern,
   renderToggleActions,
   chartToolbarCss,
-  getTimeRange,
+  requestParams,
   setDebouncedSearchTerm,
   fields,
   children,
 }: MetricsGridHeaderProps) => {
-  const {
-    dimensions,
-    valueFilters,
-    onDimensionsChange,
-    onValuesChange,
-    onClearValues,
-    onClearAllDimensions,
-    onClearSearchTerm,
-    isFullscreen,
-    onToggleFullscreen,
-    searchTerm,
-    onSearchTermChange,
-  } = useMetricsGridState();
-
-  const [showSearchInput, setShowSearchInput] = useState(false);
-
-  useDebounce(
-    () => {
-      setDebouncedSearchTerm(searchTerm);
-    },
-    300,
-    [searchTerm]
-  );
-
-  const onShowSearch = useCallback(() => {
-    setShowSearchInput(true);
-  }, []);
-
-  const onClearSearch = useCallback(() => {
-    setShowSearchInput(false);
-    onClearSearchTerm();
-    setDebouncedSearchTerm('');
-  }, [onClearSearchTerm, setDebouncedSearchTerm]);
-
-  const actions: IconButtonGroupProps['buttons'] = [
-    ...(!showSearchInput
-      ? [
-          {
-            iconType: 'search',
-            label: i18n.translate('metricsExperience.searchButton', {
-              defaultMessage: 'Search',
-            }),
-            onClick: onShowSearch,
-            'data-test-subj': 'metricsExperienceToolbarSearch',
-          },
-        ]
-      : []),
-    {
-      iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
-      label: isFullscreen
-        ? i18n.translate('metricsExperience.fullScreenExitButton', {
-            defaultMessage: 'Exit fullscreen',
-          })
-        : i18n.translate('metricsExperience.fullScreenButton', {
-            defaultMessage: 'Enter fullscreen',
-          }),
-      onClick: onToggleFullscreen,
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-      className: showSearchInput ? 'nextToSearchInput' : undefined,
-    },
-  ];
-
-  const rightSideComponents = useMemo(
-    () => [
-      renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-        onClear={onClearAllDimensions}
-      />,
-      dimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
-          indices={[indexPattern]}
-          timeRange={getTimeRange()}
-          onClear={onClearValues}
-        />
-      ) : null,
-    ],
-    [
-      dimensions,
-      fields,
-      getTimeRange,
-      indexPattern,
-      onClearAllDimensions,
-      onClearValues,
-      onDimensionsChange,
-      onValuesChange,
-      renderToggleActions,
-      valueFilters,
-    ]
-  );
+  const { leftSideActions, rightSideActions, onClearSearch, showSearchInput } = useToolbarActions({
+    fields,
+    indexPattern,
+    renderToggleActions,
+    setDebouncedSearchTerm,
+    requestParams,
+  });
+  const { searchTerm, onSearchTermChange, isFullscreen } = useMetricsGridState();
 
   return (
     <FullScreenWrapper isFullscreen={isFullscreen} dataTestSubj="metricsExperienceGrid">
@@ -142,8 +50,8 @@ export const MetricsGridHeader = ({
         id="metricsExperienceGridPanel"
         toolbarCss={chartToolbarCss}
         toolbar={{
-          leftSide: rightSideComponents,
-          rightSide: actions,
+          leftSide: leftSideActions,
+          rightSide: rightSideActions,
           additionalControls: {
             prependRight: (
               <SearchInput
