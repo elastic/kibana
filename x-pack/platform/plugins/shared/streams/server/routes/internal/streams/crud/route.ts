@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES, FAILURE_STORE_PRIVILEGE } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
@@ -19,6 +19,7 @@ export interface ListStreamDetail {
   stream: Streams.all.Definition;
   effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
+  can_read_failure_store?: boolean;
 }
 
 export const listStreamsRoute = createServerRoute({
@@ -38,6 +39,10 @@ export const listStreamsRoute = createServerRoute({
 
     const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
 
+    const failureStorePrivileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+      index: [{ names: streamNames, privileges: [FAILURE_STORE_PRIVILEGE] }],
+    });
+
     const dataStreams = await processAsyncInChunks(streamNames, (streamNamesChunk) =>
       scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk })
     );
@@ -53,6 +58,7 @@ export const listStreamsRoute = createServerRoute({
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
+        can_read_failure_store: failureStorePrivileges.index?.[stream.name]?.[FAILURE_STORE_PRIVILEGE],
       });
       return acc;
     }, []);

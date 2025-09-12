@@ -8,8 +8,9 @@
 import type { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
+import type { QualityIndicators } from '@kbn/data-quality/common';
 import { DEFAULT_DATASET_TYPE } from '../../common/constants';
-import type { DataStreamType, QualityIndicators } from '../../common/types';
+import type { DataStreamType } from '../../common/types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import type { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';

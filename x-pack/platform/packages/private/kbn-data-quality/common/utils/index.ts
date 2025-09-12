@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './filter_inactive_datasets';
-export * from './generate_datasets';
-export * from './use_kibana';
+export * from './deep_compact_object';
+export * from './quality_helpers';

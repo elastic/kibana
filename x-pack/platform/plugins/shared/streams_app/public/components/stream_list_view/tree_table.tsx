@@ -24,7 +24,12 @@ import type { TableRow, SortableField } from './utils';
 import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
+import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../hooks/use_kibana';
+import { useTimefilter } from '../../hooks/use_timefilter';
+import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
@@ -34,6 +39,7 @@ import {
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
+  DATA_QUALITY_COLUMN_HEADER,
 } from './translations';
 
 export function StreamsTreeTable({
@@ -82,6 +88,8 @@ export function StreamsTreeTable({
       direction: sortDirection,
     },
   };
+  
+  
 
   return (
     <EuiInMemoryTable<TableRow>
@@ -141,6 +149,23 @@ export function StreamsTreeTable({
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
               <DocumentsColumn indexPattern={item.stream.name} numDataPoints={25} />
+            ) : null,
+        },
+        {
+          field: 'dataQiulity',
+          name: DATA_QUALITY_COLUMN_HEADER,
+          width: '150px',
+          sortable: false,
+          dataType: 'number',
+          render: (_: unknown, item: TableRow) =>
+            item.data_stream ? (
+              <DataQualityColumn
+                indexPattern={item.stream.name}
+                considerFailedQuality={
+                  item.can_read_failure_store && item.data_stream?.failure_store?.enabled
+                }
+                numDataPoints={25}
+              />
             ) : null,
         },
         {

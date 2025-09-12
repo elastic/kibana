@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export function calculatePercentage({ totalDocs, count }: { totalDocs?: number; count?: number }) {
-  return totalDocs && count ? (count / totalDocs) * 100 : 0;
-}
+export type QualityIndicators = 'good' | 'poor' | 'degraded';

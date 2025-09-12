@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type QualityIndicators = 'good' | 'poor' | 'degraded';
-export type InfoIndicators = 'success' | 'danger' | 'warning';
+export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
+export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;

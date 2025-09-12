@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*"
-  ],
+, "../../../packages/private/kbn-data-quality/common/utils/quality_helpers.ts", "../../../packages/private/kbn-data-quality/common/utils/calculate_percentage.ts"  ],
   "kbn_references": [
     "@kbn/alerting-comparators",
     "@kbn/alerting-plugin",

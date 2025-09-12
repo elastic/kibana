@@ -25,6 +25,8 @@ export const STREAMS_UI_PRIVILEGES = {
   show: 'show',
 } as const;
 
+export const FAILURE_STORE_PRIVILEGE = 'read_failure_store';
+
 /**
  * Tiered features
  */
