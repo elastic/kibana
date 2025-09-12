@@ -7,16 +7,17 @@
 
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
+import { useCallback } from 'react';
 import type { Resolver, ResolverOptions } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
-import { useCallback } from 'react';
 import type {
   EsqlToolFormData,
   IndexSearchToolFormData,
   ToolFormData,
 } from '../../components/tools/form/types/tool_form_types';
-import { useEsqlToolFormValidationResolver } from '../../components/tools/form/validation/esql_tool_form_validation';
+import { esqlFormValidationSchema } from '../../components/tools/form/validation/esql_tool_form_validation';
 import { useIndexSearchToolFormValidationResolver } from '../../components/tools/form/validation/index_search_tool_form_validation';
+import { zodResolver } from '../../utils/zod_resolver';
 
 const getDefaultValues = (toolType: ToolType): ToolFormData => {
   switch (toolType) {
@@ -48,7 +49,7 @@ const getDefaultValues = (toolType: ToolType): ToolFormData => {
 };
 
 export const useToolForm = (tool?: ToolDefinitionWithSchema, initialToolType?: ToolType) => {
-  const esqlResolver = useEsqlToolFormValidationResolver();
+  const esqlResolver = zodResolver(esqlFormValidationSchema);
   const indexSearchResolver = useIndexSearchToolFormValidationResolver();
 
   const toolType = tool?.type ?? initialToolType ?? ToolType.esql;

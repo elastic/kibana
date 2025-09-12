@@ -78,6 +78,7 @@ export {
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,

@@ -22,7 +22,10 @@ export interface ToolsActionsContextType {
   createTool: (toolType: ToolType) => void;
   editTool: (toolId: string) => void;
   viewTool: (toolId: string) => void;
-  deleteTool: (toolId: string) => void;
+  deleteTool: (
+    toolId: string,
+    callbacks?: { onConfirm?: () => void; onCancel?: () => void }
+  ) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
   cloneTool: (toolId: string) => void;
   testTool: (toolId: string) => void;
@@ -32,11 +35,9 @@ export interface ToolsActionsContextType {
   getViewToolUrl: (toolId: string) => string;
 }
 
-export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
-  undefined
-);
+export const ToolsActionsContext = createContext<ToolsActionsContextType | undefined>(undefined);
 
-export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) => {
+export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
   const { navigateToOnechatUrl, createOnechatUrl } = useNavigation();
 
   const createTool = useCallback(
@@ -135,7 +136,7 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
   });
 
   return (
-    <ToolsTableActionsContext.Provider
+    <ToolsActionsContext.Provider
       value={{
         deleteTool,
         bulkDeleteTools,
@@ -181,12 +182,12 @@ export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) 
           <EuiText>{labels.tools.bulkDeleteEsqlToolsConfirmationText}</EuiText>
         </EuiConfirmModal>
       )}
-    </ToolsTableActionsContext.Provider>
+    </ToolsActionsContext.Provider>
   );
 };
 
 export const useToolsActions = () => {
-  const context = useContext(ToolsTableActionsContext);
+  const context = useContext(ToolsActionsContext);
   if (!context) {
     throw new Error('useToolsActions must be used within a ToolsProvider');
   }

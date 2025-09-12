@@ -106,12 +106,12 @@ export function useAgentEdit({
   }, [agentId, agent, isClone]);
 
   const submit = useCallback(
-    (data: AgentEditState) => {
+    async (data: AgentEditState) => {
       if (editingAgentId) {
         const { id, ...updatedAgent } = data;
-        updateMutation.mutate(updatedAgent);
+        await updateMutation.mutateAsync(updatedAgent);
       } else {
-        createMutation.mutate(data);
+        await createMutation.mutateAsync(data);
       }
     },
     [editingAgentId, createMutation, updateMutation]
