@@ -9,6 +9,7 @@ import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { encode } from '@kbn/rison';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { SupportedEntityTypes } from '@kbn/observability-shared-plugin/common';
@@ -90,6 +91,7 @@ export const getInventoryViewInAppUrl = ({
       timestamp: inventoryFields[TIMESTAMP],
       alertMetric: criteriaMetric,
       assetDetailsLocator,
+      preferredSchema,
     });
   }
 
@@ -188,12 +190,14 @@ function getLinkToAssetDetails({
   timestamp,
   alertMetric,
   assetDetailsLocator,
+  preferredSchema,
 }: {
   entityId: string;
   entityType: InventoryItemType;
   timestamp: string;
   alertMetric?: string;
   assetDetailsLocator: LocatorPublic<AssetDetailsLocatorParams>;
+  preferredSchema?: DataSchemaFormat;
 }): string {
   return assetDetailsLocator.getRedirectUrl({
     entityId,
@@ -204,6 +208,7 @@ function getLinkToAssetDetails({
         to: moment(timestamp).add(fifteenMinutesInMilliseconds, 'ms').toISOString(),
       },
       ...(alertMetric && alertMetric !== CUSTOM_METRIC_TYPE ? { alertMetric } : undefined),
+      preferredSchema,
     },
   });
 }

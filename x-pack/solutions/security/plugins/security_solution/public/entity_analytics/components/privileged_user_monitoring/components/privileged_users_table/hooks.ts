@@ -16,7 +16,7 @@ import type { TableItemType } from './types';
 import { getPrivilegedUsersQuery } from './esql_source_query';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { useAssetCriticalityFetchList } from '../../../asset_criticality/use_asset_criticality';
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privilege_monitoring/utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import type { EntityRiskScore } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';

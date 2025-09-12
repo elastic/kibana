@@ -15,8 +15,9 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/utils/authz';
-import { withLicense } from '../../../common/utils/with_license';
+import { authz } from '../../../common/api/util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
   router: SecuritySolutionPluginRouter,
@@ -38,36 +39,38 @@ export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
         },
       },
       withLicense(
-        async (
-          context,
-          req,
-          res
-        ): Promise<IKibanaResponse<GetDashboardMigrationResourcesMissingResponse>> => {
-          const migrationId = req.params.migration_id;
-          try {
-            const ctx = await context.resolve(['securitySolution']);
-            const dashboardMigrationsClient =
-              ctx.securitySolution.siemMigrations.getDashboardsClient();
+        withExistingMigration(
+          async (
+            context,
+            req,
+            res
+          ): Promise<IKibanaResponse<GetDashboardMigrationResourcesMissingResponse>> => {
+            const migrationId = req.params.migration_id;
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const dashboardMigrationsClient =
+                ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-            const options = { filters: { hasContent: false } };
-            const batches = dashboardMigrationsClient.data.resources.searchBatches(
-              migrationId,
-              options
-            );
+              const options = { filters: { hasContent: false } };
+              const batches = dashboardMigrationsClient.data.resources.searchBatches(
+                migrationId,
+                options
+              );
 
-            const missingResources: SiemMigrationResourceBase[] = [];
-            let results = await batches.next();
-            while (results.length) {
-              missingResources.push(...results.map(({ type, name }) => ({ type, name })));
-              results = await batches.next();
+              const missingResources: SiemMigrationResourceBase[] = [];
+              let results = await batches.next();
+              while (results.length) {
+                missingResources.push(...results.map(({ type, name }) => ({ type, name })));
+                results = await batches.next();
+              }
+
+              return res.ok({ body: missingResources });
+            } catch (err) {
+              logger.error(err);
+              return res.badRequest({ body: err.message });
             }
-
-            return res.ok({ body: missingResources });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
           }
-        }
+        )
       )
     );
 };

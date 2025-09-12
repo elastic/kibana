@@ -543,7 +543,10 @@ export class DetailPanel extends Component {
       <EuiFlyout
         data-test-subj="remoteClusterDetailFlyout"
         onClose={closeDetailPanel}
-        aria-labelledby="remoteClusterDetailsFlyoutTitle"
+        aria-label={i18n.translate('xpack.remoteClusters.detailPanel.ariaLabel', {
+          defaultMessage: 'Details for remote cluster {clusterName}',
+          values: { clusterName },
+        })}
         size="m"
         maxWidth={550}
         className="eui-textBreakAll"

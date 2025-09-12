@@ -62,7 +62,6 @@ const LazyRuleParamsExpression = React.lazy(() => import('./components/expressio
 export function createInventoryMetricRuleType({
   assetDetailsLocator,
   inventoryLocator,
-  config,
 }: {
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
@@ -81,10 +80,7 @@ export function createInventoryMetricRuleType({
     },
     ruleParamsExpression: (props: ExpressionsProps) => (
       <React.Suspense fallback={null}>
-        <LazyRuleParamsExpression
-          {...props}
-          metadata={{ ...props.metadata, hostOtelEnabled: config?.featureFlags.hostOtelEnabled }}
-        />
+        <LazyRuleParamsExpression {...props} />
       </React.Suspense>
     ),
     validate: validateMetricThreshold,

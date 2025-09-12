@@ -132,6 +132,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors [#221389]({{kib-pull}}221389). 
 * Adds `rrule` notation support for task scheduling [#217728]({{kib-pull}}217728).
 * Publishes new public APIs for the Maintenance Window [#216756]({{kib-pull}}216756).
+* Allows you to delete Maintenance Windows [#211399]({{kib-pull}}211399).
 * Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time [#216613]({{kib-pull}}216613).
 * Adds an embeddable panel for dashboards that allows you to show a simplified version of the Alerts table from {{observability}} or {{elastic-sec}} [#216076]({{kib-pull}}216076).
 * Ensures the **Reporting** page only shows reports generated in the current space [#221375]({{kib-pull}}221375).

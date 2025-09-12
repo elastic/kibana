@@ -11,7 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../hooks/use_kibana';
 import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
-import { SearchHomepageHeader } from './search_homepage_header';
+import { SearchHomepageHeader } from './header';
 
 export const SearchHomepagePage = () => {
   const {

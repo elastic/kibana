@@ -29,15 +29,6 @@ export const transformESToConversation = (
       })) ?? [],
     title: conversationSchema.title,
     category: conversationSchema.category,
-    ...(conversationSchema.summary
-      ? {
-          summary: {
-            timestamp: conversationSchema.summary['@timestamp'],
-            semanticContent: conversationSchema.summary.semantic_content,
-            summarizedMessageIds: conversationSchema.summary.summarized_message_ids,
-          },
-        }
-      : {}),
     ...(conversationSchema.api_config
       ? {
           apiConfig: {
@@ -132,12 +123,6 @@ export const transformFieldNamesToSourceScheme = (fields: string[]) => {
         return 'api_config.model';
       case 'apiConfig.provider':
         return 'api_config.provider';
-      case 'summary.timestamp':
-        return 'summary.@timestamp';
-      case 'summary.semanticContent':
-        return 'summary.semantic_content';
-      case 'summary.summarizedMessageIds':
-        return 'summary.summarized_message_ids';
       default:
         return _.snakeCase(f);
     }

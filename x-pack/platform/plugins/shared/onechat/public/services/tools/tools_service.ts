@@ -16,6 +16,7 @@ import type {
   UpdateToolResponse,
   BulkDeleteToolResponse,
   ExecuteToolResponse,
+  ResolveSearchSourcesResponse,
 } from '../../../common/http_api/tools';
 
 export class ToolsService {
@@ -63,5 +64,12 @@ export class ToolsService {
         tool_params: toolParams,
       }),
     });
+  }
+
+  async resolveSearchSources({ pattern }: { pattern: string }) {
+    return await this.http.get<ResolveSearchSourcesResponse>(
+      '/internal/chat/tools/_resolve_search_sources',
+      { query: { pattern } }
+    );
   }
 }

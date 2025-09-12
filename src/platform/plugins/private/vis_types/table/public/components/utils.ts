@@ -49,7 +49,7 @@ const sortNullsLast = (
   direction: 'asc' | 'desc',
   id: string
 ): DatatableRow[] => {
-  return rows.sort((row1, row2) => {
+  return [...rows].sort((row1, row2) => {
     const rowA = row1[id];
     const rowB = row2[id];
 
