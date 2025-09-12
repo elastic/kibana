@@ -51,7 +51,7 @@ export function initializeLibraryTransforms(
         item: { id: savedObjectId },
       } = await getMapClient().create({
         data: {
-          attributes,
+          ...attributes,
           title,
         },
         options: { references },
