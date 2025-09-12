@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VIEW_MODE, type SavedSearch } from '@kbn/saved-search-plugin/public';
-import { cloneDeep, isEqual, isFunction } from 'lodash';
-import type { SearchSourceFields } from '@kbn/data-plugin/public';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { isEqual, isObject, omit } from 'lodash';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { FilterCompareOptions } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
 import { canImportVisContext } from '@kbn/unified-histogram';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity } from '@kbn/unified-data-table';
+import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
 import { isEqualFilters } from '../../discover_app_state_container';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
@@ -31,7 +32,10 @@ export const selectHasUnsavedChanges = (
   {
     runtimeStateManager,
     services,
-  }: { runtimeStateManager: RuntimeStateManager; services: DiscoverServices }
+  }: {
+    runtimeStateManager: RuntimeStateManager;
+    services: DiscoverServices;
+  }
 ) => {
   const persistedDiscoverSession = state.persistedDiscoverSession;
 
@@ -71,25 +75,36 @@ export const selectHasUnsavedChanges = (
 
     for (const stringKey of Object.keys(tabComparators)) {
       const key = stringKey as keyof DiscoverSessionTab;
-      const compare = tabComparators[key] as CompareValues<DiscoverSessionTab[typeof key]>;
+      const compare = tabComparators[key] as FieldComparator<DiscoverSessionTab[typeof key]>;
+      const prevField = persistedTab[key];
+      const nextField = normalizedTab[key];
 
-      if (!compare(persistedTab[key], normalizedTab[key])) {
+      if (!compare(prevField, nextField)) {
+        addLog('[DiscoverSession] difference between initial and changed version', {
+          tabId,
+          key,
+          before: prevField,
+          after: nextField,
+        });
+
         return true;
       }
     }
   }
 
+  addLog('[DiscoverSession] no difference between initial and changed version');
+
   return false;
 };
 
-type CompareValues<T> = (a: T, b: T) => boolean;
+type FieldComparator<T> = (a: T, b: T) => boolean;
 
 type TabComparators = {
-  [K in keyof DiscoverSessionTab]-?: CompareValues<DiscoverSessionTab[K]>;
+  [K in keyof DiscoverSessionTab]-?: FieldComparator<DiscoverSessionTab[K]>;
 };
 
-const compareCoerced =
-  <T>(defaultValue: T): CompareValues<T> =>
+const defaultValueComparator =
+  <T>(defaultValue: T): FieldComparator<T> =>
   (a: T | undefined, b: T | undefined) => {
     // Coerce null to undefined
     a ??= undefined;
@@ -107,151 +122,72 @@ const compareCoerced =
     return isEqual(a, b);
   };
 
-const compareTabField = <K extends keyof DiscoverSessionTab>(
-  _key: K,
+const fieldComparator = <K extends keyof DiscoverSessionTab>(
+  _field: K,
   defaultValue: DiscoverSessionTab[K]
-) => compareCoerced(defaultValue);
-
-const tabComparators: TabComparators = {
-  id: compareTabField('id', ''),
-  label: compareTabField('label', ''),
-  sort: compareTabField('sort', []),
-  columns: compareTabField('columns', []),
-  grid: compareTabField('grid', {}),
-  hideChart: compareTabField('hideChart', false),
-  isTextBasedQuery: compareTabField('isTextBasedQuery', false),
-  usesAdHocDataView: compareTabField('usesAdHocDataView', false),
-  serializedSearchSource: compareTabField('serializedSearchSource', {}),
-  viewMode: compareTabField('viewMode', VIEW_MODE.DOCUMENT_LEVEL),
-  hideAggregatedPreview: compareTabField('hideAggregatedPreview', false),
-  rowHeight: compareTabField('rowHeight', 0),
-  headerRowHeight: compareTabField('headerRowHeight', 0),
-  timeRestore: compareTabField('timeRestore', false),
-  timeRange: compareTabField('timeRange', { from: '', to: '' }),
-  refreshInterval: compareTabField('refreshInterval', { pause: true, value: 0 }),
-  rowsPerPage: compareTabField('rowsPerPage', 0),
-  sampleSize: compareTabField('sampleSize', 0),
-  breakdownField: compareTabField('breakdownField', ''),
-  density: compareTabField('density', DataGridDensity.COMPACT),
-  visContext: compareTabField('visContext', {}),
-};
+) => defaultValueComparator(defaultValue);
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
   state: false, // We don't compare filter types (global vs appState).
 };
 
-export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext: SavedSearch) {
-  const { searchSource: prevSearchSource, ...prevSavedSearch } = savedSearchPrev;
-  const { searchSource: nextSearchSource, ...nextSavedSearchWithoutSearchSource } = savedSearchNext;
+// ad-hoc data view id can change, so we rather compare the ES|QL query itself here
+const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
+  isOfAggregateQueryType(searchSource.query)
+    ? searchSource.query.esql
+    : isObject(searchSource.index)
+    ? searchSource.index.id
+    : searchSource.index;
 
-  const keys = new Set([
-    ...Object.keys(prevSavedSearch),
-    ...Object.keys(nextSavedSearchWithoutSearchSource),
-  ] as Array<keyof Omit<SavedSearch, 'searchSource'>>);
+const searchSourceComparator: TabComparators['serializedSearchSource'] = (
+  searchSourceA,
+  searchSourceB
+) => {
+  const filtersA = searchSourceA.filter ?? [];
+  const filtersB = searchSourceB.filter ?? [];
 
-  // at least one change in saved search attributes
-  const hasChangesInSavedSearch = [...keys].some((key) => {
-    if (
-      ['usesAdHocDataView', 'hideChart'].includes(key) &&
-      typeof prevSavedSearch[key] === 'undefined' &&
-      nextSavedSearchWithoutSearchSource[key] === false
-    ) {
-      return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
-    }
+  return (
+    // if a filter gets pinned and the order of filters does not change,
+    // we don't show the unsaved changes badge
+    isEqualFilters(filtersA, filtersB, FILTERS_COMPARE_OPTIONS) &&
+    isEqual(searchSourceA.query, searchSourceB.query) &&
+    getAdjustedDataViewId(searchSourceA) === getAdjustedDataViewId(searchSourceB)
+  );
+};
 
-    const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
-    const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
+// ignore differences in title as it sometimes does not match the actual vis type/shape
+const getAdjustedVisContext = (visContext: VisContextUnmapped | undefined) =>
+  canImportVisContext(visContext) && visContext.attributes.title
+    ? omit(visContext, 'attributes.title')
+    : visContext;
 
-    const isSame = isEqual(prevValue, nextValue);
+const visContextComparator: TabComparators['visContext'] = (visContextA, visContextB) => {
+  return isEqual(getAdjustedVisContext(visContextA), getAdjustedVisContext(visContextB));
+};
 
-    if (!isSame) {
-      addLog('[savedSearch] difference between initial and changed version', {
-        key,
-        before: prevSavedSearch[key],
-        after: nextSavedSearchWithoutSearchSource[key],
-      });
-    }
-
-    return !isSame;
-  });
-
-  if (hasChangesInSavedSearch) {
-    return false;
-  }
-
-  // at least one change in search source fields
-  const hasChangesInSearchSource = (
-    ['filter', 'query', 'index'] as Array<keyof SearchSourceFields>
-  ).some((key) => {
-    const prevValue = getSearchSourceFieldValueForComparison(prevSearchSource, key);
-    const nextValue = getSearchSourceFieldValueForComparison(nextSearchSource, key);
-
-    const isSame =
-      key === 'filter'
-        ? isEqualFilters(prevValue, nextValue, FILTERS_COMPARE_OPTIONS) // if a filter gets pinned and the order of filters does not change, we don't show the unsaved changes badge
-        : isEqual(prevValue, nextValue);
-
-    if (!isSame) {
-      addLog('[savedSearch] difference between initial and changed version', {
-        key,
-        before: prevValue,
-        after: nextValue,
-      });
-    }
-
-    return !isSame;
-  });
-
-  if (hasChangesInSearchSource) {
-    return false;
-  }
-
-  addLog('[savedSearch] no difference between initial and changed version');
-
-  return true;
-}
-
-function getSavedSearchFieldForComparison(
-  savedSearch: Omit<SavedSearch, 'searchSource'>,
-  fieldName: keyof Omit<SavedSearch, 'searchSource'>
-) {
-  if (fieldName === 'visContext') {
-    const visContext = cloneDeep(savedSearch.visContext);
-    if (canImportVisContext(visContext) && visContext?.attributes?.title) {
-      // ignore differences in title as it sometimes does not match the actual vis type/shape
-      visContext.attributes.title = 'same';
-    }
-    return visContext;
-  }
-
-  if (fieldName === 'breakdownField') {
-    return savedSearch.breakdownField || ''; // ignore the difference between an empty string and undefined
-  }
-
-  if (fieldName === 'viewMode') {
-    // By default, viewMode: undefined is equivalent to documents view
-    // So they should be treated as same
-    return savedSearch.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }
-
-  return savedSearch[fieldName];
-}
-
-function getSearchSourceFieldValueForComparison(
-  searchSource: SavedSearch['searchSource'],
-  searchSourceFieldName: keyof SearchSourceFields
-) {
-  if (searchSourceFieldName === 'index') {
-    const query = searchSource.getField('query');
-    // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
-    return query && 'esql' in query ? query.esql : searchSource.getField('index')?.id;
-  }
-
-  if (searchSourceFieldName === 'filter') {
-    const filterField = searchSource.getField('filter');
-    return isFunction(filterField) ? filterField() : filterField;
-  }
-
-  return searchSource.getField(searchSourceFieldName);
-}
+const tabComparators: TabComparators = {
+  id: fieldComparator('id', ''),
+  label: fieldComparator('label', ''),
+  sort: fieldComparator('sort', []),
+  columns: fieldComparator('columns', []),
+  grid: fieldComparator('grid', {}),
+  hideChart: fieldComparator('hideChart', false),
+  isTextBasedQuery: fieldComparator('isTextBasedQuery', false),
+  usesAdHocDataView: fieldComparator('usesAdHocDataView', false),
+  serializedSearchSource: searchSourceComparator,
+  // By default, viewMode: undefined is equivalent to documents view
+  // So they should be treated as same
+  viewMode: fieldComparator('viewMode', VIEW_MODE.DOCUMENT_LEVEL),
+  hideAggregatedPreview: fieldComparator('hideAggregatedPreview', false),
+  rowHeight: fieldComparator('rowHeight', 0),
+  headerRowHeight: fieldComparator('headerRowHeight', 0),
+  timeRestore: fieldComparator('timeRestore', false),
+  timeRange: fieldComparator('timeRange', { from: '', to: '' }),
+  refreshInterval: fieldComparator('refreshInterval', { pause: true, value: 0 }),
+  rowsPerPage: fieldComparator('rowsPerPage', 0),
+  sampleSize: fieldComparator('sampleSize', 0),
+  breakdownField: fieldComparator('breakdownField', ''),
+  density: fieldComparator('density', DataGridDensity.COMPACT),
+  visContext: visContextComparator,
+};
