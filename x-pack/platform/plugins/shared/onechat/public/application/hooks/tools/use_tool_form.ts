@@ -7,10 +7,14 @@
 
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
-import type { Resolver } from 'react-hook-form';
+import type { Resolver, ResolverOptions } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { useCallback } from 'react';
-import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
+import type {
+  EsqlToolFormData,
+  IndexSearchToolFormData,
+  ToolFormData,
+} from '../../components/tools/form/types/tool_form_types';
 import { useEsqlToolFormValidationResolver } from '../../components/tools/form/validation/esql_tool_form_validation';
 import { useIndexSearchToolFormValidationResolver } from '../../components/tools/form/validation/index_search_tool_form_validation';
 
@@ -55,9 +59,17 @@ export const useToolForm = (tool?: ToolDefinitionWithSchema, initialToolType?: T
 
       switch (currentType) {
         case ToolType.esql:
-          return esqlResolver(data as any, context as any, options as any);
+          return esqlResolver(
+            data as EsqlToolFormData,
+            context,
+            options as ResolverOptions<EsqlToolFormData>
+          );
         case ToolType.index_search:
-          return indexSearchResolver(data as any, context as any, options as any);
+          return indexSearchResolver(
+            data as IndexSearchToolFormData,
+            context,
+            options as ResolverOptions<IndexSearchToolFormData>
+          );
         default:
           // For builtin tools or unknown types, just return valid
           return {
