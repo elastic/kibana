@@ -40,7 +40,7 @@ import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
-import { DeprecatedCallOut } from './deprecated_callout';
+import { DeprecatedAIConnectorCallOut } from './deprecated_callout';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -219,7 +219,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   const banner = useMemo(() => {
-    const openAiConnector = (provider: string) => {
+    const redirectToInferenceConnector = (provider: string) => {
       if (allActionTypes) {
         setActionType(allActionTypes['.inference']);
 
@@ -238,10 +238,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (actionTypeModel?.id && actionTypeModel?.isDeprecated && actionTypeModel?.actionTypeTitle) {
       banners.push(
         banners.length ? <EuiSpacer /> : null,
-        <DeprecatedCallOut
+        <DeprecatedAIConnectorCallOut
           name={actionTypeModel.actionTypeTitle}
           id={actionTypeModel.id}
-          onClick={openAiConnector}
+          onClick={redirectToInferenceConnector}
         />
       );
     }

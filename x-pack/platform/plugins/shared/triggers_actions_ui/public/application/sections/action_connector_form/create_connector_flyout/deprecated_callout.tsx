@@ -32,7 +32,7 @@ const DeprecatedCallOutComponent: React.FC<Props> = ({ id, name, onClick }) => (
   >
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.actionConnectorAdd.deprecatedBannerMessage"
-      defaultMessage="To keep up with GenAI innovation and take advantage of our Inference service we will deprecate this connector in a future update. Consider using the {aiConnectorLink} instead."
+      defaultMessage="To keep up with GenAI innovation and take advantage of our Inference service, we will deprecate this connector in a future update. Consider using the {aiConnectorLink} instead."
       values={{
         aiConnectorLink: (
           <EuiLink onClick={() => onClick(id)}>
@@ -47,4 +47,4 @@ const DeprecatedCallOutComponent: React.FC<Props> = ({ id, name, onClick }) => (
   </EuiCallOut>
 );
 
-export const DeprecatedCallOut = memo(DeprecatedCallOutComponent);
+export const DeprecatedAIConnectorCallOut = memo(DeprecatedCallOutComponent);

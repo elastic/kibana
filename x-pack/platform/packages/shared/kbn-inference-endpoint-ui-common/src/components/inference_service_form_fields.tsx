@@ -27,6 +27,8 @@ import {
   keys,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { parse } from 'query-string';
+import { useLocation } from 'react-router-dom';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
@@ -133,6 +135,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     []
   );
   const [authenticationFormFields, setAuthenticationFormFields] = useState<ConfigEntryView[]>([]);
+  const location = useLocation();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'secrets.providerSecrets',
@@ -408,11 +411,14 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       }
       setUpdatedProviders(getUpdatedProviders(currentSolution));
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const selectedProvider = urlParams.get('connectorProvider') ?? '';
-      const providerKey = ServiceProviderKeyMap[selectedProvider];
+      const params = parse(location.search, {
+        sort: false,
+      });
+      const selectedProvider = params.connectorProvider;
+      const providerKey =
+        typeof selectedProvider === 'string' ? ServiceProviderKeyMap[selectedProvider] : null;
 
-      if (providerKey && !config?.provider) {
+      if (typeof providerKey === 'string' && !config?.provider) {
         onProviderChange(providerKey);
       }
     }

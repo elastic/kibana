@@ -36,6 +36,7 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { DEPRECATED_LABEL } from '../../translations';
 
 import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
@@ -286,12 +287,7 @@ const ActionsConnectorsList = ({
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
                   data-test-subj="deprecatedLabelMessage"
-                  label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionsConnectorsList.deprecatedLabelMessage',
-                    {
-                      defaultMessage: 'Deprecated',
-                    }
-                  )}
+                  label={DEPRECATED_LABEL}
                   color="warning"
                   tooltipContent="This connector type will be removed in a future update."
                 />
