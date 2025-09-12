@@ -15,8 +15,10 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { OnechatInternalService } from './services';
 import type { OnechatServicesContext } from './application/context/onechat_services_context';
+import type { ContentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -27,6 +29,7 @@ export interface OnechatSetupDependencies {
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  discover: DiscoverSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -34,12 +37,14 @@ export interface OnechatStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  discover: DiscoverStart;
 }
 
 export interface OnechatPluginSetup {}
 
 export interface OnechatPluginStart {
   internalServices: OnechatInternalService;
+  contentReferenceRegistry: ContentReferenceRegistry;
 }
 
 export type { OnechatServicesContext };

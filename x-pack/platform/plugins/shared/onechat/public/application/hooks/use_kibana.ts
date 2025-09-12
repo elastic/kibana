@@ -9,9 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { OnechatStartDependencies } from '../../types';
 
-export type StartServices = CoreStart & {
-  plugins: OnechatStartDependencies;
-};
+export type StartServices = CoreStart & OnechatStartDependencies;
 
 const useTypedKibana = () => useKibana<StartServices>();
 

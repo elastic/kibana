@@ -17,6 +17,8 @@ import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/
 import { OneChatNavLink } from '@kbn/elastic-assistant/impl/assistant_context/one_chat_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { SecurityAlertReference } from './src/components/get_comments/content_reference/components/security_alert_reference';
+import { SecurityAlertsPageReference } from './src/components/get_comments/content_reference/components/security_alerts_page_reference';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -49,6 +51,10 @@ export class ElasticAssistantPublicPlugin
   }
 
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
+    // Register security alert components with onechat content reference registry
+    dependencies.onechat.contentReferenceRegistry.register('SecurityAlert', SecurityAlertReference);
+    dependencies.onechat.contentReferenceRegistry.register('SecurityAlertsPage', SecurityAlertsPageReference);
+
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);

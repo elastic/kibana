@@ -65,6 +65,7 @@
     "@kbn/management-settings-ids",
     "@kbn/visualization-utils",
     "@kbn/data-views-plugin",
+    "@kbn/discover-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
     "@kbn/scout",

@@ -13,6 +13,7 @@
       "actions",
       "data",
       "dataViews",
+      "discover",
       "esql",
       "features",
       "inference",
