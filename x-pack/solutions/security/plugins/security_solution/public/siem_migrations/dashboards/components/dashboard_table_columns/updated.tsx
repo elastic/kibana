@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
@@ -22,12 +21,7 @@ export const createUpdatedColumn = (): TableColumn => {
       <TableHeader
         id={SIEM_DASHBOARDS_MIGRATIONS_UPDATED_HEADER_ID}
         title={i18n.COLUMN_UPDATED}
-        tooltipContent={
-          <FormattedMessage
-            id="xpack.securitySolution.siemMigrations.dashboards.tableColumn.updatedTooltip"
-            defaultMessage={i18n.COLUMN_UPDATED}
-          />
-        }
+        tooltipContent={i18n.COLUMN_UPDATED}
       />
     ),
     render: (value: DashboardMigrationDashboard['original_dashboard']['last_updated']) => (

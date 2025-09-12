@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
@@ -22,12 +21,7 @@ export const createTagsColumn = (): TableColumn => {
       <TableHeader
         id={SIEM_DASHBOARDS_MIGRATIONS_TAGS_HEADER_ID}
         title={i18n.COLUMN_TAGS}
-        tooltipContent={
-          <FormattedMessage
-            id="xpack.securitySolution.siemMigrations.dashboards.tableColumn.tagsTooltip"
-            defaultMessage={i18n.COLUMN_TAGS}
-          />
-        }
+        tooltipContent={i18n.COLUMN_TAGS}
       />
     ),
     render: (value: DashboardMigrationDashboard['original_dashboard']['splunk_properties']) => {
