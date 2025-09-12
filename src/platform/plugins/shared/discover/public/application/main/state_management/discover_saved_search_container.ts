@@ -197,6 +197,7 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
+      initialInternalState: undefined,
       appState: nextState || {},
       globalState: getCurrentTab().globalState,
       services,
