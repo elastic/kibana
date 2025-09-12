@@ -90,13 +90,11 @@ export const useTimelineEventsDetails = ({
             next: (response) => {
               if (!isRunningResponse(response)) {
                 Promise.resolve().then(() => {
-                  ReactDOM.unstable_batchedUpdates(() => {
-                    setLoading(false);
-                    setTimelineDetailsResponse(response.data || []);
-                    setRawEventData(response.rawResponse.hits.hits[0]);
-                    setEcsData(response.ecs || null);
-                    searchSubscription$.current.unsubscribe();
-                  });
+                  setLoading(false);
+                  setTimelineDetailsResponse(response.data || []);
+                  setRawEventData(response.rawResponse.hits.hits[0]);
+                  setEcsData(response.ecs || null);
+                  searchSubscription$.current.unsubscribe();
                 });
               }
             },
