@@ -126,7 +126,7 @@ export const prepareRoutes = <
     ) {
       return false;
     }
-    if (filters.pathStartsWith && !filters.pathStartsWith.some((p) => route.path.startsWith(p))) {
+    if (filters.pathStartsWith && !filters.pathStartsWith.some((p) => route.path === p)) {
       return false;
     }
     if (filters.access === 'public' && route.options.access !== 'public') {

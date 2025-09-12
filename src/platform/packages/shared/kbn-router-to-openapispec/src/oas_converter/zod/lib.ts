@@ -149,6 +149,8 @@ function toJSON(schema: z.ZodType) {
   // If no wrapper is found, this is considered the innermost type.
   // Check for unsupported types that should be coerced.
 
+  console.log(JSON.stringify(schema._zod.def, null, 2));
+
   // let customOpenApiMetadata: z.core.JSONSchema.BaseSchema | undefined;
   const json = z.toJSONSchema(schema, {
     io: 'input',
@@ -171,6 +173,8 @@ function toJSON(schema: z.ZodType) {
       );
     },
   });
+
+  console.log(JSON.stringify(json, null, 2));
 
   // // If the schema has custom OpenAPI metadata, return it directly
   // if (customOpenApiMetadata) {

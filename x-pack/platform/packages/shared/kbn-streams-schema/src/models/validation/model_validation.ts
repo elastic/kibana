@@ -106,17 +106,7 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
       z.intersection(
         z.object({
           // upsert doesn't allow name to be set
-          stream: z
-            .object({ name: z.undefined().optional() })
-            .passthrough()
-            // but the definition requires it, so we set a default
-            .transform((prev) => ({ ...prev, name: '.' }))
-            .pipe(rightPartial.Definition)
-            // that should be removed after
-            .transform((prev) => {
-              delete prev.name;
-              return prev;
-            }),
+          stream: rightPartial.Definition,
         }),
         rightPartial.UpsertRequest
       )

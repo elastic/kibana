@@ -148,5 +148,5 @@ const upsertGroupRoute = createServerRoute({
 
 export const groupRoutes = {
   ...readGroupRoute,
-  ...upsertGroupRoute,
+  // ...upsertGroupRoute,
 };

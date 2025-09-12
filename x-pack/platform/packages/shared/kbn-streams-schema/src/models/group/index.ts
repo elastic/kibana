@@ -20,7 +20,7 @@ export interface Group {
 export const Group: Validation<unknown, Group> = validation(
   z.unknown(),
   z.object({
-    metadata: z.record(z.string()),
+    metadata: z.record(z.string(), z.string()),
     tags: z.array(z.string()),
     members: z.array(z.string()),
   })
