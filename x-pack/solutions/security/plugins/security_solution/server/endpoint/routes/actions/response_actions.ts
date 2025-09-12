@@ -380,7 +380,7 @@ function cancelActionHandler(
   ) => {
     const cancelActionLogger = endpointContext.logFactory.get('cancelActionHandler');
     const { parameters } = request.body;
-    const actionId = parameters?.action_id;
+    const actionId = parameters.action_id;
 
     if (!actionId) {
       return errorHandler(
