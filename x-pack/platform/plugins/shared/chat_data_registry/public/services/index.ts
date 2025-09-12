@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { DataTypeRegistry } from './data_type_registry';
-export type { DataTypeComponent } from './data_type_registry';
+export { type DataTypeComponent, DataTypeRegistry } from './data_type_registry';

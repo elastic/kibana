@@ -15,4 +15,3 @@ export function plugin() {
 
 export type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
 export type { DataTypeComponent } from './services';
-export { DataCatalog } from './components';
