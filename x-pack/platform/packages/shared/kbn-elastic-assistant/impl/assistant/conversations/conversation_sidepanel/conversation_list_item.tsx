@@ -68,7 +68,7 @@ export const ConversationListItem: React.FC<Props> = ({
 
   const shouldShowIcon = useMemo(
     () => conversationSharedState !== ConversationSharedState.PRIVATE && !!currentUser,
-    [conversationSharedState]
+    [conversationSharedState, currentUser]
   );
   const { iconType, iconTitle } = useMemo(
     () =>

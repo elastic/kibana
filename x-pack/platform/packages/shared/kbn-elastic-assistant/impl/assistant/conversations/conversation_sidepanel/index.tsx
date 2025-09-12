@@ -221,6 +221,7 @@ export const ConversationSidePanel = React.memo<Props>(
         conversationsCategorizedByDate,
         currentConversation?.id,
         currentConversation?.title,
+        currentUser,
         handleCopyUrl,
         handleDuplicateConversation,
         lastConversationId,
