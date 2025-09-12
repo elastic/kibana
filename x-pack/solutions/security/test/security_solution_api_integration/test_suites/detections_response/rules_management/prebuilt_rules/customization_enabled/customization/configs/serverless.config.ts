@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createCompleteTierTestConfig } from '../../../configs/serverless/rules_management.complete.config';
+import { createCompleteTierTestConfig } from '../../../../configs/serverless/rules_management.complete.config';
 
 export default createCompleteTierTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Prebuilt Rules (Customization Enabled) Integration Tests - Serverless Env',
+      'Rules Management - Prebuilt Rules Customization (Customization Enabled) - Serverless Env',
   },
 });
