@@ -43,7 +43,7 @@ export const IndexSearchPattern: React.FC = () => {
     setPageIndex(0);
   }, [patternValue]);
 
-  const { data, isLoading, error } = useIndexSearchSources({
+  const { data, isLoading } = useIndexSearchSources({
     pattern: patternValue,
   });
 
