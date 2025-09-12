@@ -53494,6 +53494,8 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
+                                                          customIdentifier:
+                                                            type: string
                                                           where:
                                                             allOf:
                                                               - anyOf:
@@ -55194,6 +55196,8 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      customIdentifier:
+                                                        type: string
                                                       where:
                                                         allOf:
                                                           - anyOf:
@@ -56692,6 +56696,8 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
+                                                          customIdentifier:
+                                                            type: string
                                                           where:
                                                             allOf:
                                                               - anyOf:
@@ -58242,6 +58248,8 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      customIdentifier:
+                                                        type: string
                                                       where:
                                                         allOf:
                                                           - anyOf:
@@ -60113,6 +60121,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          customIdentifier:
+                                            type: string
                                           where:
                                             allOf:
                                               - anyOf:
@@ -61726,6 +61736,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          customIdentifier:
+                                            type: string
                                           where:
                                             allOf:
                                               - anyOf:
