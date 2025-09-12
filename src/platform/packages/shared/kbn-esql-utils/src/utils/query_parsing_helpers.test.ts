@@ -219,24 +219,6 @@ describe('esql query helpers', () => {
       ]);
     });
 
-    it("should return a Lucene query when it's embedded in ES|QL query", () => {
-      expect(getKqlSearchQueries('FROM a | WHERE QSTR("""field:value""")')).toStrictEqual([
-        'field:value',
-      ]);
-    });
-
-    it('should return multiple embedded queries in an array regardless of the operator', () => {
-      expect(
-        getKqlSearchQueries(
-          'FROM a | WHERE KQL("""field : "value" """) AND QSTR("""field:value""")'
-        )
-      ).toStrictEqual(['field : "value"', 'field:value']);
-
-      expect(
-        getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """) OR QSTR("""field:value""")')
-      ).toStrictEqual(['field : "value"', 'field:value']);
-    });
-
     it('should correctly parse KQL full text embedded query', () => {
       expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
         'full text',
@@ -256,7 +238,7 @@ describe('esql query helpers', () => {
     it('should correctly parse mixed queries, omitting ES|QL valid syntax', () => {
       expect(
         getKqlSearchQueries(
-          'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND QSTR("""field2:value2""")'
+          'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND KQL("""field2:value2""")'
         )
       ).toStrictEqual(['field1: "value1"', 'field2:value2']);
     });
