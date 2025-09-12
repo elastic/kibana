@@ -20,24 +20,22 @@ describe('KEEP Validation', () => {
   });
 
   test('validates the most basic query', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('MIN(doubleField * 10)', [
-      {
-        name: 'MIN(doubleField * 10)',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('COUNT(*)', [
-      {
-        name: 'COUNT(*)',
-        type: 'integer',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('MIN(doubleField * 10)', {
+      name: 'MIN(doubleField * 10)',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('COUNT(*)', {
+      name: 'COUNT(*)',
+      type: 'integer',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
     const context = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     keepExpectErrors('from index | keep keywordField, doubleField, integerField, dateField', []);
     keepExpectErrors(
