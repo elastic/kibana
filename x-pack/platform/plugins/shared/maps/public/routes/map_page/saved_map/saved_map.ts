@@ -478,14 +478,14 @@ export class SavedMap {
     await this._syncAttributesWithStore();
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
-    const { attributes, references } = extractReferences({
-      attributes: this._attributes,
-    });
     if (saveByReference) {
       try {
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagReferences =
           savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
+        const { attributes, references } = extractReferences({
+          attributes: this._attributes,
+        });
         const { id: savedObjectId } = await saveToLibrary(
           attributes,
           [...references, ...tagReferences],
@@ -532,7 +532,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapEmbeddableState, references },
+          serializedState: { rawState: mapEmbeddableState },
         },
         path: this._originatingPath,
       });
@@ -541,7 +541,7 @@ export class SavedMap {
       await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapEmbeddableState, references },
+          serializedState: { rawState: mapEmbeddableState },
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
