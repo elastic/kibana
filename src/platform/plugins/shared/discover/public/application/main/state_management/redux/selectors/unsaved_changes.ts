@@ -8,7 +8,7 @@
  */
 
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { isEqual, isObject, omit } from 'lodash';
+import { difference, isEqual, isObject, omit } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
@@ -27,6 +27,11 @@ import {
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
+export interface HasUnsavedChangesResult {
+  hasUnsavedChanges: boolean;
+  unsavedTabIds: Set<string>;
+}
+
 export const selectHasUnsavedChanges = (
   state: DiscoverInternalState,
   {
@@ -36,26 +41,32 @@ export const selectHasUnsavedChanges = (
     runtimeStateManager: RuntimeStateManager;
     services: DiscoverServices;
   }
-) => {
+): HasUnsavedChangesResult => {
   const persistedDiscoverSession = state.persistedDiscoverSession;
 
   if (!persistedDiscoverSession) {
-    return false;
+    return { hasUnsavedChanges: false, unsavedTabIds: new Set() };
   }
 
   const persistedTabIds = persistedDiscoverSession.tabs.map((tab) => tab.id);
   const currentTabsIds = state.tabs.allIds;
 
   if (!isEqual(persistedTabIds, currentTabsIds)) {
-    return true;
+    return {
+      hasUnsavedChanges: true,
+      unsavedTabIds: new Set(difference(currentTabsIds, persistedTabIds)),
+    };
   }
+
+  const unsavedTabIds = new Set<string>();
 
   for (const tabId of currentTabsIds) {
     const persistedTab = persistedDiscoverSession.tabs.find((tab) => tab.id === tabId);
 
     // this should never happen as we already compare tab ids above
     if (!persistedTab) {
-      return true;
+      unsavedTabIds.add(tabId);
+      continue;
     }
 
     const tabState = selectTab(state, tabId);
@@ -87,14 +98,15 @@ export const selectHasUnsavedChanges = (
           after: nextField,
         });
 
-        return true;
+        unsavedTabIds.add(tabId);
+        break;
       }
     }
   }
 
   addLog('[DiscoverSession] no difference between initial and changed version');
 
-  return false;
+  return { hasUnsavedChanges: unsavedTabIds.size > 0, unsavedTabIds };
 };
 
 type FieldComparator<T> = (a: T, b: T) => boolean;
