@@ -105,6 +105,7 @@ describe('MetricsExperienceGrid', () => {
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 1,
       allFields,
+      filteredFieldsBySearch: [allFields[0]],
       currentPageFields: [allFields[0]],
       dimensions: dimensionNames,
     });
@@ -162,6 +163,7 @@ describe('MetricsExperienceGrid', () => {
       totalPages: 0,
       allFields: [],
       currentPageFields: [],
+      filteredFieldsBySearch: [],
       dimensions: dimensionNames,
     });
 
@@ -279,5 +281,48 @@ describe('MetricsExperienceGrid', () => {
     fireEvent.click(fullscreenButton);
 
     expect(onToggleFullscreen).toHaveBeenCalled();
+  });
+
+  it('filters fields by search term and respects page size', async () => {
+    const onSearchTermChange = jest.fn();
+
+    // 20 fields, 10 with "cpu" in the name
+    const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
+      name: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
+      dimensions: [dimensions[0]],
+      index: 'metrics-*',
+      type: 'long',
+      noData: false,
+    }));
+
+    useMetricsGridStateMock.mockReturnValue({
+      currentPage: 0,
+      dimensions: [],
+      valueFilters: [],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      onValuesChange: jest.fn(),
+      onClearValues: jest.fn(),
+      onClearAllDimensions: jest.fn(),
+      isFullscreen: false,
+      searchTerm: 'cpu',
+      onClearSearchTerm: jest.fn(),
+      onSearchTermChange,
+      onToggleFullscreen: jest.fn(),
+    });
+
+    usePaginatedFieldsMock.mockReturnValue({
+      totalPages: 2,
+      allFields: allFieldsSomeWithCpu,
+      filteredFieldsBySearch: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')),
+      currentPageFields: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5),
+      dimensions: dimensionNames,
+    });
+
+    const { getByText } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(getByText('10 metrics')).toBeInTheDocument();
   });
 });
