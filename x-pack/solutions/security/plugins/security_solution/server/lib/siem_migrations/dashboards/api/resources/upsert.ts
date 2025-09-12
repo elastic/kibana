@@ -21,7 +21,7 @@ import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 import { processLookups } from '../../../rules/api/util/lookups';
-import { withExistingDashboardMigration } from '../util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -45,7 +45,7 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,
