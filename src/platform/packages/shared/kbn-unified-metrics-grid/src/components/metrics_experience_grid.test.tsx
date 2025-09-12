@@ -114,51 +114,44 @@ describe('MetricsExperienceGrid', () => {
     });
   });
 
-  it('renders the <MetricsGrid />', () => {
+  it('renders the <MetricsGrid />', async () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
-    waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
+    await waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
   });
 
-  it('renders the loading state', () => {
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
+  it('renders the loading state', async () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'loading',
       isLoading: true,
     });
 
-    waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
   });
 
   it('renders the no data state covering the entire container when Fields API returns no data', () => {
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
-      status: 'loading',
+      status: 'success',
       isLoading: false,
     });
-
-    waitFor(() => {
-      expect(getByTestId('toggleActions')).not.toBeInTheDocument();
-      expect(getByTestId('metricsExperienceBreakdownSelectorButton')).not.toBeInTheDocument();
-      expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
-    });
-  });
-
-  it('renders the no data state covering only the grid section when paginated fields returns no fields', () => {
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).not.toBeInTheDocument();
+    expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
+  });
+
+  it('renders the no data state covering only the grid section when paginated fields returns no fields', async () => {
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 0,
       allFields: [],
@@ -166,7 +159,11 @@ describe('MetricsExperienceGrid', () => {
       dimensions: dimensionNames,
     });
 
-    waitFor(() => {
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    await waitFor(() => {
       expect(getByTestId('toggleActions')).toBeInTheDocument();
       expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
       expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
@@ -178,13 +175,11 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    waitFor(() => {
-      expect(getByTestId('toggleActions')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
-      expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
-    });
+    expect(getByTestId('toggleActions')).toBeInTheDocument();
+    expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
+    expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
+    expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+    expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
   });
 
   it('render <ValuesSelector /> when dimensions are selected', async () => {
@@ -203,6 +198,8 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    waitFor(() => expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument()
+    );
   });
 });
