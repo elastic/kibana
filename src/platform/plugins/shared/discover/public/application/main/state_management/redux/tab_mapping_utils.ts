@@ -31,6 +31,7 @@ export const fromSavedObjectTabToTabState = ({
   initialInternalState: {
     serializedSearchSource: tab.serializedSearchSource,
     visContext: tab.visContext,
+    controlGroupJson: tab.controlGroupJson,
   },
   initialAppState: {
     columns: tab.columns,
@@ -135,7 +136,7 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.initialAppState?.breakdownField,
     density: tab.initialAppState?.density,
     visContext: tab.initialInternalState?.visContext,
-    controlGroupJson: JSON.stringify(tab.controlGroupState ?? {}),
+    controlGroupJson: tab.initialInternalState?.controlGroupJson,
   };
 };
 

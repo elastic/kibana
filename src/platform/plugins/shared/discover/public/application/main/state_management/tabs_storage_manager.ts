@@ -77,10 +77,6 @@ export interface TabsStorageManager {
     tabId: string,
     tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
   ) => void;
-  updateTabControlStateLocally: (
-    tabId: string,
-    tabState: Pick<TabStateInLocalStorage, 'controlGroupState'>
-  ) => void;
   updateDiscoverSessionIdLocally: (discoverSessionId: string | undefined) => void;
   loadLocally: (props: {
     userId: string;
@@ -365,34 +361,6 @@ export const createTabsStorageManager = ({
     storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
   };
 
-  const updateTabControlStateLocally: TabsStorageManager['updateTabControlStateLocally'] = (
-    tabId,
-    tabStatePartial
-  ) => {
-    if (!enabled) {
-      return;
-    }
-    let hasModifications = false;
-    const storedTabsState = readFromLocalStorage();
-    const updatedTabsState = {
-      ...storedTabsState,
-      openTabs: storedTabsState.openTabs.map((tab) => {
-        if (tab.id === tabId) {
-          hasModifications = true;
-          return {
-            ...tab,
-            controlGroupState: tabStatePartial.controlGroupState,
-          };
-        }
-        return tab;
-      }),
-    };
-
-    if (hasModifications) {
-      storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
-    }
-  };
-
   const loadLocally: TabsStorageManager['loadLocally'] = ({
     userId,
     spaceId,
@@ -472,7 +440,6 @@ export const createTabsStorageManager = ({
   return {
     startUrlSync,
     persistLocally,
-    updateTabControlStateLocally,
     updateTabStateLocally,
     updateDiscoverSessionIdLocally,
     loadLocally,

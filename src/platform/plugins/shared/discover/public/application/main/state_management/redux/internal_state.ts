@@ -351,22 +351,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     },
   });
 
-  startListening({
-    actionCreator: internalStateSlice.actions.setControlGroupState,
-    effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
-      (action, listenerApi) => {
-        const { tabsStorageManager } = listenerApi.extra;
-        withTab(listenerApi.getState(), action, (tab) => {
-          tabsStorageManager.updateTabControlStateLocally(action.payload.tabId, {
-            controlGroupState: tab.controlGroupState,
-          });
-        });
-      },
-      MIDDLEWARE_THROTTLE_MS,
-      MIDDLEWARE_THROTTLE_OPTIONS
-    ),
-  });
-
   return listenerMiddleware.middleware;
 };
 

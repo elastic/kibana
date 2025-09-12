@@ -40,6 +40,7 @@ export interface TabState extends TabItem {
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
     visContext?: UnifiedHistogramVisContext | {};
+    controlGroupJson?: string;
   };
   initialAppState?: DiscoverAppState;
 
