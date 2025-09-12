@@ -175,7 +175,7 @@ export const Navigation = ({
                   data-test-subj="sideNavMoreMenuItem"
                   isActive={overflowMenuItems.some((item) => item.id === sidePanelContent?.id)}
                   isCollapsed={isCollapsed}
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   hasContent
                   href=""
                   id="more-menu"
@@ -200,7 +200,7 @@ export const Navigation = ({
                         { defaultMessage: 'More' }
                       )}
                     >
-                      <NestedSecondaryMenu.Section hasGap label={null}>
+                      <NestedSecondaryMenu.Section hasGap>
                         {overflowMenuItems.map((item) => {
                           const hasSubItems = getHasSubmenu(item);
 
@@ -263,7 +263,7 @@ export const Navigation = ({
                       defaultMessage: 'More',
                     })}
                   >
-                    <SecondaryMenu.Section hasGap label={null}>
+                    <SecondaryMenu.Section hasGap>
                       {overflowMenuItems.map((item) => (
                         <SideNav.PrimaryMenuItem
                           key={item.id}
