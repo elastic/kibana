@@ -11,8 +11,8 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { Observable } from 'rxjs';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
@@ -25,13 +25,13 @@ const ChartSizes = {
 
 export type ChartSize = keyof typeof ChartSizes;
 export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
-  Omit<LensWrapperProps, 'lensProps'> & {
-    metric: MetricField;
+  Omit<LensWrapperProps, 'lensProps' | 'esqlQuery'> & {
     dimensions: string[];
     color?: string;
     size?: ChartSize;
     filters?: Array<{ field: string; value: string }>;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+    onViewDetails: (metric: MetricField, esqlQuery: string) => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -44,6 +44,7 @@ export const Chart: React.FC<ChartProps> = ({
   searchSessionId,
   onBrushEnd,
   onFilter,
+  onViewDetails,
   requestParams,
   discoverFetch$,
   dimensions = [],
@@ -100,11 +101,13 @@ export const Chart: React.FC<ChartProps> = ({
     >
       {lensProps && (
         <LensWrapperMemo
+          metric={metric}
           lensProps={lensProps}
           services={services}
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
           abortController={abortController}
+          onViewDetails={onViewDetails}
         />
       )}
     </div>
