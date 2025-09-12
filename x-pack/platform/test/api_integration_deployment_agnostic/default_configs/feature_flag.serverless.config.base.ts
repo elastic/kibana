@@ -58,7 +58,10 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
   options: CreateTestConfigOptions<T>
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const packageRegistryConfig = path.join(
+      __dirname,
+      '../../resources/package_registry_config.yml'
+    );
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
     let kbnServerArgs: string[] = [];
 

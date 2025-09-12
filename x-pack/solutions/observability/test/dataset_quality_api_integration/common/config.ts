@@ -89,7 +89,10 @@ export function createTestConfig(
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const packageRegistryConfig = path.join(
+      __dirname,
+      '../../resources/package_registry_config.yml'
+    );
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
