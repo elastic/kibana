@@ -6,6 +6,7 @@
  */
 
 import type { ElasticAssistantApiRequestHandlerContext } from '../types';
+import type { ElasticAssistantRequestHandlerContextMock } from './request_context';
 
 // Type definitions for mock clients and contexts
 type MockSearchCall = [{ index?: string }];
@@ -17,13 +18,15 @@ interface MockElasticsearchClient {
   };
 }
 
-type SpaceAwareContext = Partial<ElasticAssistantApiRequestHandlerContext> & {
-  elasticAssistant?: {
-    getSpaceId?: jest.MockedFunction<() => string>;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-};
+type SpaceAwareContext = 
+  | (Partial<ElasticAssistantApiRequestHandlerContext> & {
+      elasticAssistant?: {
+        getSpaceId?: jest.MockedFunction<() => string>;
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
+    })
+  | ElasticAssistantRequestHandlerContextMock;
 
 /**
  * Helper to override the getSpaceId mock for a specific space in tests
