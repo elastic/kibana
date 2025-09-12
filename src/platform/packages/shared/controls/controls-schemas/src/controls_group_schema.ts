@@ -56,13 +56,6 @@ export const controlsGroupSchema = schema.object({
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
       schema
         .allOf([
-          schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-          optionsListESQLControlSchema,
-          stickyControlSchema,
-        ])
-        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
-      schema
-        .allOf([
           schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
           rangeSliderControlSchema,
           stickyControlSchema,
