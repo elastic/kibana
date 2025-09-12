@@ -123,6 +123,8 @@ module.exports = {
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
     '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
+    // '[/\\\\]node_modules(?![\\/\\\\]zod)/v3/[/\\\\].+\\.js$',
+    // '[/\\\\]node_modules(?![\\/\\\\]zod)/v4/core/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/util/[/\\\\].+\\.js$',
   ],

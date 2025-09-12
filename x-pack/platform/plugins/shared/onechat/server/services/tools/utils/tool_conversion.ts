@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
-import zodToJsonSchema from 'zod-to-json-schema';
+import type { JsonSchema7ObjectType } from '@finom/zod-to-json-schema';
+import { zodToJsonSchema } from '@finom/zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';

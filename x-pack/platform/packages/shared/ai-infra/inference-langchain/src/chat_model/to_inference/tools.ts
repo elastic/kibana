@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import type { ZodSchema } from '@kbn/zod';
-import { zodToJsonSchema, type JsonSchema7Type } from 'zod-to-json-schema';
+import { zodToJsonSchema, type JsonSchema7Type } from '@finom/zod-to-json-schema';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
 import type { ToolDefinition } from '@langchain/core/language_models/base';
 import { isLangChainTool } from '@langchain/core/utils/function_calling';

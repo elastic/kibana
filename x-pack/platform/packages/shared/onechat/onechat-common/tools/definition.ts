@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
+import type { JsonSchema7ObjectType } from '@finom/zod-to-json-schema';
 
 /**
  * Possible types of tools

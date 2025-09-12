@@ -3039,6 +3039,11 @@
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.0.0.tgz#f22824caff3ae506b18207bad4126dbc6ccdb6b8"
   integrity sha512-JUFJad5lv7jxj926GPgymrWQxxjPYuJNiNjNMzqT+HiuP6Vl3dk5xzG+8sTX96np0ZAluvaMzPsjhHZ5rNuNQQ==
 
+"@finom/zod-to-json-schema@^3.24.11":
+  version "3.24.11"
+  resolved "https://registry.yarnpkg.com/@finom/zod-to-json-schema/-/zod-to-json-schema-3.24.11.tgz#bdff4ba260719ca095c8c6fb254876863ca98900"
+  integrity sha512-fL656yBPiWebtfGItvtXLWrFNGlF1NcDFS0WdMQXMs9LluVg0CfT5E2oXYp0pidl0vVG53XkW55ysijNkU5/hA==
+
 "@floating-ui/core@^1.7.1":
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.7.1.tgz#1abc6b157d4a936174f9dbd078278c3a81c8bc6b"
@@ -34306,12 +34311,12 @@ zip-stream@^6.0.1:
     compress-commons "^6.0.2"
     readable-stream "^4.0.0"
 
-zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.24.1, zod-to-json-schema@^3.24.3, zod-to-json-schema@^3.24.6:
+zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.24.1, zod-to-json-schema@^3.24.3:
   version "3.24.6"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.6.tgz#5920f020c4d2647edfbb954fa036082b92c9e12d"
   integrity sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==
 
-zod@^3.22.3, zod@^3.23.8, zod@^3.24.1, zod@^3.24.2, zod@^3.25.32:
+zod@^3.23.8, zod@^3.24.1, zod@^3.24.2, zod@^3.25.32, zod@^3.25.76:
   version "3.25.76"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
   integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==

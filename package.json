@@ -93,6 +93,7 @@
     "**/typescript": "5.4.5",
     "**/util": "^0.12.5",
     "**/yauzl": "^3.2.0",
+    "**/zod": "^3.25.76",
     "@aws-sdk/client-bedrock-agent-runtime": "^3.879.0",
     "@aws-sdk/client-bedrock-runtime": "^3.879.0",
     "@aws-sdk/client-kendra": "3.879.0",
@@ -147,6 +148,7 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@faker-js/faker": "^9.7.0",
+    "@finom/zod-to-json-schema": "^3.24.11",
     "@formatjs/icu-messageformat-parser": "^2.7.6",
     "@formatjs/intl": "^2.10.2",
     "@formatjs/intl-utils": "^3.8.4",
@@ -1420,8 +1422,7 @@
     "yaml": "^2.5.1",
     "yauzl": "^3.2.0",
     "yazl": "^2.5.1",
-    "zod": "^3.22.3",
-    "zod-to-json-schema": "^3.24.6"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",
