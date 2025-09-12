@@ -68,6 +68,7 @@ export const MetricsExperienceGrid = ({
     currentPageFields = [],
     totalPages = 0,
     dimensions: appliedDimensions = [],
+    filteredFieldsBySearch = [],
   } = usePaginatedFields({
     fields,
     dimensions,
@@ -143,7 +144,7 @@ export const MetricsExperienceGrid = ({
               <strong>
                 {i18n.translate('metricsExperience.grid.metricsCount.label', {
                   defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                  values: { count: currentPageFields.length },
+                  values: { count: filteredFieldsBySearch.length },
                 })}
               </strong>
             </EuiText>

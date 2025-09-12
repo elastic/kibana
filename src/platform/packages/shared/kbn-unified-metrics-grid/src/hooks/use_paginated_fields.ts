@@ -32,15 +32,21 @@ export const usePaginatedFields = ({
           dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
     );
 
-    const totalPages = Math.ceil(allFields.length / pageSize);
+    const filteredFieldsBySearch = allFields.filter((field) =>
+      field.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const currentPageFields = allFields
-      .filter((field) => field.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      .slice(currentPage * pageSize, currentPage * pageSize + pageSize);
+    const totalPages = Math.ceil(filteredFieldsBySearch.length / pageSize);
+
+    const currentPageFields = filteredFieldsBySearch.slice(
+      currentPage * pageSize,
+      currentPage * pageSize + pageSize
+    );
 
     return {
       allFields,
       currentPageFields,
+      filteredFieldsBySearch,
       totalPages,
       dimensions,
     };
