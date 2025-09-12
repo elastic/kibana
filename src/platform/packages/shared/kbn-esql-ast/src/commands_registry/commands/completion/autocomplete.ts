@@ -190,7 +190,9 @@ export async function autocomplete(
 
       if (position !== CompletionPosition.AFTER_TARGET_ID) {
         suggestions.push(
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+          getNewUserDefinedColumnSuggestion(
+            (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
+          )
         );
       }
 

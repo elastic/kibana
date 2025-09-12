@@ -131,7 +131,7 @@ export interface ESQLPolicy {
 
 export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
-  getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
+  getSuggestedUserDefinedColumnName?: () => Promise<string>;
   getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;

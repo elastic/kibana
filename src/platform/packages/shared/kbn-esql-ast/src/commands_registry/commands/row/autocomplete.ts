@@ -47,7 +47,9 @@ export async function autocomplete(
   // ROW /
   // ROW foo = "bar", /
   return [
-    getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+    getNewUserDefinedColumnSuggestion(
+      (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
+    ),
     ...getFunctionSuggestions(
       { location: Location.ROW },
       callbacks?.hasMinimumLicenseRequired,

@@ -58,7 +58,9 @@ export async function autocomplete(
 
   if (!/=\s+$/i.test(innerText)) {
     suggestions.push(
-      getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+      getNewUserDefinedColumnSuggestion(
+        (await callbacks?.getSuggestedUserDefinedColumnName?.()) || ''
+      )
     );
   }
 
