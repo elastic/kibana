@@ -375,15 +375,20 @@ export const createTabsStorageManager = ({
 
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
-    sessionInfo.discoverSessionId = persistedDiscoverSession?.id;
+    sessionInfo.discoverSessionId =
+      persistedDiscoverSession?.id ??
+      (selectedTabId === NEW_TAB_ID ? storedTabsState.discoverSessionId : undefined);
 
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab })
     );
+    // TODO: the override for the openTabs here means that the replaced tabs need to be added to the recently closed tabs as well
     const openTabs =
-      persistedDiscoverSession?.id === storedTabsState.discoverSessionId
+      persistedDiscoverSession?.id === storedTabsState.discoverSessionId ||
+      (!persistedDiscoverSession?.id && selectedTabId === NEW_TAB_ID)
         ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
         : persistedTabs ?? [];
+
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
