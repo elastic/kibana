@@ -93,17 +93,8 @@ export const getRenderCellValueFn =
         const displayKey = indexPattern.fields.getByName
           ? indexPattern.fields.getByName(key)?.displayName
           : undefined;
-        const formatter = subField
-          ? indexPattern.getFormatterForField(subField)
-          : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
         const formatted = (values as unknown[])
-          .map((val: unknown) =>
-            formatter.convert(val, 'html', {
-              field: subField,
-              hit: row,
-              indexPattern,
-            })
-          )
+          .map((val: unknown) => formatFieldValue(val, row, indexPattern, subField))
           .join(', ');
         const pairs = highlights[key] ? highlightPairs : sourcePairs;
         if (displayKey) {

@@ -14,6 +14,7 @@ import { setServices } from '../../../../../../kibana_services';
 import { DiscoverServices } from '../../../../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../../../data/common/stubs';
 
+let mockConvert = jest.fn();
 describe('Row formatter', () => {
   const hit = {
     _id: 'a',
@@ -49,12 +50,13 @@ describe('Row formatter', () => {
   const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
 
   beforeEach(() => {
+    mockConvert = jest.fn((value) => value);
     setServices({
       uiSettings: {
         get: () => 100,
       },
       fieldFormats: {
-        getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+        getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => mockConvert(value) })),
         getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
       },
     } as unknown as DiscoverServices);
@@ -197,6 +199,8 @@ describe('Row formatter', () => {
     expect(
       formatTopLevelObject(
         {
+          _id: '1',
+          _index: 'test',
           fields: {
             'object.value': [5, 10],
           },
@@ -230,7 +234,11 @@ describe('Row formatter', () => {
     });
     const formatted = ReactDOM.renderToStaticMarkup(
       formatTopLevelObject(
-        { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
+        {
+          _id: '1',
+          _index: 'test',
+          fields: { 'a.zzz': [100], 'a.ccc': [50] },
+        },
         { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
         indexPattern
       )
@@ -248,12 +256,14 @@ describe('Row formatter', () => {
     expect(
       formatTopLevelObject(
         {
+          _id: '1',
+          _index: 'test',
           fields: {
             'object.value': [5, 10],
             'object.keys': ['a', 'b'],
           },
           highlight: {
-            'object.keys': 'a',
+            'object.keys': ['a'],
           },
         },
         {
@@ -287,6 +297,8 @@ describe('Row formatter', () => {
     expect(
       formatTopLevelObject(
         {
+          _id: '1',
+          _index: 'test',
           fields: {
             'object.value': [5, 10],
           },
@@ -309,5 +321,36 @@ describe('Row formatter', () => {
         }
       />
     `);
+  });
+
+  it('passes values through default formatter for unmapped objects', () => {
+    mockConvert = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
+    indexPattern.getFieldByName = jest.fn().mockReturnValue(undefined);
+    setServices({
+      uiSettings: {
+        get: () => 100,
+      },
+      fieldFormats: {
+        getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => mockConvert(value) })),
+        getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => mockConvert(value) })),
+      },
+    } as unknown as DiscoverServices);
+
+    const formatted = formatTopLevelObject(
+      {
+        _id: '1',
+        _index: 'test',
+        fields: {
+          'foo.data': ['my foo value'],
+        },
+      },
+      {
+        'foo.data': ['my foo value'],
+        getByName: jest.fn(),
+      },
+      indexPattern
+    );
+    expect(mockConvert).toHaveBeenCalled();
+    expect(ReactDOM.renderToStaticMarkup(formatted)).toContain('my bar value');
   });
 });
