@@ -39,7 +39,7 @@ import type { RuleMigrationStats } from '../../types';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
-import { RuleMigrationsLastError } from './last_error';
+import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 
 const headerStyle = css`
@@ -121,7 +121,10 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
             {migrationStats.last_execution?.error && (
               <>
-                <RuleMigrationsLastError message={migrationStats.last_execution.error} />
+                <MigrationsLastError
+                  message={migrationStats.last_execution.error}
+                  migrationType="rule"
+                />
                 <EuiSpacer size="m" />
               </>
             )}

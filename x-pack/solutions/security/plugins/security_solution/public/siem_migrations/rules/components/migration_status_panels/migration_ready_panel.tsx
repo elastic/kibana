@@ -23,7 +23,7 @@ import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
-import { RuleMigrationsLastError } from './last_error';
+import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { PanelText } from '../../../../common/components/panel_text';
 
@@ -109,7 +109,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
       {migrationStats.last_execution?.error && (
         <>
           <EuiSpacer size="m" />
-          <RuleMigrationsLastError message={migrationStats.last_execution.error} />
+          <MigrationsLastError message={migrationStats.last_execution.error} migrationType="rule" />
         </>
       )}
     </EuiPanel>
