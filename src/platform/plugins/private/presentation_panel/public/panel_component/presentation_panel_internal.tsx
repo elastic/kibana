@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+
+import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import type { PublishesTitle } from '@kbn/presentation-publishing';
@@ -16,13 +19,11 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
+import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { usePanelErrorCss } from './use_panel_error_css';
-import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -43,10 +44,10 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
-  const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = useMemo(() => {
@@ -120,6 +121,7 @@ export const PresentationPanelInternal = <
       setDragHandle={setDragHandle}
     >
       <EuiPanel
+        panelRef={panelRef}
         role="figure"
         paddingSize="none"
         className={classNames('embPanel', {
@@ -146,15 +148,7 @@ export const PresentationPanelInternal = <
           />
         )}
         {blockingError && api && (
-          <EuiFlexGroup
-            alignItems="center"
-            css={panelErrorCss}
-            className="eui-fullHeight"
-            data-test-subj="embeddableError"
-            justifyContent="center"
-          >
-            <PresentationPanelErrorInternal api={api} error={blockingError} />
-          </EuiFlexGroup>
+          <PresentationPanelErrorInternal api={api} error={blockingError} panelRef={panelRef} />
         )}
         {!initialLoadComplete && <PanelLoader />}
         <div

@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import type { ControlGroupRendererProps } from './control_group_renderer';
 
-export const usePanelErrorCss = () => {
-  const euiTheme = useEuiTheme();
-  return css({
-    padding: euiTheme.euiTheme.size.l,
-    '& > *': {
-      maxHeight: '100%',
-      overflow: 'auto',
-    },
-  });
-};
+const Component = dynamic(async () => {
+  const { ControlGroupRenderer } = await import('../../controls_module');
+  return {
+    default: ControlGroupRenderer,
+  };
+});
+
+export function LazyControlGroupRenderer(props: ControlGroupRendererProps) {
+  return <Component {...props} />;
+}

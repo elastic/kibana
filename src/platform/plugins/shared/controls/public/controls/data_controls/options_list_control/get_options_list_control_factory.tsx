@@ -26,7 +26,7 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { type Filter } from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import { type PublishingSubject, type SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -221,6 +221,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       ])
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
+          console.log({ selectedOptions });
           const dataView = dataViews?.[0];
           let newFilter: Filter | undefined;
           if (dataView) {
@@ -275,6 +276,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           if (isOptionsListESQLControlState(lastSaved?.rawState)) {
             throw new Error('ES|QL control state handling not yet implemented');
           }
+          console.log({ lastSaved });
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);

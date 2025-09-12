@@ -44,13 +44,10 @@ export class ControlsPlugin
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {
     setKibanaServices(coreStart, startPlugins);
-
     registerActions(startPlugins.uiActions);
-
     startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });
-
     startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });

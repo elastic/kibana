@@ -63,18 +63,25 @@ import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from '.
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardState['panels'],
+  initialControls: DashboardState['controlGroupInput'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
+  references$: BehaviorSubject<Reference[] | undefined>,
   getReferences: (id: string) => Reference[]
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
+  // console.log({ initialControls, references: references$.value });
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
+    initialControls,
+    references$.value ?? [],
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
+  // console.log({ initialChildState });
+
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
     layout$.pipe(
@@ -105,9 +112,10 @@ export function initializeLayoutManager(
   const childrenLoading$ = combineLatest([children$, layout$]).pipe(
     map(([children, layout]) => {
       // filter out panels that are in collapsed sections, since the APIs will never be available
-      const expectedChildCount = Object.values(layout.panels).filter((panel) => {
-        return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
-      }).length;
+      const expectedChildCount =
+        Object.values(layout.panels).filter((panel) => {
+          return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
+        }).length + Object.values(layout.controls).length;
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
     }),
@@ -116,6 +124,7 @@ export function initializeLayoutManager(
 
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
   let lastSavedLayout = initialLayout;
+
   let lastSavedChildState = initialChildState;
   const resetLayout = () => {
     layout$.next({ ...lastSavedLayout });
@@ -123,7 +132,7 @@ export function initializeLayoutManager(
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (lastSavedLayout.panels[uuid]) {
+      if (lastSavedLayout.panels[uuid] || lastSavedLayout.controls[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {
@@ -225,6 +234,7 @@ export function initializeLayoutManager(
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
     if (!childApi || !childLayout) throw new PanelNotFoundError();
+    // console.log('getDashboardPanelFromId');
     return {
       type: childLayout.type,
       gridData: childLayout.gridData,
@@ -384,9 +394,11 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
-      getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
+      getSerializedStateForPanel: (panelId: string) => {
+        // console.log('getSerializedStateForPanel', currentChildState[panelId]);
+        return currentChildState[panelId];
+      },
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
-      layout$,
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
@@ -398,8 +410,16 @@ export function initializeLayoutManager(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
-              map((lastSaved) => deserializeLayout(lastSaved.panels, getReferences)),
+              map((lastSaved) =>
+                deserializeLayout(
+                  lastSaved.panels,
+                  lastSaved.controlGroupInput,
+                  references$.value ?? [],
+                  getReferences
+                )
+              ),
               tap(({ layout, childState }) => {
+                console.log({ lastSavedChildState, childState });
                 lastSavedChildState = childState;
                 lastSavedLayout = layout;
               })
@@ -414,18 +434,24 @@ export function initializeLayoutManager(
           })
         );
       },
-      registerChildApi: (api: DefaultEmbeddableApi) => {
-        children$.next({
-          ...children$.value,
-          [api.uuid]: api,
-        });
-      },
+
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
+        // console.log('SET CHILD STATE', { uuid, state });
         currentChildState[uuid] = state;
       },
       isSectionCollapsed,
     },
     api: {
+      layout$,
+      registerChildApi: (api: DefaultEmbeddableApi) => {
+        // console.log('register', api.type, api);
+        children$.next({
+          ...children$.value,
+          [api.uuid]: api,
+        });
+        // currentChildState[api.uuid] = api.serializeState();
+      },
+
       /** Panels */
       children$,
       getChildApi,
