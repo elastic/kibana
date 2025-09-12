@@ -20,8 +20,8 @@ export interface InferenceConnector {
   connectorId: string;
   name: string;
   type: InferenceConnectorType;
-  family: ModelFamily;
-  provider: ModelProvider;
+  modelFamily: ModelFamily;
+  modelProvider: ModelProvider;
   modelId: string | undefined;
 }
 
@@ -32,15 +32,15 @@ export const getInferenceConnectorInfo = (
     return;
   }
   const inferenceConnector = connectorToInference(connector);
-  const family = getConnectorFamily(inferenceConnector);
-  const provider = getConnectorProvider(inferenceConnector);
+  const modelFamily = getConnectorFamily(inferenceConnector);
+  const modelProvider = getConnectorProvider(inferenceConnector);
   const modelId = getConnectorModel(inferenceConnector);
   return {
     connectorId: inferenceConnector.connectorId,
     name: inferenceConnector.name,
     type: inferenceConnector.type,
-    family,
-    provider,
+    modelFamily,
+    modelProvider,
     modelId,
   };
 };

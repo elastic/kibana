@@ -31,13 +31,13 @@ export const connectorSchema: RootSchema<Connector['connector']> = {
       description: 'The action type id of the connector.',
     },
   },
-  family: {
+  modelFamily: {
     type: 'text',
     _meta: {
       description: 'The model family of the connector.',
     },
   },
-  provider: {
+  modelProvider: {
     type: 'text',
     _meta: {
       description: 'The model provider of the connector.',
