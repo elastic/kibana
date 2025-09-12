@@ -40,7 +40,6 @@ export const NEW_TAB_ID = 'new' as const;
 export const APP_STATE_URL_KEY = '_a';
 export const GLOBAL_STATE_URL_KEY = '_g';
 export const TABS_STATE_URL_KEY = '_t';
-export const SEARCH_SESSION_URL_KEY = 'searchSessionId';
 
 /**
  * Product feature IDs

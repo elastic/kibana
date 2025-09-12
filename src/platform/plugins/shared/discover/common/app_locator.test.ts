@@ -242,7 +242,7 @@ describe('Discover url generator', () => {
       tabId: '__test__',
     });
 
-    expect(path).toMatchInlineSnapshot(`"#/?_t=__test__"`);
+    expect(path).toMatchInlineSnapshot(`"#/?_t=(tabId:__test__)"`);
   });
 
   test('can specify to open in a new tab', async () => {
@@ -256,7 +256,7 @@ describe('Discover url generator', () => {
     });
 
     expect(path).toMatchInlineSnapshot(
-      `"#/?searchSessionId=__test__&_t=new&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))"`
+      `"#/?searchSessionId=__test__&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_t=(tabId:new)"`
     );
   });
 

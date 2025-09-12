@@ -16,7 +16,7 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { TABS_STATE_URL_KEY, NEW_TAB_ID } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
@@ -388,7 +388,21 @@ export const createTabsStorageManager = ({
       toRecentlyClosedTabState(tab, defaultTabState)
     );
 
+    const newDefaultTab = {
+      ...defaultTabState,
+      ...createTabItem([]),
+    };
+
     if (enabled && selectedTabId) {
+      if (selectedTabId === NEW_TAB_ID) {
+        // append a new tab if requested via URL
+        return {
+          allTabs: [...openTabs, newDefaultTab],
+          selectedTabId: newDefaultTab.id,
+          recentlyClosedTabs: closedTabs,
+        };
+      }
+
       // restore previously opened tabs
       if (openTabs.find((tab) => tab.id === selectedTabId)) {
         return {
@@ -414,17 +428,17 @@ export const createTabsStorageManager = ({
       }
     }
 
-    const defaultTab = persistedTabs
-      ? persistedTabs[0]
-      : {
-          ...defaultTabState,
-          ...createTabItem([]),
-        };
-    const allTabs = persistedTabs ?? [defaultTab];
+    let allTabs = [newDefaultTab];
+    let selectedTab = newDefaultTab;
+
+    if (persistedTabs?.length) {
+      allTabs = persistedTabs;
+      selectedTab = persistedTabs[0];
+    }
 
     return {
       allTabs,
-      selectedTabId: defaultTab.id,
+      selectedTabId: selectedTab.id,
       recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
     };
   };

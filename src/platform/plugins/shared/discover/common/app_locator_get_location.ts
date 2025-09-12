@@ -13,12 +13,7 @@ import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-uti
 import type { DiscoverAppLocatorGetLocation, MainHistoryLocationState } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import {
-  APP_STATE_URL_KEY,
-  GLOBAL_STATE_URL_KEY,
-  SEARCH_SESSION_URL_KEY,
-  TABS_STATE_URL_KEY,
-} from './constants';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TABS_STATE_URL_KEY } from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -80,15 +75,8 @@ export const appLocatorGetLocationCommon = async (
 
   let path = `#/${savedSearchPath}`;
 
-  const additionalParams = [];
   if (searchSessionId) {
-    additionalParams.push(`${SEARCH_SESSION_URL_KEY}=${searchSessionId}`);
-  }
-  if (tabId) {
-    additionalParams.push(`${TABS_STATE_URL_KEY}=${tabId}`);
-  }
-  if (additionalParams.length) {
-    path += (path.includes('?') ? '&' : '?') + additionalParams.join('&');
+    path = `${path}?searchSessionId=${searchSessionId}`;
   }
 
   if (Object.keys(queryState).length) {
@@ -102,6 +90,10 @@ export const appLocatorGetLocationCommon = async (
 
   if (Object.keys(appState).length) {
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
+  }
+
+  if (tabId) {
+    path = setStateToKbnUrl(TABS_STATE_URL_KEY, { tabId }, { useHash }, path);
   }
 
   return {

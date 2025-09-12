@@ -59,7 +59,10 @@ export const mapToUISession = ({
   if (initialState) delete initialState.searchSessionId;
   // derive the URL and add it in
   const reloadUrl = getUrlFromState(locators, locatorId, initialState);
-  const restoreUrl = getUrlFromState(locators, locatorId, restoreState);
+  const restoreUrl = getUrlFromState(locators, locatorId, {
+    ...restoreState,
+    tabId: 'new',
+  });
 
   return {
     id: savedObject.id,
