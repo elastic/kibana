@@ -26,11 +26,15 @@ export function expandEvals(commands: ESQLCommand[]): ESQLCommand[] {
     if (command.name.toLowerCase() === 'eval') {
       for (const arg of command.args) {
         expanded.push(
-          Builder.command({
-            name: 'eval',
-            args: [arg],
-            location: command.location,
-          })
+          Builder.command(
+            {
+              name: 'eval',
+              args: [arg],
+            },
+            {
+              location: command.location,
+            }
+          )
         );
       }
     } else {
