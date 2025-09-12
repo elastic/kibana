@@ -7,14 +7,16 @@
 
 import React, { memo, useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import {
   MissingPrivilegesDescription,
   MissingPrivilegesTooltip,
 } from '../../../../common/components/missing_privileges';
-import type { CapabilitiesLevel } from '../../../common/service';
+import type { CapabilitiesLevel } from '../../service';
 
 export const WithMissingPrivilegesTooltip = <P extends { isAuthorized: boolean }>(
   Component: React.ComponentType<P>,
+  migrationType: MigrationType,
   level: CapabilitiesLevel
 ) => {
   const WrappedComponent = memo(function WrappedComponent(props: Omit<P, 'isAuthorized'>) {
@@ -22,10 +24,8 @@ export const WithMissingPrivilegesTooltip = <P extends { isAuthorized: boolean }
       services: { siemMigrations },
     } = useKibana();
 
-    const missingCapabilities = useMemo(
-      () => siemMigrations.rules.getMissingCapabilities(level),
-      [siemMigrations.rules]
-    );
+    const service = migrationType === 'rule' ? siemMigrations.rules : siemMigrations.dashboards;
+    const missingCapabilities = useMemo(() => service.getMissingCapabilities(level), [service]);
 
     const isAuthorized = useMemo(() => missingCapabilities.length === 0, [missingCapabilities]);
 
