@@ -24,12 +24,11 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { ControlState } from '@kbn/controls-schemas';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 import { ControlPanel } from './components/control_panel';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 export const ControlsRenderer = ({
   parentApi,
