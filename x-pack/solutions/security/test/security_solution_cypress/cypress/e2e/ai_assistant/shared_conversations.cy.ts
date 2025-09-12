@@ -42,7 +42,7 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { login, loginWithUser, logout } from '../../tasks/login';
+import { login, loginWithUser } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
@@ -90,7 +90,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   };
   before(() => {
     loginSecondaryUser(isServerless, secondaryUser);
-    logout();
+    cy.clearCookies();
   });
   beforeEach(() => {
     deleteConnectors();
