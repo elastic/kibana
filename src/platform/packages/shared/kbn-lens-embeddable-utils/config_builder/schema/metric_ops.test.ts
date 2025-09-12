@@ -35,6 +35,7 @@ describe('Metric Operations Schemas', () => {
   describe('columnValueOperationSchema', () => {
     it('validates a valid metric operation configuration', () => {
       const input = {
+        operation: 'value',
         column: 'sum' as const,
       };
 
