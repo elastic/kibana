@@ -82,6 +82,8 @@ export interface LogDocumentOverview
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
+  'transaction.id'?: string;
+  'span.id'?: string;
   'log.file.path'?: string;
   'data_stream.namespace': string;
   'data_stream.dataset': string;

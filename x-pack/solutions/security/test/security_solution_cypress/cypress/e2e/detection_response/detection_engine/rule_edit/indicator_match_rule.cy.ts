@@ -44,15 +44,14 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { visit } from '../../../../tasks/navigation';
 
-const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
+const SUPPRESS_BY_FIELDS = ['myhash.mysha256'];
 
 const rule = getNewThreatIndicatorRule();
 
-// Skipping in MKI due to flake
 describe(
   'Detection rules, Indicator Match, Edit',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
@@ -62,9 +61,7 @@ describe(
       deleteAlertsAndRules();
     });
 
-    // https://github.com/elastic/kibana/issues/187621
-    // FLAKY: https://github.com/elastic/kibana/issues/196711
-    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
+    describe('without suppression', () => {
       beforeEach(() => {
         createRule(rule);
       });
@@ -73,7 +70,7 @@ describe(
         visit(RULES_MANAGEMENT_URL);
         editFirstRule();
 
-        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS, true);
         selectAlertSuppressionPerInterval();
         setAlertSuppressionDuration(2, 'h');
 
