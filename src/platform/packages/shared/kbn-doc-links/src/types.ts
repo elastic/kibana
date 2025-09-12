@@ -554,6 +554,7 @@ export interface DocLinks {
     httpMonitoring: string;
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
+    agentReleaseProcess: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

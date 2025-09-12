@@ -673,19 +673,31 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_region_name-Georgia"
-                                          tabindex="-1"
+                                          data-test-subj="cellActions-renderContent-source.geo.region_name"
                                         >
-                                          <span
-                                            class="c3"
-                                            data-test-subj="render-content-source.geo.region_name"
-                                          >
-                                            <span
-                                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                          <div>
+                                            <div
+                                              class="euiPopover emotion-euiPopover-inline-block"
                                             >
-                                              Georgia
-                                            </span>
-                                          </span>
+                                              <div>
+                                                <div
+                                                  data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_region_name-Georgia"
+                                                  tabindex="-1"
+                                                >
+                                                  <span
+                                                    class="c3"
+                                                    data-test-subj="render-content-source.geo.region_name"
+                                                  >
+                                                    <span
+                                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                                    >
+                                                      Georgia
+                                                    </span>
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
@@ -700,19 +712,31 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_city_name-Atlanta"
-                                          tabindex="-1"
+                                          data-test-subj="cellActions-renderContent-source.geo.city_name"
                                         >
-                                          <span
-                                            class="c3"
-                                            data-test-subj="render-content-source.geo.city_name"
-                                          >
-                                            <span
-                                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                          <div>
+                                            <div
+                                              class="euiPopover emotion-euiPopover-inline-block"
                                             >
-                                              Atlanta
-                                            </span>
-                                          </span>
+                                              <div>
+                                                <div
+                                                  data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_city_name-Atlanta"
+                                                  tabindex="-1"
+                                                >
+                                                  <span
+                                                    class="c3"
+                                                    data-test-subj="render-content-source.geo.city_name"
+                                                  >
+                                                    <span
+                                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                                    >
+                                                      Atlanta
+                                                    </span>
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
