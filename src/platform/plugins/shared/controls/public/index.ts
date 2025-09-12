@@ -39,7 +39,6 @@ export type {
   ControlPanelsState,
   DefaultDataControlState,
 } from '../common';
-export type { OptionsListDSLControlState } from '../common/options_list';
 
 export function plugin() {
   return new ControlsPlugin();

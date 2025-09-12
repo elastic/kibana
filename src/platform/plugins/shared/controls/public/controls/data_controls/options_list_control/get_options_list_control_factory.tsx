@@ -68,12 +68,12 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
   return {
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      if (isOptionsListESQLControlState(initialState)) {
-        // TODO: @Zac can you fix this type error?
+      const state = initialState.rawState;
+
+      if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
       }
 
-      const state = initialState.rawState;
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);

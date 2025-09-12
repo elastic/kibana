@@ -8,12 +8,13 @@
  */
 
 import type {
-  OptionsListControlState as OptionsListDSLControlState,
+  OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
   OptionsListSelection,
 } from '@kbn/controls-schemas';
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESQLControlState } from '@kbn/esql-types';
 
 /**
  * ----------------------------------------------------------------
@@ -21,10 +22,8 @@ import type { ESQLControlState } from '@kbn/esql-types';
  * ----------------------------------------------------------------
  */
 
-export type OptionsListESQLControlState = ESQLControlState & OptionsListDSLControlState; // TODO: @Zac This should be defined via a schema
-
 export const isOptionsListESQLControlState = (
-  state: OptionsListDSLControlState | undefined
+  state: OptionsListControlState | undefined
 ): state is OptionsListESQLControlState =>
   typeof state !== 'undefined' &&
   Object.hasOwn(state, 'esqlQuery') &&

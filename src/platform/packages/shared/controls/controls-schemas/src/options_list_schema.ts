@@ -34,7 +34,7 @@ export const optionsListSortSchema = schema.object(
 
 export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.number()]);
 
-export const optionsListControlSchema = dataControlSchema.extends({
+const optionsListControlBaseParameters = {
   displaySettings: schema.maybe(optionsListDisplaySettingsSchema),
   searchTechnique: schema.maybe(optionsListSearchTechniqueSchema),
   sort: schema.maybe(optionsListSortSchema),
@@ -43,4 +43,22 @@ export const optionsListControlSchema = dataControlSchema.extends({
   runPastTimeout: schema.maybe(schema.boolean({ defaultValue: false })),
   singleSelect: schema.maybe(schema.boolean({ defaultValue: false })),
   exclude: schema.maybe(schema.boolean({ defaultValue: false })),
+};
+
+export const optionsListDSLControlSchema = dataControlSchema.extends(
+  optionsListControlBaseParameters
+);
+export const optionsListESQLControlSchema = schema.object({
+  ...optionsListControlBaseParameters,
+  selectedOptions: schema.arrayOf(schema.string()),
+  variableName: schema.string(),
+  variableType: schema.oneOf([
+    schema.literal('fields'),
+    schema.literal('values'),
+    schema.literal('functions'),
+    schema.literal('time_literal'),
+  ]),
+  esqlQuery: schema.string(),
+  controlType: schema.oneOf([schema.literal('STATIC_VALUES'), schema.literal('VALUES_FROM_QUERY')]),
+  availableOptions: schema.maybe(schema.arrayOf(schema.string())),
 });

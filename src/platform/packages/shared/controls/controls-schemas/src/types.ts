@@ -11,7 +11,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { controlSchema, dataControlSchema } from './control_schema';
 import type { controlsGroupSchema } from './controls_group_schema';
 import type {
-  optionsListControlSchema,
+  optionsListDSLControlSchema,
+  optionsListESQLControlSchema,
   optionsListDisplaySettingsSchema,
   optionsListSearchTechniqueSchema,
   optionsListSelectionSchema,
@@ -24,7 +25,11 @@ export type ControlState = TypeOf<typeof controlSchema>;
 export type DataControlState = TypeOf<typeof dataControlSchema>;
 
 export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
-export type OptionsListControlState = TypeOf<typeof optionsListControlSchema>;
+
+export type OptionsListDSLControlState = TypeOf<typeof optionsListDSLControlSchema>;
+export type OptionsListESQLControlState = TypeOf<typeof optionsListESQLControlSchema>;
+export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
+
 export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqueSchema>;
 export type OptionsListSelection = TypeOf<typeof optionsListSelectionSchema>;
 export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;

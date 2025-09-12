@@ -14,6 +14,8 @@ export type {
   ControlsGroupState,
   DataControlState,
   OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
   OptionsListDisplaySettings,
   OptionsListSearchTechnique,
   OptionsListSelection,
