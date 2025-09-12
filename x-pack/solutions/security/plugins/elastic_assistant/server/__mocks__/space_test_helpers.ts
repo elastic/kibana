@@ -9,13 +9,13 @@ import type { ElasticAssistantApiRequestHandlerContext } from '../types';
 
 // Type definitions for mock clients and contexts
 type MockSearchCall = [{ index?: string }];
-type MockElasticsearchClient = {
+interface MockElasticsearchClient {
   search?: {
     mock?: {
       calls: MockSearchCall[];
     };
   };
-};
+}
 
 type SpaceAwareContext = Partial<ElasticAssistantApiRequestHandlerContext> & {
   elasticAssistant?: {
@@ -40,7 +40,10 @@ export const withSpace = (spaceId: string) => (context: SpaceAwareContext) => {
  * @param mockClient - Mock Elasticsearch client with search calls
  * @param spaceId - Expected space ID to be found in index names
  */
-export const expectSpaceScopedIndex = (mockClient: MockElasticsearchClient, spaceId: string): void => {
+export const expectSpaceScopedIndex = (
+  mockClient: MockElasticsearchClient,
+  spaceId: string
+): void => {
   const calls = mockClient.search?.mock?.calls || [];
   if (calls.length > 0) {
     const lastCall = calls[calls.length - 1];
