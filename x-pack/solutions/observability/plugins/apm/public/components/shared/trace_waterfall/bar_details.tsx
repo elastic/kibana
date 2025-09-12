@@ -103,17 +103,13 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
         )}
         {item.errorCount > 0 ? (
           <EuiFlexItem grow={false}>
-            {onErrorClick ? (
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
-                  defaultMessage: 'View error details',
-                })}
-                data-test-subj="apmBarDetailsErrorButton"
-                color="danger"
-                iconType="errorFilled"
-                iconSize="s"
-                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
-                onClick={(e: React.MouseEvent) => {
+            {getRelatedErrorsHref || onErrorClick ? (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiBadge
+                color={theme.euiTheme.colors.danger}
+                iconType="arrowRight"
+                href={getRelatedErrorsHref?.(item.id) as any}
+                onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -123,16 +119,6 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       errorCount: item.errorCount,
                     });
                   }
-                }}
-              />
-            ) : getRelatedErrorsHref ? (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
-              <EuiBadge
-                color={theme.euiTheme.colors.danger}
-                iconType="arrowRight"
-                href={getRelatedErrorsHref(item.id) as any}
-                onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
-                  e.stopPropagation();
                 }}
                 tabIndex={0}
                 role="button"
