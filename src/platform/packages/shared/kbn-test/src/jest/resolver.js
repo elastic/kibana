@@ -84,10 +84,6 @@ module.exports = (request, options) => {
     });
   }
 
-  if (request.startsWith('zod')) {
-    console.error('rqe', request);
-  }
-
   if (request === 'zod' || request === 'zod/v3') {
     return resolve.sync('zod/v3/index.cjs', {
       basedir: options.basedir,
