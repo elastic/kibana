@@ -78,6 +78,7 @@ export interface EsWorkflowStepExecution {
   spaceId: string;
   id: string;
   stepId: string;
+  stepLabel: string;
   stepType?: string;
 
   /** Current step's scope path */

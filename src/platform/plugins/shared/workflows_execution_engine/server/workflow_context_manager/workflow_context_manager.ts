@@ -33,7 +33,7 @@ export class WorkflowContextManager {
     };
 
     const currentNode = this.workflowExecutionRuntime.getCurrentStep();
-    const currentNodeId = currentNode?.id ?? currentNode?.name;
+    const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
     allPredecessors.forEach((node) => {

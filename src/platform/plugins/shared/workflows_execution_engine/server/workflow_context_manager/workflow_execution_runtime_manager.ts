@@ -118,7 +118,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public enterScope(scopeId?: string): void {
     if (!scopeId) {
-      scopeId = this.getCurrentStep().id;
+      scopeId = (this.getCurrentStep() as any).stepId;
     }
 
     const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
@@ -143,6 +143,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getStepResult(stepId: string): RunStepResult | undefined {
+    stepId = (this.getCurrentStep() as any).stepId;
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
 
     if (!latestStepExecution) {
@@ -157,14 +158,14 @@ export class WorkflowExecutionRuntimeManager {
 
   public async setStepResult(result: RunStepResult): Promise<void> {
     const currentStep = this.getCurrentStep();
-
+    const stepId = (this.getCurrentStep() as any).stepId;
     if (result.error) {
       this.setWorkflowError(result.error);
     }
 
     this.workflowExecutionState.upsertStep({
       id: this.getCurrentStepExecutionId(),
-      stepId: currentStep.id,
+      stepId,
       path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
       input: result.input,
       output: result.output,
@@ -173,10 +174,12 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getStepState(stepId: string): Record<string, any> | undefined {
+    stepId = (this.getCurrentStep() as any).stepId;
     return this.workflowExecutionState.getLatestStepExecution(stepId)?.state;
   }
 
   public async setStepState(stepId: string, state: Record<string, any> | undefined): Promise<void> {
+    stepId = (this.getCurrentStep() as any).stepId;
     this.workflowExecutionState.upsertStep({
       id: this.buildStepExecutionId(stepId),
       path: [...(this.workflowExecutionState.getWorkflowExecution().stack || [])],
@@ -201,13 +204,15 @@ export class WorkflowExecutionRuntimeManager {
         },
       },
       async () => {
-        const nodeId = stepId;
-        const node = this.workflowGraph.getNode(nodeId);
+        // const nodeId = stepId;
+        const node = this.workflowGraph.getNode(this.getCurrentStep().id);
+        stepId = (node as any).stepId;
         const stepStartedAt = new Date();
 
         const stepExecution = {
           id: this.buildStepExecutionId(stepId),
-          stepId: nodeId,
+          stepId,
+          stepLabel: (node as any).stepId,
           stepType: (node as any)?.configuration.type,
           path: [...(workflowExecution.stack || [])],
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
@@ -238,6 +243,8 @@ export class WorkflowExecutionRuntimeManager {
         },
       },
       async () => {
+        const node = this.workflowGraph.getNode(this.getCurrentStep().id);
+        stepId = (node as any).stepId;
         const startedStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
 
         if (!startedStepExecution) {

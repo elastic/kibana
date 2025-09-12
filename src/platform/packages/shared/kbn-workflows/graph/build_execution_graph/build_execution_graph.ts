@@ -247,13 +247,14 @@ function createIfGraphForIfStepLevel(
   context: GraphBuildContext
 ) {
   const stepId = getStepId(stepWithIfCondition as BaseStep, context);
+  const generatedStepId = `if_${stepId}`;
   const ifStep: IfStep = {
-    name: `if_${stepId}`,
+    name: generatedStepId,
     type: 'if',
     condition: stepWithIfCondition.if,
     steps: [omit(stepWithIfCondition, ['if'])],
   } as IfStep;
-  return createIfGraph(stepId, ifStep, context);
+  return createIfGraph(generatedStepId, ifStep, context);
 }
 
 function visitOnFailure(
@@ -594,13 +595,14 @@ function createForeachGraphForStepWithForeach(
   context: GraphBuildContext
 ) {
   const stepId = getStepId(stepWithForeach as BaseStep, context);
+  const generatedStepId = `foreach_${stepId}`;
   const foreachStep: ForEachStep = {
-    name: `foreach_${stepId}`,
+    name: generatedStepId,
     type: 'foreach',
     foreach: stepWithForeach.foreach,
     steps: [omit(stepWithForeach, ['foreach'])],
   } as ForEachStep;
-  return createForeachGraph(stepId, foreachStep, context);
+  return createForeachGraph(generatedStepId, foreachStep, context);
 }
 
 export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
