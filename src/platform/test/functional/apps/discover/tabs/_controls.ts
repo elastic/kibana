@@ -12,12 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 const savedSession = 'my ESQL session';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover, common, header, dashboardControls } = getPageObjects([
-    'discover',
-    'common',
-    'header',
-    'dashboardControls',
-  ]);
+  const { discover, dashboardControls } = getPageObjects(['discover', 'dashboardControls']);
   const retry = getService('retry');
   const esql = getService('esql');
   const browser = getService('browser');
@@ -26,36 +21,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
       await discover.selectTextBaseLang();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await retry.try(async () => {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
         expect(controlGroupVisible).to.be(true);
       });
 
-      await common.sleep(1000);
-
       // Check Discover editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
 
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
     });
 
     it('should keep the ES|QL control after a browser refresh', async () => {
       await discover.selectTextBaseLang();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       // Refresh the page
       await browser.refresh();
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
       await retry.try(async () => {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
         expect(controlGroupVisible).to.be(true);
@@ -64,14 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should save the ES|QL control', async () => {
       await discover.selectTextBaseLang();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
       // Save the search
       await discover.saveSearch(savedSession);
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
       await retry.try(async () => {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
         expect(controlGroupVisible).to.be(true);
@@ -81,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open a saved session with a control group', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await retry.try(async () => {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
@@ -92,14 +83,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reset successfully a saved session with a control group', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       // Make a change in the controls
       const controlId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.optionsListOpenPopover(controlId, true);
       await dashboardControls.optionsListPopoverSelectOption('CN');
 
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
       await testSubjects.existOrFail('unsavedChangesBadge');
 
       await discover.revertUnsavedChanges();
