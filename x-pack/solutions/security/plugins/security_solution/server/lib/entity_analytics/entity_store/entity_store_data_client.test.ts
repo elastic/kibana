@@ -145,6 +145,7 @@ describe('EntityStoreDataClient', () => {
     } as unknown as SecurityPluginStart,
     request: {} as KibanaRequest,
     uiSettingsClient: uiSettingsClientMock,
+    isServerless: false,
   });
 
   const defaultSearchParams = {

@@ -155,6 +155,7 @@ interface EntityStoreClientOpts {
   security: SecurityPluginStart;
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
+  isServerless: boolean;
 }
 
 interface SearchEntitiesParams {
@@ -174,6 +175,7 @@ export class EntityStoreDataClient {
   private esClient: ElasticsearchClient;
   private apiKeyGenerator?: ApiKeyManager;
   private uiSettingsClient: IUiSettingsClient;
+  private isServerless: boolean;
 
   constructor(private readonly options: EntityStoreClientOpts) {
     const {
@@ -185,14 +187,17 @@ export class EntityStoreDataClient {
       namespace,
       apiKeyManager,
       uiSettingsClient,
+      isServerless,
     } = options;
     this.esClient = clusterClient.asCurrentUser;
     this.apiKeyGenerator = apiKeyManager;
     this.uiSettingsClient = uiSettingsClient;
+    this.isServerless = isServerless;
 
     this.entityClient = new EntityClient({
       clusterClient,
       soClient,
+      isServerless,
       logger,
     });
 
@@ -256,8 +261,8 @@ export class EntityStoreDataClient {
             namespace,
           }),
           ...(await getEntityILMPolicyStatuses({
-            definition,
             esClient: this.esClient,
+            isServerless: this.isServerless,
           })),
           getEntityIndexComponentTemplateStatus({
             definitionId: definition.id,

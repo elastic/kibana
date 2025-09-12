@@ -35,30 +35,32 @@ interface ComponentManagementOptions {
 export const installEntityManagerTemplates = async ({
   esClient,
   logger,
+  isServerless,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  isServerless: boolean;
 }) => {
   await Promise.all([
     upsertComponent({
       esClient,
       logger,
-      component: entitiesLatestBaseComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesLatestBaseComponentTemplateConfig, isServerless),
     }),
     upsertComponent({
       esClient,
       logger,
-      component: entitiesHistoryBaseComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesHistoryBaseComponentTemplateConfig, isServerless),
     }),
     upsertComponent({
       esClient,
       logger,
-      component: entitiesEventComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesEventComponentTemplateConfig, isServerless),
     }),
     upsertComponent({
       esClient,
       logger,
-      component: entitiesEntityComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesEntityComponentTemplateConfig, isServerless),
     }),
   ]);
 };
@@ -148,4 +150,14 @@ export async function upsertComponent({ esClient, component, logger }: Component
     logger.error(`Error updating entity manager component template: ${error.message}`);
     throw error;
   }
+}
+
+export function removeIlmInServerless(
+  component: ClusterPutComponentTemplateRequest,
+  isServerless: boolean
+): ClusterPutComponentTemplateRequest {
+  if (isServerless) {
+    component.template.lifecycle = undefined;
+  }
+  return component;
 }

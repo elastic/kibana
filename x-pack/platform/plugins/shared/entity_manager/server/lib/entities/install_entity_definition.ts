@@ -39,6 +39,7 @@ import { deleteIndices } from './delete_index';
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  isServerless: boolean;
   definition: EntityDefinition;
   logger: Logger;
 }
@@ -49,6 +50,7 @@ export interface InstallDefinitionParams {
 export async function installEntityDefinition({
   esClient,
   soClient,
+  isServerless,
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
@@ -66,7 +68,13 @@ export async function installEntityDefinition({
       installedComponents: [],
     });
 
-    return await install({ esClient, soClient, logger, definition: entityDefinition });
+    return await install({
+      esClient,
+      soClient,
+      isServerless,
+      logger,
+      definition: entityDefinition,
+    });
   } catch (e) {
     logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
@@ -104,10 +112,12 @@ export async function installEntityDefinition({
 export async function installBuiltInEntityDefinitions({
   esClient,
   soClient,
+  isServerless,
   logger,
   definitions,
 }: Omit<InstallDefinitionParams, 'definition' | 'esClient'> & {
   esClient: ElasticsearchClient;
+  isServerless: boolean;
   definitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
@@ -129,6 +139,7 @@ export async function installBuiltInEntityDefinitions({
         definition: builtInDefinition,
         esClient,
         soClient,
+        isServerless,
         logger,
       });
     }
@@ -149,6 +160,7 @@ export async function installBuiltInEntityDefinitions({
     return await reinstallEntityDefinition({
       soClient,
       esClient,
+      isServerless,
       logger,
       definition: installedDefinition,
       definitionUpdate: builtInDefinition,
@@ -164,14 +176,20 @@ export async function installBuiltInEntityDefinitions({
 async function install({
   esClient,
   soClient,
+  isServerless,
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   logger.debug(`Installing definition [${definition.id}] v${definition.version}`);
   logger.debug(() => JSON.stringify(definition, null, 2));
 
-  logger.debug(`Checking ilm policies for definition [${definition.id}]`);
-  const ilmPolicies = await getILMPoliciesStatus(esClient);
+  const ilmPolicies: Array<{ type: 'ilm_policy'; id: string }> = [];
+  if (!isServerless) {
+    logger.debug(`Checking ilm policies for definition [${definition.id}]`);
+    ilmPolicies.push(...(await getILMPoliciesStatus(esClient)));
+  } else {
+    logger.debug(`Skipping ilm policies because of Serverless deployment`);
+  }
 
   logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
@@ -193,6 +211,7 @@ async function install({
 export async function reinstallEntityDefinition({
   esClient,
   soClient,
+  isServerless,
   definition,
   definitionUpdate,
   logger,
@@ -227,9 +246,10 @@ export async function reinstallEntityDefinition({
 
     return await install({
       soClient,
-      logger,
       esClient,
+      isServerless,
       definition: updatedDefinition,
+      logger,
     });
   } catch (err) {
     await updateEntityDefinition(soClient, definition.id, {

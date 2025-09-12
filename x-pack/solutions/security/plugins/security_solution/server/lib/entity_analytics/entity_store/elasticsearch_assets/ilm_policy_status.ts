@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EntityDefinition } from '@kbn/entities-schema';
 import {
   ENTITY_HISTORY_ILM_POLICY,
   ENTITY_RESET_ILM_POLICY,
@@ -17,14 +16,17 @@ import {
 } from '../../../../../common/api/entity_analytics';
 
 interface Options {
-  definition: EntityDefinition;
   esClient: ElasticsearchClient;
+  isServerless: boolean;
 }
 
 export async function getEntityILMPolicyStatuses({
-  definition,
   esClient,
+  isServerless,
 }: Options): Promise<EngineComponentStatus[]> {
+  if (isServerless) {
+    return Promise.resolve([]);
+  }
   const namesToCheck: string[] = [ENTITY_RESET_ILM_POLICY, ENTITY_HISTORY_ILM_POLICY];
   const result: EngineComponentStatus[] = await Promise.all(
     namesToCheck.map(async (name) => {

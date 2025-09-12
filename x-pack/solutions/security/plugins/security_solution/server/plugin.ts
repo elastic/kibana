@@ -177,6 +177,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
 
+  private isServerless: boolean;
+
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
 
@@ -216,6 +218,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.completeExternalResponseActionsTask = new CompleteExternalResponseActionsTask({
       endpointAppContext: this.endpointContext,
     });
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
 
     this.logger.debug('plugin initialized');
 
@@ -289,6 +292,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityStoreConfig: config.entityAnalytics.entityStore,
         experimentalFeatures,
         kibanaVersion: pluginContext.env.packageInfo.version,
+        isServerless: this.isServerless,
       });
 
       registerEntityStoreSnapshotTask({
@@ -375,8 +379,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
     const previewIlmPolicy = previewPolicy.policy;
 
-    const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
-
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
@@ -398,7 +400,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
       analytics: core.analytics,
-      isServerless,
+      isServerless: this.isServerless,
       eventsTelemetry: this.telemetryEventsSender,
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
@@ -449,7 +451,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions,
       previewRuleDataClient,
       this.telemetryReceiver,
-      isServerless,
+      this.isServerless,
       core.docLinks,
       this.endpointContext
     );

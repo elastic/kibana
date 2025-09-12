@@ -55,9 +55,11 @@ export class EntityManagerServerPlugin
   public logger: Logger;
   public server?: EntityManagerServerSetup;
   private isDev: boolean;
+  private isServerless: boolean;
 
   constructor(context: PluginInitializerContext<EntityManagerConfig>) {
     this.isDev = context.env.mode.dev;
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -105,7 +107,12 @@ export class EntityManagerServerPlugin
   }) {
     const clusterClient = coreStart.elasticsearch.client.asScoped(request);
     const soClient = coreStart.savedObjects.getScopedClient(request);
-    return new EntityClient({ clusterClient, soClient, logger: this.logger });
+    return new EntityClient({
+      clusterClient,
+      soClient,
+      isServerless: this.isServerless,
+      logger: this.logger,
+    });
   }
 
   public start(
@@ -122,11 +129,15 @@ export class EntityManagerServerPlugin
     installEntityManagerTemplates({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
+      isServerless: this.isServerless,
     }).catch((err) => this.logger.error(err));
 
-    createAndInstallILMPolicies(core.elasticsearch.client.asInternalUser).catch((err) =>
-      this.logger.error(err)
-    );
+    // Serverless does not support ILM, see: https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/differences-from-other-elasticsearch-offerings#elasticsearch
+    if (!this.isServerless) {
+      createAndInstallILMPolicies(core.elasticsearch.client.asInternalUser).catch((err) =>
+        this.logger.error(err)
+      );
+    }
 
     // Disable v1 built-in definitions.
     // the api key invalidation requires a check against the cluster license
