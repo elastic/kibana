@@ -197,14 +197,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(firstAttachmentAnalytics.found).to.be(true);
-      });
 
-      const secondAttachmentAnalytics = await esClient.get({
-        index: '.internal.cases-attachments.space1-securitysolution',
-        id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
-      });
+        const secondAttachmentAnalytics = await esClient.get({
+          index: '.internal.cases-attachments.space1-securitysolution',
+          id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
+        });
 
-      expect(secondAttachmentAnalytics.found).to.be(true);
+        expect(secondAttachmentAnalytics.found).to.be(true);
+      });
     });
 
     it('should sync the cases comments index', async () => {
