@@ -26,12 +26,7 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { type Filter } from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import {
-  usePublishingSubject,
-  useStateFromPublishingSubject,
-  type PublishingSubject,
-  type SerializedPanelState,
-} from '@kbn/presentation-publishing';
+import { type PublishingSubject, type SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -66,7 +61,6 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
-import { ControlError } from '../control_error';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
@@ -76,6 +70,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
+
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
       }
@@ -237,12 +232,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             });
           }
           dataControlManager.internalApi.setOutputFilter(newFilter);
-
-          blockingError$.next(
-            new Error(
-              'This is a test error. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis neque blandit, efficitur tortor vitae, dictum ex. Aliquam nibh quam, interdum sed iaculis in, dictum sed tortor.'
-            )
-          );
         });
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {

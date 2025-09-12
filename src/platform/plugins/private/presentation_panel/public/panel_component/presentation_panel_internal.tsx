@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+
+import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import type { PublishesTitle } from '@kbn/presentation-publishing';
@@ -16,13 +19,11 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
+import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -75,8 +76,6 @@ export const PresentationPanelInternal = <
     viewModeSubject,
     (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
   );
-  console.log({ api: api?.type });
-  if (api?.type === 'optionsListControl') console.log({ blockingError });
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
@@ -156,14 +155,14 @@ export const PresentationPanelInternal = <
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
         >
-          <KibanaErrorBoundary>
+          <EuiErrorBoundary>
             <Component
               {...(componentProps as React.ComponentProps<typeof Component>)}
               ref={(newApi) => {
                 if (newApi && !api) setApi(newApi);
               }}
             />
-          </KibanaErrorBoundary>
+          </EuiErrorBoundary>
         </div>
       </EuiPanel>
     </PresentationPanelHoverActionsWrapper>

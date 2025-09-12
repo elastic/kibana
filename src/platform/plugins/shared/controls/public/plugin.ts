@@ -44,7 +44,6 @@ export class ControlsPlugin
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {
     setKibanaServices(coreStart, startPlugins);
-
     registerActions(startPlugins.uiActions);
 
     // startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
