@@ -84,23 +84,27 @@ export const useChatSend = ({
         );
         return;
       }
-      const apiConfig = currentConversation.apiConfig;
-      let newConvo;
-      if (currentConversation.id === '') {
-        // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
-        newConvo = await createConversation(currentConversation);
-        if (newConvo?.id) {
-          setLastConversation({
-            id: newConvo.id,
-          });
+
+      setIsLoadingChatSend(true);
+
+      try {
+        const apiConfig = currentConversation.apiConfig;
+        let newConvo;
+        if (currentConversation.id === '') {
+          // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
+          newConvo = await createConversation(currentConversation);
+          if (newConvo?.id) {
+            setLastConversation({
+              id: newConvo.id,
+            });
+          }
         }
-      }
-      const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
-      const userMessage = getCombinedMessage({
-        currentReplacements: convo.replacements,
-        promptText,
-        selectedPromptContexts,
-      });
+        const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
+        const userMessage = getCombinedMessage({
+          currentReplacements: convo.replacements,
+          promptText,
+          selectedPromptContexts,
+        });
 
         const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
 
