@@ -12,14 +12,14 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
-} from '../state_management/redux';
-import { useSavedSearch } from '../state_management/discover_state_provider';
+} from '../../state_management/redux';
+import { useSavedSearch } from '../../state_management/discover_state_provider';
 
 /**
  * @param panels - The control panels state, which may be null.

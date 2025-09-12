@@ -24,7 +24,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useESQLVariables } from '../../hooks/use_esql_variables';
+import { useESQLVariables } from './use_esql_variables';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import {
   internalStateActions,
