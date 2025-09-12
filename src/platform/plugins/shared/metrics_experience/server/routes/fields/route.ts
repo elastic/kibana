@@ -13,6 +13,7 @@ import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { getMetricFields } from './get_metric_fields';
 import { createRoute } from '../create_route';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getFieldsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/fields',
@@ -31,8 +32,11 @@ export const getFieldsRoute = createRoute({
       size: z.coerce.number().int().positive().default(100),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  handler: async ({ context, params, logger, response }) => {
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
+    const esClient = elasticsearch.client.asCurrentUser;
     const page = params.query.page;
     const size = params.query.size;
 

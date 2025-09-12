@@ -27,7 +27,6 @@ export const createMetricsDataSourceProfileProvider = (
 ): MetricsExperienceDataSourceProfileProvider => ({
   profileId: METRICS_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
-  isExperimental: true,
   profile: {
     getChartSectionConfiguration: createChartSection(
       services.metricsContextService.getMetricsExperienceClient()

@@ -23,6 +23,15 @@ import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/pub
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
+const RESOLUTION_MATCH = {
+  isMatch: true,
+  context: { category: DataSourceCategory.Metrics },
+};
+
+const RESOLUTION_MISMATCH = {
+  isMatch: false,
+};
+
 describe('metricsDataSourceProfileProvider', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
@@ -74,10 +83,7 @@ describe('metricsDataSourceProfileProvider', () => {
         })
       );
 
-      expect(result).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Metrics },
-      });
+      expect(result).toEqual(RESOLUTION_MATCH);
     });
 
     it.each([SolutionType.Observability, SolutionType.Security])(
@@ -90,10 +96,7 @@ describe('metricsDataSourceProfileProvider', () => {
           })
         );
 
-        expect(result).toEqual({
-          isMatch: true,
-          context: { category: DataSourceCategory.Metrics },
-        });
+        expect(result).toEqual(RESOLUTION_MATCH);
       }
     );
   });
@@ -105,14 +108,14 @@ describe('metricsDataSourceProfileProvider', () => {
 
     it('when query references a non-metrics index', async () => {
       const result = await provider.resolve(createParams({ query: { esql: 'FROM traces-*' } }));
-      expect(result).toEqual({ isMatch: false });
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
     it('when query references a metrics index and a non-metrics index', async () => {
       const result = await provider.resolve(
         createParams({ query: { esql: 'FROM logs-*,metrics-*' } })
       );
-      expect(result).toEqual({ isMatch: false });
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
     it('when metrics client is not initialized', async () => {
@@ -125,7 +128,7 @@ describe('metricsDataSourceProfileProvider', () => {
       });
 
       const result = await provider.resolve(createParams({ query: { esql: 'FROM metrics-*' } }));
-      expect(result).toEqual({ isMatch: false });
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
     it('when index pattern has no time series fields', async () => {
@@ -136,14 +139,14 @@ describe('metricsDataSourceProfileProvider', () => {
       });
 
       const result = await provider.resolve(createParams({ query: { esql: 'FROM foo*' } }));
-      expect(result).toEqual({ isMatch: false });
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
     it('when query contains commands that are not supported', async () => {
       const result = await provider.resolve(
         createParams({ query: { esql: 'FROM metrics-* | STATS count() BY @timestamp' } })
       );
-      expect(result).toEqual({ isMatch: false });
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
     it.each([SolutionType.Search, SolutionType.Default])(
@@ -156,7 +159,7 @@ describe('metricsDataSourceProfileProvider', () => {
           })
         );
 
-        expect(result).toEqual({ isMatch: false });
+        expect(result).toEqual(RESOLUTION_MISMATCH);
       }
     );
   });
