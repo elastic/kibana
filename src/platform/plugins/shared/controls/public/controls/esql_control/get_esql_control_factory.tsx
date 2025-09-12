@@ -17,7 +17,11 @@ import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { initializeStateManager } from '@kbn/presentation-publishing';
+import {
+  initializeStateManager,
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
@@ -38,6 +42,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
       const defaultControlManager = initializeDefaultControlManager();
+      const titlesManager = initializeTitleManager(state);
 
       // TODO Rename this; this is actually the state manager for all non-default control state params, "selections" is a confusing name
       const selections = initializeESQLControlSelections(
@@ -63,6 +68,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getComparators: () => {
           return {
             ...selectionComparators,
+            ...titleComparators,
           };
         },
         onReset: (lastSaved) => {
@@ -71,6 +77,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       });
 
       const api = finalizeApi({
+        ...titlesManager.api,
         ...unsavedChangesApi,
         ...defaultControlManager.api,
         ...selections.api,
@@ -79,6 +86,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getTypeDisplayName: () => displayName,
         onEdit: async () => {
           const nextState = {
+            ...titlesManager.getLatestState(),
             ...selections.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
@@ -86,6 +94,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             : [];
           const onSaveControl = async (updatedState: ESQLControlState) => {
             selections.reinitializeState(updatedState);
+            titlesManager.reinitializeState(updatedState);
           };
           try {
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
