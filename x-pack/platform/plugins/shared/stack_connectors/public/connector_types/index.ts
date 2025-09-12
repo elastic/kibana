@@ -37,6 +37,7 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
+import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getHttpRequestConnectorType } from './http_request';
 
 export interface RegistrationServices {
@@ -69,6 +70,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
+  connectorTypeRegistry.register(getJiraServiceManagementConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());
