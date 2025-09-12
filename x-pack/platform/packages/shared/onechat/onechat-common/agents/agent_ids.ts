@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export {
-  AgentType,
-  oneChatDefaultAgentId,
-  type AgentDescriptor,
-  type AgentDefinition,
-  type AgentConfiguration,
-} from './definition';
-export { agentIdRegexp } from './agent_ids';
+// - Must start and end with letter or digit
+// - Can contain letters, digits, hyphens, underscores
+export const agentIdRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
