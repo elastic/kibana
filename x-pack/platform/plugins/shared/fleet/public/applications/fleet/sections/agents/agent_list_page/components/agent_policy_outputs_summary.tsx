@@ -17,6 +17,7 @@ import {
   EuiListGroup,
   EuiPopover,
   EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -40,6 +41,7 @@ export const AgentPolicyOutputsSummary: React.FC<{
 
   const monitoring = outputs?.monitoring;
   const data = outputs?.data;
+  const popoverTitleId = useGeneratedHtmlId();
 
   const listItems: EuiListGroupItemProps[] = useMemo(() => {
     if (!data?.integrations) return [];
@@ -98,8 +100,9 @@ export const AgentPolicyOutputsSummary: React.FC<{
             isOpen={isPopoverOpen}
             closePopover={closePopover}
             anchorPosition="downCenter"
+            aria-labelledby={popoverTitleId}
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>
               {i18n.translate('xpack.fleet.AgentPolicyOutputsSummary.popover.title', {
                 defaultMessage: 'Output for integrations',
               })}
