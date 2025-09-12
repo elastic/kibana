@@ -8,7 +8,6 @@
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, PropsWithChildren } from 'react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
@@ -69,10 +68,6 @@ export const LogViewErrorPage: React.FC<{
                   />
                 </EuiButton>,
                 <EuiButtonEmpty
-                  aria-label={i18n.translate(
-                    'xpack.infra.logViewErrorPage.changeconfigurationButton.ariaLabel',
-                    { defaultMessage: 'Change configuration' }
-                  )}
                   data-test-subj="infraLogViewErrorPageChangeConfigurationButton"
                   iconType="gear"
                   {...settingsLinkProps}

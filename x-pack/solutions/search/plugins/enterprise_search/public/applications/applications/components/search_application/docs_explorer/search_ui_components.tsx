@@ -151,17 +151,8 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
 };
 export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
   <EuiFlexGroup gutterSize="s">
-    <EuiFieldSearch
-      data-test-subj="enterpriseSearchSearchBarFieldSearch"
-      fullWidth
-      {...additionalInputProps}
-    />
-    <EuiButton
-      data-test-subj="enterpriseSearchSearchBarSearchButton"
-      type="submit"
-      color="primary"
-      fill
-    >
+    <EuiFieldSearch fullWidth {...additionalInputProps} />
+    <EuiButton type="submit" color="primary" fill>
       {i18n.translate(
         'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.searchLabel',
         {
@@ -205,7 +196,6 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         </label>
       </EuiTitle>
       <EuiSelect
-        data-test-subj="enterpriseSearchResultsPerPageViewSelect"
         id="results-per-page"
         options={
           options?.map((option) => ({
@@ -274,7 +264,6 @@ export const Sorting = withSearch<
               </label>
             </EuiTitle>
             <EuiSelect
-              data-test-subj="enterpriseSearchSortingSelect"
               id="sorting-direction"
               onChange={(evt) => {
                 switch (evt.target.value) {
