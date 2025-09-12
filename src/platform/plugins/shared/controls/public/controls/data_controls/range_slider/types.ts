@@ -10,7 +10,7 @@
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import { DataControlApi } from '../types';
+import type { DataControlApi } from '../types';
 
 export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
   DataControlApi & {
