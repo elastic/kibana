@@ -6,10 +6,16 @@
  */
 
 import type { Rule } from '@kbn/alerts-ui-shared';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '@kbn/rule-data-utils';
 import moment from 'moment';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
 import {
   buildCustomFilter,
@@ -18,11 +24,19 @@ import {
   toElasticsearchQuery,
   type Filter,
 } from '@kbn/es-query';
-import { getViewInAppLocatorParams } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
-import type { TopAlert } from '../../../typings/alerts';
-import { useKibana } from '../../../utils/kibana_react';
+import { getViewInAppLocatorParams } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import type { TopAlert } from '../../../../typings/alerts';
+import { useKibana } from '../../../../utils/kibana_react';
+import {
+  syntheticsMonitorStatusAlertParamsToKqlQuery,
+  syntheticsTlsAlertParamsToKqlQuery,
+} from './synthetics_alert_params_to_kql';
 
-const viewInDiscoverSupportedRuleTypes = [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID] as const;
+const viewInDiscoverSupportedRuleTypes = [
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+] as const;
 
 type ViewInDiscoverSupportedRuleType = (typeof viewInDiscoverSupportedRuleTypes)[number];
 
@@ -35,10 +49,52 @@ const isViewInDiscoverSupportedRuleType = (
   );
 };
 
+const SYNTHETICS_TEMP_DATA_VIEW: DataViewSpec = {
+  title: 'synthetics-*',
+  timeFieldName: '@timestamp',
+};
+/**
+ * For certain rule types, we create a temporary data view.
+ * Otherwise, returns undefined, and an existing saved data view must be specified.
+ * @param rule an Observability alerting rule
+ * @returns A temporary data view spec, or undefined
+ */
+const getCustomDataViewParams = (rule?: Rule): DataViewSpec | undefined => {
+  switch (rule?.ruleTypeId) {
+    case SYNTHETICS_TLS_RULE:
+    case SYNTHETICS_STATUS_RULE:
+      return SYNTHETICS_TEMP_DATA_VIEW;
+    default:
+      return undefined;
+  }
+};
+
 const getLocatorParamsMap: Record<
   (typeof viewInDiscoverSupportedRuleTypes)[number],
   (rule: Rule) => DiscoverAppLocatorParams
 > = {
+  [SYNTHETICS_STATUS_RULE]: (rule): DiscoverAppLocatorParams => {
+    const params = rule.params as SyntheticsMonitorStatusRuleParams;
+    const query = syntheticsMonitorStatusAlertParamsToKqlQuery(params);
+    return {
+      query: {
+        language: 'kuery',
+        query,
+      },
+      dataViewSpec: getCustomDataViewParams(rule),
+    };
+  },
+  [SYNTHETICS_TLS_RULE]: (rule) => {
+    const params = rule.params as TLSRuleParams;
+    const query = syntheticsTlsAlertParamsToKqlQuery(params);
+    return {
+      query: {
+        language: 'kuery',
+        query,
+      },
+      dataViewSpec: getCustomDataViewParams(rule),
+    };
+  },
   [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: (rule) => {
     const ruleParams = rule.params as CustomThresholdParams;
     const { index } = ruleParams.searchConfiguration;
@@ -88,7 +144,7 @@ export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?:
     ? getLocatorParamsMap[rule.ruleTypeId](rule)
     : undefined;
 
-  if (!alert || !params || !discover.locator) return { discoverUrl: null };
+  if (!alert || !params || !discover?.locator) return { discoverUrl: null };
 
   return {
     discoverUrl: discover.locator.getRedirectUrl({
