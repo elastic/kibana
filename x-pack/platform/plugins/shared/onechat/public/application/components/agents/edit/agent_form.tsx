@@ -34,6 +34,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { css } from '@emotion/react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -72,9 +73,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
-  const {
-    services: { notifications },
-  } = useKibana();
+  const { services } = useKibana();
+  const { notifications, http, overlays, application, appParams } = services;
   const agentFormId = useGeneratedHtmlId({
     prefix: 'agentForm',
   });
@@ -129,6 +129,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { errors, isDirty } = formState;
   const hasErrors = Object.keys(errors).length > 0;
 
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty,
+    history: appParams.history,
+    http,
+    navigateToUrl: application.navigateToUrl,
+    openConfirm: overlays.openConfirm,
+  });
+
   useEffect(() => {
     if (agentState && !isLoading) {
       reset(agentState);
@@ -146,6 +154,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       setSubmittingButtonId(buttonId);
       try {
         await submit(data);
+        reset(data);
       } finally {
         setSubmittingButtonId(undefined);
       }
@@ -153,7 +162,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         navigateToOnechatUrl(appPaths.agents.list);
       }
     },
-    [submit, navigateToOnechatUrl]
+    [submit, navigateToOnechatUrl, reset]
   );
 
   const handleSaveAndChat = useCallback(

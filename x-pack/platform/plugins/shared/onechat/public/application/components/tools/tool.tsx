@@ -27,6 +27,7 @@ import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -54,6 +55,7 @@ import { ToolTestFlyout } from './execute/test_tools';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
+import { useKibana } from '../../hooks/use_kibana';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -110,6 +112,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { errors, isDirty } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+  const { services } = useKibana();
+  const { application, overlays, http, appParams } = services;
 
   const currentToolId = watch('toolId');
 
@@ -159,6 +163,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               break;
           }
         }
+        reset(data);
       } finally {
         setSubmittingButtonId(undefined);
       }
@@ -166,7 +171,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         navigateToOnechatUrl(appPaths.tools.list);
       }
     },
-    [mode, saveTool, navigateToOnechatUrl]
+    [mode, saveTool, navigateToOnechatUrl, reset]
   );
 
   const handleTestTool = useCallback(() => {
@@ -198,6 +203,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   });
 
   const isViewMode = mode === ToolFormMode.View;
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: !isViewMode && isDirty,
+    history: appParams.history,
+    http,
+    navigateToUrl: application.navigateToUrl,
+    openConfirm: overlays.openConfirm,
+  });
   const hasErrors = Object.keys(errors).length > 0;
 
   const renderSaveButton = useCallback(
