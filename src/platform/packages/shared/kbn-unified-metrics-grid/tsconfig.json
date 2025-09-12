@@ -29,5 +29,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/react-hooks",
     "@kbn/data-grid-in-table-search",
+    "@kbn/es-query",
+    "@kbn/discover-utils",
   ]
 }
