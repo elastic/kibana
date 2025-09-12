@@ -6,23 +6,26 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import {
   MissingPrivilegesDescription,
   MissingPrivilegesTooltip,
 } from '../../../../common/components/missing_privileges';
-import type { CapabilitiesLevel, SiemMigrationsServiceBase } from '../../service';
+import type { CapabilitiesLevel } from '../../service';
 
-export const WithMissingPrivilegesTooltip = <
-  P extends { isAuthorized: boolean },
-  T extends MigrationTaskStats
->(
+export const WithMissingPrivilegesTooltip = <P extends { isAuthorized: boolean }>(
   Component: React.ComponentType<P>,
-  service: SiemMigrationsServiceBase<T>,
+  migrationType: MigrationType,
   level: CapabilitiesLevel
 ) => {
   const WrappedComponent = memo(function WrappedComponent(props: Omit<P, 'isAuthorized'>) {
-    const missingCapabilities = useMemo(() => service.getMissingCapabilities(level), []);
+    const {
+      services: { siemMigrations },
+    } = useKibana();
+
+    const service = migrationType === 'rule' ? siemMigrations.rules : siemMigrations.dashboards;
+    const missingCapabilities = useMemo(() => service.getMissingCapabilities(level), [service]);
 
     const isAuthorized = useMemo(() => missingCapabilities.length === 0, [missingCapabilities]);
 

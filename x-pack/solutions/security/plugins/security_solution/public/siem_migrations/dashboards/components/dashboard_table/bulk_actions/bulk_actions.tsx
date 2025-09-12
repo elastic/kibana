@@ -7,12 +7,21 @@
 
 import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
 import type {
   DashboardMigrationDashboard,
   DashboardMigrationTranslationStats,
 } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { InstallTranslatedButton } from '../../../../common/components/bulk_actions';
-import { useReprocessFailedButton } from './use_reprocess_failed_button';
+import {
+  InstallTranslatedButton,
+  ReprocessFailedItemsButton,
+} from '../../../../common/components/bulk_actions';
+
+const ReprocessFailedDashboardsButton = WithMissingPrivilegesTooltip(
+  ReprocessFailedItemsButton,
+  'dashboard',
+  'all'
+);
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
@@ -48,7 +57,6 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     const installSelectedDashboardsCallback = useCallback(() => {
       installSelectedDashboards?.();
     }, [installSelectedDashboards]);
-    const { reprocessButton: ReprocessFailedDashboardsButton } = useReprocessFailedButton();
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showRetryFailedRulesButton && (

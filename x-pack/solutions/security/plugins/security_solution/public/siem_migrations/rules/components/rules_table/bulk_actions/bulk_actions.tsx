@@ -7,11 +7,20 @@
 
 import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InstallTranslatedButton } from '../../../../common/components/bulk_actions';
+import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
+import {
+  InstallTranslatedButton,
+  ReprocessFailedItemsButton,
+} from '../../../../common/components/bulk_actions';
 import { UpdateMissingIndex } from './update_missing_index';
 import { type RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { useReprocessFailedButton } from './use_reprocess_failed_button';
+
+const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
+  ReprocessFailedItemsButton,
+  'rule',
+  'all'
+);
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
@@ -51,7 +60,6 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     const installSelectedRulesCallback = useCallback(() => {
       installSelectedRule?.();
     }, [installSelectedRule]);
-    const { reprocessButton: ReprocessFailedRulesButton } = useReprocessFailedButton();
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showUpdateMissingIndexPatternButton && (
