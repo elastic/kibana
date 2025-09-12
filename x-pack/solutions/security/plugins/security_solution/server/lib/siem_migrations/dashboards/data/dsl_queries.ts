@@ -20,11 +20,11 @@ export const dsl = {
     return { bool: { must_not: dsl.isInstalled() } };
   },
 
-  isInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullOrPartiallyTranslated(), dsl.isNotInstalled()];
+  isInstallable(): QueryDslQueryContainer {
+    return { bool: { must: [genericDsl.isFullOrPartiallyTranslated(), dsl.isNotInstalled()] } };
   },
 
-  isNotInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullOrPartiallyTranslated(), dsl.isInstalled()];
+  isNotInstallable(): QueryDslQueryContainer {
+    return { bool: { should: [genericDsl.isNotFullOrPartiallyTranslated(), dsl.isInstalled()] } };
   },
 };
