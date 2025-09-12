@@ -84,6 +84,21 @@ export function TestStepModal({
           css={css`
             height: 100%;
             overflow: auto;
+
+            /* Monaco editor error popup positioning offset */
+            .monaco-editor .monaco-hover,
+            .monaco-editor .suggest-widget,
+            .monaco-editor .parameter-hints-widget,
+            .monaco-editor .monaco-quick-input-widget {
+              transform: translateY(-290px) translateX(-250px) !important;
+              z-index: 9999 !important;
+            }
+
+            /* Specific styling for hover widgets in modals */
+            .monaco-editor .monaco-hover .hover-contents {
+              border-radius: 4px;
+              max-width: 400px;
+            }
           `}
         >
           <EuiFlexItem>
@@ -101,13 +116,33 @@ export function TestStepModal({
                   dataTestSubj={'workflow-event-json-editor'}
                   options={{
                     language: 'json',
-                    // Disable Monaco's built-in problem UI that causes positioning issues in modals
-                    quickSuggestions: false,
-                    lightbulb: {
-                      enabled: false,
-                    },
-                    fixedOverflowWidgets: true, // Keep widgets within editor bounds
+                    minimap: { enabled: false },
                     scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    lineNumbers: 'on',
+                    glyphMargin: true,
+                    tabSize: 2,
+                    lineNumbersMinChars: 2,
+                    insertSpaces: true,
+                    fontSize: 14,
+                    renderWhitespace: 'all',
+                    wordWrapColumn: 80,
+                    wrappingIndent: 'indent',
+                    theme: 'vs-light',
+                    quickSuggestions: {
+                      other: true,
+                      comments: false,
+                      strings: true,
+                    },
+                    formatOnType: true,
+                    // Keep Monaco widgets within the modal bounds and add offset
+                    fixedOverflowWidgets: true,
+                    // Additional positioning configuration
+                    hover: {
+                      delay: 300,
+                      sticky: true,
+                    },
                   }}
                 />
               </EuiFlexItem>

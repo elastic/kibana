@@ -24,7 +24,7 @@ interface JsonValidationError {
 }
 
 /**
- * Maps a JSON path to line/column position in the JSON text using a reliable approach
+ * Maps a JSON path to line/column position in the JSON text using a more precise approach
  */
 function findPositionFromPath(
   jsonText: string,
@@ -34,18 +34,23 @@ function findPositionFromPath(
     return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 1 };
   }
 
-  // For root-level errors, highlight the entire first line
-  if (path.length === 1 && typeof path[0] === 'string') {
-    const targetProperty = path[0];
-    const searchPattern = `"${targetProperty}"`;
-    const lines = jsonText.split('\n');
-    
-    // Find the property key in the JSON
+  const lines = jsonText.split('\n');
+  const targetKey = path[path.length - 1];
+
+  if (typeof targetKey === 'string') {
+    const searchPattern = `"${targetKey}"`;
+
+    // Try to traverse the full path for better accuracy
+    if (path.length > 1) {
+      return findKeyInNestedPath(lines, path);
+    }
+
+    // For root-level properties, find the first occurrence that's a property key
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const columnIndex = line.indexOf(searchPattern);
       if (columnIndex !== -1) {
-        // Check if this is a property key (followed by colon)
+        // Verify this is a property key by checking for colon after optional whitespace
         const afterMatch = line.substring(columnIndex + searchPattern.length).trim();
         if (afterMatch.startsWith(':')) {
           return {
@@ -59,29 +64,83 @@ function findPositionFromPath(
     }
   }
 
-  // For nested properties, try to find the specific property
-  const targetProperty = path[path.length - 1];
-  if (typeof targetProperty === 'string') {
-    const searchPattern = `"${targetProperty}"`;
-    const lines = jsonText.split('\n');
-    
-    // Simple search for the property name
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const columnIndex = line.indexOf(searchPattern);
-      if (columnIndex !== -1) {
-        return {
-          startLine: i + 1,
-          startColumn: columnIndex + 1,
-          endLine: i + 1,
-          endColumn: columnIndex + searchPattern.length + 1,
-        };
+  // For array indices
+  if (typeof targetKey === 'number') {
+    return {
+      startLine: Math.max(1, targetKey + 1),
+      startColumn: 1,
+      endLine: Math.max(1, targetKey + 1),
+      endColumn: 10,
+    };
+  }
+
+  // Final fallback
+  return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 5 };
+}
+
+/**
+ * Helper function to find a key in a nested path by traversing the JSON structure
+ */
+function findKeyInNestedPath(
+  lines: string[],
+  path: (string | number)[]
+): { startLine: number; startColumn: number; endLine: number; endColumn: number } {
+  const targetKey = path[path.length - 1];
+
+  if (typeof targetKey !== 'string') {
+    return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 5 };
+  }
+
+  // Find all occurrences of the target key
+  const searchPattern = `"${targetKey}"`;
+  const matches: Array<{ line: number; column: number; text: string }> = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    let searchIndex = 0;
+
+    while (true) {
+      const columnIndex = line.indexOf(searchPattern, searchIndex);
+      if (columnIndex === -1) break;
+
+      // Check if this is a property key
+      const afterMatch = line.substring(columnIndex + searchPattern.length).trim();
+      if (afterMatch.startsWith(':')) {
+        matches.push({
+          line: i + 1,
+          column: columnIndex + 1,
+          text: line.trim(),
+        });
       }
+
+      searchIndex = columnIndex + 1;
     }
   }
-  
-  // Final fallback - highlight first few characters
-  return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 5 };
+
+  if (matches.length === 0) {
+    return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 5 };
+  }
+
+  // If there's only one match, use it
+  if (matches.length === 1) {
+    const match = matches[0];
+    return {
+      startLine: match.line,
+      startColumn: match.column,
+      endLine: match.line,
+      endColumn: match.column + searchPattern.length,
+    };
+  }
+
+  // For multiple matches, try to find the one that corresponds to our path depth
+  // Use a simple heuristic: prefer matches that appear later in the file (deeper nesting)
+  const match = matches[matches.length - 1];
+  return {
+    startLine: match.line,
+    startColumn: match.column,
+    endLine: match.line,
+    endColumn: match.column + searchPattern.length,
+  };
 }
 
 /**
@@ -91,20 +150,108 @@ function zodErrorsToMarkers(zodError: z.ZodError, jsonText: string): monaco.edit
   const markers: monaco.editor.IMarkerData[] = [];
 
   for (const issue of zodError.issues) {
-    const position = findPositionFromPath(jsonText, issue.path);
+    let position;
 
-    markers.push({
-      severity: monaco.MarkerSeverity.Error,
-      message: issue.message,
-      startLineNumber: position.startLine,
-      startColumn: position.startColumn,
-      endLineNumber: position.endLine,
-      endColumn: position.endColumn,
-      source: 'zod-validation',
-    });
+    // Handle "unrecognized_keys" error specifically
+    if (issue.code === 'unrecognized_keys' && 'keys' in issue) {
+      // For unrecognized keys, Zod provides the keys in issue.keys
+      const unrecognizedKeys = (issue as any).keys as string[];
+
+      // Find each unrecognized key in the JSON and create a marker for it
+      for (const key of unrecognizedKeys) {
+        const keyPosition = findSpecificKey(jsonText, key, issue.path);
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          message: `Unrecognized key: "${key}"`,
+          startLineNumber: keyPosition.startLine,
+          startColumn: keyPosition.startColumn,
+          endLineNumber: keyPosition.endLine,
+          endColumn: keyPosition.endColumn,
+          source: 'zod-validation',
+        });
+      }
+    } else {
+      // Handle other validation errors normally
+      position = findPositionFromPath(jsonText, issue.path);
+      markers.push({
+        severity: monaco.MarkerSeverity.Error,
+        message: issue.message,
+        startLineNumber: position.startLine,
+        startColumn: position.startColumn,
+        endLineNumber: position.endLine,
+        endColumn: position.endColumn,
+        source: 'zod-validation',
+      });
+    }
   }
 
   return markers;
+}
+
+/**
+ * Find a specific key in the JSON text, considering the path context
+ */
+function findSpecificKey(
+  jsonText: string,
+  keyName: string,
+  basePath: (string | number)[]
+): { startLine: number; startColumn: number; endLine: number; endColumn: number } {
+  const lines = jsonText.split('\n');
+  const searchPattern = `"${keyName}"`;
+  
+  // Find all occurrences of this key that are property keys
+  const matches: Array<{ line: number; column: number; context: string }> = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    let searchIndex = 0;
+    
+    while (true) {
+      const columnIndex = line.indexOf(searchPattern, searchIndex);
+      if (columnIndex === -1) break;
+      
+      // Check if this is a property key
+      const afterMatch = line.substring(columnIndex + searchPattern.length).trim();
+      if (afterMatch.startsWith(':')) {
+        matches.push({
+          line: i + 1,
+          column: columnIndex + 1,
+          context: line.trim(),
+        });
+      }
+      
+      searchIndex = columnIndex + 1;
+    }
+  }
+  
+  if (matches.length > 0) {
+    // Strategy: if there are multiple matches, try to pick the most appropriate one
+    // For unrecognized keys, we often want the one that's NOT in a nested valid structure
+    
+    if (matches.length === 1) {
+      const match = matches[0];
+      return {
+        startLine: match.line,
+        startColumn: match.column,
+        endLine: match.line,
+        endColumn: match.column + searchPattern.length,
+      };
+    }
+    
+    // For multiple matches, prefer later occurrences (often the problematic ones)
+    // unless we have specific path context
+    const preferredMatch = basePath.length > 0 ? matches[matches.length - 1] : matches[0];
+    
+    return {
+      startLine: preferredMatch.line,
+      startColumn: preferredMatch.column,
+      endLine: preferredMatch.line,
+      endColumn: preferredMatch.column + searchPattern.length,
+    };
+  }
+  
+  // Fallback
+  return { startLine: 1, startColumn: 1, endLine: 1, endColumn: 5 };
 }
 
 /**
