@@ -1728,7 +1728,7 @@
     "@types/resolve": "^1.20.1",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
     "@types/selenium-webdriver": "^4.1.28",
-    "@types/semver": "^7.7.0",
+    "@types/semver": "^7.7.1",
     "@types/sinon": "^17.0.3",
     "@types/source-map-support": "^0.5.10",
     "@types/stats-lite": "^2.2.0",
