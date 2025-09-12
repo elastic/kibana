@@ -73,9 +73,9 @@ export const selectHasUnsavedChanges = (
           services,
         });
 
-    for (const stringKey of Object.keys(tabComparators)) {
+    for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
-      const compare = tabComparators[key] as FieldComparator<DiscoverSessionTab[typeof key]>;
+      const compare = TAB_COMPARATORS[key] as FieldComparator<DiscoverSessionTab[typeof key]>;
       const prevField = persistedTab[key];
       const nextField = normalizedTab[key];
 
@@ -102,6 +102,8 @@ type FieldComparator<T> = (a: T, b: T) => boolean;
 type TabComparators = {
   [K in keyof DiscoverSessionTab]-?: FieldComparator<DiscoverSessionTab[K]>;
 };
+
+const NOOP_COMPARATOR: FieldComparator<unknown> = () => true;
 
 const defaultValueComparator =
   <T>(defaultValue: T): FieldComparator<T> =>
@@ -166,15 +168,17 @@ const visContextComparator: TabComparators['visContext'] = (visContextA, visCont
   return isEqual(getAdjustedVisContext(visContextA), getAdjustedVisContext(visContextB));
 };
 
-const tabComparators: TabComparators = {
+const TAB_COMPARATORS: TabComparators = {
   id: fieldComparator('id', ''),
   label: fieldComparator('label', ''),
   sort: fieldComparator('sort', []),
   columns: fieldComparator('columns', []),
   grid: fieldComparator('grid', {}),
   hideChart: fieldComparator('hideChart', false),
-  isTextBasedQuery: fieldComparator('isTextBasedQuery', false),
-  usesAdHocDataView: fieldComparator('usesAdHocDataView', false),
+  // isTextBasedQuery is derived from the query itself and can be ignored
+  isTextBasedQuery: NOOP_COMPARATOR,
+  // usesAdHocDataView is derived from the data view itself and can be ignored
+  usesAdHocDataView: NOOP_COMPARATOR,
   serializedSearchSource: searchSourceComparator,
   // By default, viewMode: undefined is equivalent to documents view
   // So they should be treated as same
