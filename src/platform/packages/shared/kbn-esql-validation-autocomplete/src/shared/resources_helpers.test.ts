@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, EDITOR_MARKER } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, EDITOR_MARKER, parse } from '@kbn/esql-ast';
 import { getQueryForFields } from './resources_helpers';
 
 describe('getQueryForFields', () => {
@@ -26,7 +26,7 @@ describe('getQueryForFields', () => {
 
     const result = getQueryForFields(query, root);
 
-    expect(result).toEqual(expected);
+    expect(BasicPrettyPrinter.print(result)).toEqual(expected);
   };
 
   it('should return everything up till the last command', () => {
