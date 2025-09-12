@@ -17,7 +17,8 @@ describe('CrowdstrikeError', () => {
     });
 
     it('should parse status code and message with complex message content', () => {
-      const complexMessage = 'Status code: 400. Message: Invalid parameter: endpoint_ids must be an array';
+      const complexMessage =
+        'Status code: 400. Message: Invalid parameter: endpoint_ids must be an array';
       const error = new CrowdstrikeError(complexMessage);
 
       expect(error.code).toBe(400);
