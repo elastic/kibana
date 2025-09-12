@@ -64,6 +64,7 @@ const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),
+  getObservablesFromEcsData: jest.fn(),
 };
 
 export interface CaseUiClientMock {
