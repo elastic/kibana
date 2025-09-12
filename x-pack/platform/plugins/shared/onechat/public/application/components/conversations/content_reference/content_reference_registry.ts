@@ -6,7 +6,10 @@
  */
 
 import type React from 'react';
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
+import type {
+  BaseContentReference,
+  ContentReferences,
+} from '@kbn/onechat-common/chat/conversation';
 import type {
   ContentReferenceNode,
   ResolvedContentReferenceNode,
@@ -23,7 +26,7 @@ export interface ContentReferenceComponentProps {
 export type ContentReferenceComponent = React.FC<ContentReferenceComponentProps>;
 
 export interface ContentReferenceRegistry {
-  register<T extends ContentReferences>(
+  register<T extends BaseContentReference>(
     type: T['type'],
     component: React.FC<{ contentReferenceNode: ResolvedContentReferenceNode<T> }>
   ): void;
@@ -41,7 +44,7 @@ export class ContentReferenceRegistryImpl implements ContentReferenceRegistry {
     React.FC<{ contentReferenceNode: ResolvedContentReferenceNode<any> }>
   >();
 
-  register<T extends ContentReferences>(
+  register<T extends BaseContentReference>(
     type: T['type'],
     component: React.FC<{ contentReferenceNode: ResolvedContentReferenceNode<T> }>
   ): void {

@@ -24,12 +24,12 @@ import { HrefReference } from './href_reference';
 import { contentReferenceRegistry } from '../content_reference_registry';
 
 export interface Props {
-  contentReferencesVisible: boolean;
+  contentReferencesVisible?: boolean;
   contentReferenceNode: ContentReferenceNode;
 }
 
 export const ContentReferenceComponentFactory: React.FC<Props> = ({
-  contentReferencesVisible,
+  contentReferencesVisible = true,
   contentReferenceNode,
 }: Props) => {
   if (!contentReferencesVisible) return null;

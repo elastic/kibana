@@ -53,7 +53,10 @@ export class ElasticAssistantPublicPlugin
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
     // Register security alert components with onechat content reference registry
     dependencies.onechat.contentReferenceRegistry.register('SecurityAlert', SecurityAlertReference);
-    dependencies.onechat.contentReferenceRegistry.register('SecurityAlertsPage', SecurityAlertsPageReference);
+    dependencies.onechat.contentReferenceRegistry.register(
+      'SecurityAlertsPage',
+      SecurityAlertsPageReference
+    );
 
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;

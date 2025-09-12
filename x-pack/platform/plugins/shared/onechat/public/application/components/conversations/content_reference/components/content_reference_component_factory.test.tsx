@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ContentReference } from '@kbn/elastic-assistant-common';
+import type { BaseContentReference, ContentReference } from '@kbn/elastic-assistant-common';
 import { ContentReferenceComponentFactory } from './content_reference_component_factory';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -80,12 +80,13 @@ describe('contentReferenceComponentFactory', () => {
   ])(
     "Renders correct component for '%s'",
     async (testId: string, contentReference: ContentReference) => {
-      const resolvedContentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
+      const resolvedContentReferenceNode: ResolvedContentReferenceNode<BaseContentReference> = {
         contentReferenceId: '1',
         contentReferenceCount: 1,
         contentReferenceBlock: '{reference(123)}',
         contentReference,
         type: 'contentReference',
+        href: '',
       };
 
       render(

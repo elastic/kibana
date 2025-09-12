@@ -60,7 +60,11 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} steps={steps} />
+        <ChatMessageText
+          content={message}
+          steps={steps}
+          contentReferences={rawRound.metadata?.contentReferences}
+        />
       </EuiFlexItem>
 
       {/* Render comment actions if available */}

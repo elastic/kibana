@@ -164,17 +164,6 @@ export interface EsqlContentReference extends BaseContentReference {
 }
 
 /**
- * References a security alert
- */
-export interface SecurityAlertContentReference extends BaseContentReference {
-  type: 'SecurityAlert';
-  /**
-   * ID of the Alert
-   */
-  alertId: string;
-}
-
-/**
  * References an external URL
  */
 export interface HrefContentReference extends BaseContentReference {
@@ -187,13 +176,6 @@ export interface HrefContentReference extends BaseContentReference {
    * URL to the external resource
    */
   href: string;
-}
-
-/**
- * References the security alerts page
- */
-export interface SecurityAlertsPageContentReference extends BaseContentReference {
-  type: 'SecurityAlertsPage';
 }
 
 /**
@@ -216,8 +198,6 @@ export interface ProductDocumentationContentReference extends BaseContentReferen
  */
 export type ContentReferenceInternal =
   | KnowledgeBaseEntryContentReference
-  | SecurityAlertContentReference
-  | SecurityAlertsPageContentReference
   | ProductDocumentationContentReference
   | EsqlContentReference
   | HrefContentReference;

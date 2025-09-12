@@ -6,13 +6,14 @@
  */
 
 import type { RemarkTokenizer } from '@elastic/eui';
-import type { ContentReference, ContentReferenceBlock } from '@kbn/elastic-assistant-common';
+import type { ContentReferenceBlock } from '@kbn/elastic-assistant-common';
+import type { BaseContentReference, ContentReference } from '@kbn/onechat-common/chat/conversation';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 import type { StreamingOrFinalContentReferences } from './content_reference_registry';
 
 /** A ContentReferenceNode that has been extracted from the message and the content reference details are available. */
-export interface ResolvedContentReferenceNode<T extends ContentReference> extends Node {
+export interface ResolvedContentReferenceNode<T extends BaseContentReference> extends Node {
   type: 'contentReference';
   contentReferenceId: string;
   contentReferenceCount: number;
