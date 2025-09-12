@@ -18,13 +18,13 @@ import type { SiemMigrationResourceBase } from '../../../../../common/siem_migra
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
+import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
-import { RuleMigrationsLastError } from './last_error';
-import { MigrationPanelTitle } from './migration_panel_title';
+import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
+import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { PanelText } from '../../../../common/components/panel_text';
 
 export interface MigrationReadyPanelProps {
@@ -71,7 +71,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <MigrationPanelTitle migrationStats={migrationStats} />
+              <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
             </EuiFlexItem>
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
@@ -109,7 +109,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
       {migrationStats.last_execution?.error && (
         <>
           <EuiSpacer size="m" />
-          <RuleMigrationsLastError message={migrationStats.last_execution.error} />
+          <MigrationsLastError message={migrationStats.last_execution.error} migrationType="rule" />
         </>
       )}
     </EuiPanel>
@@ -119,10 +119,10 @@ MigrationReadyPanel.displayName = 'MigrationReadyPanel';
 
 const StartTranslationButton = React.memo<{ migrationId: string; isStopped: boolean }>(
   ({ migrationId, isStopped }) => {
-    const { startMigration, isLoading } = useStartMigration();
+    const { mutate: startMutation, isLoading } = useStartSiemMigration('rule');
     const onStartMigration = useCallback(() => {
-      startMigration(migrationId);
-    }, [migrationId, startMigration]);
+      startMutation({ migrationId });
+    }, [migrationId, startMutation]);
 
     const text = useMemo(() => {
       if (isStopped) {

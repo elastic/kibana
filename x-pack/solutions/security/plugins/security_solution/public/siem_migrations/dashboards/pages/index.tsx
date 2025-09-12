@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -20,6 +21,7 @@ import * as i18n from './translations';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
+import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -68,6 +70,11 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
+
+      if (migrationStats.status === SiemMigrationTaskStatus.RUNNING) {
+        return <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />;
+      }
+
       return (
         <>
           <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />

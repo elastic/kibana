@@ -9,11 +9,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MigrationReadyPanel } from './migration_ready_panel';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+import { useStartSiemMigration } from '../../../common/hooks/use_start_siem_migration';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -23,8 +23,8 @@ jest.mock('../data_input_flyout/context', () => ({
   }),
 }));
 
-jest.mock('../../service/hooks/use_start_migration');
-const useStartMigrationMock = useStartMigration as jest.Mock;
+jest.mock('../../../common/hooks/use_start_siem_migration');
+const useStartMigrationMock = useStartSiemMigration as jest.Mock;
 const mockStartMigration = jest.fn();
 
 const mockMigrationStateWithError: RuleMigrationStats = {

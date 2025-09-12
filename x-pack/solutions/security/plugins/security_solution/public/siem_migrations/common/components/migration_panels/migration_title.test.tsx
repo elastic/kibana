@@ -7,21 +7,19 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MigrationPanelTitle } from './migration_panel_title';
-import { useUpdateMigration } from '../../logic/use_update_migration';
-import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
+import { MigrationPanelTitle as MigrationTitle } from './migration_title';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
-import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
+import * as ruleApi from '../../../rules/api';
+import { useDeleteMigration } from '../../hooks/use_delete_migrations';
+import type { RuleMigrationStats } from '../../../rules/types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../../logic/use_update_migration');
-const useUpdateMigrationMock = useUpdateMigration as jest.Mock;
-const mockUpdateMigration = jest.fn();
+const mockUpdateMigrationApi = jest.spyOn(ruleApi, 'updateMigration');
 
-jest.mock('../../../common/hooks/use_delete_migrations');
+jest.mock('../../hooks/use_delete_migrations');
 const useDeleteMigrationMock = useDeleteMigration as jest.Mock;
 const mockDeleteMigration = jest.fn();
 
@@ -40,18 +38,13 @@ const mockMigrationStatsRunning: RuleMigrationStats = {
 };
 
 const renderMigrationPanelTitle = (migrationStats: RuleMigrationStats) => {
-  return render(<MigrationPanelTitle migrationStats={migrationStats} />, {
+  return render(<MigrationTitle migrationStats={migrationStats} migrationType="rule" />, {
     wrapper: TestProviders,
   });
 };
 
 describe('MigrationPanelTitle', () => {
   beforeEach(() => {
-    useUpdateMigrationMock.mockReturnValue({
-      mutate: mockUpdateMigration,
-      isLoading: false,
-    });
-
     useDeleteMigrationMock.mockReturnValue({
       mutate: mockDeleteMigration,
       isLoading: false,
@@ -138,7 +131,10 @@ describe('MigrationPanelTitle', () => {
       fireEvent.keyDown(input, { key: 'Enter' });
 
       await waitFor(() => {
-        expect(mockUpdateMigration).toHaveBeenCalledWith({ name: 'New Migration Name' });
+        expect(mockUpdateMigrationApi).toHaveBeenCalledWith({
+          migrationId: 'test-migration-id',
+          body: { name: 'New Migration Name' },
+        });
       });
     });
 
@@ -158,11 +154,8 @@ describe('MigrationPanelTitle', () => {
       expect(screen.getByText('Test Migration')).toBeInTheDocument();
     });
 
-    it('should revert name on update error', () => {
-      useUpdateMigrationMock.mockReturnValue({
-        mutate: mockUpdateMigration,
-        isLoading: false,
-      });
+    it('should revert name on update error', async () => {
+      mockUpdateMigrationApi.mockRejectedValue(new Error('Update failed'));
 
       renderMigrationPanelTitle(mockMigrationStatsReady);
 
@@ -176,7 +169,16 @@ describe('MigrationPanelTitle', () => {
       fireEvent.change(input, { target: { value: 'New Name' } });
       fireEvent.keyDown(input, { key: 'Enter' });
 
-      expect(mockUpdateMigration).toHaveBeenCalledWith({ name: 'New Name' });
+      await waitFor(() => {
+        expect(mockUpdateMigrationApi).toHaveBeenCalledWith({
+          migrationId: 'test-migration-id',
+          body: { name: 'New Name' },
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Migration')).toBeInTheDocument();
+      });
     });
   });
 

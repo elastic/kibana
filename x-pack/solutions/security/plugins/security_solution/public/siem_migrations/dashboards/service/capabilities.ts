@@ -13,7 +13,7 @@ import {
 } from '../../common/service/capabilities';
 
 const dashboardCapability = {
-  capability: `dashboard_v2.all`,
+  capability: `dashboard_v2.createNew`,
   description: i18n.translate(
     'xpack.securitySolution.siemMigrations.service.capabilities.dashboardsAll',
     { defaultMessage: 'Analytics > Dashboards: All' }
