@@ -31,18 +31,21 @@ export const PrivMonUtils = (
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const securitySolutionUtils = getService('securitySolutionUtils');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const retry = getService('retry');
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
   const _callInitAsAdmin = async () => {
-    // Use the consistent auth approach for both ESS and serverless
-    const supertestAdmin = await securitySolutionUtils.createSuperTest('admin');
+    // we have to use cookie auth to call this API because the init route creates an API key
+    // and Kibana does not allow this with API key auth (which is the default in @serverless tests)
+    const supertestCookieAuth = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      useCookieHeader: true,
+    });
 
-    return supertestAdmin
+    return supertestCookieAuth
       .post(routeWithNamespace(MONITORING_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -71,20 +74,9 @@ export const PrivMonUtils = (
     log.info(`Initializing Privilege Monitoring engine in namespace ${namespace || 'default'}`);
     const res = await _callInitAsAdmin();
 
-    log.info(`Init engine response status: ${res.status}`);
-    log.info(`Init engine response body: ${JSON.stringify(res.body)}`);
-
-    if (res.status !== 200) {
+    if (res.status !== 200 || res.body.status !== 'started') {
       log.error(`Failed to initialize engine in namespace ${namespace}. Status: ${res.status}`);
       log.error(JSON.stringify(res.body));
-      throw new Error(
-        `Engine initialization failed with status ${res.status}: ${JSON.stringify(res.body)}`
-      );
-    }
-
-    if (res.body.status !== 'started') {
-      log.error(`Engine not started after initialization. Status: ${res.body.status}`);
-      throw new Error(`Engine status is ${res.body.status} instead of 'started'`);
     }
 
     expect(res.status).toEqual(200);
@@ -194,55 +186,28 @@ export const PrivMonUtils = (
     let lastSeenLength = -1;
 
     return retry.waitForWithTimeout('users to be synced', 90000, async () => {
-      try {
-        const res = await api.listPrivMonUsers({ query: {} });
-        const currentLength = res.body.length;
+      const res = await api.listPrivMonUsers({ query: {} });
+      const currentLength = res.body.length;
 
-        if (currentLength !== lastSeenLength) {
-          log.info(
-            `PrivMon users sync check: found ${currentLength} users (expected: ${expectedLength})`
-          );
-          lastSeenLength = currentLength;
-        }
-
-        return currentLength >= expectedLength;
-      } catch (error) {
-        log.error(`Error listing privmon users: ${error.message}`);
-        return false;
+      if (currentLength !== lastSeenLength) {
+        log.info(
+          `PrivMon users sync check: found ${currentLength} users (expected: ${expectedLength})`
+        );
+        lastSeenLength = currentLength;
       }
+
+      return currentLength >= expectedLength;
     });
   };
 
   const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
     log.info(`Scheduling engine and waiting for user count: ${expectedCount}`);
 
-    try {
-      const scheduleRes = await scheduleMonitoringEngineNow({ ignoreConflict: true });
-      log.info(`Schedule engine response status: ${scheduleRes.status}`);
-    } catch (error) {
-      log.error(`Error scheduling engine: ${error.message}`);
-      throw error;
-    }
-
-    try {
-      await waitForSyncTaskRun();
-      log.info(`Task run completed, now waiting for users to be synced`);
-    } catch (error) {
-      log.error(`Error waiting for task run: ${error.message}`);
-      throw error;
-    }
-
-    try {
-      await _waitForPrivMonUsersToBeSynced(expectedCount);
-      log.info(`Users sync completed`);
-    } catch (error) {
-      log.error(`Error waiting for users to sync: ${error.message}`);
-      throw error;
-    }
+    await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await waitForSyncTaskRun();
+    await _waitForPrivMonUsersToBeSynced(expectedCount);
 
     const res = await api.listPrivMonUsers({ query: {} });
-    log.info(`Final user count: ${res.body.length}`);
-
     return res.body;
   };
 
