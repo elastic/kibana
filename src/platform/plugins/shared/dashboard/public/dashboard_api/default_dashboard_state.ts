@@ -24,4 +24,13 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   syncCursor: true,
   syncTooltips: false,
   hidePanelTitles: false,
+  fetchOnlyVisible: false,
+};
+
+/**
+ * Some features should be opt-in for existing Dashboards and opt-out for new Dashboards.
+ * Any overrides added here will be spread on top of the state for new Dashboards only
+ */
+export const NEW_DASHBOARD_OVERRIDES: Partial<DashboardState> = {
+  fetchOnlyVisible: true,
 };

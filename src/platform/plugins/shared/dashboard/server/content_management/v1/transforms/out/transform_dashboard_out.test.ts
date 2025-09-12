@@ -117,6 +117,7 @@ describe('transformDashboardOut', () => {
       },
       optionsJSON: JSON.stringify({
         hidePanelTitles: true,
+        fetchOnlyVisible: true,
         useMargins: false,
         syncColors: false,
         syncTooltips: false,
@@ -159,6 +160,7 @@ describe('transformDashboardOut', () => {
       },
       options: {
         hidePanelTitles: true,
+        fetchOnlyVisible: true,
         useMargins: false,
         syncColors: false,
         syncTooltips: false,

@@ -27,10 +27,24 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
+  type PublishesPauseFetch,
+  apiPublishesPauseFetch,
+} from './interfaces/fetch/publishes_pause_fetch';
+export {
   apiCanLockHoverActions,
   type CanLockHoverActions,
 } from './interfaces/can_lock_hover_actions';
-export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
+export { fetch$, useFetchContext } from './interfaces/fetch/fetch';
+export type { FetchContext } from './interfaces/fetch/fetch_context';
+export {
+  type FetchSetting,
+  type PublishesFetchSetting,
+  type PublishesIsVisible,
+  apiPublishesIsVisible,
+  apiPublishesFetchSetting,
+  onVisibilityChange,
+  initializeVisibility,
+} from './interfaces/fetch/fetch_only_visible';
 export {
   initializeTimeRangeManager,
   timeRangeComparators,

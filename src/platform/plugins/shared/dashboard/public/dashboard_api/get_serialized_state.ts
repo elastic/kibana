@@ -62,6 +62,7 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
     controlGroupInput,
+    fetchOnlyVisible,
   } = dashboardState;
 
   let { panels } = dashboardState;
@@ -83,6 +84,7 @@ export const getSerializedState = ({
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    fetchOnlyVisible,
   };
 
   /**

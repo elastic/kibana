@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         syncColors: true,
         syncTooltips: true,
         syncCursor: true,
+        fetchOnlyVisible: false,
       });
     });
 

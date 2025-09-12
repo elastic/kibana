@@ -67,11 +67,13 @@ export function getDashboardApi({
     return getReferencesForPanelId(id, references$.value ?? []);
   };
 
+  const settingsManager = initializeSettingsManager(viewModeManager.api.viewMode$, initialState);
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
     trackPanel,
-    getReferences
+    getReferences,
+    settingsManager.api.fetchSetting$
   );
   const controlGroupManager = initializeControlGroupManager(
     initialState.controlGroupInput,
@@ -82,7 +84,6 @@ export function getDashboardApi({
     controlGroupManager.api.controlGroupApi$,
     layoutManager.api.children$
   );
-  const settingsManager = initializeSettingsManager(initialState);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupManager.api.controlGroupApi$,

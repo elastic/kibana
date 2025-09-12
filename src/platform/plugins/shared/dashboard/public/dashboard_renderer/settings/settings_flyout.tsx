@@ -23,6 +23,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTextArea,
@@ -34,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -62,21 +63,20 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await getDashboardContentManagementService().checkForDuplicateDashboardTitle(
-      {
+    const isTitleValid =
+      await getDashboardContentManagementService().checkForDuplicateDashboardTitle({
         title: localSettings.title,
         copyOnSave: false,
         lastSavedTitle: dashboardApi.title$.value ?? '',
         onTitleDuplicate,
         isTitleDuplicateConfirmed,
-      }
-    );
+      });
 
     if (!isMounted()) return;
 
     setIsApplying(false);
 
-    if (validTitle) {
+    if (isTitleValid) {
       dashboardApi.setSettings(localSettings);
       onClose();
     }
@@ -137,6 +137,26 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
         <savedObjectsTaggingApi.ui.components.TagSelector
           selected={localSettings.tags}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
+        />
+      </EuiFormRow>
+    );
+  };
+
+  const renderFetchOnlyVisible = () => {
+    const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
+    return (
+      <EuiFormRow>
+        <EuiSwitch
+          disabled={deferBelowFold}
+          data-test-subj="fetchOnlyVisibleCheckbox"
+          checked={deferBelowFold || localSettings.fetchOnlyVisible}
+          onChange={(event) => updateDashboardSetting({ fetchOnlyVisible: event.target.checked })}
+          label={
+            <FormattedMessage
+              id="dashboard.embeddableApi.showSettings.flyout.form.fetchOnlyVisibleFormRowLabel"
+              defaultMessage="Fetch data for visible panels only"
+            />
+          }
         />
       </EuiFormRow>
     );
@@ -211,6 +231,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             />
           </EuiFormRow>
           {renderTagSelector()}
+          <EuiSpacer />
+          {renderFetchOnlyVisible()}
           <EuiFormRow
             helpText={
               <FormattedMessage

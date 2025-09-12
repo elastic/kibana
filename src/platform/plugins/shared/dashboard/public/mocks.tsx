@@ -112,6 +112,7 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     syncCursor: true,
     syncTooltips: false,
     hidePanelTitles: false,
+    fetchOnlyVisible: true,
 
     tags: [],
     filters: [],
