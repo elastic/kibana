@@ -12,6 +12,9 @@ import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
+import classnames from 'classnames';
+import type { NavigationProps } from './navigation';
+import { Navigation } from './navigation';
 
 interface Props {
   toggleSideNav: (isVisible: boolean) => void;
@@ -26,6 +29,14 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
   toggleSideNav,
 }) => {
   const isCollapsed = useObservable(isSideNavCollapsed$, false);
+  const className = classnames(
+    'hide-for-sharing',
+    css`
+      .euiFlyoutBody__overflowContent {
+        height: 100%;
+      }
+    `
+  );
 
   return (
     <EuiCollapsibleNavBeta
@@ -36,11 +47,7 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
         overflow: 'visible',
         clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
       }}
-      className={css`
-        .euiFlyoutBody__overflowContent {
-          height: 100%;
-        }
-      `}
+      className={className}
     >
       {children}
     </EuiCollapsibleNavBeta>
