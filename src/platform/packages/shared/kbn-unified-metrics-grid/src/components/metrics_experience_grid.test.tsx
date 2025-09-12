@@ -9,7 +9,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
@@ -193,5 +193,72 @@ describe('MetricsExperienceGrid', () => {
     });
 
     waitFor(() => expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument());
+  });
+
+  it('shows and updates the search input when the search button is clicked', async () => {
+    const onSearchTermChange = jest.fn();
+
+    useMetricsGridStateMock.mockReturnValue({
+      currentPage: 0,
+      dimensions: [],
+      valueFilters: [],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      onValuesChange: jest.fn(),
+      onClearValues: jest.fn(),
+      onClearAllDimensions: jest.fn(),
+      isFullscreen: false,
+      searchTerm: '',
+      onClearSearchTerm: jest.fn(),
+      onSearchTermChange,
+      onToggleFullscreen: jest.fn(),
+    });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    const inputButton = getByTestId('metricsExperienceToolbarSearch');
+    expect(inputButton).toBeInTheDocument();
+    await inputButton.click();
+
+    const input = getByTestId('metricsExperienceToolbarSearchInputInput');
+    expect(input).toBeInTheDocument();
+
+    input.focus();
+    fireEvent.change(input, { target: { value: 'cpu' } });
+
+    expect(onSearchTermChange).toHaveBeenCalledWith('cpu');
+  });
+
+  it('toggles fullscreen mode when the fullscreen button is clicked', async () => {
+    const onToggleFullscreen = jest.fn();
+    const isFullscreen = false;
+
+    useMetricsGridStateMock.mockReturnValue({
+      currentPage: 0,
+      dimensions: [],
+      valueFilters: [],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      onValuesChange: jest.fn(),
+      onClearValues: jest.fn(),
+      onClearAllDimensions: jest.fn(),
+      isFullscreen,
+      searchTerm: '',
+      onClearSearchTerm: jest.fn(),
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen,
+    });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    const fullscreenButton = getByTestId('metricsExperienceToolbarFullScreen');
+    expect(fullscreenButton).toBeInTheDocument();
+    fireEvent.click(fullscreenButton);
+
+    expect(onToggleFullscreen).toHaveBeenCalled();
   });
 });
