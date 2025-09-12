@@ -270,10 +270,6 @@ export const getEsConversationSchemaMock = (
       name: 'elastic',
     },
   ],
-  created_by: {
-    id: '1111',
-    name: 'elastic',
-  },
   replacements: undefined,
   ...rest,
 });

@@ -58,8 +58,6 @@ const createMockMessage = (overrides?: Partial<Message>): Message => {
   const baseMessage = getAppendConversationMessagesSchemaMock().messages[0];
   return {
     ...baseMessage,
-    id: 'msg-2',
-    user: { id: 'my_profile_uid', name: 'elastic' },
     ...overrides,
   };
 };
@@ -325,28 +323,6 @@ describe('appendConversationMessages', () => {
       })
     );
   });
-
-  it('generates UUID for messages without id', async () => {
-    const messageWithoutId = createMockMessage({ id: undefined });
-    setupSuccessfulTest();
-
-    await callAppendConversationMessages([messageWithoutId]);
-
-    expect(dataWriter.bulk).toHaveBeenCalledWith(
-      expect.objectContaining({
-        documentsToUpdate: expect.arrayContaining([
-          expect.objectContaining({
-            messages: expect.arrayContaining([
-              expect.objectContaining({
-                id: expect.any(String),
-                content: 'test content',
-              }),
-            ]),
-          }),
-        ]),
-      })
-    );
-  });
 });
 
 describe('transformToUpdateScheme', () => {
@@ -375,10 +351,8 @@ describe('transformToUpdateScheme', () => {
         messages: expect.arrayContaining([
           expect.objectContaining({
             '@timestamp': msgs[0].timestamp,
-            id: msgs[0].id,
             content: msgs[0].content,
             role: msgs[0].role,
-            user: msgs[0].user,
             trace_data: expect.objectContaining({
               trace_id: '1',
               transaction_id: '2',
