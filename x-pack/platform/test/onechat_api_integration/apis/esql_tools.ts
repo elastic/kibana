@@ -32,7 +32,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       for (const toolId of createdToolIds) {
         try {
-          await supertest.delete(`/api/agent_builder/tools/${toolId}`).set('kbn-xsrf', 'kibana').expect(200);
+          await supertest
+            .delete(`/api/agent_builder/tools/${toolId}`)
+            .set('kbn-xsrf', 'kibana')
+            .expect(200);
         } catch (error) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
@@ -221,7 +224,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 404 for non-existent tool', async () => {
-        const response = await supertest.get('/api/agent_builder/tools/non-existent-tool').expect(404);
+        const response = await supertest
+          .get('/api/agent_builder/tools/non-existent-tool')
+          .expect(404);
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');

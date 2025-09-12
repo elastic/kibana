@@ -32,7 +32,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       for (const toolId of createdToolIds) {
         try {
-          await supertest.delete(`/api/agent_builder/tools/${toolId}`).set('kbn-xsrf', 'kibana').expect(200);
+          await supertest
+            .delete(`/api/agent_builder/tools/${toolId}`)
+            .set('kbn-xsrf', 'kibana')
+            .expect(200);
         } catch (error) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }

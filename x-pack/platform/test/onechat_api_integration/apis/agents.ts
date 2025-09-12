@@ -153,7 +153,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve an existing agent', async () => {
-        const response = await supertest.get(`/api/agent_builder/agents/get-test-agent`).expect(200);
+        const response = await supertest
+          .get(`/api/agent_builder/agents/get-test-agent`)
+          .expect(200);
 
         expect(response.body).to.have.property('id', 'get-test-agent');
         expect(response.body).to.have.property('name', mockAgent.name);
@@ -167,7 +169,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 404 for non-existent agent', async () => {
-        const response = await supertest.get('/api/agent_builder/agents/non-existent-agent').expect(404);
+        const response = await supertest
+          .get('/api/agent_builder/agents/non-existent-agent')
+          .expect(404);
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
