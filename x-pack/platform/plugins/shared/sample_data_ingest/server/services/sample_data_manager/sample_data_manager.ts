@@ -11,12 +11,14 @@ import type {
   ISavedObjectsImporter,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { DatasetSampleType } from '../../../common';
 import { type StatusResponse, getSampleDataIndexName } from '../../../common';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import { SavedObjectsManager } from '../saved_objects_manager';
+import { getInstallTaskId } from '../../tasks/install_sample_data';
 import type { ZipArchive } from '../types';
 interface SampleDataManagerOpts {
   artifactsFolder: string;
@@ -25,6 +27,7 @@ interface SampleDataManagerOpts {
   kibanaVersion: string;
   elserInferenceId?: string;
   isServerlessPlatform: boolean;
+  taskManager?: TaskManagerStartContract;
 }
 
 export class SampleDataManager {
@@ -32,6 +35,7 @@ export class SampleDataManager {
   private readonly artifactManager: ArtifactManager;
   private readonly indexManager: IndexManager;
   private readonly savedObjectsManager: SavedObjectsManager;
+  private readonly taskManager?: TaskManagerStartContract;
   private isInstalling: boolean = false;
 
   constructor({
@@ -41,8 +45,10 @@ export class SampleDataManager {
     elserInferenceId,
     kibanaVersion,
     isServerlessPlatform,
+    taskManager,
   }: SampleDataManagerOpts) {
     this.log = logger;
+    this.taskManager = taskManager;
 
     this.artifactManager = new ArtifactManager({
       artifactsFolder,
@@ -156,21 +162,58 @@ export class SampleDataManager {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
   }): Promise<StatusResponse> {
-    const indexName = getSampleDataIndexName(sampleType);
     try {
-      const hasIndex = await this.indexManager.hasIndex({ indexName, esClient });
-      const dashboardId = await this.savedObjectsManager.getDashboardId(soClient, sampleType);
-      if (hasIndex) {
+      if (this.taskManager) {
+        try {
+          const task = await this.taskManager.get(getInstallTaskId(sampleType));
+
+          if (task?.status === 'running') {
+            return {
+              status: 'installing',
+              taskId: getInstallTaskId(sampleType),
+            };
+          }
+        } catch {
+          this.log.debug(`Task ${getInstallTaskId(sampleType)} not found or error getting it`);
+        }
+      }
+
+      const isInstalled = await this.isSampleDataInstalled({ sampleType, esClient });
+
+      if (isInstalled) {
+        const indexName = getSampleDataIndexName(sampleType);
+        const dashboardId = await this.savedObjectsManager.getDashboardId(soClient, sampleType);
+
         return {
           status: 'installed',
           indexName,
           dashboardId,
         };
       }
+
       return { status: 'uninstalled' };
     } catch (error) {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
       return { status: 'uninstalled' };
+    }
+  }
+
+  async isSampleDataInstalled({
+    sampleType,
+    esClient,
+  }: {
+    sampleType: DatasetSampleType;
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    const indexName = getSampleDataIndexName(sampleType);
+
+    try {
+      return await this.indexManager.hasIndex({ indexName, esClient });
+    } catch (error) {
+      this.log.warn(
+        `Failed to check if sample data is installed for [${sampleType}]: ${error.message}`
+      );
+      return false;
     }
   }
 }

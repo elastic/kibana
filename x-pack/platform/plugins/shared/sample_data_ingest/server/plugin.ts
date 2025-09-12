@@ -8,7 +8,7 @@
 import * as Path from 'path';
 import type { Logger } from '@kbn/logging';
 import { getDataPath } from '@kbn/utils';
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SampleDataIngestConfig } from './config';
 import type {
   InternalServices,
@@ -18,9 +18,10 @@ import type {
 
 import { SampleDataManager } from './services/sample_data_manager';
 import { registerRoutes } from './routes';
+import { registerTaskDefinitions } from './tasks';
 
 export class SampleDataIngestPlugin
-  implements Plugin<SampleDataSetupDependencies, SampleDataStartDependencies>
+  implements Plugin<{}, {}, SampleDataSetupDependencies, SampleDataStartDependencies>
 {
   private readonly logger: Logger;
   private internalServices?: InternalServices;
@@ -31,13 +32,19 @@ export class SampleDataIngestPlugin
     this.isServerlessPlatform = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  setup(coreSetup: CoreSetup): SampleDataSetupDependencies {
+  setup(coreSetup: CoreSetup, { taskManager }: SampleDataSetupDependencies): {} {
     const getServices = () => {
       if (!this.internalServices) {
         throw new Error('getServices called before #start');
       }
       return this.internalServices;
     };
+
+    registerTaskDefinitions({
+      taskManager,
+      getServices,
+      core: coreSetup,
+    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
@@ -48,7 +55,7 @@ export class SampleDataIngestPlugin
     return {};
   }
 
-  start(): SampleDataStartDependencies {
+  start(core: CoreStart, { taskManager }: SampleDataStartDependencies): {} {
     const sampleDataManager = new SampleDataManager({
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: Path.join(getDataPath(), 'sample-data-artifacts'),
@@ -56,11 +63,13 @@ export class SampleDataIngestPlugin
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
       isServerlessPlatform: this.isServerlessPlatform,
+      taskManager,
     });
 
     this.internalServices = {
       logger: this.logger,
       sampleDataManager,
+      taskManager,
     };
 
     return {};

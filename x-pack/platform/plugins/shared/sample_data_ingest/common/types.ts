@@ -11,12 +11,29 @@ export interface StatusResponse {
   status: InstallationStatus;
   indexName?: string;
   dashboardId?: string;
+  taskId?: string;
 }
 
-export interface InstallResponse {
+export interface SampleDataResponse {
   status: InstallationStatus;
+}
+
+export interface InstalledResponse extends SampleDataResponse {
+  status: 'installed';
   indexName: string;
+  dashboardId: string;
+}
+
+export interface InstallingResponse extends SampleDataResponse {
+  status: 'installing';
+  taskId: string;
+}
+
+export interface SampleDataInstallState {
+  status: InstallationStatus;
+  indexName?: string;
   dashboardId?: string;
+  taskId?: string;
 }
 
 export enum DatasetSampleType {

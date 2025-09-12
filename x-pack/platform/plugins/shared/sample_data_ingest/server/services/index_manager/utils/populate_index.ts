@@ -45,7 +45,7 @@ export const populateIndex = async ({
       });
     }
 
-    await esClient.indices.refresh({ index: indexName });
+    // await esClient.indices.refresh({ index: indexName });
 
     log.debug(`Done populating index ${indexName}`);
   } catch (e) {
