@@ -16,10 +16,36 @@ import {
 
 import type { StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
+import { z } from '@kbn/zod';
+
+export interface StepContextMockData {
+  stepContext: Partial<StepContext>;
+  schema: z.ZodTypeAny;
+}
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
 
-export function buildStepContextMock(workflowGraph: WorkflowGraph): Partial<StepContext> {
+function buildSchemaFromObjectRecursive(obj: any): z.ZodTypeAny {
+  if (Array.isArray(obj)) {
+    return z.array(buildSchemaFromObjectRecursive(obj[0]));
+  } else if (typeof obj === 'object' && obj !== null) {
+    const config: Record<string, any> = {};
+
+    Object.keys(obj).forEach((key) => {
+      config[key] = buildSchemaFromObjectRecursive(obj[key]);
+    });
+
+    return z.object(config).strict();
+  }
+
+  return z.any();
+}
+
+function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
+  return buildSchemaFromObjectRecursive(obj);
+}
+
+export function buildStepContextMock(workflowGraph: WorkflowGraph): StepContextMockData {
   const stepContextMock = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
   const allInputs = Object.values(inputsInGraph).flat();
@@ -50,5 +76,10 @@ export function buildStepContextMock(workflowGraph: WorkflowGraph): Partial<Step
     }
   });
 
-  return stepContextMock;
+  const schema = buildStepContextSchemaFromObject(stepContextMock);
+
+  return {
+    stepContext: stepContextMock,
+    schema,
+  };
 }

@@ -19,6 +19,7 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
 import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
@@ -129,7 +130,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const [testStepId, setTestStepId] = useState<string | null>(null);
-  const [stepContextMock, setStepContextMock] = useState<Partial<StepContext> | null>(null);
+  const [stepContextMock, setStepContextMock] = useState<StepContextMockData | null>(null);
   const [testSingleStepExecutionId, setTestSingleStepExecutionId] = useState<string | null>(null);
 
   const handleRunClick = () => {
@@ -230,14 +231,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
     if (params.actionType === 'run') {
-      const builtStepContextMock = buildStepContextMockForStep(workflowYaml, params.stepId);
+      const stepContextMockData = buildStepContextMockForStep(workflowYaml, params.stepId);
 
-      if (!Object.keys(builtStepContextMock).length) {
+      if (!Object.keys(stepContextMockData).length) {
         submitStepRun(params.stepId, {});
         return;
       }
 
-      setStepContextMock(builtStepContextMock);
+      setStepContextMock(stepContextMockData);
       setTestStepId(params.stepId);
     }
   };

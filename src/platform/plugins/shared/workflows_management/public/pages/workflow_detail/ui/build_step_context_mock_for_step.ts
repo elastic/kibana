@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepContext } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
 import { buildStepContextMock } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
 
 export function buildStepContextMockForStep(
   workflowYaml: string,
   stepId: string
-): Partial<StepContext> {
+): StepContextMockData {
   const parsingResult = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
   const stepSubGraph = WorkflowGraph.fromWorkflowDefinition(
     (parsingResult as any).data
