@@ -67,7 +67,7 @@ streamlangApiTest.describe(
         const { query } = transpile(streamlangDSL);
 
         // Ingest a doc with all operand fields to satisfy ES|QL requirement that any field used in the query must be pre-mapped (available as a column)
-        const docForMapping = {
+        const mappingDoc = {
           '@timestamp': '',
           message: '',
           log: { level: '' },
@@ -75,7 +75,7 @@ streamlangApiTest.describe(
           client: { ip: '' },
         };
         const docs = [
-          docForMapping,
+          mappingDoc,
           { expect: 'undissected', log: { level: 'undissected' } },
           {
             expect: 'dissected',
@@ -111,8 +111,8 @@ streamlangApiTest.describe(
         };
         const { query } = transpile(streamlangDSL);
 
-        const docForMapping = { message: '[2025-01-01T00:00:00.000Z] [info] 192.168.90.9' };
-        const docs = [docForMapping, { log: { level: 'info' } }];
+        const mappingDoc = { message: '[2025-01-01T00:00:00.000Z] [info] 192.168.90.9' };
+        const docs = [mappingDoc, { log: { level: 'info' } }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
@@ -160,9 +160,9 @@ streamlangApiTest.describe(
         ],
       };
       const { query } = transpile(streamlangDSL);
-      const docForMapping = { log: { level: '' } };
+      const mappingDoc = { log: { level: '' } };
       const docs = [
-        docForMapping,
+        mappingDoc,
         { attributes: { should_exist: 'YES' }, message: '[info]' },
         { attributes: { size: 2048 }, message: '[warn]' },
       ];
@@ -460,9 +460,9 @@ streamlangApiTest.describe(
           ],
         };
         const { query } = transpile(streamlangDSL);
-        const docForMapping = { size: 0, message: '' }; // Ingest size as long type
+        const mappingDoc = { size: 0, message: '' }; // Ingest size as long type
         const docs = [
-          docForMapping,
+          mappingDoc,
           { case: 'dissected', size: 1.9, message: '3.14159265358979323846' },
           { case: 'skipped', size: 88.99 },
         ];

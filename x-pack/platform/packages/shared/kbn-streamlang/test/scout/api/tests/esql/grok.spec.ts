@@ -489,9 +489,9 @@ streamlangApiTest.describe(
           ],
         };
         const { query } = transpile(streamlangDSL);
-        const docForMapping = { size: 0, message: '' }; // Ingest size as long type
+        const mappingDoc = { size: 0, message: '' }; // Ingest size as long type
         const docs = [
-          docForMapping,
+          mappingDoc,
           { case: 'groked', size: 1.9, message: '3.14159265358979323846' },
           { case: 'skipped', size: 88.99 },
         ];

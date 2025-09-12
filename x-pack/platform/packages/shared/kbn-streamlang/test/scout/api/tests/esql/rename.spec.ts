@@ -57,17 +57,12 @@ streamlangApiTest.describe(
 
         const { query } = transpile(streamlangDSL);
 
-        // Add `docForMapping` to address ES|QL limitation that any column used as operand must be available as a column (pre-mapped)
-        const docForMapping = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
+        // Add `mappingDoc` to address ES|QL limitation that any column used as operand must be available as a column (pre-mapped)
+        const mappingDoc = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
         const docWithMissingSource = { host: { renamed: 'old-host-1' } };
         const docWithMissingTarget = { host: { original: 'new-host-2' } };
         const docWithMissingFields = { message: 'message-3' };
-        const docs = [
-          docForMapping,
-          docWithMissingSource,
-          docWithMissingTarget,
-          docWithMissingFields,
-        ];
+        const docs = [mappingDoc, docWithMissingSource, docWithMissingTarget, docWithMissingFields];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 

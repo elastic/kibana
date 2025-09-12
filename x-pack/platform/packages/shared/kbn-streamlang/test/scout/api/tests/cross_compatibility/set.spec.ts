@@ -134,6 +134,54 @@ streamlangApiTest.describe(
           );
         }
       );
+
+      // Add template tests
+      [
+        {
+          templateLabel: 'double-braces',
+          templateType: '{{ }}',
+          value: '{{template_value}}',
+          to: '{{template_field}}',
+        },
+        {
+          templateLabel: 'triple-braces',
+          templateType: '{{{ }}}',
+          value: '{{{template_value}}}',
+          to: '{{{template_field}}}',
+        },
+      ].forEach(({ templateLabel, templateType, value, to }) => {
+        streamlangApiTest(
+          `should consistently handle ${templateType} template syntax for both to and value fields`,
+          async ({ testBed, esql }) => {
+            const streamlangDSL: StreamlangDSL = {
+              steps: [
+                {
+                  action: 'set',
+                  to,
+                  value,
+                } as SetProcessor,
+              ],
+            };
+
+            const { processors } = asIngest(streamlangDSL);
+            const { query } = asEsql(streamlangDSL);
+
+            const docs = [{ template_value: 'actual-value', template_field: 'target.field' }];
+            await testBed.ingest(`ingest-set-template-${templateLabel}`, docs, processors);
+            const ingestResult = await testBed.getDocs(`ingest-set-template-${templateLabel}`);
+
+            await testBed.ingest(`esql-set-template-${templateLabel}`, docs);
+            const esqlResult = await esql.queryOnIndex(`esql-set-template-${templateLabel}`, query);
+
+            // Both engines should treat the templates as literal values, not as template variables to substitute
+            expect(ingestResult[0]).toHaveProperty(to, value);
+            expect(esqlResult.documents[0]).toEqual(expect.objectContaining({ [to]: value }));
+
+            // Both docs should be same
+            expect(ingestResult[0]).toEqual(esqlResult.documentsWithoutKeywords[0]);
+          }
+        );
+      });
     });
   }
 );

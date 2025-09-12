@@ -110,9 +110,9 @@ streamlangApiTest.describe(
       };
       const { query } = transpile(streamlangDSL);
 
-      const docForMapping = { '@timestamp': '2025-01-01T12:32:54.123Z' }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped
+      const mappingDoc = { '@timestamp': '2025-01-01T12:32:54.123Z' }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped
       const docs = [
-        docForMapping,
+        mappingDoc,
         { attributes: { should_exist: 'YES' }, log: { time: '2025-01-01T12:34:56.789Z' } },
         { attributes: { size: 2048 }, log: { time: '2025-01-02T12:34:56.789Z' } },
       ];

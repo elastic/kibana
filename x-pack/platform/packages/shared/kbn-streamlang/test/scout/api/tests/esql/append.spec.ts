@@ -48,8 +48,8 @@ streamlangApiTest.describe(
           ],
         };
         const { query } = transpile(streamlangDSL);
-        const docForMapping = { tags: ['initial_tag'] }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped;
-        const docs = [docForMapping, { message: 'message' }];
+        const mappingDoc = { tags: ['initial_tag'] }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped;
+        const docs = [mappingDoc, { message: 'message' }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
         expect(esqlResult.documents[1].tags).toEqual(['tag01', 'tag02']);

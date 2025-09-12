@@ -70,6 +70,67 @@ streamlangApiTest.describe(
           expect(esqlResult.documents[1].tags).toEqual(['tag1', 'tag2']);
         }
       );
+
+      // Add template tests
+      [
+        {
+          templateLabel: 'double-braces',
+          templateType: '{{ }}',
+          to: '{{template_to}}',
+          value: ['{{template_value_01}}', '{{template_value_02}}'],
+        },
+        {
+          templateLabel: 'triple-braces',
+          templateType: '{{{ }}}',
+          to: '{{{template_to}}}',
+          value: ['{{{template_value_01}}}', '{{{template_value_02}}}'],
+        },
+      ].forEach(({ templateLabel, templateType, to, value }) => {
+        streamlangApiTest(
+          `should consistently handle ${templateType} template syntax for both to and value fields`,
+          async ({ testBed, esql }) => {
+            const streamlangDSL: StreamlangDSL = {
+              steps: [
+                {
+                  action: 'append',
+                  to,
+                  value,
+                } as AppendProcessor,
+              ],
+            };
+
+            const { processors } = asIngest(streamlangDSL);
+            const { query } = asEsql(streamlangDSL);
+
+            const docs = [
+              {
+                [to]: ['existing_tag'],
+                template_to: 'original_template_to', // Should not be appended to
+                template_value: 'substituted-tag', // Should not be substituted
+              },
+            ];
+
+            await testBed.ingest(`ingest-append-template-${templateLabel}`, docs, processors);
+            const ingestResult = await testBed.getDocs(`ingest-append-template-${templateLabel}`);
+
+            await testBed.ingest(`esql-append-template-${templateLabel}`, docs);
+            const esqlResult = await esql.queryOnIndex(
+              `esql-append-template-${templateLabel}`,
+              query
+            );
+
+            // Both engines should treat the templates as literal values, not as template variables to substitute
+            expect(ingestResult[0][to]).toEqual(['existing_tag', ...value]);
+            expect(esqlResult.documents[0][to]).toEqual(['existing_tag', ...value]);
+
+            // Templates should not be parsed/substituted
+            expect(ingestResult[0]).toHaveProperty('template_to', 'original_template_to');
+            expect(ingestResult[0]).toHaveProperty('template_value', 'substituted-tag');
+            expect(esqlResult.documents[0]).toHaveProperty('template_to', 'original_template_to');
+            expect(esqlResult.documents[0]).toHaveProperty('template_value', 'substituted-tag');
+          }
+        );
+      });
     });
 
     streamlangApiTest.describe('Incompatible', () => {

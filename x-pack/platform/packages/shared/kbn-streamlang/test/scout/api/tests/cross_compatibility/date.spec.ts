@@ -97,6 +97,79 @@ streamlangApiTest.describe(
         expect(ingestResult[0]['@timestamp']).toEqual('2025/01/01');
         expect(esqlResult.documents[0]['@timestamp']).toEqual('2025/01/01');
       });
+
+      // Add template tests
+      [
+        {
+          templateLabel: 'double-braces',
+          templateType: '{{ }}',
+          from: '{{template_from}}',
+          to: '{{template_to}}',
+        },
+        {
+          templateLabel: 'triple-braces',
+          templateType: '{{{ }}}',
+          from: '{{{template_from}}}',
+          to: '{{{template_to}}}',
+        },
+      ].forEach(({ templateLabel, templateType, from, to }) => {
+        streamlangApiTest(
+          `should consistently handle ${templateType} template syntax for from and to fields`,
+          async ({ testBed, esql }) => {
+            const streamlangDSL: StreamlangDSL = {
+              steps: [
+                {
+                  action: 'date',
+                  from,
+                  to,
+                  formats: ['ISO8601'],
+                  output_format: 'yyyy/MM/dd',
+                } as DateProcessor,
+              ],
+            };
+
+            const { processors } = asIngest(streamlangDSL);
+            const { query } = asEsql(streamlangDSL);
+
+            // Create a document with the literal template strings as fields and the fields they would (should not) substitute to
+            const docs = [
+              {
+                [from]: '2025-01-01T12:34:56.789Z',
+                template_from: 'source.field', // Should not be substituted
+                template_to: 'target.field', // Should not be substituted
+              },
+            ];
+
+            await testBed.ingest(`ingest-date-template-${templateLabel}`, docs, processors);
+            const ingestResult = await testBed.getDocs(`ingest-date-template-${templateLabel}`);
+
+            await testBed.ingest(`esql-date-template-${templateLabel}`, docs);
+            const esqlResult = await esql.queryOnIndex(
+              `esql-date-template-${templateLabel}`,
+              query
+            );
+
+            // Both engines should treat the templates as literal values, not as template variables to substitute
+            expect(ingestResult[0]).toHaveProperty(to, '2025/01/01');
+            expect(ingestResult[0]).toHaveProperty('template_from', 'source.field');
+            expect(ingestResult[0]).toHaveProperty('template_to', 'target.field');
+
+            expect(esqlResult.documents[0]).toEqual(
+              expect.objectContaining({ [to]: '2025/01/01' })
+            );
+            expect(esqlResult.documents[0]).toHaveProperty('template_from', 'source.field');
+            expect(esqlResult.documents[0]).toHaveProperty('template_to', 'target.field');
+          }
+        );
+      });
+
+      // TODO: Implement compatibility test with multiple input date formats
+      streamlangApiTest(
+        'should parse the first matching among a list of input formats',
+        async ({ testBed, esql }) => {
+          //
+        }
+      );
     });
 
     streamlangApiTest.describe('Incompatible', () => {

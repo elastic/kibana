@@ -82,6 +82,70 @@ streamlangApiTest.describe(
         }
       );
 
+      // Add template tests
+      [
+        {
+          templateLabel: 'double-braces',
+          templateType: '{{ }}',
+          from: '{{template_from}}',
+          pattern: '[%{log.level}]',
+        },
+        {
+          templateLabel: 'triple-braces',
+          templateType: '{{{ }}}',
+          from: '{{{template_from}}}',
+          pattern: '[%{log.level}]',
+        },
+      ].forEach(({ templateLabel, templateType, from, pattern }) => {
+        streamlangApiTest(
+          `should consistently handle ${templateType} template syntax for from and pattern fields`,
+          async ({ testBed, esql }) => {
+            const streamlangDSL: StreamlangDSL = {
+              steps: [
+                {
+                  action: 'dissect',
+                  from,
+                  pattern,
+                } as DissectProcessor,
+              ],
+            };
+
+            const { processors } = asIngest(streamlangDSL);
+            const { query } = asEsql(streamlangDSL);
+
+            // Create a document with the literal template field and pattern content
+            const message = '[info] message content';
+            const docs = [
+              {
+                [from]: message,
+              },
+            ];
+
+            await testBed.ingest(`ingest-dissect-template-${templateLabel}`, docs, processors);
+            const ingestResult = await testBed.getDocs(`ingest-dissect-template-${templateLabel}`);
+
+            // Prepare mapping for ES|QL
+            const mappingDoc = { 'log.level': '' };
+            await testBed.ingest(`esql-dissect-template-${templateLabel}`, [mappingDoc]);
+            await testBed.ingest(`esql-dissect-template-${templateLabel}`, docs);
+            const esqlResult = await esql.queryOnIndex(
+              `esql-dissect-template-${templateLabel}`,
+              query
+            );
+
+            // Both engines should treat the templates as literal values, not as template variables to substitute
+            // expect(ingestResult[0]).toHaveProperty('log.level', 'info');
+            expect(esqlResult.documents[1]).toEqual(
+              expect.objectContaining({ 'log.level': 'info' })
+            );
+
+            // Original fields should remain
+            expect(ingestResult[0]).toHaveProperty(from);
+            expect(esqlResult.documents[1][from]).toEqual(message);
+          }
+        );
+      });
+
       streamlangApiTest.describe('Incompatible', () => {
         streamlangApiTest(
           'should support where clause both in ingest as well as in ES|QL',
@@ -110,8 +174,8 @@ streamlangApiTest.describe(
             await testBed.ingest('ingest-dissect-where', docs, processors);
             const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-where');
 
-            const docForMapping = { log: { level: '' } };
-            await testBed.ingest('esql-dissect-where', [docForMapping, ...docs]);
+            const mappingDoc = { log: { level: '' } };
+            await testBed.ingest('esql-dissect-where', [mappingDoc, ...docs]);
             const esqlResult = await esql.queryOnIndex('esql-dissect-where', query);
 
             // Loop is needed as ES|QL's FORK may return documents in different order
@@ -135,6 +199,12 @@ streamlangApiTest.describe(
       // TODO: Implement
       streamlangApiTest(
         'should nullify undissected fields in the doc when only partial dissection is possible',
+        async ({ testBed, esql }) => {}
+      );
+
+      // TODO: Implement
+      streamlangApiTest(
+        'should not nullify existing fields when no dissection is possible',
         async ({ testBed, esql }) => {}
       );
 
@@ -166,8 +236,8 @@ streamlangApiTest.describe(
         const { errors } = await testBed.ingest('ingest-dissect-fail', docs, processors);
         expect(errors[0].reason).toContain('field [message] not present as part of path [message]');
 
-        const docForMapping = { message: '' };
-        await testBed.ingest('esql-dissect-fail', [docForMapping, ...docs]);
+        const mappingDoc = { message: '' };
+        await testBed.ingest('esql-dissect-fail', [mappingDoc, ...docs]);
         const esqlResult = await esql.queryOnIndex('esql-dissect-fail', query);
         expect(esqlResult.documentsWithoutKeywords.length).toBe(2);
         expect(
