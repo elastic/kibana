@@ -223,6 +223,7 @@ describe('on_failure graph', () => {
         id: 'enterRetry_testRetryConnectorStep',
         type: 'enter-retry',
         stepId: 'testRetryConnectorStep',
+        stepType: 'retry',
         exitNodeId: 'exitRetry_testRetryConnectorStep',
         configuration: {
           'max-attempts': 3,
@@ -238,6 +239,7 @@ describe('on_failure graph', () => {
         id: 'enterContinue_testRetryConnectorStep',
         type: 'enter-continue',
         stepId: 'testRetryConnectorStep',
+        stepType: 'continue',
         exitNodeId: 'exitContinue_testRetryConnectorStep',
       });
     });
@@ -250,6 +252,7 @@ describe('on_failure graph', () => {
           id: 'enterTryBlock_testRetryConnectorStep',
           exitNodeId: 'exitTryBlock_testRetryConnectorStep',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           type: 'enter-try-block',
           enterNormalPathNodeId: 'enterNormalPath_testRetryConnectorStep',
         });
@@ -262,6 +265,7 @@ describe('on_failure graph', () => {
           type: 'exit-try-block',
           id: 'exitTryBlock_testRetryConnectorStep',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterNodeId: 'enterTryBlock_testRetryConnectorStep',
         });
       });
@@ -273,6 +277,7 @@ describe('on_failure graph', () => {
           id: 'enterNormalPath_testRetryConnectorStep',
           type: 'enter-normal-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterZoneNodeId: 'enterTryBlock_testRetryConnectorStep',
           enterFailurePathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
@@ -285,6 +290,7 @@ describe('on_failure graph', () => {
           id: 'exitNormalPath_testRetryConnectorStep',
           type: 'exit-normal-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterNodeId: 'enterNormalPath_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
@@ -299,6 +305,7 @@ describe('on_failure graph', () => {
           id: 'enterFallbackPath_testRetryConnectorStep',
           type: 'enter-fallback-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterZoneNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
@@ -310,6 +317,7 @@ describe('on_failure graph', () => {
           id: 'exitFallbackPath_testRetryConnectorStep',
           type: 'exit-fallback-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterNodeId: 'enterFallbackPath_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
