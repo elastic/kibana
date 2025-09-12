@@ -9,7 +9,6 @@ import { allToolsSelectionWildcard, createBadRequestError } from '@kbn/onechat-c
 import type { ToolSelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolRegistry } from '../../tools';
-import type { InternalToolDefinition } from '../../tools/tool_provider';
 
 // - Must start and end with letter or digit
 // - Can contain letters, digits, hyphens, underscores
@@ -24,49 +23,26 @@ export const ensureValidId = (id: string) => {
 export interface ValidateToolSelectionParams {
   toolRegistry: ToolRegistry;
   request: KibanaRequest;
-  toolSelection: ToolSelection[];
+  toolSelection: ToolSelection;
 }
 
 export async function validateToolSelection({
   toolRegistry,
-  request,
   toolSelection,
 }: ValidateToolSelectionParams): Promise<string[]> {
   const errors: string[] = [];
-  const allTools = await toolRegistry.list({ request });
-  const allToolTypes = new Set(allTools.map((t: InternalToolDefinition) => t.type));
 
-  for (const selection of toolSelection) {
-    const { type, tool_ids: toolIds } = selection;
+  const { tool_ids: toolIds } = toolSelection;
 
-    for (const toolId of toolIds) {
-      if (toolId === allToolsSelectionWildcard) {
-        // Wildcard selection - check if tool type exists
-        if (type && !allToolTypes.has(type)) {
-          errors.push(`Tool type '${type}' does not exist.`);
-        }
-      } else {
-        // Specific tool selection
-        if (type) {
-          // Tool type specified - first check if the type exists
-          if (!allToolTypes.has(type)) {
-            errors.push(`Tool type '${type}' does not exist.`);
-          } else {
-            // Type exists, now check if tool exists and belongs to that type
-            const tool = allTools.find((t: InternalToolDefinition) => t.id === toolId);
-            if (!tool) {
-              errors.push(`Tool id '${toolId}' does not exist.`);
-            } else if (tool.type !== type) {
-              errors.push(`Tool id '${toolId}' belongs to type '${tool.type}', not '${type}'.`);
-            }
-          }
-        } else {
-          // No tool type specified - check if tool exists globally
-          const exists = await toolRegistry.has(toolId);
-          if (!exists) {
-            errors.push(`Tool id '${toolId}' does not exist.`);
-          }
-        }
+  for (const toolId of toolIds) {
+    if (toolId === allToolsSelectionWildcard) {
+      // Wildcard selection is valid as long as tools exist
+      continue;
+    } else {
+      // Specific tool selection - check if tool exists
+      const exists = await toolRegistry.has(toolId);
+      if (!exists) {
+        errors.push(`Tool id '${toolId}' does not exist.`);
       }
     }
   }

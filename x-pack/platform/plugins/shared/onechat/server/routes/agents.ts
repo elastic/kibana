@@ -16,16 +16,13 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
-import { getTechnicalPreviewWarning, supportedToolTypes } from './utils';
+import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
-const TOOL_SELECTION_SCHEMA = schema.arrayOf(
-  schema.object({
-    type: schema.maybe(supportedToolTypes),
-    tool_ids: schema.arrayOf(schema.string()),
-  })
-);
+const TOOL_SELECTION_SCHEMA = schema.object({
+  tool_ids: schema.arrayOf(schema.string()),
+});
 
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });

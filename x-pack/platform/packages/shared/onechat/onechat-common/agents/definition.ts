@@ -74,7 +74,7 @@ export interface AgentConfiguration {
    */
   instructions?: string;
   /**
-   * List of tools exposed to the agent
+   * Tools exposed to the agent
    */
-  tools: ToolSelection[];
+  tools: ToolSelection;
 }
