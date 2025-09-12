@@ -12262,7 +12262,7 @@ paths:
           description: Operation on a restricted field
         '404':
           description: Entity not found
-      summary: Updates or creates an entity in Entity Store
+      summary: Upsert an entity in Entity Store
       tags:
         - Security Entity Analytics API
       x-metaTags:
