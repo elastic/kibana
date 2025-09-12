@@ -16,7 +16,11 @@ import type { NlToEsqlTaskParams, NlToEsqlTaskEvent } from './types';
 
 const loadDocBase = once(() => EsqlDocumentBase.load());
 
-export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
+export function naturalLanguageToEsql<TToolOptions extends ToolOptions>(
+  options: NlToEsqlTaskParams<TToolOptions>
+): Observable<NlToEsqlTaskEvent<TToolOptions>>;
+
+export function naturalLanguageToEsql({
   client,
   connectorId,
   tools,
@@ -28,7 +32,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   system,
   metadata,
   ...rest
-}: NlToEsqlTaskParams<TToolOptions>): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+}: NlToEsqlTaskParams<ToolOptions>): Observable<NlToEsqlTaskEvent<ToolOptions>> {
   return from(loadDocBase()).pipe(
     switchMap((docBase) => {
       const systemMessage = `You are a helpful assistant for generating and executing ES|QL queries.
