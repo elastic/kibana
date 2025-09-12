@@ -7,10 +7,28 @@
 
 import type { ElasticAssistantApiRequestHandlerContext } from '../types';
 
+// Type definitions for mock clients and contexts
+type MockSearchCall = [{ index?: string }];
+type MockElasticsearchClient = {
+  search?: {
+    mock?: {
+      calls: MockSearchCall[];
+    };
+  };
+};
+
+type SpaceAwareContext = Partial<ElasticAssistantApiRequestHandlerContext> & {
+  elasticAssistant?: {
+    getSpaceId?: jest.MockedFunction<() => string>;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+};
+
 /**
  * Helper to override the getSpaceId mock for a specific space in tests
  */
-export const withSpace = (spaceId: string) => (context: ElasticAssistantApiRequestHandlerContext) => {
+export const withSpace = (spaceId: string) => (context: SpaceAwareContext) => {
   if (context.elasticAssistant?.getSpaceId) {
     context.elasticAssistant.getSpaceId = jest.fn().mockReturnValue(spaceId);
   }
@@ -22,7 +40,7 @@ export const withSpace = (spaceId: string) => (context: ElasticAssistantApiReque
  * @param mockClient - Mock Elasticsearch client with search calls
  * @param spaceId - Expected space ID to be found in index names
  */
-export const expectSpaceScopedIndex = (mockClient: jest.Mocked<any>, spaceId: string): void => {
+export const expectSpaceScopedIndex = (mockClient: MockElasticsearchClient, spaceId: string): void => {
   const calls = mockClient.search?.mock?.calls || [];
   if (calls.length > 0) {
     const lastCall = calls[calls.length - 1];
@@ -39,7 +57,7 @@ export const expectSpaceScopedIndex = (mockClient: jest.Mocked<any>, spaceId: st
  * @param expectedSpaceId - Expected space ID that should be passed to the data client
  */
 export const expectDataClientWithSpaceId = (
-  dataClientGetter: jest.Mock,
+  dataClientGetter: jest.MockedFunction<(params: { spaceId: string }) => unknown>,
   expectedSpaceId: string
 ): void => {
   expect(dataClientGetter).toHaveBeenCalledWith(
