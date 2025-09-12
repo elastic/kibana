@@ -44,5 +44,26 @@ export function createInterceptors(proxy: LlmProxy) {
           responseMock: response,
         })
         .completeAfterIntercept(),
+
+    toolMessage: ({
+      response,
+      when,
+    }: {
+      response: LLMResponseFnOrString;
+      when?: (body: ChatCompletionStreamParams) => boolean;
+    }) =>
+      proxy
+        .intercept({
+          name: `toolMessage`,
+          when: (body) => {
+            const isToolMessage = last(body.messages)?.role === 'tool';
+            if (when) {
+              return isToolMessage && when(body);
+            }
+            return isToolMessage;
+          },
+          responseMock: response,
+        })
+        .completeAfterIntercept(),
   };
 }

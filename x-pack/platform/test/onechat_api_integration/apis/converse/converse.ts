@@ -13,7 +13,7 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/http_client';
+import { createOneChatApiClient } from '../../utils/one_chat_client';
 import { toolCallMock } from '../../utils/llm_proxy/mocks';
 import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 

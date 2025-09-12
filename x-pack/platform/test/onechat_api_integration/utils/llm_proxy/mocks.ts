@@ -12,6 +12,7 @@ export function toolCallMock(toolName: string, toolArg: Record<string, any>): To
   return {
     role: 'assistant' as const,
     content: '',
+    tool_call_id: uuidv4().slice(0, 8),
     tool_calls: [
       {
         function: {
@@ -24,4 +25,8 @@ export function toolCallMock(toolName: string, toolArg: Record<string, any>): To
       },
     ],
   } as unknown as ToolMessage;
+}
+
+export function getToolCallId(message: any): string {
+  return message?.tool_call_id ?? message?.tool_calls?.[0]?.id;
 }

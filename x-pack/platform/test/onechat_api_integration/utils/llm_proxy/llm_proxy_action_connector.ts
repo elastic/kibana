@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 
 export async function createLlmProxyActionConnector(
-  getService: FtrProviderContext['getService'],
+  getService: OneChatFtrProviderContext['getService'],
   { port }: { port: number }
 ) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -45,7 +45,7 @@ export async function createLlmProxyActionConnector(
 }
 
 export async function deleteActionConnector(
-  getService: FtrProviderContext['getService'],
+  getService: OneChatFtrProviderContext['getService'],
   { actionId }: { actionId: string }
 ) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

@@ -15,7 +15,7 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/http_client';
+import { createOneChatApiClient } from '../../utils/one_chat_client';
 import { toolCallMock } from '../../utils/llm_proxy/mocks';
 import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 
@@ -44,7 +44,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       await apmSynthtraceEsClient.clean();
     });
 
-    describe.only('tool: esql', () => {
+    describe('tool: esql', () => {
       const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
       const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
       const USER_PROMPT = 'Please find a single trace with `service.name:java-backend`';
@@ -54,17 +54,17 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       beforeEach(async () => {
         // mock title
         llmProxy.interceptors.toolChoice({
-          name: 'generate_conversation_title',
-          response: toolCallMock('generate_conversation_title', { title: MOCKED_LLM_TITLE }),
+          name: 'set_title',
+          response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
         });
 
-        // intercept the user message and respond with tool call to "platform_coresearch"
+        // intercept the user message and respond with tool call to "platform_core_search"
         llmProxy.interceptors.userMessage({
           when: ({ messages }) => {
             const lastMessage = last(messages)?.content as string;
             return lastMessage.includes(USER_PROMPT);
           },
-          response: toolCallMock('platform_coresearch', {
+          response: toolCallMock('platform_core_search', {
             query: 'service.name:java-backend',
           }),
         });
@@ -73,14 +73,12 @@ export default function ({ getService }: OneChatFtrProviderContext) {
         llmProxy.interceptors.toolChoice({
           name: 'select_resources',
           response: toolCallMock('select_resources', {
-            reasoning:
-              "The query is looking for transactions, specifically with the name 'java-backend'. The most relevant data stream for transaction-related queries is 'metrics-apm.transaction.1m-default', which likely contains transaction metrics and related data.",
             targets: [
               {
                 reason:
-                  'This data stream likely contains transaction metrics and related data, which is relevant for the query looking for transactions with a specific name.',
+                  "The query 'service.name:java-backend' suggests a search related to APM (Application Performance Monitoring) data, which typically includes traces and metrics for services. The data stream 'traces-apm-default' is likely to contain relevant trace data for the 'java-backend'.",
                 type: 'data_stream',
-                name: 'metrics-apm.transaction.1m-default',
+                name: 'traces-apm-default',
               },
             ],
           }),
@@ -97,9 +95,36 @@ export default function ({ getService }: OneChatFtrProviderContext) {
           }),
         });
 
+        const productDocsToolCall = toolCallMock('structuredOutput', { commands: ['WHERE'] });
         void llmProxy.interceptors.toolChoice({
           name: 'structuredOutput',
-          response: toolCallMock('platform_coresearch', { commands: ['FROM', 'WHERE'] }),
+          response: productDocsToolCall,
+        });
+
+        llmProxy.interceptors.toolMessage({
+          when: ({ messages }) => {
+            const lastMessage = last(messages);
+            const contentParsed = JSON.parse(lastMessage?.content as string);
+            return contentParsed?.documentation;
+          },
+          response: `To filter the data stream \`traces-apm-default\` for entries where \`service.name\` is equal to "product-service", you can use the \`WHERE\` command. Here's the ES|QL query:
+
+\`\`\`esql
+FROM traces-apm-default
+| WHERE service.name == "product-service"
+| LIMIT 100
+\`\`\`
+
+I've added a \`LIMIT 100\` for safety, as per the directives. If you need more results, please let me know!`,
+        });
+
+        llmProxy.interceptors.toolMessage({
+          when: ({ messages }) => {
+            const lastMessage = last(messages);
+            const contentParsed = JSON.parse(lastMessage?.content as string);
+            return contentParsed?.results;
+          },
+          response: MOCKED_LLM_RESPONSE,
         });
 
         body = await oneChatApiClient.converse({
