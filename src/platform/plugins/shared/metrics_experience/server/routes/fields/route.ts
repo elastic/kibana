@@ -9,6 +9,8 @@
 
 import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
+import { isoToEpoch } from '@kbn/zod-helpers';
+import { parse as dateMathParse } from '@kbn/datemath';
 import { getMetricFields } from './get_metric_fields';
 import { createRoute } from '../create_route';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
@@ -19,8 +21,12 @@ export const getFieldsRoute = createRoute({
   params: z.object({
     query: z.object({
       index: z.string().default('metrics-*'),
-      to: z.string().default('now'),
-      from: z.string().default('now-15m'),
+      to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
+      from: z
+        .string()
+        .datetime()
+        .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
+        .transform(isoToEpoch),
       fields: z.union([z.string(), z.array(z.string())]).default('*'),
       page: z.coerce.number().int().positive().default(1),
       size: z.coerce.number().int().positive().default(100),
