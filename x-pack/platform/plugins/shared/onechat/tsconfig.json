@@ -79,5 +79,6 @@
     "@kbn/cases-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/spaces-utils",
+    "@kbn/elastic-assistant-common",
   ]
 }

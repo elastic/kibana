@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { newContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RunnerFactoryDeps } from './types';
 import type { CreateScopedRunnerExtraParams, RunnerFactory } from './types';
 import { createModelProviderFactory } from './model_provider';
@@ -37,6 +38,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
     return {
       ...otherDeps,
       modelProviderFactory: createModelProviderFactory({ inference }),
+      contentReferencesStore: newContentReferencesStore(),
     };
   }
 }

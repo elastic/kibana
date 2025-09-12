@@ -9,7 +9,6 @@ import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import {
-  newContentReferencesStore,
   hrefReference,
   knowledgeBaseReference,
   contentReferenceString,
@@ -69,9 +68,6 @@ export const securityLabsKnowledgeInternalTool = (
           };
         }
 
-        // Create a new contentReferencesStore for this tool execution
-        const contentReferencesStore = newContentReferencesStore();
-
         // Get knowledge base document entries using the same logic as the original tool
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           kbResource: SECURITY_LABS_RESOURCE,
@@ -112,11 +108,11 @@ export const securityLabsKnowledgeInternalTool = (
               throw new Error('Slug or title not found in YAML');
             }
 
-            reference = contentReferencesStore.add((p) =>
+            reference = context.contentReferencesStore.add((p) =>
               hrefReference(p.id, `${SECURITY_LABS_BASE_URL}${slug}`, `Security Labs: ${title}`)
             );
           } catch (_error) {
-            reference = contentReferencesStore.add((p) =>
+            reference = context.contentReferencesStore.add((p) =>
               knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
             );
           }

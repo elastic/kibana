@@ -9,11 +9,7 @@ import { z } from '@kbn/zod';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import {
-  contentReferenceString,
-  securityAlertsPageReference,
-  newContentReferencesStore,
-} from '@kbn/elastic-assistant-common';
+import { contentReferenceString, securityAlertsPageReference } from '@kbn/elastic-assistant-common';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 
 const alertCountsToolSchema = z.object({
@@ -35,11 +31,8 @@ export const alertCountsInternalTool = (): BuiltinToolDefinition<typeof alertCou
       const query = getAlertsCountQuery(alertsIndexPattern);
       const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
 
-      // Create a new contentReferencesStore for this tool execution
-      const contentReferencesStore = newContentReferencesStore();
-
       // Add a security alerts page reference
-      const alertsCountReference = contentReferencesStore.add((p) =>
+      const alertsCountReference = context.contentReferencesStore.add((p) =>
         securityAlertsPageReference(p.id)
       );
 

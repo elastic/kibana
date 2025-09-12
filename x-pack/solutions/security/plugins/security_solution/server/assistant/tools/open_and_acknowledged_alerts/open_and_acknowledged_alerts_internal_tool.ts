@@ -15,7 +15,6 @@ import {
   transformRawData,
   securityAlertReference,
   contentReferenceBlock,
-  newContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
@@ -61,9 +60,6 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
 
       const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
 
-      // Create a new contentReferencesStore for this tool execution
-      const contentReferencesStore = newContentReferencesStore();
-
       // Process the alerts with content references
       const content = result.hits?.hits?.map((hit) => {
         const rawData = getRawDataOrDefault(hit.fields);
@@ -77,7 +73,7 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
 
         const hitId = hit._id;
         const reference = hitId
-          ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
+          ? context.contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
           : undefined;
         const citation = reference && `\nCitation:${contentReferenceBlock(reference)}`;
 

@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { isOnechatError, createInternalError } from '@kbn/onechat-common';
 import type {
   ScopedRunner,
@@ -38,6 +39,7 @@ export interface CreateScopedRunnerDeps {
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  contentReferencesStore: ContentReferencesStore;
 }
 
 export type CreateRunnerDeps = Omit<CreateScopedRunnerDeps, 'request' | 'defaultConnectorId'>;

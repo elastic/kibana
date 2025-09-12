@@ -8,11 +8,7 @@
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import {
-  newContentReferencesStore,
-  knowledgeBaseReference,
-  contentReferenceBlock,
-} from '@kbn/elastic-assistant-common';
+import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { Document } from 'langchain/document';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -97,9 +93,6 @@ export const knowledgeBaseRetrievalInternalTool = (
           };
         }
 
-        // Create a new contentReferencesStore for this tool execution
-        const contentReferencesStore = newContentReferencesStore();
-
         // Get knowledge base document entries using the same logic as the original tool
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           query,
@@ -108,7 +101,7 @@ export const knowledgeBaseRetrievalInternalTool = (
         });
 
         // Enrich documents with content references
-        const enrichedDocs = docs.map(enrichDocument(contentReferencesStore));
+        const enrichedDocs = docs.map(enrichDocument(context.contentReferencesStore));
 
         return {
           results: [

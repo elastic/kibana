@@ -11,7 +11,6 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import {
   contentReferenceBlock,
   productDocumentationReference,
-  newContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
@@ -67,11 +66,10 @@ export const productDocumentationInternalTool = (
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
 
-      // Create a new contentReferencesStore for this tool execution
-      const contentReferencesStore = newContentReferencesStore();
-
       // Enrich documents with content references
-      const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
+      const enrichedDocuments = response.documents.map(
+        enrichDocument(context.contentReferencesStore)
+      );
 
       // Format the result with references
       const resultWithReference = {
