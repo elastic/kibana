@@ -17,7 +17,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './options_list_schema';
+import { optionsListDSLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 
 const controlWidthSchema = schema.oneOf(
