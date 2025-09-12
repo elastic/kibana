@@ -291,14 +291,9 @@ async function createContainer(
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
-  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+  const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
     workflowExecution.workflowDefinition
   );
-
-  // If the execution is for a specific step, narrow the graph to that step
-  if (workflowExecution.stepId) {
-    workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
-  }
 
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
   const stepExecutionRepository = new StepExecutionRepository(esClient);
@@ -336,6 +331,7 @@ async function createContainer(
   const contextManager = new WorkflowContextManager({
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
+    workflowExecutionState,
   });
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);

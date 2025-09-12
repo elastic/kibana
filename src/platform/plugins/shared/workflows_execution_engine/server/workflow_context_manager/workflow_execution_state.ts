@@ -109,33 +109,7 @@ export class WorkflowExecutionState {
     }
   }
 
-  public async flush(): Promise<void> {
-    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
-  }
-
-  private async flushWorkflowChanges(): Promise<void> {
-    if (!this.workflowChanges.length) {
-      return;
-    }
-
-    const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
-      (prev, acc) => ({ ...prev, ...acc.change }),
-      { id: this.workflowExecution.id } as EsWorkflowExecution
-    );
-
-    await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);
-
-    const fetchedWorkflowExecution =
-      await this.workflowExecutionRepository.getWorkflowExecutionById(
-        this.workflowExecution.id,
-        this.workflowExecution.spaceId
-      );
-    this.workflowExecution = fetchedWorkflowExecution!;
-
-    this.workflowChanges = [];
-  }
-
-  private async flushStepChanges(): Promise<void> {
+  public async flushStepChanges(): Promise<void> {
     const stepChanges = Array.from(this.stepChanges.values());
     const tasks: Promise<void>[] = [];
 
@@ -185,6 +159,32 @@ export class WorkflowExecutionState {
 
     await Promise.all(tasks);
     this.stepChanges = [];
+  }
+
+  public async flush(): Promise<void> {
+    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
+  }
+
+  private async flushWorkflowChanges(): Promise<void> {
+    if (!this.workflowChanges.length) {
+      return;
+    }
+
+    const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
+      (prev, acc) => ({ ...prev, ...acc.change }),
+      { id: this.workflowExecution.id } as EsWorkflowExecution
+    );
+
+    await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);
+
+    const fetchedWorkflowExecution =
+      await this.workflowExecutionRepository.getWorkflowExecutionById(
+        this.workflowExecution.id,
+        this.workflowExecution.spaceId
+      );
+    this.workflowExecution = fetchedWorkflowExecution!;
+
+    this.workflowChanges = [];
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {

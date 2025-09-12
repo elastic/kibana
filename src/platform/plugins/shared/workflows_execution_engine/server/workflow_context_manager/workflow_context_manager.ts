@@ -10,20 +10,25 @@
 import type { StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { RunStepResult } from '../step/step_base';
 
 export interface ContextManagerInit {
   // New properties for logging
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  workflowExecutionState: WorkflowExecutionState;
 }
 
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  private workflowExecutionState: WorkflowExecutionState;
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
+    this.workflowExecutionState = init.workflowExecutionState;
   }
 
   public getContext(): StepContext {
@@ -37,20 +42,20 @@ export class WorkflowContextManager {
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
     allPredecessors.forEach((node) => {
-      const nodeId = node.id;
-      stepContext.steps[nodeId] = {};
-      const stepResult = this.workflowExecutionRuntime.getCurrentStepResult();
+      const stepId = node.stepId;
+      stepContext.steps[stepId] = {};
+      const stepResult = this.getStepResult(stepId);
       if (stepResult) {
-        stepContext.steps[nodeId] = {
-          ...stepContext.steps[nodeId],
+        stepContext.steps[stepId] = {
+          ...stepContext.steps[stepId],
           ...stepResult,
         };
       }
 
-      const stepState = this.workflowExecutionRuntime.getCurrentStepState(nodeId);
+      const stepState = this.getStepState(stepId);
       if (stepState) {
-        stepContext.steps[nodeId] = {
-          ...stepContext.steps[nodeId],
+        stepContext.steps[stepId] = {
+          ...stepContext.steps[stepId],
           ...stepState,
         };
       }
@@ -76,7 +81,7 @@ export class WorkflowContextManager {
   }
 
   private buildWorkflowContext(): WorkflowContext {
-    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
+    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
 
     return {
       execution: {
@@ -97,14 +102,29 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
-    for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
-      const node = this.workflowExecutionGraph.getNode(nodeId);
-      const nodeType = node?.type;
-      switch (nodeType) {
-        case 'enter-foreach':
-          stepContext.foreach = this.workflowExecutionRuntime.getCurrentStepState(nodeId) as any;
+    for (const stepId of this.workflowExecutionState.getWorkflowExecution().stack) {
+      const stepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+
+      if (!stepExecution) continue;
+
+      switch (stepExecution.stepType) {
+        case 'foreach':
+          stepContext.foreach = this.getStepState(stepExecution.stepId) as any;
           break;
       }
     }
+  }
+
+  private getStepState(stepId: string): Record<string, any> | undefined {
+    return this.workflowExecutionState.getLatestStepExecution(stepId)?.state;
+  }
+
+  private getStepResult(stepId: string): RunStepResult {
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId)!;
+    return {
+      input: latestStepExecution.input || {},
+      output: latestStepExecution.output || {},
+      error: latestStepExecution.error,
+    };
   }
 }
