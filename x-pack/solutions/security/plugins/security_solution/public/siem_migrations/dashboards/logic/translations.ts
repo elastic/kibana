@@ -14,6 +14,13 @@ export const GET_MIGRATION_DASHBOARDS_FAILURE = i18n.translate(
   }
 );
 
+export const GET_MIGRATION_TRANSLATION_STATS_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.getMigrationTranslationStatsFailDescription',
+  {
+    defaultMessage: 'Failed to fetch migration translation stats',
+  }
+);
+
 export const INSTALL_MIGRATION_DASHBOARDS_FAILURE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.installMigrationDashboardsFailDescription',
   {

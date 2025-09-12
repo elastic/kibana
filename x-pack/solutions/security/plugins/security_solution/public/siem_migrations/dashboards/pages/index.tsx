@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
+import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -59,13 +60,20 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
     };
 
     const invalidateGetMigrationDashboards = useInvalidateGetMigrationDashboards();
+    const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
     const refetchData = useCallback(() => {
       if (!migrationId) {
         return;
       }
       refreshStats();
       invalidateGetMigrationDashboards(migrationId);
-    }, [invalidateGetMigrationDashboards, migrationId, refreshStats]);
+      invalidateGetMigrationTranslationStats(migrationId);
+    }, [
+      invalidateGetMigrationDashboards,
+      invalidateGetMigrationTranslationStats,
+      migrationId,
+      refreshStats,
+    ]);
 
     const content = useMemo(() => {
       if (dashboardMigrationsStats.length === 0 && !migrationId) {

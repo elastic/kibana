@@ -7,10 +7,12 @@
 
 import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type {
+  DashboardMigrationDashboard,
+  DashboardMigrationTranslationStats,
+} from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { InstallTranslatedButton } from '../../../../common/components/bulk_actions';
 import { useReprocessFailedButton } from './use_reprocess_failed_button';
-import type { MigrationTranslationStats } from '../../../types';
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
@@ -18,7 +20,7 @@ export interface BulkActionsProps {
   installSelectedDashboards?: () => void;
   reprocessFailedDashboards?: () => void;
   selectedDashboards: DashboardMigrationDashboard[];
-  translationStats: MigrationTranslationStats;
+  translationStats: DashboardMigrationTranslationStats;
 }
 
 /**

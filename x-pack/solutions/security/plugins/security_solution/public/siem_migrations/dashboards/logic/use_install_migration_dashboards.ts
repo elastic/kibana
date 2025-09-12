@@ -10,7 +10,7 @@ import type { InstallMigrationDashboardsResponse } from '../../../../common/siem
 import { SIEM_DASHBOARD_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/dashboards/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-// import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
+import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { installMigrationDashboards } from '../api';
 import { useInvalidateGetMigrationDashboards } from './use_get_migration_dashboards';
 
@@ -27,8 +27,7 @@ export const useInstallMigrationDashboards = (migrationId: string) => {
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetMigrationDashboards = useInvalidateGetMigrationDashboards();
-  // TODO: Uncomment this once translation stats are merged
-  // const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
+  const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
   return useMutation<InstallMigrationDashboardsResponse, Error, InstallMigrationDashboardsParams>(
     ({ ids }) => installMigrationDashboards({ migrationId, ids }),
@@ -42,7 +41,7 @@ export const useInstallMigrationDashboards = (migrationId: string) => {
       },
       onSettled: () => {
         invalidateGetMigrationDashboards(migrationId);
-        // invalidateGetMigrationTranslationStats(migrationId);
+        invalidateGetMigrationTranslationStats(migrationId);
       },
     }
   );

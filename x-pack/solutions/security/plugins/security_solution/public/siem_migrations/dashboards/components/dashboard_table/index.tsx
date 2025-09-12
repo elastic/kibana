@@ -36,7 +36,7 @@ import {
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import type { DashboardMigrationStats, MigrationTranslationStats } from '../../types';
+import type { DashboardMigrationStats } from '../../types';
 import { MigrationDashboardsFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { EmptyMigration, SearchField, StartMigrationModal } from '../../../common/components';
@@ -45,6 +45,7 @@ import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
+import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -85,6 +86,9 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       [searchTerm, filterOptions]
     );
 
+    const { data: translationStats, isLoading: isStatsLoading } =
+      useGetMigrationTranslationStats(migrationId);
+
     const {
       data: { migrationDashboards, total } = { migrationDashboards: [], total: 0 },
       isLoading: isDataLoading,
@@ -96,25 +100,6 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       sortDirection,
       filters,
     });
-
-    // TODO: Replace this with real data once translation stats are merged
-    const translationStats: MigrationTranslationStats = {
-      id: migrationId,
-      dashboards: {
-        total,
-        success: {
-          total: total / 2,
-          result: {
-            full: total / 2,
-            partial: 0,
-            untranslatable: total / 2,
-          },
-          installable: total / 2,
-        },
-        failed: total / 2,
-      },
-    };
-    const isStatsLoading = false;
 
     const [selectedMigrationDashboards, setSelectedMigrationDashboards] = useState<
       DashboardMigrationDashboard[]
