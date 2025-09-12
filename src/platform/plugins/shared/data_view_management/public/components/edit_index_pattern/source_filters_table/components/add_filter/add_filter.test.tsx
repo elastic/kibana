@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddFilter } from './add_filter';
 
 type RenderAddFilterComponentProps = React.ComponentProps<typeof AddFilter>;
@@ -32,7 +32,7 @@ jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
 const renderAddFilterComponent = (
   { onAddFilter }: RenderAddFilterComponentProps = { onAddFilter: jest.fn() }
 ) => {
-  return renderWithI18n(<AddFilter onAddFilter={onAddFilter} />);
+  return render(<IntlProvider locale="en"><AddFilter onAddFilter={onAddFilter} /></IntlProvider>);
 };
 
 describe('AddFilter', () => {
