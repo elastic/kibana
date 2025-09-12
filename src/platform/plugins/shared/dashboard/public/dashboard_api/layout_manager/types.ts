@@ -26,7 +26,7 @@ export interface DashboardLayout {
     [uuid: string]: DashboardLayoutPanel;
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'gridData' | 'title'> };
-  controls: ControlsGroupState['controls'];
+  controls: { [id: string]: ControlsGroupState['controls'][number] };
 }
 
 export interface DashboardChildState {
