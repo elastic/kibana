@@ -680,6 +680,7 @@ src/platform/packages/shared/shared-ux/router/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/toolbar_selector @elastic/kibana-data-discovery @elastic/obs-ux-infra_services-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
@@ -894,7 +895,7 @@ x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-evals @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
-x-pack/platform/packages/shared/kbn-grok-heuristics/package.json @elastic/streams-program-team
+x-pack/platform/packages/shared/kbn-grok-heuristics/package.json @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-infra
@@ -1142,6 +1143,7 @@ x-pack/solutions/security/packages/index-adapter @elastic/security-threat-huntin
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/siem_readiness @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -2468,6 +2470,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - Cloud Security Posture
 
 x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/kibana-cloud-security-posture
 
 ## Security Solution sub teams - Security Entity Store
 x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/entity-store
@@ -2548,8 +2551,10 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/rules @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/user_info @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/alerts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/hooks @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/pages @elastic/security-threat-hunting-investigations
@@ -2654,6 +2659,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/common/components/missing_privileges @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/popover_items @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_form_with_warnings @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/fleet_integrations @elastic/security-detection-rule-management
@@ -2662,8 +2668,6 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/rules @elastic/security-detection-rule-management
@@ -2822,6 +2826,7 @@ x-pack/solutions/security/plugins/security_solution/public/common/components/ses
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/kibana-cloud-security-posture
 /x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/kibana-cloud-security-posture
 

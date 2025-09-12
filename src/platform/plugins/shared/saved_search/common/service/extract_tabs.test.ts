@@ -9,7 +9,8 @@
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from '../../server/saved_objects/schema';
-import { extractTabs, extractTabsBackfillFn, SavedSearchType, VIEW_MODE } from '..';
+import { extractTabs, extractTabsBackfillFn } from './extract_tabs';
+import { SavedSearchType, VIEW_MODE } from '..';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
