@@ -309,6 +309,10 @@ const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
       value: TrustedDeviceConditionEntryField.PRODUCT_ID,
       inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
     },
+    {
+      value: TrustedDeviceConditionEntryField.PRODUCT_NAME,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
+    },
   ];
 
   if (isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {

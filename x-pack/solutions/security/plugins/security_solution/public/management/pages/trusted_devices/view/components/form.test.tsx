@@ -285,6 +285,7 @@ describe('Trusted devices form', () => {
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
       ]);
       expect(options).not.toContain(
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
@@ -315,6 +316,7 @@ describe('Trusted devices form', () => {
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
       ]);
     });
@@ -349,6 +351,7 @@ describe('Trusted devices form', () => {
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
       ]);
       expect(options).not.toContain(
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]

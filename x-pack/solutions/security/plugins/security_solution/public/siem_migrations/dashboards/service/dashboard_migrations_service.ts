@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DashboardMigrationTaskStats } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type {
   CreateDashboardMigrationDashboardsRequestBody,
   StartDashboardsMigrationResponse,
@@ -29,10 +28,11 @@ import { requiredDashboardMigrationCapabilities } from './capabilities';
 import { SiemMigrationsServiceBase } from '../../common/service';
 import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
+import type { DashboardMigrationStats } from '../types';
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
-export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationTaskStats> {
+export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationStats> {
   constructor(
     core: CoreStart,
     plugins: StartPluginsDependencies,
@@ -191,7 +191,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
   protected async startMigrationFromStats(
     connectorId: string,
-    taskStats: DashboardMigrationTaskStats
+    taskStats: DashboardMigrationStats
   ): Promise<void> {
     await api.startDashboardMigration({
       migrationId: taskStats.id,
@@ -201,18 +201,28 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
   protected async fetchMigrationStats({
     migrationId,
-  }: GetMigrationStatsParams): Promise<DashboardMigrationTaskStats> {
+  }: GetMigrationStatsParams): Promise<DashboardMigrationStats> {
     const stats = await api.getDashboardMigrationStats({ migrationId });
     return stats;
   }
   protected async fetchMigrationsStatsAll(
     params: GetMigrationsStatsAllParams = {}
-  ): Promise<DashboardMigrationTaskStats[]> {
+  ): Promise<DashboardMigrationStats[]> {
     const allStats = await api.getDashboardMigrationAllStats(params);
     return allStats;
   }
 
-  protected sendFinishedMigrationNotification(taskStats: DashboardMigrationTaskStats) {
+  protected sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
     this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
+  }
+
+  /** Deletes a rule migration by its ID, refreshing the stats to remove it from the list */
+  public async deleteMigration(migrationId: string): Promise<string> {
+    await api.deleteDashboardMigration({ migrationId });
+
+    // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
+    await this.getMigrationsStats();
+
+    return migrationId;
   }
 }
