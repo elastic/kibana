@@ -876,7 +876,7 @@
     "@kbn/saved-search-plugin": "link:src/platform/plugins/shared/saved_search",
     "@kbn/screenshot-mode-example-plugin": "link:examples/screenshot_mode_example",
     "@kbn/screenshot-mode-plugin": "link:src/platform/plugins/shared/screenshot_mode",
-    "@kbn/screenshotting": "link:x-pack/solutions/observability/packages/screenshotting",
+    "@kbn/screenshotting": "link:x-pack/platform/packages/shared/screenshotting",
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/platform/plugins/shared/screenshotting",
     "@kbn/screenshotting-server": "link:src/platform/packages/private/kbn-screenshotting-server",
