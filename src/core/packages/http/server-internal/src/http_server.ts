@@ -634,8 +634,6 @@ export class HttpServer {
     this.server!.ext('onPreAuth', (request, responseToolkit) => {
       const attributes = getBaseAttributes(request);
 
-      this.log.error(`PreAuth ${JSON.stringify(attributes)}`);
-
       requestTotalServed.add(1, attributes);
       activeRequestsCounter.add(1, attributes);
 
