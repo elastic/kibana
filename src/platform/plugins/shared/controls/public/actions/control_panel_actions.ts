@@ -38,10 +38,10 @@ export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';
 
 export const addControlMenuTrigger: Trigger = {
   id: CONTROL_MENU_TRIGGER,
-  title: i18n.translate('uiActions.triggers.controls.typeMenu.title', {
+  title: i18n.translate('controls.uiActions.triggers.controls.typeMenu.title', {
     defaultMessage: 'Control type in control menu',
   }),
-  description: i18n.translate('uiActions.triggers.controls.typeMenu.description', {
+  description: i18n.translate('controls.uiActions.triggers.controls.typeMenu.description', {
     defaultMessage: 'A new action will appear in the control type menu',
   }),
 };
