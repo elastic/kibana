@@ -72,6 +72,7 @@ describe('convertToWorkflowGraph', () => {
         id: 'testAtomicStep1',
         type: 'atomic',
         stepId: 'testAtomicStep1',
+        stepType: 'slack',
         configuration: {
           name: 'testAtomicStep1',
           type: 'slack',
@@ -134,6 +135,7 @@ describe('convertToWorkflowGraph', () => {
         id: 'testWaitStep',
         type: 'wait',
         stepId: 'testWaitStep',
+        stepType: 'wait',
         configuration: {
           name: 'testWaitStep',
           type: 'wait',
@@ -200,6 +202,7 @@ describe('convertToWorkflowGraph', () => {
         id: 'testHttpStep',
         type: 'http',
         stepId: 'testHttpStep',
+        stepType: 'http',
         configuration: {
           name: 'testHttpStep',
           type: 'http',
@@ -372,6 +375,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'enterCondition_testIfStep',
           type: 'enter-if',
           stepId: 'testIfStep',
+          stepType: 'if',
           exitNodeId: 'exitCondition_testIfStep',
           configuration: {
             name: 'testIfStep',
@@ -388,6 +392,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'enterThen_testIfStep',
           type: 'enter-then-branch',
           stepId: 'testIfStep',
+          stepType: 'if',
           condition: 'true',
         } as EnterConditionBranchNode);
       });
@@ -399,6 +404,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'exitThen_testIfStep',
           type: 'exit-then-branch',
           stepId: 'testIfStep',
+          stepType: 'if',
           startNodeId: 'enterThen_testIfStep',
         } as ExitConditionBranchNode);
       });
@@ -410,6 +416,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'enterElse_testIfStep',
           type: 'enter-else-branch',
           stepId: 'testIfStep',
+          stepType: 'if',
           condition: undefined,
         } as EnterConditionBranchNode);
       });
@@ -421,6 +428,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'exitElse_testIfStep',
           type: 'exit-else-branch',
           stepId: 'testIfStep',
+          stepType: 'if',
           startNodeId: 'enterElse_testIfStep',
         } as ExitConditionBranchNode);
       });
@@ -432,6 +440,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'exitCondition_testIfStep',
           type: 'exit-if',
           stepId: 'testIfStep',
+          stepType: 'if',
           startNodeId: 'enterCondition_testIfStep',
         } as ExitIfNode);
       });
@@ -500,11 +509,11 @@ describe('convertToWorkflowGraph', () => {
         const topSort = graphlib.alg.topsort(executionGraph);
         expect(topSort).toHaveLength(6);
         expect(topSort).toEqual([
-          'enterCondition_firstThenTestConnectorStep',
-          'enterThen_firstThenTestConnectorStep',
+          'enterCondition_if_firstThenTestConnectorStep',
+          'enterThen_if_firstThenTestConnectorStep',
           'firstThenTestConnectorStep',
-          'exitThen_firstThenTestConnectorStep',
-          'exitCondition_firstThenTestConnectorStep',
+          'exitThen_if_firstThenTestConnectorStep',
+          'exitCondition_if_firstThenTestConnectorStep',
           'secondThenTestConnectorStep',
         ]);
       });
@@ -515,23 +524,23 @@ describe('convertToWorkflowGraph', () => {
         expect(edges).toEqual(
           expect.arrayContaining([
             {
-              v: 'enterCondition_firstThenTestConnectorStep',
-              w: 'enterThen_firstThenTestConnectorStep',
+              v: 'enterCondition_if_firstThenTestConnectorStep',
+              w: 'enterThen_if_firstThenTestConnectorStep',
             },
             {
-              v: 'enterThen_firstThenTestConnectorStep',
+              v: 'enterThen_if_firstThenTestConnectorStep',
               w: 'firstThenTestConnectorStep',
             },
             {
               v: 'firstThenTestConnectorStep',
-              w: 'exitThen_firstThenTestConnectorStep',
+              w: 'exitThen_if_firstThenTestConnectorStep',
             },
             {
-              v: 'exitThen_firstThenTestConnectorStep',
-              w: 'exitCondition_firstThenTestConnectorStep',
+              v: 'exitThen_if_firstThenTestConnectorStep',
+              w: 'exitCondition_if_firstThenTestConnectorStep',
             },
             {
-              v: 'exitCondition_firstThenTestConnectorStep',
+              v: 'exitCondition_if_firstThenTestConnectorStep',
               w: 'secondThenTestConnectorStep',
             },
           ])
@@ -541,12 +550,13 @@ describe('convertToWorkflowGraph', () => {
 
       it('should configure enter-if node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const enterIfNode = executionGraph.node('enterCondition_firstThenTestConnectorStep');
+        const enterIfNode = executionGraph.node('enterCondition_if_firstThenTestConnectorStep');
         expect(enterIfNode).toEqual({
-          id: 'enterCondition_firstThenTestConnectorStep',
+          id: 'enterCondition_if_firstThenTestConnectorStep',
           type: 'enter-if',
-          stepId: 'firstThenTestConnectorStep',
-          exitNodeId: 'exitCondition_firstThenTestConnectorStep',
+          stepId: 'if_firstThenTestConnectorStep',
+          stepType: 'if',
+          exitNodeId: 'exitCondition_if_firstThenTestConnectorStep',
           configuration: {
             name: 'if_firstThenTestConnectorStep',
             type: 'if',
@@ -557,11 +567,12 @@ describe('convertToWorkflowGraph', () => {
 
       it('should configure enter-then branch node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const enterThenBranchNode = executionGraph.node('enterThen_firstThenTestConnectorStep');
+        const enterThenBranchNode = executionGraph.node('enterThen_if_firstThenTestConnectorStep');
         expect(enterThenBranchNode).toEqual({
-          id: 'enterThen_firstThenTestConnectorStep',
+          id: 'enterThen_if_firstThenTestConnectorStep',
           type: 'enter-then-branch',
-          stepId: 'firstThenTestConnectorStep',
+          stepId: 'if_firstThenTestConnectorStep',
+          stepType: 'if',
           condition: 'false',
         } as EnterConditionBranchNode);
       });
@@ -576,23 +587,27 @@ describe('convertToWorkflowGraph', () => {
 
       it('should configure exit-then branch node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const exitThenBranchNode = executionGraph.node('exitThen_firstThenTestConnectorStep');
+        const exitThenBranchNode = executionGraph.node('exitThen_if_firstThenTestConnectorStep');
         expect(exitThenBranchNode).toEqual({
-          id: 'exitThen_firstThenTestConnectorStep',
+          id: 'exitThen_if_firstThenTestConnectorStep',
           type: 'exit-then-branch',
-          stepId: 'firstThenTestConnectorStep',
-          startNodeId: 'enterThen_firstThenTestConnectorStep',
+          stepId: 'if_firstThenTestConnectorStep',
+          stepType: 'if',
+          startNodeId: 'enterThen_if_firstThenTestConnectorStep',
         } as ExitConditionBranchNode);
       });
 
       it('should configure exit-if node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const exitConditionNode = executionGraph.node('exitCondition_firstThenTestConnectorStep');
+        const exitConditionNode = executionGraph.node(
+          'exitCondition_if_firstThenTestConnectorStep'
+        );
         expect(exitConditionNode).toEqual({
-          id: 'exitCondition_firstThenTestConnectorStep',
+          id: 'exitCondition_if_firstThenTestConnectorStep',
           type: 'exit-if',
-          stepId: 'firstThenTestConnectorStep',
-          startNodeId: 'enterCondition_firstThenTestConnectorStep',
+          stepId: 'if_firstThenTestConnectorStep',
+          stepType: 'if',
+          startNodeId: 'enterCondition_if_firstThenTestConnectorStep',
         } as ExitIfNode);
       });
     });
@@ -660,6 +675,7 @@ describe('convertToWorkflowGraph', () => {
           id: 'enterForeach_testForeachStep',
           type: 'enter-foreach',
           stepId: 'testForeachStep',
+          stepType: 'foreach',
           exitNodeId: 'exitForeach_testForeachStep',
           configuration: {
             foreach: '["item1", "item2", "item3"]',
@@ -675,6 +691,7 @@ describe('convertToWorkflowGraph', () => {
         expect(exitForeachNode).toEqual({
           type: 'exit-foreach',
           id: 'exitForeach_testForeachStep',
+          stepType: 'foreach',
           stepId: 'testForeachStep',
           startNodeId: 'enterForeach_testForeachStep',
         } as ExitForeachNode);
@@ -777,9 +794,9 @@ describe('convertToWorkflowGraph', () => {
         const topSort = graphlib.alg.topsort(executionGraph);
         expect(topSort).toHaveLength(4);
         expect(topSort).toEqual([
-          'enterForeach_testForeachConnectorStep',
+          'enterForeach_foreach_testForeachConnectorStep',
           'testForeachConnectorStep',
-          'exitForeach_testForeachConnectorStep',
+          'exitForeach_foreach_testForeachConnectorStep',
           'secondConnectorStep',
         ]);
       });
@@ -789,9 +806,18 @@ describe('convertToWorkflowGraph', () => {
         const edges = executionGraph.edges();
         expect(edges).toEqual(
           expect.arrayContaining([
-            { v: 'enterForeach_testForeachConnectorStep', w: 'testForeachConnectorStep' },
-            { v: 'testForeachConnectorStep', w: 'exitForeach_testForeachConnectorStep' },
-            { v: 'exitForeach_testForeachConnectorStep', w: 'secondConnectorStep' },
+            {
+              v: 'enterForeach_foreach_testForeachConnectorStep',
+              w: 'testForeachConnectorStep',
+            },
+            {
+              v: 'testForeachConnectorStep',
+              w: 'exitForeach_foreach_testForeachConnectorStep',
+            },
+            {
+              v: 'exitForeach_foreach_testForeachConnectorStep',
+              w: 'secondConnectorStep',
+            },
           ])
         );
         expect(edges).toHaveLength(3);
@@ -799,12 +825,15 @@ describe('convertToWorkflowGraph', () => {
 
       it('should configure enter-foreach node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const enterForeachNode = executionGraph.node('enterForeach_testForeachConnectorStep');
+        const enterForeachNode = executionGraph.node(
+          'enterForeach_foreach_testForeachConnectorStep'
+        );
         expect(enterForeachNode).toEqual({
-          id: 'enterForeach_testForeachConnectorStep',
+          id: 'enterForeach_foreach_testForeachConnectorStep',
           type: 'enter-foreach',
-          stepId: 'testForeachConnectorStep',
-          exitNodeId: 'exitForeach_testForeachConnectorStep',
+          stepId: 'foreach_testForeachConnectorStep',
+          stepType: 'foreach',
+          exitNodeId: 'exitForeach_foreach_testForeachConnectorStep',
           configuration: {
             foreach: '["item1", "item2", "item3"]',
             name: 'foreach_testForeachConnectorStep',
@@ -823,12 +852,13 @@ describe('convertToWorkflowGraph', () => {
 
       it('should configure exit-foreach node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const exitForeachNode = executionGraph.node('exitForeach_testForeachConnectorStep');
+        const exitForeachNode = executionGraph.node('exitForeach_foreach_testForeachConnectorStep');
         expect(exitForeachNode).toEqual({
           type: 'exit-foreach',
-          id: 'exitForeach_testForeachConnectorStep',
-          stepId: 'testForeachConnectorStep',
-          startNodeId: 'enterForeach_testForeachConnectorStep',
+          id: 'exitForeach_foreach_testForeachConnectorStep',
+          stepId: 'foreach_testForeachConnectorStep',
+          stepType: 'foreach',
+          startNodeId: 'enterForeach_foreach_testForeachConnectorStep',
         } as ExitForeachNode);
       });
     });
@@ -929,13 +959,13 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
       expect(topsort).toEqual([
-        'enterCondition_testForeachConnectorStep',
-        'enterThen_testForeachConnectorStep',
-        'enterForeach_testForeachConnectorStep',
+        'enterCondition_if_testForeachConnectorStep',
+        'enterThen_if_testForeachConnectorStep',
+        'enterForeach_foreach_testForeachConnectorStep',
         'testForeachConnectorStep',
-        'exitForeach_testForeachConnectorStep',
-        'exitThen_testForeachConnectorStep',
-        'exitCondition_testForeachConnectorStep',
+        'exitForeach_foreach_testForeachConnectorStep',
+        'exitThen_if_testForeachConnectorStep',
+        'exitCondition_if_testForeachConnectorStep',
       ]);
     });
 
@@ -945,28 +975,28 @@ describe('convertToWorkflowGraph', () => {
       expect(edges).toEqual(
         expect.arrayContaining([
           {
-            v: 'enterCondition_testForeachConnectorStep',
-            w: 'enterThen_testForeachConnectorStep',
+            v: 'enterCondition_if_testForeachConnectorStep',
+            w: 'enterThen_if_testForeachConnectorStep',
           },
           {
-            v: 'enterThen_testForeachConnectorStep',
-            w: 'enterForeach_testForeachConnectorStep',
+            v: 'enterThen_if_testForeachConnectorStep',
+            w: 'enterForeach_foreach_testForeachConnectorStep',
           },
           {
-            v: 'exitForeach_testForeachConnectorStep',
-            w: 'exitThen_testForeachConnectorStep',
+            v: 'exitForeach_foreach_testForeachConnectorStep',
+            w: 'exitThen_if_testForeachConnectorStep',
           },
           {
-            v: 'enterForeach_testForeachConnectorStep',
+            v: 'enterForeach_foreach_testForeachConnectorStep',
             w: 'testForeachConnectorStep',
           },
           {
             v: 'testForeachConnectorStep',
-            w: 'exitForeach_testForeachConnectorStep',
+            w: 'exitForeach_foreach_testForeachConnectorStep',
           },
           {
-            v: 'exitThen_testForeachConnectorStep',
-            w: 'exitCondition_testForeachConnectorStep',
+            v: 'exitThen_if_testForeachConnectorStep',
+            w: 'exitCondition_if_testForeachConnectorStep',
           },
         ])
       );
@@ -1002,9 +1032,9 @@ describe('convertToWorkflowGraph', () => {
       expect(topsort).toEqual([
         'enterCondition_testIfStep',
         'enterThen_testIfStep',
-        'enterForeach_testForeachConnectorStep',
+        'enterForeach_foreach_testForeachConnectorStep',
         'testForeachConnectorStep',
-        'exitForeach_testForeachConnectorStep',
+        'exitForeach_foreach_testForeachConnectorStep',
         'exitThen_testIfStep',
         'exitCondition_testIfStep',
       ]);
@@ -1052,13 +1082,13 @@ describe('convertToWorkflowGraph', () => {
         'enterTryBlock_testForeachConnectorStep',
         'enterNormalPath_testForeachConnectorStep',
         'enterRetry_testForeachConnectorStep',
-        'enterCondition_testForeachConnectorStep',
-        'enterThen_testForeachConnectorStep',
-        'enterForeach_testForeachConnectorStep',
+        'enterCondition_if_testForeachConnectorStep',
+        'enterThen_if_testForeachConnectorStep',
+        'enterForeach_foreach_testForeachConnectorStep',
         'testForeachConnectorStep',
-        'exitForeach_testForeachConnectorStep',
-        'exitThen_testForeachConnectorStep',
-        'exitCondition_testForeachConnectorStep',
+        'exitForeach_foreach_testForeachConnectorStep',
+        'exitThen_if_testForeachConnectorStep',
+        'exitCondition_if_testForeachConnectorStep',
         'exitRetry_testForeachConnectorStep',
         'exitNormalPath_testForeachConnectorStep',
         'enterFallbackPath_testForeachConnectorStep',

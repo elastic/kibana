@@ -14,6 +14,7 @@ export const GraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   stepId: z.string(),
+  stepType: z.string(),
 });
 export type GraphNode = z.infer<typeof GraphNodeSchema>;
 

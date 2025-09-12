@@ -122,13 +122,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): g
   return visitAtomicStep(currentStep, context);
 }
 
-export function visitWaitStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+export function visitWaitStep(currentStep: WaitStep, context: GraphBuildContext): graphlib.Graph {
   const stepId = getStepId(currentStep, context);
   const graph = new graphlib.Graph({ directed: true });
   const waitNode: WaitGraphNode = {
     id: getStepId(currentStep, context),
     type: 'wait',
     stepId,
+    stepType: currentStep.type,
     configuration: {
       ...currentStep,
     },
@@ -138,13 +139,14 @@ export function visitWaitStep(currentStep: any, context: GraphBuildContext): gra
   return graph;
 }
 
-export function visitHttpStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+export function visitHttpStep(currentStep: HttpStep, context: GraphBuildContext): graphlib.Graph {
   const stepId = getStepId(currentStep, context);
   const graph = new graphlib.Graph({ directed: true });
   const httpNode: HttpGraphNode = {
     id: getStepId(currentStep, context),
     type: 'http',
     stepId,
+    stepType: currentStep.type,
     configuration: {
       ...currentStep,
     },
@@ -154,13 +156,14 @@ export function visitHttpStep(currentStep: any, context: GraphBuildContext): gra
   return graph;
 }
 
-export function visitAtomicStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+export function visitAtomicStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
   const stepId = getStepId(currentStep, context);
   const graph = new graphlib.Graph({ directed: true });
   const atomicNode: AtomicGraphNode = {
     id: getStepId(currentStep, context),
     type: 'atomic',
     stepId,
+    stepType: currentStep.type,
     configuration: {
       ...currentStep,
     },
@@ -183,6 +186,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
     exitNodeId: exitConditionNodeId,
     type: 'enter-if',
     stepId,
+    stepType: ifStep.type,
     configuration: {
       ...omit(ifElseStep, ['steps', 'else']), // No need to include them as they will be represented in the graph
     },
@@ -192,6 +196,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
     type: 'exit-if',
     id: exitConditionNodeId,
     stepId,
+    stepType: ifStep.type,
     startNodeId: enterConditionNodeId,
   };
   const enterThenBranchNode: EnterConditionBranchNode = {
@@ -199,6 +204,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
     type: 'enter-then-branch',
     condition: ifElseStep.condition,
     stepId,
+    stepType: ifStep.type,
   };
 
   graph.setNode(enterThenBranchNode.id, enterThenBranchNode);
@@ -207,6 +213,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen_${stepId}`,
     type: 'exit-then-branch',
+    stepType: ifStep.type,
     startNodeId: enterThenBranchNode.id,
     stepId,
   };
@@ -220,6 +227,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
       id: `enterElse_${stepId}`,
       type: 'enter-else-branch',
       stepId,
+      stepType: ifStep.type,
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
@@ -228,6 +236,7 @@ function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContex
       type: 'exit-else-branch',
       startNodeId: enterElseBranchNode.id,
       stepId,
+      stepType: ifStep.type,
     };
     const elseGraph = createStepsSequence(falseSteps, context);
     insertGraphBetweenNodes(graph, elseGraph, enterElseBranchNode.id, exitElseBranchNode.id);
@@ -266,6 +275,8 @@ function visitOnFailure(
   const onFailureGraphNode: GraphNode = {
     id: `onFailure_${stepId}`,
     type: 'on-failure',
+    stepId,
+    stepType: 'on-failure',
   };
 
   context.stack.push(onFailureGraphNode);
@@ -303,6 +314,8 @@ function handleStepLevelOnFailure(
   const stackEntry: GraphNode = {
     id: `stepLevelOnFailure_${getStepId(step, context)}`,
     type: 'step-level-on-failure',
+    stepId: getStepId(step, context),
+    stepType: step.type,
   };
   if (context.stack.some((node) => node.id === stackEntry.id)) {
     return null;
@@ -324,6 +337,8 @@ function handleWorkflowLevelOnFailure(
   const stackEntry: GraphNode = {
     id: `workflowLevelOnFailure_${getStepId(step, { ...context, parentKey: '' })}`,
     type: 'workflow-level-on-failure',
+    stepId: getStepId(step, { ...context, parentKey: '' }),
+    stepType: step.name,
   };
 
   if (
@@ -348,11 +363,13 @@ function createContinue(stepId: string, innerGraph: graphlib.Graph): graphlib.Gr
     id: enterContinueNodeId,
     type: 'enter-continue',
     stepId,
+    stepType: 'continue',
     exitNodeId,
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',
     stepId,
+    stepType: 'continue',
     id: exitNodeId,
   };
   graph.setNode(enterContinueNode.id, enterContinueNode);
@@ -373,6 +390,7 @@ function createRetry(
     id: enterRetryNodeId,
     type: 'enter-retry',
     stepId,
+    stepType: 'retry',
     exitNodeId,
     configuration: retry,
   };
@@ -380,6 +398,7 @@ function createRetry(
     type: 'exit-retry',
     id: exitNodeId,
     stepId,
+    stepType: 'retry',
     startNodeId: enterRetryNodeId,
   };
   graph.setNode(enterRetryNode.id, enterRetryNode);
@@ -396,12 +415,14 @@ function createNormalPath(stepId: string, normalPathGraph: graphlib.Graph): grap
     id: enterNormalPathNodeId,
     type: 'enter-normal-path',
     stepId,
+    stepType: 'fallback',
     enterZoneNodeId: `enterTryBlock_${stepId}`,
     enterFailurePathNodeId: `enterFallbackPath_${stepId}`,
   };
   const exitNormalPathNode: ExitNormalPathNode = {
     id: exitNormalPathNodeId,
     stepId,
+    stepType: 'fallback',
     type: 'exit-normal-path',
     enterNodeId: enterNormalPathNodeId,
     exitOnFailureZoneNodeId: `exitTryBlock_${stepId}`,
@@ -427,6 +448,7 @@ function createFallbackPath(
   const enterFallbackPathNode: EnterFallbackPathNode = {
     id: enterFallbackPathNodeId,
     stepId,
+    stepType: 'fallback',
     type: 'enter-fallback-path',
     enterZoneNodeId: enterFallbackPathNodeId,
   };
@@ -434,6 +456,7 @@ function createFallbackPath(
   const exitFallbackPathNode: ExitFallbackPathNode = {
     id: exitFallbackPathNodeId,
     stepId,
+    stepType: 'fallback',
     type: 'exit-fallback-path',
     enterNodeId: enterFallbackPathNodeId,
     exitOnFailureZoneNodeId: `exitTryBlock_${stepId}`,
@@ -469,6 +492,7 @@ function createFallback(
     id: enterTryBlockNodeId,
     exitNodeId: exitTryBlockNodeId,
     stepId,
+    stepType: 'fallback',
     type: 'enter-try-block',
     enterNormalPathNodeId,
   };
@@ -477,6 +501,7 @@ function createFallback(
     id: exitTryBlockNodeId,
     type: 'exit-try-block',
     stepId,
+    stepType: 'fallback',
     enterNodeId: enterTryBlockNodeId,
   };
   graph.setNode(exitTryBlockNodeId, exitTryBlockNode);
@@ -569,6 +594,7 @@ function createForeachGraph(
     id: enterForeachNodeId,
     type: 'enter-foreach',
     stepId,
+    stepType: foreachStep.type,
     exitNodeId,
     configuration: {
       ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
@@ -579,6 +605,7 @@ function createForeachGraph(
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
+    stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
   };
