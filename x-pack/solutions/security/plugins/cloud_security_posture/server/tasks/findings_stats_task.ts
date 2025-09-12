@@ -88,12 +88,11 @@ const checkFieldMappings = (
 };
 
 // Comprehensive template validation that checks all fields against benchmarkScoreMapping
-const validateBenchmarkScoreTemplate = async (
+export const validateBenchmarkScoreTemplate = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<boolean> => {
   try {
-    // Fetch initial template
     const template = await fetchBenchmarkScoreTemplate(esClient);
 
     // Check if template has basic structure
@@ -106,17 +105,17 @@ const validateBenchmarkScoreTemplate = async (
         await createBenchmarkScoreIndex(esClient, DEFAULT_CONFIG, logger);
       } catch (fixError) {
         logger.error('Failed to fix template with missing properties:', fixError);
-        return false; // Fix failed
+        return false;
       }
 
       // Verify the fix worked
       const verifyTemplate = await fetchBenchmarkScoreTemplate(esClient);
       if (!verifyTemplateStructure(verifyTemplate, logger)) {
         logger.error(`Template still has no mapping properties after fixing attempt`);
-        return false; // Fix failed
+        return false;
       }
 
-      return true; // Successfully fixed
+      return true;
     }
 
     const templateProperties = template.template!.mappings!.properties;
@@ -138,7 +137,7 @@ const validateBenchmarkScoreTemplate = async (
         await createBenchmarkScoreIndex(esClient, DEFAULT_CONFIG, logger);
       } catch (fixError) {
         logger.error('Failed to fix template with field mapping issues:', fixError);
-        return false; // Fix failed
+        return false;
       }
 
       // Verify the fix worked by re-checking field mappings
