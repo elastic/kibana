@@ -6,8 +6,14 @@
  */
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
-  const { service_settings: serviceSettings, task_type: taskType } = provider;
+  const {
+    inference_id: inferenceId,
+    service,
+    service_settings: serviceSettings,
+    task_type: taskType,
+  } = provider;
   const modelId = serviceSettings?.model_id;
 
   // If there's no model ID in service settings, it's not a tech preview
