@@ -29,6 +29,7 @@ export class WorkChatAppPlugin
   private services?: WorkChatServices;
 
   constructor(context: PluginInitializerContext) {
+    this.services = {};
     this.logger = context.logger.get();
   }
 
