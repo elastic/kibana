@@ -50,13 +50,38 @@ import {
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
+import {
+  defaultIngestErrorHandler,
+  ingestErrorToResponseOptions,
+  IngestManagerError,
+} from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
+
+const ALLOWED_MIME_TYPES = [
+  'image/svg+xml',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'application/json',
+  'application/yaml',
+  'text/plain',
+  'text/markdown',
+  'text/yaml',
+];
+
+function validateContentTypeIsAllowed(contentType: string) {
+  if (!ALLOWED_MIME_TYPES.includes(contentType.split(';')[0])) {
+    throw new IngestManagerError(
+      `File content type "${contentType}" is not allowed to be retrieved`,
+      400
+    );
+  }
+}
 
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
@@ -152,6 +177,7 @@ export const getFileHandler: FleetRequestHandler<
           statusCode: 400,
         });
       }
+      validateContentTypeIsAllowed(contentType);
 
       return response.custom({
         body: buffer,
@@ -171,6 +197,11 @@ export const getFileHandler: FleetRequestHandler<
         }
         return headers;
       }, {} as ResponseHeaders);
+
+      if (!proxiedHeaders['content-type'] || typeof proxiedHeaders['content-type'] !== 'string') {
+        throw new IngestManagerError(`unknown content type for file: ${filePath}`);
+      }
+      validateContentTypeIsAllowed(proxiedHeaders['content-type']);
 
       return response.custom({
         body: registryResponse.body,
