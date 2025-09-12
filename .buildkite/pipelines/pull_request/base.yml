@@ -103,29 +103,29 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/ci_stats_ready.sh
-    label: Mark CI Stats as ready
-    agents:
-      machineType: n2-standard-2
-      diskSizeGb: 85
-    timeout_in_minutes: 10
-    depends_on:
-      - build
-      - build_api_docs
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+  # - command: .buildkite/scripts/steps/ci_stats_ready.sh
+  #   label: Mark CI Stats as ready
+  #   agents:
+  #     machineType: n2-standard-2
+  #     diskSizeGb: 85
+  #   timeout_in_minutes: 10
+  #   depends_on:
+  #     - build
+  #     - build_api_docs
+  #   retry:
+  #     automatic:
+  #       - exit_status: '*'
+  #         limit: 1
 
-  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
-    label: 'Build API Docs'
-    agents:
-      machineType: n2-highmem-4
-      preemptible: true
-      diskSizeGb: 85
-    key: build_api_docs
-    timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+  # - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
+  #   label: 'Build API Docs'
+  #   agents:
+  #     machineType: n2-highmem-4
+  #     preemptible: true
+  #     diskSizeGb: 85
+  #   key: build_api_docs
+  #   timeout_in_minutes: 90
+  #   retry:
+  #     automatic:
+  #       - exit_status: '-1'
+  #         limit: 3
