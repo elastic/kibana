@@ -95,6 +95,11 @@ export class WorkflowExecutionRuntimeManager {
     return this.buildStepExecutionId(currentStep.id);
   }
 
+  public getCurrentStepExecutionId(): string {
+    const currentStep = this.getCurrentStep();
+    return this.buildStepExecutionId(currentStep.id);
+  }
+
   // TODO: To rename to getCurrentNode and use proper type
   public getCurrentStep(): GraphNode {
     const currentStepId = this.topologicalOrder[this.currentStepIndex];
@@ -212,7 +217,6 @@ export class WorkflowExecutionRuntimeManager {
         const stepExecution = {
           id: this.buildStepExecutionId(stepId),
           stepId,
-          stepLabel: (node as any).stepId,
           stepType: (node as any)?.configuration.type,
           path: [...(workflowExecution.stack || [])],
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),

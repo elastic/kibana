@@ -74,25 +74,9 @@ export function fromBucketLensApiToLensState(
 }
 
 export function fromBucketLensStateToAPI(
-  column: FiltersIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiFiltersOperation;
-export function fromBucketLensStateToAPI(
-  column: DateHistogramIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiDateHistogramOperation;
-export function fromBucketLensStateToAPI(
-  column: RangeIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiRangeOperation;
-export function fromBucketLensStateToAPI(
-  column: TermsIndexPatternColumn,
-  columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiTermsOperation;
-export function fromBucketLensStateToAPI(
   column: AnyBucketLensStateColumn,
   columns: { column: AnyLensStateColumn; id: string }[]
-): LensApiBucketOperations | undefined {
+): LensApiBucketOperations {
   if (isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', column)) {
     return fromFiltersLensStateToAPI(column);
   }

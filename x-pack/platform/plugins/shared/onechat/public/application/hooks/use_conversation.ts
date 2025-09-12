@@ -14,12 +14,16 @@ import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
 
-const useConversation = () => {
+export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
-  const { data: conversation, isLoading } = useQuery({
+  const {
+    data: conversation,
+    isLoading,
+    isFetched,
+  } = useQuery({
     queryKey,
     // Disable query if we are on a new conversation or if there is a message currently being sent
     // Otherwise a refetch will overwrite our optimistic updates
@@ -32,7 +36,12 @@ const useConversation = () => {
     },
   });
 
-  return { conversation, isLoading };
+  return { conversation, isLoading, isFetched };
+};
+
+export const useConversationStatus = () => {
+  const { isLoading, isFetched } = useConversation();
+  return { isLoading, isFetched };
 };
 
 export const useAgentId = () => {

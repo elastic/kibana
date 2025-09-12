@@ -136,7 +136,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Prefix
    */
-  prefix: schema.string({ meta: { description: 'Prefix' }, defaultValue: '' }),
+  prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
   /**
    * Compare to
    */
