@@ -44,7 +44,6 @@ interface WorkflowExecutionRuntimeManagerInit {
  */
 export class WorkflowExecutionRuntimeManager {
   private currentStepIndex: number = -1;
-  // private topologicalOrder: string[];
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;

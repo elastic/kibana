@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
@@ -78,7 +79,9 @@ export function TestStepModal({
   return (
     <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>Test Step</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup direction="row" gutterSize="l" css={styles.codeEditorWrapper}>
@@ -135,7 +138,10 @@ export function TestStepModal({
                   iconType="play"
                   size="s"
                 >
-                  Run
+                  <FormattedMessage
+                    id="workflows.testStepModal.submitRunBtn"
+                    defaultMessage="Run"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
