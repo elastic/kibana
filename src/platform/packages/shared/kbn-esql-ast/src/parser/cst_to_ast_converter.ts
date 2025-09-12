@@ -2323,16 +2323,30 @@ export class CstToAstConverter {
       args,
       incomplete: Boolean(ctx.exception),
     };
-    const identifierOrParameter = functionNameCtx.identifierOrParameter();
+    const identifierOrParameterCtx = functionNameCtx.identifierOrParameter();
     const asteriskNode = functionExpressionCtx.ASTERISK()
       ? this.toColumnStar(functionExpressionCtx.ASTERISK()!)
       : undefined;
 
-    if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.fromIdentifierOrParam(identifierOrParameter);
+    if (identifierOrParameterCtx instanceof cst.IdentifierOrParameterContext) {
+      const operator = this.fromIdentifierOrParam(identifierOrParameterCtx);
 
       if (operator) {
         fn.operator = operator;
+      }
+    } else {
+      const lastCtx = functionNameCtx.LAST();
+
+      if (lastCtx) {
+        fn.operator = this.fromNodeToIdentifier(lastCtx);
+        fn.operator.name = fn.operator.name.toLowerCase();
+      } else {
+        const firstCtx = functionNameCtx.FIRST();
+
+        if (firstCtx) {
+          fn.operator = this.fromNodeToIdentifier(firstCtx);
+          fn.operator.name = fn.operator.name.toLowerCase();
+        }
       }
     }
 
