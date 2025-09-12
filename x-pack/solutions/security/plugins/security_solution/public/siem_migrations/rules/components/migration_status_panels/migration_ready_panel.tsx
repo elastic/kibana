@@ -24,7 +24,7 @@ import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { RuleMigrationsLastError } from './last_error';
-import { MigrationPanelTitle } from './migration_panel_title';
+import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { PanelText } from '../../../../common/components/panel_text';
 
 export interface MigrationReadyPanelProps {
@@ -71,7 +71,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <MigrationPanelTitle migrationStats={migrationStats} />
+              <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
             </EuiFlexItem>
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>

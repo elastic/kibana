@@ -146,46 +146,6 @@ export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'The last execution of this migration failed with the following message:' }
 );
 
-export const OPEN_MIGRATION_OPTIONS_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.openMigrationOptionsButton',
-  { defaultMessage: 'Open migration options' }
-);
-export const RENAME_MIGRATION_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.renameMigrationText',
-  { defaultMessage: 'Rename' }
-);
-
-export const DELETE_BUTTON_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.deleteButtonText',
-  { defaultMessage: 'Delete' }
-);
-
-export const DELETE_MIGRATION_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.deleteMigrationText',
-  { defaultMessage: 'Delete Migration' }
-);
-export const NOT_DELETABLE_MIGRATION_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.notDeletableMigrationText',
-  { defaultMessage: 'Can not delete running migrations' }
-);
-
-export const CANCEL_DELETE_MIGRATION_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.cancelDeleteMigrationText',
-  { defaultMessage: 'Cancel' }
-);
-
-export const DELETE_MIGRATION_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.delete.title',
-  { defaultMessage: 'Are you sure you want to delete this migration?' }
-);
-
-export const DELETE_MIGRATION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.delete.description',
-  {
-    defaultMessage:
-      'This action cannot be undone. All translations related to this migration will be removed permanently.',
-  }
-);
 export const RENAME_MIGRATION_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.renameMigrationButton',
   { defaultMessage: 'Rename' }

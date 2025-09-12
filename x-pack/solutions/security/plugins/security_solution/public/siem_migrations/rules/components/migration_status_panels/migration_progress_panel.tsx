@@ -24,8 +24,8 @@ import { PanelText } from '../../../../common/components/panel_text';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { RuleMigrationsReadMore } from './read_more';
-import { MigrationPanelTitle } from './migration_panel_title';
 import { useStopSiemMigration } from '../../../common/hooks/use_stop_siem_migration';
+import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 
 export interface MigrationProgressPanelProps {
   migrationStats: RuleMigrationStats;
@@ -51,7 +51,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <MigrationPanelTitle migrationStats={migrationStats} />
+                <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">{i18n.RULE_MIGRATION_PROGRESS_DESCRIPTION(items.total)}</EuiText>
