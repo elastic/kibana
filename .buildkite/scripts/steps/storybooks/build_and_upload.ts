@@ -10,6 +10,8 @@
 import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
+import pLimit from 'p-limit';
 import { storybookAliases } from '../../../../src/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
 
@@ -63,7 +65,11 @@ const ghStatus = (state: string, description: string) =>
 const build = async () => {
   console.log('--- Building Storybooks');
 
-  await Promise.all(Object.keys(storybookAliases).map(buildStorybook));
+  const limit = pLimit(os.availableParallelism());
+
+  await Promise.all(
+    Object.keys(storybookAliases).map((storybook) => limit(() => buildStorybook(storybook)))
+  );
 };
 
 const upload = () => {
