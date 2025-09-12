@@ -6,7 +6,7 @@
  */
 
 import { SplunkXmlDashboardParser } from './dashboard_xml';
-import type { VizType } from './types';
+import type { VizType } from '../types';
 
 describe('SplunkXmlDashboardParser', () => {
   const createBasicXml = (

@@ -30,7 +30,7 @@ export function CurrentStreamEntry({
           : router.link('/{key}/management/{tab}', {
               path: {
                 key: parentId,
-                tab: 'route',
+                tab: 'partitioning',
               },
             }),
       };
