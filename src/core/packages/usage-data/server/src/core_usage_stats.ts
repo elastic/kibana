@@ -92,6 +92,20 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsUpdate.namespace.custom.total'?: number;
   'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'?: number;
   'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.total'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.namespace.default.total'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.namespace.custom.total'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsChangeObjectOwner.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.total'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.namespace.default.total'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.namespace.custom.total'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsChangeObjectMode.namespace.custom.kibanaRequest.no'?: number;
   // Saved Objects Management APIs
   'apiCalls.savedObjectsImport.total'?: number;
   'apiCalls.savedObjectsImport.namespace.default.total'?: number;
