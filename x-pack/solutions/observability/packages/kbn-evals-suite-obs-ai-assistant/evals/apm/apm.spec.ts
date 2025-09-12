@@ -38,16 +38,17 @@ const evaluate = base.extend<{
 evaluate.describe('APM Service', { tag: '@svlOblt' }, () => {
   const ruleIds: string[] = [];
 
-  evaluate.beforeAll(async ({ apmSynthtraceEsClient, fetch, log }) => {
+  evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, log }) => {
     await apmSynthtraceEsClient.clean();
     await generateAIAssistantApmScenario({ apmSynthtraceEsClient });
 
     const ruleBody = apmErrorCountAIAssistant.ruleParams;
 
     try {
-      const rule = await fetch<RuleResponse>('/api/alerting/rule', {
+      const { data: rule } = await kbnClient.request<RuleResponse>({
         method: 'POST',
-        body: JSON.stringify(ruleBody),
+        path: '/api/alerting/rule',
+        body: ruleBody,
       });
       ruleIds.push(rule.id);
       log.debug(`Created APM rule ${rule.id}`);
@@ -199,12 +200,12 @@ evaluate.describe('APM Service', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate.afterAll(async ({ apmSynthtraceEsClient, fetch, log }) => {
+  evaluate.afterAll(async ({ apmSynthtraceEsClient, kbnClient, log }) => {
     await apmSynthtraceEsClient.clean();
 
     for (const id of ruleIds) {
       try {
-        await fetch(`/api/alerting/rule/${id}`, { method: 'DELETE' });
+        await kbnClient.request({ method: 'DELETE', path: `/api/alerting/rule/${id}` });
         log.debug(`Deleted APM rule ${id}`);
       } catch (e) {
         log.error(`Failed to delete APM rule ${id}: ${e}`);
