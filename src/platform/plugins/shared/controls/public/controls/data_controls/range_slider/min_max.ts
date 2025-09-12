@@ -10,18 +10,22 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  FetchContext,
+  PublishesDataViews,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import type { ControlGroupApi } from '../../../control_group/types';
 
 export function minMax$({
-  controlGroupApi,
+  controlFetch$,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
-  controlGroupApi: ControlGroupApi;
+  controlFetch$: Observable<FetchContext>;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;

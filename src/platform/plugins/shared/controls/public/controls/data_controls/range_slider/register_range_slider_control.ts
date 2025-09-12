@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function registerRangeSliderControl() {
-  // registerControlPanelType(RANGE_SLIDER_CONTROL, async () => {
-  //   const [{ getRangesliderControlFactory }] = await Promise.all([
-  //     import('../../../controls_module'),
-  //     untilPluginStartServicesReady(),
-  //   ]);
-  //   return getRangesliderControlFactory();
-  // });
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { untilPluginStartServicesReady } from '../../../services/kibana_services';
+
+export function registerRangeSliderControl(embeddable: EmbeddableSetup) {
+  embeddable.registerReactEmbeddableFactory(RANGE_SLIDER_CONTROL, async () => {
+    const [{ getRangesliderControlFactory }] = await Promise.all([
+      import('../../../controls_module'),
+      untilPluginStartServicesReady(),
+    ]);
+    return getRangesliderControlFactory();
+  });
 }

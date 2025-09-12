@@ -20,4 +20,6 @@ export type {
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSortingType,
+  RangeSliderControlState,
+  RangeSliderValue,
 } from './src/types';

@@ -51,12 +51,12 @@ export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext
     }
   },
   getDisplayName: () =>
-    i18n.translate('esqlControl.displayNameAriaLabel', {
+    i18n.translate('controls.esqlControl.displayNameAriaLabel', {
       defaultMessage: 'ES|QL Control',
     }),
 
   getDisplayNameTooltip: () =>
-    i18n.translate('esqlControl.tooltip', {
+    i18n.translate('controls.esqlControl.tooltip', {
       defaultMessage: 'Add an ES|QL control to your dashboard.',
     }),
 });

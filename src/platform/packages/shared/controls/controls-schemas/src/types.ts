@@ -18,6 +18,7 @@ import type {
   optionsListSelectionSchema,
   optionsListSortSchema,
 } from './options_list_schema';
+import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 export type ControlState = TypeOf<typeof controlSchema>;
@@ -33,3 +34,6 @@ export type OptionsListControlState = OptionsListDSLControlState | OptionsListES
 export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqueSchema>;
 export type OptionsListSelection = TypeOf<typeof optionsListSelectionSchema>;
 export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;
+
+export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
+export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
