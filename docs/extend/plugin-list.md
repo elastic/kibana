@@ -240,8 +240,4 @@ mapped_pages:
 | [urlDrilldown](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md) | NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin. |
 | [ux](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/readme.md) | https://docs.elastic.dev/kibana-dev-docs/welcome |
 | [watcher](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation): |
-| [wciExternalServer](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/wci-external-server/README.md) | WorkChat External Server integration plugin that provides functionality to connect to external servers for the WorkChat application. |
-| [wciIndexSource](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/wci-index-source/README.md) | WorkChat Index Source integration plugin that provides functionality to search Elasticsearch indices for the WorkChat application. |
-| [wciSalesforce](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/wci-salesforce/README.md) | WorkChat Salesforce integration plugin that provides Salesforce-specific functionality for the WorkChat application. |
-| [workchatApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/workchat-app/README.md) | WorkChat application plugin |
-| [workchatFramework](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/workchat-framework/README.md) | WorkChat framework plugin |
+| [workchatApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/workchat_app/README.md) | WorkChat application plugin |
