@@ -282,7 +282,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       alertIds: undefined,
       ruleId: undefined,
       ruleName: undefined,
-      meta: {},
     };
 
     if (command === 'get-file') {

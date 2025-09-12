@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -355,7 +354,7 @@ export function registerResponseActionRoutes(
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteSecuritySolution'] }, // Use base permission for middleware
+        { all: ['canAccessResponseConsole'] }, // Use base permission for middleware
         logger,
         cancelActionHandler(endpointContext)
       )
@@ -400,9 +399,27 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
         );
       }
 
+      // Validate that endpoint_id (if provided) is associated with the original action
+      const requestEndpointId = request.body.endpoint_ids?.[0];
+      if (requestEndpointId && originalAction.agent?.id) {
+        const originalActionAgentIds = Array.isArray(originalAction.agent.id)
+          ? originalAction.agent.id
+          : [originalAction.agent.id];
+        if (!originalActionAgentIds.includes(requestEndpointId)) {
+          return errorHandler(
+            logger,
+            response,
+            new CustomHttpRequestError(
+              `Endpoint '${requestEndpointId}' is not associated with action '${actionId}'`,
+              403
+            )
+          );
+        }
+      }
+
       // Extract command and agent type from original action
-      const command = originalAction.EndpointActions.data.command;
-      const agentType = originalAction.EndpointActions.input_type;
+      const command = originalAction.EndpointActions?.data?.command;
+      const agentType = originalAction.EndpointActions?.input_type;
 
       if (!command) {
         logger.warn(`Action ${actionId} missing command information`);
@@ -411,7 +428,7 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
           response,
           new CustomHttpRequestError(
             `Unable to determine command type for action '${actionId}'`,
-            400
+            500
           )
         );
       }
@@ -421,7 +438,7 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
         return errorHandler(
           logger,
           response,
-          new CustomHttpRequestError(`Unable to determine agent type for action '${actionId}'`, 400)
+          new CustomHttpRequestError(`Unable to determine agent type for action '${actionId}'`, 500)
         );
       }
 
@@ -435,18 +452,7 @@ function cancelActionHandler(endpointContext: EndpointAppContext) {
       );
 
       if (!canCancel) {
-        return errorHandler(
-          logger,
-          response,
-          new EndpointAuthorizationError(
-            i18n.translate(
-              'xpack.securitySolution.endpoint.actions.cancel.insufficientPrivileges',
-              {
-                defaultMessage: 'Insufficient privileges to cancel this action',
-              }
-            )
-          )
-        );
+        return errorHandler(logger, response, new EndpointAuthorizationError());
       }
 
       // Proceed with existing cancellation logic using the standard response action handler

@@ -1104,18 +1104,6 @@ describe('When using Actions service utilities', () => {
       });
     });
 
-    it('should preserve meta field in action details record', () => {
-      const machineActionId = 'ms-defender-action-456';
-      actionRequest.meta = { machineActionId };
-
-      const actionDetails = createActionDetailsRecord(
-        actionRequest,
-        actionResponses,
-        agentHostInfo
-      );
-      expect(actionDetails.meta).toEqual({ machineActionId });
-    });
-
     it('should populate host name from action request', () => {
       agentHostInfo = {};
       actionRequest.hosts[actionRequest.agents[0]] = { name: 'host-b' };

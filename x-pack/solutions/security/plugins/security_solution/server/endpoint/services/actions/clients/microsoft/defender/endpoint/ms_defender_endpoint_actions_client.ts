@@ -24,7 +24,10 @@ import type {
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+} from '../../../../../../../../common/endpoint/constants';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -1040,7 +1043,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   /**
    * Resolves the external action ID from an internal response action ID for Microsoft Defender Endpoint.
-   * This fetches the action details and extracts the Microsoft-specific machineActionId.
+   * This queries the original action request document to get the Microsoft-specific machineActionId.
    */
   protected async resolveExternalActionId(actionId: string): Promise<string> {
     try {
@@ -1048,19 +1051,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         `resolveExternalActionId: attempting to resolve external action ID for action [${actionId}]`
       );
 
-      // Fetch the action details to get external action information
-      const actionDetails = await this.fetchActionDetails(actionId);
-
-      if (!actionDetails) {
-        throw new ResponseActionsClientError(`Action with ID [${actionId}] not found`, 404);
-      }
-
-      this.log.debug(
-        `resolveExternalActionId: fetched action details for [${actionId}]: command=${actionDetails.command}, agentType=${actionDetails.agentType}`
-      );
-
-      // Extract the Microsoft Defender machine action ID
-      const externalActionId = this.extractExternalActionId(actionDetails);
+      // Get the Microsoft Defender machine action ID from the original action request
+      const externalActionId = await this.getExternalActionId(actionId);
 
       if (!externalActionId) {
         throw new ResponseActionsClientError(
@@ -1077,26 +1069,37 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   /**
-   * Extract Microsoft Defender Endpoint's machineActionId from action details.
-   * For Microsoft Defender Endpoint, the external action ID is stored in the meta field as machineActionId.
+   * Get Microsoft Defender Endpoint's machineActionId by querying the original action request.
+   * The external action ID is stored in the meta field of the action request document.
    */
-  protected extractExternalActionId(actionDetails: ActionDetails): string | undefined {
-    // For Microsoft Defender Endpoint, the external action ID is stored in the meta field
-    const meta = (
-      actionDetails as ActionDetails & { meta?: MicrosoftDefenderEndpointActionRequestCommonMeta }
-    ).meta;
+  private async getExternalActionId(actionId: string): Promise<string | undefined> {
+    try {
+      const result = await this.options.esClient.search({
+        index: ENDPOINT_ACTIONS_INDEX,
+        query: {
+          term: { action_id: actionId },
+        },
+        _source: ['meta'],
+        size: 1,
+      });
 
-    this.log.debug(
-      `extractExternalActionId: actionDetails.id=${actionDetails.id}, meta=${JSON.stringify(meta)}`
-    );
+      const actionRequest = result.hits.hits[0]?._source;
+      const meta = (actionRequest as { meta?: MicrosoftDefenderEndpointActionRequestCommonMeta })
+        ?.meta;
 
-    return meta?.machineActionId;
+      this.log.debug(
+        `getExternalActionId: actionId=${actionId}, machineActionId=${meta?.machineActionId}`
+      );
+
+      return meta?.machineActionId;
+    } catch (error) {
+      this.log.warn(`Error fetching external action ID for ${actionId}: ${error.message}`);
+      return undefined;
+    }
   }
 
   /**
-   * Check if a successful cancel action already exists for the target actionId.
-   * This method queries the endpoint response index to look for action been canceled
-   * that target the specified action ID.
+   * Check if the target action has already been successfully canceled.
    */
   private async checkForAlreadyCanceledAction(targetActionId: string): Promise<boolean> {
     try {
@@ -1104,21 +1107,30 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
         query: {
           bool: {
-            filter: [{ term: { 'EndpointActions.action_id': targetActionId } }],
-            should: [{ match_phrase: { 'error.message': 'Response action was canceled by' } }],
-            minimum_should_match: 1,
+            filter: [
+              { term: { 'EndpointActions.action_id': targetActionId } },
+              { match_phrase: { 'error.message': 'Response action was canceled by' } },
+            ],
           },
         },
         size: 1,
-        _source: ['EndpointActions.action_id', 'error.message', '@timestamp'],
+        _source: false,
       };
 
-      const searchResult = await this.options.esClient.search(searchQuery);
+      this.log.debug(
+        `Checking response index for cancellation messages for action ${targetActionId}`
+      );
 
-      return searchResult.hits.hits.length > 0;
+      const searchResult = await this.options.esClient.search(searchQuery);
+      const isCanceled = searchResult.hits.hits.length > 0;
+
+      if (isCanceled) {
+        this.log.debug(`Action ${targetActionId} shows cancellation in response index`);
+      }
+
+      return isCanceled;
     } catch (error) {
-      this.log.warn(`Error checking for existing cancel actions: ${error.message}`);
-      // On ES query error, allow cancel to proceed (fail open)
+      this.log.warn(`Error checking response index for cancellation: ${error.message}`);
       return false;
     }
   }

@@ -503,8 +503,6 @@ export interface ActionDetails<
   ruleName?: string;
   /** The agent type to where the response action was sent */
   agentType: ResponseActionAgentType;
-  /** Additional metadata that might be stored with the action (ex. 3rd party EDR action IDs) */
-  meta?: {};
 }
 
 export interface ActionDetailsApiResponse<

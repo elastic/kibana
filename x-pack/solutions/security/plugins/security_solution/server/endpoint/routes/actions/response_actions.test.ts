@@ -1253,7 +1253,7 @@ describe('Response actions', () => {
           body: expect.objectContaining({
             message: "Unable to determine command type for action 'test-action-id'",
           }),
-          statusCode: 400,
+          statusCode: 500,
         });
       });
 

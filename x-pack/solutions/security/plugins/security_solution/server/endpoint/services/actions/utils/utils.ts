@@ -109,7 +109,6 @@ export const mapToNormalizedActionRequest = (
       ruleName: actionRequest.rule?.name,
       error: actionRequest.error,
       hosts: actionRequest.EndpointActions.data.hosts ?? {},
-      meta: actionRequest.meta,
     };
   }
 
@@ -618,7 +617,6 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
     alertIds: actionRequest.alertIds,
     ruleId: actionRequest.ruleId,
     ruleName: actionRequest.ruleName,
-    meta: actionRequest.meta,
   };
 
   return actionDetails as T;

@@ -1053,9 +1053,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('cancel');
   }
 
-  protected abstract resolveExternalActionId(actionId: string): Promise<string>;
-
-  protected abstract extractExternalActionId(actionDetails: ActionDetails): string | undefined;
 
   public async getCustomScripts(
     options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
