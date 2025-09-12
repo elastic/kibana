@@ -12,7 +12,6 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { AgentEventEmitterFn } from '@kbn/onechat-server';
 import { getActPrompt } from './prompts';
 
 const StateAnnotation = Annotation.Root({
@@ -35,7 +34,6 @@ export const createAgentGraph = ({
   tools,
   customInstructions,
   noPrompt,
-  eventEmitter,
   logger,
 }: {
   chatModel: InferenceChatModel;
@@ -43,7 +41,6 @@ export const createAgentGraph = ({
   customInstructions?: string;
   noPrompt?: boolean;
   logger: Logger;
-  eventEmitter?: AgentEventEmitterFn;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
