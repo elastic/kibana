@@ -33,5 +33,6 @@ export * from './replace_favicon';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';
 export * from './fetch_agent_versions_list';
+export * from './upload_sourcemaps_to_apm';
 
 export { InstallChromium } from './install_chromium';
