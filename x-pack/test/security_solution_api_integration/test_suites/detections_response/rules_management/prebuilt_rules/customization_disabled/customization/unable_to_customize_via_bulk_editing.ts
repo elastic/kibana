@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return prebuiltRule;
   };
 
-  describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
+  describe('@ess @serverless @skipInServerless Customization under insufficient license', () => {
     const bulkEditingCases = [
       {
         type: BulkActionEditTypeEnum.add_tags,

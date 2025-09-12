@@ -28,3 +28,17 @@ export const CONNECTOR_MANAGEMENT_BUTTON_TITLE = i18n.translate(
     defaultMessage: 'Manage Connectors',
   }
 );
+
+export const BOTTOM_BAR_ACTIONS_SAVE_LABEL = i18n.translate(
+  'xpack.elasticAssistant.settings.bottomBar.action.saveButton',
+  {
+    defaultMessage: 'Save changes',
+  }
+);
+
+export const BOTTOM_BAR_ACTIONS_SAVE_ERROR = i18n.translate(
+  'xpack.elasticAssistant.settings.bottomBar.action.save.error',
+  {
+    defaultMessage: 'An error occurred while saving the settings',
+  }
+);

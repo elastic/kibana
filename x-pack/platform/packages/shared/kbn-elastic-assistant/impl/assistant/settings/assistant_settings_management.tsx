@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -36,6 +37,7 @@ import { SettingsTabs } from './types';
 interface Props {
   dataViews: DataViewsContract;
   selectedConversation: Conversation;
+  settings: SettingsStart;
   onTabChange?: (tabId: string) => void;
   currentTab: SettingsTabs;
 }
@@ -50,6 +52,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     onTabChange,
     currentTab: selectedSettingsTab,
+    settings,
   }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
@@ -145,7 +148,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           `}
           data-test-subj={`tab-${selectedSettingsTab}`}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
+          {selectedSettingsTab === CONNECTORS_TAB && (
+            <ConnectorsSettingsManagement connectors={connectors} settings={settings} />
+          )}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               connectors={connectors}

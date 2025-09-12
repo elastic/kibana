@@ -97,6 +97,13 @@ describe('ManagementSettings', () => {
             getCurrent: jest.fn().mockResolvedValue({ data: { color: 'blue', initials: 'P' } }),
           },
         },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
+          },
+        },
       },
     });
 
