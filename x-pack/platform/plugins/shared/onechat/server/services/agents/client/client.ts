@@ -211,7 +211,7 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId: id });
     }
 
-    const deleteResponse = await this.storage.getClient().delete({ id });
+    const deleteResponse = await this.storage.getClient().delete({ id: document._id });
     return deleteResponse.result === 'deleted';
   }
 
