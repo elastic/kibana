@@ -14,6 +14,7 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { Chart } from './chart';
+import { EmptyState } from './empty_state/empty_state';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -62,6 +63,10 @@ export const MetricsGrid = ({
       ? fields.map((field, i) => ({ key: `${field.name}-${i}`, metric: field }))
       : dimensions.map((dim, i) => ({ key: `${dim}-${i}`, metric: fields }));
   }, [pivotOn, fields, dimensions]);
+
+  if (rows.length === 0) {
+    return <EmptyState />;
+  }
 
   return (
     <EuiFlexGrid columns={columns} gutterSize="s" data-test-subj="unifiedMetricsExperienceGrid">
