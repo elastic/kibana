@@ -8,30 +8,55 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { NoDataCard } from './no_data_card.component';
 
 describe('NoDataCardComponent', () => {
-  test('renders', () => {
-    const component = shallow(<NoDataCard canAccessFleet={true} />);
-    expect(component).toMatchSnapshot();
+  test('renders with defaults', () => {
+    render(<NoDataCard canAccessFleet={true} />);
+
+    expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
+    expect(screen.getByText('Add Data to get started')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Browse integration options to find the best way to add your data and start analyzing.'
+      )
+    ).toBeInTheDocument();
   });
 
-  test('renders with canAccessFleet false', () => {
-    const component = shallow(<NoDataCard canAccessFleet={false} />);
-    expect(component).toMatchSnapshot();
+  test('renders no permission content when canAccessFleet is false', () => {
+    render(<NoDataCard canAccessFleet={false} />);
+
+    expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
+    expect(screen.getByText('Contact your administrator')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This integration is not yet enabled. Your administrator has the required permissions to turn it on.'
+      )
+    ).toBeInTheDocument();
   });
 
   describe('props', () => {
-    test('button', () => {
-      const component = shallow(<NoDataCard button="Button" canAccessFleet={true} />);
-      expect(component).toMatchSnapshot();
+    test('renders button with href', () => {
+      render(<NoDataCard href="/some-path" buttonText="Browse integrations" />);
+
+      const button = screen.getByRole('link', { name: 'Browse integrations' });
+      expect(button).toHaveAttribute('href', '/some-path');
     });
 
-    test('href', () => {
-      const component = shallow(<NoDataCard canAccessFleet={true} href={'some path'} />);
-      expect(component).toMatchSnapshot();
+    test('renders custom title and description', () => {
+      render(<NoDataCard title="Custom Title" description="Custom description" />);
+
+      expect(screen.getByText('Custom Title')).toBeInTheDocument();
+      expect(screen.getByText('Custom description')).toBeInTheDocument();
+    });
+
+    test('does not render button if hideButton is passed and/or without href', () => {
+      render(<NoDataCard hideActionButton={true} />);
+
+      expect(screen.queryByTestId('noDataDefaultActionButton')).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Should not show/i })).not.toBeInTheDocument();
     });
   });
 });

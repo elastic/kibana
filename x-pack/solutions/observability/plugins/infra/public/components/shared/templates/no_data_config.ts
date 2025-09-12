@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiCardProps } from '@elastic/eui';
+import type { NoDataCardComponentProps } from '@kbn/shared-ux-card-no-data-types';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
@@ -29,8 +29,9 @@ interface NoDataConfigDetails {
 
 const createCardConfig = (
   onboardingFlow: OnboardingFlow,
-  locators: LocatorClient
-): Pick<EuiCardProps, 'title' | 'description' | 'href'> => {
+  locators: LocatorClient,
+  docsLink?: string
+): NoDataCardComponentProps => {
   const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
@@ -45,6 +46,10 @@ const createCardConfig = (
             'Start collecting data for your hosts to understand metric trends, explore logs and deep insight into their performance',
         }),
         href: onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
+        buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
+          defaultMessage: 'Add data',
+        }),
+        docsLink,
       };
     }
     default: {
@@ -52,15 +57,18 @@ const createCardConfig = (
         title: noMetricIndicesPromptTitle,
         description: noMetricIndicesPromptDescription,
         href: onboardingLocator?.getRedirectUrl({}),
+        buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
+          defaultMessage: 'Add data',
+        }),
+        docsLink,
       };
     }
   }
 };
 
 const createPageConfig = (
-  onboardingFlow: OnboardingFlow,
-  docsLink?: string
-): Pick<NoDataPageProps, 'pageTitle' | 'pageDescription' | 'docsLink'> | undefined => {
+  onboardingFlow: OnboardingFlow
+): Pick<NoDataPageProps, 'pageTitle' | 'pageDescription'> | undefined => {
   switch (onboardingFlow) {
     case OnboardingFlow.Hosts: {
       return {
@@ -74,9 +82,7 @@ const createPageConfig = (
       };
     }
     default: {
-      return {
-        docsLink,
-      };
+      return {};
     }
   }
 };
@@ -87,13 +93,10 @@ const getNoDataConfigDetails = ({
   docsLink,
 }: NoDataConfigDetails): NoDataConfig => {
   return {
-    ...createPageConfig(onboardingFlow, docsLink),
-    solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
-      defaultMessage: 'Observability',
-    }),
+    ...createPageConfig(onboardingFlow),
     action: {
       beats: {
-        ...createCardConfig(onboardingFlow, locators),
+        ...createCardConfig(onboardingFlow, locators, docsLink),
       },
     },
   };
