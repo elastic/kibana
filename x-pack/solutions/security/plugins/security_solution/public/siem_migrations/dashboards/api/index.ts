@@ -32,6 +32,7 @@ import type {
   UpsertDashboardMigrationResourcesRequestBody,
   UpsertDashboardMigrationResourcesResponse,
   StartDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestBody,
   GetDashboardMigrationDashboardsResponse,
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -81,6 +82,21 @@ export const getDashboardMigrationStats = async ({
   return KibanaServices.get().http.get<DashboardMigrationStats>(
     replaceParams(SIEM_DASHBOARD_MIGRATION_STATS_PATH, { migration_id: migrationId }),
     { version: VERSION, signal }
+  );
+};
+
+export const updateDashboardMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: WithSignal<GetDashboardMigrationParams> & Body<UpdateDashboardMigrationRequestBody>) => {
+  return KibanaServices.get().http.patch<void>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, { migration_id: migrationId }),
+    {
+      version: VERSION,
+      signal,
+      body: JSON.stringify(body),
+    }
   );
 };
 
