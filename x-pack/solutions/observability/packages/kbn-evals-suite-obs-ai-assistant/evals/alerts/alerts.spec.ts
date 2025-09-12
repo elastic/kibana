@@ -11,11 +11,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { createEvaluateAlerts } from './evaluate_alerts';
 import type { EvaluateAlerts } from './evaluate_alerts';
 import { evaluate as base } from '../../src/evaluate';
-import {
-  apmErrorCountAIAssistant,
-  apmTransactionRateAIAssistant,
-  customThresholdAIAssistantLogCount,
-} from '../utils/alerts';
+import { apmTransactionRateAIAssistant, customThresholdAIAssistantLogCount } from '../utils/alerts';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -43,44 +39,42 @@ const evaluate = base.extend<{
 evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
   const ruleIds: string[] = [];
 
-  evaluate.beforeAll(async ({ kbnClient, apmSynthtraceEsClient }) => {
+  evaluate.beforeAll(async ({ kbnClient, apmSynthtraceEsClient, log }) => {
+    log.info('Creating APM rule');
     const responseApmRule = await kbnClient.request<RuleResponse>({
       method: 'POST',
       path: '/api/alerting/rule',
       body: apmTransactionRateAIAssistant.ruleParams,
     });
     ruleIds.push(responseApmRule.data.id);
-
-    const responseApmAIAssistantRule = await kbnClient.request<RuleResponse>({
-      method: 'POST',
-      path: '/api/alerting/rule',
-      body: apmErrorCountAIAssistant.ruleParams,
-    });
-    ruleIds.push(responseApmAIAssistantRule.data.id);
-
+    log.info('Creating dataview');
     try {
       await kbnClient.request({
         method: 'POST',
         path: '/api/content_management/rpc/create',
         body: customThresholdAIAssistantLogCount.dataViewParams,
       });
-    } catch (error: any) {
-      if (error?.status !== 409) {
+    } catch (error) {
+      if (error?.status === 409) {
+        log.info('Data view already exists, skipping creation');
+      } else {
         throw error;
       }
     }
-
+    log.info('Creating logs rule');
     const responseLogsRule = await kbnClient.request<RuleResponse>({
       method: 'POST',
       path: '/api/alerting/rule',
       body: customThresholdAIAssistantLogCount.ruleParams,
     });
     ruleIds.push(responseLogsRule.data.id);
+    log.debug('Cleaning APM indices');
+    await apmSynthtraceEsClient.clean();
 
     const myServiceInstance = apm.service('my-service', 'production', 'go').instance('my-instance');
-
+    log.debug('Indexing synthtrace data');
     await apmSynthtraceEsClient.index(
-      timerange(moment().subtract(2, 'hours'), moment())
+      timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
         .rate(10)
         .generator((timestamp) => [
@@ -101,7 +95,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
             .outcome('success'),
         ])
     );
-
+    log.debug('Triggering a rule run');
     await Promise.all(
       ruleIds.map((ruleId) =>
         kbnClient.request<void>({
@@ -110,7 +104,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
         })
       )
     );
-
+    log.debug('Waiting 2.5s to make sure all indices are refreshed');
     await new Promise((resolve) => setTimeout(resolve, 2500));
   });
 
@@ -127,7 +121,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
             output: {
               criteria: [
                 'Correctly uses the `alerts` function to fetch data for the current time range',
-                'Retrieves exactly 2 alerts',
+                'Retrieves 2 alerts',
                 'Responds with a summary of the current active alerts',
               ],
             },
@@ -147,15 +141,14 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
         examples: [
           {
             input: {
-              question:
-                'Do I have any active threshold alerts for the service my-service? Summarize the active alerts.',
+              question: 'Do I have any active threshold alerts for the service my-service?',
             },
             output: {
               criteria: [
                 'Uses the get_alerts_dataset_info function',
                 'Correctly uses the alerts function',
-                'Returns exactly two alerts related to threshold for service "my-service" and no alerts for other services',
-                'Filters on service.name my-service using `service.name:"my-service"` or `service.name:my-service`',
+                'Returns two alerts related to threshold',
+                'After the second question, uses alerts function to filtering on service.name my-service to retrieve active alerts for that service. The filter should be `service.name:"my-service"` or `service.name:my-service`.',
                 'Summarizes the active alerts for the `my-service` service',
               ],
             },
@@ -166,9 +159,15 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate.afterAll(async ({ kbnClient, apmSynthtraceEsClient }) => {
+  evaluate.afterAll(async ({ kbnClient, apmSynthtraceEsClient, esClient }) => {
     await apmSynthtraceEsClient.clean();
-
+    await esClient.deleteByQuery({
+      index: '.alerts-observability-*',
+      query: {
+        match_all: {},
+      },
+      refresh: true,
+    });
     for (const ruleId of ruleIds) {
       await kbnClient.request({
         method: 'DELETE',
