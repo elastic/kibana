@@ -13,8 +13,10 @@ import type {
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import type { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {

@@ -55,7 +55,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
-import { formatSettings } from './helpers';
+import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -688,6 +688,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           settings: formatSettings(settings, this.dependencies.isServerless),
         },
       });
+
+      const oldSettings = getInheritedSettings(
+        getAncestorsAndSelf(this._definition.name).map((id) => startingState.get(id)!.definition)
+      );
+      if (settingsUpdateRequiresRollover(oldSettings, settings)) {
+        actions.push({
+          type: 'rollover',
+          request: { name: this._definition.name },
+        });
+      }
     }
 
     const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);

@@ -98,6 +98,11 @@ export {
   isDisabledLifecycle,
 } from './src/models/ingest/lifecycle';
 
+export {
+  type IngestStreamSettings,
+  type WiredIngestStreamEffectiveSettings,
+} from './src/models/ingest/settings';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,

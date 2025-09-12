@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
+import type { IngestStreamSettings } from '@kbn/streams-schema';
 
 export function formatSettings(settings: IngestStreamSettings, isServerless: boolean) {
   if (isServerless) {
@@ -19,4 +19,13 @@ export function formatSettings(settings: IngestStreamSettings, isServerless: boo
     'index.number_of_shards': settings['index.number_of_shards']?.value ?? null,
     'index.refresh_interval': settings['index.refresh_interval']?.value ?? null,
   };
+}
+
+export function settingsUpdateRequiresRollover(
+  oldSettings: IngestStreamSettings,
+  newSettings: IngestStreamSettings
+) {
+  return (
+    oldSettings['index.number_of_shards']?.value !== newSettings['index.number_of_shards']?.value
+  );
 }
