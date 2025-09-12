@@ -14,6 +14,7 @@ import { getServices } from '../../../../../../kibana_services';
 import { formatHit } from '../../../../../helpers/format_hit';
 
 import './row_formatter.scss';
+import { formatFieldValue } from '../../../../../helpers/format_value';
 
 interface Props {
   defPairs: Array<[string, string]>;
@@ -45,8 +46,7 @@ export const formatRow = (
 };
 
 export const formatTopLevelObject = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  row: Record<string, any>,
+  row: estypes.SearchHit,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>,
   indexPattern: IndexPattern
@@ -58,18 +58,9 @@ export const formatTopLevelObject = (
   sorted.forEach(([key, values]) => {
     const field = indexPattern.getFieldByName(key);
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
-    const formatter = field
-      ? indexPattern.getFormatterForField(field)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
-      .map((val: unknown) =>
-        formatter.convert(val, 'html', {
-          field,
-          hit: row,
-          indexPattern,
-        })
-      )
+      .map((val: unknown) => formatFieldValue(val, row, indexPattern, field))
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([displayKey ? displayKey : key, formatted]);
