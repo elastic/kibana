@@ -141,12 +141,7 @@ export function DashboardRenderer({
         className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
-        ref={(e) => {
-          if (dashboardInternalApi) {
-            dashboardInternalApi.setDashboardContainerRef(e);
-          }
-          dashboardContainerRef.current = e;
-        }}
+        ref={(e) => (dashboardContainerRef.current = e)}
       >
         <GlobalPrintStyles />
         <ExitFullScreenButtonKibanaProvider
