@@ -23,37 +23,10 @@ import { mount } from 'enzyme';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
-
-const mockTimeHistory = {
-  get: () => {
-    return [];
-  },
-  add: jest.fn(),
-  get$: () => {
-    return {
-      pipe: () => {},
-    };
-  },
-};
+import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { createMockStorage, createMockTimeHistory } from './mocks';
 
 const noop = jest.fn();
-
-const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
-  length: 0,
-});
-
-const createMockStorage = () => ({
-  storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
 
 const kqlQuery = {
   query: 'response:200',
@@ -67,7 +40,7 @@ const esqlQuery = {
 function wrapSearchBarInContext(testProps: any) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: mockTimeHistory,
+    timeHistory: createMockTimeHistory(),
     intl: null as any,
   };
 
@@ -97,6 +70,7 @@ function wrapSearchBarInContext(testProps: any) {
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      search: searchServiceMock.createStartContract(),
       query: {
         savedQueries: {
           findSavedQueries: () =>
