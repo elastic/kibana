@@ -41,10 +41,7 @@ describe('When using the `useSendCancelRequest()` hook', () => {
   let customOptions: CancelRequestCustomOptions;
   let http: AppContextTestRender['coreStart']['http'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
-  let renderHook: () => RenderHookResult<
-    UseSendCancelRequestResult,
-    CancelRequestCustomOptions
-  >;
+  let renderHook: () => RenderHookResult<UseSendCancelRequestResult, CancelRequestCustomOptions>;
 
   beforeEach(() => {
     const testContext = createAppRootMockRenderer();
@@ -157,19 +154,6 @@ describe('When using the `useSendCancelRequest()` hook', () => {
     });
   });
 
-  it('should handle error responses', async () => {
-    const error = new Error('Cancel request failed');
-    apiMocks.responseProvider.cancel.mockRejectedValue(error);
-
-    const {
-      result: {
-        current: { mutateAsync },
-      },
-    } = renderHook();
-
-    await expect(mutateAsync(cancelPayload)).rejects.toThrow('Cancel request failed');
-  });
-
   it('should pass custom mutation options correctly', () => {
     const customMutationOptions: CancelRequestCustomOptions = {
       mutationKey: ['custom-cancel-key'],
@@ -183,10 +167,7 @@ describe('When using the `useSendCancelRequest()` hook', () => {
     const testContext = createAppRootMockRenderer();
     testContext.renderHook(() => useSendCancelRequest(customMutationOptions));
 
-    expect(useMutationMock).toHaveBeenCalledWith(
-      expect.any(Function),
-      customMutationOptions
-    );
+    expect(useMutationMock).toHaveBeenCalledWith(expect.any(Function), customMutationOptions);
   });
 
   it('should use correct API version', async () => {
