@@ -16,6 +16,7 @@ import type { Observable } from 'rxjs';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
+import { EmptyState } from './empty_state/empty_state';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -81,6 +82,9 @@ export const MetricsGrid = ({
   const handleCloseFlyout = useCallback(() => {
     setExpandedMetric(undefined);
   }, []);
+  if (rows.length === 0) {
+    return <EmptyState />;
+  }
 
   return (
     <>
