@@ -107,7 +107,7 @@ export const getActPrompt = ({
 
         1.  **Exclusive Tool Call Output:** When you decide to call a tool, your entire response **must** be the tool call. Do not include any text, greetings, or explanations before or after this block.
 
-        2.  **Mandatory Internal Reasoning:** All reasoning, thinking, or justification for making a tool call **must** be placed inside the \`reasoning\` parameter of that tool call. Do not provide reasoning as plain text outside the tool call.
+        2.  **Mandatory Internal Reasoning:** All reasoning, thinking, or justification for making a tool call **must** be placed inside the \`_reasoning\` parameter of that tool call. Do not provide reasoning as plain text outside the tool call.
 
         This protocol is critical for the automated parsing of your responses.
 
