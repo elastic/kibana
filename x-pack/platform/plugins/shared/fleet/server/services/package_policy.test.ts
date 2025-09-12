@@ -3798,6 +3798,49 @@ describe('Package policy service', () => {
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
     });
+
+    describe('with validation errors', () => {
+      it('should convert ValidationError to PackagePolicyValidationError', async () => {
+        const soClient = createSavedObjectClientMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Create a callback that returns an invalid package policy (uppercase namespace)
+        const invalidCallback: CombinedExternalCallback = jest.fn(async (ds) => {
+          return {
+            ...ds,
+            namespace: 'InvalidNamespace', // This should cause a validation error
+          };
+        });
+
+        appContextService.addExternalCallback('packagePolicyCreate', invalidCallback);
+
+        await expect(
+          packagePolicyService.runExternalCallbacks(
+            'packagePolicyCreate',
+            newPackagePolicy,
+            soClient,
+            esClient,
+            coreMock.createCustomRequestHandlerContext(context),
+            request
+          )
+        ).rejects.toThrow(PackagePolicyValidationError);
+
+        // Verify the error message contains the validation details
+        try {
+          await packagePolicyService.runExternalCallbacks(
+            'packagePolicyCreate',
+            newPackagePolicy,
+            soClient,
+            esClient,
+            coreMock.createCustomRequestHandlerContext(context),
+            request
+          );
+        } catch (error) {
+          expect(error).toBeInstanceOf(PackagePolicyValidationError);
+          expect(error.message).toContain('Namespace must be lowercase');
+        }
+      });
+    });
   });
 
   describe('runPackagePolicyPostCreateCallback', () => {
