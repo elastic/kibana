@@ -85,7 +85,7 @@ const indexSearchFormValidationSchema = (toolsService: ToolsService) =>
     pattern: z
       .string()
       .min(1, { message: indexSearchI18nMessages.pattern.requiredError })
-      .regex(/^(?!.*,$).+$/, { message: indexSearchI18nMessages.pattern.trailingCommaError })
+      .regex(/^.+[^,]$/, { message: indexSearchI18nMessages.pattern.trailingCommaError })
       .refine(
         async (pattern) => {
           if (!pattern || !pattern.trim()) {
