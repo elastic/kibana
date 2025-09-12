@@ -18,7 +18,6 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
-import { checkPromptChanges } from '../../steps/checks/prompt_changes_detector';
 import {
   areChangesSkippable,
   doAllChangesMatch,
@@ -497,10 +496,19 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    // Check for prompt file changes and conditionally add pipeline step
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/local_prompt_object\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
+      ])
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml'));
+    }
 
-    // Check for prompt file changes and post reminder comment if needed
-    await checkPromptChanges();
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     emitPipeline(pipeline);
   } catch (ex) {

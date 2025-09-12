@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { doAnyChangesMatch, upsertComment } from '#pipeline-utils';
-
-const PROMPT_FILES = [
-  /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/local_prompt_object\.ts$/,
-  /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
-  /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
-  /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
-];
+import { upsertComment } from '#pipeline-utils';
 
 const COMMENT_MESSAGE = `## 🤖 Prompt Changes Detected
 
@@ -30,19 +23,23 @@ Changes have been detected to one or more prompt files in the Elastic Assistant 
 
 This is an automated reminder to help maintain prompt consistency across repositories.`;
 
-export async function checkPromptChanges(): Promise<void> {
+export async function main() {
   try {
-    const hasPromptChanges = await doAnyChangesMatch(PROMPT_FILES);
+    console.log('Posting prompt changes reminder comment...');
 
-    if (hasPromptChanges) {
-      await upsertComment({
-        commentBody: COMMENT_MESSAGE,
-        commentContext: 'prompt-changes-reminder',
-        clearPrevious: true,
-      });
-    }
+    await upsertComment({
+      commentBody: COMMENT_MESSAGE,
+      commentContext: 'prompt-changes-reminder',
+      clearPrevious: true,
+    });
+
+    console.log('✅ Reminder comment posted successfully');
   } catch (error) {
-    console.warn('❌ Error checking for prompt changes:', error);
-    // Don't fail the pipeline generation if comment posting fails
+    console.error('❌ Error posting prompt changes comment:', error);
+    process.exit(1);
   }
+}
+
+if (require.main === module) {
+  main();
 }
