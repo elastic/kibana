@@ -19,5 +19,3 @@ export const TOP_BAR_HEIGHT = 48;
 export const TOP_BAR_POPOVER_GAP = 8;
 export const BOTTOM_POPOVER_GAP = 17;
 export const POPOVER_OFFSET = 5;
-export const FEEDBACK_PANEL_LS_KEY = 'core.ui.chrome.sideNavigation.feedbackInteraction';
-export const FEEDBACK_PANEL_POSITIVE_LIFETIME = 3000;
