@@ -674,7 +674,7 @@ describe('ESQL query utils', () => {
             { name: 'count', type: 'number' },
           ]
         )
-      ).toEqual(['h', 'c']);
+      ).toEqual(['c', 'h']);
 
       expect(
         getAlertIdFields(
@@ -685,7 +685,7 @@ describe('ESQL query utils', () => {
             { name: 'count', type: 'number' },
           ]
         )
-      ).toEqual(['h', 'c']);
+      ).toEqual(['c', 'h']);
     });
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and drops fields', () => {

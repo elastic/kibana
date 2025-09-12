@@ -269,19 +269,17 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
   commands.filter((c) => c.name === 'rename');
 
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
-  return astCommands.reduce((updatedFields, command) => {
+  for (const command of astCommands) {
     for (const renameArg of command.args) {
       if (isFunctionExpression(renameArg)) {
         const { original, renamed } = getArgsFromRenameFunction(renameArg);
         if (isColumn(original) && isColumn(renamed)) {
-          updatedFields = updatedFields.map((field) =>
-            field === original.name ? renamed.name : field
-          );
+          fields = fields.map((field) => (field === original.name ? renamed.name : field));
         }
       }
     }
-    return updatedFields;
-  }, fields);
+  }
+  return fields;
 };
 
 const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | undefined => {

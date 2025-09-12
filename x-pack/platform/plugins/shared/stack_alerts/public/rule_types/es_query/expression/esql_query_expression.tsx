@@ -173,7 +173,8 @@ export const EsqlQueryExpression: React.FC<
       const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
-        isGroupAgg
+        isGroupAgg,
+        true
       );
       const warning = getWarning(duplicateAlertIds, longAlertIds);
 
