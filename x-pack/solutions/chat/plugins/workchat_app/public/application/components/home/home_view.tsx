@@ -8,21 +8,15 @@
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { HomeChatSection } from './home_chat_section';
-import { HomeAssistantsSection } from './home_assistants_section';
-import { HomeConversationHistorySection } from './home_conversation_history';
 
 export const WorkChatHomeView: React.FC<{}> = () => {
   return (
     <KibanaPageTemplate data-test-subj="workChatHomePage">
       <KibanaPageTemplate.Section flex-direction="column" restrictWidth={800} paddingSize="xl">
         <EuiSpacer size="xl" />
-        <HomeChatSection />
+        <p>Work Chat Home Page</p>
         <EuiSpacer size="xl" />
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-          <HomeAssistantsSection />
-          <HomeConversationHistorySection />
-        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart" />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

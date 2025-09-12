@@ -16,9 +16,7 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import type { WorkChatServices } from '../services';
 import type { WorkChatAppPluginStartDependencies } from '../types';
-import { WorkChatServicesContext } from './context/workchat_services_context';
 import { WorkchatAppRoutes } from './routes';
-import { InitialMessageProvider } from './context/initial_message_context';
 
 export const mountApp = async ({
   core,
@@ -40,15 +38,11 @@ export const mountApp = async ({
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
-            <WorkChatServicesContext.Provider value={services}>
-              <InitialMessageProvider>
-                <RedirectAppLinks coreStart={core}>
-                  <Router history={history}>
-                    <WorkchatAppRoutes />
-                  </Router>
-                </RedirectAppLinks>
-              </InitialMessageProvider>
-            </WorkChatServicesContext.Provider>
+            <RedirectAppLinks coreStart={core}>
+              <Router history={history}>
+                <WorkchatAppRoutes />
+              </Router>
+            </RedirectAppLinks>
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>

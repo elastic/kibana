@@ -8592,10 +8592,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/workchat-framework-plugin@link:x-pack/solutions/chat/plugins/workchat_framework":
-  version "0.0.0"
-  uid ""
-
 "@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
   version "0.0.0"
   uid ""
