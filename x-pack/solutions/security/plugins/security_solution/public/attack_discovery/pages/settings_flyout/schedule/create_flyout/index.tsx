@@ -58,9 +58,10 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     services: { uiSettings },
   } = useKibana();
 
-  const { alertsIndexPattern, http } = useAssistantContext();
+  const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    settings,
   });
 
   const { sourcererDataView } = useSourcererDataView();
