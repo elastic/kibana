@@ -16,7 +16,7 @@ import { useRovingIndex } from '../../utils/use_roving_index';
 
 export interface SideNavPanelProps {
   children: ReactNode;
-  sidePanelFooter?: ReactNode;
+  footer?: ReactNode;
 }
 
 /**
@@ -26,7 +26,7 @@ export interface SideNavPanelProps {
  *
  * TODO: pass ref to EuiPanel
  */
-export const SideNavPanel = ({ children, sidePanelFooter }: SideNavPanelProps): JSX.Element => {
+export const SideNavPanel = ({ children, footer }: SideNavPanelProps): JSX.Element => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -61,7 +61,7 @@ export const SideNavPanel = ({ children, sidePanelFooter }: SideNavPanelProps): 
         >
           {children}
         </div>
-        {sidePanelFooter}
+        {footer}
       </EuiPanel>
     </div>
   );

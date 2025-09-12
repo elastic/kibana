@@ -346,7 +346,7 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
-        <SideNav.Panel sidePanelFooter={sidePanelFooter}>
+        <SideNav.Panel footer={sidePanelFooter}>
           <SecondaryMenu
             badgeType={sidePanelContent.badgeType}
             isPanel
