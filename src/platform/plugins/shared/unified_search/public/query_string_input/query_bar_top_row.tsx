@@ -196,7 +196,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * This prop allows you to define and manage variables used within ES|QL queries,
    * typically bound to UI controls like dropdowns or input fields (Dashboard controls).
    */
-  esqLVariablesConfig?: {
+  esqlVariablesConfig?: {
     /**
      * An array of control variables, each defining a key, an initial value,
      * and its data type, which are used to parameterize the ES|QL query.
@@ -825,15 +825,15 @@ export const QueryBarTopRow = React.memo(
             initialState={props.esqlEditorInitialState}
             onInitialStateChange={props.onEsqlEditorInitialStateChange}
             controlsContext={
-              props.esqLVariablesConfig
+              props.esqlVariablesConfig
                 ? {
-                    onSaveControl: props.esqLVariablesConfig.onSaveControl,
-                    onCancelControl: props.esqLVariablesConfig.onCancelControl ?? (() => {}),
+                    onSaveControl: props.esqlVariablesConfig.onSaveControl,
+                    onCancelControl: props.esqlVariablesConfig.onCancelControl ?? (() => {}),
                     supportsControls: true,
                   }
                 : undefined
             }
-            esqlVariables={props.esqLVariablesConfig?.esqlVariables ?? []}
+            esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
           />
         )
       );
@@ -877,8 +877,8 @@ export const QueryBarTopRow = React.memo(
                 />
               )}
               {/* Optional wrapper for the ES|QL controls elements */}
-              {Boolean(props.esqLVariablesConfig?.controlsWrapper) && (
-                <EuiFlexItem grow={false}>{props.esqLVariablesConfig?.controlsWrapper}</EuiFlexItem>
+              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                <EuiFlexItem grow={false}>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
               )}
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}

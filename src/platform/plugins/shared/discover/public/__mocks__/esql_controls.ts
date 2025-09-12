@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 
-export const mockControlState = {
+export const mockControlState: ControlPanelsState<ESQLControlState> = {
   panel1: {
     type: 'esqlControl',
     availableOptions: ['bar', 'baz'],

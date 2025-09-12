@@ -65,8 +65,7 @@ export const DiscoverTopNav = ({
   const query = useAppStateSelector((state) => state.query);
   const esqlVariables = useInternalStateSelector((state) => state.esqlVariables);
 
-  const { timefilter } = data.query.timefilter;
-  const timeRange = timefilter.getTime();
+  const timeRange = useCurrentTabSelector((tab) => tab.dataRequestParams.timeRangeAbsolute);
 
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -305,7 +304,7 @@ export const DiscoverTopNav = ({
         onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
-        esqLVariablesConfig={
+        esqlVariablesConfig={
           isEsqlMode
             ? {
                 esqlVariables: esqlVariables ?? [],
