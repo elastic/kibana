@@ -123,7 +123,6 @@ export function initializeLayoutManager(
   );
 
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
-  // console.log({ initialChildState });
   let lastSavedLayout = initialLayout;
 
   let lastSavedChildState = initialChildState;
@@ -133,7 +132,7 @@ export function initializeLayoutManager(
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (lastSavedLayout.panels[uuid]) {
+      if (lastSavedLayout.panels[uuid] || lastSavedLayout.controls[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {
@@ -420,6 +419,7 @@ export function initializeLayoutManager(
                 )
               ),
               tap(({ layout, childState }) => {
+                console.log({ lastSavedChildState, childState });
                 lastSavedChildState = childState;
                 lastSavedLayout = layout;
               })
