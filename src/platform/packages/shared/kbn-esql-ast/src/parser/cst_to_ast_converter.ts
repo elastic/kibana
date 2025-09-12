@@ -13,7 +13,7 @@ import type * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition, nonNullable } from './helpers';
-import { firstItem, lastItem, resolveItem } from '../visitor/utils';
+import { firstItem, lastItem, resolveItem, singleItems } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
 import type { Parser } from './parser';
@@ -421,7 +421,7 @@ export class CstToAstConverter {
   private toOption(
     name: string,
     ctx: antlr.ParserRuleContext,
-    args: ast.ESQLAstExpression[] = []
+    args: ast.ESQLAstItem[] = []
   ): ast.ESQLCommandOption {
     return {
       type: 'option',
@@ -429,7 +429,7 @@ export class CstToAstConverter {
       text: ctx.getText(),
       location: getPosition(ctx.start, ctx.stop),
       args,
-      incomplete: !!ctx.exception || args.some((arg) => arg.incomplete),
+      incomplete: !!ctx.exception || [...singleItems(args)].some((arg) => arg.incomplete),
     };
   }
 
@@ -460,10 +460,9 @@ export class CstToAstConverter {
 
     if (metadataCtx && metadataCtx.METADATA()) {
       const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = this.toOption(name, metadataCtx);
       const optionArgs = this.toColumnsFromCommand(metadataCtx);
+      const option = this.toOption(name, metadataCtx, optionArgs);
 
-      option.args.push(...optionArgs);
       command.args.push(option);
     }
 
@@ -495,10 +494,9 @@ export class CstToAstConverter {
 
     if (metadataCtx && metadataCtx.METADATA()) {
       const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = this.toOption(name, metadataCtx);
       const optionArgs = this.toColumnsFromCommand(metadataCtx);
+      const option = this.toOption(name, metadataCtx, optionArgs);
 
-      option.args.push(...optionArgs);
       command.args.push(option);
     }
 
@@ -643,9 +641,9 @@ export class CstToAstConverter {
       return [];
     }
 
-    const option = this.toOption(byCtx.getText().toLowerCase(), ctx);
+    const optionArgs = this.fromFields(expr);
+    const option = this.toOption(byCtx.getText().toLowerCase(), ctx, optionArgs);
 
-    option.args.push(...this.fromFields(expr));
     option.location.min = byCtx.symbol.start;
 
     const lastArg = lastItem(option.args);
@@ -802,20 +800,26 @@ export class CstToAstConverter {
     const options: ast.ESQLCommandOption[] = [];
 
     for (const optionCtx of ctx.dissectCommandOption_list()) {
-      const option = this.toOption(
-        this.sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
-        optionCtx
-      );
-      options.push(option);
+      const optionArgs: ast.ESQLAstItem[] = [];
+
       // it can throw while accessing constant for incomplete commands, so try catch it
       try {
         const optionValue = this.fromConstant(optionCtx.constant());
+
         if (optionValue != null) {
-          option.args.push(optionValue);
+          optionArgs.push(optionValue);
         }
       } catch (e) {
         // do nothing here
       }
+
+      const option = this.toOption(
+        this.sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
+        optionCtx,
+        optionArgs
+      );
+
+      options.push(option);
     }
 
     return options;
@@ -967,18 +971,22 @@ export class CstToAstConverter {
     const identifier = ctx.qualifiedNamePattern();
 
     if (identifier) {
-      const fn = this.toOption(ctx.ON()!.getText().toLowerCase(), ctx);
       let max: number = ctx.ON()!.symbol.stop;
+
+      const optionArgs: ast.ESQLSingleAstItem[] = [];
 
       if (textExistsAndIsValid(identifier.getText())) {
         const column = this.toColumn(identifier);
-        fn.args.push(column);
+        optionArgs.push(column);
         max = column.location.max;
       }
-      fn.location.min = ctx.ON()!.symbol.start;
-      fn.location.max = max;
 
-      return [fn];
+      const onOption = this.toOption(ctx.ON()!.getText().toLowerCase(), ctx, optionArgs);
+
+      onOption.location.min = ctx.ON()!.symbol.start;
+      onOption.location.max = max;
+
+      return [onOption];
     }
 
     return [];
@@ -1017,6 +1025,10 @@ export class CstToAstConverter {
             const fn = this.createFunction('=', clause, undefined, 'binary-expression');
             fn.args.push(args[0], args[1] ? [args[1]] : []);
             option.args.push(fn);
+
+            if (fn.incomplete) {
+              option.incomplete = true;
+            }
           }
         }
 
@@ -1054,8 +1066,7 @@ export class CstToAstConverter {
 
     const joinTarget = this.fromJoinTarget(ctx.joinTarget());
     const joinCondition = ctx.joinCondition();
-    const onOption = this.toOption('on', joinCondition);
-    const joinPredicates: ast.ESQLAstItem[] = onOption.args;
+    const joinPredicates: ast.ESQLAstItem[] = [];
 
     for (const joinPredicateCtx of joinCondition.joinPredicate_list()) {
       const expression = this.visitValueExpression(joinPredicateCtx.valueExpression());
@@ -1064,6 +1075,8 @@ export class CstToAstConverter {
         joinPredicates.push(expression);
       }
     }
+
+    const onOption = this.toOption('on', joinCondition, joinPredicates);
 
     command.args.push(joinTarget);
 
@@ -1318,13 +1331,13 @@ export class CstToAstConverter {
       return;
     }
 
-    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx);
     const fields = this.fromRerankFields(rerankFieldsCtx);
+    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx, fields);
 
-    onOption.args.push(...fields);
     onOption.location.min = onToken.symbol.start;
 
     const lastArg = lastItem(onOption.args);
+
     if (lastArg) {
       onOption.location.max = lastArg.location.max;
     }
