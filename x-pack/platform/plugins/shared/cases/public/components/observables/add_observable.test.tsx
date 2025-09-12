@@ -70,7 +70,7 @@ describe('AddObservable', () => {
 
     await userEvent.selectOptions(
       screen.getByTestId('observable-type-select'),
-      OBSERVABLE_TYPE_IPV4.key
+      OBSERVABLE_TYPE_IPV4.label
     );
 
     await userEvent.click(screen.getByTestId('observable-value-field'));

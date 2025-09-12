@@ -276,7 +276,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
           subcategory: '45',
         },
       },
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
       status: 'open',
       severity: 'low',
       owner: SECURITY_SOLUTION_OWNER,

@@ -1914,7 +1914,7 @@ describe('normalizeCreateCaseRequest', () => {
       type: ConnectorTypes.none,
       fields: null,
     },
-    settings: { syncAlerts: true },
+    settings: { syncAlerts: true, extractObservables: true },
     severity: CaseSeverity.LOW,
     owner: SECURITY_SOLUTION_OWNER,
     assignees: [{ uid: '1' }],

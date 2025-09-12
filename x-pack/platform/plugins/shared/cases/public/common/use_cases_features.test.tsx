@@ -48,6 +48,7 @@ describe('useCasesFeatures', () => {
         pushToServiceAuthorized: false,
         observablesAuthorized: false,
         isObservablesFeatureEnabled: true,
+        isExtractObservablesEnabled: true,
         connectorsAuthorized: false,
       });
     }
@@ -70,6 +71,7 @@ describe('useCasesFeatures', () => {
       pushToServiceAuthorized: false,
       observablesAuthorized: false,
       isObservablesFeatureEnabled: true,
+      isExtractObservablesEnabled: true,
       connectorsAuthorized: false,
     });
   });

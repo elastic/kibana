@@ -32,6 +32,7 @@ describe('Create case', () => {
         title: 'sample title',
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
         owner: 'cases',
       },
@@ -144,6 +145,7 @@ describe('Create case', () => {
         title: 'sample title',
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
         owner: 'cases',
       },

@@ -113,6 +113,7 @@ describe('useAddToCaseActions', () => {
     });
     expect(open).toHaveBeenCalledWith({
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
+      observables: [],
     });
   });
 
