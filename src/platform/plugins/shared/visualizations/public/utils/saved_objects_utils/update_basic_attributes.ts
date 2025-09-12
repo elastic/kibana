@@ -114,7 +114,7 @@ export const deleteSOByType = async (
 
   const { success } = await client.delete(id);
 
-  if (!success) throw new Error(); // when is this the case?
+  if (!success) throw new Error();
 };
 
 export const deleteListItems = async (
