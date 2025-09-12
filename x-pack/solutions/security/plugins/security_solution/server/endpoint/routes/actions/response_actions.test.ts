@@ -1305,6 +1305,25 @@ describe('Response actions', () => {
           statusCode: 400,
         });
       });
+
+      it('returns 403 when cancel feature flag is disabled', async () => {
+        // Disable the experimental feature for cancel actions
+        endpointContext.experimentalFeatures = {
+          ...endpointContext.experimentalFeatures,
+          microsoftDefenderEndpointCancelEnabled: false,
+        };
+
+        await callRoute(CANCEL_ROUTE, {
+          body: {
+            endpoint_ids: ['test-endpoint-id'],
+            parameters: { action_id: 'test-action-id' },
+          } as CancelActionRequestBody,
+          authz: { canIsolateHost: true },
+          version: '2023-10-31',
+        });
+
+        expect(mockResponse.forbidden).toHaveBeenCalled();
+      });
     });
   });
 
