@@ -85,7 +85,7 @@ export class ObservabilityStreamsWrapperPlugin
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
-          pluginsStart.streams.status$.pipe(
+          pluginsStart.streams.navigationStatus$.pipe(
             map(({ status }) => {
               if (status !== 'enabled') {
                 return [];
@@ -127,7 +127,7 @@ export class ObservabilityStreamsWrapperPlugin
       order: 8001,
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
-          pluginsStart.streams.status$.pipe(
+          pluginsStart.streams.navigationStatus$.pipe(
             map(({ status }): AppUpdater => {
               return (app) => {
                 if (status !== 'enabled') {

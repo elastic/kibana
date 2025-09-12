@@ -84,6 +84,21 @@ export const SentinelOneRunScriptParameters = z.object({
   inputParams: z.string().min(1).optional(),
 });
 
+/**
+ * Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
+ */
+export type MDERunScriptParameters = z.infer<typeof MDERunScriptParameters>;
+export const MDERunScriptParameters = z.object({
+  /**
+   * The name of the script to execute from the cloud storage.
+   */
+  scriptName: z.string().min(1),
+  /**
+   * Optional command line arguments for the script.
+   */
+  args: z.string().min(1).optional(),
+});
+
 export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
 export const RunScriptRouteRequestBody = BaseActionSchema.merge(
   z.object({
@@ -96,6 +111,7 @@ export const RunScriptRouteRequestBody = BaseActionSchema.merge(
       HostPathScriptParameters,
       CloudFileScriptParameters,
       SentinelOneRunScriptParameters,
+      MDERunScriptParameters,
     ]),
   })
 );

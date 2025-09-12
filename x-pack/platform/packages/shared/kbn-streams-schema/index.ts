@@ -104,3 +104,5 @@ export type {
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
+
+export { emptyAssets } from './src/helpers/empty_assets';

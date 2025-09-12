@@ -10,13 +10,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AiForSOCAlertsTable, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
 import { TestProviders } from '../../../common/mock';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
+import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
 
 jest.mock('./table', () => ({
   Table: () => <div />,
 }));
 jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
-jest.mock('../../../common/hooks/use_create_data_view');
+jest.mock('../../../detections/hooks/alert_summary/use_create_data_view');
 
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };
@@ -33,7 +33,7 @@ describe('<AiForSOCAlertsTab />', () => {
   });
 
   it('should render a loading skeleton while fetching packages (integrations)', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
@@ -48,7 +48,7 @@ describe('<AiForSOCAlertsTab />', () => {
   });
 
   it('should render a loading skeleton while creating the dataView', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,
       loading: true,
     });
@@ -61,7 +61,7 @@ describe('<AiForSOCAlertsTab />', () => {
   });
 
   it('should render an error if the dataView fail to be created correctly', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
@@ -79,7 +79,7 @@ describe('<AiForSOCAlertsTab />', () => {
   });
 
   it('should render the content', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
       loading: false,
     });
