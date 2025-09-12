@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MetricField, MetricFieldsResponse, MetricFieldType } from './fields/types';
-export type { Dimension } from './dimensions/types';
+import { z } from '@kbn/zod';
+
+export function isoToEpoch(input: string, ctx: z.RefinementCtx) {
+  const epoch = new Date(input).getTime();
+  if (isNaN(epoch)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Invalid ISO date string',
+    });
+    return z.NEVER;
+  }
+
+  return epoch;
+}
