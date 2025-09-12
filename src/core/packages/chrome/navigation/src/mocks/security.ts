@@ -112,7 +112,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'investigations-section',
-        label: null,
         items: [
           {
             id: 'investigations-timelines',
@@ -147,7 +146,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'explore-section',
-        label: null,
         items: [
           {
             id: 'hosts',
@@ -261,7 +259,6 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     sections: [
       {
         id: 'ml-section-1',
-        label: null,
         items: [
           {
             id: 'overview',

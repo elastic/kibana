@@ -101,7 +101,6 @@ export function WorkflowYAMLValidationErrors({
   return (
     <EuiAccordion
       id={accordionId}
-      key={validationErrors?.length}
       data-testid="wf-yaml-editor-validation-errors-list"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>

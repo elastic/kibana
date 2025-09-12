@@ -65,7 +65,7 @@ const EntityAnalyticsComponent = () => {
           <FiltersGlobal>
             <SiemSearchBar
               id={InputsModelId.global}
-              sourcererDataView={oldSourcererDataViewSpec} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
             />
           </FiltersGlobal>
 

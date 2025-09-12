@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter, extractSemanticsFromGrok } from './columns_after';
 
 describe('GROK', () => {
@@ -40,29 +40,22 @@ describe('GROK', () => {
     });
   });
   describe('columnsAfter', () => {
-    const context = {
-      userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
-      fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
-      ]),
-    };
     it('adds the GROK columns from the pattern in the list', () => {
-      const previousCommandFields = [
-        { name: 'field1', type: 'keyword' },
-        { name: 'field2', type: 'double' },
-      ] as ESQLFieldWithMetadata[];
+      const previousCommandFields: ESQLFieldWithMetadata[] = [
+        { name: 'field1', type: 'keyword', userDefined: false },
+        { name: 'field2', type: 'double', userDefined: false },
+      ];
 
       const result = columnsAfter(
         synth.cmd`GROK agent "%{WORD:firstWord}"`,
         previousCommandFields,
-        context
+        ''
       );
 
       expect(result).toEqual([
-        { name: 'field1', type: 'keyword' },
-        { name: 'field2', type: 'double' },
-        { name: 'firstWord', type: 'keyword' },
+        { name: 'field1', type: 'keyword', userDefined: false },
+        { name: 'field2', type: 'double', userDefined: false },
+        { name: 'firstWord', type: 'keyword', userDefined: false },
       ]);
     });
   });

@@ -103,6 +103,7 @@ export const AlertsTabContent = () => {
           nodeType="host"
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
+          schema={searchCriteria.preferredSchema}
         />
       )}
     </HeightRetainer>

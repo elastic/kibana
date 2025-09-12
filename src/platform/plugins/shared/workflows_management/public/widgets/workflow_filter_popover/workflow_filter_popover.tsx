@@ -21,21 +21,6 @@ interface WorkflowFilterPopoverProps {
   onSelectedValuesChanged: (newValues: any[]) => void;
 }
 
-export const toggleSelectedGroup = (
-  group: string,
-  selectedGroups: string[],
-  setSelectedGroups: (groups: string[]) => void
-): void => {
-  const selectedGroupIndex = selectedGroups.indexOf(group);
-  const updatedSelectedGroups = [...selectedGroups];
-  if (selectedGroupIndex >= 0) {
-    updatedSelectedGroups.splice(selectedGroupIndex, 1);
-  } else {
-    updatedSelectedGroups.push(group);
-  }
-  setSelectedGroups(updatedSelectedGroups);
-};
-
 const WorkflowsFilterPopoverComponent = ({
   filter,
   title,
@@ -69,7 +54,7 @@ const WorkflowsFilterPopoverComponent = ({
     const newSelectableOptions: EuiSelectableOption[] = values.map(
       ({ label, key }): EuiSelectableOption => {
         return {
-          label,
+          label: label ?? key,
           key,
           checked: selectedValuesSet.has(key!) ? 'on' : undefined,
         };

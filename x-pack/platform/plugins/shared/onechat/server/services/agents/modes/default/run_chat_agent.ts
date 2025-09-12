@@ -6,10 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { from, filter, shareReplay } from 'rxjs';
+import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
+import type { ChatAgentEvent } from '@kbn/onechat-common';
 import { allToolsSelection } from '@kbn/onechat-common';
-import type { AgentHandlerContext } from '@kbn/onechat-server';
+import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -53,10 +54,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
   });
 
+  const manualEvents$ = new Subject<ChatAgentEvent>();
+  const eventEmitter: AgentEventEmitterFn = (event) => {
+    manualEvents$.next(event);
+  };
+
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
     tools: selectedTools,
     logger,
     request,
+    sendEvent: eventEmitter,
   });
 
   const initialMessages = conversationToLangchainMessages({
@@ -89,13 +96,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   );
 
-  const events$ = from(eventStream).pipe(
+  const graphEvents$ = from(eventStream).pipe(
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
       toolIdMapping,
       logger,
     }),
+    finalize(() => manualEvents$.complete())
+  );
+
+  const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );

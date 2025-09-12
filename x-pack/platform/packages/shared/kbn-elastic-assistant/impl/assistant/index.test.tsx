@@ -43,6 +43,7 @@ const fullWelcomeConversation = {
   ...welcomeConvo,
   id: 'welcome_id',
   apiConfig,
+  isConversationOwner: true,
 };
 const fullSheepConversation = {
   ...welcomeConvo,
@@ -53,6 +54,7 @@ const fullSheepConversation = {
   replacements: {},
   apiConfig,
   updatedAt: '2024-10-10T22:07:44.915Z',
+  isConversationOwner: true,
 };
 
 const mockData = {
@@ -169,7 +171,11 @@ describe('Assistant', () => {
         fireEvent.click(openConversationMenu);
       });
       // selecting first conversation proves sort by updatedAt is working
-      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      const contextMenuButton = screen.getAllByTestId('convo-context-menu-button')[0];
+      await act(async () => {
+        fireEvent.click(contextMenuButton);
+      });
+      const deleteButton = screen.getByTestId('convo-context-menu-item-delete');
       await act(async () => {
         fireEvent.click(deleteButton);
       });

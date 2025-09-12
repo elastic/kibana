@@ -9,6 +9,7 @@ import {
   API_VERSIONS,
   DEFEND_INSIGHTS,
   type DefendInsightsResponse,
+  type DefendInsightType,
   DefendInsightStatusEnum,
 } from '@kbn/elastic-assistant-common';
 import { WORKFLOW_INSIGHTS } from '../../translations';
@@ -17,6 +18,7 @@ import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 interface UseFetchOngoingScansConfig {
   isPolling: boolean;
   endpointId: string;
+  insightTypes: DefendInsightType[];
   onSuccess: (expectedCount: number) => void;
   onInsightGenerationFailure: () => void;
 }
@@ -24,62 +26,79 @@ interface UseFetchOngoingScansConfig {
 export const useFetchLatestScan = ({
   isPolling,
   endpointId,
+  insightTypes,
   onSuccess,
   onInsightGenerationFailure,
 }: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
 
-  return useQuery<
-    DefendInsightsResponse | undefined,
-    { body?: { error: string } },
-    DefendInsightsResponse | undefined
-  >(
-    [`fetchOngoingTasks-${endpointId}`],
+  return useQuery<{ hasRunning: boolean }, { body?: { error: string } }, { hasRunning: boolean }>(
+    [`fetchOngoingTasks-${endpointId}`, insightTypes.length],
     async () => {
       try {
         const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
           version: API_VERSIONS.internal.v1,
           query: {
             endpoint_ids: [endpointId],
-            size: 1,
+            size: insightTypes.length,
           },
         });
 
-        const defendInsight = response.data[0];
-        if (!defendInsight) {
-          // no previous scan record - treat as 0 expected insights
-          onSuccess(0);
-          return undefined;
-        }
+        const insights = response.data;
 
-        const status = defendInsight.status;
+        const processQueryResults = (insightResults: DefendInsightsResponse[]) => {
+          if (!insightResults.length) {
+            // no previous scan record - treat as 0 expected insights
+            onSuccess(0);
+            return { hasRunning: false };
+          }
 
-        if (status === DefendInsightStatusEnum.failed) {
-          toasts.addDanger({
-            title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
-            text: defendInsight.failureReason,
-          });
-          onInsightGenerationFailure();
-        }
+          const expectedCount = insightResults.reduce(
+            (total, defendInsight) =>
+              total +
+              defendInsight.insights.reduce((acc, insight) => {
+                if (!insight.events) return acc;
+                return acc + insight.events.length;
+              }, 0),
+            0
+          );
 
-        if (status === DefendInsightStatusEnum.succeeded) {
-          const expectedCount = defendInsight.insights.reduce((acc, insight) => {
-            if (!insight.events) {
-              return acc;
-            }
-            return acc + insight.events.length;
-          }, 0);
-          onSuccess(expectedCount);
-        }
+          const hasRunningInsight = insightResults.some(
+            (insight) => insight.status === DefendInsightStatusEnum.running
+          );
 
-        return defendInsight;
+          const hasFailedInsight = insightResults.some(
+            (insight) => insight.status === DefendInsightStatusEnum.failed
+          );
+
+          if (hasFailedInsight) {
+            const failureReasons = insightResults
+              .filter((insight) => insight.status === DefendInsightStatusEnum.failed)
+              .map((insight) => insight.failureReason)
+              .filter(Boolean);
+
+            toasts.addDanger({
+              title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+              text: failureReasons.join('; '),
+            });
+            onInsightGenerationFailure();
+          }
+
+          if (!hasRunningInsight && !hasFailedInsight) {
+            onSuccess(expectedCount);
+          }
+
+          return { hasRunning: hasRunningInsight };
+        };
+
+        return processQueryResults(insights);
       } catch (error) {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
           text: error?.body?.error,
         });
-        return undefined;
+        return { hasRunning: false };
       }
     },
     {

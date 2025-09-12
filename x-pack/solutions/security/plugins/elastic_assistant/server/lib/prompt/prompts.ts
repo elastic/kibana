@@ -284,3 +284,16 @@ export const starterPromptTitle4 = 'Suggest';
 export const starterPromptIcon4 = 'sparkles';
 export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
+
+export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+
+\`\`\`
+- Between July 18 and August 18, daily cost savings **averaged around $135K**
+- The lowest point, **just above $70K**, occurred in early August.
+- **Peaks near $160K** appeared in late July and mid-August.
+- After a mid-period decline, savings steadily recovered and grew toward the end of the month.
+- At this pace, projected annual savings **exceed $48M**, confirming strong and predictable ROI.
+\`\`\`
+
+Respond only with the markdown. Do not include any explanation or extra text.`;

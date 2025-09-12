@@ -104,3 +104,15 @@ export enum RowHeightMode {
   auto = 'auto',
   custom = 'custom',
 }
+
+export interface ValueFormatConfig {
+  id: string;
+  params?: {
+    decimals: number;
+    suffix?: string;
+    compact?: boolean;
+    pattern?: string;
+    fromUnit?: string;
+    toUnit?: string;
+  };
+}

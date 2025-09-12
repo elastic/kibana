@@ -33,35 +33,34 @@ describe('AlertProcessingCompare', () => {
     expect(getByTestId('alertProcessingCompareEscalatedLabel')).toBeInTheDocument();
   });
 
-  it('does not render if filteredAlertsPerc is 0', () => {
-    const metrics = { ...baseMetrics, filteredAlertsPerc: 0 };
-    const { queryByTestId } = render(
-      <AlertProcessingCompare valueMetrics={metrics} valueMetricsCompare={baseMetrics} />
-    );
-    expect(queryByTestId('alertProcessingCompare')).toBeNull();
-  });
+  it('does not render when any required percentage is 0', () => {
+    const testCases = [
+      {
+        metrics: { ...baseMetrics, filteredAlertsPerc: 0 },
+        description: 'filteredAlertsPerc is 0',
+      },
+      {
+        metrics: { ...baseMetrics, escalatedAlertsPerc: 0 },
+        description: 'escalatedAlertsPerc is 0',
+      },
+      {
+        metricsCompare: { ...baseMetrics, filteredAlertsPerc: 0 },
+        description: 'compare filteredAlertsPerc is 0',
+      },
+      {
+        metricsCompare: { ...baseMetrics, escalatedAlertsPerc: 0 },
+        description: 'compare escalatedAlertsPerc is 0',
+      },
+    ];
 
-  it('does not render if escalatedAlertsPerc is 0', () => {
-    const metrics = { ...baseMetrics, escalatedAlertsPerc: 0 };
-    const { queryByTestId } = render(
-      <AlertProcessingCompare valueMetrics={metrics} valueMetricsCompare={baseMetrics} />
-    );
-    expect(queryByTestId('alertProcessingCompare')).toBeNull();
-  });
-
-  it('does not render if filteredAlertsPerc in compare is 0', () => {
-    const metricsCompare = { ...baseMetrics, filteredAlertsPerc: 0 };
-    const { queryByTestId } = render(
-      <AlertProcessingCompare valueMetrics={baseMetrics} valueMetricsCompare={metricsCompare} />
-    );
-    expect(queryByTestId('alertProcessingCompare')).toBeNull();
-  });
-
-  it('does not render if escalatedAlertsPerc in compare is 0', () => {
-    const metricsCompare = { ...baseMetrics, escalatedAlertsPerc: 0 };
-    const { queryByTestId } = render(
-      <AlertProcessingCompare valueMetrics={baseMetrics} valueMetricsCompare={metricsCompare} />
-    );
-    expect(queryByTestId('alertProcessingCompare')).toBeNull();
+    testCases.forEach(({ metrics, metricsCompare, description }) => {
+      const { queryByTestId } = render(
+        <AlertProcessingCompare
+          valueMetrics={metrics || baseMetrics}
+          valueMetricsCompare={metricsCompare || baseMetrics}
+        />
+      );
+      expect(queryByTestId('alertProcessingCompare')).toBeNull();
+    });
   });
 });

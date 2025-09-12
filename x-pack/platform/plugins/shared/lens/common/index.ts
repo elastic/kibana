@@ -5,4 +5,4 @@
  * 2.0.
  */
 export { DOCUMENT_FIELD_NAME } from './constants';
-export type { PersistableFilter, LegacyMetricState } from './types';
+export type { PersistableFilter, LegacyMetricState, ValueFormatConfig } from './types';

@@ -7,6 +7,7 @@
 
 import {
   EuiAccordion,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -15,32 +16,58 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
-import React from 'react';
+import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../../context/send_message_context';
 import type { Timer } from '../../../../hooks/use_timer';
+import { RoundFlyout } from '../round_flyout';
 import { RoundTimer } from './round_timer';
 import { RoundSteps } from './steps/round_steps';
 
 interface RoundThinkingProps {
+  rawRound: ConversationRound;
   steps: ConversationRoundStep[];
   isLoading: boolean;
   timer: Timer;
 }
 
-const fullWidthStyles = css`
-  width: 100%;
-`;
+const buttonContentClassName = 'thinkingButtonContent';
 
-const thinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
+const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
 });
 const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinking.completed', {
   defaultMessage: 'Thinking completed',
 });
+const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
+  defaultMessage: 'View raw response',
+});
 
-export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, timer }) => {
+export const RoundThinking: React.FC<RoundThinkingProps> = ({
+  steps,
+  isLoading,
+  timer,
+  rawRound,
+}) => {
   const { euiTheme } = useEuiTheme();
+  const thinkingButtonStyles = css`
+    margin-right: ${euiTheme.size.xs};
+    & .${buttonContentClassName} {
+      /*
+      From what I can tell this is by far the easiest solution to limit the content to one line.
+      Other solutions require managing the width of the content, changing for if the timer
+      is displayed or not.
+      These CSS properties are supported by all modern browsers https://developer.mozilla.org/en-US/docs/Web/CSS/line-clamp
+    */
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  `;
   const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
+  const { agentReasoning } = useSendMessage();
+  const [showFlyout, setShowFlyout] = useState(false);
 
   if (steps.length === 0) {
     return timer.showTimer ? (
@@ -58,15 +85,27 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     }
   `;
 
+  let thinkingButtonLabel = thinkingCompletedLabel;
+  if (isLoading) {
+    // While this round is loading, show the agent reasoning as the button label if available
+    // Otherwise fallback to default thinking label.
+    // Agent reasoning can be reasoning directly from the agent or individual tool call progression
+    thinkingButtonLabel = agentReasoning ?? defaultThinkingLabel;
+  }
+  const toggleFlyout = () => {
+    setShowFlyout(!showFlyout);
+  };
+
   return (
     <EuiAccordion
       id={thinkingAccordionId}
       arrowDisplay="left"
       css={accordionStyles}
       buttonProps={{
-        css: fullWidthStyles,
+        css: thinkingButtonStyles,
       }}
-      buttonContent={isLoading ? thinkingLabel : thinkingCompletedLabel}
+      buttonContent={thinkingButtonLabel}
+      buttonContentClassName={buttonContentClassName}
       extraAction={
         timer.showTimer ? (
           <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
@@ -75,7 +114,13 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     >
       <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
         <RoundSteps steps={steps} />
+        {!isLoading && (
+          <EuiButton iconType={'code'} color="primary" iconSide="left" onClick={toggleFlyout}>
+            {rawResponseButtonLabel}
+          </EuiButton>
+        )}
       </EuiPanel>
+      <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
     </EuiAccordion>
   );
 };

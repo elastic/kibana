@@ -14,16 +14,25 @@ import {
   type RootContext,
 } from '../../../profiles';
 import { DataSourceType } from '../../../../../common/data_sources';
+import type { MetricsExperienceDataSourceProfileProvider } from './profile';
 import { createMetricsDataSourceProfileProvider } from './profile';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
-describe('metricsDataSourceProfileProvider', () => {
-  const provider = createMetricsDataSourceProfileProvider(mockServices);
+const RESOLUTION_MATCH = {
+  isMatch: true,
+  context: { category: DataSourceCategory.Metrics },
+};
 
+const RESOLUTION_MISMATCH = {
+  isMatch: false,
+};
+
+describe('metricsDataSourceProfileProvider', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
@@ -38,54 +47,120 @@ describe('metricsDataSourceProfileProvider', () => {
     ...overrides,
   });
 
+  let provider: MetricsExperienceDataSourceProfileProvider;
+
+  const createProvider = (clientOverrides?: Partial<MetricsExperienceClient>) =>
+    createMetricsDataSourceProfileProvider({
+      ...mockServices,
+      metricsContextService: {
+        ...mockServices.metricsContextService,
+        getMetricsExperienceClient: () => ({
+          ...mockServices.metricsContextService.getMetricsExperienceClient()!,
+          ...clientOverrides,
+        }),
+      },
+    });
+
   describe('matches', () => {
-    it('returns match when ES|QL query starts with FROM metrics-*', () => {
-      const result = provider.resolve(createParams({ query: { esql: 'FROM metrics-*' } }));
-      expect(result).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Metrics },
+    beforeEach(() => {
+      provider = createProvider({
+        getIndexPatternMetadata: jest.fn().mockResolvedValue({
+          indexPatternMetadata: { 'metrics-system.cpu': { hasTimeSeriesFields: true } },
+        }),
       });
     });
 
-    it('returns match when ES|QL query starts with TS metrics-*', () => {
-      const result = provider.resolve(createParams({ query: { esql: 'TS metrics-*' } }));
-      expect(result).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Metrics },
-      });
+    it.each([
+      'TS metrics-*,',
+      'FROM metrics-* | LIMIT 10',
+      'FROM metrics-* | SORT @timestamp DESC',
+      'FROM metrics-* | WHERE host.name="foo"',
+    ])('when query conatains supported commands %s', async (query) => {
+      const result = await provider.resolve(
+        createParams({
+          query: { esql: query },
+          rootContext: { profileId: 'foo', solutionType: SolutionType.Observability },
+        })
+      );
+
+      expect(result).toEqual(RESOLUTION_MATCH);
     });
+
+    it.each([SolutionType.Observability, SolutionType.Security])(
+      'when SolutionType is %s',
+      async (solutionType) => {
+        const result = await provider.resolve(
+          createParams({
+            query: { esql: 'TS metrics-*' },
+            rootContext: { profileId: 'foo', solutionType },
+          })
+        );
+
+        expect(result).toEqual(RESOLUTION_MATCH);
+      }
+    );
   });
 
   describe('does not match', () => {
-    it('when the query references non-metrics indices', () => {
-      const result = provider.resolve(createParams({ query: { esql: 'FROM traces-*' } }));
-      expect(result).toEqual({ isMatch: false });
+    beforeEach(() => {
+      provider = createProvider();
     });
 
-    it('when the metrics client is not initialized', () => {
-      const providerWithoutMetrics = createMetricsDataSourceProfileProvider({
+    it('when query references a non-metrics index', async () => {
+      const result = await provider.resolve(createParams({ query: { esql: 'FROM traces-*' } }));
+      expect(result).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('when query references a metrics index and a non-metrics index', async () => {
+      const result = await provider.resolve(
+        createParams({ query: { esql: 'FROM logs-*,metrics-*' } })
+      );
+      expect(result).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('when metrics client is not initialized', async () => {
+      provider = createMetricsDataSourceProfileProvider({
         ...mockServices,
         metricsContextService: {
+          ...mockServices.metricsContextService,
           getMetricsExperienceClient: () => undefined,
         },
       });
 
-      const result = providerWithoutMetrics.resolve(
-        createParams({ query: { esql: 'FROM metrics-*' } })
-      );
-      expect(result).toEqual({ isMatch: false });
+      const result = await provider.resolve(createParams({ query: { esql: 'FROM metrics-*' } }));
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
-    it('when the root solutionType is not Observability', () => {
-      const result = provider.resolve(
-        createParams({
-          rootContext: {
-            profileId: 'security-root-profile',
-            solutionType: SolutionType.Security,
-          },
-        })
-      );
-      expect(result).toEqual({ isMatch: false });
+    it('when index pattern has no time series fields', async () => {
+      provider = createProvider({
+        getIndexPatternMetadata: jest.fn().mockResolvedValue({
+          indexPatternMetadata: { 'foo-bar': { hasTimeSeriesFields: false } },
+        }),
+      });
+
+      const result = await provider.resolve(createParams({ query: { esql: 'FROM foo*' } }));
+      expect(result).toEqual(RESOLUTION_MISMATCH);
     });
+
+    it('when query contains commands that are not supported', async () => {
+      const result = await provider.resolve(
+        createParams({ query: { esql: 'FROM metrics-* | STATS count() BY @timestamp' } })
+      );
+      expect(result).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it.each([SolutionType.Search, SolutionType.Default])(
+      'when SolutionType is %s',
+      async (solutionType) => {
+        const result = await provider.resolve(
+          createParams({
+            query: { esql: 'TS metrics-*' },
+            rootContext: { profileId: 'foo', solutionType },
+          })
+        );
+
+        expect(result).toEqual(RESOLUTION_MISMATCH);
+      }
+    );
   });
 });

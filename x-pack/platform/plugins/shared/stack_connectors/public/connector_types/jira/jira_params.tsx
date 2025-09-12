@@ -39,7 +39,7 @@ const summaryFieldLabel = i18n.translate(
   }
 );
 
-const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
+const JiraConnectorParams: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,
   actionParams,
   editAction,
@@ -436,4 +436,4 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 };
 
 // eslint-disable-next-line import/no-default-export
-export { JiraParamsFields as default };
+export { JiraConnectorParams as default };

@@ -9,12 +9,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const overlayStyle = css`
   pointer-events: none;
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: ${layoutLevels.debug};
 `;
 
 const rectStyle = css`
@@ -44,95 +45,99 @@ const slots: Array<{ name: string; style: React.CSSProperties }> = [
   {
     name: 'banner',
     style: {
-      top: 'var(--kbn-layout--banner-top, 0)',
-      left: 'var(--kbn-layout--banner-left, 0)',
-      width: 'var(--kbn-layout--banner-width, 100vw)',
-      height: 'var(--kbn-layout--banner-height, 0)',
+      top: layoutVar('banner.top'),
+      left: layoutVar('banner.left'),
+      right: layoutVar('banner.right'),
+      bottom: layoutVar('banner.bottom'),
+      width: layoutVar('banner.width'),
+      height: layoutVar('banner.height'),
     },
   },
   {
     name: 'header',
     style: {
-      top: 'var(--kbn-layout--header-top, 0)',
-      left: 'var(--kbn-layout--header-left, 0)',
-      width: 'var(--kbn-layout--header-width, 100vw)',
-      height: 'var(--kbn-layout--header-height, 0)',
+      top: layoutVar('header.top'),
+      bottom: layoutVar('header.bottom'),
+      left: layoutVar('header.left'),
+      right: layoutVar('header.right'),
+      width: layoutVar('header.width'),
+      height: layoutVar('header.height'),
     },
   },
   {
     name: 'navigation',
     style: {
-      top: 'var(--kbn-layout--navigation-top, 0)',
-      left: '0',
-      width: 'var(--kbn-layout--navigation-width, 0)',
-      height: 'var(--kbn-layout--navigation-height, 0)',
+      top: layoutVar('navigation.top'),
+      bottom: layoutVar('navigation.bottom'),
+      left: layoutVar('navigation.left'),
+      right: layoutVar('navigation.right'),
+      width: layoutVar('navigation.width'),
+      height: layoutVar('navigation.height'),
     },
   },
   {
     name: 'sidebar',
     style: {
-      top: 'var(--kbn-layout--sidebar-top, 0)',
-      right: '0',
-      width: 'var(--kbn-layout--sidebar-width, 0)',
-      height: 'var(--kbn-layout--sidebar-height, 0)',
-    },
-  },
-  {
-    name: 'sidebarPanel',
-    style: {
-      top: 'var(--kbn-layout--sidebar-top, 0)',
-      right: 'var(--kbn-layout--sidebar-width, 0)',
-      width: 'var(--kbn-layout--sidebar-panel-width, 0)',
-      height: 'var(--kbn-layout--sidebar-height, 0)',
+      top: layoutVar('sidebar.top'),
+      bottom: layoutVar('sidebar.bottom'),
+      left: layoutVar('sidebar.left'),
+      right: layoutVar('sidebar.right'),
+      width: layoutVar('sidebar.width'),
+      height: layoutVar('sidebar.height'),
     },
   },
   {
     name: 'application',
     style: {
-      top: 'var(--kbn-layout--application-top, 0)',
-      left: 'var(--kbn-layout--application-left, 0)',
-      right: 'var(--kbn-layout--application-right, 0)',
-      width: 'var(--kbn-layout--application-width, 0)',
-      height: 'var(--kbn-layout--application-height, 0)',
+      top: layoutVar('application.top'),
+      bottom: layoutVar('application.bottom'),
+      left: layoutVar('application.left'),
+      right: layoutVar('application.right'),
+      width: layoutVar('application.width'),
+      height: layoutVar('application.height'),
     },
   },
   {
     name: 'applicationTopBar',
     style: {
-      top: 'var(--kbn-application--top-bar-top, 0)',
-      left: 'var(--kbn-application--top-bar-left, 0)',
-      right: 'var(--kbn-application--top-bar-right, 0)',
-      width: 'var(--kbn-application--top-bar-width, 0)',
-      height: 'var(--kbn-application--top-bar-height, 0)',
+      top: layoutVar('application.topBar.top'),
+      bottom: layoutVar('application.topBar.bottom'),
+      left: layoutVar('application.topBar.left'),
+      right: layoutVar('application.topBar.right'),
+      width: layoutVar('application.topBar.width'),
+      height: layoutVar('application.topBar.height'),
     },
   },
   {
     name: 'footer',
     style: {
-      top: 'var(--kbn-layout--footer-top, 0)',
-      left: 'var(--kbn-layout--footer-left, 0)',
-      width: 'var(--kbn-layout--footer-width, 0)',
-      height: 'var(--kbn-layout--footer-height, 0)',
+      top: layoutVar('footer.top'),
+      bottom: layoutVar('footer.bottom'),
+      left: layoutVar('footer.left'),
+      right: layoutVar('footer.right'),
+      width: layoutVar('footer.width'),
+      height: layoutVar('footer.height'),
     },
   },
   {
     name: 'applicationBottomBar',
     style: {
-      bottom: 'var(--kbn-application--bottom-bar-bottom, 0)',
-      left: 'var(--kbn-application--bottom-bar-left, 0)',
-      right: 'var(--kbn-application--bottom-bar-right, 0)',
-      width: 'var(--kbn-application--bottom-bar-width, 0)',
-      height: 'var(--kbn-application--bottom-bar-height, 0)',
+      top: layoutVar('application.bottomBar.top'),
+      bottom: layoutVar('application.bottomBar.bottom'),
+      left: layoutVar('application.bottomBar.left'),
+      right: layoutVar('application.bottomBar.right'),
+      width: layoutVar('application.bottomBar.width'),
+      height: layoutVar('application.bottomBar.height'),
     },
   },
   {
     name: 'applicationContent',
     style: {
-      top: 'var(--kbn-application--content-top, 0)',
-      left: 'var(--kbn-application--content-left, 0)',
-      right: 'var(--kbn-application--content-right, 0)',
-      width: 'var(--kbn-application--content-width, 0)',
-      height: 'var(--kbn-application--content-height, 0)',
+      top: layoutVar('application.content.top'),
+      left: layoutVar('application.content.left'),
+      right: layoutVar('application.content.right'),
+      width: layoutVar('application.content.width'),
+      height: layoutVar('application.content.height'),
     },
   },
 ];
@@ -146,7 +151,6 @@ const defaultColors: Record<string, string> = {
   header: '#00bfae',
   navigation: '#c837ab',
   sidebar: '#ffd600',
-  sidebarPanel: '#ff3d00',
   application: '#4caf50',
   applicationTopBar: '#1976d2',
   applicationBottomBar: '#e65100',

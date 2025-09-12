@@ -195,10 +195,13 @@ function getObserveInvestigationsPrompts({
   };
 }
 
-export interface ObservationStepSummary {
+// make sure this is a `type` and not an `interface` so it matches
+// the ToolData shape
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ObservationStepSummary = {
   investigations: EntityInvestigation[];
   content: string;
-}
+};
 
 export function observeInvestigationResults({
   rcaContext,

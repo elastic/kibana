@@ -133,6 +133,7 @@ export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
   targetField?: ESQLColumn;
+  inferenceId: ESQLLiteral | undefined;
 }
 
 export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;

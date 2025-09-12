@@ -17,17 +17,15 @@ import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
 
-export type BuiltinToolId = `.${string}`;
-
 /**
  * Onechat tool, as registered by built-in tool providers.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
-  extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
+  extends Omit<ToolDefinition, 'id' | 'type' | 'readonly' | 'configuration'> {
   /**
-   * Built-in tool ID following the {@link BuiltinToolId} pattern
+   * Built-in tool ID
    */
-  id: BuiltinToolId;
+  id: string;
   /**
    * Tool's input schema, defined as a zod schema.
    */
@@ -53,7 +51,21 @@ export interface ExecutableTool<
    * Run handler that can be used to execute the tool.
    */
   execute: ExecutableToolHandlerFn<z.infer<TSchema>>;
+  /**
+   * Optional handled to add additional instructions to the LLM.
+   * When provided, will replace the description when converting to llm tool.
+   */
+  llmDescription?: LlmDescriptionHandler<TConfig>;
 }
+
+export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {
+  config: TConfig;
+  description: string;
+}
+
+export type LlmDescriptionHandler<TConfig extends object = {}> = (
+  params: LLmDescriptionHandlerParams<TConfig>
+) => string;
 
 /**
  * Param type for {@link ExecutableToolHandlerFn}

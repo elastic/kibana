@@ -13,17 +13,21 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+} from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -95,6 +99,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       },
       {
         onError: (err: unknown) => {
+          // Extract message from HTTP error body and update the error message
+          if (
+            err &&
+            typeof err === 'object' &&
+            'body' in err &&
+            err.body &&
+            typeof err.body === 'object' &&
+            'message' in err.body &&
+            typeof err.body.message === 'string'
+          ) {
+            (err as any).message = err.body.message;
+          }
           notifications?.toasts.addError(err as Error, {
             toastLifeTimeMs: 3000,
             title: 'Failed to save workflow',
@@ -188,6 +204,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
   );
+  const isExecutionGraphEnabled = uiSettings?.get<boolean>(
+    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+    false
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -215,6 +235,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
+        yaml={yamlValue}
         isLoading={isLoadingWorkflow}
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
@@ -229,16 +250,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         handleTabChange={(tab) => {
           setActiveTab(tab);
         }}
+        hasUnsavedChanges={hasChanges}
       />
       <EuiFlexGroup gutterSize="none" css={styles.container}>
-        {activeTab === 'executions' && (
-          <EuiFlexItem css={styles.executionListColumn}>
-            <WorkflowExecutionList workflowId={workflow?.id ?? null} />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem css={styles.workflowMainColumn}>
+        <EuiFlexItem css={styles.main}>
           <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem css={styles.workflowYamlEditorColumn}>
+            <EuiFlexItem css={styles.yamlEditor}>
               <React.Suspense fallback={<EuiLoadingSpinner />}>
                 <WorkflowYAMLEditor
                   workflowId={workflow?.id ?? 'unknown'}
@@ -250,11 +267,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
                   readOnly={activeTab === 'executions'}
+                  activeTab={activeTab}
+                  selectedExecutionId={selectedExecutionId}
+                  originalValue={workflow?.yaml ?? ''}
                 />
               </React.Suspense>
             </EuiFlexItem>
             {isVisualEditorEnabled && workflow && (
-              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+              <EuiFlexItem css={styles.visualEditor}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <WorkflowVisualEditor
                     workflowYaml={yamlValue}
@@ -263,11 +283,19 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 </React.Suspense>
               </EuiFlexItem>
             )}
+            {isExecutionGraphEnabled && workflow && (
+              <EuiFlexItem css={styles.visualEditor}>
+                <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <ExecutionGraph workflowYaml={yamlValue} />
+                </React.Suspense>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {selectedExecutionId && (
-          <EuiFlexItem css={styles.stepExecutionListColumn}>
-            {workflow && (
+        {activeTab === 'executions' && (
+          <EuiFlexItem css={styles.sidebar}>
+            {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
+            {workflow && selectedExecutionId && (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
                 workflowYaml={yamlValue}
@@ -297,7 +325,8 @@ const componentStyles = {
   pageContainer: css({
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 auto',
+    flex: '1 1 0',
+    overflow: 'hidden',
   }),
   container: css`
     flex: 1;
@@ -305,32 +334,23 @@ const componentStyles = {
     min-height: 0;
     flex-wrap: nowrap !important;
   `,
-  executionListColumn: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexBasis: '200px',
-      maxWidth: '200px',
-      flex: 1,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  workflowMainColumn: css({
+  main: css({
     flex: 1,
     overflow: 'hidden',
   }),
-  workflowYamlEditorColumn: css({
+  yamlEditor: css({
     flex: 1,
     overflow: 'hidden',
   }),
-  workflowVisualEditorColumn: ({ euiTheme }: UseEuiTheme) =>
+  visualEditor: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
       overflow: 'hidden',
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  stepExecutionListColumn: ({ euiTheme }: UseEuiTheme) =>
+  sidebar: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flexBasis: '275px',
-      maxWidth: '275px',
+      maxWidth: '300px',
       flex: 1,
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),

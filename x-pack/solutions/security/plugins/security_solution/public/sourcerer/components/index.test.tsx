@@ -83,7 +83,9 @@ const sourcererDataView: Partial<SelectedDataView> = {
   },
 };
 
-describe('Sourcerer component', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Sourcerer component', () => {
   const pollForSignalIndexMock = jest.fn();
   let wrapper: ReactWrapper;
   beforeEach(() => {

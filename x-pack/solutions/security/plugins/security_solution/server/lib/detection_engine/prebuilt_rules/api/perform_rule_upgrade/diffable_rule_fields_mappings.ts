@@ -12,7 +12,7 @@ import type {
   InlineKqlQuery,
   ThreeWayDiff,
   DiffableRuleTypes,
-  AllFieldsDiff,
+  AllThreeWayFieldsDiff,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
@@ -79,7 +79,7 @@ interface MapRuleFieldToDiffableRuleFieldParams {
 export function mapRuleFieldToDiffableRuleField({
   ruleType,
   fieldName,
-}: MapRuleFieldToDiffableRuleFieldParams): keyof AllFieldsDiff {
+}: MapRuleFieldToDiffableRuleFieldParams): keyof AllThreeWayFieldsDiff {
   // Handle query, filters and language fields based on rule type
   if (fieldName === 'query' || fieldName === 'language' || fieldName === 'filters') {
     switch (ruleType) {
@@ -95,7 +95,7 @@ export function mapRuleFieldToDiffableRuleField({
     }
   }
 
-  const diffableRuleFieldMap: Record<string, keyof AllFieldsDiff> = {
+  const diffableRuleFieldMap: Record<string, keyof AllThreeWayFieldsDiff> = {
     building_block_type: 'building_block',
     saved_id: 'kql_query',
     event_category_override: 'eql_query',

@@ -9,12 +9,12 @@ import React, { useMemo } from 'react';
 import hash from 'object-hash';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_ITEMS_INDEX, DEFAULT_LISTS_INDEX } from '../../../../common/constants';
-import { missingPrivilegesCallOutBody } from '../../../detections/components/callouts/translations';
+import { missingPrivilegesCallOutBody } from '../../../common/components/missing_privileges';
 import {
   type MissingIndexPrivileges,
   type MissingPrivileges,
   useMissingPrivileges,
-} from '../../../detections/hooks/alerts/use_missing_privileges';
+} from '../../../common/hooks/use_missing_privileges';
 import { type CallOutMessage, CallOutSwitcher } from '../../../common/components/callouts';
 import { useGetMigrationMissingPrivileges } from '../logic/use_get_migration_privileges';
 

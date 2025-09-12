@@ -38,6 +38,8 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
@@ -172,6 +174,9 @@ describe('<UserDetails />', () => {
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(['index']), status: 'ready' });
   });
 
   it('should render user details correctly', () => {

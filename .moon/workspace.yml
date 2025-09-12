@@ -23,6 +23,8 @@ pipeline:
 unstable_remote:
   host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
   api: http
+  cache:
+    localReadOnly: true
   auth:
     headers:
       Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
