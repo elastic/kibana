@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, merge } from 'rxjs';
-import type { ESQLControlState } from '@kbn/esql-types';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeStateManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { BehaviorSubject } from 'rxjs';
+
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { omit } from 'lodash';
-import type { OptionsListSelection } from '../../../common/options_list';
-import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeStateManager } from '@kbn/presentation-publishing';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+
 import { uiActionsService } from '../../services/kibana_services';
-import {
-  defaultControlComparators,
-  initializeDefaultControlManager,
-} from '../default_control_manager';
-import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
-import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
+import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
+import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
+import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
+import { initializeDefaultControlManager } from '../default_control_manager';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
@@ -38,10 +37,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-      const defaultControlManager = await initializeDefaultControlManager({
-        grow: state.grow,
-        width: state.width,
-      });
+      const defaultControlManager = initializeDefaultControlManager();
 
       // TODO Rename this; this is actually the state manager for all non-default control state params, "selections" is a confusing name
       const selections = initializeESQLControlSelections(
@@ -53,7 +49,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       function serializeState() {
         return {
           rawState: {
-            ...defaultControlManager.getLatestState(),
             ...selections.getLatestState(),
           },
           references: [],
@@ -64,15 +59,13 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(defaultControlManager.anyStateChange$, selections.anyStateChange$),
+        anyStateChange$: selections.anyStateChange$,
         getComparators: () => {
           return {
-            ...defaultControlComparators,
             ...selectionComparators,
           };
         },
         onReset: (lastSaved) => {
-          defaultControlManager.reinitializeState(lastSaved?.rawState);
           selections.reinitializeState(lastSaved?.rawState);
         },
       });
@@ -86,14 +79,12 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getTypeDisplayName: () => displayName,
         onEdit: async () => {
           const nextState = {
-            ...defaultControlManager.getLatestState(),
             ...selections.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
           const onSaveControl = async (updatedState: ESQLControlState) => {
-            defaultControlManager.reinitializeState(updatedState);
             selections.reinitializeState(updatedState);
           };
           try {

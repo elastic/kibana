@@ -782,6 +782,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notify_when: RuleNotifyWhen.CHANGE,
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 
@@ -790,8 +793,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
           await runRuleAndEnsureCompletion({
-            runs: 18,
-            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(8).fill(5), 6],
+            runs: 15,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(6).fill(5)],
             ruleId: alertId,
             spaceId: space.id,
           });
@@ -806,12 +809,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { equal: 18 }],
-                ['execute', { equal: 18 }],
-                ['execute-action', { equal: 6 }],
+                ['execute-start', { equal: 15 }],
+                ['execute', { equal: 15 }],
+                ['execute-action', { equal: 5 }],
+                ['active-instance', { equal: 12 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { equal: 14 }],
-                ['recovered-instance', { equal: 3 }],
+                ['recovered-instance', { equal: 2 }],
               ]),
             });
           });
@@ -823,12 +826,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, false, false, false, false].concat(
-            new Array(9).fill(true),
-            false,
-            false,
-            false
-          );
+          const result = [false, false, false, false, false].concat(new Array(9).fill(true));
           expect(flapping).to.eql(result);
         });
 
@@ -909,8 +907,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
           await runRuleAndEnsureCompletion({
-            runs: 18,
-            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(8).fill(5), 6],
+            runs: 15,
+            totalAlertsGeneratedPerRun: [1, 2, 2, 3, 4, 5, 5, 5, 5, ...new Array(6).fill(5)],
             ruleId: alertId,
             spaceId: space.id,
           });
@@ -925,12 +923,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { equal: 18 }],
-                ['execute', { equal: 18 }],
-                ['execute-action', { equal: 6 }],
+                ['execute-start', { equal: 15 }],
+                ['execute', { equal: 15 }],
+                ['execute-action', { equal: 5 }],
+                ['active-instance', { equal: 12 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { equal: 14 }],
-                ['recovered-instance', { equal: 3 }],
+                ['recovered-instance', { equal: 2 }],
               ]),
             });
           });
@@ -942,12 +940,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, false, false, false, false].concat(
-            new Array(9).fill(true),
-            false,
-            false,
-            false
-          );
+          const result = [false, false, false, false, false].concat(new Array(9).fill(true));
           expect(flapping).to.eql(result);
         });
 
@@ -1009,6 +1002,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notify_when: RuleNotifyWhen.CHANGE,
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 
@@ -1123,6 +1119,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     },
                   },
                 ],
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 

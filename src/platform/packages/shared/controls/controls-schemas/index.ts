@@ -11,9 +11,13 @@ export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
   ControlState,
-  ControlWidth,
   ControlsGroupState,
-  ControlsLabelPosition,
-  ControlsChainingSystem,
-  ControlsIgnoreParentSettings,
+  DataControlState,
+  OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
+  OptionsListDisplaySettings,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
 } from './src/types';

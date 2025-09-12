@@ -19,7 +19,7 @@ import type { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
-  controlsCollectorFactory,
+  // controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
   collectDashboardSections,
@@ -94,7 +94,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
     return {
       async run() {
         let dashboardData = getEmptyDashboardData();
-        const controlsCollector = controlsCollectorFactory(embeddable);
+        // const controlsCollector = controlsCollectorFactory(embeddable);
         const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
             // TODO is this injecting references really necessary?
@@ -102,7 +102,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             //   embeddablePersistableStateService: embeddable,
             // });
 
-            dashboardData = controlsCollector(dashboard.attributes, dashboardData);
+            // dashboardData = controlsCollector(dashboard.attributes, dashboardData);
             dashboardData = collectDashboardSections(dashboard.attributes, dashboardData);
 
             try {

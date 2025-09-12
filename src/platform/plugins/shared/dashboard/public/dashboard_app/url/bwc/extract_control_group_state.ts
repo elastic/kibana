@@ -14,6 +14,7 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardState } from '../../../../common';
 
+/** TODO: Fix the types here and make URLs work for new controls */
 export function extractControlGroupState(state: {
   [key: string]: unknown;
 }): DashboardState['controlGroupInput'] {

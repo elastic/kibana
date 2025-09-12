@@ -43,14 +43,19 @@ export const useESQLVariables = ({
       }
 
       // add a new control
-      parentApi.addNewPanel({
-        panelType: 'esqlControl',
-        serializedState: {
-          rawState: {
-            ...controlState,
+      parentApi.addNewPanel(
+        {
+          panelType: 'esqlControl',
+          serializedState: {
+            rawState: {
+              ...controlState,
+            },
           },
         },
-      });
+        {
+          beside: panelId,
+        }
+      );
       if (panel && updatedQuery && attributes) {
         panel.updateAttributes({
           ...attributes,

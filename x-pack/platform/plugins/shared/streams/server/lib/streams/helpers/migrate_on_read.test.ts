@@ -222,4 +222,40 @@ describe('migrateOnRead', () => {
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });
+
+  describe('group migration', () => {
+    it('should add metadata to group if missing', () => {
+      const definition = {
+        name: 'test-group-stream',
+        description: 'Test group stream',
+        group: {
+          members: ['stream1', 'stream2'],
+          tags: ['tag1', 'tag2'],
+          // No metadata field
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).group.metadata).toEqual({});
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add tags to group if missing', () => {
+      const definition = {
+        name: 'test-group-stream',
+        description: 'Test group stream',
+        group: {
+          members: ['stream1', 'stream2'],
+          metadata: { foo: 'bar' },
+          // No tags field
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).group.tags).toEqual([]);
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
 });

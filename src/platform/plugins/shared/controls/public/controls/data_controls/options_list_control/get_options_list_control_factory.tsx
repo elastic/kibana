@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { type Filter } from '@kbn/es-query';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import {
-  initializeTitleManager,
-  titleComparators,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
@@ -28,11 +19,16 @@ import {
   merge,
   skip,
 } from 'rxjs';
-import type {
-  OptionsListControlState,
-  OptionsListSuccessResponse,
-} from '../../../../common/options_list';
-import { isValidSearch } from '../../../../common/options_list';
+
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { type Filter } from '@kbn/es-query';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+
+import type { OptionsListSuccessResponse } from '../../../../common/options_list';
+import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
 import { coreServices } from '../../../services/kibana_services';
 import {
   defaultDataControlComparators,
@@ -73,9 +69,13 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
+
+      if (isOptionsListESQLControlState(state)) {
+        throw new Error('ES|QL control state handling not yet implemented');
+      }
+
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
-      const titlesManager = initializeTitleManager(state);
       const selectionsManager = initializeSelectionsManager(state);
 
       const dataControlManager: DataControlStateManager =
@@ -88,7 +88,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
           getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
           editorStateManager,
-          titlesManager,
         });
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
@@ -234,24 +233,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           dataControlManager.internalApi.setOutputFilter(newFilter);
         });
 
-      const { placeholder, hideActionBar, hideExclude, hideExists, hideSort } = state;
-
-      function serializeState() {
+      function serializeState(): SerializedPanelState<OptionsListControlState> {
         return {
           rawState: {
             ...dataControlManager.getLatestState(),
             ...selectionsManager.getLatestState(),
             ...editorStateManager.getLatestState(),
-            ...titlesManager.getLatestState(),
 
             // serialize state that cannot be changed to keep it consistent
-            placeholder,
-            hideActionBar,
-            hideExclude,
-            hideExists,
-            hideSort,
+            displaySettings: state.displaySettings,
           },
-          references: dataControlManager.internalApi.extractReferences('optionsListDataView'),
         };
       }
 
@@ -262,21 +253,15 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
-          editorStateManager.anyStateChange$,
-          titlesManager.anyStateChange$
+          editorStateManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
-            ...titleComparators,
             ...defaultDataControlComparators,
             ...selectionComparators,
             ...editorComparators,
             // This state cannot currently be changed after the control is created
-            placeholder: 'skip',
-            hideActionBar: 'skip',
-            hideExclude: 'skip',
-            hideExists: 'skip',
-            hideSort: 'skip',
+            displaySettings: 'skip',
           };
         },
         defaultState: {
@@ -286,7 +271,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
-          titlesManager.reinitializeState(lastSaved?.rawState);
+          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+            throw new Error('ES|QL control state handling not yet implemented');
+          }
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
@@ -308,7 +295,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...dataControlManager.api,
-        ...titlesManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
@@ -339,7 +325,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,
-        ...titlesManager.api,
         loadMoreSubject,
         deselectOption: (key) =>
           deselectOption({ api, selectionsManager, temporaryStateManager, key }),
@@ -379,7 +364,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             <OptionsListControlContext.Provider
               value={{
                 componentApi,
-                displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
+                displaySettings: state.displaySettings ?? {},
               }}
             >
               <OptionsListControl />

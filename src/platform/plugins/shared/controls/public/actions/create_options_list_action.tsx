@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 
-import type { OptionsListControlState } from '../../common/options_list';
 import { OptionsListEditorOptions } from '../controls/data_controls/options_list_control/components/options_list_editor_options';
 import { dataViewsService } from '../services/kibana_services';
 import { OPTIONS_LIST_ACTION } from './constants';

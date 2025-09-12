@@ -78,9 +78,13 @@ export const AgentsList: React.FC = () => {
       render: (name: string, agent: AgentDefinition) => (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
-              {name}
-            </EuiLink>
+            {agent.id === oneChatDefaultAgentId ? (
+              <EuiText size="s">{name}</EuiText>
+            ) : (
+              <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
+                {name}
+              </EuiLink>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{agent.description}</EuiText>

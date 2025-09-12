@@ -44,7 +44,9 @@ export function createAddAlertsPanelAction(
             panelType: SLO_ALERTS_EMBEDDABLE_ID,
             serializedState: { rawState: initialState },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

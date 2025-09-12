@@ -9,64 +9,62 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONTROLS_LABEL_POSITION_ONE_LINE,
-  CONTROLS_LABEL_POSITION_TWO_LINE,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
+  CONTROL_WIDTH_LARGE,
+  CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_SMALL,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { controlSchema } from './control_schema';
+import { optionsListControlSchema } from './options_list_schema';
+import { rangeSliderControlSchema } from './range_slider_schema';
 
-export const labelPositionSchema = schema.oneOf(
+const controlWidthSchema = schema.oneOf(
   [
-    schema.literal(CONTROLS_LABEL_POSITION_ONE_LINE),
-    schema.literal(CONTROLS_LABEL_POSITION_TWO_LINE),
+    schema.literal(CONTROL_WIDTH_SMALL),
+    schema.literal(CONTROL_WIDTH_MEDIUM),
+    schema.literal(CONTROL_WIDTH_LARGE),
   ],
   {
-    defaultValue: DEFAULT_CONTROLS_LABEL_POSITION,
-    meta: {
-      description: 'Position of the labels for controls. For example, "oneLine", "twoLine".',
-    },
+    defaultValue: DEFAULT_CONTROL_WIDTH,
+    meta: { description: 'Minimum width of the control panel in the control group.' },
   }
 );
 
-export const ignoreParentSettingsSchema = schema.object({
-  ignoreFilters: schema.maybe(
+const stickyControlSchema = schema.object({
+  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
+  width: schema.maybe(controlWidthSchema),
+  grow: schema.maybe(
     schema.boolean({
-      meta: { description: 'Ignore global filters in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
-    })
-  ),
-  ignoreQuery: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore the global query bar in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
-    })
-  ),
-  ignoreTimerange: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore the global time range in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
-    })
-  ),
-  ignoreValidations: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore validations in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
+      defaultValue: DEFAULT_CONTROL_GROW,
+      meta: { description: 'Expand width of the control panel to fit available space.' },
     })
   ),
 });
 
 export const controlsGroupSchema = schema.object({
-  controls: schema.arrayOf(controlSchema, {
-    defaultValue: [],
-    meta: { description: 'An array of control panels and their state in the control group.' },
-  }),
-  labelPosition: labelPositionSchema,
-  enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
-  autoApplySelections: schema.boolean({
-    meta: { description: 'Show apply selections button in controls.' },
-    defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
-  }),
+  controls: schema.arrayOf(
+    // order will be determined by the array
+    schema.oneOf([
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
+          optionsListControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
+          rangeSliderControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }),
+    ]),
+    {
+      defaultValue: [],
+      meta: { description: 'An array of control panels and their state in the control group.' },
+    }
+  ),
 });

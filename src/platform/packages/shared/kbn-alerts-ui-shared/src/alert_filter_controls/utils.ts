@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ControlGroupRuntimeState,
-  OptionsListControlState,
-  ControlPanelState,
-} from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/controls-plugin/public';
 
 import { isEmpty, isEqual, pick } from 'lodash';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
@@ -25,7 +22,7 @@ export const getFilterItemObjListFromControlState = (controlState: ControlGroupR
   const panels = getPanelsInOrderFromControlsState(controlState);
   return panels.map((panel) => {
     const { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar } =
-      panel as ControlPanelState<OptionsListControlState>;
+      panel as ControlPanelState<OptionsListDSLControlState>;
 
     return {
       fieldName: fieldName as string,

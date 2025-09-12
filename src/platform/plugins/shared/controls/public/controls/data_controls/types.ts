@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import type {
@@ -19,7 +20,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import type { DefaultDataControlState } from '../../../common';
+import type { DefaultControlState } from '../../../common';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -28,7 +29,7 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export type DataControlApi = StateManager<DefaultDataControlState>['api'] &
+export type DataControlApi = StateManager<DataControlState>['api'] &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesBlockingError &
@@ -41,10 +42,10 @@ export type DataControlApi = StateManager<DefaultDataControlState>['api'] &
   };
 
 export interface CustomOptionsComponentProps<
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultControlState = DefaultControlState
 > {
   initialState: Partial<State>;
-  field: DataViewField;
+  field?: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
 }

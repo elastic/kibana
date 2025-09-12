@@ -27,6 +27,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
     canUserReadFailureStore,
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
+    view,
   } = useDatasetQualityDetailsState();
 
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
@@ -54,9 +55,12 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         </EuiFlexItem>
       )}
 
-      {/* This should be hidden in `streams` view */}
-      <Summary />
-      <EuiSpacer size="m" />
+      {view === 'classic' && (
+        <>
+          <Summary />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiSplitPanel.Outer
         direction="row"
@@ -73,8 +77,11 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         <EuiSplitPanel.Inner grow={true}>
           <DocumentTrends
             lastReloadTime={lastReloadTime}
-            displayCreateRuleButton={selectedQualityCard === 'degraded'}
             openAlertFlyout={openAlertFlyout}
+            displayActions={{
+              displayCreateRuleButton: selectedQualityCard === 'degraded',
+              displayEditFailureStore: selectedQualityCard === 'failed',
+            }}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
