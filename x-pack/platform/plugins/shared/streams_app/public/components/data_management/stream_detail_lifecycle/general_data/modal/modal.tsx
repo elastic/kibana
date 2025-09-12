@@ -50,18 +50,16 @@ export function EditLifecycleModal({
 }: Props) {
   const { isServerless } = useKibana();
   const modalTitleId = useGeneratedHtmlId();
+  const isCurrentLifecycleInherit = isInheritLifecycle(definition.stream.ingest.lifecycle);
+  const initialSelectedAction: LifecycleEditAction = isIlmLifecycle(definition.effective_lifecycle)
+    ? 'ilm'
+    : isDslLifecycle(definition.effective_lifecycle) &&
+      !definition.effective_lifecycle.dsl.data_retention
+    ? 'forever'
+    : 'custom';
 
-  const [isInherit, setIsInherit] = useState<boolean>(
-    isInheritLifecycle(definition.stream.ingest.lifecycle)
-  );
-  const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(
-    isIlmLifecycle(definition.effective_lifecycle)
-      ? 'ilm'
-      : isDslLifecycle(definition.effective_lifecycle) &&
-        !definition.effective_lifecycle.dsl.data_retention
-      ? 'forever'
-      : 'custom'
-  );
+  const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
+  const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(initialSelectedAction);
   const [lifecycle, setLifecycle] = useState<IngestStreamLifecycle>(
     definition.effective_lifecycle as IngestStreamLifecycle
   );
@@ -154,21 +152,18 @@ export function EditLifecycleModal({
                         }
                       )
                 }
-                checked={isInherit}
+                checked={isInheritToggleOn}
                 onChange={(event) => {
                   if (event.target.checked) {
-                    setLifecycle({ inherit: {} });
-                    setIsInherit(true);
+                    if (isCurrentLifecycleInherit) {
+                      setLifecycle(definition.effective_lifecycle as IngestStreamLifecycle);
+                      setSelectedAction(initialSelectedAction);
+                    }
+                    setIsInheritToggleOn(true);
                     setIsSaveButtonDisabled(false);
                   } else {
-                    setIsInherit(false);
+                    setIsInheritToggleOn(false);
                     setIsSaveButtonDisabled(selectedAction === 'ilm');
-                    if (selectedAction === 'forever') {
-                      setLifecycle({ dsl: {} });
-                    }
-                    if (selectedAction === 'custom') {
-                      setLifecycle({ dsl: { data_retention: initialCustomPeriodValue } });
-                    }
                   }
                 }}
                 data-test-subj="inheritDataRetentionSwitch"
@@ -206,25 +201,25 @@ export function EditLifecycleModal({
               options={toggleButtonsCompressed}
               idSelected={selectedAction}
               buttonSize="m"
-              isDisabled={isInherit}
+              isDisabled={isInheritToggleOn}
               isFullWidth
             />
             <EuiSpacer size="s" />
 
-            {selectedAction === 'ilm' && (
+            {selectedAction === 'ilm' && (!isInheritToggleOn || isCurrentLifecycleInherit) && (
               <IlmField
                 getIlmPolicies={getIlmPolicies}
-                definition={definition}
+                initialValue={lifecycle}
                 setLifecycle={setLifecycle}
                 setSaveButtonDisabled={setIsSaveButtonDisabled}
-                readOnly={isInherit}
+                readOnly={isInheritToggleOn}
               />
             )}
 
-            {selectedAction === 'custom' && (
+            {selectedAction === 'custom' && (!isInheritToggleOn || isCurrentLifecycleInherit) && (
               <DslField
-                definition={definition}
-                isDisabled={isInherit}
+                initialValue={lifecycle}
+                isDisabled={isInheritToggleOn}
                 setLifecycle={setLifecycle}
                 setSaveButtonDisabled={setIsSaveButtonDisabled}
               />
@@ -263,7 +258,7 @@ export function EditLifecycleModal({
               fill
               disabled={isSaveButtonDisabled}
               isLoading={updateInProgress}
-              onClick={() => updateLifecycle(lifecycle)}
+              onClick={() => updateLifecycle(isInheritToggleOn ? { inherit: {} } : lifecycle)}
             >
               {i18n.translate('xpack.streams.streamDetailLifecycle.saveButton', {
                 defaultMessage: 'Save',

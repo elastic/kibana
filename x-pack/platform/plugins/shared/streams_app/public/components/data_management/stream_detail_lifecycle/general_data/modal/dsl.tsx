@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isDslLifecycle } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -22,7 +22,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { parseDuration } from '../../helpers/helpers';
 
 interface Props {
-  definition: Streams.ingest.all.GetResponse;
+  initialValue: IngestStreamLifecycle;
   isDisabled: boolean;
   setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
@@ -36,7 +36,7 @@ const isInvalidRetention = (value: string) => {
 export const DEFAULT_RETENTION_VALUE = '90';
 export const DEFAULT_RETENTION_UNIT = { name: 'Days', value: 'd' };
 
-export function DslField({ definition, isDisabled, setLifecycle, setSaveButtonDisabled }: Props) {
+export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButtonDisabled }: Props) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -44,8 +44,8 @@ export function DslField({ definition, isDisabled, setLifecycle, setSaveButtonDi
     { name: 'Seconds', value: 's' },
   ];
 
-  const existingRetention = isDslLifecycle(definition.effective_lifecycle)
-    ? parseDuration(definition.effective_lifecycle.dsl.data_retention)
+  const existingRetention = isDslLifecycle(initialValue)
+    ? parseDuration(initialValue.dsl.data_retention)
     : undefined;
   const [selectedUnit, setSelectedUnit] = useState(
     (existingRetention && timeUnits.find((unit) => unit.value === existingRetention.unit)) ||
@@ -56,6 +56,17 @@ export function DslField({ definition, isDisabled, setLifecycle, setSaveButtonDi
   );
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
   const invalidRetention = useMemo(() => isInvalidRetention(retentionValue), [retentionValue]);
+
+  useEffect(() => {
+    setSelectedUnit(
+      (existingRetention && timeUnits.find((unit) => unit.value === existingRetention.unit)) ||
+        DEFAULT_RETENTION_UNIT
+    );
+    setRetentionValue(
+      (existingRetention && existingRetention.value?.toString()) || DEFAULT_RETENTION_VALUE
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValue]);
 
   useEffect(() => {
     if (!invalidRetention && retentionValue && selectedUnit.value) {
@@ -74,7 +85,7 @@ export function DslField({ definition, isDisabled, setLifecycle, setSaveButtonDi
     <>
       <EuiFieldText
         data-test-subj="streamsAppDslModalDaysField"
-        value={retentionValue}
+        value={isDisabled && existingRetention ? existingRetention?.value : retentionValue}
         onChange={(e) => {
           setRetentionValue(e.target.value);
         }}

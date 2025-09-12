@@ -7,8 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import type { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiHighlight, EuiPanel, EuiSelectable, EuiText } from '@elastic/eui';
 import { rolloverCondition } from '../../helpers/rollover_condition';
@@ -20,7 +20,7 @@ interface IlmOptionData {
 
 interface ModalOptions {
   getIlmPolicies: () => Promise<PolicyFromES[]>;
-  definition: Streams.ingest.all.GetResponse;
+  initialValue: IngestStreamLifecycle;
   setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
   readOnly: boolean;
@@ -28,18 +28,21 @@ interface ModalOptions {
 
 export function IlmField({
   getIlmPolicies,
-  definition,
+  initialValue,
   setLifecycle,
   setSaveButtonDisabled,
   readOnly,
 }: ModalOptions) {
-  const existingLifecycle = definition.effective_lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
-    isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm?.policy : undefined
+    isIlmLifecycle(initialValue) ? initialValue.ilm?.policy : undefined
   );
   const [policies, setPolicies] = useState<Array<EuiSelectableOption<IlmOptionData>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+  useEffect(() => {
+    setSelectedPolicy(isIlmLifecycle(initialValue) ? initialValue.ilm?.policy : undefined);
+  }, [initialValue]);
 
   useEffect(() => {
     const phasesDescription = (phases: Phases) => {
@@ -92,19 +95,18 @@ export function IlmField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const existingPolicyOption = isIlmLifecycle(existingLifecycle)
-    ? policies.find((option) => option.label === existingLifecycle.ilm.policy)
+  const initialPolicyOption = isIlmLifecycle(initialValue)
+    ? policies.find((option) => option.label === initialValue.ilm.policy)
     : undefined;
 
   if (readOnly) {
     return (
-      existingPolicyOption &&
-      isInheritLifecycle(definition.stream.ingest.lifecycle) && (
+      initialPolicyOption && (
         <EuiPanel hasBorder hasShadow={false} paddingSize="s" color="subdued">
           <>
-            {existingPolicyOption.label}
+            {initialPolicyOption.label}
             <EuiText size="xs" color="subdued" className="eui-displayBlock">
-              <small>{existingPolicyOption.data?.phases || ''}</small>
+              <small>{initialPolicyOption.data?.phases || ''}</small>
             </EuiText>
           </>
         </EuiPanel>
