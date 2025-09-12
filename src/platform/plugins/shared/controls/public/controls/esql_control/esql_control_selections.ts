@@ -16,15 +16,11 @@ import {
 } from '@kbn/presentation-publishing';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
+import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/controls-schemas';
 import { EsqlControlType } from '@kbn/esql-types';
-import type {
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSuggestions,
-} from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
-import type { ESQLControlApi } from './types';
+import type { OptionsListSuggestions } from '../../../common/options_list';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -61,7 +57,7 @@ export const selectionComparators: StateComparators<
 };
 
 export function initializeESQLControlSelections(
-  api: ESQLControlApi,
+  parentApi: unknown,
   initialState: ESQLControlState,
   setDataLoading: (loading: boolean) => void
 ) {
@@ -95,7 +91,7 @@ export function initializeESQLControlSelections(
   }
 
   // For Values From Query controls, update values on dashboard load/reload
-  const fetchSubscription = fetch$(api)
+  const fetchSubscription = fetch$({ parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       switchMap(async ({ timeRange }) => {

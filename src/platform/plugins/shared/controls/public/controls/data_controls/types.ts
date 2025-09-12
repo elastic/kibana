@@ -20,7 +20,6 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import type { DefaultControlState } from '../../../common';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -41,9 +40,7 @@ export type DataControlApi = StateManager<DataControlState>['api'] &
     setBlockingError: (error: Error | undefined) => void;
   };
 
-export interface CustomOptionsComponentProps<
-  State extends DefaultControlState = DefaultControlState
-> {
+export interface CustomOptionsComponentProps<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
   field?: DataViewField;
   updateState: (newState: Partial<State>) => void;

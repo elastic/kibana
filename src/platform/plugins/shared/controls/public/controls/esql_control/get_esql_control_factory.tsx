@@ -41,7 +41,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
 
       // TODO Rename this; this is actually the state manager for all non-default control state params, "selections" is a confusing name
       const selections = initializeESQLControlSelections(
-        { uuid, parentApi },
+        parentApi,
         state,
         defaultControlManager.api.setDataLoading
       );
@@ -148,7 +148,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
            * The problem with this is that the user cannot edit variable names after the control is created.
            * Once we come up with a good UX solution to this, we can return duplicatePanel to the parentApi
            */
-          parentApi: omit(api.parentApi, 'duplicatePanel'),
+          parentApi: omit(api.parentApi, ['duplicatePanel', 'expandPanel']),
         },
         Component: () => (
           <OptionsListControlContext.Provider

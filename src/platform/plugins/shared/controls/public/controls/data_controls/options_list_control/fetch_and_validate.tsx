@@ -13,10 +13,11 @@ import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom 
 import { fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   OptionsListSearchTechnique,
+  OptionsListSelection,
   OptionsListSortingType,
-} from '../../../../common/options_list';
+} from '@kbn/controls-schemas';
+
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import type { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
