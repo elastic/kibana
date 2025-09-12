@@ -36,7 +36,14 @@ export async function bulkMigrateAgentsBatch(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agents: Agent[],
-  options: any
+  options: {
+    actionId?: string;
+    total?: number;
+    spaceId?: string;
+    enrollment_token?: string;
+    uri?: string;
+    settings?: Record<string, any>;
+  }
 ) {
   const agentPolicies = await getAgentPolicyForAgents(soClient, agents);
 

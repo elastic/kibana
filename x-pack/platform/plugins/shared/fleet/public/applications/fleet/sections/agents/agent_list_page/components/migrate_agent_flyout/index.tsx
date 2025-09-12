@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -49,7 +49,8 @@ import {
 import { HeadersInput } from './headers_input';
 
 interface Props {
-  agents: Agent[];
+  agents: Agent[] | string;
+  agentCount: number;
   onClose: () => void;
   onSave: () => void;
   protectedAndFleetAgents: Agent[];
@@ -57,6 +58,7 @@ interface Props {
 
 export const AgentMigrateFlyout: React.FC<Props> = ({
   agents,
+  agentCount,
   onClose,
   onSave,
   protectedAndFleetAgents,
@@ -78,9 +80,19 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
   const flyoutTitleId = useGeneratedHtmlId();
 
+  // TODO protectedAndFleetAgents only has agents from current page
+  const filteredAgents = useMemo(
+    () =>
+      Array.isArray(agents)
+        ? agents.filter((agent) => !protectedAndFleetAgents.some((a) => a.id === agent.id))
+        : agents,
+    [agents, protectedAndFleetAgents]
+  );
+
   useEffect(() => {
     const validateForm = () => {
-      if (formContent.uri && formContent.enrollment_token && validClusterURL) {
+      const hasValidAgents = !Array.isArray(filteredAgents) || filteredAgents.length > 0;
+      if (formContent.uri && formContent.enrollment_token && validClusterURL && hasValidAgents) {
         setFormValid(true);
       } else {
         setFormValid(false);
@@ -103,14 +115,25 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
     validateClusterURL();
     validateForm();
-  }, [formContent, validClusterURL]);
+  }, [formContent, validClusterURL, filteredAgents]);
 
   const submitForm = () => {
     try {
-      if (agents.length === 1) {
-        migrateAgent({ ...formContent, id: agents[0].id });
+      if (Array.isArray(filteredAgents)) {
+        if (filteredAgents.length === 1) {
+          migrateAgent({ ...formContent, id: filteredAgents[0].id });
+        } else {
+          migrateAgents({
+            ...formContent,
+            agents: filteredAgents.map((agent) => agent.id),
+          });
+        }
       } else {
-        migrateAgents({ ...formContent, agents: agents.map((agent) => agent.id) });
+        // agents is a query string
+        migrateAgents({
+          ...formContent,
+          agents: filteredAgents,
+        });
       }
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.successNotificationTitle', {
@@ -180,7 +203,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: protectedAndFleetAgents.length,
-                      y: agents.length + protectedAndFleetAgents.length,
+                      y: agentCount,
                     }}
                   />
                 </EuiText>
@@ -638,7 +661,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.submitButtonLabel"
                 defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount: agents.length }}
+                values={{
+                  agentCount: Array.isArray(filteredAgents) ? filteredAgents.length : agentCount,
+                }}
               />
             </EuiButton>
           </EuiFlexGroup>

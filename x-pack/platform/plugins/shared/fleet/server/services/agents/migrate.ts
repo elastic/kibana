@@ -50,6 +50,9 @@ export async function bulkMigrateAgents(
   soClient: SavedObjectsClientContract,
   options: GetAgentsOptions & {
     batchSize?: number;
+    enrollment_token: string;
+    uri: string;
+    settings?: Record<string, any>;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
