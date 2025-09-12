@@ -75,6 +75,7 @@ export const Settings: FC<Props> = ({ settings, setSettings, readonly = false })
               setLocalSettings(value);
             }}
             transparentBackground={readonly === false}
+            width="100%"
           />
         </EuiPanel>
       ) : null}

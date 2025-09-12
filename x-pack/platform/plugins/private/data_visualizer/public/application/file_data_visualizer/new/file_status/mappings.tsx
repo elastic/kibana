@@ -73,6 +73,7 @@ export const Mappings: FC<Props> = ({
           setLocalMappings(value);
         }}
         transparentBackground={readonly === false}
+        width="100%"
       />
     </EuiPanel>
   );

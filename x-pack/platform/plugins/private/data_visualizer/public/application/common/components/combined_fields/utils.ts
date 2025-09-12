@@ -133,7 +133,8 @@ export function isLatLonCompatible(results: FindFileStructureResponse | undefine
   }
 
   const { latFields, lonFields } = getLatLonFields(results);
-  return latFields.length > 0 && lonFields.length > 0;
+  const allFields = [...new Set([...latFields, ...lonFields])];
+  return latFields.length > 0 && lonFields.length > 0 && allFields.length > 1;
 }
 
 export function createGeoPointCombinedField(

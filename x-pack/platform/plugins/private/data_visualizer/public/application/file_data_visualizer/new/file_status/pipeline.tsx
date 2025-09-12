@@ -70,6 +70,7 @@ export const IngestPipeline: FC<Props> = ({
           setLocalPipeline(value);
         }}
         transparentBackground={readonly === false}
+        width="100%"
       />
     </EuiPanel>
   );

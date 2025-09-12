@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -143,38 +144,64 @@ export const FileStatus: FC<Props> = ({
               }
               extraAction={
                 <>
-                  {fileStatus.results !== null ? (
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <AnalysisExplanation fileStatus={fileStatus} />
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <AnalysisOverrides
-                          fileStatus={fileStatus}
-                          analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
-                            index
-                          )}
-                        />
-                      </EuiFlexItem>
-
-                      {/* TODO, remove button should be stop if analysis is in progress */}
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          onClick={() => deleteFile(index)}
-                          iconType="trash"
-                          size="xs"
-                          color="danger"
-                          aria-label={i18n.translate(
-                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                            {
-                              defaultMessage: 'Remove file',
+                  <EuiFlexGroup gutterSize="xs">
+                    {fileStatus.results !== null ? (
+                      <>
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip
+                            position="top"
+                            content={
+                              <FormattedMessage
+                                id="xpack.dataVisualizer.file.fileStatus.analysisExplanationTooltip"
+                                defaultMessage="Analysis explanation"
+                              />
                             }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) : null}
+                          >
+                            <AnalysisExplanation fileStatus={fileStatus} />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <AnalysisOverrides
+                            fileStatus={fileStatus}
+                            analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
+                              index
+                            )}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    ) : null}
+
+                    {fileStatus.results !== null || fileStatus.analysisError !== undefined ? (
+                      <>
+                        {/* TODO, remove button should be stop if analysis is in progress */}
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip
+                            position="top"
+                            content={
+                              <FormattedMessage
+                                id="xpack.dataVisualizer.file.fileStatus.deleteFile"
+                                defaultMessage="Remove file"
+                              />
+                            }
+                          >
+                            <EuiButtonIcon
+                              onClick={() => deleteFile(index)}
+                              iconType="trash"
+                              size="xs"
+                              color="danger"
+                              aria-label={i18n.translate(
+                                'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                                {
+                                  defaultMessage: 'Remove file',
+                                }
+                              )}
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      </>
+                    ) : null}
+                  </EuiFlexGroup>
                 </>
               }
               paddingSize="s"

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { InputOverrides } from '@kbn/file-upload-common';
 import type { FileAnalysis } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EditFlyout } from './edit_flyout';
 
 interface Props {
@@ -27,15 +28,28 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
 
   return (
     <>
-      <EuiButtonIcon
-        onClick={() => setIsEditFlyoutVisible(true)}
-        iconType="gear"
-        size="xs"
-        color="text"
-        aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.editButtonLabel', {
-          defaultMessage: 'Override settings',
-        })}
-      />
+      <EuiToolTip
+        position="top"
+        content={
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.analysisSummary.overrideSettingsTooltip"
+            defaultMessage="File settings"
+          />
+        }
+      >
+        <EuiButtonIcon
+          onClick={() => setIsEditFlyoutVisible(true)}
+          iconType="gear"
+          size="xs"
+          color="text"
+          aria-label={i18n.translate(
+            'xpack.dataVisualizer.file.analysisSummary.overrideSettingsAriaLabel',
+            {
+              defaultMessage: 'File settings',
+            }
+          )}
+        />
+      </EuiToolTip>
 
       <EditFlyout
         setOverrides={analyzeFileWithOverrides}

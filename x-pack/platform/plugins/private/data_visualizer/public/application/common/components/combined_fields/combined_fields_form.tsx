@@ -250,21 +250,20 @@ export class CombinedFieldsForm extends Component<Props, State> {
                 <EuiFlexItem>
                   <CombinedFieldLabel combinedField={combinedField} />
                 </EuiFlexItem>
-                {!this.props.isDisabled && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      onClick={this.removeCombinedField.bind(null, idx)}
-                      title={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
-                        defaultMessage: 'Remove combined field',
-                      })}
-                      aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
-                        defaultMessage: 'Remove combined field',
-                      })}
-                    />
-                  </EuiFlexItem>
-                )}
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    onClick={this.removeCombinedField.bind(null, idx)}
+                    title={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                      defaultMessage: 'Remove combined field',
+                    })}
+                    aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                      defaultMessage: 'Remove combined field',
+                    })}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             ))}
           </>
