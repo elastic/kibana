@@ -35,7 +35,6 @@ const createCardConfig = (
   const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
-  console.log('docs', docsLink);
   switch (onboardingFlow) {
     case OnboardingFlow.Hosts: {
       return {
