@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // This test passes locally but fails in the flaky test runner.
     // Increasing the timeout did not work.
-    it.skip('should sync the cases index', async () => {
+    it('should sync the cases index', async () => {
       await createConfiguration(
         supertest,
         getConfigurationRequest({
