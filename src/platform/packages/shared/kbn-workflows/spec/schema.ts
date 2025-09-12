@@ -371,14 +371,14 @@ export const WorkflowContextSchema = z.object({
 
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
+export const StepDataSchema = z.object({
+  output: z.any().optional(),
+  error: z.any().optional(),
+});
+export type StepData = z.infer<typeof StepDataSchema>;
+
 export const StepContextSchema = WorkflowContextSchema.extend({
-  steps: z.record(
-    z.string(),
-    z.object({
-      output: z.any().optional(),
-      error: z.any().optional(),
-    })
-  ),
+  steps: z.record(z.string(), StepDataSchema),
   foreach: z
     .object({
       items: z.array(z.any()),

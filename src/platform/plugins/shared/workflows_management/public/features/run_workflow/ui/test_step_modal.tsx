@@ -18,33 +18,53 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
-import type { StepContext } from '@kbn/workflows';
+import type { monaco } from '@kbn/monaco';
+import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
+import { useJsonValidation } from './hooks/use_json_validation';
 
 export function TestStepModal({
   initialStepContextMock,
   onClose,
   onSubmit,
 }: {
-  initialStepContextMock: Partial<StepContext>;
+  initialStepContextMock: StepContextMockData;
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {
   const [inputsJson, setInputsJson] = React.useState<string>(
-    JSON.stringify(initialStepContextMock, null, 2)
+    JSON.stringify(initialStepContextMock.stepContext, null, 2)
   );
   const [isJsonValid, setIsJsonValid] = React.useState<boolean>(true);
   const modalTitleId = useGeneratedHtmlId();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+
+  const { validateJson, createSuggestionProvider, createHoverProvider } = useJsonValidation({
+    schema: initialStepContextMock.schema,
+  });
 
   useEffect(() => {
-    try {
-      JSON.parse(inputsJson);
-      setIsJsonValid(true);
-    } catch (e) {
-      setIsJsonValid(false);
+    if (editorRef.current) {
+      const validation = validateJson(editorRef.current, inputsJson);
+      setIsJsonValid(validation.isValid);
     }
-  }, [inputsJson]);
+  }, [inputsJson, validateJson]);
+
+  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    editorRef.current = editor;
+    // Trigger initial validation
+    const validation = validateJson(editor, inputsJson);
+    setIsJsonValid(validation.isValid);
+  };
+
+  const handleInputChange = (value: string) => {
+    setInputsJson(value);
+    if (editorRef.current) {
+      const validation = validateJson(editorRef.current, value);
+      setIsJsonValid(validation.isValid);
+    }
+  };
 
   const handleSubmit = () => {
     if (onSubmit) {
@@ -74,12 +94,20 @@ export function TestStepModal({
                   value={inputsJson}
                   width={1000}
                   height={500}
-                  editorDidMount={() => {}}
-                  onChange={setInputsJson}
-                  suggestionProvider={undefined}
+                  editorDidMount={handleEditorDidMount}
+                  onChange={handleInputChange}
+                  suggestionProvider={createSuggestionProvider()}
+                  hoverProvider={createHoverProvider()}
                   dataTestSubj={'workflow-event-json-editor'}
                   options={{
                     language: 'json',
+                    // Disable Monaco's built-in problem UI that causes positioning issues in modals
+                    quickSuggestions: false,
+                    lightbulb: {
+                      enabled: false,
+                    },
+                    fixedOverflowWidgets: true, // Keep widgets within editor bounds
+                    scrollBeyondLastLine: false,
                   }}
                 />
               </EuiFlexItem>
