@@ -16,6 +16,30 @@ export interface EditorExtensions {
   recommendedFields: RecommendedField[];
 }
 
+const prettifyQuery = (src: string): string => {
+  // Split by pipes and format each command on its own line with indentation
+  const parts = src.split('|').map((part) => part.trim());
+
+  return parts
+    .map((part, index) => {
+      if (index === 0) {
+        // First part (FROM command) - no leading pipe or indentation
+        return part;
+      } else {
+        // All subsequent commands start with pipe and have 2-space indentation
+        return `  | ${part}`;
+      }
+    })
+    .join('\n');
+};
+
+const prettifyQueryTemplate = (query: string) => {
+  const formattedQuery = prettifyQuery(query);
+  // remove the FROM command if it exists
+  const queryParts = formattedQuery.split('|');
+  return `\n|${queryParts.slice(1).join('|')}`;
+};
+
 // Order starts with the simple ones and goes to more complex ones
 
 export const getRecommendedQueriesTemplates = ({
@@ -35,7 +59,7 @@ export const getRecommendedQueriesTemplates = ({
       description: i18n.translate('kbn-esql-ast.recommendedQueries.aggregateExample.description', {
         defaultMessage: 'Count aggregation',
       }),
-      queryString: `${fromCommand}\n  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
+      queryString: `${fromCommand}  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
     },
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
@@ -44,7 +68,7 @@ export const getRecommendedQueriesTemplates = ({
       description: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.description', {
         defaultMessage: 'Use WHERE to filter/search data',
       }),
-      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
+      queryString: `${fromCommand}| WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
       sortText: 'D',
     },
     ...(timeField
@@ -56,7 +80,7 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate('kbn-esql-ast.recommendedQueries.sortByTime.description', {
               defaultMessage: 'Sort by time',
             }),
-            queryString: `${fromCommand}\n  | SORT ${timeField} /* Data is not sorted by default */`,
+            queryString: `${fromCommand}| SORT ${timeField} /* Data is not sorted by default */`,
           },
           {
             label: i18n.translate('kbn-esql-ast.recommendedQueries.dateIntervals.label', {
@@ -68,7 +92,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}\n  | EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
+            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
           },
         ]
       : []),
@@ -79,7 +103,7 @@ export const getRecommendedQueriesTemplates = ({
       description: i18n.translate('kbn-esql-ast.recommendedQueries.caseExample.description', {
         defaultMessage: 'Conditional',
       }),
-      queryString: `${fromCommand}\n  | STATS count = COUNT(*)\n  | EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other")\n  | KEEP newField`,
+      queryString: `${fromCommand}| STATS count = COUNT(*)| EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other")| KEEP newField`,
     },
     ...(timeField
       ? [
@@ -93,7 +117,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}\n  | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n  | STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) /* ?_tstart and ?_tend take the values of the time picker */`,
+            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) /* ?_tstart and ?_tend take the values of the time picker */`,
           },
           {
             label: i18n.translate('kbn-esql-ast.recommendedQueries.eventRate.label', {
@@ -102,7 +126,7 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate('kbn-esql-ast.recommendedQueries.eventRate.description', {
               defaultMessage: 'Event rate over time',
             }),
-            queryString: `${fromCommand}\n  | STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ \n  | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */\n | KEEP event_rate`,
+            queryString: `${fromCommand}| STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */ | KEEP event_rate`,
           },
           {
             label: i18n.translate('kbn-esql-ast.recommendedQueries.categorize.label', {
@@ -113,7 +137,7 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate('kbn-esql-ast.recommendedQueries.categorize.description', {
               defaultMessage: 'Change point on count aggregation',
             }),
-            queryString: `${fromCommand}\n | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend) \n | CHANGE_POINT count ON buckets `,
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend)  | CHANGE_POINT count ON buckets `,
           },
           {
             label: i18n.translate('kbn-esql-ast.recommendedQueries.lastHour.label', {
@@ -122,14 +146,7 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate('kbn-esql-ast.recommendedQueries.lastHour.description', {
               defaultMessage: 'A more complicated example',
             }),
-            queryString: `${fromCommand}
-    | SORT ${timeField}
-    | EVAL now = NOW()
-    | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other")
-    | STATS count = COUNT(*) BY key
-    | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
-    | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
-    | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+            queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
           },
         ]
       : []),
@@ -147,11 +164,20 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
             ),
-            queryString: `${fromCommand}\n  | SAMPLE .001\n  | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})\n  | SORT Count DESC`,
+            queryString: `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
           },
         ]
       : []),
   ];
+
+  // prettify the query string
+  queries.forEach((query) => {
+    // the formatted query needs to start with FROM for prettify to work correctly
+    const formattedQuery = fromCommand
+      ? prettifyQuery(query.queryString)
+      : prettifyQueryTemplate(`FROM index ${query.queryString}`);
+    query.queryString = formattedQuery;
+  });
   return queries;
 };
 
@@ -214,11 +240,10 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
   // the templates are the recommended queries without the source command (FROM)
   const recommendedQueriesTemplates: ISuggestionItem[] = recommendedQueriesExtensions.map(
     (recommendedQuery) => {
-      const queryParts = recommendedQuery.query.split('|');
-      // remove the first part (the FROM command)
+      const formattedQuery = prettifyQueryTemplate(recommendedQuery.query);
       return {
         label: recommendedQuery.name,
-        text: `|${queryParts.slice(1).join('|')}`,
+        text: formattedQuery,
         detail: recommendedQuery.name ?? '',
         ...(recommendedQuery.description
           ? { documentation: { value: recommendedQuery.description } }

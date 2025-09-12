@@ -6211,6 +6211,55 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.BasicVisualizationClient",
+        "type": "Type",
+        "tags": [],
+        "label": "BasicVisualizationClient",
+        "description": [
+          "\nA slim visualization client used but the vis plugin to save basic attributes\n\nTODO cleanup the vis-type client code.\nAll viz pass this client require type overrides to adopt VisualizationClient"
+        ],
+        "signature": [
+          "{ update: (visualization: Omit<",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.UpdateIn",
+            "text": "UpdateIn"
+          },
+          "<ContentType, Partial<Attr>, Pick<",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.SavedObjectUpdateOptions",
+            "text": "SavedObjectUpdateOptions"
+          },
+          "<unknown>, \"references\">>, \"contentTypeId\">) => Promise<{ item: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.SOWithMetadataPartial",
+            "text": "SOWithMetadataPartial"
+          },
+          "<Attr>; meta?: undefined; }>; get: (id: string) => Promise<{ item: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.SOWithMetadata",
+            "text": "SOWithMetadata"
+          },
+          "<Attr>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
         "type": "string",
         "tags": [],

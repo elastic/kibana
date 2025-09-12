@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { ONECHAT_A2A_SERVER_UI_SETTING_ID } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
 import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
 import { getKibanaUrl } from '../utils/get_kibana_url';
@@ -60,12 +59,9 @@ export function registerA2ARoutes({
           },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          return await a2aAdapter.handleAgentCardRequest(request, response, request.params.agentId);
-        },
-        { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
-      )
+      wrapHandler(async (ctx, request, response) => {
+        return await a2aAdapter.handleAgentCardRequest(request, response, request.params.agentId);
+      })
     );
 
   router.versioned
@@ -97,12 +93,9 @@ export function registerA2ARoutes({
           },
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const { agentId } = request.params;
-          return await a2aAdapter.handleA2ARequest(request, response, agentId);
-        },
-        { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
-      )
+      wrapHandler(async (ctx, request, response) => {
+        const { agentId } = request.params;
+        return await a2aAdapter.handleA2ARequest(request, response, agentId);
+      })
     );
 }
