@@ -192,7 +192,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
             getColumnsByType,
             {
               functions: true,
-              fields: true,
+              columns: true,
               values: Boolean(operator.subtype === 'binary-expression'),
             },
             {},
