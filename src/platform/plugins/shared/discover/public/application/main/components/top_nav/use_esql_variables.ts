@@ -80,7 +80,7 @@ const parseControlGroupJson = (
  * @param options.controlGroupApi - The ControlGroupRendererApi instance for interacting with control panels.
  * @param options.currentEsqlVariables - The currently active ESQL variables from the application state.
  * @param options.stateContainer - The DiscoverStateContainer instance for data fetching.
- * @param options.onTextLangQueryChange - Callback function to update the ESQL query.
+ * @param options.onUpdateESQLQuery - Callback function to update the ESQL query.
  *
  * @returns An object containing handler functions for saving and canceling control changes,
  * and a getter function to retrieve the currently active control panels state for the current tab.
@@ -91,20 +91,20 @@ export const useESQLVariables = ({
   controlGroupApi,
   currentEsqlVariables,
   stateContainer,
-  onTextLangQueryChange,
+  onUpdateESQLQuery,
 }: {
   isEsqlMode: boolean;
   controlGroupApi?: ControlGroupRendererApi;
   currentEsqlVariables?: ESQLControlVariable[];
   stateContainer: DiscoverStateContainer;
-  onTextLangQueryChange: (query: string) => void;
+  onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
-  const currentTab = useCurrentTabSelector((tab) => tab);
+  const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
   const initialSavedSearch = useObservable(stateContainer.savedSearchState.getInitial$());
 
   const savedSearchState = useSavedSearch();
@@ -183,19 +183,19 @@ export const useESQLVariables = ({
 
       // update the query
       if (updatedQuery) {
-        onTextLangQueryChange(updatedQuery);
+        onUpdateESQLQuery(updatedQuery);
       }
     },
-    [controlGroupApi, onTextLangQueryChange]
+    [controlGroupApi, onUpdateESQLQuery]
   );
 
   // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
-    if (currentTab.controlGroupState && Object.keys(currentTab.controlGroupState).length > 0) {
-      return currentTab.controlGroupState;
+    if (currentControlGroupState && Object.keys(currentControlGroupState).length > 0) {
+      return currentControlGroupState;
     }
     return parseControlGroupJson(savedSearchState?.controlGroupJson);
-  }, [currentTab.controlGroupState, savedSearchState?.controlGroupJson]);
+  }, [currentControlGroupState, savedSearchState?.controlGroupJson]);
 
   return {
     onSaveControl,

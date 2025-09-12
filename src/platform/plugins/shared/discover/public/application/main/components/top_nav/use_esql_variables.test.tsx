@@ -56,13 +56,13 @@ describe('useESQLVariables', () => {
     isEsqlMode = true,
     controlGroupApi = mockControlGroupAPI as unknown as ControlGroupRendererApi,
     currentEsqlVariables = [],
-    onTextLangQueryChange = jest.fn(),
+    onUpdateESQLQuery = jest.fn(),
   }: {
     stateContainer?: DiscoverStateContainer;
     isEsqlMode?: boolean;
     controlGroupApi?: ControlGroupRendererApi;
     currentEsqlVariables?: ESQLControlVariable[];
-    onTextLangQueryChange?: (query: string) => void;
+    onUpdateESQLQuery?: (query: string) => void;
   }) => {
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverTestProvider stateContainer={stateContainer}>{children}</DiscoverTestProvider>
@@ -75,7 +75,7 @@ describe('useESQLVariables', () => {
           isEsqlMode,
           controlGroupApi,
           currentEsqlVariables,
-          onTextLangQueryChange,
+          onUpdateESQLQuery,
         }),
       {
         wrapper: Wrapper,
@@ -255,13 +255,13 @@ describe('useESQLVariables', () => {
   });
 
   describe('onSaveControl', () => {
-    it('should call addNewPanel and onTextLangQueryChange', async () => {
+    it('should call addNewPanel and onUpdateESQLQuery', async () => {
       const mockOnTextLangQueryChange = jest.fn();
       const mockUpdatedQuery = 'new query text';
 
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
-        onTextLangQueryChange: mockOnTextLangQueryChange,
+        onUpdateESQLQuery: mockOnTextLangQueryChange,
       });
 
       await act(async () => {
@@ -281,12 +281,12 @@ describe('useESQLVariables', () => {
       expect(mockOnTextLangQueryChange).toHaveBeenCalledWith(mockUpdatedQuery);
     });
 
-    it('should not call onTextLangQueryChange if updatedQuery is empty', async () => {
+    it('should not call onUpdateESQLQuery if updatedQuery is empty', async () => {
       const mockOnTextLangQueryChange = jest.fn();
 
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
-        onTextLangQueryChange: mockOnTextLangQueryChange,
+        onUpdateESQLQuery: mockOnTextLangQueryChange,
       });
 
       await act(async () => {

@@ -94,7 +94,7 @@ export const DiscoverTopNav = ({
     stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
-    onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
+    onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
   });
 
   useEffect(() => {
