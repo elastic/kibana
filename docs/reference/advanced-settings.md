@@ -22,7 +22,7 @@ When you have insufficient privileges to edit advanced settings, the edit option
 % TO DO: Use `:class: screenshot`
 ![Example of Advanced Settings Management's read only access indicator in Kibana's header](images/settings-read-only-badge.png)
 
-To add the privilege, go to the **Roles** management page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
+To add the privilege, go to the **Roles** management page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 
 For more information on granting access to {{kib}}, refer to [Granting access to {{kib}}](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/built-in-roles.md).
 
@@ -31,7 +31,7 @@ For more information on granting access to {{kib}}, refer to [Granting access to
 
 Change the settings that apply only to {{kib}} spaces.
 
-1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
+1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 2. Click **Space Settings**.
 3. Scroll or search for the setting.
 4. Make your change, then click **Save changes**.
@@ -540,7 +540,7 @@ $$$visualization-visualize-heatmapChartslibrary$$$`visualization:visualize:legac
 
 Change the settings that apply only to {{kib}} spaces.
 
-1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
+1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 2. Click **Global Settings**.
 3. Scroll or search for the setting.
 4. Make your change, then click **Save changes**.
