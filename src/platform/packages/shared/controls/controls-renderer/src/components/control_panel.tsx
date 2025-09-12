@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -21,18 +21,18 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { ControlState } from '@kbn/controls-schemas';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { HasSerializedChildState } from '@kbn/presentation-containers';
+import { type DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import {
-  PublishesDisabledActionIds,
+  type PublishesDisabledActionIds,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { ControlError } from './control_error';
+import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
@@ -47,14 +47,16 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
   parentApi: HasSerializedChildState<object> & Partial<PublishesDisabledActionIds>;
   uuid: string;
   type: string;
-  grow: ControlState['grow'];
-  width: ControlState['width'];
+  grow: ControlsGroupState['controls'][number]['grow'];
+  width: ControlsGroupState['controls'][number]['width'];
 }) => {
   // const internalApi = useMemo(() => {
   //   const state = parentApi.getSerializedStateForChild(uuid);
   //   console.log({ state });
   // }, []);
 
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  console.log({ panelRef: panelRef.current });
   const [api, setApi] = useState<ApiType | null>(null);
   const {
     attributes,
@@ -190,21 +192,25 @@ export const ControlPanel = <ApiType extends DefaultEmbeddableApi = DefaultEmbed
             // compressed={isCompressed(api)}
             compressed={true}
           >
-            {/* {blockingError && <ControlError error={blockingError} />} */}
-            {/* <span css={shouldHideComponent && styles.containerHidden}> */}
-            <EmbeddableRenderer
-              key={uuid}
-              maybeId={uuid}
-              type={type}
-              getParentApi={() => parentApi}
-              onApiAvailable={(api) => {
-                console.log('REFIST', api);
-                setApi(api);
-                parentApi.registerChildApi(api);
-              }}
-              hidePanelChrome
-            />
-            {/* </span> */}
+            <div ref={panelRef} css={css({ height: '100%' })}>
+              {blockingError && (
+                // becaise we are hiding the panel chrome, we must handle blockingerrors manually
+                <PresentationPanelError api={api} error={blockingError} panelRef={panelRef} />
+              )}
+              <span css={shouldHideComponent && styles.containerHidden}>
+                <EmbeddableRenderer
+                  key={uuid}
+                  maybeId={uuid}
+                  type={type}
+                  getParentApi={() => parentApi}
+                  onApiAvailable={(api) => {
+                    setApi(api);
+                    parentApi.registerChildApi(api);
+                  }}
+                  hidePanelChrome
+                />
+              </span>
+            </div>
           </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>

@@ -47,9 +47,9 @@ export class ControlsPlugin
 
     registerActions(startPlugins.uiActions);
 
-    startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
-      return CONTROL_PANEL_PLACEMENT;
-    });
+    // startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
+    //   return CONTROL_PANEL_PLACEMENT;
+    // });
 
     startPlugins.dashboard.registerDashboardPanelSettings(RANGE_SLIDER_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
