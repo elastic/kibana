@@ -27,11 +27,20 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
 export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
 /**
+ * The id value used to indicate that a link should open in a new Discover tab.
+ * It will be used in the `_t` query param to indicate that a new tab should be created.
+ * For example: `?_t=new`
+ * Once created, the new tab will have a unique id.
+ */
+export const NEW_TAB_ID = 'new' as const;
+
+/**
  * The query param key used to store the Discover app state in the URL
  */
 export const APP_STATE_URL_KEY = '_a';
 export const GLOBAL_STATE_URL_KEY = '_g';
 export const TABS_STATE_URL_KEY = '_t';
+export const SEARCH_SESSION_URL_KEY = 'searchSessionId';
 
 /**
  * Product feature IDs
