@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { expectType } from 'tsd';
 import type { TypeOf } from './type_of';
 import { offeringBasedSchema, schema } from '../..';
-import type { Props } from './object_type';
+import type { ObjectProps, Props } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -983,5 +983,122 @@ describe('#extendsDeep', () => {
     expect(() =>
       forbidSchema.validate({ test: { foo: 'test', bar: 'test' } })
     ).toThrowErrorMatchingInlineSnapshot(`"[test.bar]: definition for this key is missing"`);
+  });
+});
+
+describe('#defaultValue', () => {
+  const types = {
+    string: 'some-string',
+    number: 123,
+  };
+
+  test('should enforce properties in object default', () => {
+    const simpleProps = {
+      str: schema.string(),
+      num: schema.number(),
+    } satisfies ObjectProps<Props>;
+
+    schema.object(simpleProps, {
+      // @ts-expect-error
+      defaultValue: {},
+    });
+    schema.object(simpleProps, {
+      defaultValue: {
+        str: types.string,
+        num: types.number,
+      },
+    });
+  });
+  test('should pass property default types to object default', () => {
+    const simpleProps = {
+      str: schema.string({ defaultValue: types.string }),
+      num: schema.number(),
+    } satisfies ObjectProps<Props>;
+
+    schema.object(simpleProps, {
+      // @ts-expect-error
+      defaultValue: {},
+    });
+    schema.object(simpleProps, {
+      defaultValue: {
+        num: types.number,
+      },
+    });
+    schema.object(simpleProps, {
+      defaultValue: {
+        str: types.string,
+        num: types.number,
+      },
+    });
+  });
+  test('should handle nested schemas with defaults in object default', () => {
+    const nestedProps = {
+      str: schema.string({ defaultValue: types.string }),
+      num: schema.number(),
+      obj: schema.object({
+        str: schema.string(),
+        num: schema.number({ defaultValue: types.number }),
+      }),
+      objMaybe: schema.object(
+        {
+          bool: schema.boolean(),
+        },
+        { defaultValue: { bool: false } }
+      ),
+    } satisfies ObjectProps<Props>;
+
+    // full
+    schema.object(nestedProps, {
+      defaultValue: {
+        str: types.string,
+        num: types.number,
+        obj: {
+          str: types.string,
+          num: types.number,
+        },
+        objMaybe: {
+          bool: true,
+        },
+      },
+    });
+    // sparse
+    schema.object(nestedProps, {
+      defaultValue: {
+        num: types.number,
+        obj: {
+          str: types.string,
+        },
+      },
+    });
+    // bad types
+    schema.object(nestedProps, {
+      defaultValue: {
+        // @ts-expect-error
+        str: types.number,
+        // @ts-expect-error
+        num: types.string,
+        obj: {
+          // @ts-expect-error
+          str: types.number,
+          // @ts-expect-error
+          num: types.string,
+        },
+        objMaybe: {
+          // @ts-expect-error
+          bool: types.string,
+        },
+      },
+    });
+    schema.object(nestedProps, {
+      defaultValue: {
+        // @ts-expect-error
+        objMaybe: types.string,
+      },
+    });
+    // empty
+    schema.object(nestedProps, {
+      // @ts-expect-error
+      defaultValue: {},
+    });
   });
 });

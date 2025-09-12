@@ -93,6 +93,17 @@ describe('#defaultValue', () => {
   test('returns value when specified', () => {
     expect(schema.number({ defaultValue: 2 }).validate(3)).toBe(3);
   });
+
+  test('should allow only number defaults', () => {
+    schema.number({ defaultValue: 123 });
+    schema.number({ defaultValue: undefined });
+    // @ts-expect-error
+    schema.number({ defaultValue: types.string });
+    // @ts-expect-error
+    schema.number({ defaultValue: false });
+    // @ts-expect-error
+    schema.number({ defaultValue: null });
+  });
 });
 
 test('returns error when not number or numeric string', () => {

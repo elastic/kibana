@@ -17,19 +17,15 @@
  */
 
 import { expectType } from 'tsd';
-import type { Duration } from 'moment';
 import { duration } from 'moment';
 import { Stream } from 'stream';
 
 import type { TypeOfOutput, TypeOfInput } from './type_of';
-import type { Props } from '../..';
 import { ByteSizeValue, schema } from '../..';
 import type { IpOptions } from './ip_type';
 import type { ContextReference } from '../references';
-import type { ObjectProps } from './object_type';
 
 function expectNever<T extends never>() {}
-// function expectUnknown<T extends unknown>(t: unknown) {}
 
 const types = {
   string: 'some-string',
@@ -43,202 +39,6 @@ const types = {
 };
 
 describe('schema types', () => {
-  describe('General types', () => {
-    describe('string', () => {
-      test('should allow only string defaults', () => {
-        schema.string({ defaultValue: types.string });
-        schema.string({ defaultValue: undefined });
-        // @ts-expect-error
-        schema.string({ defaultValue: types.number });
-        // @ts-expect-error
-        schema.string({ defaultValue: false });
-        // @ts-expect-error
-        schema.string({ defaultValue: null });
-      });
-    });
-
-    describe('number', () => {
-      test('should allow only number defaults', () => {
-        schema.number({ defaultValue: types.number });
-        schema.string({ defaultValue: undefined });
-        // @ts-expect-error
-        schema.number({ defaultValue: types.string });
-        // @ts-expect-error
-        schema.number({ defaultValue: false });
-        // @ts-expect-error
-        schema.number({ defaultValue: null });
-      });
-    });
-
-    describe('byteSize', () => {
-      test('should allow only byteSize, number and string defaults', () => {
-        schema.byteSize({ defaultValue: types.byteSize });
-        schema.byteSize({ defaultValue: types.number });
-        schema.byteSize({ defaultValue: types.string });
-      });
-      test('should pass only ByteSizeValue to validate', () => {
-        schema.byteSize({
-          defaultValue: types.byteSize,
-          validate(value) {
-            expectType<ByteSizeValue>(value);
-          },
-        });
-        schema.byteSize({
-          defaultValue: types.number,
-          validate(value) {
-            expectType<ByteSizeValue>(value);
-          },
-        });
-        schema.byteSize({
-          defaultValue: types.string,
-          validate(value) {
-            expectType<ByteSizeValue>(value);
-          },
-        });
-      });
-    });
-
-    describe('duration', () => {
-      test('should allow only duration, number and string defaults', () => {
-        schema.duration({ defaultValue: types.duration });
-        schema.duration({ defaultValue: types.number });
-        schema.duration({ defaultValue: types.string });
-      });
-      test('should pass only Duration to validate', () => {
-        schema.duration({
-          defaultValue: types.duration,
-          validate(value) {
-            expectType<Duration>(value);
-          },
-        });
-        schema.duration({
-          defaultValue: types.number,
-          validate(value) {
-            expectType<Duration>(value);
-          },
-        });
-        schema.duration({
-          defaultValue: types.string,
-          validate(value) {
-            expectType<Duration>(value);
-          },
-        });
-      });
-    });
-
-    describe('object', () => {
-      test('should enforce properties in object default', () => {
-        const simpleProps = {
-          str: schema.string(),
-          num: schema.number(),
-        } satisfies ObjectProps<Props>;
-
-        schema.object(simpleProps, {
-          // @ts-expect-error
-          defaultValue: {},
-        });
-        schema.object(simpleProps, {
-          defaultValue: {
-            str: types.string,
-            num: types.number,
-          },
-        });
-      });
-      test('should pass property default types to object default', () => {
-        const simpleProps = {
-          str: schema.string({ defaultValue: types.string }),
-          num: schema.number(),
-        } satisfies ObjectProps<Props>;
-
-        schema.object(simpleProps, {
-          // @ts-expect-error
-          defaultValue: {},
-        });
-        schema.object(simpleProps, {
-          defaultValue: {
-            num: types.number,
-          },
-        });
-        schema.object(simpleProps, {
-          defaultValue: {
-            str: types.string,
-            num: types.number,
-          },
-        });
-      });
-      test('should handle nested schemas with defaults in object default', () => {
-        const nestedProps = {
-          str: schema.string({ defaultValue: types.string }),
-          num: schema.number(),
-          obj: schema.object({
-            str: schema.string(),
-            num: schema.number({ defaultValue: types.number }),
-          }),
-          objMaybe: schema.object(
-            {
-              bool: schema.boolean(),
-            },
-            { defaultValue: { bool: false } }
-          ),
-        } satisfies ObjectProps<Props>;
-
-        // full
-        schema.object(nestedProps, {
-          defaultValue: {
-            str: types.string,
-            num: types.number,
-            obj: {
-              str: types.string,
-              num: types.number,
-            },
-            objMaybe: {
-              bool: true,
-            },
-          },
-        });
-        // sparse
-        schema.object(nestedProps, {
-          defaultValue: {
-            num: types.number,
-            obj: {
-              str: types.string,
-            },
-          },
-        });
-        // bad types
-        schema.object(nestedProps, {
-          defaultValue: {
-            // @ts-expect-error
-            str: types.number,
-            // @ts-expect-error
-            num: types.string,
-            obj: {
-              // @ts-expect-error
-              str: types.number,
-              // @ts-expect-error
-              num: types.string,
-            },
-            objMaybe: {
-              // @ts-expect-error
-              bool: types.string,
-            },
-          },
-        });
-        schema.object(nestedProps, {
-          defaultValue: {
-            // @ts-expect-error
-            objMaybe: types.string,
-          },
-        });
-        // empty
-        schema.object(nestedProps, {
-          // @ts-expect-error
-          defaultValue: {},
-        });
-      });
-    });
-  });
-
   describe('TypeOfOutput', () => {
     describe('any', () => {
       test('should output any value', () => {
@@ -372,7 +172,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output byteSize value with string default', () => {
-        const testSchema = schema.byteSize({ defaultValue: types.string });
+        const testSchema = schema.byteSize({ defaultValue: '1gb' });
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -407,7 +207,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output duration value with string default', () => {
-        const testSchema = schema.duration({ defaultValue: types.string });
+        const testSchema = schema.duration({ defaultValue: '1h' });
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -436,7 +236,7 @@ describe('schema types', () => {
     });
 
     describe('ip', () => {
-      const baseOptions: IpOptions<string> = { versions: [] };
+      const baseOptions: IpOptions<string> = { versions: ['ipv4'] };
 
       test('should output ip value', () => {
         const testSchema = schema.ip();
@@ -727,7 +527,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input byteSize value with string default', () => {
-        const testSchema = schema.byteSize({ defaultValue: types.string });
+        const testSchema = schema.byteSize({ defaultValue: '1gb' });
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -763,7 +563,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input duration value with string default', () => {
-        const testSchema = schema.duration({ defaultValue: types.string });
+        const testSchema = schema.duration({ defaultValue: '1h' });
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -880,7 +680,7 @@ describe('schema types', () => {
     });
 
     describe('ip', () => {
-      const baseOptions: IpOptions<string> = { versions: [] };
+      const baseOptions: IpOptions<string> = { versions: ['ipv4'] };
 
       test('should input ip value', () => {
         const testSchema = schema.ip();

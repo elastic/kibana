@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
 import { schema } from '../..';
 import { ByteSizeValue } from '../byte_size_value';
 
@@ -88,6 +89,28 @@ describe('#defaultValue', () => {
   });
 });
 
+describe('#validate', () => {
+  test('should pass only ByteSizeValue to validate', () => {
+    byteSize({
+      defaultValue: ByteSizeValue.parse('1kb'),
+      validate(value) {
+        expectType<ByteSizeValue>(value);
+      },
+    });
+    byteSize({
+      defaultValue: 1024,
+      validate(value) {
+        expectType<ByteSizeValue>(value);
+      },
+    });
+    byteSize({
+      defaultValue: '1024',
+      validate(value) {
+        expectType<ByteSizeValue>(value);
+      },
+    });
+  });
+});
 describe('#min', () => {
   test('returns value when larger', () => {
     expect(
