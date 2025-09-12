@@ -124,7 +124,7 @@ describe('MigrateAgentFlyout', () => {
             active: true,
             status: 'online',
             local_metadata: { elastic: { agent: { version: '8.8.0' } } },
-            id: '2',
+            id: '1',
             packages: [],
             type: 'PERMANENT',
             enrolled_at: new Date().toISOString(),
@@ -134,6 +134,17 @@ describe('MigrateAgentFlyout', () => {
     );
     const alertPanel = component.getByTestId('migrateAgentFlyoutAlertPanel');
     expect(alertPanel).toBeInTheDocument();
+    const submitButton = component.getByTestId('migrateAgentFlyoutSubmitButton');
+    expect(submitButton.textContent).toEqual('Migrate 0 agents');
+
+    // set the value of the url
+    const urlInput = component.getByTestId('migrateAgentFlyoutClusterUrlInput');
+    fireEvent.change(urlInput, { target: { value: 'https://www.example.com' } });
+    //  also set the value of enrollment token
+    const tokenInput = component.getByTestId('migrateAgentFlyoutEnrollmentTokenInput');
+    fireEvent.change(tokenInput, { target: { value: 'someToken' } });
+
+    expect(submitButton).toBeDisabled();
   });
   it('alert panel should not be visible when there are no protected or fleet-server agents', () => {
     const alertPanel = component.queryByTestId('migrateAgentFlyoutAlertPanel');
