@@ -355,6 +355,12 @@ export function getDiscoverStateContainer({
         dataViewId,
       },
     });
+
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.setControlGroupState)({
+        controlGroupState: undefined,
+      })
+    );
   };
 
   const transitionFromDataViewToESQL = (dataView: DataView) => {

@@ -102,9 +102,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           updatedTab.visContext = overriddenVisContextAfterInvalidation;
         }
 
-        if (controlGroupState) {
-          updatedTab.controlGroupJson = JSON.stringify(controlGroupState);
-        }
+        updatedTab.controlGroupJson = JSON.stringify(controlGroupState ?? {});
 
         const dataViewSpec = updatedTab.serializedSearchSource.index;
 
