@@ -35,6 +35,7 @@ const createCardConfig = (
   const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
+  console.log('docs', docsLink);
   switch (onboardingFlow) {
     case OnboardingFlow.Hosts: {
       return {
@@ -49,7 +50,7 @@ const createCardConfig = (
         buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
           defaultMessage: 'Add data',
         }),
-        docsLink: 'https://www.elastic.co/observability/infrastructure-monitoring',
+        docsLink,
       };
     }
     default: {
@@ -60,7 +61,7 @@ const createCardConfig = (
         buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
           defaultMessage: 'Add data',
         }),
-        docsLink: 'https://www.elastic.co/observability/infrastructure-monitoring',
+        docsLink,
       };
     }
   }
