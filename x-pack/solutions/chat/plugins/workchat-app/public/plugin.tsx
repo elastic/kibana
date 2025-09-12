@@ -51,8 +51,8 @@ export class WorkChatAppPlugin
     });
 
     // Register custom data type descriptors
-    chatDataRegistry.dataTypeRegistry.register(new WorkspaceDataType());
-    chatDataRegistry.dataTypeRegistry.register(new DocumentDataType());
+    // chatDataRegistry.dataTypeRegistry.register(new WorkspaceDataType());
+    // chatDataRegistry.dataTypeRegistry.register(new DocumentDataType());
 
     return {
       integrations: {
