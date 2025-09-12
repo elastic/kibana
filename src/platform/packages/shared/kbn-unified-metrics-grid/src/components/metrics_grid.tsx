@@ -13,6 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 
@@ -74,6 +75,7 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback((metric: MetricField, esqlQuery: string) => {
     setExpandedMetric({ metric, esqlQuery });
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
   }, []);
 
   const handleCloseFlyout = useCallback(() => {
