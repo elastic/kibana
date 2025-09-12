@@ -67,9 +67,9 @@ export class QueryColumns {
   ): Promise<ESQLColumnData[]> {
     const types = Array.isArray(expectedType) ? expectedType : [expectedType];
     await this.buildCache();
-    const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
+    const columns = QueryColumns.fromCache(this.fullQueryCacheKey);
     return (
-      cachedFields?.filter(({ name, type }) => {
+      columns?.filter(({ name, type }) => {
         const ts = Array.isArray(type) ? type : [type];
         return (
           !ignored.includes(name) &&
@@ -85,9 +85,9 @@ export class QueryColumns {
    */
   async asMap(): Promise<Map<string, ESQLColumnData>> {
     await this.buildCache();
-    const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
+    const columns = QueryColumns.fromCache(this.fullQueryCacheKey);
     const cacheCopy = new Map<string, ESQLColumnData>();
-    cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
+    columns?.forEach((field) => cacheCopy.set(field.name, field));
     return cacheCopy;
   }
 
