@@ -649,7 +649,7 @@ describe('DiscoverEBTManager', () => {
       );
     });
 
-    it('should track Lucene query field usage', async () => {
+    it('should track free text search for KQL queries without field names', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -658,41 +658,13 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      const luceneQuery = {
-        query: 'test:value',
-        language: 'lucene',
-      };
-
-      await scopedManager.trackSubmittingQuery({
-        query: luceneQuery,
-        fieldsMetadata,
-      });
-
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_fields_usage',
-        {
-          eventName: 'luceneQuery',
-          fieldNames: ['test'],
-        }
-      );
-    });
-
-    it('should track full text search for KQL queries without field names', async () => {
-      discoverEBTContextManager.initialize({
-        core: coreSetupMock,
-        discoverEbtContext$,
-      });
-
-      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
-      scopedManager.setAsActiveManager();
-
-      const fullTextQuery = {
+      const freeTextQuery = {
         query: 'error occurred',
         language: 'kuery',
       };
 
       await scopedManager.trackSubmittingQuery({
-        query: fullTextQuery,
+        query: freeTextQuery,
         fieldsMetadata,
       });
 
@@ -701,6 +673,34 @@ describe('DiscoverEBTManager', () => {
         {
           eventName: 'kqlQuery',
           fieldNames: ['__FREE_TEXT__'],
+        }
+      );
+    });
+
+    it('should track both free text and field names for KQL queries', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const freeTextQuery = {
+        query: 'test: "test value" and error occurred',
+        language: 'kuery',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: freeTextQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'kqlQuery',
+          fieldNames: ['test', '__FREE_TEXT__'],
         }
       );
     });
@@ -837,7 +837,7 @@ describe('DiscoverEBTManager', () => {
       );
     });
 
-    it('should extract KQL and Lucene queries embedded in ES|QL query', async () => {
+    it('should extract KQL queries embedded in ES|QL query', async () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -847,7 +847,7 @@ describe('DiscoverEBTManager', () => {
       scopedManager.setAsActiveManager();
 
       const esqlQuery = {
-        esql: 'FROM logs-synth-default | WHERE QSTR("""test:test-value""")',
+        esql: 'FROM logs-synth-default | WHERE KQL("""test:test-value""")',
       };
 
       await scopedManager.trackSubmittingQuery({
