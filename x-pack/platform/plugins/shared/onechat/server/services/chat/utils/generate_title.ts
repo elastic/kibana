@@ -50,15 +50,18 @@ export const generateConversationTitle = async ({
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
-        z.object({
-          title: z.string().describe('The title for the conversation'),
-        })
+        z
+          .object({
+            title: z.string().describe('The title for the conversation'),
+          })
+          .describe('Tool to use to provide the title'),
+        { name: 'set_title' }
       );
 
       const prompt: BaseMessageLike[] = [
         [
           'system',
-          "'You are a helpful assistant. Assume the following messages is the start of a conversation between you and a user; give this conversation a title based on the content below",
+          `You are a helpful assistant. Assume the following messages is the start of a conversation between you and a user; give this conversation a title based on the content below`,
         ],
         ...conversationToLangchainMessages({ previousRounds, nextInput }),
       ];

@@ -236,23 +236,26 @@ const selectResources = async ({
 }): Promise<SelectedResource[]> => {
   const { chatModel } = model;
   const indexSelectorModel = chatModel.withStructuredOutput(
-    z.object({
-      reasoning: z
-        .string()
-        .optional()
-        .describe(
-          'optional brief overall reasoning. Can be used to explain why you did not return any target.'
+    z
+      .object({
+        reasoning: z
+          .string()
+          .optional()
+          .describe(
+            'optional brief overall reasoning. Can be used to explain why you did not return any target.'
+          ),
+        targets: z.array(
+          z.object({
+            reason: z.string().describe('brief explanation of why this resource could be relevant'),
+            type: z
+              .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
+              .describe('the type of the resource'),
+            name: z.string().describe('name of the index, alias or data stream'),
+          })
         ),
-      targets: z.array(
-        z.object({
-          reason: z.string().describe('brief explanation of why this resource could be relevant'),
-          type: z
-            .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
-            .describe('the type of the resource'),
-          name: z.string().describe('name of the index, alias or data stream'),
-        })
-      ),
-    })
+      })
+      .describe('Tool to use to select the relevant targets to search against'),
+    { name: 'select_resources' }
   );
 
   const promptContent = createIndexSelectorPrompt({
