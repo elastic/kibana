@@ -55,6 +55,7 @@ export const entitySchema = schema.object({
 });
 
 export const nodeDocumentDataSchema = schema.object({
+  _id: schema.string(),
   id: schema.string(),
   type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
   index: schema.maybe(schema.string()),
