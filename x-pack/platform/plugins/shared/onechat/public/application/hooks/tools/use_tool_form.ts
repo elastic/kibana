@@ -14,7 +14,7 @@ import type { ToolFormData } from '../../components/tools/form/types/tool_form_t
 import { useEsqlToolFormValidationResolver } from '../../components/tools/form/validation/esql_tool_form_validation';
 import { useIndexSearchToolFormValidationResolver } from '../../components/tools/form/validation/index_search_tool_form_validation';
 
-export const getDefaultValues = (toolType: ToolType): ToolFormData => {
+const getDefaultValues = (toolType: ToolType): ToolFormData => {
   switch (toolType) {
     case ToolType.esql:
       return {
