@@ -17,7 +17,6 @@ import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
 import { IntegrationRegistry } from './services/integration/integration_registry';
-import { WorkspaceDataType, DocumentDataType } from './data_types';
 
 export class WorkChatAppPlugin
   implements
@@ -49,10 +48,6 @@ export class WorkChatAppPlugin
         return this.services;
       },
     });
-
-    // Register custom data type descriptors
-    chatDataRegistry.dataTypeRegistry.register(new WorkspaceDataType());
-    chatDataRegistry.dataTypeRegistry.register(new DocumentDataType());
 
     return {
       integrations: {

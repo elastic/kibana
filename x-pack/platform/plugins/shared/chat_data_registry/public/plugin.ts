@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
-import { renderApp } from './application';
 
 export class ChatDataRegistryPlugin
   implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
 {
   public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
-    renderApp();
+    core.application.register({
+      id: 'chatDataRegistry',
+      title: 'Chat Data Registry',
+      appRoute: '/app/chat-data-registry',
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
     return {};
   }
 

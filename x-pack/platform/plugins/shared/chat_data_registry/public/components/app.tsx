@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import { PLUGIN_NAME } from '../../common';
 
 export const ChatDataRegistryApp = () => {
   return (
-    <h1>
-      <FormattedMessage
-        id="chatDataRegistry.helloWorldText"
-        defaultMessage="{name}"
-        values={{ name: PLUGIN_NAME }}
-      />
-    </h1>
+    <I18nProvider>
+      <h1>
+        <FormattedMessage
+          id="chatDataRegistry.helloWorldText"
+          defaultMessage="{name}"
+          values={{ name: PLUGIN_NAME }}
+        />
+      </h1>
+    </I18nProvider>
   );
 };
