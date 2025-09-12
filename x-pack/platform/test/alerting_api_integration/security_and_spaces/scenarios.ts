@@ -42,7 +42,7 @@ export const Superuser: User = {
   },
 };
 
-const GlobalRead: User = {
+export const GlobalRead: User = {
   username: 'global_read',
   fullName: 'global_read',
   password: 'global_read-password',

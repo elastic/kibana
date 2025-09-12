@@ -74,6 +74,7 @@ describe('secrets validation', () => {
       crt: null,
       key: null,
       pfx: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
@@ -93,6 +94,7 @@ describe('secrets validation', () => {
       password: null,
       pfx: null,
       user: null,
+      secretHeaders: null,
     });
   });
 
@@ -103,6 +105,7 @@ describe('secrets validation', () => {
       key: KEY_FILE,
       pfx: null,
       user: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -112,6 +115,7 @@ describe('secrets validation', () => {
       pfx: null,
       user: null,
       password: null,
+      secretHeaders: null,
     };
 
     expect(
@@ -126,6 +130,7 @@ describe('secrets validation', () => {
       user: null,
       crt: null,
       key: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -135,6 +140,7 @@ describe('secrets validation', () => {
       password: null,
       crt: null,
       key: null,
+      secretHeaders: null,
     };
 
     expect(
@@ -365,7 +371,14 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: null,
+      },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -392,6 +405,103 @@ describe('execute()', () => {
     });
   });
 
+  test('execute with secret headers and basic auth', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: { secretKey: 'secretValue' },
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    delete requestMock.mock.calls[0][0].configurationUtilities;
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorUsageCollector: {
+        usage: {
+          requestBodyBytes: 0,
+        },
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'Basic YWJjOjEyMw==',
+        aheader: 'a value',
+        secretKey: 'secretValue',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
+  });
+
+  test('execute with secret headers and basic auth when header keys overlap', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: { Authorization: 'secretAuthorizationValue' },
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    delete requestMock.mock.calls[0][0].configurationUtilities;
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorUsageCollector: {
+        usage: {
+          requestBodyBytes: 0,
+        },
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'secretAuthorizationValue',
+        aheader: 'a value',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
+  });
+
   test('execute with ssl adds ssl settings to sslOverrides', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
@@ -407,7 +517,14 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { crt: CRT_FILE, key: KEY_FILE, password: 'passss', user: null, pfx: null },
+      secrets: {
+        crt: CRT_FILE,
+        key: KEY_FILE,
+        password: 'passss',
+        user: null,
+        pfx: null,
+        secretHeaders: null,
+      },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -626,7 +743,14 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: null,
+      },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -652,6 +776,7 @@ describe('execute()', () => {
       pfx: null,
       crt: null,
       key: null,
+      secretHeaders: null,
     };
     await connectorType.executor({
       actionId: 'some-id',
@@ -786,7 +911,14 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: null,
+      },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
