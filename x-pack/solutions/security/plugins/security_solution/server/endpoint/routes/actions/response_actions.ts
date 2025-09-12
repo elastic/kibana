@@ -367,12 +367,7 @@ export function registerResponseActionRoutes(
  */
 function cancelActionHandler(
   endpointContext: EndpointAppContext
-): RequestHandler<
-  unknown,
-  unknown,
-  CancelActionRequestBody,
-  SecuritySolutionRequestHandlerContext
-> {
+): RequestHandler<unknown, unknown, CancelActionRequestBody, SecuritySolutionRequestHandlerContext> {
   return async (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<unknown, unknown, CancelActionRequestBody>,
@@ -381,14 +376,6 @@ function cancelActionHandler(
     const cancelActionLogger = endpointContext.logFactory.get('cancelActionHandler');
     const { parameters } = request.body;
     const actionId = parameters.action_id;
-
-    if (!actionId) {
-      return errorHandler(
-        cancelActionLogger,
-        response,
-        new Error('action_id is required in parameters')
-      );
-    }
 
     try {
       // Get space ID from context

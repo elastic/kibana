@@ -538,12 +538,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: canCancelForCurrentContext(),
       }),
       RenderComponent: CancelActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'cancel --action="action-123-456-789"',
       exampleInstruction: i18n.translate(
         'xpack.securitySolution.endpointConsoleCommands.cancel.exampleInstruction',
@@ -563,7 +558,6 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'truthy',
           selectorShowTextValue: true,
           SelectorComponent: PendingActionsSelector,
-          validate: emptyArgumentValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -587,7 +581,6 @@ export const getEndpointConsoleCommands = ({
       return adjustCommandsForMicrosoftDefenderEndpoint({
         commandList: consoleCommands,
         microsoftDefenderEndpointRunScriptEnabled,
-        microsoftDefenderEndpointCancelEnabled,
       });
     default:
       // agentType === endpoint: just returns the defined command list
@@ -861,14 +854,13 @@ const adjustCommandsForCrowdstrike = ({
 const adjustCommandsForMicrosoftDefenderEndpoint = ({
   commandList,
   microsoftDefenderEndpointRunScriptEnabled,
-  microsoftDefenderEndpointCancelEnabled,
 }: {
   commandList: CommandDefinition[];
   microsoftDefenderEndpointRunScriptEnabled: boolean;
-  microsoftDefenderEndpointCancelEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
+  const microsoftDefenderEndpointCancelEnabled = featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (
@@ -883,10 +875,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
       disableCommand(command, 'microsoft_defender_endpoint');
     }
 
-    if (command.name === 'cancel') {
-      if (!microsoftDefenderEndpointCancelEnabled) {
-        disableCommand(command, 'microsoft_defender_endpoint');
-      }
+    if (command.name === 'cancel' && !microsoftDefenderEndpointCancelEnabled) {
+      disableCommand(command, 'microsoft_defender_endpoint');
     }
     if (command.name === 'runscript') {
       if (!microsoftDefenderEndpointRunScriptEnabled) {

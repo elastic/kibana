@@ -21,8 +21,6 @@ export interface PendingActionsRequestQueryParams {
   page?: number;
   pageSize?: number;
   commands?: string[];
-
-  [key: string]: string | number | string[] | undefined;
 }
 
 /**
