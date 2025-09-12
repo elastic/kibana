@@ -39,7 +39,7 @@ export const useDiscoverTopNav = ({
   // const hasUnsavedChanges = Boolean(
   //   hasSavedSearchChanges && stateContainer.savedSearchState.getId()
   // );
-  const hasUnsavedChanges = useInternalStateSelector((state) =>
+  const { hasUnsavedChanges } = useInternalStateSelector((state) =>
     selectHasUnsavedChanges(state, {
       runtimeStateManager: stateContainer.runtimeStateManager,
       services,
