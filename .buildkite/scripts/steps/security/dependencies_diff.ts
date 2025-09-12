@@ -66,7 +66,8 @@ async function getDependenciesDiff() {
 
 async function main() {
   // Skipping PRs from Renovate
-  if (process.env.GIT_BRANCH?.startsWith('renovate')) {
+  console.info('GIT_BRANCH', process.env.GIT_BRANCH);
+  if (process.env.GIT_PR_BRANCH?.startsWith('renovate')) {
     return;
   }
 
