@@ -7,12 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import {
-  EuiSkeletonLoading,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
