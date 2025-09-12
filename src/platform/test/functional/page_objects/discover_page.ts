@@ -272,7 +272,7 @@ export class DiscoverPageObject extends FtrService {
   public async isLensEditFlyoutOpen() {
     return await this.testSubjects.exists('lnsChartSwitchPopover');
   }
-  
+
   public async openLensEditFlyout() {
     await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
     await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
