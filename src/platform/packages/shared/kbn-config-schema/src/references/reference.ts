@@ -10,9 +10,9 @@
 import type { Reference as InternalReference } from 'joi';
 import { internals } from '../internals';
 
-export class Reference<T> {
-  // @ts-expect-error - preserve type
-  #type: T;
+export class Reference<T = any> {
+  // @ts-expect-error
+  #type: T; // preserve type otherwise it's completely ignored
 
   public static isReference<V>(value: V | Reference<V> | undefined): value is Reference<V> {
     return (

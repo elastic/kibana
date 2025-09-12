@@ -775,11 +775,11 @@ function allOf<RTS extends Array<ObjectType<any>>, DV extends ObjectDefaultValue
   return new IntersectionType(types, options);
 }
 
-function contextRef<T>(key: string): ContextReference<T> {
+function contextRef<T = any>(key: string): ContextReference<T> {
   return new ContextReference(key);
 }
 
-function siblingRef<T>(key: string): SiblingReference<T> {
+function siblingRef<T = any>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
