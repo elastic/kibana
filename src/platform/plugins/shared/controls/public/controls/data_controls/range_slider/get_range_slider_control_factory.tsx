@@ -176,7 +176,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           const dataView = dataViews?.[0];
           const dataViewField =
             dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-          console.log('RANGE VALUE', value);
           const gte = parseFloat(value?.[0] ?? '');
           const lte = parseFloat(value?.[1] ?? '');
 
