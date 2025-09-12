@@ -138,7 +138,49 @@ async function mockedGetInstallation(params: any) {
 async function mockedGetPackageInfo(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
-  if (params.pkgName === 'aws') pkg = { name: 'aws', version: '0.3.3' };
+  if (params.pkgName === 'aws') {
+    pkg = {
+      name: 'aws',
+      version: '0.3.3',
+      policy_templates: [
+        {
+          name: 'aws',
+          inputs: [
+            {
+              title: 'AWS',
+              type: 'aws',
+              description: 'AWS input',
+              vars: [
+                {
+                  name: 'role_arn',
+                  required: false,
+                  type: 'text',
+                },
+                {
+                  name: 'external_id',
+                  required: false,
+                  secret: true,
+                  type: 'password',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      data_streams: [
+        {
+          dataset: 'test',
+          type: 'logs',
+          streams: [
+            {
+              input: 'aws',
+              template_path: 'test-template.yml',
+            },
+          ],
+        },
+      ],
+    };
+  }
   if (params.pkgName === 'endpoint') pkg = { name: 'endpoint', version: params.pkgVersion };
   if (params.pkgName === 'test') {
     pkg = {
@@ -192,7 +234,17 @@ jest.mock('./epm/registry', () => ({
 
 jest.mock('./epm/packages/get', () => ({
   getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
-  getAgentTemplateAssetsMap: jest.fn().mockResolvedValue(new Map()),
+  getAgentTemplateAssetsMap: jest.fn().mockImplementation(async (params) => {
+    const assetsMap = new Map();
+    // Add mock template data for aws package
+    if (params.packageInfo.name === 'aws') {
+      assetsMap.set('test-template.yml', {
+        buffer: Buffer.from('mock template content'),
+        path: 'test-template.yml',
+      });
+    }
+    return assetsMap;
+  }),
 }));
 
 jest.mock('./agent_policy');
@@ -214,6 +266,10 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 
 jest.mock('./secrets', () => ({
   isSecretStorageEnabled: jest.fn(),
+  toCompiledSecretRef: jest.fn((id: string) => ({
+    id,
+    isSecretRef: true,
+  })),
 }));
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
@@ -407,10 +463,16 @@ describe('Package policy service', () => {
         enabled: true,
         policy_id: 'test',
         policy_ids: ['test'],
+        cloud_connector_id: undefined,
         supports_cloud_connector: true,
+        package: {
+          name: 'aws',
+          title: 'AWS',
+          version: '0.3.3',
+        },
         inputs: [
           {
-            type: 'cis_aws', // tcp input is in the blocklist for agentless
+            type: 'aws',
             enabled: true,
             streams: [
               {
@@ -473,6 +535,11 @@ describe('Package policy service', () => {
         policy_id: 'test',
         policy_ids: ['test'],
         supports_cloud_connector: false,
+        package: {
+          name: 'aws',
+          title: 'AWS',
+          version: '0.3.3',
+        },
         inputs: [
           {
             type: 'aws',
@@ -517,296 +584,295 @@ describe('Package policy service', () => {
 
       expect(result.supports_cloud_connector).toBe(false);
     });
-    describe('createCloudConnectorForPackagePolicy', () => {
-      it('should create cloud connector when all conditions are met', async () => {
-        const soClient = createSavedObjectClientMock();
-        const enrichedPackagePolicy = {
-          name: 'test-package-policy',
-          supports_cloud_connector: true,
-          cloud_connector_id: undefined,
-          inputs: [
-            {
-              type: 'cis_aws',
-              enabled: true,
-              streams: [
-                {
-                  enabled: true,
-                  data_stream: { dataset: 'test', type: 'logs' },
-                  vars: {
-                    role_arn: {
-                      value: 'arn:aws:iam::123456789012:role/TestRole',
-                      type: 'text',
+  });
+  describe('createCloudConnectorForPackagePolicy', () => {
+    it('should create cloud connector when all conditions are met', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
                     },
-                    external_id: {
-                      value: {
-                        id: 'ABCDEFGHIJKLMNOPQRST',
-                        isSecretRef: true,
-                      },
-                      type: 'password',
-                    },
+                    type: 'password',
                   },
                 },
-              ],
-            },
-          ],
-        } as any;
+              },
+            ],
+          },
+        ],
+      } as any;
 
-        const agentPolicy = {
-          id: 'test',
-          agentless: {
-            cloud_connectors: {
-              enabled: true,
-              target_csp: 'aws',
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloud connector service
+      const mockCloudConnector = {
+        id: 'cloud-connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: {
+            value: 'arn:aws:iam::123456789012:role/TestRole',
+            type: 'text',
+          },
+          external_id: {
+            type: 'password',
+            value: {
+              id: 'ABCDEFGHIJKLMNOPQRST',
+              isSecretRef: true,
             },
           },
-        } as any;
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
 
-        // Mock the cloud connector service
-        const mockCloudConnector = {
-          id: 'cloud-connector-123',
-          name: 'test-connector',
-          cloudProvider: 'aws',
+      // Mock the cloudConnectorService.create method
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy
+        );
+
+        expect(result).toEqual(mockCloudConnector);
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+          name: 'aws-cloud-connector: test-package-policy',
           vars: {
             role_arn: {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
             external_id: {
-              type: 'password',
               value: {
                 id: 'ABCDEFGHIJKLMNOPQRST',
                 isSecretRef: true,
               },
+              type: 'password',
             },
           },
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        };
+          cloudProvider: 'aws',
+        });
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
 
-        // Mock the cloudConnectorService.create method
-        const originalCreate = cloudConnectorService.create;
-        cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+    it('should return undefined when cloud connector setup is not required', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: false, // Not supported
+        cloud_connector_id: undefined,
+      } as any;
 
-        try {
-          const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when agentless cloud connectors are disabled', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: false, // Disabled
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when cloud connector already exists', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id', // Already exists
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no cloud connector variables are found', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {}, // No cloud connector variables
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+        soClient,
+        enrichedPackagePolicy,
+        agentPolicy
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should throw error when cloud connector creation fails', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      // Mock the cloudConnectorService.create method to throw an error
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest
+        .fn()
+        .mockRejectedValue(new Error('Cloud connector creation failed'));
+
+      try {
+        await expect(
+          (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
             enrichedPackagePolicy,
             agentPolicy
-          );
-
-          expect(result).toEqual(mockCloudConnector);
-          expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
-            name: 'aws-cloud-connector: test-package-policy',
-            vars: {
-              role_arn: {
-                value: 'arn:aws:iam::123456789012:role/TestRole',
-                type: 'text',
-              },
-              external_id: {
-                value: {
-                  id: 'ABCDEFGHIJKLMNOPQRST',
-                  isSecretRef: true,
-                },
-                type: 'password',
-              },
-            },
-            cloudProvider: 'aws',
-          });
-        } finally {
-          // Restore the original method
-          cloudConnectorService.create = originalCreate;
-        }
-      });
-
-      it('should return undefined when cloud connector setup is not required', async () => {
-        const soClient = createSavedObjectClientMock();
-        const enrichedPackagePolicy = {
-          name: 'test-package-policy',
-          supports_cloud_connector: false, // Not supported
-          cloud_connector_id: undefined,
-        } as any;
-
-        const agentPolicy = {
-          id: 'test',
-          agentless: {
-            cloud_connectors: {
-              enabled: true,
-              target_csp: 'aws',
-            },
-          },
-        } as any;
-
-        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
-          soClient,
-          enrichedPackagePolicy,
-          agentPolicy
+          )
+        ).rejects.toThrow(
+          'Error creating cloud connector in Fleet, Error: Cloud connector creation failed'
         );
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should return undefined when agentless cloud connectors are disabled', async () => {
-        const soClient = createSavedObjectClientMock();
-        const enrichedPackagePolicy = {
-          name: 'test-package-policy',
-          supports_cloud_connector: true,
-          cloud_connector_id: undefined,
-        } as any;
-
-        const agentPolicy = {
-          id: 'test',
-          agentless: {
-            cloud_connectors: {
-              enabled: false, // Disabled
-              target_csp: 'aws',
-            },
-          },
-        } as any;
-
-        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
-          soClient,
-          enrichedPackagePolicy,
-          agentPolicy
-        );
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should return undefined when cloud connector already exists', async () => {
-        const soClient = createSavedObjectClientMock();
-        const enrichedPackagePolicy = {
-          name: 'test-package-policy',
-          supports_cloud_connector: true,
-          cloud_connector_id: 'existing-connector-id', // Already exists
-        } as any;
-
-        const agentPolicy = {
-          id: 'test',
-          agentless: {
-            cloud_connectors: {
-              enabled: true,
-              target_csp: 'aws',
-            },
-          },
-        } as any;
-
-        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
-          soClient,
-          enrichedPackagePolicy,
-          agentPolicy
-        );
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should return undefined when no cloud connector variables are found', async () => {
-        const soClient = createSavedObjectClientMock();
-        const enrichedPackagePolicy = {
-          name: 'test-package-policy',
-          supports_cloud_connector: true,
-          cloud_connector_id: undefined,
-          inputs: [
-            {
-              type: 'cis_aws',
-              enabled: true,
-              streams: [
-                {
-                  enabled: true,
-                  data_stream: { dataset: 'test', type: 'logs' },
-                  vars: {}, // No cloud connector variables
-                },
-              ],
-            },
-          ],
-        } as any;
-
-        const agentPolicy = {
-          id: 'test',
-          agentless: {
-            cloud_connectors: {
-              enabled: true,
-              target_csp: 'aws',
-            },
-          },
-        } as any;
-
-        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
-          soClient,
-          enrichedPackagePolicy,
-          agentPolicy
-        );
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should throw error when cloud connector creation fails', async () => {
-        const soClient = createSavedObjectClientMock();
-        const enrichedPackagePolicy = {
-          name: 'test-package-policy',
-          supports_cloud_connector: true,
-          cloud_connector_id: undefined,
-          inputs: [
-            {
-              type: 'cis_aws',
-              enabled: true,
-              streams: [
-                {
-                  enabled: true,
-                  data_stream: { dataset: 'test', type: 'logs' },
-                  vars: {
-                    role_arn: {
-                      value: 'arn:aws:iam::123456789012:role/TestRole',
-                      type: 'text',
-                    },
-                    external_id: {
-                      value: {
-                        id: 'ABCDEFGHIJKLMNOPQRST',
-                        isSecretRef: true,
-                      },
-                      type: 'password',
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        } as any;
-
-        const agentPolicy = {
-          id: 'test',
-          agentless: {
-            cloud_connectors: {
-              enabled: true,
-              target_csp: 'aws',
-            },
-          },
-        } as any;
-
-        // Mock the cloudConnectorService.create method to throw an error
-        const originalCreate = cloudConnectorService.create;
-        cloudConnectorService.create = jest
-          .fn()
-          .mockRejectedValue(new Error('Cloud connector creation failed'));
-
-        try {
-          await expect(
-            (packagePolicyService as any).createCloudConnectorForPackagePolicy(
-              soClient,
-              enrichedPackagePolicy,
-              agentPolicy
-            )
-          ).rejects.toThrow(
-            'Error creating cloud connector in Fleet, Error: Cloud connector creation failed'
-          );
-        } finally {
-          // Restore the original method
-          cloudConnectorService.create = originalCreate;
-        }
-      });
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
     });
   });
-
   describe('inspect', () => {
     it('should return compiled inputs', async () => {
       const soClient = createSavedObjectClientMock();

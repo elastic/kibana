@@ -118,7 +118,9 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
-import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
+import {
+  validateDeploymentModesForInputs
+} from '../../common/services/agentless_policy_helper';
 
 import {
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
@@ -271,7 +273,7 @@ const extractPackagePolicyVars = (
   logger.get('extract package policy vars');
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
-    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0].vars;
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
 
     if (!vars) {
       logger.error('Package policy must contain vars');
@@ -364,6 +366,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let secretReferences: PolicySecretReference[] | undefined;
 
     this.keepPolicyIdInSync(packagePolicy);
+
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -399,6 +402,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (useSpaceAwareness) {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
+
 
       validateDeploymentModesForInputs(
         packagePolicy.inputs,
@@ -483,15 +487,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy = secretsRes.packagePolicy;
       secretReferences = secretsRes.secretReferences;
 
-      inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
-      const cloudConnector = await this.createCloudConnectorForPackagePolicy(
-        soClient,
-        enrichedPackagePolicy,
-        agentPolicies[0]
-      );
-      if (cloudConnector) {
-        enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+      // Create cloud connector for package policy if it is supported and package supports agentless
+      if (
+        enrichedPackagePolicy.supports_agentless &&
+        enrichedPackagePolicy.supports_cloud_connector
+      ) {
+        const cloudConnector = await this.createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicies[0]
+        );
+        if (cloudConnector) {
+          enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+        }
       }
+
+      inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
     }
 
     const assetsMap = await getAgentTemplateAssetsMap({
@@ -1313,6 +1324,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
         throw new FleetError(
           'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+        );
+      }
+
+      // Validate that if supports_agentless is true, the package actually supports agentless
+      if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
+        throw new PackagePolicyValidationError(
+          `Package "${pkgInfo.name}" does not support agentless deployment mode`
         );
       }
 
@@ -2889,16 +2907,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Check if cloud connector setup supported and not already created
     const isNewCloudConnectorSetup =
       !!enrichedPackagePolicy?.supports_cloud_connector &&
-      agentPolicy.agentless?.cloud_connectors?.enabled &&
+      agentPolicy.agentless?.cloud_connectors?.enabled === true &&
       !enrichedPackagePolicy?.cloud_connector_id;
 
     if (!isNewCloudConnectorSetup) {
       logger.debug(
-        `New cloud connector setup is not supported, supports_cloud_connector: ${enrichedPackagePolicy?.supports_cloud_connector}, agentless.cloud_connectors.enabled: ${agentPolicy.agentless?.cloud_connectors?.enabled}, cloud_connector_id: ${enrichedPackagePolicy?.cloud_connector_id}`
+        `New cloud connector setup is not supported, supports_cloud_connector: ${
+          enrichedPackagePolicy?.supports_cloud_connector
+        }, agentless.cloud_connectors.enabled: ${
+          agentPolicy.agentless?.cloud_connectors?.enabled ?? 'undefined'
+        }, cloud_connector_id: ${enrichedPackagePolicy?.cloud_connector_id}`
       );
       return;
     }
     const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+
+    if (!cloudProvider) {
+      logger.debug('No cloud provider specified for cloud connector');
+      return;
+    }
     try {
       const cloudConnectorVars = extractPackagePolicyVars(
         cloudProvider,
@@ -3036,6 +3063,10 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
         integrations: { writeIntegrationPolicies: true },
       },
     });
+
+    // Add debug logging
+    const logger = appContextService.getLogger();
+    logger.debug(`PackagePolicyService.create called with supports_agentless: ${packagePolicy.supports_agentless}`);
 
     return super.create(soClient, esClient, packagePolicy, options, context, request);
   }
