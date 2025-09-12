@@ -19,7 +19,7 @@ import type {
   ListAgentResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
-import type { publicApiPath } from '../../../common/constants';
+import { publicApiPath } from '../../../common/constants';
 
 export class AgentService {
   private readonly http: HttpSetup;
