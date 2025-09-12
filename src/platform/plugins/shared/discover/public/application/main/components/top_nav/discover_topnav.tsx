@@ -338,6 +338,7 @@ export const DiscoverTopNav = ({
   );
 };
 
+// ToDo: Remove when the new layout lands https://github.com/elastic/kibana/issues/234854
 const floatingActionStyles = css({
   '.controlFrameFloatingActions': {
     top: '100%',
