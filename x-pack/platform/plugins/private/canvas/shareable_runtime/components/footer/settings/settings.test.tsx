@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JestContext } from '../../../test/context_jest';
-import { takeMountedSnapshot } from '../../../test';
-import { openSettings, selectMenuItem } from '../../../test/interactions';
-import {
-  getSettingsTrigger as trigger,
-  getPopover as popover,
-  getPortal as portal,
-  getContextMenu as contextMenu,
-  getContextMenuItems as menuItems,
-} from '../../../test/selectors';
 import { Settings } from './settings';
 
 jest.mock('../../../supported_renderers');
@@ -27,62 +18,110 @@ import * as Portal from '@elastic/eui/lib/components/portal/portal';
 
 // Mock the EuiPortal - `insertAdjacentElement is not supported in
 // `jsdom` 12.  We're just going to render a `div` with the children
-// so the `enzyme` tests will be accurate.
+// so the tests will be accurate.
 jest.spyOn(Portal, 'EuiPortal').mockImplementation((props: any) => {
   return <div className="mockedEuiPortal">{props.children}</div>;
 });
 
 describe('<Settings />', () => {
-  let wrapper: ReactWrapper;
-
-  beforeEach(() => {
+  const renderSettings = () => {
     const ref = React.createRef<HTMLDivElement>();
-    wrapper = mount(
+    return render(
       <JestContext stageRef={ref}>
         <div ref={ref}>
           <Settings />
         </div>
       </JestContext>
     );
-  });
+  };
 
   test('renders as expected', () => {
-    expect(trigger(wrapper).exists()).toEqual(true);
-    expect(portal(wrapper).exists()).toEqual(false);
+    renderSettings();
+
+    const settingsButton = screen.getByRole('button', { name: /settings/i });
+    expect(settingsButton).toBeInTheDocument();
+
+    // Portal should not be visible initially
+    expect(screen.queryByText('Auto Play')).not.toBeInTheDocument();
   });
 
-  test('clicking settings opens and closes the menu', () => {
-    trigger(wrapper).simulate('click');
-    expect(portal(wrapper).exists()).toEqual(true);
-    expect(popover(wrapper).prop('isOpen')).toEqual(true);
-    expect(menuItems(wrapper).length).toEqual(3);
-    expect(contextMenu(wrapper).last().text()).toEqual('SettingsAuto PlayToolbar');
-    trigger(wrapper).simulate('click');
-    expect(popover(wrapper).prop('isOpen')).toEqual(false);
+  test('clicking settings opens and closes the menu', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const settingsButton = screen.getByRole('button', { name: /settings/i });
+
+    // Open the popover
+    await user.click(settingsButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+      expect(screen.getByText('Auto Play')).toBeInTheDocument();
+      expect(screen.getByText('Toolbar')).toBeInTheDocument();
+    });
+
+    // Close the popover
+    await user.click(settingsButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+    });
   });
 
   test('can navigate Autoplay Settings', async () => {
-    await openSettings(wrapper);
-    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    renderSettings();
 
-    await selectMenuItem(wrapper, 1);
-    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
+    const settingsButton = screen.getByRole('button', { name: /settings/i });
+
+    // Open the settings menu
+    await user.click(settingsButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
+
+    // Click on Auto Play menu item - use getByRole to be more specific
+    const autoPlayMenuItem = screen.getByRole('button', { name: 'Auto Play' });
+    await user.click(autoPlayMenuItem);
+
+    await waitFor(() => {
+      // Should show autoplay specific controls - "Cycle Slides" is the actual text
+      expect(screen.getByText('Cycle Slides')).toBeInTheDocument();
+    });
   });
 
   test('can navigate Toolbar Settings, closes when activated', async () => {
-    await openSettings(wrapper);
-    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    renderSettings();
 
-    await selectMenuItem(wrapper, 2);
-    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
+    const settingsButton = screen.getByRole('button', { name: /settings/i });
+
+    // Open the settings menu
+    await user.click(settingsButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
+
+    // Click on Toolbar menu item - use getByRole to be more specific
+    const toolbarMenuItem = screen.getByRole('button', { name: 'Toolbar' });
+    await user.click(toolbarMenuItem);
+
+    await waitFor(() => {
+      // Should show the toolbar settings panel
+      expect(screen.getByText('Hide Toolbar')).toBeInTheDocument();
+      expect(screen.getByTestId('hideToolbarSwitch')).toBeInTheDocument();
+    });
 
     // Click the Hide Toolbar switch
-    portal(wrapper).find('button[data-test-subj="hideToolbarSwitch"]').simulate('click');
+    const hideToolbarSwitch = screen.getByTestId('hideToolbarSwitch');
+    await user.click(hideToolbarSwitch);
 
-    portal(wrapper).update();
-
-    // The Portal should not be open.
-    expect(popover(wrapper).prop('isOpen')).toEqual(false);
-    expect(portal(wrapper).render()).toMatchSnapshot();
+    // The popover should close after clicking the switch
+    await waitFor(() => {
+      expect(screen.queryByText('Toolbar')).not.toBeInTheDocument();
+      expect(screen.queryByText('Hide Toolbar')).not.toBeInTheDocument();
+    });
   });
 });
