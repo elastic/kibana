@@ -21,10 +21,10 @@ export const dsl = {
   },
 
   isInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullyTranslated(), dsl.isNotInstalled()];
+    return [genericDsl.isFullOrPartiallyTranslated(), dsl.isNotInstalled()];
   },
 
   isNotInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
+    return [genericDsl.isFullOrPartiallyTranslated(), dsl.isInstalled()];
   },
 };
