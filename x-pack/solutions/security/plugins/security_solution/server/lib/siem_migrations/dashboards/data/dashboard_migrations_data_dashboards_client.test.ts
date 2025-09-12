@@ -9,25 +9,24 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
+import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_data_dashboards_client';
 import {
   SiemMigrationStatus,
   MigrationTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
-import type { StoredRuleMigrationRule } from '../types';
-import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
+import type { StoredDashboardMigrationDashboard } from '../types';
 import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
 import { dsl } from './dsl_queries';
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
+import type { DashboardMigrationFilters } from '../../../../../common/siem_migrations/dashboards/types';
 
-describe('RuleMigrationsDataRulesClient', () => {
-  let ruleMigrationsDataRulesClient: RuleMigrationsDataRulesClient;
+describe('DashboardMigrationsDataDashboardsClient', () => {
+  let dashboardMigrationsDataDashboardsClient: DashboardMigrationsDataDashboardsClient;
   const esClient =
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations');
+  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-dashboard-migrations');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
@@ -35,7 +34,7 @@ describe('RuleMigrationsDataRulesClient', () => {
   const dependencies = {} as unknown as SiemMigrationsClientDependencies;
 
   beforeEach(() => {
-    ruleMigrationsDataRulesClient = new RuleMigrationsDataRulesClient(
+    dashboardMigrationsDataDashboardsClient = new DashboardMigrationsDataDashboardsClient(
       indexNameProvider,
       currentUser,
       esClient,
@@ -49,62 +48,62 @@ describe('RuleMigrationsDataRulesClient', () => {
   });
 
   describe('create', () => {
-    test('should create rule migrations in bulk', async () => {
-      const ruleMigrations: CreateMigrationItemInput<RuleMigrationRule>[] = [
+    test('should create dashboard migrations in bulk', async () => {
+      const dashboardMigrations: CreateMigrationItemInput<DashboardMigrationDashboard>[] = [
         {
           migration_id: 'migration1',
-          original_rule: {
-            id: 'rule1',
+          original_dashboard: {
+            id: 'dashboard1',
             vendor: 'splunk',
-            title: 'Test Rule 1',
+            title: 'Test Dashboard 1',
             description: 'Test description 1',
-            query: 'test query 1',
-            query_language: 'spl',
+            data: 'test data 1',
+            format: 'xml',
           },
-          elastic_rule: {
-            id: 'elastic_rule1',
-            title: 'Elastic Rule 1',
-            query: 'elastic query 1',
+          elastic_dashboard: {
+            id: 'elastic_dashboard1',
+            title: 'Elastic Dashboard 1',
+            data: 'elastic data 1',
           },
         },
         {
           migration_id: 'migration1',
-          original_rule: {
-            id: 'rule2',
+          original_dashboard: {
+            id: 'dashboard2',
             vendor: 'splunk',
-            title: 'Test Rule 2',
+            title: 'Test Dashboard 2',
             description: 'Test description 2',
-            query: 'test query 2',
-            query_language: 'spl',
+            data: 'test data 2',
+            format: 'xml',
           },
-          elastic_rule: {
-            id: 'elastic_rule2',
-            title: 'Elastic Rule 2',
-            query: 'elastic query 2',
+          elastic_dashboard: {
+            id: 'elastic_dashboard2',
+            title: 'Elastic Dashboard 2',
+            data: 'elastic data 2',
           },
         },
       ];
 
-      await ruleMigrationsDataRulesClient.create(ruleMigrations);
+      await dashboardMigrationsDataDashboardsClient.create(dashboardMigrations);
 
       expect(esClient.asInternalUser.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
         operations: [
-          { create: { _index: '.kibana-siem-rule-migrations' } },
+          { create: { _index: '.kibana-siem-dashboard-migrations' } },
           {
             migration_id: 'migration1',
-            original_rule: {
-              id: 'rule1',
+            original_dashboard: {
+              id: 'dashboard1',
               vendor: 'splunk',
-              title: 'Test Rule 1',
+              title: 'Test Dashboard 1',
               description: 'Test description 1',
-              query: 'test query 1',
-              query_language: 'spl',
+              data: 'test data 1',
+              format: 'xml',
             },
-            elastic_rule: {
-              id: 'elastic_rule1',
-              title: 'Elastic Rule 1',
-              query: 'elastic query 1',
+            elastic_dashboard: {
+              id: 'elastic_dashboard1',
+              title: 'Elastic Dashboard 1',
+              data: 'elastic data 1',
             },
             '@timestamp': expect.any(String),
             status: SiemMigrationStatus.PENDING,
@@ -112,21 +111,21 @@ describe('RuleMigrationsDataRulesClient', () => {
             updated_by: 'testProfileUid',
             updated_at: expect.any(String),
           },
-          { create: { _index: '.kibana-siem-rule-migrations' } },
+          { create: { _index: '.kibana-siem-dashboard-migrations' } },
           {
             migration_id: 'migration1',
-            original_rule: {
-              id: 'rule2',
+            original_dashboard: {
+              id: 'dashboard2',
               vendor: 'splunk',
-              title: 'Test Rule 2',
+              title: 'Test Dashboard 2',
               description: 'Test description 2',
-              query: 'test query 2',
-              query_language: 'spl',
+              data: 'test data 2',
+              format: 'xml',
             },
-            elastic_rule: {
-              id: 'elastic_rule2',
-              title: 'Elastic Rule 2',
-              query: 'elastic query 2',
+            elastic_dashboard: {
+              id: 'elastic_dashboard2',
+              title: 'Elastic Dashboard 2',
+              data: 'elastic data 2',
             },
             '@timestamp': expect.any(String),
             status: SiemMigrationStatus.PENDING,
@@ -139,35 +138,33 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
 
     test('should handle bulk operations in chunks', async () => {
-      const ruleMigrations: CreateMigrationItemInput<RuleMigrationRule>[] = Array.from(
-        { length: 600 },
-        (_, i) => ({
+      const dashboardMigrations: CreateMigrationItemInput<DashboardMigrationDashboard>[] =
+        Array.from({ length: 600 }, (_, i) => ({
           migration_id: 'migration1',
-          original_rule: {
-            id: `rule${i}`,
+          original_dashboard: {
+            id: `dashboard${i}`,
             vendor: 'splunk',
-            title: `Test Rule ${i}`,
+            title: `Test Dashboard ${i}`,
             description: `Test description ${i}`,
-            query: `test query ${i}`,
-            query_language: 'spl',
+            data: `test data ${i}`,
+            format: 'xml',
           },
-          elastic_rule: {
-            id: `elastic_rule${i}`,
-            title: `Elastic Rule ${i}`,
-            query: `elastic query ${i}`,
+          elastic_dashboard: {
+            id: `elastic_dashboard${i}`,
+            title: `Elastic Dashboard ${i}`,
+            data: `elastic data ${i}`,
           },
-        })
-      );
+        }));
 
-      await ruleMigrationsDataRulesClient.create(ruleMigrations);
+      await dashboardMigrationsDataDashboardsClient.create(dashboardMigrations);
 
       expect(esClient.asInternalUser.bulk).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('update', () => {
-    test('should update rule migrations in bulk', async () => {
-      const ruleMigrations = [
+    test('should update dashboard migrations in bulk', async () => {
+      const dashboardMigrations = [
         {
           id: 'doc1',
           status: SiemMigrationStatus.COMPLETED,
@@ -180,12 +177,12 @@ describe('RuleMigrationsDataRulesClient', () => {
         },
       ];
 
-      await ruleMigrationsDataRulesClient.update(ruleMigrations);
+      await dashboardMigrationsDataDashboardsClient.update(dashboardMigrations);
 
       expect(esClient.asInternalUser.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
         operations: [
-          { update: { _index: '.kibana-siem-rule-migrations', _id: 'doc1' } },
+          { update: { _index: '.kibana-siem-dashboard-migrations', _id: 'doc1' } },
           {
             doc: {
               status: SiemMigrationStatus.COMPLETED,
@@ -194,7 +191,7 @@ describe('RuleMigrationsDataRulesClient', () => {
               updated_at: expect.any(String),
             },
           },
-          { update: { _index: '.kibana-siem-rule-migrations', _id: 'doc2' } },
+          { update: { _index: '.kibana-siem-dashboard-migrations', _id: 'doc2' } },
           {
             doc: {
               status: SiemMigrationStatus.FAILED,
@@ -208,7 +205,7 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
 
     test('should throw an error if bulk update fails', async () => {
-      const ruleMigrations = [
+      const dashboardMigrations = [
         {
           id: 'doc1',
           status: SiemMigrationStatus.COMPLETED,
@@ -218,19 +215,19 @@ describe('RuleMigrationsDataRulesClient', () => {
       const error = new Error('Bulk update failed');
       esClient.asInternalUser.bulk = jest.fn().mockRejectedValue(error);
 
-      await expect(ruleMigrationsDataRulesClient.update(ruleMigrations)).rejects.toThrow(
-        'Bulk update failed'
-      );
+      await expect(
+        dashboardMigrationsDataDashboardsClient.update(dashboardMigrations)
+      ).rejects.toThrow('Bulk update failed');
       expect(logger.error).toHaveBeenCalledWith(
-        'Error updating migration rule: Bulk update failed'
+        'Error updating migration dashboard: Bulk update failed'
       );
     });
   });
 
   describe('get', () => {
-    test('should retrieve rule migrations with filters', async () => {
+    test('should retrieve dashboard migrations with filters', async () => {
       const migrationId = 'migration1';
-      const mockResponse: SearchResponse<RuleMigrationRule> = {
+      const mockResponse: SearchResponse<DashboardMigrationDashboard> = {
         hits: {
           total: { value: 2 },
           hits: [
@@ -238,18 +235,18 @@ describe('RuleMigrationsDataRulesClient', () => {
               _id: 'doc1',
               _source: {
                 migration_id: 'migration1',
-                original_rule: {
-                  id: 'rule1',
+                original_dashboard: {
+                  id: 'dashboard1',
                   vendor: 'splunk',
-                  title: 'Test Rule 1',
+                  title: 'Test Dashboard 1',
                   description: 'Test description 1',
-                  query: 'test query 1',
-                  query_language: 'spl',
+                  data: 'test data 1',
+                  format: 'xml',
                 },
-                elastic_rule: {
-                  id: 'elastic_rule1',
-                  title: 'Elastic Rule 1',
-                  query: 'elastic query 1',
+                elastic_dashboard: {
+                  id: 'elastic_dashboard1',
+                  title: 'Elastic Dashboard 1',
+                  data: 'elastic data 1',
                 },
                 status: SiemMigrationStatus.COMPLETED,
               },
@@ -258,31 +255,31 @@ describe('RuleMigrationsDataRulesClient', () => {
               _id: 'doc2',
               _source: {
                 migration_id: 'migration1',
-                original_rule: {
-                  id: 'rule2',
+                original_dashboard: {
+                  id: 'dashboard2',
                   vendor: 'splunk',
-                  title: 'Test Rule 2',
+                  title: 'Test Dashboard 2',
                   description: 'Test description 2',
-                  query: 'test query 2',
-                  query_language: 'spl',
+                  data: 'test data 2',
+                  format: 'xml',
                 },
-                elastic_rule: {
-                  id: 'elastic_rule2',
-                  title: 'Elastic Rule 2',
-                  query: 'elastic query 2',
+                elastic_dashboard: {
+                  id: 'elastic_dashboard2',
+                  title: 'Elastic Dashboard 2',
+                  data: 'elastic data 2',
                 },
                 status: SiemMigrationStatus.PENDING,
               },
             },
           ],
         },
-      } as SearchResponse<RuleMigrationRule>;
+      } as SearchResponse<DashboardMigrationDashboard>;
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
 
-      const result = await ruleMigrationsDataRulesClient.get(migrationId, {
+      const result = await dashboardMigrationsDataDashboardsClient.get(migrationId, {
         filters: { status: SiemMigrationStatus.COMPLETED },
-        sort: { sortField: 'elastic_rule.title', sortDirection: 'asc' },
+        sort: { sortField: 'elastic_dashboard.title', sortDirection: 'asc' },
         from: 0,
         size: 10,
       });
@@ -293,36 +290,36 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             id: 'doc1',
             migration_id: 'migration1',
-            original_rule: {
-              id: 'rule1',
+            original_dashboard: {
+              id: 'dashboard1',
               vendor: 'splunk',
-              title: 'Test Rule 1',
+              title: 'Test Dashboard 1',
               description: 'Test description 1',
-              query: 'test query 1',
-              query_language: 'spl',
+              data: 'test data 1',
+              format: 'xml',
             },
-            elastic_rule: {
-              id: 'elastic_rule1',
-              title: 'Elastic Rule 1',
-              query: 'elastic query 1',
+            elastic_dashboard: {
+              id: 'elastic_dashboard1',
+              title: 'Elastic Dashboard 1',
+              data: 'elastic data 1',
             },
             status: SiemMigrationStatus.COMPLETED,
           },
           {
             id: 'doc2',
             migration_id: 'migration1',
-            original_rule: {
-              id: 'rule2',
+            original_dashboard: {
+              id: 'dashboard2',
               vendor: 'splunk',
-              title: 'Test Rule 2',
+              title: 'Test Dashboard 2',
               description: 'Test description 2',
-              query: 'test query 2',
-              query_language: 'spl',
+              data: 'test data 2',
+              format: 'xml',
             },
-            elastic_rule: {
-              id: 'elastic_rule2',
-              title: 'Elastic Rule 2',
-              query: 'elastic query 2',
+            elastic_dashboard: {
+              id: 'elastic_dashboard2',
+              title: 'Elastic Dashboard 2',
+              data: 'elastic data 2',
             },
             status: SiemMigrationStatus.PENDING,
           },
@@ -335,19 +332,23 @@ describe('RuleMigrationsDataRulesClient', () => {
       const error = new Error('Search failed');
       esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
 
-      await expect(ruleMigrationsDataRulesClient.get(migrationId)).rejects.toThrow('Search failed');
-      expect(logger.error).toHaveBeenCalledWith('Error searching migration rule: Search failed');
+      await expect(dashboardMigrationsDataDashboardsClient.get(migrationId)).rejects.toThrow(
+        'Search failed'
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error searching migration dashboard: Search failed'
+      );
     });
   });
 
   describe('saveProcessing', () => {
-    test('should update rule migration status to processing', async () => {
+    test('should update dashboard migration status to processing', async () => {
       const id = 'doc1';
 
-      await ruleMigrationsDataRulesClient.saveProcessing(id);
+      await dashboardMigrationsDataDashboardsClient.saveProcessing(id);
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
+        index: '.kibana-siem-dashboard-migrations',
         id: 'doc1',
         doc: {
           status: SiemMigrationStatus.PROCESSING,
@@ -360,22 +361,22 @@ describe('RuleMigrationsDataRulesClient', () => {
   });
 
   describe('saveCompleted', () => {
-    test('should update rule migration status to completed', async () => {
-      const ruleMigration = {
+    test('should update dashboard migration status to completed', async () => {
+      const dashboardMigration = {
         id: 'doc1',
         migration_id: 'migration1',
-        original_rule: {
-          id: 'rule1',
+        original_dashboard: {
+          id: 'dashboard1',
           vendor: 'splunk',
-          title: 'Test Rule',
+          title: 'Test Dashboard',
           description: 'Test description',
-          query: 'test query',
-          query_language: 'spl',
+          data: 'test data',
+          format: 'xml',
         },
-        elastic_rule: {
-          id: 'elastic_rule1',
-          title: 'Elastic Rule',
-          query: 'elastic query',
+        elastic_dashboard: {
+          id: 'elastic_dashboard1',
+          title: 'Elastic Dashboard',
+          data: 'elastic data',
         },
         status: SiemMigrationStatus.PROCESSING,
         translation_result: MigrationTranslationResult.FULL,
@@ -383,25 +384,27 @@ describe('RuleMigrationsDataRulesClient', () => {
         created_by: 'testProfileUid',
       };
 
-      await ruleMigrationsDataRulesClient.saveCompleted(ruleMigration as StoredRuleMigrationRule);
+      await dashboardMigrationsDataDashboardsClient.saveCompleted(
+        dashboardMigration as StoredDashboardMigrationDashboard
+      );
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
+        index: '.kibana-siem-dashboard-migrations',
         id: 'doc1',
         doc: {
           migration_id: 'migration1',
-          original_rule: {
-            id: 'rule1',
+          original_dashboard: {
+            id: 'dashboard1',
             vendor: 'splunk',
-            title: 'Test Rule',
+            title: 'Test Dashboard',
             description: 'Test description',
-            query: 'test query',
-            query_language: 'spl',
+            data: 'test data',
+            format: 'xml',
           },
-          elastic_rule: {
-            id: 'elastic_rule1',
-            title: 'Elastic Rule',
-            query: 'elastic query',
+          elastic_dashboard: {
+            id: 'elastic_dashboard1',
+            title: 'Elastic Dashboard',
+            data: 'elastic data',
           },
           status: SiemMigrationStatus.COMPLETED,
           translation_result: MigrationTranslationResult.FULL,
@@ -416,22 +419,22 @@ describe('RuleMigrationsDataRulesClient', () => {
   });
 
   describe('saveError', () => {
-    test('should update rule migration status to failed', async () => {
-      const ruleMigration = {
+    test('should update dashboard migration status to failed', async () => {
+      const dashboardMigration = {
         id: 'doc1',
         migration_id: 'migration1',
-        original_rule: {
-          id: 'rule1',
+        original_dashboard: {
+          id: 'dashboard1',
           vendor: 'splunk',
-          title: 'Test Rule',
+          title: 'Test Dashboard',
           description: 'Test description',
-          query: 'test query',
-          query_language: 'spl',
+          data: 'test data',
+          format: 'xml',
         },
-        elastic_rule: {
-          id: 'elastic_rule1',
-          title: 'Elastic Rule',
-          query: 'elastic query',
+        elastic_dashboard: {
+          id: 'elastic_dashboard1',
+          title: 'Elastic Dashboard',
+          data: 'elastic data',
         },
         status: SiemMigrationStatus.PROCESSING,
         error: 'Translation failed',
@@ -439,25 +442,27 @@ describe('RuleMigrationsDataRulesClient', () => {
         created_by: 'testProfileUid',
       };
 
-      await ruleMigrationsDataRulesClient.saveError(ruleMigration as StoredRuleMigrationRule);
+      await dashboardMigrationsDataDashboardsClient.saveError(
+        dashboardMigration as StoredDashboardMigrationDashboard
+      );
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
+        index: '.kibana-siem-dashboard-migrations',
         id: 'doc1',
         doc: {
           migration_id: 'migration1',
-          original_rule: {
-            id: 'rule1',
+          original_dashboard: {
+            id: 'dashboard1',
             vendor: 'splunk',
-            title: 'Test Rule',
+            title: 'Test Dashboard',
             description: 'Test description',
-            query: 'test query',
-            query_language: 'spl',
+            data: 'test data',
+            format: 'xml',
           },
-          elastic_rule: {
-            id: 'elastic_rule1',
-            title: 'Elastic Rule',
-            query: 'elastic query',
+          elastic_dashboard: {
+            id: 'elastic_dashboard1',
+            title: 'Elastic Dashboard',
+            data: 'elastic data',
           },
           status: SiemMigrationStatus.FAILED,
           error: 'Translation failed',
@@ -472,13 +477,13 @@ describe('RuleMigrationsDataRulesClient', () => {
   });
 
   describe('releaseProcessing', () => {
-    test('should update processing rules back to pending', async () => {
+    test('should update processing dashboards back to pending', async () => {
       const migrationId = 'migration1';
 
-      await ruleMigrationsDataRulesClient.releaseProcessing(migrationId);
+      await dashboardMigrationsDataDashboardsClient.releaseProcessing(migrationId);
 
       expect(esClient.asInternalUser.updateByQuery).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
+        index: '.kibana-siem-dashboard-migrations',
         query: {
           bool: {
             filter: [
@@ -494,17 +499,22 @@ describe('RuleMigrationsDataRulesClient', () => {
   });
 
   describe('updateStatus', () => {
-    test('should update rule migration status with filters', async () => {
+    test('should update dashboard migration status with filters', async () => {
       const migrationId = 'migration1';
       const filter = { status: SiemMigrationStatus.PENDING };
       const statusToUpdate = SiemMigrationStatus.PROCESSING;
 
-      await ruleMigrationsDataRulesClient.updateStatus(migrationId, filter, statusToUpdate, {
-        refresh: true,
-      });
+      await dashboardMigrationsDataDashboardsClient.updateStatus(
+        migrationId,
+        filter,
+        statusToUpdate,
+        {
+          refresh: true,
+        }
+      );
 
       expect(esClient.asInternalUser.updateByQuery).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
+        index: '.kibana-siem-dashboard-migrations',
         query: {
           bool: {
             filter: [
@@ -524,10 +534,14 @@ describe('RuleMigrationsDataRulesClient', () => {
       esClient.asInternalUser.updateByQuery = jest.fn().mockRejectedValue(error);
 
       await expect(
-        ruleMigrationsDataRulesClient.updateStatus(migrationId, {}, SiemMigrationStatus.COMPLETED)
+        dashboardMigrationsDataDashboardsClient.updateStatus(
+          migrationId,
+          {},
+          SiemMigrationStatus.COMPLETED
+        )
       ).rejects.toThrow('UpdateByQuery failed');
       expect(logger.error).toHaveBeenCalledWith(
-        'Error updating migration rule status: UpdateByQuery failed'
+        'Error updating migration dashboard status: UpdateByQuery failed'
       );
     });
   });
@@ -548,19 +562,17 @@ describe('RuleMigrationsDataRulesClient', () => {
               ],
             },
             installable: { doc_count: 6 },
-            prebuilt: { doc_count: 4 },
-            missing_index: { doc_count: 2 },
           },
           failed: { doc_count: 2 },
         },
       };
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
-      const result = await ruleMigrationsDataRulesClient.getTranslationStats(migrationId);
+      const result = await dashboardMigrationsDataDashboardsClient.getTranslationStats(migrationId);
 
       // make sure the search is being called with correct query
       expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
+        index: '.kibana-siem-dashboard-migrations',
         query: {
           bool: {
             filter: [{ term: { migration_id: 'migration1' } }],
@@ -575,17 +587,16 @@ describe('RuleMigrationsDataRulesClient', () => {
                 filter: {
                   bool: {
                     must: [
-                      { term: { translation_result: MigrationTranslationResult.FULL } },
+                      {
+                        terms: {
+                          translation_result: [
+                            MigrationTranslationResult.FULL,
+                            MigrationTranslationResult.PARTIAL,
+                          ],
+                        },
+                      },
                       { bool: { must_not: dsl.isInstalled() } },
                     ],
-                  },
-                },
-              },
-              prebuilt: { filter: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } },
-              missing_index: {
-                filter: {
-                  query_string: {
-                    query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"`,
                   },
                 },
               },
@@ -598,7 +609,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       expect(result).toEqual({
         id: 'migration1',
-        rules: {
+        dashboards: {
           total: 10,
           success: {
             total: 8,
@@ -608,8 +619,6 @@ describe('RuleMigrationsDataRulesClient', () => {
               [MigrationTranslationResult.UNTRANSLATABLE]: 1,
             },
             installable: 6,
-            prebuilt: 4,
-            missing_index: 2,
           },
           failed: 2,
         },
@@ -621,11 +630,11 @@ describe('RuleMigrationsDataRulesClient', () => {
       const error = new Error('Search failed');
       esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
 
-      await expect(ruleMigrationsDataRulesClient.getTranslationStats(migrationId)).rejects.toThrow(
-        'Search failed'
-      );
+      await expect(
+        dashboardMigrationsDataDashboardsClient.getTranslationStats(migrationId)
+      ).rejects.toThrow('Search failed');
       expect(logger.error).toHaveBeenCalledWith(
-        'Error getting rule migrations stats: Search failed'
+        'Error getting dashboard migrations stats: Search failed'
       );
     });
   });
@@ -651,7 +660,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
 
-      const result = await ruleMigrationsDataRulesClient.getStats(migrationId);
+      const result = await dashboardMigrationsDataDashboardsClient.getStats(migrationId);
 
       expect(result).toEqual({
         id: 'migration1',
@@ -693,7 +702,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
 
-      const result = await ruleMigrationsDataRulesClient.getAllStats();
+      const result = await dashboardMigrationsDataDashboardsClient.getAllStats();
 
       expect(result).toEqual([
         {
@@ -712,30 +721,6 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
   });
 
-  describe('getAllIntegrationsStats', () => {
-    test('should return integrations stats', async () => {
-      const mockResponse = {
-        aggregations: {
-          integrationIds: {
-            buckets: [
-              { key: 'integration1', doc_count: 10 },
-              { key: 'integration2', doc_count: 5 },
-            ],
-          },
-        },
-      };
-
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
-
-      const result = await ruleMigrationsDataRulesClient.getAllIntegrationsStats();
-
-      expect(result).toEqual([
-        { id: 'integration1', total_rules: 10 },
-        { id: 'integration2', total_rules: 5 },
-      ]);
-    });
-  });
-
   describe('prepareDelete', () => {
     test('should prepare bulk delete operations', async () => {
       const migrationId = 'migration1';
@@ -745,18 +730,18 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             id: 'doc1',
             migration_id: 'migration1',
-            original_rule: {
-              id: 'rule1',
+            original_dashboard: {
+              id: 'dashboard1',
               vendor: 'splunk',
-              title: 'Test Rule 1',
+              title: 'Test Dashboard 1',
               description: 'Test description 1',
-              query: 'test query 1',
-              query_language: 'spl',
+              data: 'test data 1',
+              format: 'xml',
             },
-            elastic_rule: {
-              id: 'elastic_rule1',
-              title: 'Elastic Rule 1',
-              query: 'elastic query 1',
+            elastic_dashboard: {
+              id: 'elastic_dashboard1',
+              title: 'Elastic Dashboard 1',
+              data: 'elastic data 1',
             },
             status: SiemMigrationStatus.COMPLETED,
             '@timestamp': '2025-08-04T00:00:00.000Z',
@@ -765,146 +750,42 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             id: 'doc2',
             migration_id: 'migration1',
-            original_rule: {
-              id: 'rule2',
+            original_dashboard: {
+              id: 'dashboard2',
               vendor: 'splunk',
-              title: 'Test Rule 2',
+              title: 'Test Dashboard 2',
               description: 'Test description 2',
-              query: 'test query 2',
-              query_language: 'spl',
+              data: 'test data 2',
+              format: 'xml',
             },
-            elastic_rule: {
-              id: 'elastic_rule2',
-              title: 'Elastic Rule 2',
-              query: 'elastic query 2',
+            elastic_dashboard: {
+              id: 'elastic_dashboard2',
+              title: 'Elastic Dashboard 2',
+              data: 'elastic data 2',
             },
             status: SiemMigrationStatus.PENDING,
             '@timestamp': '2025-08-04T00:00:00.000Z',
             created_by: 'testProfileUid',
           },
-        ] as StoredRuleMigrationRule[],
+        ] as StoredDashboardMigrationDashboard[],
       };
-      jest.spyOn(ruleMigrationsDataRulesClient, 'get').mockResolvedValue(mockGetResponse);
+      jest.spyOn(dashboardMigrationsDataDashboardsClient, 'get').mockResolvedValue(mockGetResponse);
 
-      const result = await ruleMigrationsDataRulesClient.prepareDelete(migrationId);
+      const result = await dashboardMigrationsDataDashboardsClient.prepareDelete(migrationId);
 
       expect(result).toEqual([
-        { delete: { _id: 'doc1', _index: '.kibana-siem-rule-migrations' } },
-        { delete: { _id: 'doc2', _index: '.kibana-siem-rule-migrations' } },
+        { delete: { _id: 'doc1', _index: '.kibana-siem-dashboard-migrations' } },
+        { delete: { _id: 'doc2', _index: '.kibana-siem-dashboard-migrations' } },
       ]);
-    });
-  });
-
-  describe('updateIndexPattern', () => {
-    test('should update index pattern for specific rule IDs', async () => {
-      const id = 'migration1';
-      const indexPattern = 'new-index-*';
-      const translatedRuleIds = ['rule1', 'rule2'];
-      const mockResponse = { updated: 2 };
-
-      esClient.asInternalUser.updateByQuery = jest.fn().mockResolvedValue(mockResponse);
-
-      const result = await ruleMigrationsDataRulesClient.updateIndexPattern(
-        id,
-        indexPattern,
-        translatedRuleIds
-      );
-
-      expect(esClient.asInternalUser.updateByQuery).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
-        script: {
-          source: expect.stringContaining(
-            `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
-                ctx._source.elastic_rule.query = newQuery;`
-          ),
-          lang: 'painless',
-          params: {
-            indexPattern,
-          },
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  migration_id: 'migration1',
-                },
-              },
-              {
-                terms: {
-                  _id: ['rule1', 'rule2'],
-                },
-              },
-              dsl.isMissingIndex(),
-            ],
-          },
-        },
-        refresh: true,
-      });
-      expect(result).toBe(2);
-    });
-
-    test('should update index pattern for all rules in migration', async () => {
-      const id = 'migration1';
-      const indexPattern = 'new-index-*';
-      const mockResponse = { updated: 5 };
-
-      esClient.asInternalUser.updateByQuery = jest.fn().mockResolvedValue(mockResponse);
-
-      const result = await ruleMigrationsDataRulesClient.updateIndexPattern(id, indexPattern);
-
-      expect(esClient.asInternalUser.updateByQuery).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
-        script: {
-          source: expect.stringContaining(
-            `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
-                ctx._source.elastic_rule.query = newQuery;`
-          ),
-          lang: 'painless',
-          params: {
-            indexPattern,
-          },
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  migration_id: 'migration1',
-                },
-              },
-              dsl.isMissingIndex(),
-            ],
-          },
-        },
-        refresh: true,
-      });
-      expect(result).toBe(5);
-    });
-
-    test('should throw an error if updateByQuery fails', async () => {
-      const id = 'migration1';
-      const indexPattern = 'new-index-*';
-      const error = new Error('UpdateByQuery failed');
-      esClient.asInternalUser.updateByQuery = jest.fn().mockRejectedValue(error);
-
-      await expect(
-        ruleMigrationsDataRulesClient.updateIndexPattern(id, indexPattern)
-      ).rejects.toThrow('UpdateByQuery failed');
-      expect(logger.error).toHaveBeenCalledWith(
-        'Error updating index pattern for migration migration1: Error: UpdateByQuery failed'
-      );
     });
   });
 
   describe('private methods', () => {
     describe('getFilterQuery', () => {
       const migrationId = 'migration1';
-      const getFilterQuery = (filters: RuleMigrationFilters) => {
+      const getFilterQuery = (filters: DashboardMigrationFilters) => {
         return (
-          ruleMigrationsDataRulesClient as unknown as { getFilterQuery: Function }
+          dashboardMigrationsDataDashboardsClient as unknown as { getFilterQuery: Function }
         ).getFilterQuery(migrationId, filters);
       };
 
@@ -920,7 +801,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       test('should build filter query with searchTerm filter', () => {
         const result = getFilterQuery({ searchTerm: 'test' });
-        expect(result.bool.filter[1]).toEqual({ match: { 'elastic_rule.title': 'test' } });
+        expect(result.bool.filter[1]).toEqual({ match: { 'elastic_dashboard.title': 'test' } });
       });
 
       test('should build filter query with multiple statuses', () => {
@@ -940,13 +821,13 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       test('should build filter query with installed filter', () => {
         const result = getFilterQuery({ installed: true });
-        expect(result.bool.filter[1]).toEqual({ exists: { field: 'elastic_rule.id' } });
+        expect(result.bool.filter[1]).toEqual({ exists: { field: 'elastic_dashboard.id' } });
       });
 
       test('should build filter query with not installed filter', () => {
         const result = getFilterQuery({ installed: false });
         expect(result.bool.filter[1]).toEqual({
-          bool: { must_not: { exists: { field: 'elastic_rule.id' } } },
+          bool: { must_not: { exists: { field: 'elastic_dashboard.id' } } },
         });
       });
 
@@ -955,8 +836,15 @@ describe('RuleMigrationsDataRulesClient', () => {
         expect(result.bool.filter[1]).toEqual({
           bool: {
             must: [
-              { term: { translation_result: MigrationTranslationResult.FULL } },
-              { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+              {
+                terms: {
+                  translation_result: [
+                    MigrationTranslationResult.FULL,
+                    MigrationTranslationResult.PARTIAL,
+                  ],
+                },
+              },
+              { bool: { must_not: { exists: { field: 'elastic_dashboard.id' } } } },
             ],
           },
         });
@@ -969,26 +857,19 @@ describe('RuleMigrationsDataRulesClient', () => {
             should: [
               {
                 bool: {
-                  must_not: { term: { translation_result: MigrationTranslationResult.FULL } },
+                  must_not: {
+                    terms: {
+                      translation_result: [
+                        MigrationTranslationResult.FULL,
+                        MigrationTranslationResult.PARTIAL,
+                      ],
+                    },
+                  },
                 },
               },
-              { exists: { field: 'elastic_rule.id' } },
+              { exists: { field: 'elastic_dashboard.id' } },
             ],
           },
-        });
-      });
-
-      test('should build filter query with prebuilt filter', () => {
-        const result = getFilterQuery({ prebuilt: true });
-        expect(result.bool.filter[1]).toEqual({
-          exists: { field: 'elastic_rule.prebuilt_rule_id' },
-        });
-      });
-
-      test('should build filter query with not prebuilt filter', () => {
-        const result = getFilterQuery({ prebuilt: false });
-        expect(result.bool.filter[1]).toEqual({
-          bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } },
         });
       });
 
@@ -1054,20 +935,12 @@ describe('RuleMigrationsDataRulesClient', () => {
         });
       });
 
-      test('should build filter query with missingIndex filter', () => {
-        const result = getFilterQuery({ missingIndex: true });
-        expect(result.bool.filter[1]).toEqual({
-          query_string: { query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"` },
-        });
-      });
-
       test('should build filter query with multiple conditions', () => {
         const filters = {
           ids: ['doc1', 'doc2'],
           searchTerm: 'test',
           installed: true,
           installable: true,
-          prebuilt: false,
           failed: false,
           fullyTranslated: true,
           partiallyTranslated: false,
@@ -1075,7 +948,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         };
 
         // @ts-expect-error protected function
-        const result = ruleMigrationsDataRulesClient.getFilterQuery(migrationId, filters);
+        const result = dashboardMigrationsDataDashboardsClient.getFilterQuery(migrationId, filters);
 
         expect(result).toEqual({
           bool: {
@@ -1096,17 +969,23 @@ describe('RuleMigrationsDataRulesClient', () => {
                   },
                 },
               },
-              { match: { 'elastic_rule.title': 'test' } },
-              { exists: { field: 'elastic_rule.id' } },
+              { match: { 'elastic_dashboard.title': 'test' } },
+              { exists: { field: 'elastic_dashboard.id' } },
               {
                 bool: {
                   must: [
-                    { term: { translation_result: MigrationTranslationResult.FULL } },
-                    { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+                    {
+                      terms: {
+                        translation_result: [
+                          MigrationTranslationResult.FULL,
+                          MigrationTranslationResult.PARTIAL,
+                        ],
+                      },
+                    },
+                    { bool: { must_not: { exists: { field: 'elastic_dashboard.id' } } } },
                   ],
                 },
               },
-              { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
             ],
           },
         });
@@ -1125,7 +1004,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         };
 
         const result = (
-          ruleMigrationsDataRulesClient as unknown as { statusAggCounts: Function }
+          dashboardMigrationsDataDashboardsClient as unknown as { statusAggCounts: Function }
         ).statusAggCounts(statusAgg);
 
         expect(result).toEqual({
@@ -1142,7 +1021,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         };
 
         const result = (
-          ruleMigrationsDataRulesClient as unknown as { statusAggCounts: Function }
+          dashboardMigrationsDataDashboardsClient as unknown as { statusAggCounts: Function }
         ).statusAggCounts(statusAgg);
 
         expect(result).toEqual({
@@ -1165,7 +1044,9 @@ describe('RuleMigrationsDataRulesClient', () => {
         };
 
         const result = (
-          ruleMigrationsDataRulesClient as unknown as { translationResultAggCount: Function }
+          dashboardMigrationsDataDashboardsClient as unknown as {
+            translationResultAggCount: Function;
+          }
         ).translationResultAggCount(resultAgg);
 
         expect(result).toEqual({
@@ -1181,7 +1062,9 @@ describe('RuleMigrationsDataRulesClient', () => {
         };
 
         const result = (
-          ruleMigrationsDataRulesClient as unknown as { translationResultAggCount: Function }
+          dashboardMigrationsDataDashboardsClient as unknown as {
+            translationResultAggCount: Function;
+          }
         ).translationResultAggCount(resultAgg);
 
         expect(result).toEqual({

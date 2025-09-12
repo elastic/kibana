@@ -60,7 +60,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
         filter: { term: { status: SiemMigrationStatus.COMPLETED } },
         aggs: {
           result: { terms: { field: 'translation_result' } },
-          installable: { filter: { bool: { must: dsl.isInstallable() } } },
+          installable: { filter: dsl.isInstallable() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
