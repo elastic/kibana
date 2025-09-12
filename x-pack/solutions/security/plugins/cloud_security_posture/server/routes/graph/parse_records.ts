@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   EdgeColor,
   EdgeDataModel,
@@ -82,6 +83,16 @@ export const parseRecords = (
   };
 };
 
+const getEntityDocuments = (
+  entityId: string,
+  nodesDataArray: NodeDocumentDataModel[]
+): NodeDocumentDataModel[] => {
+  // Filter documents that match this entity ID
+  const matchingDocs = nodesDataArray.filter((doc) => doc.id === entityId);
+
+  return matchingDocs.map((doc) => ({ ...doc, type: DOCUMENT_TYPE_ENTITY }));
+};
+
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
@@ -137,14 +148,28 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       }
     });
 
-    // Create entity nodes
-    [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
+    // Create entity nodes for actors
+    actorIdsArray.forEach((id) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
+          documentsData: getEntityDocuments(id, actorsDocDataArray),
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
+          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray]),
+        };
+      }
+    });
+
+    // Create entity nodes for targets
+    targetIdsArraySafe.forEach((id) => {
+      if (nodesMap[id] === undefined) {
+        nodesMap[id] = {
+          documentsData: getEntityDocuments(id, targetsDocDataArray),
+          id,
+          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
+          color: 'primary',
+          ...determineEntityNodeVisualProps(id, [...targetsDocDataArray]),
         };
       }
     });
