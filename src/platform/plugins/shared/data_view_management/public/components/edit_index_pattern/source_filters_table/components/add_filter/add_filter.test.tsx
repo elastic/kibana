@@ -32,7 +32,11 @@ jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
 const renderAddFilterComponent = (
   { onAddFilter }: RenderAddFilterComponentProps = { onAddFilter: jest.fn() }
 ) => {
-  return render(<IntlProvider locale="en"><AddFilter onAddFilter={onAddFilter} /></IntlProvider>);
+  return render(
+    <IntlProvider locale="en">
+      <AddFilter onAddFilter={onAddFilter} />
+    </IntlProvider>
+  );
 };
 
 describe('AddFilter', () => {
