@@ -73,6 +73,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         },
         onReset: (lastSaved) => {
           selections.reinitializeState(lastSaved?.rawState);
+          titlesManager.reinitializeState(lastSaved?.rawState);
         },
       });
 
