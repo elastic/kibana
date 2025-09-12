@@ -18,7 +18,7 @@ import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
-import type { DiscoverSessionTab } from '../server';
+import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '../server';
 import type { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
@@ -71,7 +71,7 @@ export interface SavedSearchAttributes {
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
 
-  tabs: DiscoverSessionTab[];
+  tabs: DiscoverSessionTabSchema[];
 }
 
 /** @internal **/
@@ -98,3 +98,43 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
 export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
   serializedSearchSource?: SerializedSearchSourceFields;
 };
+
+export interface DiscoverSessionTab {
+  id: string;
+  label: string;
+  sort: SortOrder[];
+  columns: string[];
+  grid: DiscoverGridSettings;
+  hideChart: boolean;
+  isTextBasedQuery: boolean;
+  usesAdHocDataView?: boolean;
+  serializedSearchSource: SerializedSearchSourceFields;
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
+  rowHeight?: number;
+  headerRowHeight?: number;
+  timeRestore?: boolean;
+  timeRange?: Pick<TimeRange, 'from' | 'to'>;
+  refreshInterval?: RefreshInterval;
+  rowsPerPage?: number;
+  sampleSize?: number;
+  breakdownField?: string;
+  density?: DataGridDensity;
+  visContext?: VisContextUnmapped;
+}
+
+export interface DiscoverSession {
+  id: string;
+  title: string;
+  description: string;
+  tabs: DiscoverSessionTab[];
+  managed: boolean;
+  tags?: string[] | undefined;
+  references?: SavedObjectReference[];
+  sharingSavedObjectProps?: {
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+    errorJSON?: string;
+  };
+}

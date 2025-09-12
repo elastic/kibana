@@ -28,6 +28,7 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedQualityIssue,
+    view,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -101,6 +102,11 @@ export const useDatasetQualityDetailsState = () => {
 
   const canUserReadFailureStore = Boolean(
     dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
+  );
+
+  const canUserManageFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]
+      ?.canManageFailureStore
   );
 
   const dataStreamDetails = useSelector(service, (state) =>
@@ -212,7 +218,9 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    view,
     defaultRetentionPeriod,
     customRetentionPeriod,
+    canUserManageFailureStore,
   };
 };
