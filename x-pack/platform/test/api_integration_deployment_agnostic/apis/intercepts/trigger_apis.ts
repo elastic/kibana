@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { interceptTriggerRecordSavedObject } from '@kbn/intercepts-plugin/server/saved_objects';
 import { TRIGGER_INFO_API_ROUTE } from '@kbn/intercepts-plugin/common/constants';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

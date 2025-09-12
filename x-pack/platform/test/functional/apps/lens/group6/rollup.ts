@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/lens/rollup/data');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/config.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/rollup/config.json'
       );
     });
 

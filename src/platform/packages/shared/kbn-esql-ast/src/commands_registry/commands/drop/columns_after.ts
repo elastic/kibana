@@ -8,13 +8,12 @@
  */
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
-import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import type { ESQLColumnData } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
-  context?: ICommandContext
+  previousColumns: ESQLColumnData[],
+  query: string
 ) => {
   const columnsToDrop: string[] = [];
 

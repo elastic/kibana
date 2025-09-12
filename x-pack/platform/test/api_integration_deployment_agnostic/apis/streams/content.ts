@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
-import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import { Streams, FieldDefinition, RoutingDefinition } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   disableStreams,
   enableStreams,
@@ -24,17 +25,24 @@ import {
   putStream,
 } from './helpers/requests';
 
-const upsertRequest = (fields: FieldDefinition, routing: RoutingDefinition[]) => ({
-  dashboards: [],
-  queries: [],
+const upsertRequest = ({
+  fields = {},
+  routing = [],
+  queries = [],
+}: {
+  fields?: FieldDefinition;
+  routing?: RoutingDefinition[];
+  queries?: StreamQuery[];
+}) => ({
+  ...emptyAssets,
+  queries,
   stream: {
     description: 'Test stream',
     ingest: {
-      processing: [],
-      wired: {
-        fields,
-        routing,
+      processing: {
+        steps: [],
       },
+      wired: { fields, routing },
       lifecycle: { inherit: {} },
     },
   },
@@ -42,64 +50,90 @@ const upsertRequest = (fields: FieldDefinition, routing: RoutingDefinition[]) =>
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const kibanaServer = getService('kibanaServer');
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Content packs', () => {
     before(async () => {
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+      });
+
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
-      await putStream(apiClient, 'logs.branch_a.child1.nested', upsertRequest({}, []));
+      await putStream(
+        apiClient,
+        'logs.branch_a.child1.nested',
+        upsertRequest({
+          queries: [
+            { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+          ],
+        })
+      );
       await putStream(
         apiClient,
         'logs.branch_a.child1',
-        upsertRequest({}, [
-          {
-            destination: 'logs.branch_a.child1.nested',
-            if: { field: 'resource.attributes.hello', operator: 'eq', value: 'yes' },
-          },
-        ])
+        upsertRequest({
+          routing: [
+            {
+              destination: 'logs.branch_a.child1.nested',
+              where: { field: 'resource.attributes.hello', eq: 'yes' },
+              status: 'enabled',
+            },
+          ],
+        })
       );
-      await putStream(apiClient, 'logs.branch_a.child2', upsertRequest({}, []));
-      await putStream(apiClient, 'logs.branch_b.child1', upsertRequest({}, []));
-      await putStream(apiClient, 'logs.branch_b.child2', upsertRequest({}, []));
+      await putStream(apiClient, 'logs.branch_a.child2', upsertRequest({}));
+      await putStream(apiClient, 'logs.branch_b.child1', upsertRequest({}));
+      await putStream(apiClient, 'logs.branch_b.child2', upsertRequest({}));
       await putStream(
         apiClient,
         'logs.branch_a',
-        upsertRequest(
-          {
+        upsertRequest({
+          fields: {
             'resource.attributes.foo.bar': { type: 'keyword' },
           },
-          [
+          routing: [
             {
               destination: 'logs.branch_a.child1',
-              if: { field: 'resource.attributes.foo', operator: 'eq', value: 'bar' },
+              where: { field: 'resource.attributes.foo', eq: 'bar' },
+              status: 'enabled',
             },
             {
               destination: 'logs.branch_a.child2',
-              if: { field: 'resource.attributes.bar', operator: 'eq', value: 'foo' },
+              where: { field: 'resource.attributes.bar', eq: 'foo' },
+              status: 'enabled',
             },
-          ]
-        )
+          ],
+        })
       );
       await putStream(
         apiClient,
         'logs.branch_b',
-        upsertRequest({}, [
-          {
-            destination: 'logs.branch_b.child1',
-            if: { field: 'resource.attributes.foo', operator: 'eq', value: 'bar' },
-          },
-          {
-            destination: 'logs.branch_b.child2',
-            if: { field: 'resource.attributes.bar', operator: 'eq', value: 'foo' },
-          },
-        ])
+        upsertRequest({
+          routing: [
+            {
+              destination: 'logs.branch_b.child1',
+              where: { field: 'resource.attributes.foo', eq: 'bar' },
+              status: 'enabled',
+            },
+            {
+              destination: 'logs.branch_b.child2',
+              where: { field: 'resource.attributes.bar', eq: 'foo' },
+              status: 'enabled',
+            },
+          ],
+        })
       );
     });
 
     after(async () => {
       await disableStreams(apiClient);
+
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      });
     });
 
     describe('Export', () => {
@@ -108,7 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'logs_content_pack',
           description: 'Content pack with all logs streams',
           version: '1.0.0',
-          include: { all: {} },
+          include: { objects: { all: {} } },
         };
 
         const archiveBuffer = await exportContent(apiClient, 'logs', exportBody);
@@ -145,7 +179,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
-              streams: ['branch_a.child1.nested'],
+              queries: [],
+              routing: [
+                {
+                  destination: 'branch_a',
+                  objects: {
+                    queries: [],
+                    routing: [
+                      {
+                        destination: 'branch_a.child1',
+                        objects: {
+                          queries: [],
+                          routing: [
+                            {
+                              destination: 'branch_a.child1.nested',
+                              objects: { queries: [{ id: 'my-error-query' }], routing: [] },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           },
         };
@@ -170,14 +226,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (entry): entry is ContentPackStream =>
             entry.type === 'stream' && entry.name === ROOT_STREAM_ID
         )!;
-        expect(rootEntry.request.stream.ingest.wired.routing.length).to.eql(1);
-        expect(rootEntry.request.stream.ingest.wired.routing[0]).to.eql(
+        expect(rootEntry.request.stream.ingest.wired.routing).to.eql([
           {
             destination: 'branch_a',
-            if: { never: {} },
+            where: { never: {} },
+            status: 'disabled',
           },
-          'it only includes the routing of the exported children'
-        );
+        ]);
+        const leafEntry = contentPack.entries.find(
+          (entry): entry is ContentPackStream =>
+            entry.type === 'stream' && entry.name === 'branch_a.child1.nested'
+        )!;
+        expect(leafEntry.request.queries).to.eql([
+          {
+            id: 'my-error-query',
+            title: 'error query',
+            kql: { query: 'message: ERROR' },
+          },
+        ]);
       });
 
       it('fails when trying to export a stream thats not a descendant', async () => {
@@ -185,7 +251,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'nonexistent_stream_pack',
           description: 'Content pack for non-existent stream',
           version: '1.0.0',
-          include: { objects: { streams: ['branch_b.child1'] } },
+          include: {
+            objects: {
+              queries: [],
+              routing: [
+                {
+                  destination: 'branch_b',
+                  objects: {
+                    queries: [],
+                    routing: [
+                      { destination: 'branch_b.child1', objects: { queries: [], routing: [] } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         };
 
         await exportContent(apiClient, 'logs.branch_a', exportBody, 400);
@@ -209,13 +290,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'ok',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
             {
@@ -225,13 +307,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'a'.repeat(twoMB),
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
           ]
@@ -241,7 +324,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           'logs',
           {
-            include: { all: {} },
+            include: { objects: { all: {} } },
             content: Readable.from(archive),
             filename: 'content_pack-1.0.0.zip',
           },
@@ -258,14 +341,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'branch_a_child1_content_pack',
           description: 'Content pack from branch_a with nested child',
           version: '1.0.0',
-          include: { objects: { streams: ['nested'] } },
+          include: {
+            objects: {
+              queries: [],
+              routing: [
+                {
+                  destination: 'nested',
+                  objects: { queries: [{ id: 'my-error-query' }], routing: [] },
+                },
+              ],
+            },
+          },
         };
         const archiveBuffer = await exportContent(apiClient, 'logs.branch_a.child1', exportBody);
 
-        await putStream(apiClient, 'logs.branch_c', upsertRequest({}, []));
+        await putStream(apiClient, 'logs.branch_c', upsertRequest({}));
 
         const importResponse = await importContent(apiClient, 'logs.branch_c', {
-          include: { all: {} },
+          include: { objects: { all: {} } },
           content: Readable.from(archiveBuffer),
           filename: 'branch_a_content_pack-1.0.0.zip',
         });
@@ -273,17 +366,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updatedStream = (await getStream(
           apiClient,
-          'logs.branch_c',
-          200
+          'logs.branch_c'
         )) as Streams.WiredStream.GetResponse;
 
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_c.nested',
-            if: {
+            status: 'enabled',
+            where: {
               field: 'resource.attributes.hello',
-              operator: 'eq',
-              value: 'yes',
+              eq: 'yes',
             },
           },
         ]);
@@ -291,6 +383,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.fields['resource.attributes.foo.bar']).to.eql({
           type: 'keyword',
         });
+
+        // check that the created stream includes the queries
+        const createdStream = (await getStream(
+          apiClient,
+          'logs.branch_c.nested'
+        )) as Streams.WiredStream.GetResponse;
+        expect(createdStream.queries).to.eql([
+          {
+            id: 'my-error-query',
+            title: 'error query',
+            kql: { query: 'message: ERROR' },
+          },
+        ]);
       });
 
       it('imports selected streams', async () => {
@@ -298,17 +403,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'complete_tree',
           description: 'Content pack from logs',
           version: '1.0.0',
-          include: { all: {} },
+          include: { objects: { all: {} } },
         };
         const archiveBuffer = await exportContent(apiClient, 'logs', exportBody);
 
-        await putStream(apiClient, 'logs.branch_d', upsertRequest({}, []));
+        await putStream(apiClient, 'logs.branch_d', upsertRequest({}));
 
         const importResponse = await importContent(apiClient, 'logs.branch_d', {
-          include: { objects: { streams: ['branch_b.child1'] } },
+          include: {
+            objects: {
+              queries: [],
+              routing: [
+                {
+                  destination: 'branch_b',
+                  objects: {
+                    queries: [],
+                    routing: [
+                      { destination: 'branch_b.child1', objects: { queries: [], routing: [] } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
           content: Readable.from(archiveBuffer),
           filename: 'complete_tree-1.0.0.zip',
         });
+
         expect(importResponse.result.created).to.eql([
           'logs.branch_d.branch_b',
           'logs.branch_d.branch_b.child1',
@@ -316,14 +437,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updatedStream = (await getStream(
           apiClient,
-          'logs.branch_d',
-          200
+          'logs.branch_d'
         )) as Streams.WiredStream.GetResponse;
 
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_d.branch_b',
-            if: { never: {} },
+            where: { never: {} },
+            status: 'disabled',
           },
         ]);
       });
@@ -344,7 +465,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: '',
                     ingest: {
-                      processing: [],
+                      processing: {
+                        steps: [],
+                      },
                       wired: {
                         fields,
                         routing: [],
@@ -352,8 +475,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       lifecycle: { inherit: {} },
                     },
                   },
-                  dashboards: [],
-                  queries: [],
+                  ...emptyAssets,
                 },
               },
             ]
@@ -366,7 +488,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           targetStreamName,
           {
-            include: { all: {} },
+            include: { objects: { all: {} } },
             content: Readable.from(
               await generateWithMappings({
                 'resource.attributes.foo.bar': { type: 'long' },
@@ -378,7 +500,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Cannot change mapping of [resource.attributes.foo.bar]'
+          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
         );
 
         // fails when field configuration changes
@@ -386,7 +508,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           targetStreamName,
           {
-            include: { all: {} },
+            include: { objects: { all: {} } },
             content: Readable.from(
               await generateWithMappings({
                 'resource.attributes.foo.bar': { type: 'keyword', boost: 2.0 },
@@ -398,7 +520,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Cannot change mapping of [resource.attributes.foo.bar]'
+          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
         );
 
         // succeeds when the field configuration is unchanged
@@ -406,7 +528,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           targetStreamName,
           {
-            include: { all: {} },
+            include: { objects: { all: {} } },
             content: Readable.from(
               await generateWithMappings({
                 'resource.attributes.foo.bar': { type: 'keyword' },
@@ -420,7 +542,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('fails when importing overlapping child', async () => {
         const targetStreamName = 'logs.overlapping.child';
-        await putStream(apiClient, targetStreamName, upsertRequest({}, []));
+        await putStream(apiClient, targetStreamName, upsertRequest({}));
 
         const archive = await generateArchive(
           {
@@ -436,21 +558,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: {
                       fields: {},
                       routing: [
                         {
                           destination: 'child',
-                          if: { never: {} },
+                          where: { never: {} },
+                          status: 'disabled',
                         },
                       ],
                     },
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
             {
@@ -460,13 +584,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
-                dashboards: [],
-                queries: [],
+                ...emptyAssets,
               },
             },
           ]
@@ -476,7 +601,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           'logs.overlapping',
           {
-            include: { all: {} },
+            include: { objects: { all: {} } },
             content: Readable.from(archive),
             filename: 'overlap-1.0.0.zip',
           },
@@ -484,7 +609,58 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Child stream [logs.overlapping.child] already exists'
+          '[logs.overlapping.child] already exists'
+        );
+      });
+
+      it('fails when importing existing query', async () => {
+        const archive = await generateArchive(
+          {
+            name: 'content_pack',
+            description: 'with overlapping query',
+            version: '1.0.0',
+          },
+          [
+            {
+              type: 'stream',
+              name: ROOT_STREAM_ID,
+              request: {
+                stream: {
+                  description: '',
+                  ingest: {
+                    processing: {
+                      steps: [],
+                    },
+                    wired: {
+                      fields: {},
+                      routing: [],
+                    },
+                    lifecycle: { inherit: {} },
+                  },
+                },
+                ...emptyAssets,
+                queries: [
+                  { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+                ],
+                rules: [],
+              },
+            },
+          ]
+        );
+
+        const response = await importContent(
+          apiClient,
+          'logs.branch_a.child1.nested',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'overlap-1.0.0.zip',
+          },
+          409
+        );
+
+        expect((response as unknown as { message: string }).message).to.eql(
+          'Query [my-error-query | error query] already exists on [logs.branch_a.child1.nested]'
         );
       });
     });

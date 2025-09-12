@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { EnsurePackageResult } from '@kbn/fleet-plugin/server/services/epm/packages/install';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { ENDPOINT_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { findLatestPackageVersion } from './find_latest_package_version';
+import { ensureInstalledPackage } from './ensure_installed_package';
 
-export async function installEndpointPackage(context: SecuritySolutionApiRequestHandlerContext) {
-  const pkgVersion = await findLatestPackageVersion(context, ENDPOINT_PACKAGE_NAME);
+export async function installEndpointPackage(
+  context: SecuritySolutionApiRequestHandlerContext,
+  logger: Logger
+): Promise<EnsurePackageResult> {
+  const pkgVersion = await findLatestPackageVersion(context, ENDPOINT_PACKAGE_NAME, logger);
 
-  return context.getInternalFleetServices().packages.ensureInstalledPackage({
-    pkgName: ENDPOINT_PACKAGE_NAME,
-    pkgVersion,
-  });
+  return ensureInstalledPackage(context, ENDPOINT_PACKAGE_NAME, pkgVersion, logger);
 }

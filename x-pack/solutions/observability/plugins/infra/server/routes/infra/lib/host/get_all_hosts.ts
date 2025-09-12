@@ -8,15 +8,12 @@
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { BasicMetricValueRT } from '@kbn/metrics-data-access-plugin/server';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { InfraEntityMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
 import type { GetHostParameters } from '../types';
-import {
-  getFilterForEntityType,
-  getInventoryModelAggregations,
-  getDocumentsFilter,
-} from '../helpers/query';
+import { getInventoryModelAggregations, getDocumentsFilter } from '../helpers/query';
 
 export const getAllHosts = async ({
   infraMetricsClient,
@@ -27,7 +24,7 @@ export const getAllHosts = async ({
   metrics,
   hostNames,
   apmDataAccessServices,
-  schema,
+  schema = 'ecs',
 }: Pick<
   GetHostParameters,
   'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics' | 'schema'
@@ -35,6 +32,8 @@ export const getAllHosts = async ({
   hostNames: string[];
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
+  const inventoryModel = findInventoryModel('host');
+
   const metricAggregations = await getInventoryModelAggregations(
     'host',
     metrics.map((metric) => metric),
@@ -63,7 +62,7 @@ export const getAllHosts = async ({
     aggs: {
       // find hosts with metrics that are monitored by the system integration.
       monitoredHosts: {
-        filter: getFilterForEntityType('host'),
+        filter: { bool: { filter: [...(inventoryModel.nodeFilter?.({ schema }) ?? [])] } },
         aggs: {
           names: {
             terms: {

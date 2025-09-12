@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 export interface Dimension {
   accessor: number;

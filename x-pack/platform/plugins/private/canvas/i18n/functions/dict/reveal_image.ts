@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { revealImage } from '../../../canvas_plugin_src/functions/common/reveal_image';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory, Position } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
+import { Position } from '../../../types';
 import { BASE64, URL } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {

@@ -10,12 +10,8 @@ import { EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { css } from '@emotion/react';
 
 import { usePipelineProcessorsContext } from './context';
-import {
-  ProcessorsEmptyPrompt,
-  OnFailureProcessorsTitle,
-  ProcessorsHeader,
-  OnDoneLoadJsonHandler,
-} from './components';
+import type { OnDoneLoadJsonHandler } from './components';
+import { ProcessorsEmptyPrompt, OnFailureProcessorsTitle, ProcessorsHeader } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
 import './pipeline_editor.scss';

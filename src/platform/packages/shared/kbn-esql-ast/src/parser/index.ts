@@ -16,4 +16,6 @@ export {
   type ParseResult,
 } from './parser';
 
+export { TIME_SPAN_UNITS } from './constants';
+
 export { ESQLErrorListener } from './esql_error_listener';

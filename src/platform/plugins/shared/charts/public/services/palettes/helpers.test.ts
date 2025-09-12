@@ -8,7 +8,7 @@
  */
 
 import { workoutColorForValue } from './helpers';
-import { CustomPaletteState } from '../..';
+import type { CustomPaletteState } from '../..';
 
 describe('workoutColorForValue', () => {
   it('should return no color for empty value', () => {

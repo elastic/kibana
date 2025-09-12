@@ -8,9 +8,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { cloneDeep, isEmpty } from 'lodash';
-import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
-import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
-import {
+import type { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import type {
   ChildFieldName,
   ComboBoxOption,
   DataType,
@@ -39,8 +39,8 @@ import {
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
 } from '../constants';
 
-import { TreeItem } from '../components/tree';
-import { FieldConfig } from '../shared_imports';
+import type { TreeItem } from '../components/tree';
+import type { FieldConfig } from '../shared_imports';
 
 export const getUniqueId = () => uuidv4();
 

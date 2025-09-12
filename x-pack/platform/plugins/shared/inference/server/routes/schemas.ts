@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { Type, schema } from '@kbn/config-schema';
-import {
-  MessageRole,
-  ModelFamily,
-  ModelProvider,
-  ToolCall,
-  ToolChoiceType,
-} from '@kbn/inference-common';
-import { ChatCompleteRequestBody } from '../../common';
-import { PromptRequestBody } from '../../common/http_apis';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ToolCall } from '@kbn/inference-common';
+import { MessageRole, ModelFamily, ModelProvider, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompleteRequestBody } from '../../common';
+import type { PromptRequestBody } from '../../common/http_apis';
 
 export const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
   schema.object({
     toolCallId: schema.string(),
     function: schema.object({
       name: schema.string(),
-      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+      arguments: schema.recordOf(schema.string(), schema.any()),
     }),
   })
 );

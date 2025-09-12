@@ -9,7 +9,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
-import { SeriesUrl } from '../types';
+import type { SeriesUrl } from '../types';
 
 interface Props {
   field: string;

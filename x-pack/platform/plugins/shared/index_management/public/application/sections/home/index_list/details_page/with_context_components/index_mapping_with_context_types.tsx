@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { IndexMappingProps } from '@kbn/index-management-shared-types';
-import { AppDependencies } from '../../../../../app_context';
-import { ExtensionsService } from '../../../../../../services/extensions_service';
+import type { CoreStart } from '@kbn/core/public';
+import type { IndexMappingProps } from '@kbn/index-management-shared-types';
+import type { AppDependencies } from '../../../../../app_context';
+import type { ExtensionsService } from '../../../../../../services/extensions_service';
 
 export type IndexMappingWithContextProps = {
   core: CoreStart;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { removeAttributesId } from './remove_attributes_id';
-import { CanvasSavedObjectTypeMigrationsDeps } from './types';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './types';
 
 export const workpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
   ({

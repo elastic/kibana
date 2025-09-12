@@ -9,7 +9,7 @@
 import { Subject } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';

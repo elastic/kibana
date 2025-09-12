@@ -32,11 +32,6 @@ import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitori
 
 export const DEFAULT_PAGE_SIZE = 10;
 
-export interface VisualizationStackByOption {
-  text: string;
-  value: string;
-}
-
 export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>({
   stackByField,
   generateVisualizationQuery,

@@ -14,20 +14,16 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { ClientConfigType } from '@kbn/reporting-public';
+import type { ClientConfigType, ReportingAPIClient, KibanaContext } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  InternalApiClientProvider,
-  ReportingAPIClient,
-  KibanaContext,
-} from '@kbn/reporting-public';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { InternalApiClientProvider } from '@kbn/reporting-public';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { queryClient } from '../query_client';
-import { Section } from '../constants';
+import type { Section } from '../constants';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
 const ReportingTabs = lazy(() => import('./components/reporting_tabs'));

@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiDataGrid,
+import type {
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
-  useEuiTheme,
 } from '@elastic/eui';
+import { EuiDataGrid, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
-import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
+import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
+
+const emptyCell = <>&nbsp;</>;
 
 export function PreviewTable({
   documents,
@@ -190,7 +191,7 @@ export function PreviewTable({
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
-          return '';
+          return emptyCell;
         }
 
         if (renderCellValue) {
@@ -202,12 +203,12 @@ export function PreviewTable({
 
         const value = doc[columnId];
         if (value === undefined || value === null) {
-          return '';
+          return emptyCell;
         }
         if (typeof value === 'object') {
           return JSON.stringify(value);
         }
-        return String(value);
+        return String(value) || emptyCell;
       }}
     />
   );

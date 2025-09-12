@@ -8,7 +8,7 @@
 import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { APP_ID, getEditPath, getFullPath, MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { getEmbeddableService, getHttp, getMapsCapabilities } from '../kibana_services';
-import { MapSerializedState } from './types';
+import type { MapSerializedState } from './types';
 
 export function initializeEditApi(
   uuid: string,

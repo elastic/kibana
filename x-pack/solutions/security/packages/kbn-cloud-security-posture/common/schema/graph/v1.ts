@@ -49,6 +49,11 @@ export const graphRequestSchema = schema.object({
 export const DOCUMENT_TYPE_EVENT = 'event' as const;
 export const DOCUMENT_TYPE_ALERT = 'alert' as const;
 
+export const entitySchema = schema.object({
+  name: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
+});
+
 export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
   type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
@@ -58,6 +63,7 @@ export const nodeDocumentDataSchema = schema.object({
       ruleName: schema.maybe(schema.string()),
     })
   ),
+  entity: schema.maybe(entitySchema),
 });
 
 export const graphResponseSchema = () =>
@@ -112,6 +118,9 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('diamond'),
     ]),
     tag: schema.maybe(schema.string()),
+    count: schema.maybe(schema.number()),
+    ips: schema.maybe(schema.arrayOf(schema.string())),
+    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
@@ -129,6 +138,8 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
+    ips: schema.maybe(schema.arrayOf(schema.string())),
+    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);

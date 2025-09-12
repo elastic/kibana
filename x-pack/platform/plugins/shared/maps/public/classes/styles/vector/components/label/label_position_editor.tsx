@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { LABEL_POSITIONS, VECTOR_STYLES } from '../../../../../../common/constants';
-import { LabelPositionStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
-import { LabelPositionProperty } from '../../properties/label_position_property';
+import type { LabelPositionStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
+import type { LabelPositionProperty } from '../../properties/label_position_property';
 import { DisabledToolTip } from '../../disabled_tooltip';
 
 const options = [

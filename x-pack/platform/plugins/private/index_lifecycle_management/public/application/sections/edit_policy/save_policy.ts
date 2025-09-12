@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { SerializedPolicy } from '../../../../common/types';
+import type { SerializedPolicy } from '../../../../common/types';
 
 import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
 

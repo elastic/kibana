@@ -7,11 +7,11 @@
 
 import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import { OnRefreshProps } from '@elastic/eui';
+import type { OnRefreshProps } from '@elastic/eui';
 import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
-import { BasicDataStream } from '../../common/types';
+import type { BasicDataStream } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
@@ -28,6 +28,7 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedQualityIssue,
+    view,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -100,7 +101,12 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const canUserReadFailureStore = Boolean(
-    dataStreamSettings?.datasetUserPrivileges?.canReadFailureStore
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
+  );
+
+  const canUserManageFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]
+      ?.canManageFailureStore
   );
 
   const dataStreamDetails = useSelector(service, (state) =>
@@ -160,8 +166,30 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+    }) => {
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        data: {
+          ...dataStreamDetails,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
+        },
+      });
+    },
+    [dataStreamDetails, service]
+  );
+
   const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
   const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+  const defaultRetentionPeriod = dataStreamDetails?.defaultRetentionPeriod;
+  const customRetentionPeriod = dataStreamDetails?.customRetentionPeriod;
 
   return {
     service,
@@ -180,6 +208,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     loadingState,
     updateTimeRange,
+    updateFailureStore,
     dataStreamSettings,
     integrationDetails,
     canUserAccessDashboards,
@@ -189,5 +218,9 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    view,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    canUserManageFailureStore,
   };
 };

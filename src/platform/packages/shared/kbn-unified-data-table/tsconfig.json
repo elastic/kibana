@@ -46,5 +46,6 @@
     "@kbn/data-view-utils",
     "@kbn/restorable-state",
     "@kbn/react-hooks",
+    "@kbn/css-utils",
   ]
 }

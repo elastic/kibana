@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -318,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // TODO Maybe move this test to x-pack/test/api_integration/dashboards
+    // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
     it('can create a dashboard in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
 

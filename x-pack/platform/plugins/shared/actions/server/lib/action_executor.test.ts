@@ -25,6 +25,7 @@ import {
   asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
+  isSavedObjectExecutionSource,
 } from './action_execution_source';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
@@ -430,6 +431,10 @@ describe('Action Executor', () => {
 
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
           ...execStartDoc,
+          ...(isSavedObjectExecutionSource(executionSource.source) &&
+          executionSource.source.source.type === 'alert'
+            ? { rule: { id: executionSource.source.source.id } }
+            : {}),
           kibana: {
             ...execStartDoc.kibana,
             action: {
@@ -443,6 +448,10 @@ describe('Action Executor', () => {
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
           ...execDoc,
+          ...(isSavedObjectExecutionSource(executionSource.source) &&
+          executionSource.source.source.type === 'alert'
+            ? { rule: { id: executionSource.source.source.id } }
+            : {}),
           kibana: {
             ...execDoc.kibana,
 

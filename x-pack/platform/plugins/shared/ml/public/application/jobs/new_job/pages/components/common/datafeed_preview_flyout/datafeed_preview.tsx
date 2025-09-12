@@ -25,7 +25,8 @@ import { useMlApi } from '../../../../../../contexts/kibana';
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
   heightOffset?: number;
-}> = ({ combinedJob, heightOffset = 0 }) => {
+  flyoutTitleId?: string;
+}> = ({ combinedJob, heightOffset = 0, flyoutTitleId }) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApi();
@@ -99,7 +100,7 @@ export const DatafeedPreview: FC<{
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h5>
+            <h5 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.title"
                 defaultMessage="Datafeed preview"

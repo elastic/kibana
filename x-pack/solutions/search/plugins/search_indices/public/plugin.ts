@@ -14,7 +14,7 @@ import {
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,

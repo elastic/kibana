@@ -6,10 +6,10 @@
  */
 
 import { FILE_FORMATS } from '@kbn/file-upload-common/src/constants';
+import type { ImportFactoryOptions } from '@kbn/file-upload-common';
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
 import { TikaImporter } from './tika_importer';
-import type { ImportFactoryOptions } from './types';
 
 export function importerFactory(format: string, options: ImportFactoryOptions) {
   switch (format) {

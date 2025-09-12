@@ -2954,6 +2954,33 @@ Object {
       ],
       "type": "string",
     },
+    "schema": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "sourceId": Object {
       "flags": Object {
         "error": [Function],
@@ -5754,6 +5781,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -6425,6 +6453,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7067,6 +7096,9 @@ Object {
                     "field": Object {
                       "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
                     },
+                    "negate": Object {
+                      "type": "boolean",
+                    },
                     "type": Object {
                       "const": "mapping",
                       "type": "string",
@@ -7159,6 +7191,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7811,6 +7844,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -8519,6 +8553,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9228,6 +9263,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9937,6 +9973,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",

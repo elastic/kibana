@@ -157,6 +157,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                   language={getQueryLanguage(tabPreviewData)}
                   transparentBackground
                   paddingSize="none"
+                  css={codeBlockCss}
                 >
                   {getPreviewQuery(tabPreviewData)}
                 </EuiCodeBlock>
@@ -206,6 +207,15 @@ const getPreviewContainerCss = (
     transition: opacity ${euiTheme.animation.normal} ease;
   `;
 };
+
+const codeBlockCss = css`
+  .euiCodeBlock__code {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+`;
 
 const getSplitPanelCss = (euiTheme: EuiThemeComputed) => {
   return css`

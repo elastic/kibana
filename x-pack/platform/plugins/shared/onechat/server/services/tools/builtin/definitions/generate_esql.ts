@@ -6,12 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
+import { generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { generateEsql, GenerateEsqlResponse } from '@kbn/onechat-genai-utils';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
-  query: z.string().describe('The query to generate an ES|QL query from.'),
+  query: z.string().describe('A natural language query to generate an ES|QL query from.'),
   index: z
     .string()
     .optional()
@@ -24,27 +26,44 @@ const nlToEsqlToolSchema = z.object({
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<
-  typeof nlToEsqlToolSchema,
-  GenerateEsqlResponse
-> => {
+export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
   return {
-    id: builtinToolIds.generateEsql,
+    id: platformCoreTools.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
-    handler: async ({ query, index, context }, { esClient, modelProvider }) => {
+    handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await generateEsql({
-        query,
+      const esqlResponse = await generateEsql({
+        nlQuery,
         context,
         index,
         model,
         esClient: esClient.asCurrentUser,
       });
+
+      const toolResults: ToolResult[] = esqlResponse.queries.map((esqlQuery) => ({
+        type: ToolResultType.query,
+        data: {
+          esql: esqlQuery,
+        },
+      }));
+
+      if (esqlResponse.answer) {
+        toolResults.push({
+          type: ToolResultType.other,
+          data: {
+            answer: esqlResponse.answer,
+            nlQuery,
+            context,
+            index,
+          },
+        });
+      }
+
       return {
-        result,
+        results: toolResults,
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

@@ -8,8 +8,13 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { LinksAttributes, LinksItem } from '../../../../common/content_management';
-import { LinksCreateOptions, LinksSavedObjectAttributes } from './types';
+import type { Reference } from '@kbn/content-management-utils/src/types';
+import type { LinksItem } from '../../../../common/content_management';
+import type { LinksState, StoredLinksState } from './types';
+import {
+  extractReferences,
+  injectReferences,
+} from '../../../../common/embeddable/transforms/references';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -21,27 +26,30 @@ interface PartialLinksItem {
 }
 
 export function savedObjectToItem(
-  savedObject: SavedObject<LinksSavedObjectAttributes>,
-  partial: false
-): LinksItem;
-
-export function savedObjectToItem(
-  savedObject: PartialSavedObject<LinksSavedObjectAttributes>,
-  partial: true
-): PartialLinksItem;
-
-export function savedObjectToItem(
-  savedObject:
-    | SavedObject<LinksSavedObjectAttributes>
-    | PartialSavedObject<LinksSavedObjectAttributes>,
-  partial: boolean /* partial arg is used to enforce the correct savedObject type */
+  savedObject: SavedObject<StoredLinksState> | PartialSavedObject<StoredLinksState>
 ): LinksItem | PartialLinksItem {
-  return savedObject;
+  const { references, attributes, ...rest } = savedObject;
+  const links = injectReferences(savedObject.attributes.links ?? [], savedObject.references);
+  return {
+    ...rest,
+    attributes: {
+      ...attributes,
+      links,
+    },
+    references: (references ?? []).filter(({ type }) => type === 'tag'),
+  };
 }
 
-export function itemToSavedObject(item: {
-  attributes: LinksAttributes;
-  references?: LinksCreateOptions['references'];
-}) {
-  return item as SavedObject<LinksSavedObjectAttributes>;
+export function itemToAttributes(state: LinksState): {
+  attributes: StoredLinksState;
+  references: Reference[];
+} {
+  const { links, references } = extractReferences(state.links ?? []);
+  return {
+    attributes: {
+      ...state,
+      links,
+    },
+    references,
+  };
 }

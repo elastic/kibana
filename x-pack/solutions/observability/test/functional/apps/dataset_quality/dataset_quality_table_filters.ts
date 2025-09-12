@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import { datasetNames, getInitialTestLogs, getLogsForDataset, productionNamespace } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   ]);
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
@@ -57,6 +58,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
+      await PageObjects.datasetQuality.waitUntilTableLoaded();
     });
 
     after(async () => {
@@ -68,7 +70,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(allDatasetNames);
+      await retry.tryForTime(5000, async () => {
+        expect(datasetNameColCellTexts).to.eql(allDatasetNames);
+      });
 
       await PageObjects.datasetQuality.toggleShowFullDatasetNames();
 
@@ -83,7 +87,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       // resetting the toggle
       await PageObjects.datasetQuality.toggleShowFullDatasetNames();
       const datasetNameColCellTextsAfterReToggle = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTextsAfterReToggle).to.eql(allDatasetNames);
+      await retry.tryForTime(5000, async () => {
+        expect(datasetNameColCellTextsAfterReToggle).to.eql(allDatasetNames);
+      });
     });
 
     it('searches the datasets', async () => {

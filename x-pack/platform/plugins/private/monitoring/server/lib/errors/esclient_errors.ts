@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { boomify } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { ErrorTypes } from '../../types';
+import type { ErrorTypes } from '../../types';
 
 /*
  * Check if the given error message is a known "safe" type of error

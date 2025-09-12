@@ -9,8 +9,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
 
 export interface FieldWithActionsProps {

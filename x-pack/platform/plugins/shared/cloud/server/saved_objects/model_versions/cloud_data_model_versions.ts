@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
 
 export const cloudDataModelVersions: SavedObjectsModelVersionMap = {

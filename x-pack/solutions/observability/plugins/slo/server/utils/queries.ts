@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { reject } from 'lodash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '@kbn/es-types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ESSearchResponse } from '@kbn/es-types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export function isUndefinedOrNull(value: any): value is undefined | null {
   return value === undefined || value === null;

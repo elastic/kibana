@@ -8,7 +8,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Filter, buildEmptyFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -17,7 +18,7 @@ import type { IUnifiedSearchPluginServices } from '../types';
 import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
-import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 interface QueryDslFilter {
   queryDsl: string;

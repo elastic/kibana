@@ -16,6 +16,7 @@ import {
   handleIntlError,
   getIsInitialized,
 } from './src/core';
+import { formatList } from './src/core/i18n';
 
 import {
   registerTranslationFile,
@@ -30,6 +31,7 @@ const i18n = {
   getTranslation,
   getLocale,
   translate,
+  formatList,
   init,
   load,
   handleIntlError,

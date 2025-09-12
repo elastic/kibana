@@ -18,13 +18,9 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
-import {
-  ESQL_STRING_TYPES,
-  ESQL_NUMBER_TYPES,
-  FunctionReturnType,
-  FieldType,
-} from '../../../definitions/types';
+import type { ICommandCallbacks } from '../../types';
+import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 
@@ -77,6 +73,14 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 
 // types accepted by the AVG function
 export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+
+export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
+  'BY ',
+  ' = ',
+  ...allAggFunctions,
+  ...allGroupingFunctions,
+  ...allEvalFunctionsForStats,
+];
 
 export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ' = ',
@@ -303,7 +307,10 @@ describe('FORK Autocomplete', () => {
 
         describe('stats', () => {
           it('suggests for empty expression', async () => {
-            await forkExpectSuggestions('FROM a | FORK (STATS ', EXPECTED_FOR_EMPTY_EXPRESSION);
+            await forkExpectSuggestions(
+              'FROM a | FORK (STATS ',
+              EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
+            );
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(integerField), ',
               EXPECTED_FOR_EMPTY_EXPRESSION

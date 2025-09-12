@@ -217,7 +217,7 @@
         "label": "createKibanaClient",
         "description": [],
         "signature": [
-          "({\n  log,\n  signal,\n}: { log: ",
+          "({\n  log,\n  signal,\n  baseUrl,\n}: { log: ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -225,7 +225,7 @@
             "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
-          "; signal: AbortSignal; }) => Promise<",
+          "; signal: AbortSignal; baseUrl?: string | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/kibana-api-cli",
             "scope": "common",
@@ -244,7 +244,7 @@
             "id": "def-common.createKibanaClient.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  log,\n  signal,\n}",
+            "label": "{\n  log,\n  signal,\n  baseUrl,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
             "deprecated": false,
@@ -279,6 +279,20 @@
                 "description": [],
                 "signature": [
                   "AbortSignal"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.createKibanaClient.$1.baseUrl",
+                "type": "string",
+                "tags": [],
+                "label": "baseUrl",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
                 "deprecated": false,
@@ -476,18 +490,12 @@
               {
                 "parentPluginId": "@kbn/kibana-api-cli",
                 "id": "def-common.toolingLogToLogger.$1.flags",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "flags",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "common",
-                    "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-common.Flags",
-                    "text": "Flags"
-                  }
+                  "{ verbose: boolean; quiet: boolean; silent: boolean; debug: boolean; help: boolean; _: string[]; unexpected: string[]; } & UnspecifiedFlags"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
                 "deprecated": false,

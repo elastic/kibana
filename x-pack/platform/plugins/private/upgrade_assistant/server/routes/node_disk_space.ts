@@ -7,9 +7,9 @@
 
 import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 interface NodeWithLowDiskSpace {
   nodeId: string;
@@ -43,7 +43,11 @@ const getLowDiskWatermarkSetting = (
   return undefined;
 };
 
-export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerNodeDiskSpaceRoute({
+  router,
+  current,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/node_disk_space`,
@@ -55,7 +59,7 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },

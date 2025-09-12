@@ -8,8 +8,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Filter, FilterMeta, FILTERS } from './types';
-import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
+import type { Filter, FilterMeta } from './types';
+import { FILTERS } from './types';
+import type { PhraseFilterValue } from './phrase_filter';
+import { getPhraseScript } from './phrase_filter';
 import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {

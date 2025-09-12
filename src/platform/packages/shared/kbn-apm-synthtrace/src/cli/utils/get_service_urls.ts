@@ -8,9 +8,11 @@
  */
 
 import fetch from 'node-fetch';
-import { format, parse, Url } from 'url';
-import { Logger } from '../../lib/utils/create_logger';
-import { RunOptions } from './parse_run_cli_flags';
+import type { Url } from 'url';
+import { format, parse } from 'url';
+import { readKibanaConfig } from './read_kibana_config';
+import type { Logger } from '../../lib/utils/create_logger';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getFetchAgent } from './ssl';
 
 async function getFetchStatus(url: string) {
@@ -157,6 +159,23 @@ async function discoverTargetFromKibanaUrl(kibanaUrl: string) {
   );
 }
 
+function discoverTargetFromKibanaConfig() {
+  const config = readKibanaConfig();
+  const hosts = config.elasticsearch?.hosts;
+  let username = config.elasticsearch?.username;
+  if (username === 'kibana_system_user') {
+    username = 'elastic';
+  }
+  const password = config.elasticsearch?.password;
+  if (hosts) {
+    const parsed = parse(Array.isArray(hosts) ? hosts[0] : hosts);
+    return format({
+      ...parsed,
+      auth: parsed.auth || (username && password ? `${username}:${password}` : undefined),
+    });
+  }
+}
+
 function getTargetUrlFromKibana(kibanaUrl: string) {
   const kbToEs = kibanaUrl.replace('.kb', '.es');
 
@@ -191,11 +210,14 @@ function logCertificateWarningsIfNeeded(parsedTarget: Url, parsedKibanaUrl: Url,
 
 export async function getServiceUrls({ logger, target, kibana }: RunOptions & { logger: Logger }) {
   if (!target) {
+    target = discoverTargetFromKibanaConfig();
     if (!kibana) {
       kibana = 'http://localhost:5601';
       logger.debug(`No target provided, defaulting Kibana to ${kibana}`);
     }
-    target = await discoverTargetFromKibanaUrl(kibana);
+    if (!target) {
+      target = await discoverTargetFromKibanaUrl(kibana);
+    }
   }
 
   const parsedTarget = parse(target);

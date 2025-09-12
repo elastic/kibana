@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export const ReactQueryStorybookDecorator = (Story: ComponentType) => {

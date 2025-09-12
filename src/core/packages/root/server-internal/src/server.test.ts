@@ -30,6 +30,7 @@ import {
   mockUserSettingsService,
   mockSecurityService,
   mockUserProfileService,
+  mockInjectionService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -133,6 +134,7 @@ test('sets up services on "setup"', async () => {
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
   expect(mockUserProfileService.setup).not.toHaveBeenCalled();
+  expect(mockInjectionService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -153,6 +155,7 @@ test('sets up services on "setup"', async () => {
   expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.setup).toHaveBeenCalledTimes(1);
+  expect(mockInjectionService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -207,6 +210,7 @@ test('runs services on "start"', async () => {
   expect(mockCustomBrandingService.start).not.toHaveBeenCalled();
   expect(mockSecurityService.start).not.toHaveBeenCalled();
   expect(mockUserProfileService.start).not.toHaveBeenCalled();
+  expect(mockInjectionService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -221,6 +225,7 @@ test('runs services on "start"', async () => {
   expect(mockSecurityService.start).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
+  expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {

@@ -9,7 +9,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { parseToolName } from '@kbn/wci-common';
 import type { McpClientProvider, McpClient } from '@kbn/wci-server';
 import type { Logger } from '@kbn/core/server';
-import { GatewayTool, GatewayToolInputSchema } from './types';
+import type { GatewayTool, GatewayToolInputSchema } from './types';
 import { listClientsTools } from './utils';
 
 /**

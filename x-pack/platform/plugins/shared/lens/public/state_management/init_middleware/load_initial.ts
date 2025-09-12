@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { MiddlewareAPI } from '@reduxjs/toolkit';
+import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
-import { setState, initExisting, initEmpty, LensStoreDeps, LensAppState } from '..';
+import type { History } from 'history';
+import type { LensStoreDeps, LensAppState, VisualizationState } from '..';
+import { setState, initExisting, initEmpty } from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
-import { SharingSavedObjectProps } from '../../types';
+import type { SharingSavedObjectProps } from '../../types';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
 import { initializeSources } from '../../editor_frame_service/editor_frame';
-import { LensAppServices } from '../../app_plugin/types';
+import type { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { LensDocument } from '../../persistence';
-import { LensSerializedState } from '../../react_embeddable/types';
+import type { LensDocument } from '../../persistence';
+import type { LensSerializedState } from '../../react_embeddable/types';
 
 interface PersistedDoc {
   doc: LensDocument;
@@ -252,7 +253,7 @@ async function loadFromSavedObject(
     data.query.filterManager.setAppFilters(filters);
   }
 
-  const docVisualizationState = {
+  const docVisualizationState: VisualizationState = {
     activeId: doc.visualizationType,
     state: doc.state.visualization,
   };

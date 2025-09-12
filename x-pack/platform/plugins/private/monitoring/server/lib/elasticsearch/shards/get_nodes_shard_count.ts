@@ -8,8 +8,8 @@
 import { get } from 'lodash';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
-import { LegacyRequest } from '../../../types';
-import { ElasticsearchModifiedSource } from '../../../../common/types/es';
+import type { LegacyRequest } from '../../../types';
+import type { ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 

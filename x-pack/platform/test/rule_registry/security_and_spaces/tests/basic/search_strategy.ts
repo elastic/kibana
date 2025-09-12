@@ -1026,7 +1026,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         const { body: createdRule1 } = await supertest
-          .post('/api/alerting/rule')
+          .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send(rulePayload)
           .expect(200);

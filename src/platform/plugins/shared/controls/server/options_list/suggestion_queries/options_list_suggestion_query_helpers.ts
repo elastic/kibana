@@ -9,11 +9,9 @@
 
 import { get } from 'lodash';
 
-import {
-  OptionsListSortingType,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '../../../common/options_list/suggestions_sorting';
-import { EsBucket } from '../types';
+import type { OptionsListSortingType } from '../../../common/options_list/suggestions_sorting';
+import { OPTIONS_LIST_DEFAULT_SORT } from '../../../common/options_list/suggestions_sorting';
+import type { EsBucket } from '../types';
 
 export const getSortType = (sort?: OptionsListSortingType) => {
   return sort

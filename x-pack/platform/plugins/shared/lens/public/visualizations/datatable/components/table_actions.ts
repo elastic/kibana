@@ -15,7 +15,7 @@ import type {
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
 import { getOriginalId } from '@kbn/transpose-utils';

@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLoadingChart, EuiStat, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';

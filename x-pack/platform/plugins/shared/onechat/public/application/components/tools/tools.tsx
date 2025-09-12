@@ -5,29 +5,42 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { OnechatBaseTools } from './base/base_tools';
-import { OnechatEsqlTools } from './esql/esql_tools';
-
+import { useToolsActions } from '../../context/tools_table_provider';
+import { labels } from '../../utils/i18n';
+import { OnechatToolsTable } from './table/tools_table';
+import { McpConnectionButton } from './mcp_server/mcp_connection_button';
 export const OnechatTools = () => {
+  const { euiTheme } = useEuiTheme();
+  const { createTool } = useToolsActions();
+
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
-        pageTitle={i18n.translate('xpack.onechat.tools.title', {
-          defaultMessage: 'Tools',
-        })}
-        description={i18n.translate('xpack.onechat.tools.toolsDescription', {
-          defaultMessage:
-            'Functionality used to enhance the capabilities of your AI agents in your chat experience by allowing them to perform specific tasks or access additional information.',
-        })}
+        pageTitle={labels.tools.title}
+        description={labels.tools.description}
+        css={css`
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+          border-block-end: none;
+        `}
+        rightSideItems={[
+          <EuiButton
+            key="new-esql-tool-button"
+            fill
+            iconType="plusInCircleFilled"
+            onClick={() => createTool(ToolType.esql)}
+          >
+            <EuiText size="s">{labels.tools.newToolButton}</EuiText>
+          </EuiButton>,
+          <McpConnectionButton key="mcp-server-connection-button" />,
+        ]}
       />
       <KibanaPageTemplate.Section>
-        <OnechatEsqlTools />
-        <EuiSpacer size="xl" />
-        <OnechatBaseTools />
+        <OnechatToolsTable />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

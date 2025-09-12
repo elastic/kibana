@@ -19,12 +19,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  UseField,
-  ArrayItem,
-  ValidationFunc,
-  getFieldValidityAndErrorMessage,
-} from '../../../../../../shared_imports';
+import type { ArrayItem, ValidationFunc } from '../../../../../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 
 import './input_list.scss';
 

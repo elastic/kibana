@@ -10,7 +10,7 @@
 import { parse } from '../../parser';
 import { Parser } from '../../parser/parser';
 import { EsqlQuery } from '../../query';
-import {
+import type {
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -18,7 +18,6 @@ import {
   ESQLLiteral,
   ESQLSource,
   ESQLList,
-  ESQLTimeInterval,
   ESQLInlineCast,
   ESQLUnknownItem,
   ESQLIdentifier,
@@ -233,68 +232,86 @@ describe('structurally can walk all nodes', () => {
   });
 
   describe('expressions', () => {
-    test('can visit a "map" expression', () => {
-      const src = 'ROW f(0, {"a": 0})';
-      const { ast } = parse(src);
-      const nodes: ESQLMap[] = [];
+    describe('maps', () => {
+      test('can visit a "map" expression', () => {
+        const src = 'ROW f(0, {"a": 0})';
+        const { ast } = parse(src);
+        const nodes: ESQLMap[] = [];
 
-      walk(ast, {
-        visitMap: (node) => nodes.push(node),
+        walk(ast, {
+          visitMap: (node) => nodes.push(node),
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'map',
+          },
+        ]);
+        expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('{"a": 0}');
       });
 
-      expect(nodes).toMatchObject([
-        {
-          type: 'map',
-        },
-      ]);
-      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('{"a": 0}');
-    });
+      test('can nested "map" expression', () => {
+        const src = 'ROW f(0, {"a": {"b": 0}})';
+        const { ast } = parse(src);
+        const nodes: ESQLMap[] = [];
 
-    test('can visit a "map-entry" expression', () => {
-      const src = 'ROW f(0, {"a":0, "foo" : /* 1 */ "bar"})';
-      const { ast } = parse(src);
-      const nodes: ESQLMapEntry[] = [];
+        walk(ast, {
+          visitMap: (node) => nodes.push(node),
+        });
 
-      walk(ast, {
-        visitMapEntry: (node) => nodes.push(node),
+        expect(nodes.length).toBe(2);
+        expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe(
+          '{"a": {"b": 0}}'
+        );
+        expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe('{"b": 0}');
       });
 
-      expect(nodes).toMatchObject([
-        {
-          type: 'map-entry',
-        },
-        {
-          type: 'map-entry',
-        },
-      ]);
-      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('"a":0');
-      expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
-        '"foo" : /* 1 */ "bar"'
-      );
-    });
+      test('can visit a "map-entry" expression', () => {
+        const src = 'ROW f(0, {"a":0, "foo" : /* 1 */ "bar"})';
+        const { ast } = parse(src);
+        const nodes: ESQLMapEntry[] = [];
 
-    test('can visit "source" components', () => {
-      const src = 'FROM a:b';
-      const { ast } = parse(src);
-      const nodes: ESQLLiteral[] = [];
+        walk(ast, {
+          visitMapEntry: (node) => nodes.push(node),
+        });
 
-      walk(ast, {
-        visitLiteral: (node) => nodes.push(node),
+        expect(nodes).toMatchObject([
+          {
+            type: 'map-entry',
+          },
+          {
+            type: 'map-entry',
+          },
+        ]);
+        expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('"a":0');
+        expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
+          '"foo" : /* 1 */ "bar"'
+        );
       });
-
-      expect(nodes).toMatchObject([
-        {
-          type: 'literal',
-          valueUnquoted: 'a',
-        },
-        {
-          type: 'literal',
-          valueUnquoted: 'b',
-        },
-      ]);
     });
 
     describe('sources', () => {
+      test('can visit "source" components', () => {
+        const src = 'FROM a:b';
+        const { ast } = parse(src);
+        const nodes: ESQLLiteral[] = [];
+
+        walk(ast, {
+          visitLiteral: (node) => nodes.push(node),
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'literal',
+            valueUnquoted: 'a',
+          },
+          {
+            type: 'literal',
+            valueUnquoted: 'b',
+          },
+        ]);
+      });
+
       test('iterates through a single source', () => {
         const { ast } = parse('FROM index');
         const sources: ESQLSource[] = [];
@@ -494,7 +511,8 @@ describe('structurally can walk all nodes', () => {
       });
 
       test('can walk through all literals', () => {
-        const query = 'FROM index | STATS a = 123, b = "foo", c = true AND false';
+        const query =
+          'FROM index | STATS a = 123, b = "foo", c = true AND false, d = 1 day, e = 4 seconds';
         const { ast } = parse(query);
         const columns: ESQLLiteral[] = [];
 
@@ -502,7 +520,7 @@ describe('structurally can walk all nodes', () => {
           visitLiteral: (node) => columns.push(node),
         });
 
-        expect(columns).toMatchObject([
+        expect(columns).toMatchObject<Array<Partial<ESQLLiteral>>>([
           {
             type: 'literal',
             literalType: 'keyword',
@@ -527,6 +545,18 @@ describe('structurally can walk all nodes', () => {
             type: 'literal',
             literalType: 'boolean',
             value: 'false',
+          },
+          {
+            type: 'literal',
+            literalType: 'date_period',
+            unit: 'day',
+            quantity: 1,
+          },
+          {
+            type: 'literal',
+            literalType: 'time_duration',
+            unit: 'seconds',
+            quantity: 4,
           },
         ]);
       });
@@ -803,63 +833,6 @@ describe('structurally can walk all nodes', () => {
             },
           ]);
         });
-      });
-    });
-
-    describe('time interval', () => {
-      test('can visit time interval nodes', () => {
-        const query = 'FROM index | STATS a = 123 BY 1h';
-        const { ast } = parse(query);
-        const intervals: ESQLTimeInterval[] = [];
-
-        walk(ast, {
-          visitTimeIntervalLiteral: (node) => intervals.push(node),
-        });
-
-        expect(intervals).toMatchObject([
-          {
-            type: 'timeInterval',
-            quantity: 1,
-            unit: 'h',
-          },
-        ]);
-      });
-
-      test('"visitAny" can capture time interval expressions', () => {
-        const query = 'FROM index | STATS a = 123 BY 1h';
-        const { ast } = parse(query);
-        const intervals: ESQLTimeInterval[] = [];
-
-        walk(ast, {
-          visitAny: (node) => {
-            if (node.type === 'timeInterval') intervals.push(node);
-          },
-        });
-
-        expect(intervals).toMatchObject([
-          {
-            type: 'timeInterval',
-            quantity: 1,
-            unit: 'h',
-          },
-        ]);
-      });
-
-      test('"visitAny" does not capture time interval node if type-specific callback provided', () => {
-        const query = 'FROM index | STATS a = 123 BY 1h';
-        const { ast } = parse(query);
-        const intervals1: ESQLTimeInterval[] = [];
-        const intervals2: ESQLTimeInterval[] = [];
-
-        walk(ast, {
-          visitTimeIntervalLiteral: (node) => intervals1.push(node),
-          visitAny: (node) => {
-            if (node.type === 'timeInterval') intervals2.push(node);
-          },
-        });
-
-        expect(intervals1.length).toBe(1);
-        expect(intervals2.length).toBe(0);
       });
     });
 

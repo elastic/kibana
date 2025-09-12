@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 export interface CacheConfig {
   dir: string;

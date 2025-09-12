@@ -17,9 +17,7 @@ All features in the Onechat plugin are developed behind UI settings (feature fla
 
 ```yml
 uiSettings.overrides:
-  onechat:mcp:enabled: true
-  onechat:api:enabled: true
-  onechat:ui:enabled: true
+  agentBuilder:enabled: true
 ```
 
 This will ensure all Onechat features are available in your Kibana instance.
@@ -30,11 +28,41 @@ If running in Serverless or Cloud dev environments, it may be more practical to 
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "onechat:mcp:enabled": true,
-      "onechat:api:enabled": true,
-      "onechat:ui:enabled": true
+      "agentBuilder:enabled": true
    }
 }
+```
+
+## Enabling tracing
+
+Onechat agents are compatible with the Kibana inference tracing.
+
+You can enable tracing on your local instance by adding the following config parameters:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+
+telemetry.tracing.exporters.phoenix.base_url: {phoenix server url}
+telemetry.tracing.exporters.phoenix.public_url: {phoenix server url}
+telemetry.tracing.exporters.phoenix.project_name: {your project name}
+```
+
+To run phoenix locally and configuring Kibana inference tracing accordingly:
+
+```bash
+docker run -p 6006:6006 -p 4317:4317 -i -t arizephoenix/phoenix:latest
+```
+
+and then edit the Kibana config:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+
+telemetry.tracing.exporters.phoenix.base_url: 'http://localhost:6006/'
+telemetry.tracing.exporters.phoenix.public_url: 'http://localhost:6006/'
+telemetry.tracing.exporters.phoenix.project_name: '1chat'
 ```
 
 ## Overview
@@ -45,7 +73,7 @@ The main primitives are:
 
 - [tools](#tools)
 
-Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools.
+Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools and [A2A server](#a2a-server) that exposes onechat agents for agent-to-agent communication.
 
 ## Tools
 
@@ -250,17 +278,11 @@ try {
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools.
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/chat/mcp` endpoint.
 
 
 ### Running with Claude Desktop
 
-To enable the MCP server, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:mcp:enabled: true
-```
 Configure Claude Desktop by adding this to its configuration:
 ```json
 {
@@ -269,17 +291,23 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/mcp",
+        "http://localhost:5601/api/chat/mcp",
         "--header",
-        "Authorization: ApiKey ${API_KEY}"
+        "Authorization:${AUTH_HEADER}"
       ],
       "env": {
-        "API_KEY": "..."
+        "AUTH_HEADER": "ApiKey {...}"
       }
     }
   }
 }
 ```
+
+## A2A Server
+
+The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
+
+Agentcards for onechat agents are exposed on `GET /api/chat/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/chat/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 
@@ -302,18 +330,4 @@ POST kbn://api/chat/tools
   "type": "esql",
   "tags": ["salesforce"]
 }
-```
-
-To enable the API, add the following to your Kibana config
-
-```yaml
-uiSettings.overrides:
-  onechat:api:enabled: true
-```
-## Chat UI
-To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:ui:enabled: true
 ```

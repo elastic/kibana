@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
-import List from 'react-virtualized/dist/commonjs/List';
-import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
+import type List from 'react-virtualized/dist/commonjs/List';
+import type WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
 
 import { DropSpecialLocations } from '../../constants';
-import { ProcessorInternal, ProcessorSelector } from '../../types';
+import type { ProcessorInternal, ProcessorSelector } from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
 import { AddProcessorButton } from '../add_processor_button';
 

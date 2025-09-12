@@ -9,7 +9,7 @@
 
 import fastGlob from 'fast-glob';
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import yaml from 'js-yaml';

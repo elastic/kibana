@@ -17,6 +17,7 @@
     "@kbn/config-schema",
     "@kbn/utility-types",
     "@kbn/core-test-helpers-test-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

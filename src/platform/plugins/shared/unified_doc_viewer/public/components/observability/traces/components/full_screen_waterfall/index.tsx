@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiFlexGroup,
@@ -19,21 +19,21 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { where } from '@kbn/esql-composer';
+import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { SpanFlyout } from './span_flyout';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { ExitFullScreenButton } from './exit_full_screen_button';
+import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
-  tracesIndexPattern: string;
+  serviceName: string;
   onExitFullScreen: () => void;
 }
 
@@ -42,47 +42,25 @@ export const FullScreenWaterfall = ({
   rangeFrom,
   rangeTo,
   dataView,
-  tracesIndexPattern,
+  serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
-  const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-
-  const {
-    share: {
-      url: { locators },
-    },
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-  } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
-
-  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern: [indexes.apm.errors, indexes.logs],
+  });
 
   const generateRelatedErrorsDiscoverUrl = useCallback(
     (docId: string) => {
-      if (!discoverLocator) {
-        return null;
-      }
-
-      const url = discoverLocator.getRedirectUrl({
-        timeRange: timefilter.getAbsoluteTime(),
-        filters: [],
-        query: {
-          language: 'kuery',
-          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE QSTR("trace.id:${traceId} AND span.id:${docId}")`,
-        },
-      });
-
-      return url;
+      return generateDiscoverLink(
+        where(`QSTR("${TRACE_ID_FIELD}:${traceId} AND ${SPAN_ID_FIELD}:${docId}")`)
+      );
     },
-    [discoverLocator, timefilter, indexes.apm.errors, indexes.logs, traceId]
+    [generateDiscoverLink, traceId]
   );
 
   const getParentApi = useCallback(
@@ -92,18 +70,18 @@ export const FullScreenWaterfall = ({
           traceId,
           rangeFrom,
           rangeTo,
-          serviceName: transaction?.[SERVICE_NAME_FIELD],
-          entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
+          serviceName,
           scrollElement: overlayMaskRef.current,
           getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
           onNodeClick: (nodeSpanId: string) => {
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
           },
+          mode: 'full',
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, transaction, generateRelatedErrorsDiscoverUrl]
+    [traceId, rangeFrom, rangeTo, serviceName, generateRelatedErrorsDiscoverUrl]
   );
 
   return (
@@ -138,7 +116,7 @@ export const FullScreenWaterfall = ({
                   ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
                     {
-                      defaultMessage: 'Exit full screen waterfall',
+                      defaultMessage: 'Exit expanded trace timeline',
                     }
                   )}
                 />
@@ -161,7 +139,6 @@ export const FullScreenWaterfall = ({
       {isFlyoutVisible && spanId && (
         <EuiFocusTrap>
           <SpanFlyout
-            tracesIndexPattern={tracesIndexPattern}
             spanId={spanId}
             dataView={dataView}
             onCloseFlyout={() => {

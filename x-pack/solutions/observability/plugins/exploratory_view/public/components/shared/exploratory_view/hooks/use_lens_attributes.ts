@@ -7,25 +7,29 @@
 
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
-import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import type { LayerConfig } from '../configurations/lens_attributes';
+import { LensAttributes } from '../configurations/lens_attributes';
+import type { AllSeries } from './use_series_storage';
 import {
-  AllSeries,
   allSeriesKey,
   convertAllShortSeries,
   reportTypeKey,
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
-import { DataViewState, useAppDataViewContext } from './use_app_data_view';
+import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
+import type { DataViewState } from './use_app_data_view';
+import { useAppDataViewContext } from './use_app_data_view';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import type { ReportConfigMap } from '../contexts/exploratory_view_config';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 
 export const getFiltersFromDefs = (

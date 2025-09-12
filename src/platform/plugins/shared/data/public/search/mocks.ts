@@ -27,6 +27,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
     showError: jest.fn(),
+    showSearchSessionsFlyout: jest.fn(),
     showWarnings: jest.fn(),
     session: getSessionServiceMock(),
     sessionsClient: getSessionsClientMock(),

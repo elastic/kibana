@@ -4,15 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+
 import * as i18n from './translations';
 import { MaintenanceWindowStatus } from '../../../common';
-
-export const VALID_CATEGORIES = [
-  DEFAULT_APP_CATEGORIES.observability.id,
-  DEFAULT_APP_CATEGORIES.security.id,
-  DEFAULT_APP_CATEGORIES.management.id,
-];
 
 export const STATUS_DISPLAY = {
   [MaintenanceWindowStatus.Running]: { color: 'primary', label: i18n.TABLE_STATUS_RUNNING },

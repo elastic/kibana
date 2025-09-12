@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TraceDocumentOverview } from '@kbn/discover-utils';
 import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
@@ -14,12 +15,10 @@ import {
   HTTP_RESPONSE_STATUS_CODE_FIELD,
   AGENT_NAME_FIELD,
   TRANSACTION_NAME_FIELD,
-  SpanDocumentOverview,
-  TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { Timestamp, HttpStatusCode } from '@kbn/apm-ui-shared';
 import { ServiceNameLink } from '../components/service_name_link';
 import { TraceIdLink } from '../components/trace_id_link';
@@ -40,8 +39,8 @@ export const getCommonFieldConfiguration = ({
   attributes,
   flattenedDoc,
 }: {
-  attributes: TransactionDocumentOverview | SpanDocumentOverview;
-  flattenedDoc: TransactionDocumentOverview | SpanDocumentOverview;
+  attributes: TraceDocumentOverview;
+  flattenedDoc: TraceDocumentOverview;
 }): Record<string, FieldConfiguration> => {
   return {
     [TRANSACTION_NAME_FIELD]: {

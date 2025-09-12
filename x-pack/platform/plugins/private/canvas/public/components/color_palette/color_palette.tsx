@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import chroma from 'chroma-js';

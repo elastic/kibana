@@ -16,7 +16,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlType, TermIntersect, Workspace } from '../../types';
+import type { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 

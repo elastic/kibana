@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/workflowsManagement
 title: "workflowsManagement"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the workflowsManagement plugin
-date: 2025-08-01
+date: 2025-09-12
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'workflowsManagement']
 ---
 import workflowsManagementObj from './workflows_management.devdocs.json';
@@ -21,7 +21,7 @@ Contact [@elastic/workflows-eng](https://github.com/orgs/elastic/teams/workflows
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 20 | 0 | 20 | 0 |
+| 16 | 0 | 15 | 1 |
 
 ## Client
 
@@ -34,6 +34,9 @@ Contact [@elastic/workflows-eng](https://github.com/orgs/elastic/teams/workflows
 ### Functions
 <DocDefinitionList data={workflowsManagementObj.client.functions}/>
 
+### Interfaces
+<DocDefinitionList data={workflowsManagementObj.client.interfaces}/>
+
 ## Server
 
 ### Setup
@@ -43,9 +46,6 @@ Contact [@elastic/workflows-eng](https://github.com/orgs/elastic/teams/workflows
 <DocDefinitionList data={[workflowsManagementObj.server.start]}/>
 
 ## Common
-
-### Functions
-<DocDefinitionList data={workflowsManagementObj.common.functions}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={workflowsManagementObj.common.misc}/>

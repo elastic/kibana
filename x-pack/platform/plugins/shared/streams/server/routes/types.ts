@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InferenceClient } from '@kbn/inference-common';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { ContentClient } from '../lib/content/content_client';
-import { AssetClient } from '../lib/streams/assets/asset_client';
-import { AssetService } from '../lib/streams/assets/asset_service';
-import { QueryClient } from '../lib/streams/assets/query/query_client';
-import { StreamsClient } from '../lib/streams/client';
-import { StreamsTelemetryClient } from '../lib/telemetry/client';
-import { StreamsServer } from '../types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { ContentClient } from '../lib/content/content_client';
+import type { AssetClient } from '../lib/streams/assets/asset_client';
+import type { AssetService } from '../lib/streams/assets/asset_service';
+import type { QueryClient } from '../lib/streams/assets/query/query_client';
+import type { StreamsClient } from '../lib/streams/client';
+import type { StreamsTelemetryClient } from '../lib/telemetry/client';
+import type { StreamsServer } from '../types';
 
 type GetScopedClients = ({
   request,
@@ -34,6 +35,7 @@ export interface RouteHandlerScopedClients {
   contentClient: ContentClient;
   queryClient: QueryClient;
   licensing: LicensingPluginStart;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface RouteDependencies {

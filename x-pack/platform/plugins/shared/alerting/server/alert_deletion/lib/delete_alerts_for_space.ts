@@ -35,10 +35,11 @@ export const deleteAlertsForSpace = async (
     }
   }
 
-  const ruleTypes =
-    categoryIds && categoryIds.length > 0
-      ? context.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
-      : context.ruleTypeRegistry.getAllTypes();
+  const ruleTypes = context.ruleTypeRegistry.getFilteredTypes({
+    categories: categoryIds,
+    excludeInternallyManaged: true,
+  });
+
   const indices = context.getAlertIndicesAlias(ruleTypes, spaceId);
 
   let numAlertsDeleted = 0;

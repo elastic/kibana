@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiLoadingSpinner, EuiText, EuiPageTemplate } from '@elastic/eui';
 
 export const PageLoading: FC<PropsWithChildren<unknown>> = ({ children }) => {

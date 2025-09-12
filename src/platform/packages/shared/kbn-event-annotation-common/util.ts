@@ -9,7 +9,7 @@
 
 import { euiLightVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,

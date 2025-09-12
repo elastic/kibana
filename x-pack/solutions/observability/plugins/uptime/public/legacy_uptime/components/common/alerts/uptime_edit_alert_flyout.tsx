@@ -13,12 +13,12 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {
   alertFlyoutVisible: boolean;

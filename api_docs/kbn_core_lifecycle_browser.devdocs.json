@@ -135,6 +135,22 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreSetup.injection",
+            "type": "Object",
+            "tags": [],
+            "label": "injection",
+            "description": [
+              "{@link CoreDiServiceSetup}"
+            ],
+            "signature": [
+              "CoreDiServiceSetup"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-public.CoreSetup.notifications",
             "type": "Object",
             "tags": [],
@@ -428,6 +444,22 @@
             ],
             "signature": [
               "HttpSetup"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreStart.injection",
+            "type": "Object",
+            "tags": [],
+            "label": "injection",
+            "description": [
+              "{@link CoreDiServiceStart}"
+            ],
+            "signature": [
+              "CoreDiServiceStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,

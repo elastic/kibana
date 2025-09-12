@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
   const { canvas, header, lens } = getPageObjects(['canvas', 'header', 'lens']);
@@ -16,7 +16,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const testSubjects = getService('testSubjects');
   const archives = {
     es: 'x-pack/platform/test/fixtures/es_archives/canvas/logstash_lens',
-    kbn: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens',
+    kbn: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/lens',
   };
 
   describe('lens in canvas', function () {

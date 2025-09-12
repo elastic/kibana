@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore

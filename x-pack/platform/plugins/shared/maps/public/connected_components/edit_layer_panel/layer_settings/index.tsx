@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import type { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { LayerSettings } from './layer_settings';
 import {
@@ -20,7 +20,7 @@ import {
   updateFittableFlag,
   updateDisableTooltips,
 } from '../../../actions';
-import { Attribution } from '../../../../common/descriptor_types';
+import type { Attribution } from '../../../../common/descriptor_types';
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {

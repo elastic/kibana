@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { KeyboardEvent, forwardRef, ForwardedRef } from 'react';
+import type { KeyboardEvent, ForwardedRef } from 'react';
+import React, { forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
+import type { EuiButtonIconProps, IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
-import { MenuItem } from '../../../types';
+import type { MenuItem } from '../../../types';
+import { useTooltip } from '../../hooks/use_tooltip';
+import { BetaBadge } from '../beta_badge';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
-  iconType?: IconType;
-  isCurrent: boolean;
+  iconType: IconType;
+  isActive: boolean;
   label: string;
   onClick: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
@@ -26,7 +30,13 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
-  ({ hasContent, iconType, id, isCurrent, label, ...props }, ref: ForwardedRef<HTMLDivElement>) => {
+  (
+    { badgeType, hasContent, iconType, id, isActive, label, ...props },
+    ref: ForwardedRef<HTMLDivElement>
+  ) => {
+    const { euiTheme } = useEuiTheme();
+    const { tooltipRef, handleMouseOut } = useTooltip();
+
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
@@ -36,28 +46,46 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
     const menuItem = (
       <EuiButtonIcon
         aria-label={label}
-        color={isCurrent ? 'primary' : 'text'}
+        color={isActive ? 'primary' : 'text'}
         data-test-subj={`footerMenuItem-${id}`}
-        display={isCurrent ? 'base' : 'empty'}
+        display={isActive ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
         size="s"
         {...props}
       />
     );
 
-    if (!hasContent)
+    if (!hasContent) {
+      const tooltipStyles = css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+      `;
+      const tooltipContent = badgeType ? (
+        <span css={tooltipStyles}>
+          {label}
+          <BetaBadge type={badgeType} isInverted />
+        </span>
+      ) : (
+        label
+      );
+
       return (
         <EuiToolTip
+          ref={tooltipRef}
           anchorProps={{
             css: wrapperStyles,
           }}
+          content={tooltipContent}
           disableScreenReaderOutput
-          content={label}
+          onMouseOut={handleMouseOut}
           position="right"
+          repositionOnScroll
         >
           {menuItem}
         </EuiToolTip>
       );
+    }
 
     return (
       <div ref={ref} css={wrapperStyles}>

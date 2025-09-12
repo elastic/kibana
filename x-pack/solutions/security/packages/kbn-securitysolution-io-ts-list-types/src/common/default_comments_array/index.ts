@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
-import { comment, CommentsArray } from '../comment';
+import type { Either } from 'fp-ts/Either';
+import type { CommentsArray } from '../comment';
+import { comment } from '../comment';
 
 /**
  * Types the DefaultCommentsArray as:

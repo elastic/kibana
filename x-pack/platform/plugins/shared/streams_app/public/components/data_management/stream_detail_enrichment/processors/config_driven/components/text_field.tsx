@@ -8,7 +8,7 @@
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FieldConfiguration } from '../types';
+import type { FieldConfiguration } from '../types';
 
 export const TextField = ({ fieldConfiguration }: { fieldConfiguration: FieldConfiguration }) => {
   const { field, label, helpText, required } = fieldConfiguration;

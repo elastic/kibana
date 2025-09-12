@@ -13,7 +13,7 @@ import {
   EuiDescriptionListDescription,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
 
 interface Props {

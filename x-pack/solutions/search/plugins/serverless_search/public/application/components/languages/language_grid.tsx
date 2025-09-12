@@ -17,7 +17,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
-import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
+import type { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 
 export interface LanguageGridProps {

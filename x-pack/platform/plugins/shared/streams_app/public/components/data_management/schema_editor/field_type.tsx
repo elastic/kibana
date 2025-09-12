@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import { i18n } from '@kbn/i18n';
 import { FIELD_TYPE_MAP } from './constants';

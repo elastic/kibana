@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 const getSystemPrompt = (agentPrompt: string) => {

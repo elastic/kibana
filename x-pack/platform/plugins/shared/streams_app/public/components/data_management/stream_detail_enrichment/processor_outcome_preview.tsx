@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -13,17 +14,17 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
-  EuiDataGridRowHeightsOptions,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import type { GrokProcessor } from '@kbn/streamlang';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
-  PreviewDocsFilterOption,
   getSourceField,
   getTableColumns,
   getUniqueDetectedFields,
@@ -41,11 +42,10 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { isProcessorUnderEdit } from './state_management/processor_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import { WithUIAttributes } from './types';
-import { isGrokProcessor } from './utils';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
-import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
+import type { DataTableRecordWithIndex } from './preview_flyout';
+import { PreviewFlyout } from './preview_flyout';
 import { MemoProcessingPreviewTable } from './processing_preview_table';
 import {
   NoPreviewDocumentsEmptyPrompt,
@@ -104,6 +104,7 @@ const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
   const simulationFailedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
   );
@@ -120,6 +121,7 @@ const PreviewDocumentsGroupBy = () => {
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
     isSelected: previewDocsFilter === filter,
+    disabled: !hasMetrics,
     hasActiveFilters: previewDocsFilter === filter,
     onClick: () => changePreviewDocsFilter(filter),
   });
@@ -231,9 +233,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         fields.add(key);
       });
     });
-    // Keep the detected fields as first columns on the table
+    // Keep the detected fields as first columns on the table and sort the rest alphabetically
     const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
-    return Array.from(fields).sort((curr) => (uniqDetectedFields.includes(curr) ? -1 : 1));
+    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
+
+    return [...uniqDetectedFields, ...otherFields.sort()];
   }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
@@ -246,20 +250,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const grokMode =
     draftProcessor?.processor &&
-    isGrokProcessor(draftProcessor.processor) &&
-    !isEmpty(draftProcessor.processor.grok.field) &&
+    draftProcessor.processor.action === 'grok' &&
+    !isEmpty(draftProcessor.processor.from) &&
     // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
     !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
-      const fieldName = draftProcessor.processor?.grok.field;
+      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
+      const fieldName = draftProcessor.processor?.from;
       return Array.from(grokExpression.getFields().values()).some(
         (field) => field.name === fieldName
       );
     });
 
-  const grokField = grokMode
-    ? (draftProcessor.processor as WithUIAttributes<GrokProcessorDefinition>).grok.field
-    : undefined;
+  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
   const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
 
   const validCurrentProcessorSourceField =
@@ -356,7 +358,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
                 />
               );
             } else {
-              return undefined;
+              return <>&nbsp;</>;
             }
           }
         : undefined,

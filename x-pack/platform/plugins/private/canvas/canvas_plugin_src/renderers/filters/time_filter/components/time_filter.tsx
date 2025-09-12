@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker, OnTimeChangeProps, EuiSuperDatePickerCommonRange } from '@elastic/eui';
+import type { OnTimeChangeProps, EuiSuperDatePickerCommonRange } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';

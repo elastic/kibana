@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { DataViewEditorLazy } from './data_view_editor_lazy';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import type { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
 
 export interface DataViewEditorPropsWithServices extends DataViewEditorProps {
@@ -25,13 +25,19 @@ export const DataViewEditor = ({
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
+  getDataViewHelpText,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<DataViewEditorContext>(services);
 
   return (
     <KibanaReactContextProvider>
-      <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
+      <EuiFlyout
+        onClose={() => {}}
+        hideCloseButton={true}
+        size="l"
+        aria-labelledby="dataViewEditorFlyoutTitle"
+      >
         <DataViewEditorLazy
           onSave={onSave}
           onCancel={onCancel}
@@ -39,6 +45,7 @@ export const DataViewEditor = ({
           requireTimestampField={requireTimestampField}
           editData={editData}
           allowAdHocDataView={allowAdHocDataView}
+          getDataViewHelpText={getDataViewHelpText}
         />
       </EuiFlyout>
     </KibanaReactContextProvider>

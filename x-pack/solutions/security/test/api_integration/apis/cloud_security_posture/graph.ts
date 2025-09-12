@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { result } from '../../../cloud_security_posture_api/utils';
 
 export default function (providerContext: FtrProviderContext) {

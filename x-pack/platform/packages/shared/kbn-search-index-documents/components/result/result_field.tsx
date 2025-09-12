@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
 import { ResultFieldValue } from './result_field_value';
 

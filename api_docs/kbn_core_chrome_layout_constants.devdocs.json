@@ -74,6 +74,58 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.euiIncludeSelectorInFocusTrap",
+        "type": "Object",
+        "tags": [],
+        "label": "euiIncludeSelectorInFocusTrap",
+        "description": [
+          "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.euiIncludeSelectorInFocusTrap.prop",
+            "type": "Object",
+            "tags": [],
+            "label": "prop",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-constants",
+                "id": "def-common.euiIncludeSelectorInFocusTrap.prop.dataeuiincludesinflyoutfocustrap",
+                "type": "boolean",
+                "tags": [],
+                "label": "'data-eui-includes-in-flyout-focus-trap'",
+                "description": [],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.euiIncludeSelectorInFocusTrap.selector",
+            "type": "string",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

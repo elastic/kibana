@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
-import { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
   upsertComponent,
@@ -15,8 +15,10 @@ import {
 import {
   deleteDataStream,
   updateDataStreamsLifecycle,
-  updateOrRolloverDataStream,
+  updateDataStreamsMappings,
+  rolloverDataStream,
   upsertDataStream,
+  updateDefaultIngestPipeline,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -36,14 +38,17 @@ import type {
   DeleteDotStreamsDocumentAction,
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
+  DeleteQueriesAction,
   ElasticsearchAction,
+  UpdateDataStreamMappingsAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
   UpsertDotStreamsDocumentAction,
   UpsertIndexTemplateAction,
   UpsertIngestPipelineAction,
-  UpsertWriteIndexOrRolloverAction,
+  RolloverAction,
+  UpdateDefaultIngestPipelineAction,
 } from './types';
 
 /**
@@ -70,10 +75,13 @@ export class ExecutionPlan {
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
       update_lifecycle: [],
-      upsert_write_index_or_rollover: [],
+      update_default_ingest_pipeline: [],
+      rollover: [],
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
+      update_data_stream_mappings: [],
+      delete_queries: [],
     };
   }
 
@@ -154,10 +162,13 @@ export class ExecutionPlan {
         delete_processor_from_ingest_pipeline,
         upsert_datastream,
         update_lifecycle,
-        upsert_write_index_or_rollover,
+        rollover,
+        update_default_ingest_pipeline,
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
+        update_data_stream_mappings,
+        delete_queries,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -179,8 +190,10 @@ export class ExecutionPlan {
       ]);
       await this.upsertDatastreams(upsert_datastream);
       await Promise.all([
-        this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
+        this.rollover(rollover),
         this.updateLifecycle(update_lifecycle),
+        this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
+        this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -192,6 +205,7 @@ export class ExecutionPlan {
       await Promise.all([
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
+        this.deleteQueries(delete_queries),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -203,6 +217,16 @@ export class ExecutionPlan {
         `Failed to execute Elasticsearch actions: ${error.message}`
       );
     }
+  }
+
+  private async deleteQueries(actions: DeleteQueriesAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.name))
+    );
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
@@ -229,13 +253,25 @@ export class ExecutionPlan {
     );
   }
 
-  private async upsertWriteIndexOrRollover(actions: UpsertWriteIndexOrRolloverAction[]) {
+  private async rollover(actions: RolloverAction[]) {
     return Promise.all(
       actions.map((action) =>
-        updateOrRolloverDataStream({
+        rolloverDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
+        })
+      )
+    );
+  }
+
+  private async updateDefaultIngestPipeline(actions: UpdateDefaultIngestPipelineAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDefaultIngestPipeline({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          name: action.request.name,
+          pipeline: action.request.pipeline,
         })
       )
     );
@@ -250,6 +286,19 @@ export class ExecutionPlan {
           names: [action.request.name],
           lifecycle: action.request.lifecycle,
           isServerless: this.dependencies.isServerless,
+        })
+      )
+    );
+  }
+
+  private async updateDataStreamMappingsAndRollover(actions: UpdateDataStreamMappingsAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsMappings({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+          mappings: action.request.mappings,
         })
       )
     );

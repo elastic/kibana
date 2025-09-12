@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
-import { Writable } from '@kbn/utility-types';
+import type { Writable } from '@kbn/utility-types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,
@@ -349,6 +349,7 @@ export const GroupWithAlertAPIMock: Story = {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         label: 'google.iam.admin.v1.CreateRole',
         color: 'danger',
+        alertsCount: 1,
         shape: 'label',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
       },
@@ -366,6 +367,7 @@ export const GroupWithAlertAPIMock: Story = {
         source: 'admin@example.com',
         target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
         color: 'danger',
+        alertsCount: 1,
         type: 'solid',
       },
       {
@@ -373,6 +375,7 @@ export const GroupWithAlertAPIMock: Story = {
         source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
         target: 'projects/your-project-id/roles/customRole',
         color: 'danger',
+        alertsCount: 1,
         type: 'solid',
       },
       {
@@ -381,6 +384,7 @@ export const GroupWithAlertAPIMock: Story = {
         target:
           'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         color: 'danger',
+        alertsCount: 1,
         type: 'solid',
       },
       {
@@ -389,6 +393,7 @@ export const GroupWithAlertAPIMock: Story = {
           'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
         color: 'danger',
+        alertsCount: 1,
         type: 'solid',
       },
       {
@@ -418,6 +423,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'hexagon',
     icon: 'storage',
+    ips: ['213.180.204.3'],
+    countryCodes: ['RU'],
+    tag: 'Host',
+    count: 3,
   },
   {
     id: '213.180.204.3',
@@ -432,6 +441,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'ellipse',
     icon: 'user',
+    ips: ['213.180.204.3'],
+    countryCodes: ['RU'],
+    tag: 'Host',
+    count: 3,
   },
   {
     id: 'oktauser',
@@ -474,7 +487,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'user',
     label: 'User login to OKTA',
     color: 'danger',
+    alertsCount: 1,
     shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(213.180.204.3)-b(user)',
@@ -482,7 +498,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'user',
     label: 'User login to OKTA',
     color: 'danger',
+    alertsCount: 1,
     shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(user)-b(oktauser)',
@@ -491,6 +510,8 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'user.authentication.sso',
     color: 'primary',
     shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(user)-b(oktauser)',
@@ -499,6 +520,16 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'AssumeRoleWithSAML',
     color: 'primary',
     shape: 'label',
+  },
+  {
+    id: 'a(user)-b(oktauser)',
+    source: 'user',
+    target: 'oktauser',
+    label: 'AssumeRoleWithSAML2',
+    color: 'primary',
+    shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(oktauser)-b(hackeruser)',
@@ -534,6 +565,12 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
+const entitiesData = [
+  { name: 'Suspicious ip' },
+  { name: 'Admin User' },
+  { name: 'Suspicious User' },
+];
+
 export const LargeGraph: Story = {
   args: {
     ...meta.args,
@@ -559,6 +596,7 @@ export const GraphLabelOverlayCases: Story = {
         target: 'hackeruser',
         label: 'Overlay Label',
         color: 'danger',
+        alertsCount: 1,
         shape: 'label',
       },
       {
@@ -567,6 +605,7 @@ export const GraphLabelOverlayCases: Story = {
         target: 's3',
         label: 'Overlay Label',
         color: 'danger',
+        alertsCount: 1,
         shape: 'label',
       },
     ]),
@@ -592,7 +631,10 @@ export const GraphStackedEdgeCases: Story = {
         target: 'user',
         label: 'User login to OKTA2',
         color: 'danger',
+        alertsCount: 1,
         shape: 'label',
+        ips: ['85.43.21.73'],
+        countryCodes: ['es', 'il', 'it'],
       },
     ]),
   },
@@ -621,6 +663,7 @@ export const GraphLargeStackedEdgeCases: Story = {
           target: 'user',
           label: `User login to OKTA${idx}`,
           color: 'danger',
+          alertsCount: 1,
           shape: 'label',
         })),
     ]),
@@ -656,6 +699,73 @@ export const VariantStackSizes: Story = {
             }))
         )
         .flat(),
+    ]),
+  },
+};
+
+export const GraphWithAssetInventoryData: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...baseGraph.map((node, index) => {
+        // Add asset data to specific nodes
+        if (index === 1) {
+          return {
+            ...node,
+            label: entitiesData[0].name,
+            icon: 'globe',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        } else if (index === 2) {
+          return {
+            ...node,
+            label: entitiesData[1].name,
+            icon: 'user',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        } else if (index === 6) {
+          return {
+            ...node,
+            label: entitiesData[2].name,
+            icon: 'storage',
+            documentsData: [
+              {
+                id: node.id,
+                type: 'event' as 'event' | 'alert',
+              },
+            ],
+          };
+        }
+        return node;
+      }),
+      // Add the same additional nodes as GraphStackedEdgeCases
+      {
+        id: 'a(oktauser)-b(hackeruser)',
+        source: 'oktauser',
+        target: 'hackeruser',
+        label: 'CreateUser2',
+        color: 'primary',
+        shape: 'label',
+      },
+      {
+        id: 'a(siem-windows)-b(user)',
+        source: 'siem-windows',
+        target: 'user',
+        label: 'User login to OKTA2',
+        color: 'danger',
+        alertsCount: 1,
+        shape: 'label',
+      },
     ]),
   },
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PieVisualizationState } from '../../../../common/types';
-import { GeneralDatasourceStates } from '../../../state_management';
+import type { PieVisualizationState } from '../../../../common/types';
+import type { GeneralDatasourceStates } from '../../../state_management';
 
 import { getRuntimeConverters } from './converters';
 

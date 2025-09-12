@@ -8,14 +8,15 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
+import type { DataPublicPluginStart } from './shared_imports';
+import { createKibanaReactContext } from './shared_imports';
 
-import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
+import type { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 
 interface Dependencies {
@@ -49,6 +50,7 @@ export const getEditorOpener =
       requireTimestampField = false,
       allowAdHocDataView = false,
       editData,
+      getDataViewHelpText,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -79,6 +81,7 @@ export const getEditorOpener =
               requireTimestampField={requireTimestampField}
               allowAdHocDataView={allowAdHocDataView}
               showManagementLink={Boolean(editData && editData.isPersisted())}
+              getDataViewHelpText={getDataViewHelpText}
             />
           </KibanaReactContextProvider>,
           core
@@ -90,6 +93,7 @@ export const getEditorOpener =
             // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
             style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
+          'aria-labelledby': 'dataViewEditorFlyoutTitle',
         }
       );
 

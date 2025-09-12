@@ -26,7 +26,7 @@ import type {
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -37,6 +37,44 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.name).join(',');
+}
+
+export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
+  if (!esql) return undefined;
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
+
+  const clustersSet = new Set<string>();
+
+  // Handle sources with explicit prefix (e.g., FROM cluster1:index1)
+  args
+    .filter((arg) => arg.prefix)
+    .forEach((arg) => {
+      if (arg.prefix?.value) {
+        clustersSet.add(arg.prefix.value);
+      }
+    });
+
+  // Handle sources without prefix that might contain cluster:index patterns
+  // This includes quoted sources like "cluster1:index1,cluster2:index2"
+  args
+    .filter((arg) => !arg.prefix)
+    .forEach((arg) => {
+      // Split by comma to handle cases like "cluster1:index1,cluster2:index2"
+      const indices = arg.name.split(',');
+      indices.forEach((index) => {
+        const trimmedIndex = index.trim();
+        const colonIndex = trimmedIndex.indexOf(':');
+        // Only add if there's a valid cluster:index pattern
+        if (colonIndex > 0 && colonIndex < trimmedIndex.length - 1) {
+          const clusterName = trimmedIndex.substring(0, colonIndex);
+          clustersSet.add(clusterName);
+        }
+      });
+    });
+
+  return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
 // For ES|QL we consider stats and keep transformational command

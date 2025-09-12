@@ -18,7 +18,8 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
-import { Interpolation, Theme, css } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationInline,
@@ -335,6 +336,7 @@ export const EditorFooter = memo(function EditorFooter({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
+            isSpaceReduced={isSpaceReduced}
           />
         </EuiFlexItem>
       )}

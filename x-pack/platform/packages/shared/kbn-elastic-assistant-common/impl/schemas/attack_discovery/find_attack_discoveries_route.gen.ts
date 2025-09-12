@@ -73,6 +73,10 @@ export const AttackDiscoveryFindRequestQuery = z.object({
    * filter by kibana.alert.workflow.status
    */
   status: ArrayFromString(z.enum(['acknowledged', 'closed', 'open'])).optional(),
+  /**
+   * whether to include attack alert IDs in the response
+   */
+  include_unique_alert_ids: BooleanFromString.optional(),
 });
 export type AttackDiscoveryFindRequestQueryInput = z.input<typeof AttackDiscoveryFindRequestQuery>;
 
@@ -84,4 +88,5 @@ export const AttackDiscoveryFindResponse = z.object({
   per_page: z.number().int().optional(),
   total: z.number().int(),
   unique_alert_ids_count: z.number().int(),
+  unique_alert_ids: z.array(z.string()).optional(),
 });

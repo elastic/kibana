@@ -17,7 +17,7 @@ import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
-import {
+import type {
   AbstractESJoinSourceDescriptor,
   AggDescriptor,
   ESDistanceSourceDescriptor,

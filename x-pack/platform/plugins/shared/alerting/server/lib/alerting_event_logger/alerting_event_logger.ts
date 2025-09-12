@@ -409,6 +409,7 @@ export class AlertingEventLogger {
     }
 
     const gapToReport = new Gap({
+      ruleId: this.ruleData.id,
       range: gap,
     });
 

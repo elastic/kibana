@@ -8,7 +8,6 @@
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
-import { CONNECTORS_LABEL, WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
   function isAvailable<T>(appId: string, content: T): T[] {
@@ -96,14 +95,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
               }),
-              {
-                title: CONNECTORS_LABEL,
-                link: 'serverlessConnectors',
-              },
-              {
-                title: WEB_CRAWLERS_LABEL,
-                link: 'serverlessWebCrawlers',
-              },
             ],
           },
           {
@@ -123,7 +114,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               {
                 id: 'searchQueryRules',
                 title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchQueryRules', {
-                  defaultMessage: 'Query Rules',
+                  defaultMessage: 'Query rules',
                 }),
                 link: 'searchQueryRules',
               },
@@ -132,7 +123,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 title: i18n.translate(
                   'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
                   {
-                    defaultMessage: 'Inference Endpoints',
+                    defaultMessage: 'Inference endpoints',
                   }
                 ),
                 link: 'searchInferenceEndpoints',
@@ -233,6 +224,16 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
                   },
                   {
+                    title: 'AI',
+                    children: [
+                      { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
                     title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
@@ -250,17 +251,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                        title: i18n.translate(
-                          'xpack.serverlessSearch.nav.mngt.other.aiAssistantSettings',
-                          { defaultMessage: 'AI Assistant Settings' }
-                        ),
-                      },
-                    ],
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
                   },
                 ],
               },

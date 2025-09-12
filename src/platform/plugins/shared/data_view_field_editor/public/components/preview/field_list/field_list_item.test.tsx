@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { PreviewListItem } from './field_list_item';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useFieldPreviewContext } from '../field_preview_context';
-import { PreviewController } from '../preview_controller';
+import type { PreviewController } from '../preview_controller';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../field_preview_context', () => ({

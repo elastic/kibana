@@ -151,6 +151,17 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.serverlessReleaseNotes",
+            "type": "string",
+            "tags": [],
+            "label": "serverlessReleaseNotes",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.upgrade",
             "type": "Object",
             "tags": [],
@@ -515,7 +526,7 @@
             "label": "siem",
             "description": [],
             "signature": [
-              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly gapsTable: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; readonly ingestDataToSecurity: string; }"
+              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly gapsTable: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; readonly ingestDataToSecurity: string; readonly automaticImport: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -557,7 +568,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly aiAssistant: string; readonly cloudSecurityPosture: string; readonly installElasticDefend: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly thirdPartyLlmProviders: string; readonly trustedApps: string; readonly elasticAiFeatures: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly resolvePrebuiltRuleConflicts: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; readonly privilegedUserMonitoring: string; readonly mlAnomalyDetection: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
+              "{ readonly aiAssistant: { home: string; knowledgeBaseIndexEntries: string; }; readonly cloudSecurityPosture: string; readonly installElasticDefend: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly thirdPartyLlmProviders: string; readonly trustedApps: string; readonly trustedDevices: string; readonly elasticAiFeatures: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly resolvePrebuiltRuleConflicts: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; readonly privilegedUserMonitoring: string; readonly mlAnomalyDetection: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -851,7 +862,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fingerprint: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly kafkaOutputTopicsSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly datastreamsDownsampling: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly grantESAccessToStandaloneAgents: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly agentlessIntegrations: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; readonly performancePresets: string; readonly scalingKubernetesResourcesAndLimits: string; readonly roleAndPrivileges: string; readonly proxiesSettings: string; readonly unprivilegedMode: string; readonly httpMonitoring: string; readonly agentLevelLogging: string; readonly remoteESOoutputTroubleshooting: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fingerprint: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly kafkaOutputTopicsSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly datastreamsDownsampling: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly grantESAccessToStandaloneAgents: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly agentlessIntegrations: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; readonly performancePresets: string; readonly scalingKubernetesResourcesAndLimits: string; readonly roleAndPrivileges: string; readonly proxiesSettings: string; readonly unprivilegedMode: string; readonly httpMonitoring: string; readonly agentLevelLogging: string; readonly remoteESOoutputTroubleshooting: string; readonly agentReleaseProcess: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

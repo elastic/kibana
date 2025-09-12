@@ -16,16 +16,18 @@ import {
   type WorkflowExecutionState,
 } from '@kbn/wc-framework-types-server';
 import { getPromptNodeTypeDefinition } from './prompt';
+import type {
+  MockedNodeFactoryBaseServices,
+  MockedState,
+  NodeEventReporterMock,
+  MockedModel,
+} from '../../test_utils';
 import {
   createMockFactoryServices,
   createMockedState,
   createMockedNodeEventReporter,
   createExecutionState,
-  MockedNodeFactoryBaseServices,
-  MockedState,
-  NodeEventReporterMock,
   createMockedModel,
-  MockedModel,
 } from '../../test_utils';
 
 describe('Node type: prompt', () => {

@@ -7,8 +7,8 @@
 
 import DateMath from '@kbn/datemath';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { RecursivePartial } from '@kbn/utility-types';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { RecursivePartial } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
 import moment from 'moment';
 import { useEffect, useRef, useState } from 'react';

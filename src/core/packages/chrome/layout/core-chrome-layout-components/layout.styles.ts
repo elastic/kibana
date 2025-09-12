@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { LayoutState } from './layout.types';
+import type { LayoutState } from './layout.types';
 
 const cssProp = css`
   align-items: baseline;

@@ -84,4 +84,76 @@ describe('Create rule request schema, additional validation', () => {
       'when "concurrent_searches" exists, "items_per_search" must also exist',
     ]);
   });
+
+  describe('threat mapping validation', () => {
+    test('validates threat mapping fields', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateThreatMatchRulesSchemaMock(),
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'user.name',
+                value: 'threat.indicator.user.name',
+                type: 'mapping',
+                negate: false,
+              },
+            ],
+          },
+        ],
+      };
+      const errors = validateCreateRuleProps(payload);
+      expect(errors).toEqual([]);
+    });
+
+    test('does not validate single negate entry', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateThreatMatchRulesSchemaMock(),
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'user.name',
+                value: 'user.name',
+                type: 'mapping',
+                negate: true,
+              },
+            ],
+          },
+        ],
+      };
+      const errors = validateCreateRuleProps(payload);
+      expect(errors).toEqual([
+        'Negate mappings cannot be used as a single entry in the AND condition. Please use at least one matching mapping entry.',
+      ]);
+    });
+
+    test('does not validate entries with identical fields and values and negate=true', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateThreatMatchRulesSchemaMock(),
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'user.name',
+                value: 'user.name',
+                type: 'mapping',
+                negate: false,
+              },
+              {
+                field: 'user.name',
+                value: 'user.name',
+                type: 'mapping',
+                negate: true,
+              },
+            ],
+          },
+        ],
+      };
+      const errors = validateCreateRuleProps(payload);
+      expect(errors).toEqual([
+        'Negate and matching mappings cannot have identical fields and values in the same AND condition.',
+      ]);
+    });
+  });
 });

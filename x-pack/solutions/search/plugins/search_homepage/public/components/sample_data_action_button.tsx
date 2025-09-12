@@ -14,23 +14,25 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
 import { useNavigateToDiscover } from '../hooks/use_navigate_to_discover';
+import { useNavigateToDashboard } from '../hooks/use_navigate_to_dashboard';
+import { AnalyticsEvents } from '../analytics/constants';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 
-interface SampleDataActionButtonProps {
-  isLoading: boolean;
-  onIngestSampleData: () => void;
-}
-
-export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
-  isLoading,
-  onIngestSampleData,
-}) => {
+export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSampleDataClick }) => {
+  const usageTracker = useUsageTracker();
+  const { ingestSampleData, isLoading } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, isLoading: isStatusLoading } = useSampleDataStatus();
+  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
 
+  const onInstallButtonClick = useCallback(() => {
+    usageTracker.click(clickEvent);
+    ingestSampleData();
+  }, [ingestSampleData, usageTracker, clickEvent]);
   const onViewButtonClick = useCallback(() => {
     setShowViewDataOptions(true);
   }, []);
@@ -52,6 +54,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
   }, [share, uiSettings, indexName]);
 
   const navigateToDiscover = useNavigateToDiscover(indexName || '');
+  const navigateToDashboard = useNavigateToDashboard(dashboardId);
 
   const navigateToIndexDetails = useCallback(async () => {
     const indexDetailsLocator = share.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID');
@@ -95,6 +98,20 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
                   defaultMessage="Discover"
                 />
               </EuiContextMenuItem>,
+              ...(dashboardId
+                ? [
+                    <EuiContextMenuItem
+                      key="dashboard"
+                      onClick={navigateToDashboard}
+                      icon="dashboardApp"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchHomepage.createIndex.ingestSampleData.linkToDashboard"
+                        defaultMessage="Dashboard"
+                      />
+                    </EuiContextMenuItem>,
+                  ]
+                : []),
               <EuiContextMenuItem key="playground" onClick={navigateToPlayground} icon="comment">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToPlayground"
@@ -122,7 +139,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       size="s"
       data-test-subj="installSampleBtn"
       isLoading={isLoading}
-      onClick={onIngestSampleData}
+      onClick={onInstallButtonClick}
     >
       <FormattedMessage
         id="xpack.searchHomepage.sampleData.btn"

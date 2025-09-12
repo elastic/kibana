@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Option, createOptionsFromFields } from '../../helpers/create_options';
-import { CreateSLOForm } from '../../types';
+import type { Option } from '../../helpers/create_options';
+import { createOptionsFromFields } from '../../helpers/create_options';
+import type { CreateSLOForm } from '../../types';
 
 interface Props {
   fields: FieldSpec[];

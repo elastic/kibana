@@ -6,8 +6,9 @@
  */
 
 import { createServer } from '@mswjs/http-middleware';
-import { UsageMetricsAutoOpsResponseSchemaBody } from '@kbn/data-usage-plugin/common/rest_types';
-import { http, HttpResponse, StrictResponse } from 'msw';
+import type { UsageMetricsAutoOpsResponseSchemaBody } from '@kbn/data-usage-plugin/server/services/autoops_api';
+import type { StrictResponse } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { mockAutoOpsResponse } from './mock_data';
 
 export const setupMockServer = () => {

@@ -4,8 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+
+export const dataSourceExclusionsSchema = schema.recordOf(
+  schema.string(),
+  schema.arrayOf(schema.oneOf([schema.literal('readOnly'), schema.literal('reindex')])),
+  { defaultValue: {} }
+);
+
+export const featureSetSchema = schema.object({
+  /**
+   * Ml Snapshot should only be enabled for major version upgrades. Currently this
+   * is manually set to `true` on every `x.last` version.
+   * ML Upgrade mode can be toggled from outside Kibana, the purpose
+   * of this feature guard is to hide all ML related deprecations from the end user
+   * until the next major upgrade.
+   *
+   * When we want to enable ML model snapshot deprecation warnings again we need
+   * to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+   * to something higher than 7.0.0 in the Elasticsearch code.
+   */
+  mlSnapshots: schema.boolean({ defaultValue: true }),
+  /**
+   * Migrating system indices should only be enabled for major version upgrades.
+   * Currently this is manually set to `true` on every `x.last` version.
+   */
+  migrateSystemIndices: schema.boolean({ defaultValue: true }),
+  /**
+   * Deprecations with reindexing corrective actions are only enabled for major version upgrades.
+   * Currently this is manually set to `true` on every `x.last` version.
+   *
+   * The reindex action includes some logic that is specific to the 8.0 upgrade
+   * End users could get into a bad situation if this is enabled before this logic is fixed.
+   */
+  reindexCorrectiveActions: schema.boolean({ defaultValue: true }),
+  /**
+   * Migrating deprecated data streams should only be enabled for major version upgrades.
+   * Currently this is manually set to `true` on every `x.last` version.
+   */
+  migrateDataStreams: schema.boolean({ defaultValue: true }),
+});
 
 // -------------------------------
 // >= 8.6 UA is always enabled to guide stack upgrades
@@ -31,44 +71,8 @@ const configSchema = schema.object({
    * xpack.upgrade_assistant.dataSourceExclusions:
    *    7_17_data_stream: ["readOnly"]
    */
-  dataSourceExclusions: schema.recordOf(
-    schema.string(),
-    schema.arrayOf(schema.oneOf([schema.literal('readOnly'), schema.literal('reindex')])),
-    { defaultValue: {} }
-  ),
-
-  featureSet: schema.object({
-    /**
-     * Ml Snapshot should only be enabled for major version upgrades. Currently this
-     * is manually set to `true` on every `x.last` version.
-     * ML Upgrade mode can be toggled from outside Kibana, the purpose
-     * of this feature guard is to hide all ML related deprecations from the end user
-     * until the next major upgrade.
-     *
-     * When we want to enable ML model snapshot deprecation warnings again we need
-     * to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
-     * to something higher than 7.0.0 in the Elasticsearch code.
-     */
-    mlSnapshots: schema.boolean({ defaultValue: true }),
-    /**
-     * Migrating system indices should only be enabled for major version upgrades.
-     * Currently this is manually set to `true` on every `x.last` version.
-     */
-    migrateSystemIndices: schema.boolean({ defaultValue: true }),
-    /**
-     * Deprecations with reindexing corrective actions are only enabled for major version upgrades.
-     * Currently this is manually set to `true` on every `x.last` version.
-     *
-     * The reindex action includes some logic that is specific to the 8.0 upgrade
-     * End users could get into a bad situation if this is enabled before this logic is fixed.
-     */
-    reindexCorrectiveActions: schema.boolean({ defaultValue: true }),
-    /**
-     * Migrating deprecated data streams should only be enabled for major version upgrades.
-     * Currently this is manually set to `true` on every `x.last` version.
-     */
-    migrateDataStreams: schema.boolean({ defaultValue: true }),
-  }),
+  dataSourceExclusions: dataSourceExclusionsSchema,
+  featureSet: featureSetSchema,
   /**
    * This config allows to hide the UI without disabling the plugin.
    */

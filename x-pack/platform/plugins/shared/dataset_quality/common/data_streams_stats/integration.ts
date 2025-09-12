@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationType } from '../api_types';
+import type { IntegrationType } from '../api_types';
 
 export class Integration {
   name: IntegrationType['name'];

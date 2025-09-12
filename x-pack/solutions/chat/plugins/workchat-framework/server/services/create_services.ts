@@ -8,7 +8,7 @@
 import type { CoreStart, LoggerFactory } from '@kbn/core/server';
 import type { WorkChatFrameworkPluginStartDependencies } from '../types';
 import type { WorkChatFrameworkConfig } from '../config';
-import { InternalSetupServices, InternalStartServices } from './types';
+import type { InternalSetupServices, InternalStartServices } from './types';
 import { createWorkflowRegistry, createWorkflowService } from './workflow';
 import {
   createModelProviderFactory,

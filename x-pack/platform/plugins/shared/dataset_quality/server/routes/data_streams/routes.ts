@@ -7,18 +7,20 @@
 
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import {
+import type {
   CheckAndLoadIntegrationResponse,
   DataStreamDetails,
   DataStreamDocsStat,
   DataStreamRolloverResponse,
   DataStreamSettings,
   DataStreamStat,
+  DatasetTypesPrivileges,
   DatasetUserPrivileges,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
   NonAggregatableDatasets,
+  UpdateFailureStoreResponse,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { datasetQualityPrivileges } from '../../services';
@@ -28,7 +30,7 @@ import { createDatasetQualityServerRoute } from '../create_datasets_quality_serv
 import { checkAndLoadIntegration } from './check_and_load_integration';
 import { failedDocsRouteRepository } from './failed_docs/routes';
 import { getDataStreamDetails } from './get_data_stream_details';
-import { getDataStreams } from './get_data_streams';
+import { getDataStreams, getDatasetTypesPrivileges } from './get_data_streams';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
@@ -40,6 +42,43 @@ import { getDegradedFields } from './get_degraded_fields';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { updateFieldLimit } from './update_field_limit';
 import { getDataStreamsCreationDate } from './get_data_streams_creation_date';
+import { updateFailureStore } from './update_failure_store';
+import { getDataStreamDefaultRetentionPeriod } from './get_data_streams_default_retention_period';
+
+const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/types_privileges',
+  params: t.type({
+    query: t.type({ types: typesRt }),
+  }),
+  options: {
+    tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  async handler(resources): Promise<{
+    datasetTypesPrivileges: DatasetTypesPrivileges;
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const { datasetsPrivilages } = await getDatasetTypesPrivileges({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      datasetTypesPrivileges: datasetsPrivilages,
+    };
+  },
+});
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -235,7 +274,7 @@ const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
     path: t.type({
       dataStream: t.string,
     }),
-    query: t.intersection([rangeRt, typeRt]),
+    query: rangeRt,
   }),
   options: {
     tags: [],
@@ -253,12 +292,10 @@ const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
-
     return await getNonAggregatableDataStreams({
       esClient,
+      dataStream: params.path.dataStream,
       ...params.query,
-      types: [params.query.type],
     });
   },
 });
@@ -288,11 +325,21 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    return await getDegradedFields({
-      esClient,
-      dataStream,
-      ...params.query,
-    });
+    try {
+      return await getDegradedFields({
+        esClient,
+        dataStream,
+        ...params.query,
+      });
+    } catch (e) {
+      if (e.body?.error?.type === 'index_closed_exception') {
+        return {
+          degradedFields: [],
+        };
+      }
+
+      throw e;
+    }
   },
 });
 
@@ -430,6 +477,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     const esClient = coreContext.elasticsearch.client;
 
     const isServerless = (await getEsCapabilities()).serverless;
+
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
       dataStream,
@@ -438,7 +486,16 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
       isServerless,
     });
 
-    return dataStreamDetails;
+    // If dataStreamDetails is empty, return empty object, otherwise append defaultRetentionPeriod
+    if (!dataStreamDetails || Object.keys(dataStreamDetails).length === 0) {
+      return {} as DataStreamDetails;
+    }
+
+    const defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
+      esClient: esClient.asSecondaryAuthUser,
+    });
+
+    return { ...dataStreamDetails, defaultRetentionPeriod };
   },
 });
 
@@ -546,7 +603,47 @@ const rolloverDataStream = createDatasetQualityServerRoute({
   },
 });
 
+const updateFailureStoreRoute = createDatasetQualityServerRoute({
+  endpoint: 'PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    body: t.type({
+      failureStoreEnabled: t.boolean,
+      customRetentionPeriod: t.union([t.string, t.undefined]),
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  async handler(resources): Promise<UpdateFailureStoreResponse> {
+    const { context, params, getEsCapabilities } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const isServerless = (await getEsCapabilities()).serverless;
+
+    const updatedLimitResponse = await updateFailureStore({
+      esClient,
+      dataStream: params.path.dataStream,
+      failureStoreEnabled: params.body.failureStoreEnabled,
+      customRetentionPeriod: params.body.customRetentionPeriod,
+      isServerless,
+    });
+
+    return updatedLimitResponse;
+  },
+});
+
 export const dataStreamsRouteRepository = {
+  ...datasetTypesPrivilegesRoute,
   ...statsRoute,
   ...degradedDocsRoute,
   ...totalDocsRoute,
@@ -561,4 +658,5 @@ export const dataStreamsRouteRepository = {
   ...updateFieldLimitRoute,
   ...rolloverDataStream,
   ...failedDocsRouteRepository,
+  ...updateFailureStoreRoute,
 };

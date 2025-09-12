@@ -8,8 +8,8 @@
  */
 
 import fs from 'fs';
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getScoutPlaywrightConfigs } from '../config';
 import { runDiscoverPlaywrightConfigs } from './config_discovery';
 import { measurePerformance } from '../common';

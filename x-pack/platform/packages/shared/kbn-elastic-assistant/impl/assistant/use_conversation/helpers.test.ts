@@ -12,9 +12,10 @@ import {
   getDefaultNewSystemPrompt,
   getDefaultSystemPrompt,
 } from './helpers';
-import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation } from '../../..';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import type { Conversation } from '../../..';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { MOCK_CURRENT_USER } from './sample_conversations';
 
 const tilde = '`';
 const codeDelimiter = '```';
@@ -145,6 +146,9 @@ describe('useConversation helpers', () => {
       messages: [],
       replacements: {},
       title: '1',
+      createdAt: '2025-02-19T23:28:54.962Z',
+      createdBy: MOCK_CURRENT_USER,
+      users: [MOCK_CURRENT_USER],
     };
     test('should return the conversation system prompt', () => {
       const result = getDefaultSystemPrompt({ allSystemPrompts, conversation });
@@ -217,6 +221,9 @@ describe('useConversation helpers', () => {
       messages: [],
       replacements: {},
       title: 'Test Conversation',
+      createdAt: '2025-02-19T23:28:54.962Z',
+      createdBy: MOCK_CURRENT_USER,
+      users: [MOCK_CURRENT_USER],
     };
 
     const connectors: AIConnector[] = [

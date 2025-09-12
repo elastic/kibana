@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiIcon,
@@ -16,12 +16,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { BurnRateRuleParams } from '../../../typings';
+import type { BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 import { useActionModal } from '../../../context/action_modal';
 

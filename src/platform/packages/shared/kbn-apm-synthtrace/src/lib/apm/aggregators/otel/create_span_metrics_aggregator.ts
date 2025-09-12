@@ -8,7 +8,8 @@
  */
 
 import { pick } from 'lodash';
-import { ApmOtelFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
+import type { ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { createOtelMetricAggregator } from '../create_apm_metric_aggregator';
 
 const KEY_FIELDS: Array<keyof ApmOtelFields> = [

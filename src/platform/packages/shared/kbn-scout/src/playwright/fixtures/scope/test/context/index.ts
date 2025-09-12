@@ -9,7 +9,8 @@
 
 import * as os from 'os';
 import getPort from 'get-port';
-import { BrowserContext, chromium } from 'playwright/test';
+import type { BrowserContext } from 'playwright/test';
+import { chromium } from 'playwright/test';
 import { coreWorkerFixtures } from '../../worker';
 
 /**

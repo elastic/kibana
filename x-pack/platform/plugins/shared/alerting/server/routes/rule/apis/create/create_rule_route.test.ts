@@ -911,4 +911,51 @@ describe('createRuleRoute', () => {
       );
     });
   });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+        docLinks,
+        alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          actionsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: { ...ruleToCreate, rule_type_id: 'test.internal-rule-type' },
+        },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(res.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            'Cannot create rule of type "test.internal-rule-type" because it is internally managed.',
+        },
+      });
+    });
+  });
 });

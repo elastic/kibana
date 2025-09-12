@@ -50,7 +50,18 @@ export async function getUnifiedTraceErrors({
   };
 }
 
-export const requiredFields = asMutableArray([SPAN_ID, EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
+export const requiredFields = asMutableArray([SPAN_ID] as const);
+export const optionalFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
+
+interface OtelError {
+  span: {
+    id: string;
+  };
+  exception?: {
+    type: string;
+    message: string;
+  };
+}
 
 async function getUnprocessedOtelErrors({
   logsClient,
@@ -75,12 +86,14 @@ async function getUnprocessedOtelErrors({
         minimum_should_match: 1,
       },
     },
-    fields: requiredFields,
+    fields: [...requiredFields, ...optionalFields],
   });
 
   return response.hits.hits
     .map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+      const event = unflattenKnownApmEventFields(hit.fields, requiredFields) as
+        | OtelError
+        | undefined;
       if (!event) return null;
 
       return {
@@ -98,7 +111,7 @@ async function getUnprocessedOtelErrors({
         doc
       ): doc is {
         id: string;
-        error: { exception: { type: string; message: string } };
+        error: { exception: { type: string | undefined; message: string | undefined } };
       } => !!doc
     );
 }

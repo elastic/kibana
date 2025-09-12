@@ -106,6 +106,14 @@ Array [
   },
   Object {
     "appLink": "",
+    "attributes": Object {
+      "title": "Sample alerting rule template",
+    },
+    "id": "sample_alerting_rule_template",
+    "type": "alerting_rule_template",
+  },
+  Object {
+    "appLink": "",
     "attributes": Object {},
     "id": "sample_csp_rule_template",
     "type": "csp-rule-template",
@@ -164,6 +172,7 @@ Array [
     "appLink": "/app/osquery/saved_queries/sample_osquery_saved_query",
     "attributes": Object {
       "description": "Test saved query description",
+      "title": "Saved-Query-Id",
     },
     "id": "sample_osquery_saved_query",
     "type": "osquery-saved-query",
@@ -195,6 +204,7 @@ Array [
     "appLink": "",
     "attributes": Object {
       "description": "",
+      "title": "my tag",
     },
     "id": "sample_tag",
     "type": "tag",

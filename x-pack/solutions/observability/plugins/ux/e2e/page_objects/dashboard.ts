@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Page } from '@elastic/synthetics';
-import { Locator, byTestId } from './utils';
+import type { Page } from '@elastic/synthetics';
+import type { Locator } from './utils';
+import { byTestId } from './utils';
 
 export class UXDashboardFilters {
   readonly page: Page;

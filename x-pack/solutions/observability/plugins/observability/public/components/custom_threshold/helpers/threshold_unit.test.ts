@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { convertToApiThreshold } from './threshold_unit';
 
 describe('convertToApiThreshold', () => {

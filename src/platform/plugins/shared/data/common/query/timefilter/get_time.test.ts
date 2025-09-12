@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RangeFilter } from '@kbn/es-query';
+import type { RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import moment from 'moment';
 import sinon from 'sinon';

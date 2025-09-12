@@ -9,13 +9,14 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiPanelProps } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
 import { OverviewPanel } from './overview_panel';
-import { LanguageDefinition } from '../types';
+import type { LanguageDefinition } from '../types';
 import { GithubLink } from './github_link';
 
 interface InstallClientProps {

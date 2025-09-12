@@ -13,7 +13,7 @@
  * tries to mock out simple versions of the Mocha types
  */
 
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 
 export interface Suite extends Runnable {
   _beforeAll: Runnable[];

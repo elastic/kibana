@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeepPartial, ValuesType } from 'utility-types';
-import { UnionToIntersection } from '..';
+import type { DeepPartial, ValuesType } from 'utility-types';
+import type { UnionToIntersection } from '..';
 
 type DedotKey<
   TObject extends Record<string, any>,

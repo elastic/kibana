@@ -8,7 +8,8 @@
  */
 
 import _, { defaults } from 'lodash';
-import { AggGroupNames, AggParam } from '@kbn/data-plugin/public';
+import type { AggParam } from '@kbn/data-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import type { ISchemas, Schema } from './types';
 
 /** @internal **/

@@ -15,7 +15,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { selectDynamicSettings } from '../../../state/settings';
 import {
   selectSyntheticsAlerts,

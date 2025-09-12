@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
-import {
+import type {
   IBasePath,
   IUiSettingsClient,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -33,8 +33,11 @@ import {
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { sloDefinitionSchema } from '@kbn/slo-schema';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import {
+  getErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running/errors';
 import { get } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -48,11 +51,12 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
-import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
+import type { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import { BurnRateAlert, getRuleExecutor } from './executor';
+import type { BurnRateAlert } from './executor';
+import { getRuleExecutor } from './executor';
 import {
   LONG_WINDOW,
   SHORT_WINDOW,
@@ -61,14 +65,15 @@ import {
   generateStatsKey,
   generateWindowId,
 } from './lib/build_query';
-import { EvaluationBucket } from './lib/evaluate';
-import {
-  AlertStates,
+import type { EvaluationBucket } from './lib/evaluate';
+import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
 } from './types';
+import { AlertStates } from './types';
+import { toStoredSLO } from '../../../services/slo_repository';
 
 const commonEsResponse = {
   took: 100,
@@ -91,13 +96,16 @@ function createFindResponse(
     page: 1,
     per_page: 25,
     total: sloList.length,
-    saved_objects: sloList.map((slo) => ({
-      id: slo.id,
-      attributes: sloDefinitionSchema.encode(slo),
-      type: SO_SLO_TYPE,
-      references: [],
-      score: 1,
-    })),
+    saved_objects: sloList.map((slo) => {
+      const { storedSLO } = toStoredSLO(slo);
+      return {
+        id: slo.id,
+        attributes: storedSLO,
+        type: SO_SLO_TYPE,
+        references: [],
+        score: 1,
+      };
+    }),
   };
 }
 
@@ -190,8 +198,8 @@ describe('BurnRateRuleExecutor', () => {
       soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
       const executor = getRuleExecutor(basePathMock);
 
-      await expect(
-        executor({
+      try {
+        await executor({
           params: someRuleParamsWithWindows({ sloId: 'non-existent' }),
           startedAt: new Date(),
           startedAtOverridden: false,
@@ -199,14 +207,23 @@ describe('BurnRateRuleExecutor', () => {
           executionId: 'irrelevant',
           logger: loggerMock,
           previousStartedAt: null,
-          rule: {} as SanitizedRuleConfig,
+          rule: {
+            id: '123-456',
+            name: 'an slo rule',
+          } as SanitizedRuleConfig,
           spaceId: 'irrelevant',
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
           isServerless: false,
-        })
-      ).rejects.toThrowError();
+        });
+        throw new Error('the executor ran successfully, but should not have');
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe(
+          'Rule "an slo rule" 123-456 is referencing an SLO which cannot be found: "non-existent": SLO [non-existent] not found'
+        );
+      }
     });
 
     it('returns early when the slo is disabled', async () => {
