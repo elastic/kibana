@@ -7,18 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-
-const root = css`
-  align-self: start;
-  display: flex;
-  grid-area: sidebarPanel;
-  height: 100%;
-  position: sticky;
-  width: var(--kbn-layout--sidebar-panel-width);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
-`;
-
-export const styles = {
-  root,
-};
+export const METRICS_EXPERIENCE_FEATURE_FLAG_KEY = 'metricsExperienceEnabled';
