@@ -185,13 +185,16 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
-    // Recommended fields are not part of the data view fields list, so we need to check them separately
-    // Filter recommended fields to only include those that are also available in availableFields
-    const allRecommendedFields = additionalFieldGroups?.recommendedFields ?? ([] as T[]);
-    const availableFieldNames = new Set(groupedFields.availableFields.map((field) => field.name));
-    const recommendedFields = allRecommendedFields.filter((field) =>
-      availableFieldNames.has(field.name)
-    );
+    let recommendedFields = [];
+
+    if (additionalFieldGroups?.recommendedFields?.length) {
+      const allRecommendedFields = additionalFieldGroups?.recommendedFields ?? ([] as T[]);
+      // Filter recommended fields to only include those that are also available in availableFields
+      const availableFieldNames = new Set(groupedFields.availableFields.map((field) => field.name));
+      recommendedFields = allRecommendedFields.filter((field) =>
+        availableFieldNames.has(field.name)
+      );
+    }
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
       ...(recommendedFields.length > 0
