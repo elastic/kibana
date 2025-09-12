@@ -17,7 +17,6 @@ import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
 import { IntegrationRegistry } from './services/integration/integration_registry';
-import { WorkspaceDataType, DocumentDataType } from './data_types';
 
 export class WorkChatAppPlugin
   implements
