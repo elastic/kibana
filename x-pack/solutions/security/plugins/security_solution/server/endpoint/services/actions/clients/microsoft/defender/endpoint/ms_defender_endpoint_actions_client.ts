@@ -24,10 +24,6 @@ import type {
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-} from '../../../../../../../../common/endpoint/constants';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -618,8 +614,12 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       if (!error) {
         try {
           // Get the external action ID from the internal response action ID
-          const externalActionId = await this.getExternalActionId(actionId);
-
+          const actionRequestWithExternalId = await this.fetchActionRequestEsDoc<
+            EndpointActionDataParameterTypes,
+            EndpointActionResponseDataOutput,
+            MicrosoftDefenderEndpointActionRequestCommonMeta
+          >(actionId);
+          const externalActionId = actionRequestWithExternalId?.meta?.machineActionId;
           if (!externalActionId) {
             throw new ResponseActionsClientError(
               `Unable to resolve Microsoft Defender machine action ID for action [${actionId}]`,
@@ -1064,66 +1064,28 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   /**
-   * Get Microsoft Defender Endpoint's machineActionId by querying the original action request.
-   * The external action ID is stored in the meta field of the action request document.
-   */
-  private async getExternalActionId(actionId: string): Promise<string | undefined> {
-    try {
-      const result = await this.options.esClient.search({
-        index: ENDPOINT_ACTIONS_INDEX,
-        query: {
-          term: { action_id: actionId },
-        },
-        _source: ['meta'],
-        size: 1,
-      });
-
-      const actionRequest = result.hits.hits[0]?._source;
-      const meta = (actionRequest as { meta?: MicrosoftDefenderEndpointActionRequestCommonMeta })
-        ?.meta;
-
-      this.log.debug(
-        `getExternalActionId: actionId=${actionId}, machineActionId=${meta?.machineActionId}`
-      );
-
-      return meta?.machineActionId;
-    } catch (error) {
-      this.log.warn(`Error fetching external action ID for ${actionId}: ${error.message}`);
-      return undefined;
-    }
-  }
-
-  /**
    * Check if the target action has already been successfully canceled.
    */
   private async checkForAlreadyCanceledAction(targetActionId: string): Promise<boolean> {
     try {
-      const searchQuery = {
-        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'EndpointActions.action_id': targetActionId } },
-              { match_phrase: { 'error.message': 'Response action was canceled by' } },
-            ],
-          },
-        },
-        size: 1,
-        _source: false,
-      };
-
       this.log.debug(
         `Checking response index for cancellation messages for action ${targetActionId}`
       );
 
-      const searchResult = await this.options.esClient.search(searchQuery);
-      const isCanceled = searchResult.hits.hits.length > 0;
+      // Fetch all response documents for the target action
+      const responseDocuments = await this.fetchActionResponseEsDocs(targetActionId);
 
-      if (isCanceled) {
-        this.log.debug(`Action ${targetActionId} shows cancellation in response index`);
+      // Check if any response document contains a cancellation error message
+      for (const [agentId, responseDoc] of Object.entries(responseDocuments)) {
+        if (responseDoc.error?.message?.includes('Response action was canceled by')) {
+          this.log.debug(
+            `Action ${targetActionId} shows cancellation in response index for agent ${agentId}`
+          );
+          return true;
+        }
       }
 
-      return isCanceled;
+      return false;
     } catch (error) {
       this.log.warn(`Error checking response index for cancellation: ${error.message}`);
       return false;

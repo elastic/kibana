@@ -972,9 +972,7 @@ describe('MS Defender response actions client', () => {
           comment: 'cancel test comment',
           parameters: { action_id: 'non-existent-action' },
         })
-      ).rejects.toThrow(
-        'Unable to resolve Microsoft Defender machine action ID for action [non-existent-action]'
-      );
+      ).rejects.toThrow("Action with id 'non-existent-action' not found.");
     });
 
     it('should throw error when original action lacks machineActionId in meta', async () => {
@@ -1166,9 +1164,7 @@ describe('MS Defender response actions client', () => {
           comment: 'cancel test comment',
           parameters: { action_id: 'original-action-id' },
         })
-      ).rejects.toThrow(
-        'Unable to resolve Microsoft Defender machine action ID for action [original-action-id]'
-      );
+      ).rejects.toThrow("Action with id 'original-action-id' not found.");
 
       // Restore original mock
       (clientConstructorOptionsMock.esClient.search as unknown as jest.Mock).mockImplementation(
@@ -1881,14 +1877,12 @@ describe('MS Defender response actions client', () => {
             query: {
               bool: {
                 filter: [
-                  { term: { 'EndpointActions.action_id': 'target-action-id-123' } },
-                  { match_phrase: { 'error.message': 'Response action was canceled by' } },
+                  { terms: { action_id: ['target-action-id-123'] } },
                 ],
               },
             },
-            size: 1,
-            _source: false,
-          });
+            size: 10000,
+          }, { ignore: [404] });
         });
 
         it('should allow cancel request when target action has no cancel records', async () => {
