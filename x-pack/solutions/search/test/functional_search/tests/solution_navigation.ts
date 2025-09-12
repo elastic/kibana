@@ -8,6 +8,9 @@
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
+
 export default function searchSolutionNavigation({
   getPageObjects,
   getService,
@@ -20,12 +23,14 @@ export default function searchSolutionNavigation({
   const spaces = getService('spaces');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
 
   describe('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
+      await esArchiver.load(archiveEmptyIndex);
       // Navigate to the spaces management page which will log us in Kibana
       await common.navigateToUrl('management', 'kibana/spaces', {
         shouldUseHashForSubUrl: false,
@@ -42,6 +47,7 @@ export default function searchSolutionNavigation({
     after(async () => {
       // Clean up space created
       await cleanUp();
+      await esArchiver.unload(archiveEmptyIndex);
     });
 
     it('renders expected side nav items', async () => {
@@ -58,6 +64,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Stack Monitoring' });
 
       if (isV2) {
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Graph' });
@@ -81,113 +88,126 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Create your first index',
-      });
 
       const sideNavTestCases: Array<{
-        deepLinkId: AppDeepLinkId;
+        link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         breadcrumbs: string[];
         pageTestSubject: string;
       }> = isV2
         ? [
             {
-              deepLinkId: 'discover',
+              link: { navId: 'agent_builder' },
+              breadcrumbs: ['Agent Chat'],
+              pageTestSubject: 'onechatPageConversations',
+            },
+            {
+              link: { deepLinkId: 'agent_builder:tools' },
+              breadcrumbs: ['Tools'],
+              pageTestSubject: 'kbnAppWrapper visibleChrome',
+            },
+            {
+              link: { deepLinkId: 'agent_builder:agents' },
+              breadcrumbs: ['Agents'],
+              pageTestSubject: 'kbnAppWrapper visibleChrome',
+            },
+            {
+              link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
-              pageTestSubject: 'kbnNoDataPage',
+              pageTestSubject: 'noDataViewsPrompt',
             },
             {
-              deepLinkId: 'dashboards',
+              link: { deepLinkId: 'dashboards' },
               breadcrumbs: ['Dashboards'],
-              pageTestSubject: 'kbnNoDataPage',
+              pageTestSubject: 'noDataViewsPrompt',
             },
             {
-              deepLinkId: 'searchPlayground',
+              link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
             },
             {
-              deepLinkId: 'searchSynonyms:synonyms',
+              link: { deepLinkId: 'searchSynonyms:synonyms' },
               breadcrumbs: ['Relevance', 'Synonyms'],
               pageTestSubject: 'searchSynonymsOverviewPage',
             },
             {
-              deepLinkId: 'searchQueryRules',
+              link: { deepLinkId: 'searchQueryRules' },
               breadcrumbs: ['Relevance', 'Query rules'],
               pageTestSubject: 'queryRulesBasePage',
             },
             {
-              deepLinkId: 'graph',
+              link: { deepLinkId: 'graph' },
               breadcrumbs: ['Graph'],
               pageTestSubject: 'graphCreateGraphPromptButton',
             },
             {
-              deepLinkId: 'visualize',
+              link: { deepLinkId: 'visualize' },
               breadcrumbs: ['Visualize library'],
-              pageTestSubject: 'kbnNoDataPage',
+              pageTestSubject: 'noDataViewsPrompt',
             },
             {
-              deepLinkId: 'dev_tools',
+              link: { deepLinkId: 'dev_tools' },
               breadcrumbs: ['Developer Tools'],
               pageTestSubject: 'console',
             },
           ]
         : [
             {
-              deepLinkId: 'discover',
+              link: { deepLinkId: 'searchHomepage' },
+              breadcrumbs: ['Home'],
+              pageTestSubject: 'search-homepage',
+            },
+            {
+              link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
-              pageTestSubject: 'kbnNoDataPage',
+              pageTestSubject: 'noDataViewsPrompt',
             },
             {
-              deepLinkId: 'dashboards',
+              link: { deepLinkId: 'dashboards' },
               breadcrumbs: ['Dashboards'],
-              pageTestSubject: 'kbnNoDataPage',
+              pageTestSubject: 'noDataViewsPrompt',
             },
             {
-              deepLinkId: 'elasticsearchIndexManagement',
+              link: { deepLinkId: 'elasticsearchIndexManagement' },
               breadcrumbs: ['Build', 'Index Management', 'Indices'],
               pageTestSubject: 'elasticsearchIndexManagement',
             },
             {
-              deepLinkId: 'searchPlayground',
+              link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
             },
             {
-              deepLinkId: 'enterpriseSearchApplications:searchApplications',
+              link: { deepLinkId: 'enterpriseSearchApplications:searchApplications' },
               breadcrumbs: ['Build', 'Search applications'],
               pageTestSubject: 'searchApplicationsListPage',
             },
             {
-              deepLinkId: 'searchSynonyms:synonyms',
+              link: { deepLinkId: 'searchSynonyms:synonyms' },
               breadcrumbs: ['Relevance', 'Synonyms'],
               pageTestSubject: 'searchSynonymsOverviewPage',
             },
             {
-              deepLinkId: 'searchQueryRules',
+              link: { deepLinkId: 'searchQueryRules' },
               breadcrumbs: ['Relevance', 'Query rules'],
               pageTestSubject: 'queryRulesBasePage',
             },
             {
-              deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
+              link: { deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints' },
               breadcrumbs: ['Relevance', 'Inference endpoints'],
               pageTestSubject: 'inferenceEndpointsPage',
             },
             {
-              deepLinkId: 'dev_tools',
+              link: { deepLinkId: 'dev_tools' },
               breadcrumbs: ['Developer Tools'],
               pageTestSubject: 'console',
             },
           ];
 
       for (const testCase of sideNavTestCases) {
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.clickLink(testCase.link);
         await testSubjects.existOrFail(testCase.pageTestSubject);
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.expectLinkActive(testCase.link);
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
@@ -197,6 +217,7 @@ export default function searchSolutionNavigation({
     });
 
     it('renders only expected items', async () => {
+      await solutionNavigation.sidenav.clickLink({ deepLinkId: 'searchHomepage' });
       const isV2 = await solutionNavigation.sidenav.isV2();
 
       if (isV2) {
@@ -204,6 +225,7 @@ export default function searchSolutionNavigation({
         await solutionNavigation.sidenav.expectOnlyDefinedLinks(
           [
             'searchHomepage',
+            'agent_builder',
             'discover',
             'dashboards',
             'searchPlayground',

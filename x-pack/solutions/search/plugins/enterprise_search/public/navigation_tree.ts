@@ -104,7 +104,8 @@ export const getNavigationTreeDefinition = ({
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
                     );
                   },
                   link: SEARCH_HOMEPAGE,
@@ -112,18 +113,6 @@ export const getNavigationTreeDefinition = ({
                     defaultMessage: 'Home',
                   }),
                   sideNavVersion: 'v1',
-                },
-                {
-                  children: [
-                    { link: 'agent_builder:conversations' },
-                    { link: 'agent_builder:tools' },
-                    { link: 'agent_builder:agents' },
-                  ],
-                  iconV2: 'comment',
-                  id: 'chat',
-                  renderAs: 'panelOpener',
-                  sideNavVersion: 'v2',
-                  title: AGENTS_TITLE,
                 },
                 {
                   link: 'discover',
@@ -144,6 +133,18 @@ export const getNavigationTreeDefinition = ({
                   title: AGENTS_TITLE,
                   renderAs: 'accordion',
                   sideNavVersion: 'v1',
+                },
+                {
+                  children: [
+                    { link: 'agent_builder:conversations' },
+                    { link: 'agent_builder:tools' },
+                    { link: 'agent_builder:agents' },
+                  ],
+                  iconV2: 'comment',
+                  id: 'agent_builder',
+                  renderAs: 'panelOpener',
+                  sideNavVersion: 'v2',
+                  title: AGENTS_TITLE,
                 },
                 {
                   children: [
@@ -326,18 +327,6 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     {
                       children: [
-                        { link: 'management:ingest_pipelines' },
-                        { link: 'management:pipelines' },
-                      ],
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.ingest.pipelines.title',
-                        {
-                          defaultMessage: 'Ingest',
-                        }
-                      ),
-                    },
-                    {
-                      children: [
                         {
                           getIsActive: ({ pathNameSerialized, prepend }) => {
                             return (
@@ -358,6 +347,18 @@ export const getNavigationTreeDefinition = ({
                         'xpack.enterpriseSearch.searchNav.ingest.indices.title',
                         {
                           defaultMessage: 'Indices, data streams and roll ups',
+                        }
+                      ),
+                    },
+                    {
+                      children: [
+                        { link: 'management:ingest_pipelines' },
+                        { link: 'management:pipelines' },
+                      ],
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.ingest.pipelines.title',
+                        {
+                          defaultMessage: 'Ingest',
                         }
                       ),
                     },
