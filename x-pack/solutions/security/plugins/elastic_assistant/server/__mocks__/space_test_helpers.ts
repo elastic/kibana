@@ -18,7 +18,7 @@ interface MockElasticsearchClient {
   };
 }
 
-type SpaceAwareContext = 
+type SpaceAwareContext =
   | (Partial<ElasticAssistantApiRequestHandlerContext> & {
       elasticAssistant?: {
         getSpaceId?: jest.MockedFunction<() => string>;
