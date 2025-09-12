@@ -1074,8 +1074,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           untranslatable: false,
         };
 
-        // @ts-expect-error protected function
-        const result = ruleMigrationsDataRulesClient.getFilterQuery(migrationId, filters);
+        const result = getFilterQuery(filters);
 
         expect(result).toEqual({
           bool: {
