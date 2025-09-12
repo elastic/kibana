@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformEsqlMultiTermBreakdown } from '.';
+import { transformEsqlMultiTermBreakdown, isMultiTermColumn } from '.';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('transformEsqlMultiTermBreakdown', () => {
@@ -102,9 +102,27 @@ describe('transformEsqlMultiTermBreakdown', () => {
     expect(result.columns).toHaveLength(3);
     expect(result.columns[2].name).toBe('host.name › region');
     expect(result.rows).toEqual([
-      { date: 1, metric: 100, 'host.name › region': 'host-a › us-east-1' },
-      { date: 2, metric: 200, 'host.name › region': 'host-b › us-west-2' },
-      { date: 3, metric: 300, 'host.name › region': 'host-c › __missing__' },
+      {
+        date: 1,
+        metric: 100,
+        host: 'host-a',
+        region: 'us-east-1',
+        'host.name › region': 'host-a › us-east-1',
+      },
+      {
+        date: 2,
+        metric: 200,
+        host: 'host-b',
+        region: 'us-west-2',
+        'host.name › region': 'host-b › us-west-2',
+      },
+      {
+        date: 3,
+        metric: 300,
+        host: 'host-c',
+        region: null,
+        'host.name › region': 'host-c › __missing__',
+      },
     ]);
   });
 
@@ -126,7 +144,23 @@ describe('transformEsqlMultiTermBreakdown', () => {
     expect(result.columns).toHaveLength(3);
     expect(result.columns[2].name).toBe('host.name › region › cloud.provider');
     expect(result.rows).toEqual([
-      { date: 1, metric: 100, 'host.name › region › cloud.provider': 'host-a › us-east-1 › aws' },
+      {
+        date: 1,
+        metric: 100,
+        host: 'host-a',
+        region: 'us-east-1',
+        cloud: 'aws',
+        'host.name › region › cloud.provider': 'host-a › us-east-1 › aws',
+      },
     ]);
+    const { meta } = result.columns[2];
+    expect(isMultiTermColumn({ meta } as any)).toBe(true);
+    if (isMultiTermColumn({ meta } as any)) {
+      expect(meta.originalValueLookup.get('host-a › us-east-1 › aws')).toEqual({
+        host: 'host-a',
+        region: 'us-east-1',
+        cloud: 'aws',
+      });
+    }
   });
 });

@@ -17,7 +17,8 @@ import {
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendWhereClauseToESQLQuery, appendSetToWhereClause } from '@kbn/esql-utils';
+import { isMultiTermColumn } from '@kbn/esql-multiterm-transformer';
 import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
@@ -239,16 +240,39 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
         if (value == null) {
           return;
         }
-        const queryWithWhere = appendWhereClauseToESQLQuery(
-          queryString,
-          column.name,
-          value,
-          negate ? '-' : '+',
-          column.meta?.type
-        );
 
-        if (queryWithWhere) {
-          queryString = queryWithWhere;
+        if (isMultiTermColumn(column)) {
+          const { originalStringColumns, originalValueLookup } = column.meta;
+          const originalValues = originalValueLookup.get(value as string);
+
+          if (originalValues) {
+            const fields = originalStringColumns.map((c) => c.name);
+            const values = originalStringColumns.map((c) => originalValues[c.id]);
+            const types = originalStringColumns.map((c) => c.meta?.type);
+            const queryWithWhere = appendSetToWhereClause(
+              queryString,
+              fields,
+              values,
+              negate ? '-' : '+',
+              types
+            );
+            if (queryWithWhere) {
+              queryString = queryWithWhere;
+            }
+          }
+        } else {
+          // If the column is not a combined multi-term column, we can construct a simple WHERE clause.
+          const queryWithWhere = appendWhereClauseToESQLQuery(
+            queryString,
+            column.name,
+            value,
+            negate ? '-' : '+',
+            column.meta?.type
+          );
+
+          if (queryWithWhere) {
+            queryString = queryWithWhere;
+          }
         }
       }
     }

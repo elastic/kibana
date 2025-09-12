@@ -325,5 +325,43 @@ AND \`columnB\`=="2048"`);
       expect(queryString).toEqual(`from meow
 | WHERE \`columnA\`!="2048"`);
     });
+
+    test('should return the updated query string for a multi-term column', () => {
+      const multiTermColumn = {
+        name: 'host.name › region',
+        id: 'multiTerm',
+        meta: {
+          type: 'string',
+          originalStringColumns: [
+            { id: 'host', name: 'host.name', meta: { type: 'string' } },
+            { id: 'region', name: 'region', meta: { type: 'string' } },
+          ],
+          originalValueLookup: new Map([
+            ['host-a › us-east-1', { host: 'host-a', region: 'us-east-1' }],
+          ]),
+        },
+      };
+
+      // a little hack to make typescript happy
+      (multiTermColumn.meta as any).originalValueLookup.get = jest.fn().mockReturnValue({
+        host: 'host-a',
+        region: 'us-east-1',
+      });
+
+      dataPoints[0].table.columns[0] = multiTermColumn as any;
+      dataPoints[0].table.rows[0] = {
+        multiTerm: 'host-a › us-east-1',
+      } as any;
+
+      const queryString = appendFilterToESQLQueryFromValueClickAction({
+        data: dataPoints,
+        query: { esql: 'from my_index' },
+        negate: true,
+      });
+
+      expect(queryString).toEqual(
+        'from my_index\n| WHERE NOT (`host.name`=="host-a" AND `region`=="us-east-1")'
+      );
+    });
   });
 });

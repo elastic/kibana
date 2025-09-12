@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type {
+  DatatableColumn,
+  DatatableRow,
+  DatatableColumnMeta,
+} from '@kbn/expressions-plugin/common';
 import { Parser, Walker } from '@kbn/esql-ast';
 import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +33,30 @@ interface EsqlMultiTermTransformOutput {
   transformed: boolean;
   newColumnName: string | null;
   originalStringColumns: DatatableColumn[];
+}
+
+interface DatatableColumnMetaWithOriginalStringColumns extends DatatableColumnMeta {
+  originalStringColumns: DatatableColumn[];
+  originalValueLookup: Map<string, Record<string, unknown>>;
+}
+
+/**
+ * Type guard to check if a datatable column has been transformed to combine multiple string columns.
+ * This is identified by the presence of `originalStringColumns` and `originalValueLookup` in the column's meta property.
+ *
+ * @param {DatatableColumn} column - The datatable column to check.
+ * @returns {boolean} - True if the column has original string columns, false otherwise.
+ */
+export function isMultiTermColumn(
+  column: DatatableColumn
+): column is DatatableColumn & { meta: DatatableColumnMetaWithOriginalStringColumns } {
+  return (
+    column.meta !== undefined &&
+    'originalStringColumns' in column.meta &&
+    Array.isArray((column.meta as any).originalStringColumns) &&
+    'originalValueLookup' in column.meta &&
+    (column.meta as any).originalValueLookup instanceof Map
+  );
 }
 
 /**
@@ -111,18 +139,23 @@ export function transformEsqlMultiTermBreakdown({
     const newColumnName = stringColumns.map((c) => c.name).join(' › ');
     const stringColumnIds = stringColumns.map((c) => c.id);
 
+    const originalValueLookup = new Map<string, Record<string, unknown>>();
     // Transform each row to have the new combined column.
     const newRows = rows.map((row) => {
       const newRow = { ...row };
       // Concatenate the values of the original string columns.
       const values = stringColumnIds.map((id) => row[id] ?? '__missing__');
-      newRow[newColumnName] = formatter
+      const combinedValue = formatter
         ? formatter.convert({ keys: values }, 'text')
         : values.join(' › ');
-      // Remove the original string columns from the row.
-      stringColumnIds.forEach((id) => {
-        delete newRow[id];
-      });
+      newRow[newColumnName] = combinedValue;
+
+      const originalValues = stringColumnIds.reduce((acc, id) => {
+        acc[id] = row[id];
+        return acc;
+      }, {} as Record<string, unknown>);
+      originalValueLookup.set(combinedValue, originalValues);
+
       return newRow;
     });
 
@@ -133,7 +166,12 @@ export function transformEsqlMultiTermBreakdown({
       {
         id: newColumnName,
         name: newColumnName,
-        meta: { type: 'string' as const, esqlType: 'keyword' },
+        meta: {
+          type: 'string' as const,
+          esqlType: 'keyword',
+          originalStringColumns: stringColumns,
+          originalValueLookup,
+        },
       },
     ];
 
