@@ -73,7 +73,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
-        const controlGroupState = tab.controlGroupState;
 
         let updatedTab: DiscoverSessionTab;
 
@@ -101,8 +100,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         if (overriddenVisContextAfterInvalidation) {
           updatedTab.visContext = overriddenVisContextAfterInvalidation;
         }
-
-        updatedTab.controlGroupJson = JSON.stringify(controlGroupState ?? {});
 
         const dataViewSpec = updatedTab.serializedSearchSource.index;
 

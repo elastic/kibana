@@ -135,6 +135,7 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.initialAppState?.breakdownField,
     density: tab.initialAppState?.density,
     visContext: tab.initialInternalState?.visContext,
+    controlGroupJson: JSON.stringify(tab.controlGroupState ?? {}),
   };
 };
 
@@ -174,5 +175,6 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     density: savedSearch.density,
     visContext: savedSearch.visContext,
+    controlGroupJson: savedSearch.controlGroupJson,
   };
 };
