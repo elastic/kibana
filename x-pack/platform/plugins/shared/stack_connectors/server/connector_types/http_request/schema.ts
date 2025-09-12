@@ -16,6 +16,14 @@ export const configSchema = schema.object({
     schema.literal('delete'),
     schema.literal('patch'),
   ]),
+  contentType: schema.oneOf([
+    schema.literal('json'),
+    schema.literal('xml'),
+    schema.literal('form'),
+    schema.literal('data'),
+    schema.literal('custom'),
+  ]),
+  customContentType: schema.maybe(schema.string()),
 });
 export type HttpRequestConfig = TypeOf<typeof configSchema>;
 

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -14,9 +15,11 @@ import type { HttpRequestActionParams } from '.';
 
 const HttpRequestParamsFields: React.FunctionComponent<
   ActionParamsProps<HttpRequestActionParams>
-> = ({ actionParams, editAction, index, messageVariables, errors }) => {
+> = ({ actionParams, editAction, index, messageVariables, errors, actionConnector }) => {
   const { body } = actionParams;
-  return (
+  const contentType = (actionConnector as any).config;
+
+  return contentType === 'json' ? (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'body'}
@@ -41,8 +44,32 @@ const HttpRequestParamsFields: React.FunctionComponent<
       }}
       dataTestSubj="actionJsonEditor"
     />
+  ) : (
+    <CodeEditor
+      languageId={'xml'}
+      options={{
+        renderValidationDecorations: 'off',
+        lineNumbers: 'on',
+        fontSize: 14,
+        minimap: {
+          enabled: false,
+        },
+        scrollBeyondLastLine: false,
+        folding: true,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        automaticLayout: true,
+      }}
+      value={body || ''}
+      width="100%"
+      height="200px"
+      data-test-subj={`${contentType}Editor`}
+      onChange={(val: string) => {
+        editAction('body', val, index);
+      }}
+    />
   );
-}
+};
 
 // eslint-disable-next-line import/no-default-export
 export { HttpRequestParamsFields as default };

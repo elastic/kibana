@@ -16,6 +16,8 @@ import type {
 interface HttpRequestConfig {
   url: string;
   method: 'get' | 'put' | 'post' | 'delete' | 'patch';
+  contentType: 'json' | 'xml' | 'form' | 'data' | 'custom';
+  customContentType?: string;
 }
 
 type HttpRequestSecrets = void;

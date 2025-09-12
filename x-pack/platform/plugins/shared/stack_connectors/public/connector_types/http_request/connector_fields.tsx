@@ -7,16 +7,37 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 
 const HTTP_VERBS = ['get', 'put', 'post', 'delete', 'patch'];
+const CONTENT_TYPES: Record<string, string> = {
+  json: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.json', {
+    defaultMessage: 'JSON',
+  }),
+  xml: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.xml', {
+    defaultMessage: 'XML',
+  }),
+  form: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.form', {
+    defaultMessage: 'Form',
+  }),
+  data: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.data', {
+    defaultMessage: 'Data',
+  }),
+  custom: i18n.translate('xpack.stackConnectors.components.httpRequest.contentTypes.custom', {
+    defaultMessage: 'Custom',
+  }),
+};
 
 const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
+  const [{ config }] = useFormData({
+    watch: ['config.contentType'],
+  });
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -56,10 +77,62 @@ const HttpRequestConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             }}
             component={Field}
             componentProps={{
-              euiFieldProps: { readOnly, 'data-test-subj': 'webhookUrlText', fullWidth: true },
+              euiFieldProps: { readOnly, 'data-test-subj': 'httpRequestUrlText', fullWidth: true },
             }}
           />
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <UseField
+            path="config.contentType"
+            component={SelectField}
+            config={{
+              label: i18n.translate(
+                'xpack.stackConnectors.components.httpRequest.contentTypeTextFieldLabel',
+                {
+                  defaultMessage: 'Content Type',
+                }
+              ),
+              defaultValue: 'json',
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'httpRequestContentTypeSelect',
+                options: Object.keys(CONTENT_TYPES).map((key) => ({
+                  text: CONTENT_TYPES[key],
+                  value: key,
+                })),
+                fullWidth: true,
+                readOnly,
+              },
+            }}
+          />
+        </EuiFlexItem>
+        {config && config.contentType === 'custom' && (
+          <EuiFlexItem>
+            <UseField
+              path="config.customContentType"
+              config={{
+                label: i18n.translate(
+                  'xpack.stackConnectors.components.httpRequest.cutomContentTypeTextFieldLabel',
+                  {
+                    defaultMessage: 'Custom Content Type',
+                  }
+                ),
+              }}
+              component={Field}
+              componentProps={{
+                euiFieldProps: {
+                  readOnly,
+                  'data-test-subj': 'customContentTypeText',
+                  fullWidth: true,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
