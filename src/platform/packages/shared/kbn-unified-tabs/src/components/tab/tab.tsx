@@ -216,7 +216,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                   id={tabLabelId}
                   color="inherit"
                   size="s"
-                  css={getTabLabelCss(euiTheme)}
+                  css={getTabLabelCss()}
                   className="unifiedTabs__tabLabelText"
                 >
                   <EuiTextTruncate
@@ -298,14 +298,12 @@ function getTabContainerCss(
 
   return css`
     position: relative;
-    display: inline-block;
     border-right: ${euiTheme.border.thin};
     border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
-    height: ${euiTheme.size.xl};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 
-    color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
+    color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
 
     .unifiedTabs__tabActions {
       position: absolute;
@@ -313,7 +311,6 @@ function getTabContainerCss(
       right: ${euiTheme.size.xs};
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
-      pointer-events: auto;
     }
 
     &:hover,
@@ -335,20 +332,15 @@ function getTabContainerCss(
       }
     }
 
-    ${!isSelected
-      ? `
-          &:hover {
-            color: ${euiTheme.colors.text};
-        }`
-      : ''}
+    &:hover {
+      color: ${euiTheme.colors.text};
+    }
   `;
 }
 
 function getTabContentCss(euiTheme: EuiThemeComputed) {
   return css`
-    position: relative;
     display: inline-flex;
-    flex-direction: row;
     align-items: center;
     width: 100%;
     height: ${euiTheme.size.xl};
@@ -358,22 +350,12 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
 
 function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
   return css`
-    width: 100%;
-    height: ${euiTheme.size.l};
-    padding-top: ${euiTheme.size.xxs};
     padding-inline: ${euiTheme.size.xs};
-    text-align: left;
-    color: inherit;
-    border: none;
-    border-radius: 0;
-    background: transparent;
   `;
 }
 
-function getTabLabelCss(euiTheme: EuiThemeComputed) {
+function getTabLabelCss() {
   return css`
-    white-space: nowrap;
-    transform: translateZ(0);
     overflow: hidden;
   `;
 }
