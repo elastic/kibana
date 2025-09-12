@@ -1,0 +1,21 @@
+tags:
+  - is-webpack-built
+tasks:
+  build-webpack:
+    command: yarn
+    args:
+      - build
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - --watch
+    deps:
+      - '^:build-webpack'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm

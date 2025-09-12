@@ -1,0 +1,23 @@
+$schema: https://moonrepo.dev/schemas/project.json
+
+tags:
+  - is-webpack-built
+tasks:
+  build-webpack:
+    command: yarn
+    args:
+      - 'build'
+    inputs:
+      - '@group(src)'
+    outputs:
+      - /target/build/src/platform/packages/shared/kbn-monaco
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - --watch
+    outputs:
+      - /target/build/src/platform/packages/shared/kbn-monaco
