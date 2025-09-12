@@ -13,10 +13,7 @@ This service provides a comprehensive interface to interact with Kibana's Alerti
 ## Usage Example
 
 ```typescript
-import { test } from '@playwright/test';
-import { apiServicesFixture } from './path/to/apis';
-
-test.use(apiServicesFixture);
+import { test } from '@kbn/scout';
 
 test('create and manage alerting rule', async ({ apiServices }) => {
   const { alerting } = apiServices;
@@ -46,13 +43,15 @@ test('create and manage alerting rule', async ({ apiServices }) => {
       timeWindowSize: 5,
       timeWindowUnit: 'm',
     },
-    actions: [{
-      id: connector.id,
-      group: 'query matched',
-      params: {
-        documents: [{ test: 'value' }],
+    actions: [
+      {
+        id: connector.id,
+        group: 'query matched',
+        params: {
+          documents: [{ test: 'value' }],
+        },
       },
-    }],
+    ],
     schedule: { interval: '1m' },
   });
 
@@ -74,18 +73,24 @@ test('create and manage alerting rule', async ({ apiServices }) => {
 });
 
 // Working with spaces
-test('use alerting in custom space', async ({ apiServices }) => {
+import { spaceTest } from '@kbn/scout';
+
+spaceTest('use alerting in custom space', async ({ apiServices, scoutSpace }) => {
   const { alerting } = apiServices;
-  const spaceId = 'test-space';
 
-  const rule = await alerting.rules.create({
-    name: 'space-specific-rule',
-    ruleTypeId: '.es-query',
-    consumer: 'alerts',
-    params: { /* ... */ },
-  }, spaceId);
+  const rule = await alerting.rules.create(
+    {
+      name: 'space-specific-rule',
+      ruleTypeId: '.es-query',
+      consumer: 'alerts',
+      params: {
+        /* ... */
+      },
+    },
+    scoutSpace.id
+  );
 
-  await alerting.rules.enable(rule.id, spaceId);
+  await alerting.rules.enable(rule.id, scoutSpace.id);
 });
 ```
 
@@ -94,7 +99,7 @@ test('use alerting in custom space', async ({ apiServices }) => {
 ### Rules Management
 
 - `create(params, spaceId?)` - Create a new rule
-- `get(ruleId, spaceId?)` - Get rule details
+- `get(ruleId, spaceId?, options?)` - Get rule details with optional error handling
 - `update(ruleId, updates, spaceId?)` - Update a rule
 - `delete(ruleId, spaceId?)` - Delete a rule
 - `find(searchParams?, spaceId?)` - Search for rules
@@ -110,6 +115,19 @@ test('use alerting in custom space', async ({ apiServices }) => {
 - `getRuleTypes(spaceId?)` - Get available rule types
 - `getExecutionLog(ruleId, spaceId?)` - Get rule execution history
 - `getHealth()` - Get alerting framework health
+
+#### RequestOptions
+
+The `get` method supports additional options:
+
+```typescript
+interface RequestOptions {
+  ignoreErrors?: number[]; // HTTP status codes to ignore (e.g., [404])
+}
+
+// Example: Get rule and ignore 404 errors
+const rule = await alerting.rules.get(ruleId, spaceId, { ignoreErrors: [404] });
+```
 
 ### Connectors Management
 
@@ -148,25 +166,52 @@ Based on the Kibana Alerting API documentation, the service supports all rule ty
 
 ## Error Handling
 
-The service leverages kbnClient's robust built-in retry mechanism:
+The service leverages kbnClient's robust built-in retry mechanism with enhanced error reporting:
 
 - **Automatic retries**: All operations retry up to 3 times (configurable via `retries` option)
 - **Exponential backoff**: Delay increases with each retry attempt (`1000ms * attempt`)
 - **Comprehensive error coverage**: Retries on network errors, timeouts, and HTTP error status codes
+- **Enhanced error logging**: Detailed error information including status codes, response bodies, and error causes
 - **Ignorable errors**: Specific HTTP errors like 404 can be ignored using `ignoreErrors` option
 - **Optimized polling**: Waiting operations use fewer retries (1) to avoid excessive delays during frequent polling
+
+### Enhanced Error Information
+
+The service now provides detailed error context when requests fail:
+
+```
+KbnClientRequesterError: [POST - http://localhost:5620/api/alerting/rule]
+request failed (attempt=3/3): ERR_BAD_REQUEST
+-- Status: 400, Cause: ERR_BAD_REQUEST, Response: {
+  "error": "Bad Request",
+  "message": "Invalid rule parameters",
+  "statusCode": 400,
+  "validation": {
+    "source": "payload",
+    "keys": ["params.threshold"]
+  }
+} -- and ran out of retries
+```
 
 ### Retry Strategy Examples
 
 ```typescript
 // Standard operations use 3 retries
-await alerting.rules.create({ /* params */ });
+await alerting.rules.create({
+  /* params */
+});
 
 // Polling operations use 1 retry to avoid delays
 await alerting.waiting.waitForRuleStatus(ruleId, 'ok');
 
 // Delete operations ignore 404 errors
 await alerting.rules.delete(ruleId); // Won't throw on already-deleted rules
+
+// Get operations with custom error handling
+const rule = await alerting.rules.get(ruleId, undefined, { ignoreErrors: [404] });
+if (rule.status === 404) {
+  console.log('Rule not found');
+}
 ```
 
 ## Performance Monitoring
