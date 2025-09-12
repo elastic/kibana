@@ -12,17 +12,20 @@ import { fromKueryExpression } from '../../..';
 import { nodeTypes } from '../node_types';
 import { functions } from '../functions';
 
-export function getKqlFieldNamesFromExpression(expression: string): string[] {
+/**
+ * Returns true whether the given expression contains at least one free text expression (e.g. `foo: "bar" AND my_free_text_query`)
+ */
+export function getIsKqlFreeTextExpression(expression: string): boolean {
   const node = fromKueryExpression(expression);
-  return getKqlFieldNames(node);
+  return getIsKqlFreeText(node);
 }
 
-export function getKqlFieldNames(node: KueryNode): string[] {
+export function getIsKqlFreeText(node: KueryNode): boolean {
   if (nodeTypes.function.isNode(node)) {
     if (functions.and.isNode(node) || functions.or.isNode(node)) {
-      return node.arguments.reduce<string[]>((result, child) => {
-        return result.concat(getKqlFieldNames(child));
-      }, []);
+      return node.arguments.reduce<boolean>((result, child) => {
+        return result || getIsKqlFreeText(child);
+      }, false);
     } else if (
       functions.not.isNode(node) ||
       functions.exists.isNode(node) ||
@@ -32,16 +35,15 @@ export function getKqlFieldNames(node: KueryNode): string[] {
     ) {
       // For each of these field types, we only need to look at the first argument to determine the fields
       const [fieldNode] = node.arguments;
-      return getKqlFieldNames(fieldNode);
+      return getIsKqlFreeText(fieldNode);
     } else {
-      throw new Error(`KQL function ${node.function} not supported in getKqlFieldNames`);
+      throw new Error(`KQL function ${node.function} not supported in isKqlFreeText`);
     }
   } else if (nodeTypes.literal.isNode(node)) {
-    if (node.value === null) return [];
-    return [`${nodeTypes.literal.toElasticsearchQuery(node)}`];
+    return node.value === null;
   } else if (nodeTypes.wildcard.isNode(node)) {
-    return [nodeTypes.wildcard.toElasticsearchQuery(node)];
+    return false;
   } else {
-    throw new Error(`KQL node type ${node.type} not supported in getKqlFieldNames`);
+    throw new Error(`KQL node type ${node.type} not supported in isKqlFreeText`);
   }
 }

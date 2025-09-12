@@ -10,12 +10,9 @@
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import {
-  getKqlFieldNamesFromExpression,
-  isKqlFreeTextExpression,
-  isOfAggregateQueryType,
-} from '@kbn/es-query';
-import { getQueryColumnsFromESQLQuery, getSearchQueries } from '@kbn/esql-utils';
+import { getKqlFieldNamesFromExpression, isOfAggregateQueryType } from '@kbn/es-query';
+import { getIsKqlFreeTextExpression } from '@kbn/es-query/src/kuery/utils/get_is_kql_free_text'; // temporary import, until import from '@kbn/es-query' is fixed (issue #234892)
+import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -212,7 +209,6 @@ export class ScopedDiscoverEBTManager {
       const categorizedFields = fieldNames.map((fieldName) =>
         fields[fieldName]?.short || fieldName === FREE_TEXT ? fieldName : NON_ECS_FIELD
       );
-
       eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
     }
 
@@ -238,14 +234,16 @@ export class ScopedDiscoverEBTManager {
       }
 
       const esqlColumns = getQueryColumnsFromESQLQuery(query.esql);
-      const embeddedQueries = getSearchQueries(query.esql); // KQL embedded within ES|QL query
+      const embeddedQueries = getKqlSearchQueries(query.esql); // KQL embedded within ES|QL query
 
       const embeddedQueryColumns = embeddedQueries
         ? embeddedQueries
             .map((embeddedQuery) => {
               const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
-              // TODO refactor for isKqlFreeTextExpression when import fixed
-              return embeddedKQLFieldNames.length === 0 ? [FREE_TEXT] : embeddedKQLFieldNames;
+              if (getIsKqlFreeTextExpression(embeddedQuery)) {
+                embeddedKQLFieldNames.push(FREE_TEXT);
+              }
+              return embeddedKQLFieldNames;
             })
             .flat()
         : [];
@@ -273,7 +271,7 @@ export class ScopedDiscoverEBTManager {
       }
 
       const fieldNames = getKqlFieldNamesFromExpression(query.query);
-      if (isKqlFreeTextExpression(query.query)) {
+      if (getIsKqlFreeTextExpression(query.query)) {
         fieldNames.push(FREE_TEXT);
       }
 

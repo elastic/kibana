@@ -26,7 +26,7 @@ import {
   getArgsFromRenameFunction,
   getCategorizeField,
   findClosestColumn,
-  getSearchQueries,
+  getKqlSearchQueries,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -204,44 +204,48 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('getSearchQueries', () => {
+  describe('getKqlSearchQueries', () => {
     it('should return an empty array for a regular ES|QL query', () => {
-      expect(getSearchQueries('from a | where field == "value"')).toStrictEqual([]);
+      expect(getKqlSearchQueries('from a | where field == "value"')).toStrictEqual([]);
     });
 
-    it('should return and empty array if there are no search functions', () => {
-      expect(getSearchQueries('from a | eval b = 1')).toStrictEqual([]);
+    it('should return an empty array if there are no search functions', () => {
+      expect(getKqlSearchQueries('from a | eval b = 1')).toStrictEqual([]);
     });
 
     it("should return a KQL query when it's embedded in ES|QL query", () => {
-      expect(getSearchQueries('FROM a | WHERE KQL("""field : "value" """)')).toStrictEqual([
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """)')).toStrictEqual([
         'field : "value"',
       ]);
     });
 
     it("should return a Lucene query when it's embedded in ES|QL query", () => {
-      expect(getSearchQueries('FROM a | WHERE QSTR("""field:value""")')).toStrictEqual([
+      expect(getKqlSearchQueries('FROM a | WHERE QSTR("""field:value""")')).toStrictEqual([
         'field:value',
       ]);
     });
 
     it('should return multiple embedded queries in an array regardless of the operator', () => {
       expect(
-        getSearchQueries('FROM a | WHERE KQL("""field : "value" """) AND QSTR("""field:value""")')
+        getKqlSearchQueries(
+          'FROM a | WHERE KQL("""field : "value" """) AND QSTR("""field:value""")'
+        )
       ).toStrictEqual(['field : "value"', 'field:value']);
 
       expect(
-        getSearchQueries('FROM a | WHERE KQL("""field : "value" """) OR QSTR("""field:value""")')
+        getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """) OR QSTR("""field:value""")')
       ).toStrictEqual(['field : "value"', 'field:value']);
     });
 
     it('should correctly parse KQL full text embedded query', () => {
-      expect(getSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual(['full text']);
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
+        'full text',
+      ]);
     });
 
     it('should correctly parse long queries', () => {
       expect(
-        getSearchQueries(
+        getKqlSearchQueries(
           'From a | WHERE KQL("""(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories" """)'
         )
       ).toStrictEqual([
@@ -251,7 +255,7 @@ describe('esql query helpers', () => {
 
     it('should correctly parse mixed queries, omitting ES|QL valid syntax', () => {
       expect(
-        getSearchQueries(
+        getKqlSearchQueries(
           'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND QSTR("""field2:value2""")'
         )
       ).toStrictEqual(['field1: "value1"', 'field2:value2']);

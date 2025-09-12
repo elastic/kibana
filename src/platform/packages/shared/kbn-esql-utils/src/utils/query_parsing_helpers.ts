@@ -171,7 +171,7 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   return columnName;
 };
 
-export const getSearchQueries = (esql: string) => {
+export const getKqlSearchQueries = (esql: string) => {
   const { ast } = parse(esql);
   const functions: ESQLFunction[] = [];
 
@@ -179,8 +179,7 @@ export const getSearchQueries = (esql: string) => {
     visitFunction: (node) => functions.push(node),
   });
 
-  const queryStringFunctions = ['kql'];
-  const searchFunctions = functions.filter(({ name }) => queryStringFunctions.includes(name));
+  const searchFunctions = functions.filter(({ name }) => name === 'kql');
 
   return searchFunctions
     .map((func) => {
