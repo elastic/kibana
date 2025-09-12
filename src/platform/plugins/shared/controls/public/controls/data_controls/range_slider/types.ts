@@ -10,10 +10,10 @@
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+import { DataControlApi } from '../types';
 
-export type RangeValue = [string, string];
-
-export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> & {
-  clearSelections: () => void;
-  hasSelections$: PublishingSubject<boolean | undefined>;
-};
+export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
+  DataControlApi & {
+    clearSelections: () => void;
+    hasSelections$: PublishingSubject<boolean | undefined>;
+  };
