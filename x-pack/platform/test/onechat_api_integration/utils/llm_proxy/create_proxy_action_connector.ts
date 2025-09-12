@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export async function createProxyActionConnector(
   getService: FtrProviderContext['getService'],

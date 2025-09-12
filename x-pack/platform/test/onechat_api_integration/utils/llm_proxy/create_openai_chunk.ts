@@ -7,10 +7,10 @@
 
 import { v4 } from 'uuid';
 import type OpenAI from 'openai';
-import type { ToolMessage } from './create_llm_proxy';
+import type { ToolMessage } from '.';
 
 export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
-  msg = typeof msg === 'string' ? { content: msg } : msg;
+  const message = typeof msg === 'string' ? { role: 'user' as const, content: msg } : msg;
 
   return {
     id: v4(),
@@ -19,7 +19,7 @@ export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatComplet
     model: 'gpt-4',
     choices: [
       {
-        delta: msg,
+        delta: message,
         index: 0,
         finish_reason: null,
       },

@@ -8,60 +8,61 @@
 import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
-import { createLlmProxy, type LlmProxy } from '../../utils/create_llm_proxy';
-import { createProxyActionConnector } from '../../utils/create_proxy_action_connector';
+import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
+import { createProxyActionConnector } from '../../utils/llm_proxy/create_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/http_client';
-import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { toolCallMock } from '../../utils/llm_proxy/mocks';
+import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: OneChatFtrProviderContext) {
   const supertest = getService('supertest');
 
   const log = getService('log');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe('POST /api/chat/converse', function () {
-    let proxy: LlmProxy;
+  describe.only('POST /api/chat/converse', function () {
+    let llmProxy: LlmProxy;
     let connectorId: string;
 
     beforeEach(async () => {
-      proxy = await createLlmProxy(log);
+      llmProxy = await createLlmProxy(log);
       connectorId = await createProxyActionConnector(getService, {
-        port: proxy.getPort(),
+        port: llmProxy.getPort(),
       });
     });
 
     afterEach(() => {
-      proxy.close();
+      llmProxy.close();
     });
 
     describe('simple conversation', () => {
-      const MockedLLMResponse = 'Mocked LLM response';
-      const MockedLLMTitle = 'Mocked Conversation Title';
+      const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
+      const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
       let body: ChatResponse;
 
       beforeEach(async () => {
-        proxy.interceptToolChoice({
+        llmProxy.interceptors.toolChoice({
           name: 'set_title',
-          arguments: () => JSON.stringify({ title: MockedLLMTitle }),
+          response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
         });
 
-        proxy.interceptUserMessage(MockedLLMResponse);
+        llmProxy.interceptors.userMessage({ response: MOCKED_LLM_RESPONSE });
 
         body = await oneChatApiClient.converse({
           input: 'Hello OneChat',
           connector_id: connectorId,
         });
 
-        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       it('returns the response from the LLM', async () => {
-        expect(body.response.message).to.eql(MockedLLMResponse);
+        expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
       });
 
       it('persists the conversation with a title', async () => {
         const conversation = await oneChatApiClient.getConversation(body.conversation_id);
-        expect(conversation.title).to.eql(MockedLLMTitle);
+        expect(conversation.title).to.eql(MOCKED_LLM_TITLE);
       });
     });
 
