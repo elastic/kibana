@@ -50,18 +50,18 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           },
           {
             title: i18n.translate('xpack.serverlessSearch.nav.chat', {
-              defaultMessage: 'Chat',
+              defaultMessage: 'AI Agent Builder',
             }),
             renderAs: 'accordion',
             children: [
               {
-                link: 'onechat:conversations',
+                link: 'agent_builder:conversations',
               },
               {
-                link: 'onechat:agents',
+                link: 'agent_builder:agents',
               },
               {
-                link: 'onechat:tools',
+                link: 'agent_builder:tools',
               },
             ],
           },

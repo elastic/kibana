@@ -121,13 +121,13 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'onechat:conversations' },
-                    { link: 'onechat:tools' },
-                    { link: 'onechat:agents' },
+                    { link: 'agent_builder:conversations' },
+                    { link: 'agent_builder:tools' },
+                    { link: 'agent_builder:agents' },
                   ],
                   id: 'chat',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
-                    defaultMessage: 'Chat',
+                    defaultMessage: 'AI Agent Builder',
                   }),
                   renderAs: 'accordion',
                 },

@@ -32,17 +32,17 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       for (const toolId of createdToolIds) {
         try {
-          await supertest.delete(`/api/chat/tools/${toolId}`).set('kbn-xsrf', 'kibana').expect(200);
+          await supertest.delete(`/api/agent_builder/tools/${toolId}`).set('kbn-xsrf', 'kibana').expect(200);
         } catch (error) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
       }
     });
 
-    describe('POST /api/chat/tools', () => {
+    describe('POST /api/agent_builder/tools', () => {
       it('should create a new ES|QL tool successfully', async () => {
         const response = await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(mockTool)
           .expect(200);
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(invalidTool)
           .expect(400);
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(incompleteTool)
           .expect(400);
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(mockTool)
           .expect(404);
@@ -118,14 +118,14 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(toolWithInvalidParams)
           .expect(400);
       });
     });
 
-    describe('POST /api/chat/tools/_execute', () => {
+    describe('POST /api/agent_builder/tools/_execute', () => {
       const testIndex = 'test-onechat-index';
 
       before(async () => {
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(testTool)
           .expect(200);
@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
           tool_params: {},
         };
         const response = await supertest
-          .post('/api/chat/tools/_execute')
+          .post('/api/agent_builder/tools/_execute')
           .set('kbn-xsrf', 'kibana')
           .send(executeRequest)
           .expect(200);
@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('GET /api/chat/tools/get-test-tool', () => {
+    describe('GET /api/agent_builder/tools/get-test-tool', () => {
       let testToolId: string;
 
       before(async () => {
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(testTool)
           .expect(200);
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve an existing ES|QL tool', async () => {
-        const response = await supertest.get(`/api/chat/tools/get-test-tool`).expect(200);
+        const response = await supertest.get(`/api/agent_builder/tools/get-test-tool`).expect(200);
 
         expect(response.body).to.have.property('id', 'get-test-tool');
         expect(response.body).to.have.property('type', 'esql');
@@ -221,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 404 for non-existent tool', async () => {
-        const response = await supertest.get('/api/chat/tools/non-existent-tool').expect(404);
+        const response = await supertest.get('/api/agent_builder/tools/non-existent-tool').expect(404);
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
@@ -232,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.get(`/api/chat/tools/get-test-tool`).expect(404);
+        await supertest.get(`/api/agent_builder/tools/get-test-tool`).expect(404);
 
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('GET /api/chat/tools', () => {
+    describe('GET /api/agent_builder/tools', () => {
       before(async () => {
         for (let i = 0; i < 3; i++) {
           const testTool = {
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
 
           await supertest
-            .post('/api/chat/tools')
+            .post('/api/agent_builder/tools')
             .set('kbn-xsrf', 'kibana')
             .send(testTool)
             .expect(200);
@@ -259,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should list all ES|QL tools', async () => {
-        const response = await supertest.get('/api/chat/tools').expect(200);
+        const response = await supertest.get('/api/agent_builder/tools').expect(200);
 
         expect(response.body).to.have.property('results');
         expect(response.body.results).to.be.an('array');
@@ -271,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.get('/api/chat/tools/esql').expect(404);
+        await supertest.get('/api/agent_builder/tools/esql').expect(404);
 
         await kibanaServer.uiSettings.update({
           [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('PUT /api/chat/tools/update-test-tool', () => {
+    describe('PUT /api/agent_builder/tools/update-test-tool', () => {
       before(async () => {
         const testTool = {
           ...mockTool,
@@ -287,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(testTool)
           .expect(200);
@@ -301,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .put(`/api/chat/tools/update-test-tool`)
+          .put(`/api/agent_builder/tools/update-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .send(updates)
           .expect(200);
@@ -312,7 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 for non-existent tool', async () => {
         await supertest
-          .put('/api/chat/tools/non-existent-tool')
+          .put('/api/agent_builder/tools/non-existent-tool')
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated description' })
           .expect(404);
@@ -324,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .put(`/api/chat/tools/update-test-tool`)
+          .put(`/api/agent_builder/tools/update-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated Description' })
           .expect(404);
@@ -335,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('DELETE /api/chat/tools/delete-test-tool', () => {
+    describe('DELETE /api/agent_builder/tools/delete-test-tool', () => {
       before(async () => {
         const testTool = {
           ...mockTool,
@@ -343,7 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(testTool)
           .expect(200);
@@ -353,7 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should delete an existing ES|QL tool', async () => {
         const response = await supertest
-          .delete(`/api/chat/tools/delete-test-tool`)
+          .delete(`/api/agent_builder/tools/delete-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
@@ -362,7 +362,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return success even for non-existent tool', async () => {
         const response = await supertest
-          .delete('/api/chat/tools/non-existent-tool')
+          .delete('/api/agent_builder/tools/non-existent-tool')
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
@@ -375,7 +375,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .delete(`/api/chat/tools/delete-test-tool`)
+          .delete(`/api/agent_builder/tools/delete-test-tool`)
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
