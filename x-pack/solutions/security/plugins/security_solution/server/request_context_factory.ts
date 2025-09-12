@@ -125,12 +125,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         namespace: getSpaceId(),
       });
 
-    const getPrivilegedUserMonitoringApiKeyManager = () => {
-      // APIKey scheme is not supported in serverless environments
-      if (this.options.buildFlavor === 'serverless') {
-        return undefined;
-      }
-      return getApiKeyManagerPrivilegedUserMonitoring({
+    const getPrivilegedUserMonitoringApiKeyManager = () =>
+      getApiKeyManagerPrivilegedUserMonitoring({
         core: coreStart,
         logger: options.logger,
         security: startPlugins.security,
@@ -138,7 +134,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         request,
         namespace: getSpaceId(),
       });
-    };
 
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
